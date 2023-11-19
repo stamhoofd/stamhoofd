@@ -66,6 +66,19 @@ export class Formatter {
     }
 
     /**
+     * januari 2020
+     */
+    static dateWithoutDay(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const year = datetime.year;
+        return this.month(datetime.month) + " "+year
+    }
+
+    /**
      * 2020
      */
     static year(date: Date): number {

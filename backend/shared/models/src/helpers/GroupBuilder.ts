@@ -86,8 +86,6 @@ export class GroupBuilder {
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
-            registrationStartDate: this.organization.meta.defaultStartDate,
-            registrationEndDate: this.organization.meta.defaultEndDate,
             prices: this.organization.meta.defaultPrices,
             minAge: 6,
             maxAge: 7
@@ -102,8 +100,6 @@ export class GroupBuilder {
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
-            registrationStartDate: this.organization.meta.defaultStartDate,
-            registrationEndDate: this.organization.meta.defaultEndDate,
             prices: this.organization.meta.defaultPrices,
             minAge: 17,
             maxAge: 17
@@ -119,8 +115,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 8,
                 maxAge: 10
@@ -135,8 +129,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 11,
                 maxAge: 13
@@ -151,8 +143,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 14,
                 maxAge: 16
@@ -169,8 +159,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 8,
                 maxAge: 10
@@ -185,8 +173,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 11,
                 maxAge: 13
@@ -201,8 +187,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 14,
                 maxAge: 16
@@ -219,8 +203,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 8,
                 maxAge: 10
@@ -235,8 +217,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 11,
                 maxAge: 13
@@ -251,8 +231,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 14,
                 maxAge: 16
@@ -278,8 +256,6 @@ export class GroupBuilder {
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
-            registrationStartDate: this.organization.meta.defaultStartDate,
-            registrationEndDate: this.organization.meta.defaultEndDate,
             prices: this.organization.meta.defaultPrices,
             minAge: 6,
             maxAge: 7
@@ -293,8 +269,6 @@ export class GroupBuilder {
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
-            registrationStartDate: this.organization.meta.defaultStartDate,
-            registrationEndDate: this.organization.meta.defaultEndDate,
             prices: this.organization.meta.defaultPrices,
             minAge: 8,
             maxAge: 9
@@ -309,8 +283,6 @@ export class GroupBuilder {
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
-            registrationStartDate: this.organization.meta.defaultStartDate,
-            registrationEndDate: this.organization.meta.defaultEndDate,
             prices: this.organization.meta.defaultPrices,
             minAge: 16,
             maxAge: 17
@@ -325,8 +297,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 10,
                 maxAge: 11
@@ -340,8 +310,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 12,
                 maxAge: 13
@@ -355,8 +323,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.Mixed,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 14,
                 maxAge: 15
@@ -372,8 +338,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 10,
                 maxAge: 11
@@ -387,8 +351,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 12,
                 maxAge: 13
@@ -402,8 +364,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyFemale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 14,
                 maxAge: 15
@@ -419,8 +379,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 10,
                 maxAge: 11
@@ -434,8 +392,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 12,
                 maxAge: 13
@@ -449,8 +405,6 @@ export class GroupBuilder {
                 genderType: GroupGenderType.OnlyMale,
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: this.organization.meta.defaultPrices,
                 minAge: 14,
                 maxAge: 15

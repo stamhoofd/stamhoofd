@@ -1,19 +1,19 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Group, Token } from '@stamhoofd/models';
-import { Group as GroupStruct } from "@stamhoofd/structures";
+import { Group as GroupStruct, GroupStatus } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
 type ResponseBody = GroupStruct[]
 
-export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationArchivedEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/deleted-groups", {});
+        const params = Endpoint.parseParameters(request.url, "/organization/archived-groups", {});
 
         if (params) {
             return [true, params as Params];
@@ -33,7 +33,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         }
 
         // Get all admins
-        const groups = await Group.where({ organizationId: user.organization.id, deletedAt: { sign: '!=', value: null } })
+        const groups = await Group.where({ organizationId: user.organization.id, status: GroupStatus.Archived, deletedAt: null })
         return new Response(groups.map(g => g.getPrivateStructure(user.permissions ?? undefined)));
     }
 }

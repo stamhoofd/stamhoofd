@@ -115,6 +115,10 @@
                 <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             </div>
 
+            <button v-if="enableMemberModule && fullAccess" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'member-archive'}" @click="openMemberArchive(true)"> 
+                <span class="icon archive" />
+                <span>Leden archief</span>
+            </button>
 
             <button v-if="enableWebshopModule && hasWebshopArchive" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
                 <span class="icon archive" />
@@ -217,7 +221,10 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get tree() {
-        return this.organization.categoryTreeForPermissions(OrganizationManager.user.permissions ?? Permissions.create({}))
+        return this.organization.getCategoryTree({
+            permissions: OrganizationManager.user.permissions ?? Permissions.create({}),
+            smartCombine: true
+        })
     }
 
     getGroupImageSrc(group: Group) {
@@ -282,6 +289,13 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
                 didSet = true
             }
         }        
+
+        if ((parts.length >= 1 && parts[0] == 'archived-groups')) {
+            if (this.fullAccess && this.enableMemberModule) {
+                this.openMemberArchive(false).catch(console.error)
+                didSet = true
+            }
+        }
 
         if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
             this.gotoFeedback(true).catch(console.error).finally(() => UrlHelper.shared.clear())
@@ -392,7 +406,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */  "./groups/GroupMembersView.vue"), { group }, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "GroupOverview", webpackPrefetch: true */  "./groups/GroupOverview.vue"), { group }, { instant: !animated })
                 })
             ]}
         );
@@ -454,6 +468,19 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         );
     }
 
+    async openMemberArchive(animated = true) {
+        this.currentlySelected = "member-archive"
+
+        this.showDetail({
+            adjustHistory: animated,
+            animated,
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: await LoadComponent(() => import(/* webpackChunkName: "ArchivedGroupsView" */  "./groups/ArchivedGroupsView.vue"), {  }, { instant: !animated })
+                })
+            ]}
+        );
+    }
 
     async managePayments(animated = true) {
         this.currentlySelected = "manage-payments"

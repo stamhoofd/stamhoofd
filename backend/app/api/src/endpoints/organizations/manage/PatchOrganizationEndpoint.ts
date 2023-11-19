@@ -272,6 +272,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             model.organizationId = organization.id
             model.settings = struct.settings
             model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
+            model.status = struct.status
 
             // Check if current user has permissions to this new group -> else fail with error
             if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
@@ -302,6 +303,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (struct.settings) {
                 model.settings.patchOrPut(struct.settings)
+            }
+
+            if (struct.status) {
+                model.status = struct.status
             }
             
             if (struct.privateSettings) {

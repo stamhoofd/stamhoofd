@@ -1,12 +1,18 @@
-import { AutoEncoder, DateDecoder, field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { GroupCategory } from './GroupCategory';
 import { GroupPrivateSettings } from './GroupPrivateSettings';
-import { GroupSettings, WaitingListType } from './GroupSettings';
+import { CycleInformation, GroupSettings, WaitingListType } from './GroupSettings';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Permissions } from './Permissions';
+
+export enum GroupStatus {
+    "Open" = "Open",
+    "Closed" = "Closed",
+    "Archived" = "Archived"
+}
 
 export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -29,6 +35,27 @@ export class Group extends AutoEncoder {
      */
     @field({ decoder: GroupPrivateSettings, nullable: true, version: 10 })
     privateSettings: GroupPrivateSettings | null = null
+
+        /**
+     * Manually close a group
+     */
+    @field({ decoder: new EnumDecoder(GroupStatus), version: 192 })
+    status = GroupStatus.Open
+
+    getTimeRange(cycle = 0) {
+        if (cycle === this.cycle) {
+            return this.settings.dateRangeDescription
+        }
+        const cycleInfo = this.settings.cycleSettings.get(cycle)
+        if (!cycleInfo || ! cycleInfo.dateRangeDescription) {
+            return this.settings.getEstimatedTimeRange(this.cycle - cycle)
+        }
+        return cycleInfo.dateRangeDescription
+    }
+
+    getTimeRangeOffset(cycleOffset = 0) {
+        return this.getTimeRange(this.cycle - cycleOffset)
+    }
 
     static defaultSort(this: unknown, a: Group, b: Group) {
         if (a.settings.maxAge && !b.settings.maxAge) {
@@ -60,10 +87,22 @@ export class Group extends AutoEncoder {
         return 0
     }
 
+    getMemberCount({cycle, cycleOffset, waitingList}: {cycle?: number, cycleOffset?: number, waitingList?: boolean}) {
+        if (cycleOffset) {
+            cycle = this.cycle - cycleOffset
+        }
+
+        return this.settings.getMemberCount({cycle, waitingList})
+    }
+
     /**
      * Return the pre registration date only if is is active right now
      */
     get activePreRegistrationDate() {
+        if (!this.settings.registrationStartDate) {
+            // Registration start date is a requirement for pre registrations
+            return null
+        }
         if (this.settings.registrationStartDate < new Date() || this.settings.waitingListType !== WaitingListType.PreRegistrations) {
             // Start date is in the past: registrations are open
             return null
@@ -71,7 +110,14 @@ export class Group extends AutoEncoder {
         return this.settings.preRegistrationsDate
     }
 
+    /**
+     * Closed now, but will open in the future
+     */
     get notYetOpen() {
+        if (!this.settings.registrationStartDate) {
+            return false
+        }
+
         const now = new Date()
         const preRegistrationDate = this.activePreRegistrationDate
 
@@ -88,13 +134,17 @@ export class Group extends AutoEncoder {
      * No registrations and waiting list registrations are possible if closed
      */
     get closed() {
+        if (this.status !== GroupStatus.Open) {
+            return true;
+        }
+        
         if (this.notYetOpen) {
             // Start date or pre registration date are in the future
             return true
         }
 
         const now = new Date()
-        if (this.settings.registrationEndDate < now) {
+        if (this.settings.registrationEndDate && this.settings.registrationEndDate < now) {
             return true
         }
         
@@ -102,7 +152,7 @@ export class Group extends AutoEncoder {
     }
 
     hasWaitingList(): boolean {
-        return this.settings.waitingListType !== WaitingListType.None
+        return this.settings.canHaveWaitingList
     }
 
     /**

@@ -1,5 +1,5 @@
 import { column, Database, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { Group as GroupStruct, GroupPrivateSettings, GroupSettings, OrganizationMetaData, Permissions } from '@stamhoofd/structures';
+import { CycleInformation, Group as GroupStruct, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationMetaData, Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Member, MemberWithRegistrations, Payment, Registration, User } from './';
@@ -73,9 +73,15 @@ export class Group extends Model {
     })
     deletedAt: Date | null = null
 
+    /**
+     * Every time a new registration period starts, this number increases. This is used to mark all older registrations as 'out of date' automatically
+     */
+    @column({ type: "string" })
+    status = GroupStatus.Open;
+
     static async getAll(organizationId: string, active = true) {
         if (active) {
-            return await Group.where({ organizationId, deletedAt: null })
+            return await Group.where({ organizationId, deletedAt: null, status: {sign: '!=', value: GroupStatus.Archived} })
         }
         return await Group.where({ organizationId })
     }
@@ -179,6 +185,37 @@ export class Group extends Model {
             "groupId = ? and cycle = ? and waitingList = 1",
             [this.id, this.cycle, new Date()]
         )
+
+        // Loop cycle 0 until current (excluding current)
+        for (let cycle = 0; cycle < this.cycle; cycle++) {
+            if (!this.settings.cycleSettings.has(cycle)) {
+                this.settings.cycleSettings.set(cycle, CycleInformation.create({
+                    registeredMembers: 0,
+                    reservedMembers: 0,
+                    waitingListSize: 0
+                }))
+            }
+        }
+
+        // Older cycles
+        // todo: optimize this a bit
+        for (const [cycle, info] of this.settings.cycleSettings) {
+
+            info.registeredMembers = await Group.getCount(
+                "groupId = ? and cycle = ? and waitingList = 0 and registeredAt is not null",
+                [this.id, cycle]
+            )
+
+            info.reservedMembers = await Group.getCount(
+                "groupId = ? and cycle = ? and ((waitingList = 0 and registeredAt is null AND reservedUntil >= ?) OR (waitingList = 1 and canRegister = 1))",
+                [this.id, cycle, new Date()]
+            )
+
+            info.waitingListSize = await Group.getCount(
+                "groupId = ? and cycle = ? and waitingList = 1",
+                [this.id, cycle, new Date()]
+            )
+        }
     }
 
     static async deleteUnreachable(organizationId: string, organizationMetaData: OrganizationMetaData, allGroups: Group[]) {
@@ -212,9 +249,9 @@ export class Group extends Model {
         }
 
         for (const group of allGroups) {
-            if (!reachable.get(group.id)) {
-                console.log("Deleted unreachable group "+group.id+" from organization "+organizationId)
-                group.deletedAt = new Date()
+            if (!reachable.get(group.id) && group.status !== GroupStatus.Archived) {
+                console.log("Archiving unreachable group "+group.id+" from organization "+organizationId)
+                group.status = GroupStatus.Archived
                 await group.save()
             }
         }

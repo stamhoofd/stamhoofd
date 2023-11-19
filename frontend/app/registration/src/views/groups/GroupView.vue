@@ -113,16 +113,16 @@ import GroupMemberSelectionView from "./GroupMemberSelectionView.vue";
 })
 export default class GroupView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    group!: Group
+        group!: Group
 
     /**
      * In case you want to add this member
      */
     @Prop({ required: false, default: null })
-    member!: MemberWithRegistrations | null
+        member!: MemberWithRegistrations | null
 
     @Prop({ default: true })
-    registerButton!: boolean
+        registerButton!: boolean
 
     MemberManager = MemberManager
     SessionManager = SessionManager
@@ -225,7 +225,7 @@ export default class GroupView extends Mixins(NavigationMixin){
     }
 
     get infoBox() {
-        if (this.group.settings.registrationStartDate > this.now) {
+        if (this.group.settings.registrationStartDate && this.group.settings.registrationStartDate > this.now) {
             if (this.group.activePreRegistrationDate) {
                 if (this.group.settings.priorityForFamily) {
                     return "De inschrijvingen gaan open op " + Formatter.dateTime(this.group.settings.registrationStartDate, true)
@@ -241,7 +241,7 @@ export default class GroupView extends Mixins(NavigationMixin){
     }
 
     get infoBox2() {
-        if (this.group.settings.registrationEndDate < this.now || this.group.settings.isFull) {
+        if ((this.group.settings.registrationEndDate && this.group.settings.registrationEndDate < this.now) || this.group.settings.isFull) {
             return null
         }
 
@@ -261,8 +261,12 @@ export default class GroupView extends Mixins(NavigationMixin){
     }
 
     get errorBox() {
-        if (this.group.settings.registrationEndDate < this.now) {
+        if (this.group.settings.registrationEndDate && this.group.settings.registrationEndDate < this.now) {
             return "De inschrijvingen zijn afgelopen"
+        }
+
+        if (this.closed) {
+            return "De inschrijvingen zijn gesloten"
         }
 
         if (this.group.settings.isFull && !this.canRegister) {

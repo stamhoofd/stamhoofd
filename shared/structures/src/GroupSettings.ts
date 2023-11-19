@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder, EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder, EnumDecoder,field, IntegerDecoder,MapDecoder,RecordDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Image } from './files/Image';
@@ -13,12 +13,79 @@ export enum WaitingListType {
     All = "All"
 }
 
+export class CycleInformation extends AutoEncoder {
+    @field({ decoder: DateDecoder, nullable: true })
+    startDate: Date | null = null
+
+    @field({ decoder: DateDecoder, nullable: true })
+    endDate: Date | null = null
+
+    @field({ 
+        decoder: IntegerDecoder, 
+        nullable: true
+    })
+    registeredMembers: number | null = null
+
+    /**
+     * Amount of members that is reserved (e.g in payment process, or a member on the waiting list that is invited)
+     */
+    @field({ 
+        decoder: IntegerDecoder, 
+        nullable: true, 
+        version: 139
+    })
+    reservedMembers: number | null = null
+
+    /**
+     * Amount of members on the waiting list
+     */
+    @field({ 
+        decoder: IntegerDecoder, 
+        nullable: true, 
+        version: 139
+    })
+    waitingListSize: number | null = null
+
+    get dateRangeDescription() {
+        if (!this.endDate) {
+            return null
+        }
+
+        if (!this.startDate) {
+            return null
+        }
+
+        const daysBetween = Math.abs(this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 24);
+
+        if (Formatter.dateWithoutDay(this.startDate) === Formatter.dateWithoutDay(this.endDate)) {
+            return `${Formatter.dateWithoutDay(this.startDate)}`
+        }
+        
+        if (daysBetween < 10 * 30) {
+            return `${Formatter.dateWithoutDay(this.startDate)} - ${Formatter.dateWithoutDay(this.endDate)}`
+        }
+        const year1 = Formatter.year(this.startDate);
+        const year2 = Formatter.year(this.endDate);
+        if (year1 !== year2) {
+            return `${year1} - ${year2}`
+        }
+        return `${year1}`
+    }
+
+}
+
 export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
 
     @field({ decoder: StringDecoder })
     description = ""
+
+    /**
+     * Information about previous cycles
+     */
+    @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193 })
+    cycleSettings: Map<number, CycleInformation> = new Map()
 
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
@@ -42,11 +109,13 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 78 })
     displayStartEndTime = false
 
-    @field({ decoder: DateDecoder, nullable: true, version: 73, upgrade: function(this: GroupSettings){ return this.startDate } })
-    registrationStartDate: Date
+    @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function(this: GroupSettings){ return this.startDate } })
+    @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function(this: GroupSettings){ return this.registrationStartDate ?? this.startDate } })
+    registrationStartDate: Date | null = null
 
-    @field({ decoder: DateDecoder, nullable: true, version: 73, upgrade: function(this: GroupSettings){ return this.endDate } })
-    registrationEndDate: Date
+    @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function(this: GroupSettings){ return this.endDate } })
+    @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function(this: GroupSettings){ return this.registrationEndDate ?? this.endDate } })
+    registrationEndDate: Date | null = null
 
     @field({ decoder: new ArrayDecoder(GroupPrices) })
     prices: GroupPrices[] = []
@@ -137,6 +206,10 @@ export class GroupSettings extends AutoEncoder {
 
     get isFull() {
         return this.maxMembers !== null && this.registeredMembers !== null && (this.registeredMembers + (this.reservedMembers ?? 0)) >= this.maxMembers
+    }
+
+    get canHaveWaitingList() {
+        return this.waitingListType !== WaitingListType.None || (this.waitingListIfFull && this.maxMembers !== null)
     }
 
     get availableMembers() {
@@ -293,14 +366,37 @@ export class GroupSettings extends AutoEncoder {
         return who;
     }
 
+    getMemberCount({cycle, waitingList}: {cycle?: number, waitingList?: boolean}) {
+        let data: GroupSettings|CycleInformation|undefined = this;
+
+        if (cycle) {
+            data = this.cycleSettings.get(cycle)
+        }
+
+        if (!data) {
+            return null;
+        }
+
+        if (waitingList) {
+            return data.waitingListSize;
+        }
+
+        return data.registeredMembers;
+    }
+
     getShortCode(maxLength: number) {
         return Formatter.firstLetters(this.name, maxLength)
     }
 
     get dateRangeDescription() {
         const daysBetween = Math.abs(this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 24);
-        if (daysBetween < 3 * 30) {
-            return `${Formatter.date(this.startDate)} tot ${Formatter.date(this.endDate)}`
+
+        if (Formatter.dateWithoutDay(this.startDate) === Formatter.dateWithoutDay(this.endDate)) {
+            return `${Formatter.dateWithoutDay(this.startDate)}`
+        }
+        
+        if (daysBetween < 10 * 30) {
+            return `${Formatter.dateWithoutDay(this.startDate)} - ${Formatter.dateWithoutDay(this.endDate)}`
         }
         const year1 = Formatter.year(this.startDate);
         const year2 = Formatter.year(this.endDate);
@@ -308,6 +404,15 @@ export class GroupSettings extends AutoEncoder {
             return `${year1} - ${year2}`
         }
         return `${year1}`
+    }
+
+    getEstimatedTimeRange(cycleOffset = 0) {
+        const yearStart = Formatter.year(this.startDate) - cycleOffset
+        const yearEnd = Formatter.year(this.endDate) - cycleOffset
+        if (yearStart !== yearEnd) {
+            return `${yearStart} - ${yearEnd}`
+        }
+        return `${yearStart}`
     }
 }
 

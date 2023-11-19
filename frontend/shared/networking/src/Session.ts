@@ -370,6 +370,7 @@ export class Session implements RequestMiddleware {
         } else {
             const oldGroups = this.organization.groups
             const oldWebshopPreviews = this.organization.webshops
+            const oldAdmins = this.organization.admins
 
             this.organization.set(organization)
 
@@ -395,6 +396,10 @@ export class Session implements RequestMiddleware {
                     preview.set(newWebshop)
                     this.organization.webshops[newWebshopIndex] = preview
                 }
+            }
+
+            if (oldAdmins && !this.organization.admins) {
+                this.organization.admins = oldAdmins
             }
         }
     }

@@ -11,10 +11,10 @@ import { WebshopManager } from '../WebshopManager';
 @Component
 export default class EditWebshopMixin extends Mixins(NavigationMixin) {
     @Prop({ required: false })
-    webshopManager?: WebshopManager
+        webshopManager?: WebshopManager
 
     @Prop({ required: false })
-    initialWebshop?: PrivateWebshop
+        initialWebshop?: PrivateWebshop
 
     originalWebshop: PrivateWebshop = this.webshopManager?.webshop ?? this.initialWebshop ?? PrivateWebshop.create({})
 
