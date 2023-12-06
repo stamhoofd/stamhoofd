@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://www.stamhoofd.be/logo.svg" alt="Stamhoofd" height="50"><br><br>
+<img src="https://files.stamhoofd.be/website/github/logo.svg" alt="Stamhoofd" height="27"><br><br>
 Supporting clubs and non-profits with great software
 </p>
 
