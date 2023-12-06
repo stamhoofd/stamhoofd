@@ -1,9 +1,10 @@
 import { SimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { DNSRecord, DNSRecordStatus, DNSRecordType } from "@stamhoofd/structures";
+import { sleep } from "@stamhoofd/utility";
 
 const { Resolver } = require('dns').promises;
 
-export async function validateDNSRecords(dnsRecords: DNSRecord[]) {
+export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = false) {
      // Revalidate all
     const resolver = new Resolver();
     resolver.setServers(['1.1.1.1', '8.8.8.8', '8.8.4.4']);
@@ -137,6 +138,12 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[]) {
                 hasAllNonTXT = false
             }
         }
+    }
+
+    if (!allValid && !didRetry) {
+        // Do a retry once
+        await sleep(100)
+        return validateDNSRecords(dnsRecords, true)
     }
 
     return {

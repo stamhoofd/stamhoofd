@@ -640,32 +640,39 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             Toast.fromError(e).show()
         }
 
-        this.present(new ComponentWithProperties(CartItemView, { 
-            admin: true,
-            cartItem: newCartItem, 
-            oldItem: cartItem,
-            cart: clone,
-            webshop: webshop,
-            saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                cartItem.validate(webshop, clone, false, true)
-                component.dismiss({force: true})
-                
-                if (oldItem) {
-                    clone.removeItem(oldItem)
-                }
-                clone.addItem(cartItem)
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(CartItemView, { 
+                        admin: true,
+                        cartItem: newCartItem, 
+                        oldItem: cartItem,
+                        cart: clone,
+                        webshop: webshop,
+                        saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
+                            cartItem.validate(webshop, clone, false, true)
+                            component.dismiss({force: true})
+                            
+                            if (oldItem) {
+                                clone.removeItem(oldItem)
+                            }
+                            clone.addItem(cartItem)
 
-                if (clone.price != this.patchedOrder.data.cart.price) {
-                    new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
-                }
+                            if (clone.price != this.patchedOrder.data.cart.price) {
+                                new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
+                            }
 
-                this.patchOrder = this.patchOrder.patch({ 
-                    data: OrderData.patch({
-                        cart: clone
+                            this.patchOrder = this.patchOrder.patch({ 
+                                data: OrderData.patch({
+                                    cart: clone
+                                })
+                            })
+                        }
                     })
                 })
-            }
-        }).setDisplayStyle("sheet"))
+            ],
+            modalDisplayStyle: "sheet"
+        })
     }
 
     async deleteItem(cartItem: CartItem ) {

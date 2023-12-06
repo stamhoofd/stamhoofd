@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="st-list-item" :class="{selectable, disabled}" @click="$emit('click', $event)" @contextmenu="$emit('contextmenu', $event)">
+    <component :is="elementName" class="st-list-item" :class="{selectable, disabled, button: elementName === 'button'}" :type="elementName === 'button' ? 'button' : undefined" @click="$emit('click', $event)" @contextmenu="$emit('contextmenu', $event)">
         <div class="left">
             <slot name="left" />
         </div>
@@ -49,7 +49,12 @@ a.st-list-item {
     }
 }
 
+button.st-list-item {
+    text-align: inherit;
+}
+
 .st-list-item {
+
     padding-left: var(--st-horizontal-padding, 15px);
     padding-right: 0;
     padding-right: var(--st-horizontal-padding, 15px);

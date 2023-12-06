@@ -91,6 +91,11 @@
                     <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
                     Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
                 </p>
+
+                <button v-if="withSeats && oldItem" class="button text" type="button" @click="chooseSeats">
+                    <span>Wijzig plaatsen</span>
+                    <span class="icon arrow-right-small" />
+                </button>
             </template>
 
             <div v-if="!cartEnabled && (administrationFee || (canSelectAmount && !webshop.isAllFree))" class="pricing-box max">
@@ -115,7 +120,11 @@
         </main>
 
         <STToolbar v-if="canOrder">
-            <button v-if="oldItem && cartEnabled" slot="right" class="button primary" type="submit">
+            <button v-if="willNeedSeats" slot="right" class="button primary" type="submit">
+                <span>Kies plaatsen</span>
+                <span class="icon arrow-right" />
+            </button>
+            <button v-else-if="oldItem && cartEnabled" slot="right" class="button primary" type="submit">
                 <span class="icon basket" />
                 <span>Opslaan</span>
             </button>
@@ -131,13 +140,14 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { BackButton,ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Cart,CartItem, ProductDateRange, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
+import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 
@@ -187,7 +197,15 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     errorBox: ErrorBox | null = null
 
+    get willNeedSeats() {
+        return this.withSeats && (!this.oldItem || this.oldItem.amount !== this.cartItem.amount)
+    }
+
     addToCart() {
+        if (this.willNeedSeats) {
+            this.chooseSeats();
+            return;
+        }
         try {
             this.saveHandler(this.cartItem, this.oldItem, this)
         } catch (e) {
@@ -199,8 +217,27 @@ export default class CartItemView extends Mixins(NavigationMixin){
         //this.dismiss({ force: true })
     }
 
+    chooseSeats() {
+        this.show({
+            components: [
+                new ComponentWithProperties(ChooseSeatsView, {
+                    cartItem: this.cartItem,
+                    oldItem: this.oldItem,
+                    webshop: this.webshop,
+                    admin: this.admin,
+                    cart: this.cart,
+                    saveHandler: this.saveHandler
+                })
+            ]
+        })
+    }
+
     get cartEnabled() {
         return this.webshop.shouldEnableCart
+    }
+
+    get withSeats() {
+        return this.cartItem.product.seatingPlanId !== null
     }
 
     get suffixSingular() {

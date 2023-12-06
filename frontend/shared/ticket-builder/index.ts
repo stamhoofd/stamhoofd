@@ -251,7 +251,16 @@ export class TicketBuilder {
         MAX_COLUMN_HEIGHT = height - initialColumnHeight
 
         // SECOND COLUMN
-        const description = ticket.items.map(item => item.amount+"x "+item.product.name+(item.descriptionWithoutDate ? ("\n"+item.descriptionWithoutDate) : "")).join("\n")
+        let description = ticket.items.map(item => (ticket.isSingle ? '' : item.amount+"x "+item.product.name)+(item.descriptionWithoutDate ? ("\n"+item.descriptionWithoutDate) : "")).join("\n")
+
+        // Index description
+        const indexDescription = ticket.getIndexDescription(this.webshop)
+        if (indexDescription.length > 0) {
+            if (description) {
+                description += "\n"
+            }
+            description += indexDescription.map(d => d.title+": "+d.value).join("\n")
+        }
 
         if (description) {
             // Second column

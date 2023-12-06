@@ -3,6 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+import { ReservedSeat } from '../SeatingPlan';
 import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product';
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
@@ -35,6 +36,9 @@ export class CartItem extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(WebshopFieldAnswer), version: 94 })
     fieldAnswers: WebshopFieldAnswer[] = []
 
+    @field({ decoder: new ArrayDecoder(ReservedSeat), version: 212 })
+    seats: ReservedSeat[] = []
+
     @field({ decoder: IntegerDecoder })
     amount = 1;
 
@@ -44,6 +48,13 @@ export class CartItem extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, version: 115 })
     reservedAmount = 0;
+
+    /**
+     * When the seats are successfully reserved, we store them here
+     * This makes editing seats possible because we know we can still use these seats even if they are blocked normally
+     */
+    @field({ decoder: new ArrayDecoder(ReservedSeat), version: 213 })
+    reservedSeats: ReservedSeat[] = []
 
     /**
      * Saved unitPrice (migration needed)
@@ -378,6 +389,46 @@ export class CartItem extends AutoEncoder {
             }
         }
 
+        if (this.product.seatingPlanId) {
+            // Seating validation
+            if (this.seats.length !== this.amount) {
+                throw new SimpleError({
+                    code: "invalid_seats",
+                    message: "Invalid seats",
+                    human: `Kies ${this.amount} plaatsen`
+                })
+            }
+
+            // Check seats taken already?
+            const reservedSeats = this.product.reservedSeats
+
+            // Check if seats are still available
+            if (this.product.seatingPlanId && reservedSeats) {
+                const reserved = reservedSeats.filter(s => this.seats.find(s2 => s2.equals(s)) && !this.reservedSeats.find(s2 => s2.equals(s)))
+                if (reserved.length > 0) {
+                    throw new SimpleError({
+                        code: "seats_unavailable",
+                        message: "Seats unavailable",
+                        human: "De volgende plaatsen zijn niet meer beschikbaar: "+reserved.map(s => s.getNameString(webshop, this.product)).join(", ")
+                    })
+                }
+            }
+
+            // Check other cart items have same seats
+            const otherItems = cart.items.filter(i => i.product.id === this.product.id && i.id < this.id)
+            for (const item of otherItems) {
+                for (const seat of item.seats) {
+                    if (this.seats.find(s => s.equals(seat))) {
+                        throw new SimpleError({
+                            code: "seats_unavailable",
+                            message: "Seats unavailable",
+                            human: "De volgende plaatsen heb je twee keer gekozen: "+seat.getNameString(webshop, this.product)
+                        })
+                    }
+                }
+            }
+        }
+
         // Update prices
         this.calculateUnitPrice(cart)
     }
@@ -400,6 +451,7 @@ export class Cart extends AutoEncoder {
         for (const i of this.items) {
             if (i.code === c) {
                 i.amount += item.amount
+                i.seats.push(...item.seats)
                 return
             }
         }

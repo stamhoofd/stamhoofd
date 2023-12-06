@@ -46,7 +46,7 @@ export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 3, upgrade: () => "" })
     uri: string;
 
-    @field({ decoder: OrganizationMetaData })
+    @field({ decoder: OrganizationMetaData, defaultValue: () => OrganizationMetaData.create({}) })
     meta: OrganizationMetaData;
 
     @field({ decoder: Address })

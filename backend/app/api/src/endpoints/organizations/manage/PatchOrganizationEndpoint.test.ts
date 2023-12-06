@@ -40,7 +40,7 @@ describe("Endpoint.PatchOrganization", () => {
         const user = await new UserFactory({ organization }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
+        const r = Request.buildJson("PATCH", "/organization", organization.getApiHost(), {
             id: organization.id,
             name: "My crazy name"
         });
@@ -54,7 +54,7 @@ describe("Endpoint.PatchOrganization", () => {
         const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create()
         const token = await Token.createToken(user)
 
-        const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
+        const r = Request.buildJson("PATCH", "/organization", organization.getApiHost(), {
             id: organization.id,
             name: "My crazy name"
         });
@@ -101,7 +101,7 @@ describe("Endpoint.PatchOrganization", () => {
                 })
             }))
 
-            const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
+            const r = Request.buildJson("PATCH", "/organization", organization.getApiHost(), {
                 id: organization.id,
                 groups: changes.encode({ version: 2 }),
             });
@@ -176,7 +176,7 @@ describe("Endpoint.PatchOrganization", () => {
                         name: "My crazy group name",
                     })
                 }))
-                const r = Request.buildJson("PATCH", "/v2/organization", organization.getApiHost(), {
+                const r = Request.buildJson("PATCH", "/organization", organization.getApiHost(), {
                     id: organization.id,
                     groups: changes.encode({ version: 2 }),
                 });

@@ -242,6 +242,10 @@
         // need to evaluate the usage of this class
         display: inline-block;
     }
+
+    &.inline-first {
+        margin-left: 5px;
+    }
 }
 
 .style-normal {
@@ -372,7 +376,8 @@
     background: $color-background;
     border-radius: $border-radius;
     transition: border-color 0.2s;
-
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    
     &:focus,
     &:focus-within {
         border-color: $color-primary;
@@ -696,9 +701,9 @@
             
         }
 
-        > h2 + .st-list {
-            margin-top: -10px;
-        }
+        // > h2:not(.style-with-button) + .st-list {
+        //     margin-top: -10px;
+        // }
 
         > hr {
             @extend .style-hr;
@@ -924,5 +929,18 @@
 
     .middle {
         font-weight: 600;
+    }
+}
+
+.split-info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+
+    &>div {
+        flex-shrink: 0;
+        flex-grow: 1;
+        min-width: 0;
     }
 }

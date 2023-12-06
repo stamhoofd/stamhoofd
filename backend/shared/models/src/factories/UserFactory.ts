@@ -18,8 +18,6 @@ class Options {
 }
 
 export class UserFactory extends Factory<Options, UserWithOrganization> {
-    lastPrivateKey!: string
-
     async create(): Promise<UserWithOrganization> {
         let organization: Organization
 

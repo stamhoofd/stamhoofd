@@ -10,6 +10,7 @@
 
         <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.name" />
         <p v-if="cartItem.product.location && cartItem.product.location.address" class="description" v-text="cartItem.product.location.address" />
+        <p v-if="ticket.getIndexDescriptionString(webshop)" class="description" v-text="ticket.getIndexDescriptionString(webshop)" />
 
         <span slot="right" class="icon qr-code" />
         <span slot="right" class="icon arrow-right-small gray" />
@@ -18,7 +19,7 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Order, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -39,13 +40,13 @@ import DetailedTicketView from "../orders/DetailedTicketView.vue";
 })
 export default class TicketListItem extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    webshop: Webshop
+        webshop: Webshop
 
     @Prop({ required: true })
-    ticket: TicketPublic
+        ticket: TicketPublic
 
     @Prop({ required: false, default: null })
-    order: Order | null
+        order: Order | null
 
     QRCodeUrl: string | null = null
 
@@ -73,10 +74,12 @@ export default class TicketListItem extends Mixins(NavigationMixin){
     openTicket() {
         this.present({
             components: [
-                new ComponentWithProperties(DetailedTicketView, {
-                    ticket: this.ticket,
-                    order: this.order,
-                    webshop: this.webshop
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(DetailedTicketView, {
+                        ticket: this.ticket,
+                        order: this.order,
+                        webshop: this.webshop
+                    })
                 })
             ],
             modalDisplayStyle: "sheet"

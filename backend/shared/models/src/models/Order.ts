@@ -168,12 +168,20 @@ export class Order extends Model {
             // Remove stock from old items without modifying old data
             for (const item of previousData.cart.items) {
                 const product = this.webshop.products.find(p => p.id === item.product.id)
-                if (product && item.reservedAmount > 0) {
-                    product.usedStock -= item.reservedAmount
-                    if (product.usedStock < 0) {
-                        product.usedStock = 0
+                if (product) {
+                    if (item.reservedAmount > 0) {
+                        product.usedStock -= item.reservedAmount
+                        if (product.usedStock < 0) {
+                            product.usedStock = 0
+                        }
+                        changed = true
                     }
-                    changed = true
+
+                    // Seats
+                    if (item.reservedSeats.length > 0) {
+                        product.reservedSeats = product.reservedSeats.filter(s => !item.reservedSeats.find(s2 => s2.equals(s)))
+                        changed = true
+                    }
                 }
             }
         }
@@ -224,6 +232,25 @@ export class Order extends Model {
                 changed = changed || updated
             } else {
                 console.error("Missing timeslot "+s.id+" in webshop "+this.webshopId)
+            }
+        }
+
+        // Seats
+        for (const item of this.data.cart.items) {
+            if (item.seats.length > 0) {
+                const product = this.webshop.products.find(p => p.id === item.product.id)
+                if (product) {
+                    // First remove all, to avoid duplicates
+                    for (const seat of item.seats) {
+                        product.reservedSeats = product.reservedSeats.filter(s => !s.equals(seat))
+
+                        if (add) {
+                            product.reservedSeats.push(seat)
+                        }
+                    }
+                    changed = true
+                    item.reservedSeats = add ? item.seats : []
+                }
             }
         }
 

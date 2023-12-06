@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? 'Keuzemenu toevoegen' : name+' bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? 'Keuzemenu toevoegen' : 'Keuzemenu bewerken'" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             Keuzemenu toevoegen
         </h1>
         <h1 v-else>
-            {{ name }} bewerken
+            Keuzemenu bewerken
         </h1>
         
         <STErrorsDefault :error-box="errorBox" />
@@ -23,7 +23,7 @@
             Meerkeuze
         </Checkbox>
         <p class="style-description">
-            Bij meerkeuze kan men geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).
+            Bij meerkeuze kunnen bestellers geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).
         </p>
 
         <hr>
@@ -77,13 +77,13 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    product!: Product
+        product!: Product
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-    optionMenu: OptionMenu
+        optionMenu: OptionMenu
 
     patchProduct: AutoEncoderPatchType<Product> = Product.patch({ id: this.product.id })
 
@@ -91,7 +91,7 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-    saveHandler: (patch: AutoEncoderPatchType<Product>) => void;
+        saveHandler: (patch: AutoEncoderPatchType<Product>) => void;
 
     get patchedProduct() {
         return this.product.patch(this.patchProduct)

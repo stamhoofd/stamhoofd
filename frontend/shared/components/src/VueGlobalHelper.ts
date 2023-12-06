@@ -85,7 +85,7 @@ export class VueGlobalHelper {
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;
-            if (element && (element.tagName === 'INPUT' || element.tagName === 'SELECT') && element.form) {
+            if (element && (element.tagName === 'INPUT' || element.tagName === 'SELECT') && element.form && !element.closest('[data-disable-enter-focus]')) {
                 if (event.which === 13) {
                     if (focusNextElement() === true) {
                         event.preventDefault();

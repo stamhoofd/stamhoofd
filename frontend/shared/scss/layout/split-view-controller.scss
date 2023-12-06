@@ -100,8 +100,18 @@
         position: absolute;
         left: 50%;
         top: 0;
-        width: 100%;
-        max-width: 800px;
+        
+        //width: 100%;
+        //max-width: 800px;
+        width: auto;
+        contain: layout style paint;
+        max-width: none;
+
+        .st-view {
+            // We set explicit widths on all views inside a sheet, so we can animate width changes
+            width: min(100vw, var(--st-popup-width, 800px));
+        }
+
         transform: translate(-50%, var(--popup-padding-top-outside, 0px));
 
         touch-action: auto;
@@ -163,8 +173,21 @@
         touch-action: auto;
         background: $color-background;
         border-radius: $border-radius-modals;
-        width: 400px;
-        width: min(100vw, var(--st-sheet-width, 400px));
+        
+        //width: 400px;
+        //width: min(100vw, var(--st-sheet-width, 400px));
+        width: auto;
+        max-width: none;
+        
+        // max-width: 100vw;
+        // min-width: min(100vw, var(--st-sheet-width, 400px));
+
+        .st-view {
+            contain: content;
+            // We set explicit widths on all views inside a sheet, so we can animate width changes
+            width: min(100vw, var(--st-sheet-width, 400px));
+        }
+
         overscroll-behavior: contain;
         box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
         
@@ -208,6 +231,11 @@
         // Reduce navigation bar height if height is limited
         --navigation-bar-margin: 10px;
         //--navigation-bar-horizontal-padding: 10px;
+    }
+
+    .navigation-controller {
+        transition: height 0.25s cubic-bezier(0.4, 0.0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+        will-change: height, width;
     }
 }
 

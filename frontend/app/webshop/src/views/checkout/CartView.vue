@@ -28,7 +28,7 @@
                         </p>
                         <div @click.stop>
                             <button class="button icon trash" type="button" @click="deleteItem(cartItem)" />
-                            <StepperInput v-if="maximumRemainingFor(cartItem) > 1" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
+                            <StepperInput v-if="cartItem.seats.length == 0 && maximumRemainingFor(cartItem) > 1" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
                         </div>
                     </footer>
 
@@ -87,7 +87,7 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { CartItemView, ErrorBox, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem } from '@stamhoofd/structures';
@@ -176,21 +176,28 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     editCartItem(cartItem: CartItem ) {
-        this.present(new ComponentWithProperties(CartItemView, { 
-            cartItem: cartItem.clone(), 
-            oldItem: cartItem,
-            cart: CheckoutManager.cart,
-            webshop: WebshopManager.webshop,
-            saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
-                component?.dismiss({force: true})
-                if (oldItem) {
-                    CheckoutManager.cart.removeItem(oldItem)
-                }
-                CheckoutManager.cart.addItem(cartItem)
-                CheckoutManager.saveCart()
-            }
-        }).setDisplayStyle("sheet"))
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(CartItemView, { 
+                        cartItem: cartItem.clone(), 
+                        oldItem: cartItem,
+                        cart: CheckoutManager.cart,
+                        webshop: WebshopManager.webshop,
+                        saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
+                            cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
+                            component?.dismiss({force: true})
+                            if (oldItem) {
+                                CheckoutManager.cart.removeItem(oldItem)
+                            }
+                            CheckoutManager.cart.addItem(cartItem)
+                            CheckoutManager.saveCart()
+                        }
+                    })
+                })
+            ],
+            modalDisplayStyle: "sheet"
+        })
     }
 
     mounted() {

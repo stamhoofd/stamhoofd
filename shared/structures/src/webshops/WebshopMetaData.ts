@@ -15,6 +15,7 @@ import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } fro
 import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
 import { RichText } from '../RichText';
+import { SeatingPlan } from '../SeatingPlan';
 import { TransferSettings } from './TransferSettings';
 import { WebshopField } from './WebshopField';
 
@@ -388,6 +389,9 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
     checkoutMethods: CheckoutMethod[] = []
+
+    @field({ decoder: new ArrayDecoder(SeatingPlan), version: 211 })
+    seatingPlans: SeatingPlan[] = []
 
     /**
      * @deprecated

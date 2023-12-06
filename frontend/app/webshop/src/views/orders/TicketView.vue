@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { TicketPublic } from '@stamhoofd/structures';
@@ -76,11 +76,13 @@ export default class TicketView extends Mixins(NavigationMixin){
     openTicket() {
         this.present({
             components: [
-                new ComponentWithProperties(DetailedTicketView, {
-                    ticket: this.tickets[0],
-                    webshop: this.webshop,
-                    allowDismiss: false,
-                    logo: !!(this as any).$isMobile
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(DetailedTicketView, {
+                        ticket: this.tickets[0],
+                        webshop: this.webshop,
+                        allowDismiss: false,
+                        logo: !!(this as any).$isMobile
+                    })
                 })
             ],
             modalDisplayStyle: "sheet",

@@ -2442,11 +2442,6 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.15.0.tgz#b06422cec97a7c5d477bc31b0f1a6a01b745c8bc"
   integrity sha512-XiQCeOu2hmokNB3pXSrD5L1ABd4aKO+UGnXfrkURuNY45t31LqOgr47YJ8Nkfu+npDsPelL91JLIlVFb9BC0eQ==
 
-"@simonbackx/vue-app-navigation@^1.24.1":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.24.1.tgz#0187fa3231e5a7900f007da08ccd6a28606006ee"
-  integrity sha512-irkYtkEZucPxt8guEpWIZLmFIwnvPlZ3KFqqe3WA0Miqa1TRj1VKFjMq1gXksIc1AaiUbj6iyHrHSJwDHKVb/Q==
-
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@simonbackx/webfonts-loader/-/webfonts-loader-0.0.1.tgz#f68497b61c56554c4544ab6235170185bf307252"
@@ -4709,9 +4704,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001286, caniuse-lite@^1.0.30001294:
-  version "1.0.30001489"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001489.tgz"
-  integrity sha512-x1mgZEXK8jHIfAxm+xgdpHpk50IN3z3q3zP261/WS+uvePxW8izXuCu6AHz0lkuYTlATDehiZ/tNyYBdSQsOUQ==
+  version "1.0.30001565"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001565.tgz"
+  integrity sha512-xrE//a3O7TP0vaJ8ikzkD2c2NgcVUvsEe2IvFTntV4Yd1Z9FVzh+gW+enX96L0psrbaFMcVcH2l90xNuGDWc8w==
 
 capacitor-rate-app@^2.0.0:
   version "2.0.0"

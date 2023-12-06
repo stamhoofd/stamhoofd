@@ -37,7 +37,7 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Cart, CartItem, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -146,14 +146,21 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 saveHandler: this.saveHandler,
             }))
         } else {
-            this.present(new ComponentWithProperties(CartItemView, { 
-                admin: this.admin,
-                cartItem,
-                oldItem,
-                cart: this.cart,
-                webshop: this.webshop,
-                saveHandler: this.saveHandler,
-            }).setDisplayStyle("sheet"))
+            this.present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(CartItemView, { 
+                            admin: this.admin,
+                            cartItem,
+                            oldItem,
+                            cart: this.cart,
+                            webshop: this.webshop,
+                            saveHandler: this.saveHandler,
+                        })
+                    })
+                ],
+                modalDisplayStyle: "sheet"
+            });
         }
     }
 

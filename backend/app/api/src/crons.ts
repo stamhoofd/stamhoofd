@@ -11,7 +11,7 @@ import { STInvoice } from '@stamhoofd/models';
 import { STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
@@ -23,8 +23,6 @@ import { ForwardHandler } from './helpers/ForwardHandler';
 // Importing postmark returns undefined (this is a bug, so we need to use require)
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const postmark = require("postmark")
-
-let isRunningCrons = false
 
 let lastDNSCheck: Date | null = null
 let lastDNSId = ""
@@ -561,6 +559,7 @@ async function checkFailedBuckarooPayments() {
         lastBuckarooId = payments[payments.length - 1].id
     }
 }
+
 // Unreserve reserved registrations
 async function checkReservedUntil() {
     if (STAMHOOFD.environment !== "development") {
@@ -646,95 +645,141 @@ async function checkBilling() {
     
 }
 
-//const citySync = AddressValidator.getSlowSync()
-
-// Schedule automatic paynl charges
-export const crons = async () => {
-    if (isRunningCrons) {
-        return;
-    }
-    isRunningCrons = true
-    await logger.setContext({
-        prefixes: [
-            new StyledText('[Crons] ').addClass('crons', 'tag')
-        ],
-        tags: ['crons']
-    }, async () => {
-        try {
-            await checkSettlements()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkFailedBuckarooPayments()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkExpirationEmails()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkPostmarkBounces()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkBilling()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkReservedUntil()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkComplaints()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkReplies()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkBounces()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkDNS()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkWebshopDNS()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-
-        try {
-            await checkPayments()
-        } catch (e) {
-            console.error(new StyledText(e).addClass('error'))
-        }
-    })
-    isRunningCrons = false
-};
-
-export function areCronsRunning(): boolean {
-    return isRunningCrons
+type CronJobDefinition = {
+    name: string,
+    method: () => Promise<void>,
+    running: boolean
 }
+
+const registeredCronJobs: CronJobDefinition[] = []
+
+registeredCronJobs.push({
+    name: 'checkSettlements',
+    method: checkSettlements,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkFailedBuckarooPayments',
+    method: checkFailedBuckarooPayments,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkExpirationEmails',
+    method: checkExpirationEmails,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkPostmarkBounces',
+    method: checkPostmarkBounces,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkBilling',
+    method: checkBilling,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkReservedUntil',
+    method: checkReservedUntil,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkComplaints',
+    method: checkComplaints,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkReplies',
+    method: checkReplies,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkBounces',
+    method: checkBounces,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkDNS',
+    method: checkDNS,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkWebshopDNS',
+    method: checkWebshopDNS,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'checkPayments',
+    method: checkPayments,
+    running: false
+});
+
+
+async function run(name: string, handler: () => Promise<void>) {
+    try {
+        await logger.setContext({
+            prefixes: [
+                new StyledText(`[${name}] `).addClass('crons', 'tag')
+            ],
+            tags: ['crons']
+        }, async () => {
+            try {
+                await handler()
+            } catch (e) {
+                console.error(new StyledText(e).addClass('error'))
+            }
+        })
+    } catch (e) {
+        console.error(new StyledText(e).addClass('error'))
+    }
+}
+
+let stopCrons = false;
+export function stopCronScheduling() {
+    stopCrons = true;
+}
+
+let schedulingJobs = false;
+export function areCronsRunning(): boolean {
+    if (schedulingJobs && !stopCrons) {
+        return true
+    }
+
+    for (const job of registeredCronJobs) {
+        if (job.running) {
+            return true
+        }
+    }
+    return false
+}
+
+export const crons = async () => {
+    schedulingJobs = true;
+    for (const job of registeredCronJobs) {
+        if (stopCrons) {
+            break;
+        }
+        if (job.running) {
+            continue;
+        }
+        job.running = true
+        run(job.name, job.method).finally(() => {
+            job.running = false
+        })
+
+        // Prevent starting too many jobs at once
+        await sleep(10 * 1000);
+    }
+    schedulingJobs = false;
+};
