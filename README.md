@@ -41,6 +41,10 @@ To run everything locally, we need to glue all the packages together and build t
 5. Make sure you create `/backend/.env` based on `/backend/.env.template`
 6. Run tests before creating a pull request.
 
+You can run all services at once locally by running `yarn dev` in the root directory. Do note that you need to set up Caddy (start caddy service, run `yarn caddy`, update `caddy.dev.watch.json` file and run `yarn caddy:update` to set that config in caddy) and local DNS (because Stamhoofd depends on wildcard DNS domains) to get everything working correctly. 
+
+Feel free to contact us via hello@stamhoofd.be if you have questions about development and how to set it up.
+
 ### Backend
 
 Use these commands in `/backend`
