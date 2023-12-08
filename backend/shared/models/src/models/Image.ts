@@ -24,7 +24,7 @@ export class Image extends Model {
     @column({ type: "datetime" })
     createdAt: Date = new Date()
 
-    static async create(fileContent: any, type: string | undefined, resolutions: ResolutionRequest[]): Promise<Image> {
+    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[]): Promise<Image> {
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: "not_available",

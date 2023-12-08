@@ -7,7 +7,7 @@ import { Interval } from "luxon";
 
 Handlebars.registerHelper('eq', (a, b) => a == b);
 Handlebars.registerHelper('neq', (a, b) => a != b);
-Handlebars.registerHelper('formatPrice', (a) => Formatter.price(a));
+Handlebars.registerHelper('formatPrice', (a) => typeof a === 'number' ? Formatter.price(a) : a);
 Handlebars.registerHelper('formatDate', (a, options) => {
     if (!(a instanceof Date)) {
         return ""
@@ -36,12 +36,12 @@ Handlebars.registerHelper('filterString', (a, options) => {
         return ""
     }
     if (options.hash.type === "phone") {
-        return Formatter.removeAccents(a).replace(/[^A-Za-z0-9\+]+/g, "")
+        return Formatter.removeAccents(a).replace(/[^A-Za-z0-9+]+/g, "")
     }
     // Default: alphanumeric
     return Formatter.removeAccents(a).replace(/[^A-Za-z0-9]+/g, "")
 });
-Handlebars.registerHelper('year', (a, options) => {
+Handlebars.registerHelper('year', (a) => {
     if (!(a instanceof Date)) {
         return ""
     }
@@ -105,6 +105,10 @@ function getNumberValue(obj: any, keys: string[]): number {
     return getNumberValue(obj[key], keys.slice(1));
 }
 Handlebars.registerHelper('arraySum', (objects: any[], property) => {
+    if (typeof property !== "string") {
+        console.warn('arraySum helper: property is not a string')
+        return 0;
+    }
     const keys = (property ?? "").split(".");
     return objects.reduce((c, obj) => getNumberValue(obj, keys) + c, 0);
 });
@@ -119,9 +123,20 @@ Handlebars.registerHelper('mul', (a, b) => {
 Handlebars.registerHelper('src', (a, options) => {
     const width = options.hash.width || undefined;
     const height = options.hash.height || undefined;
+
+    if (width !== undefined && typeof width !== "number") {
+        console.error('src helper: width is not a number');
+        return "";
+    }
+
+    if (height !== undefined && typeof height !== "number") {
+        console.error('src helper: height is not a number');
+        return "";
+    }
+
     try {
         const image = Image.decode(new ObjectData(a, {version: 0}));
-        const resolution = image.getResolutionForSize(width, height);
+        const resolution = image.getResolutionForSize(width as number|undefined, height as number|undefined);
         return resolution.file.getPublicPath()
     } catch (e) {
         console.error('src helper:', e);
@@ -131,9 +146,20 @@ Handlebars.registerHelper('src', (a, options) => {
 Handlebars.registerHelper('src-width', (a, options) => {
     const width = options.hash.width || undefined;
     const height = options.hash.height || undefined;
+
+    if (width !== undefined && typeof width !== "number") {
+        console.error('src-width helper: width is not a number');
+        return "";
+    }
+
+    if (height !== undefined && typeof height !== "number") {
+        console.error('src-width helper: height is not a number');
+        return "";
+    }
+
     try {
         const image = Image.decode(new ObjectData(a, {version: 0}));
-        const resolution = image.getResolutionForSize(width, height);
+        const resolution = image.getResolutionForSize(width as number|undefined, height as number|undefined);
         return resolution.width;
     } catch (e) {
         console.error('src-width helper:', e);
@@ -143,9 +169,20 @@ Handlebars.registerHelper('src-width', (a, options) => {
 Handlebars.registerHelper('src-height', (a, options) => {
     const width = options.hash.width || undefined;
     const height = options.hash.height || undefined;
+
+    if (width !== undefined && typeof width !== "number") {
+        console.error('src-height helper: width is not a number');
+        return "";
+    }
+
+    if (height !== undefined && typeof height !== "number") {
+        console.error('src-height helper: height is not a number');
+        return "";
+    }
+
     try {
         const image = Image.decode(new ObjectData(a, {version: 0}));
-        const resolution = image.getResolutionForSize(width, height);
+        const resolution = image.getResolutionForSize(width as number|undefined, height as number|undefined);
         return resolution.height;
     } catch (e) {
         console.error('src-height helper:', e);

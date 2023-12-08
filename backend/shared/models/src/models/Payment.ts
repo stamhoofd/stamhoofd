@@ -3,6 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, Country, getPermissionLevelNumber, Member as MemberStruct, Order as OrderStruct, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, Settlement, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
+
 import { Organization, UserWithOrganization } from './';
 
 export class Payment extends Model {
@@ -45,7 +46,7 @@ export class Payment extends Model {
      * Fee paid to the payment provider (if available, otherwise set to 0)
      */
     @column({ type: "integer" })
-    transferFee: number = 0
+    transferFee = 0
 
     /**
      * Included in the total price
@@ -253,7 +254,7 @@ export class Payment extends Model {
                         balanceItem: BalanceItemDetailed.create({
                             ...balanceItem,
                             registration: registration ? registration.getStructure() : null,
-                            member: member ? MemberStruct.create(member!) : null,
+                            member: member ? MemberStruct.create(member) : null,
                             order: order ? OrderStruct.create({...order, payment: null}) : null
                         })
                     })

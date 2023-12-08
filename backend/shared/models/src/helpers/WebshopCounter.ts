@@ -14,7 +14,7 @@ export class WebshopCounter  {
         // The queue can only run one at a time for the same webshop (so multiple webshops at the same time are allowed)
         return await QueueHandler.schedule("webshop/numbers-"+webshopId, async () => {
             if (this.numberCache.has(webshopId)) {
-                let nextNumber = this.numberCache.get(webshopId)!
+                const nextNumber = this.numberCache.get(webshopId)!
                 this.numberCache.set(webshopId, nextNumber + 1)
                 return nextNumber
             }

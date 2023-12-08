@@ -1,10 +1,10 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { EmailTemplateType, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from "uuid";
-
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from "@stamhoofd/queues";
+import { EmailTemplateType, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
+import { v4 as uuidv4 } from "uuid";
+
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { WebshopCounter } from '../helpers/WebshopCounter';
 import { EmailTemplate, Organization, Payment, Ticket, Webshop } from './';
@@ -284,7 +284,7 @@ export class Order extends Model {
         return changed
     }
 
-    async updateTickets(this: Order & { webshop: Webshop }): Promise<{ tickets: Ticket[], didCreateTickets: Boolean }> {
+    async updateTickets(this: Order & { webshop: Webshop }): Promise<{ tickets: Ticket[], didCreateTickets: boolean }> {
         const webshop = this.webshop
 
         // Create tickets if needed (we might already be valid in case of transfer payments)
@@ -427,32 +427,32 @@ export class Order extends Model {
             }
             if (this.data.customer.email.length > 0){
                 if (didCreateTickets) {
-                    this.setRelation(Order.webshop, webshop).sendTickets()
+                    await this.setRelation(Order.webshop, webshop).sendTickets()
                 } else {
                     if (payment && payment.method === PaymentMethod.Transfer) {
-                        this.setRelation(Order.webshop, webshop).sendPaidMail()
+                        await this.setRelation(Order.webshop, webshop).sendPaidMail()
                     }
                 }
             }
         }
     }
 
-    sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {        
+    async sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
 
-        this.sendEmailTemplate({
+        await this.sendEmailTemplate({
             type: EmailTemplateType.OrderReceivedTransfer,
             from,
             replyTo
         })
     }
 
-    sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
+    async sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
 
-        this.sendEmailTemplate({
+        await this.sendEmailTemplate({
             type: EmailTemplateType.TicketsReceivedTransfer,
             from,
             replyTo
@@ -466,7 +466,7 @@ export class Order extends Model {
     async getStructure()  {
         if (this.paymentId) {
             if (Order.payment.isLoaded(this)) {
-                return OrderStruct.create(Object.assign({...this}, { payment: PaymentStruct.create((this as any).payment) }));
+                return OrderStruct.create(Object.assign({...this}, { payment: PaymentStruct.create((this as unknown as (Order & {payment: Payment})).payment) }));
             }
             const payment = await Payment.getByID(this.paymentId)
             if (!payment) {
@@ -554,13 +554,13 @@ export class Order extends Model {
             if (tickets.length > 0) {
                 // Also send a copy
                 if (payment && payment.method === PaymentMethod.PointOfSale) {
-                    this.sendEmailTemplate({
+                    await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmationPOS,
                         from,
                         replyTo
                     })
                 } else {
-                    this.sendEmailTemplate({
+                    await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmation,
                         from,
                         replyTo
@@ -571,20 +571,20 @@ export class Order extends Model {
 
                     if (payment && payment.method === PaymentMethod.Transfer) {
                         // Also send a copy
-                        this.sendEmailTemplate({
+                        await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationTransfer,
                             from,
                             replyTo
                         })
                     } else if (payment && payment.method === PaymentMethod.PointOfSale) {
-                        this.sendEmailTemplate({
+                        await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationPOS,
                             from,
                             replyTo
                         })
                     } else {
                         // Also send a copy
-                        this.sendEmailTemplate({
+                        await this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationOnline,
                             from,
                             replyTo
@@ -592,7 +592,7 @@ export class Order extends Model {
                     }
                     
                 } else {
-                    this.sendEmailTemplate({
+                    await this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmationTransfer,
                         from,
                         replyTo
@@ -611,7 +611,7 @@ export class Order extends Model {
 
             // Send an email to all these notification emails
             for (const email of this.webshop.privateMeta.notificationEmails) {
-                this.sendEmailTemplate({
+                await this.sendEmailTemplate({
                     type: EmailTemplateType.OrderNotification,
                     from,
                     replyTo,

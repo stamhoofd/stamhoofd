@@ -1,10 +1,9 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import basex from "base-x";
+import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 
 import { Order, Organization, Webshop } from './';
-
-import basex from "base-x";
-import crypto from "crypto";
 
 // Note: 0 and O is removed to prevent typing it in wrong
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
@@ -72,13 +71,13 @@ export class Ticket extends Model {
      * If multiple items are made for the same product, this contains the index
      */
     @column({ type: "number" })
-    index: number = 0
+    index = 0
 
     /**
      * total items with index
      */
     @column({ type: "number" })
-    total: number = 0
+    total = 0
 
     @column({
         type: "datetime", beforeSave(old?: any) {

@@ -3,6 +3,7 @@ import { Email } from '@stamhoofd/email';
 import { EmailTemplateType, getPermissionLevelNumber, PaymentMethod, PaymentMethodHelper, PermissionLevel, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
+
 import { getEmailBuilder } from '../helpers/EmailBuilder';
 import { Document, EmailTemplate, Organization, User, UserWithOrganization } from './';
 
@@ -177,7 +178,7 @@ export class Registration extends Model {
         }
     }
 
-    async markValid() {
+    async markValid(this: Registration) {
         if (this.registeredAt !== null) {
             await this.save();
             return false;
@@ -195,7 +196,7 @@ export class Registration extends Model {
         if (member) {
             const registrationMemberRelation = new ManyToOneRelation(Member, "member")
             registrationMemberRelation.foreignKey = Member.registrations.foreignKey
-            await Document.updateForRegistration(this.setRelation(registrationMemberRelation, member) as any)
+            await Document.updateForRegistration(this.setRelation(registrationMemberRelation, member))
         }
 
         return true;

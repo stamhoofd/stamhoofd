@@ -1,9 +1,8 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';
-import { Order } from '../models/Order';
+
 import { Organization } from '../models/Organization';
 import { Payment } from '../models/Payment';
-import { Webshop } from '../models/Webshop';
 
 /**
  * Set the reservedAmount for all orders if they were included in the stock
@@ -16,6 +15,7 @@ export default new Migration(async () => {
 
     let lastId = ""
 
+    // eslint-disable-next-line no-constant-condition
     while(true) {
         const payments = await Payment.where({ id: { sign: '>', value: lastId }, transferSettings: { sign: '=', value: null}, transferDescription: { sign: '!=', value: null} }, {
             limit: 500,

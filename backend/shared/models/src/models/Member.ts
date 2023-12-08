@@ -2,6 +2,7 @@ import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToMa
 import { EncryptedMemberWithRegistrations, Member as MemberStruct, MemberDetails, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
+
 import { Payment, Registration, User, UserWithOrganization } from './';
 export type MemberWithUsers = Member & { users: User[] }
 export type MemberWithRegistrations = MemberWithUsers & { registrations: Registration[] }
@@ -42,7 +43,7 @@ export class Member extends Model {
     @column({ 
         type: "string", 
         nullable: true, 
-        beforeSave: function() {
+        beforeSave: function(this: Member) {
             return this.details?.birthDay ? Formatter.dateIso(this.details.birthDay) : null
         },
         skipUpdate: true 
@@ -313,7 +314,7 @@ export class Member extends Model {
         const [results] = await Database.select(query, [id])
         const ids: string[] = []
         for (const row of results) {
-            ids.push(row["l2"]["id"])
+            ids.push(row["l2"]["id"] as string)
         }
 
         if (!ids.includes(id)) {
@@ -334,7 +335,7 @@ export class Member extends Model {
 
         const [results] = await Database.select(query, [user.id])
 
-        const memberIds = results.map((r: any) => r[Member.table][Member.primary.name])
+        const memberIds = results.map((r: any) => r[Member.table][Member.primary.name] as string)
         return await this.getAllWithRegistrations(...memberIds)
     }
 

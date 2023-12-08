@@ -1,12 +1,11 @@
 
-import { column,Database,ManyToOneRelation,Model } from "@simonbackx/simple-database";
+import { column, Model } from "@simonbackx/simple-database";
 import { AnyDecoder } from "@simonbackx/simple-encoding";
-import { I18n } from "@stamhoofd/backend-i18n";
-import { Organization } from "./Organization";
 import basex from "base-x";
 import crypto from "crypto";
 
-import { User, UserWithOrganization } from "./User";
+import { Organization } from "./Organization";
+
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = basex(ALPHABET)
 
@@ -112,7 +111,7 @@ export class OneTimeToken extends Model {
     /**
      * Pass in an organization if you want to use the registration page instead of the dashboard
      */
-    async getUrl(organization: Organization, dashboard = false) {
+    getUrl(organization: Organization, dashboard = false) {
         // Send an e-mail to say you already have an account + follow password forgot flow
         const i18n = organization.i18n;
 

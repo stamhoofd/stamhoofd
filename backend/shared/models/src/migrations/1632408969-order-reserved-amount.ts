@@ -1,4 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
+
 import { Order } from '../models/Order';
 
 /**
@@ -15,6 +16,7 @@ export default new Migration(async () => {
     let countChecked = 0
     let countOrders = 0
 
+    // eslint-disable-next-line no-constant-condition
     while(true) {
         const orders = await Order.where({ id: { sign: '>', value: lastId } }, {
             limit: 1000,

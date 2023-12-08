@@ -4,10 +4,10 @@ import { Email } from "@stamhoofd/email";
 import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
+
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { GroupBuilder } from "../helpers/GroupBuilder";
 import { EmailTemplate } from "./";
-
 import { Organization } from "./";
 
 export class STPackage extends Model {
@@ -254,7 +254,7 @@ export class STPackage extends Model {
         replyTo?: string
     }) {
         // First fetch template
-        let templates = await EmailTemplate.where({ type: data.type, organizationId: null })
+        const templates = await EmailTemplate.where({ type: data.type, organizationId: null })
 
         if (!templates || templates.length == 0) {
             console.error("Could not find email template for type "+data.type)

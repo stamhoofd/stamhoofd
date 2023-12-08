@@ -3,7 +3,9 @@ require('@stamhoofd/backend-env').load({path: __dirname+'/../../.env.test.json'}
 import { Column,Database } from "@simonbackx/simple-database";
 import { Request } from '@simonbackx/simple-endpoints';
 import { I18n } from "@stamhoofd/backend-i18n";
+import { Email } from "@stamhoofd/email";
 import { Version } from '@stamhoofd/structures';
+import { sleep } from "@stamhoofd/utility";
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -44,5 +46,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+    // Wait for email queue etc
+    while (Email.currentQueue.length > 0) {
+        console.info("Emails still in queue. Waiting...")
+        await sleep(100)
+    }
     await Database.end();
 });

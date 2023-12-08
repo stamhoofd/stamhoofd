@@ -12,7 +12,8 @@
     "scripts": {
         "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/assets && tsc -b && mkdir -p ./dist/src/migrations && cp ./src/migrations/*.sql ./dist/src/migrations && cp -R ./src/migrations/data ./dist/src/migrations && cp -R ./src/assets ./dist/src/assets",
         "build:full": "rm -rf ./dist && yarn build",
-        "test": "yarn build:full && jest"
+        "test": "yarn build:full && jest",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "peerDependencies": {
         "@stamhoofd/email": "*",
