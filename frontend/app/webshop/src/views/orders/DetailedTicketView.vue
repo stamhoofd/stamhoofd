@@ -20,12 +20,55 @@
             </h1>
             <p v-if="isSingle && order" class="description" v-text="'Bestelling #'+order.number" />
             <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
-            <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
+            <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
 
-            <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.name" />
-            <p v-if="cartItem.product.location && cartItem.product.location.address" class="description" v-text="cartItem.product.location.address" />
+            <STList>
+                <STListItem v-if="cartItem.product.location">
+                    <h3 class="style-definition-label">
+                        Locatie
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ cartItem.product.location.name }}
+                    </p>
+                    <p v-if="cartItem.product.location.address" class="style-description-small">
+                        {{ cartItem.product.location.address }}
+                    </p>
+                </STListItem>
+                <STListItem v-if="indexDescription.length">
+                    <div class="split-info">
+                        <div v-for="(row, index) in indexDescription" :key="index">
+                            <h3 class="style-definition-label">
+                                {{ row.title }}
+                            </h3>
+                            <p class="style-definition-text">
+                                {{ row.value }}
+                            </p>
+                        </div>
+                    </div>
+                    <button class="button text" type="button" @click="showSeats">
+                        <span>Toon op zaalplan</span>
+                        <span class="icon arrow-right-small" />
+                    </button>
+                </STListItem>
 
-            <p class="description" v-text="formatPrice(price)" />
+                <STListItem v-if="cartItem.product.location">
+                    <h3 class="style-definition-label">
+                        Wanneer?
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatDateRange(cartItem.product.dateRange) }}
+                    </p>
+                </STListItem>
+                
+                <STListItem v-if="price">
+                    <h3 class="style-definition-label">
+                        Prijs
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatPrice(price) }}
+                    </p>
+                </STListItem>
+            </STList>
         </main>
 
         <STToolbar>
@@ -39,8 +82,8 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { OrganizationLogo,STErrorsDefault, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { OrganizationLogo,ShowSeatsView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Order, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from 'vue-property-decorator';
@@ -53,7 +96,9 @@ import { WebshopManager } from "../../classes/WebshopManager";
         STNavigationBar,
         STToolbar,
         STErrorsDefault,
-        OrganizationLogo
+        OrganizationLogo,
+        STList,
+        STListItem
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -83,6 +128,10 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         return this.ticket.items[0]
     }
 
+    get indexDescription() {
+        return this.ticket.getIndexDescription(this.webshop)
+    }
+
     get organization() {
         return WebshopManager.organization
     }
@@ -109,6 +158,19 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
             text: "Bekijk en sla jouw ticket op via deze link.",
             url: this.qrMessage,
         }).catch(e => console.error(e))
+    }
+
+    showSeats() {
+        this.show({
+            components: [
+                new ComponentWithProperties(ShowSeatsView, {
+                    webshop: this.webshop,
+                    ticket: this.ticket,
+                    order: this.order,
+                    allowDismiss: this.allowDismiss
+                })
+            ]
+        })
     }
 
     formatPrice(price: number) {
@@ -215,20 +277,35 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
     }
 
     figure {
-        padding-bottom: var(--st-horizontal-padding, 30px);
+        padding-bottom: calc(var(--st-horizontal-padding, 30px));
+        max-width: calc(100vh - 200px);
+        max-width: calc(100dvh - 200px);
+        margin: 0 auto;
+
+        body.dark & {
+            padding-top: 30px;
+            padding-bottom: calc(var(--st-horizontal-padding, 30px) + 10px);
+        }
+
+        body:not(.light) & {
+            @media (prefers-color-scheme: dark) {
+                padding-top: 30px;
+                padding-bottom: calc(var(--st-horizontal-padding, 30px) + 10px);
+            }
+        }
 
         > div {
             position: relative;
-        }
 
-        body.dark & {
-            padding-bottom: 20px;
-            margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
-
-            > div {
-                background: white;
-                padding: 30px;
+            &:before {
+                position: absolute;
+                content: "";
+                top: -30px;
+                left: -30px;
+                right: -30px;
+                bottom: -30px;
                 border-radius: $border-radius;
+                background: white; // no variable here, because should be white (qr code)
             }
         }
 
@@ -236,8 +313,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
             width: auto;
             height: auto;
             max-width: 100%;
-            //max-height: calc(100vh - 200px);
-            //max-height: calc(100dvh - 200px);
+            
         }
 
         img {

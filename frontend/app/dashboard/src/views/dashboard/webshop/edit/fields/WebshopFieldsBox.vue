@@ -3,25 +3,18 @@
         <STList>
             <WebshopFieldRow v-for="field in fields" :key="field.id" :field="field" @patch="addPatch" @move-up="moveFieldUp(field)" @move-down="moveFieldDown(field)" />
         </STList>
-        <p>
-            <button class="button text" type="button" @click="addField">
-                <span class="icon add" />
-                <span>Vraag toevoegen</span>
-            </button>
-        </p>
     </div>
 </template>
 
 <script lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STList, STListItem } from "@stamhoofd/components";
-import { WebshopField } from "@stamhoofd/structures"
+import { WebshopField } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import EditWebshopFieldView from './EditWebshopFieldView.vue';
-import WebshopFieldRow from "./WebshopFieldRow.vue"
+import WebshopFieldRow from "./WebshopFieldRow.vue";
 
 @Component({
     components: {
@@ -35,7 +28,7 @@ import WebshopFieldRow from "./WebshopFieldRow.vue"
 })
 export default class WebshopFieldsBox extends Mixins(NavigationMixin) {
     @Prop({})
-    fields: WebshopField[]
+        fields: WebshopField[]
 
     moveFieldUp(field: WebshopField) {
         const index = this.fields.findIndex(c => field.id === c.id)
@@ -61,17 +54,6 @@ export default class WebshopFieldsBox extends Mixins(NavigationMixin) {
         this.addPatch(p)
     }
     
-    addField() {
-        const field = WebshopField.create({})
-
-        const p: PatchableArrayAutoEncoder<WebshopField>= new PatchableArray()
-        p.addPut(field)
-
-        this.present(new ComponentWithProperties(EditWebshopFieldView, { field, isNew: true, saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
-            this.$emit("patch", p.patch(patch))
-        }}).setDisplayStyle("sheet"))
-    }
-
     addPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
         this.$emit("patch", patch)
     }

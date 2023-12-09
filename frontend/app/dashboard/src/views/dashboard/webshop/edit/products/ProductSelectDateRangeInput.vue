@@ -1,20 +1,18 @@
 <template>
     <div>
-        <STInputBox v-if="dateRanges.length > 0" :title="title" :error-box="errorBox" error-fields="selectedDateRange" class="max">
-            <STList>
-                <STListItem v-for="_dateRange in dateRanges" :key="_dateRange.id" element-name="label" :selectable="true" class="left-center dateRange-selection">
-                    <Radio slot="left" v-model="selectedDateRange" :value="_dateRange" @change="changeSelected" />
-                    <h3>
-                        {{ formatDate(_dateRange) }}
-                    </h3>
-                    <button slot="right" type="button" class="button icon gray edit" @click.stop="doEditDateRange(_dateRange)" />
-                </STListItem>
-                <STListItem element-name="label" :selectable="true" class="left-center">
-                    <Radio slot="left" v-model="selectedDateRange" :value="null" @change="changeSelected" />
-                    Een andere datum/tijdstip
-                </STListItem>
-            </STList>
-        </STInputBox>
+        <STList v-if="dateRanges.length > 0">
+            <STListItem v-for="_dateRange in dateRanges" :key="_dateRange.id" element-name="label" :selectable="true" class="left-center dateRange-selection">
+                <Radio slot="left" v-model="selectedDateRange" :value="_dateRange" @change="changeSelected" />
+                <h3>
+                    {{ formatDate(_dateRange) }}
+                </h3>
+                <button slot="right" type="button" class="button icon gray edit" @click.stop="doEditDateRange(_dateRange)" />
+            </STListItem>
+            <STListItem element-name="label" :selectable="true" class="left-center">
+                <Radio slot="left" v-model="selectedDateRange" :value="null" @change="changeSelected" />
+                Een andere datum/tijdstip
+            </STListItem>
+        </STList>
         <ProductDateRangeInput v-if="editingDateRange || selectedDateRange === null" v-model="editDateRange" :validator="internalValidator" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
@@ -43,23 +41,23 @@ import ProductDateRangeInput from "./ProductDateRangeInput.vue"
 })
 export default class ProductSelectDateRangeInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ required: true }) 
-    dateRanges: ProductDateRange[];
+        dateRanges: ProductDateRange[];
 
     /**
      * Assign a validator if you want to offload the validation to components
      */
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     errorBox: ErrorBox | null = null
 
     internalValidator = new Validator()
     
     @Prop({ default: null })
-    value: ProductDateRange | null
+        value: ProductDateRange | null
 
     selectedDateRange: ProductDateRange | null = null
     customDateRange: ProductDateRange | null = null

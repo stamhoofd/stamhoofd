@@ -2,16 +2,13 @@
     <div class="container">
         <hr>
         <h2 class="style-with-button">
-            <div>{{ optionMenu.name || 'Naamloos' }}</div>
             <div>
-                <button class="button text only-icon-smartphone" type="button" @click="editOptionMenu">
-                    <span class="icon edit" />
-                    <span>Wijzig</span>
-                </button>
-                <button class="button text only-icon-smartphone" type="button" @click="addOption">
-                    <span class="icon add" />
-                    <span>Keuze</span>
-                </button>
+                {{ optionMenu.name || 'Naamloos' }}
+                <span class="style-tag inline-first">{{ optionMenu.multipleChoice ? 'Keuzemenu' : 'Keuzemenu' }}</span>
+            </div>
+            <div>
+                <button class="button icon edit" type="button" @click="editOptionMenu" />
+                <button class="button icon add" type="button" @click="addOption" />
             </div>
         </h2>
 
@@ -42,10 +39,10 @@ import OptionMenuOptions from './OptionMenuOptions.vue';
 })
 export default class OptionMenuSection extends Mixins(NavigationMixin) {
     @Prop({})
-    optionMenu: OptionMenu
+        optionMenu: OptionMenu
 
     @Prop({})
-    product: Product
+        product: Product
 
     addOption() {
         const option = Option.create({})

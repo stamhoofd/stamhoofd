@@ -69,6 +69,11 @@ export class ForwardHandler {
                 return
             }
 
+            if (from.endsWith("@amazonses.com")) {
+                // Ignore
+                return
+            }
+
             // Send back to receiver without including the original message to avoid spam
             return {
                 from: email ?? "unknown@stamhoofd.be",

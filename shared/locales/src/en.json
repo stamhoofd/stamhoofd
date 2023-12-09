@@ -7,7 +7,7 @@
     },
     "inputs": {
       "iban": {
-        "placeholder": "E.g. BE71 6316 1793 1969"
+        "placeholder": "E.g. BE71 6316 1793 1960"
       },
       "companyNumber": {
         "label": "Company number"

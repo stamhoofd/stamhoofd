@@ -2,8 +2,10 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDe
 import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
+import { ReservedSeat } from "../SeatingPlan";
 import { CartItem } from "./Cart";
 import { Order } from "./Order";
+import { Webshop, WebshopPreview } from "./Webshop";
 
 export class Ticket extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -41,11 +43,70 @@ export class TicketPublic extends Ticket {
     @field({ decoder: new ArrayDecoder(CartItem) })
     items: CartItem[] = []
 
+    get isSingle() {
+        return this.items.length === 1 && this.items[0].product.isTicket
+    }
+
     getTitle() {
-        if (this.items.length != 1) {
+        if (!this.isSingle) {
             return "Ticket"
         }
         return this.items[0].product.name
+    }
+
+    getIndexDescriptionString(webshop: Webshop|WebshopPreview) {
+        if (!this.isSingle) {
+            return '';
+        }
+        const description = this.getIndexDescription(webshop)
+        return description.map(d => d.title + ': ' + d.value).join('\n')
+    }
+
+    getIndexDescription(webshop: Webshop|WebshopPreview): {title: string, value: string}[] {
+        if (!this.isSingle) {
+            return []
+        }
+        const item = this.items[0];
+        if (!item || !item.product.seatingPlanId) {
+            return []
+        }
+
+        const seat = this.getSeat()
+        if (seat) {
+            const r = seat.getName(webshop, item.product)
+            if (r.length > 0) {
+                return r
+            }
+        } 
+        return [
+            {
+                title: 'Plaats',
+                value: 'Onbekende plaats. Jouw toegekende plaats werd waarschijnlijk verwijderd. Neem contact met ons op om dit recht te zetten.'
+            }
+        ]
+    }
+
+    getSeatingPlanId() {
+        if (!this.isSingle) {
+            return null
+        }
+        return this.items[0].product.seatingPlanId
+    }
+
+    getSeat(): ReservedSeat | null {
+        if (!this.isSingle) {
+            return null
+        }
+        const item = this.items[0];
+        if (!item || !item.product.seatingPlanId) {
+            return null
+        }
+
+        const index = this.index - 1
+        if (item.seats[index]) {
+            return item.seats[index]
+        } 
+        return null
     }
 
     getIndexText(): string | null {

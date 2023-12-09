@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Address } from '../addresses/Address';
 import { Image } from '../files/Image';
+import { ReservedSeat } from '../SeatingPlan';
 import { WebshopField } from './WebshopField';
 
 export class ProductPrice extends AutoEncoder {
@@ -157,6 +158,10 @@ export class Product extends AutoEncoder {
         return this.enabled && !this.hidden && this.enableAfter !== null && this.enableAfter > new Date() && (!this.disableAfter || this.disableAfter >= new Date())
     }
 
+    get isTicket() {
+        return this.type === ProductType.Ticket || this.type === ProductType.Voucher
+    }
+
     @field({ decoder: new ArrayDecoder(Image) })
     images: Image[] = []
 
@@ -171,7 +176,13 @@ export class Product extends AutoEncoder {
 
     @field({ decoder: ProductDateRange, nullable: true, version: 105 })
     dateRange: ProductDateRange | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 211 })
+    seatingPlanId: string|null = null
     
+    @field({ decoder: new ArrayDecoder(ReservedSeat), nullable: true, version: 211 })
+    reservedSeats: ReservedSeat[] = []
+
     /**
      * WIP: not yet supported
      * Set to true if you need to have a name for every ordered product. When this is true, you can't order this product mutliple times with the same name.

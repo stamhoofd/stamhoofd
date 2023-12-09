@@ -48,12 +48,11 @@ export async function checkAllStripePayouts(checkAll = false) {
 }
 
 export async function checkSettlements(checkAll = false) {
-    if (!checkAll && lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 24 * 60 * 60 * 1000))) {
-        console.log("Skip settlement check")
+    if (STAMHOOFD.environment !== "production") {
         return
     }
 
-     if (STAMHOOFD.environment !== "production") {
+    if (!checkAll && lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 24 * 60 * 60 * 1000))) {
         console.log("Skip settlement check")
         return
     }

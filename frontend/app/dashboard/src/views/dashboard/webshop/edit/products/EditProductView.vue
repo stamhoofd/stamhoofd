@@ -79,7 +79,7 @@
                 </button>
             </div>
         </h2>
-        <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Als je maar één prijs hebt kan je die geen naam geven. Naast meerdere prijzen kan je ook keuzemogelijkheden toevoegen (zie onder).</p>
+        <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).</p>
 
         <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
 
@@ -89,45 +89,91 @@
 
         <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addPatch" />
 
+        <template v-if="fields.length">
+            <hr>
+            <h2 class="style-with-button">
+                <div>Tekstvelden / open vragen</div>
+                <div>
+                    <button class="button icon add only-icon-smartphone" type="button" @click="addField" />
+                </div>
+            </h2>
+
+            <p>Open vragen zijn vragen (bv. 'naam op de trui') waarbij bestellers zelf tekst kunnen intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
+
+            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
+        </template>
+
         <hr>
-        <h2 class="style-with-button">
-            <div>Keuzemenu's</div>
-            <div>
-                <button class="button text only-icon-smartphone" type="button" @click="addOptionMenu">
-                    <span class="icon add" />
-                    <span>Keuzemenu toevoegen</span>
-                </button>
+
+        <STList>
+            <STListItem :selectable="true" element-name="button" @click="addOptionMenu">
+                <span slot="left" class="icon add gray" />
+
+                <h3 class="style-title-list">
+                    Keuzemenu
+                </h3>
+                <p class="style-description-small">
+                    Laat bestellers een keuze maken uit een lijst met opties, al dan niet met een meerprijs. Bv. "Kies je extra's" met daarin bijvoorbeeld "Kaas op je spaghetti"
+                </p>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="button" @click="addField">
+                <span slot="left" class="icon add gray" />
+
+                <h3 class="style-title-list">
+                    Tekstveld (open vraag)
+                </h3>
+                <p class="style-description-small">
+                    Stel een open vraag (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.
+                </p>
+            </STListItem>
+
+            <STListItem v-if="getFeatureFlag('seating-plans') && isTicket" :selectable="true" element-name="button" @click="chooseSeatingPlan">
+                <span slot="left" class="icon seat gray" />
+                <h3 class="style-title-list">
+                    Zetelselectie instellen
+                </h3>
+                <p class="style-description-small">
+                    Laat bestellers hun zetel kiezen bij het bestellen. Ideaal voor bijvoorbeeld een dansvoorstelling met vaste plaatsen.
+                </p>
+            </STListItem>
+
+            <STListItem v-if="!image" :selectable="true" element-name="label" class="button">
+                <span slot="left" class="icon camera gray" />
+
+                <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
+                    <h3 class="style-title-list">
+                        Foto toevoegen
+                    </h3>
+                    <p class="style-description-small">
+                        Voeg een foto toe aan dit artikel. Knip bij voorkeur zelf je foto's wat bij zodat ze mooi weergegeven worden voor je ze uploadt.
+                    </p>
+                </UploadButton>
+            </STListItem>
+        </STList>
+        
+        <template v-if="image">
+            <hr>
+            <h2 class="style-with-button">
+                <div>Foto</div>
+                <div>
+                    <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
+                        <span class="icon trash" />
+                        <span>Verwijderen</span>
+                    </button>
+                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
+                </div>
+            </h2>
+
+            <div class="image-box">
+                <img v-if="image" :src="imageSrc" class="image">
             </div>
-        </h2>
-        <p>Je kan bij dit artikel nog een keuzemenu toevoegen waarbij men geen, één of meerdere antwoorden moet aanduiden. Elk menu heeft ook een titel, bv. "kies je extra's".</p>
-
-        <hr>
-        <h2>Open vragen</h2>
-        <p>Je kan ook nog open vragen stellen (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
-
-        <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
-
-        <hr>
-        <h2 class="style-with-button">
-            <div>Foto</div>
-            <div>
-                <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
-            </div>
-        </h2>
-        <p>Knip bij voorkeur zelf je foto's wat bij zodat ze mooi weergegeven worden voor je ze uploadt. Een hoge foto kan soms veel plaats in beslag nemen.</p>
-
-        <div class="image-box">
-            <img v-if="image" :src="imageSrc" class="image">
-        </div>  
+        </template>
         
         <hr>
         <h2>
             Beschikbaarheid
-            {{ remainingStock !== null ? ('(nog '+ remainingStock +' beschikbaar)') : '' }}
+            <span v-if="remainingStock !== null" class="title-suffix">nog {{ remainingStock }} beschikbaar</span>
         </h2>
 
         <STList>
@@ -275,14 +321,16 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton, Validator } from "@stamhoofd/components";
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
 import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue";
+import ChooseSeatingPlanView from '../seating/ChooseSeatingPlanView.vue';
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditProductPriceView from './EditProductPriceView.vue';
 import OptionMenuSection from "./OptionMenuSection.vue";
@@ -362,10 +410,36 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         return this.patchedProduct.customFields
     }
 
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    getFeatureFlag(flag: string) {
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+    }
+
     addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
         this.addPatch(Product.patch({
             customFields: patch
         }))
+    }
+
+    chooseSeatingPlan() {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: new ComponentWithProperties(ChooseSeatingPlanView, { 
+                        product: this.patchedProduct, 
+                        webshop: this.patchedWebshop, 
+                        saveHandler: (patchProduct: AutoEncoderPatchType<PrivateWebshop>, patch: AutoEncoderPatchType<PrivateWebshop>) => {
+                            this.patchProduct = this.patchProduct.patch(patchProduct)
+                            this.patchWebshop = this.patchWebshop.patch(patch)
+                        }
+                    })
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
 
     get name() {
@@ -677,6 +751,24 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         }}).setDisplayStyle("popup"))
     }
 
+    addField() {
+        const field = WebshopField.create({})
+        const p: PatchableArrayAutoEncoder<WebshopField>= new PatchableArray()
+        
+        p.addPut(field)
+
+        this.present(
+            new ComponentWithProperties(EditWebshopFieldView, { 
+                field, 
+                isNew: true, 
+                saveHandler: (patch: PatchableArrayAutoEncoder<WebshopField>) => {
+                    this.addFieldsPatch(p.patch(patch))
+                }
+            }).setDisplayStyle("sheet")
+        )
+    }
+
+
     addProductPrice() {
         const price = ProductPrice.create({})
         const p = Product.patch({ id: this.product.id })
@@ -753,7 +845,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchProduct, this.product, { version: Version })
+        return patchContainsChanges(this.patchProduct, this.product, { version: Version }) || patchContainsChanges(this.patchWebshop, this.webshop, { version: Version })
     }
 
     async shouldNavigateAway() {

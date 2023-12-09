@@ -140,7 +140,7 @@ export class OrganizationMetaData extends AutoEncoder {
     }
 
     @field({ decoder: new EnumDecoder(OrganizationType) })
-    type: OrganizationType;
+    type = OrganizationType.Other
 
     /**
      * Show beta features in this organization

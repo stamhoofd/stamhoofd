@@ -85,6 +85,10 @@
             <Checkbox :checked="getFeatureFlag('webshop-auth')" @change="setFeatureFlag('webshop-auth', !!$event)">
                 Webshop auth
             </Checkbox>
+
+            <Checkbox :checked="getFeatureFlag('seating-plans')" @change="setFeatureFlag('seating-plans', !!$event)">
+                Zetelselectie
+            </Checkbox>
         </div>
     </SaveView>
 </template>

@@ -360,8 +360,13 @@
     }
 
     &.icon {
+        color: $color-gray-4;
         transition: opacity 0.2s ease-out, color 0.2s ;
         overflow: visible; // fix for breakout region
+
+        &.selected {
+            color: $color-primary;
+        }
 
         &:after {
             // Breakout region

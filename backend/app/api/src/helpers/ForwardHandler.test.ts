@@ -1,7 +1,7 @@
 /* eslint-disable jest/expect-expect */
 
-import { OrganizationFactory } from "@stamhoofd/models"
-import { UserFactory } from "@stamhoofd/models"
+import { EmailAddress } from "@stamhoofd/email"
+import { OrganizationFactory, UserFactory } from "@stamhoofd/models"
 import { OrganizationEmail, PermissionLevel, Permissions } from "@stamhoofd/structures"
 
 import { ForwardHandler } from "./ForwardHandler"
@@ -29,7 +29,12 @@ describe("ForwardHandler", () => {
             dmarcVerdict: { status: 'PASS' },
         })
         expect(options).toMatchObject({
-            to: '"default" <def@example.com>',
+            to: [
+                {
+                    email: "def@example.com",
+                    name: "default",
+                }
+            ],
             subject: "Hello",
             replyTo: "someone@example.com"
         })
@@ -57,7 +62,12 @@ describe("ForwardHandler", () => {
             dmarcVerdict: { status: 'PASS' },
         })
         expect(options).toMatchObject({
-            to: '"First" <first@example.com>',
+            to: [
+                {
+                    email: "first@example.com",
+                    name: "First"
+                }
+            ],
             subject: "Hello",
             replyTo: "someone@example.com"
         })
@@ -77,7 +87,12 @@ describe("ForwardHandler", () => {
             dmarcVerdict: { status: 'PASS' },
         })
         expect(options).toMatchObject({
-            to: user.email,
+            to: [
+                {
+                    email: user.email,
+                    name: null
+                }
+            ],
             subject: "Hello",
             replyTo: "someone@example.com"
         })
@@ -108,7 +123,16 @@ describe("ForwardHandler", () => {
             subject: "Hello",
             replyTo: "someone@example.com"
         })
-        expect(options!.to).toBeOneOf([user.email+", "+user2.email, user2.email+", "+user.email])
+        expect(options!.to).toIncludeAllMembers([
+            {
+                email: user.email,
+                name: null
+            },
+            {
+                email: user2.email,
+                name: null
+            }
+        ])
         expect(options!.text).toContain("Content hier")
 
         // Check notice
@@ -138,7 +162,7 @@ describe("ForwardHandler", () => {
         expect(options).toBeUndefined()
     })
 
-    it("should not ignore aws bounce emails for own", async () => {
+    it("should ignore aws bounce emails for unknown organizations", async () => {
         const options = await ForwardHandler.handle("From: bounces@amazonses.com\nSubject: Hello\nTo: ksjdgsdgkjlsdg@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
             recipients: ["ksjdgsdgkjlsdg@stamhoofd.email"],
             spamVerdict: { status: 'PASS' },
@@ -147,10 +171,46 @@ describe("ForwardHandler", () => {
             dkimVerdict: { status: 'PASS' },
             dmarcVerdict: { status: 'PASS' },
         })
-        expect(options).toMatchObject({
-            to: 'hallo@stamhoofd.be',
-            subject: "Hello",
-            replyTo: "bounces@amazonses.com"
+        expect(options).toBeUndefined()
+    })
+
+    it("should unsubscribe email addresses that send to unsubscribe", async () => {
+        const address = new EmailAddress()
+        address.email = "exampleaddress-unsusbcribe-test@example.com";
+        address.organizationId = null
+        address.token = null;
+        await address.save()
+
+        const id = address.id
+
+        const options = await ForwardHandler.handle(`From: bounces@amazonses.com\nSubject: Hello\nTo: unsubscribe+${id}@stamhoofd.email\nContent-Type: text/plain\n\nContent hier`, {
+            recipients: [`unsubscribe+${id}@stamhoofd.email`],
+            spamVerdict: { status: 'PASS' },
+            virusVerdict: { status: 'PASS' },
+            spfVerdict: { status: 'PASS' },
+            dkimVerdict: { status: 'PASS' },
+            dmarcVerdict: { status: 'PASS' },
         })
+        expect(options).toBeUndefined()
+
+        // Refresh adress and check unsubscribed for all
+        const updatedAddress = await EmailAddress.getByID(id)
+        expect(updatedAddress).toBeDefined()
+        expect(updatedAddress!.unsubscribedAll).toEqual(true);
+    })
+
+    it("should forward unsubscribe emails to unrecognized id", async () => {
+        const options = await ForwardHandler.handle(`From: bounces@amazonses.com\nSubject: Hello\nTo: unsubscribe+testid@stamhoofd.email\nContent-Type: text/plain\n\nContent hier`, {
+            recipients: [`unsubscribe+testid@stamhoofd.email`],
+            spamVerdict: { status: 'PASS' },
+            virusVerdict: { status: 'PASS' },
+            spfVerdict: { status: 'PASS' },
+            dkimVerdict: { status: 'PASS' },
+            dmarcVerdict: { status: 'PASS' },
+        })
+        expect(options).toMatchObject({
+             to: "hallo@stamhoofd.be",
+            subject: "E-mail unsubscribe mislukt",
+        });
     })
 })

@@ -33,10 +33,10 @@ describe("Endpoint.GetOrganization", () => {
 
         expect(response.body.data.id).toEqual(organization.id)
         expect(response.body.data.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
-        expect(response.body.keychainItems).toHaveLength(0)
+        expect(response.body.data.privateMeta).toEqual(null)
     });
 
-    test("Get organization as admin with keys", async () => {
+    test("Get organization as admin", async () => {
         const user = await new UserFactory({
             permissions: Permissions.create({
                 level: PermissionLevel.Read
@@ -63,10 +63,7 @@ describe("Endpoint.GetOrganization", () => {
 
         expect(response.body.data.id).toEqual(organization.id)
         expect(response.body.data.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
-        expect(response.body.keychainItems).toHaveLength(1)
-        expect(response.body.keychainItems[0]).toMatchObject({
-            publicKey: organization.publicKey
-        })
+        expect(response.body.data.privateMeta).not.toEqual(null)
     });
 
 });

@@ -1,23 +1,21 @@
 <template>
     <div>
-        <STInputBox v-if="locations.length > 0" :title="title" :error-box="errorBox" error-fields="selectedLocation" class="max">
-            <STList>
-                <STListItem v-for="_location in locations" :key="_location.id" element-name="label" :selectable="true" class="left-center location-selection">
-                    <Radio slot="left" v-model="selectedLocation" :value="_location" @change="changeSelected" />
-                    <h3 class="style-title-list">
-                        {{ _location.name }}
-                    </h3>
-                    <p v-if="_location.address" class="style-description">
-                        {{ _location.address }}
-                    </p>
-                    <button slot="right" type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)" />
-                </STListItem>
-                <STListItem element-name="label" :selectable="true" class="left-center">
-                    <Radio slot="left" v-model="selectedLocation" :value="null" @change="changeSelected" />
-                    Een andere locatie
-                </STListItem>
-            </STList>
-        </STInputBox>
+        <STList v-if="locations.length > 0">
+            <STListItem v-for="_location in locations" :key="_location.id" element-name="label" :selectable="true" class="left-center location-selection">
+                <Radio slot="left" v-model="selectedLocation" :value="_location" @change="changeSelected" />
+                <h3 class="style-title-list">
+                    {{ _location.name }}
+                </h3>
+                <p v-if="_location.address" class="style-description">
+                    {{ _location.address }}
+                </p>
+                <button slot="right" type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)" />
+            </STListItem>
+            <STListItem element-name="label" :selectable="true" class="left-center">
+                <Radio slot="left" v-model="selectedLocation" :value="null" @change="changeSelected" />
+                Een andere locatie
+            </STListItem>
+        </STList>
         <ProductLocationInput v-if="editingLocation || selectedLocation === null" v-model="editLocation" :validator="internalValidator" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
@@ -45,24 +43,21 @@ import ProductLocationInput from "./ProductLocationInput.vue"
     }
 })
 export default class ProductSelectLocationInput extends Vue {
-    @Prop({ default: "" }) 
-    title: string;
-
     @Prop({ required: true }) 
-    locations: ProductLocation[];
+        locations: ProductLocation[];
 
     /**
      * Assign a validator if you want to offload the validation to components
      */
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     errorBox: ErrorBox | null = null
 
     internalValidator = new Validator()
     
     @Prop({ default: null })
-    value: ProductLocation | null
+        value: ProductLocation | null
 
     selectedLocation: ProductLocation | null = null
     customLocation: ProductLocation | null = null

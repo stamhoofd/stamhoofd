@@ -56,6 +56,10 @@
         color: $color-gray-1;
     }
 
+    .button &.gray {
+        color: $color-gray-4;
+    }
+
     &.primary-light {
         color: $color-primary-gray-light;
     }

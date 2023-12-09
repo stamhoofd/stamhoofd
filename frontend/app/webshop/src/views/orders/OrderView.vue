@@ -582,10 +582,12 @@ export default class OrderView extends Mixins(NavigationMixin){
     openTicket(ticket: TicketPublic) {
         this.present({
             components: [
-                new ComponentWithProperties(DetailedTicketView, {
-                    ticket: ticket,
-                    order: this.order,
-                    webshop: this.webshop
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(DetailedTicketView, {
+                        ticket: ticket,
+                        order: this.order,
+                        webshop: this.webshop
+                    })
                 })
             ],
             modalDisplayStyle: "sheet"

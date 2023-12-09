@@ -8,7 +8,7 @@ import { loadLogger } from "@stamhoofd/logging";
 import { Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 
-import { areCronsRunning, crons } from './src/crons';
+import { areCronsRunning, crons, stopCronScheduling } from './src/crons';
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -88,7 +88,8 @@ const start = async () => {
             routerServer.server.headersTimeout = 5000;
             routerServer.server.keepAliveTimeout = 1;
         }
-
+        
+        stopCronScheduling();
         clearInterval(cronInterval)
 
         try {

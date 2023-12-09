@@ -1,5 +1,5 @@
 <template>
-    <label class="upload-button">
+    <component :is="elementName" class="upload-button">
         <LoadingButton :loading="uploading">
             <slot>
                 <div class="button text only-icon-smartphone">
@@ -9,7 +9,7 @@
             </slot>
         </LoadingButton>
         <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
-    </label>
+    </component>
 </template>
 
 <script lang="ts">
@@ -30,6 +30,9 @@ import LoadingButton from "../navigation/LoadingButton.vue";
     }
 })
 export default class UploadButton extends Mixins(NavigationMixin) {
+    @Prop({ default: 'label' })
+        elementName!: string;
+
     @Prop({ default: "" }) 
         text: string;
 
