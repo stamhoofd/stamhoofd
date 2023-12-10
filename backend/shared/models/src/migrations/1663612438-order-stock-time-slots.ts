@@ -1,4 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
+
 import { Order } from '../models/Order';
 import { Webshop } from '../models/Webshop';
 
@@ -12,8 +13,9 @@ export default new Migration(async () => {
     }
 
     let lastId = ""
-    let shopBuffer = new Map<string, Webshop>()
+    const shopBuffer = new Map<string, Webshop>()
 
+    // eslint-disable-next-line no-constant-condition
     while(true) {
         const orders = await Order.where({ id: { sign: '>', value: lastId } }, {
             limit: 1000,

@@ -1,11 +1,11 @@
 import { createMollieClient, SequenceType } from '@mollie/api-client';
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Email } from "@stamhoofd/email";
 import { calculateVATPercentage, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPricingType, Version } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { Email } from "@stamhoofd/email";
-import { Formatter } from "@stamhoofd/utility";
 import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
 import { MolliePayment, Organization, Payment, Registration, STCredit, STInvoice, STPackage } from './';
 
@@ -76,7 +76,7 @@ export class STPendingInvoice extends Model {
      */
     static async addItems(organization: Organization, invoiceItems: STInvoiceItem[]): Promise<STPendingInvoice | undefined> {
         // Get the pending invoice if it exists
-        let pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+        const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
         return await this.addItemsTo(pendingInvoice, organization, invoiceItems)
     }
 
@@ -114,7 +114,7 @@ export class STPendingInvoice extends Model {
      */
     static async addAutomaticItems(organization: Organization): Promise<STPendingInvoice | undefined> {
         // Get the pending invoice if it exists
-        let pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+        const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
 
         // Generate temporary pending invoice items for the current state without adding them IRL
         const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)

@@ -4,6 +4,7 @@ import { Formatter } from "@stamhoofd/utility";
 import AWS from 'aws-sdk';
 import PDFDocument from 'pdfkit';
 import { v4 as uuidv4 } from "uuid";
+
 import { Payment, STInvoice } from "../models";
 
 // 1 mm
@@ -129,7 +130,7 @@ export class InvoiceBuilder {
         if (this.invoice.number) {
             this.document.text("Factuur", logoX * MM, this.posY * MM, { align: 'left' })
             this.document.fillColor(COLOR_PRIMARY);
-            this.document.text(this.invoice.number! + "", 43 * MM, this.posY * MM, { align: 'left' })
+            this.document.text(this.invoice.number + "", 43 * MM, this.posY * MM, { align: 'left' })
         } else {
             this.document.text("Pro-forma factuur", logoX * MM, this.posY * MM, { align: 'left' })
         }
@@ -195,21 +196,21 @@ export class InvoiceBuilder {
     }
 
     drawSinglePageShape() {
-        let grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
+        const grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
         grad.stop(0, COLOR_PRIMARY, 0.05)
         grad.stop(1, COLOR_PRIMARY, 0.0125)
         this.document.path("M77.7712 218.083L171.619 235.042C243.199 247.977 296.942 170.932 260.082 108.224C227.956 53.5718 264.75 -15.7544 328.017 -19.7785L448.398 -27.4352C464.702 -28.4722 480.75 -32.0117 495.978 -37.9294L675 -107.5L620.736 657.908C632.149 683.877 636.326 712.954 632.019 741.981L599 964.5L620.736 657.908C610.866 635.452 595.586 615.319 575.701 599.553C517.911 553.731 435.178 556.051 379.56 604.487C336.64 641.865 276.285 652.913 223.063 632.745L207.613 626.89C152.353 605.95 90.367 613.137 41.3649 646.167L-82.2193 729.468C-100.412 741.73 -124.568 726.81 -121.748 705.052L-72.9101 328.306C-63.4384 255.239 5.26735 204.981 77.7712 218.083Z").fill(grad)
     }
 
     drawLastPageShape() {
-        let grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
+        const grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
         grad.stop(0, COLOR_PRIMARY, 0.05)
         grad.stop(1, COLOR_PRIMARY, 0.0125)
         this.document.path("M-0.5 217.5L0 0H596L597.916 613.667L634.755 642.877C641.094 647.903 644.268 655.931 643.081 663.933C638.973 691.617 598.15 688.669 598.062 660.681L597.916 613.667L575.701 596.053C517.911 550.231 435.178 552.551 379.56 600.987C336.64 638.365 276.285 649.413 223.063 629.245L207.613 623.39C152.353 602.45 90.367 609.637 41.3649 642.667L-76.3939 722.041C-95.0939 734.646 -119.534 717.721 -114.314 695.783L-0.5 217.5Z").fill(grad)
     }
 
     drawFirstPageShape() {
-        let grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
+        const grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
         grad.stop(0, COLOR_PRIMARY, 0.05)
         grad.stop(1, COLOR_PRIMARY, 0.0125)
         this.document.path("M75.804 217.728L171.619 235.042C243.199 247.977 296.942 170.932 260.082 108.224C227.956 53.5718 264.75 -15.7544 328.017 -19.7785L473 -29H658L617 853.5H187.043C61.057 853.5 -56.3482 789.664 -124.84 683.922C-127.52 679.785 -128.591 674.809 -127.85 669.935L-75.5533 325.915C-64.5699 253.664 3.88734 204.732 75.804 217.728Z").fill(grad)
@@ -217,7 +218,7 @@ export class InvoiceBuilder {
 
     drawBackground() {
           // Create a linear gradient
-        let grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
+        const grad = this.document.linearGradient(0, 0, 0, PAGE_HEIGHT);
         grad.stop(0, "#F1F6FF", 1)
         grad.stop(1, "#FFFFFF", 1)
         this.document.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT).fill(grad)
@@ -364,7 +365,9 @@ export class InvoiceBuilder {
                 price = this.invoice.meta.includingVATToExcludingVAT(price)
             }
 
+            // eslint-disable-next-line no-irregular-whitespace
             this.document.text(Formatter.price(unitPrice).replace(/ /g, " "), x3, y, { align: 'left', width: x4 - x3 })
+            // eslint-disable-next-line no-irregular-whitespace
             this.document.text(Formatter.price(price).replace(/ /g, " "), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
         }
 
@@ -399,12 +402,14 @@ export class InvoiceBuilder {
 
         this.document.text("Totaal excl. BTW", x4 - 40*MM, y, { align: 'right', width: 40*MM })
         this.document.font('Metropolis-Medium')
+        // eslint-disable-next-line no-irregular-whitespace
         this.document.text(Formatter.price(this.invoice.meta.priceWithoutVAT).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
 
         y = this.document.y + 5*MM
         this.document.font('Metropolis-SemiBold')
         this.document.text("BTW ("+this.invoice.meta.VATPercentage+"%)", x4 - 40*MM, y, { align: 'right', width: 40*MM })
         this.document.font('Metropolis-Medium')
+        // eslint-disable-next-line no-irregular-whitespace
         this.document.text(Formatter.price(this.invoice.meta.VAT).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
 
         // Keep semibold
@@ -413,6 +418,7 @@ export class InvoiceBuilder {
         this.document.fontSize(4 * MM);
         this.document.text("Totaal incl. BTW", x4 - 40*MM, y, { align: 'right', width: 40*MM })
         this.document.fontSize(3.5 * MM);
+        // eslint-disable-next-line no-irregular-whitespace
         this.document.text(Formatter.price(this.invoice.meta.priceWithVAT).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
 
         y = this.document.y - 12

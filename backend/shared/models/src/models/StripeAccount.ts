@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { column, Model } from '@simonbackx/simple-database';
 import { Requirements, StripeBusinessProfile, StripeCompany, StripeMetaAccountSettings, StripeMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";

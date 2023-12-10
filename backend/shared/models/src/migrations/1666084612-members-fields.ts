@@ -11,6 +11,7 @@ export default new Migration(async () => {
     // Start to loop all members
     let lastId = "";
 
+    // eslint-disable-next-line no-constant-condition
     while(true) {
         const members = await Member.where({id: {sign: '>', value: lastId}}, {limit: 1000, sort: ["id"]});
 

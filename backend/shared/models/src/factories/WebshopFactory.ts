@@ -1,41 +1,39 @@
 import { Factory } from "@simonbackx/simple-database";
-import { Address,Country,OrganizationMetaData, OrganizationType } from "@stamhoofd/structures";
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { Address,Country,OrganizationMetaData, OrganizationType, Product, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility"; 
+import { Webshop } from "../models";
 
 import { Organization } from "../models/Organization";
+import { OrganizationFactory } from "./OrganizationFactory";
 
 class Options {
-    publicKey?: string;
-    uri?: string;
-    domain?: string;
-    meta?: OrganizationMetaData;
-    name?: string;
-    city?: string
+    organizationId?: string
+    name?: string
+    meta?: WebshopMetaData|AutoEncoderPatchType<WebshopMetaData>
+    products?: Product[]
 }
 
-export class OrganizationFactory extends Factory<Options, Organization> {
-    async create(): Promise<Organization> {
-        const organization = new Organization();
-        organization.name = this.options.name ?? "Organization " + (new Date().getTime() + Math.floor(Math.random() * 999999));
-        organization.website = "https://domain.com";
-        organization.registerDomain = this.options.domain ?? null;
-        organization.uri = this.options.uri ?? Formatter.slug(organization.name);
-        organization.meta = this.options.meta ?? OrganizationMetaData.create({
-            type: this.randomEnum(OrganizationType),
-            umbrellaOrganization: null,
-            defaultEndDate: new Date(),
-            defaultStartDate: new Date(),
-            defaultPrices: []
-        });
-        organization.address = Address.create({
-            street: "Demostraat",
-            number: "12",
-            city: this.options.city ?? "Gent",
-            postalCode: "9000",
-            country: Country.Belgium
-        })
+export class WebshopFactory extends Factory<Options, Webshop> {
+    async create(): Promise<Webshop> {
+        const organizationId = this.options.organizationId ?? (await new OrganizationFactory({}).create()).id;
 
-        await organization.save();
-        return organization;
+        const webshop = new Webshop();
+        webshop.organizationId = organizationId;
+        webshop.meta = WebshopMetaData.create({
+            name: this.options?.name ?? ("Webshop " + (new Date().getTime() + Math.floor(Math.random() * 999999)))
+        });
+        webshop.uri = Formatter.slug(this.randomString(20));
+
+        if (this.options.meta) {
+            webshop.meta.patchOrPut(this.options.meta);
+        }
+
+        if (this.options.products) {
+            webshop.products = this.options.products;
+        }
+       
+        await webshop.save();
+        return webshop;
     }
 }

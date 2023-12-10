@@ -11,6 +11,7 @@ export * from "./factories/ParentFactory"
 export * from "./factories/RecordFactory"
 export * from "./factories/RegistrationFactory"
 export * from "./factories/UserFactory"
+export * from "./factories/WebshopFactory"
 
 export * from "./helpers/GroupBuilder"
 export * from "./helpers/WebshopCounter"

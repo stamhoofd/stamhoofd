@@ -1,18 +1,17 @@
 
-import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, MemberWithRegistrations, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import { Formatter, Sorter } from "@stamhoofd/utility";
+import { column, Model } from "@simonbackx/simple-database";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
+import { QueueHandler } from "@stamhoofd/queues";
+import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
+
+import { render } from "../helpers/Handlebars";
+import { BalanceItem } from "./BalanceItem";
 import { Document } from "./Document";
 import { Group } from "./Group";
 import { Member, RegistrationWithMember } from "./Member";
-import { Registration } from "./Registration";
-import { render } from "../helpers/Handlebars";
-import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
-import { QueueHandler } from "@stamhoofd/queues";
 import { Organization } from "./Organization";
-import { field } from "@simonbackx/simple-encoding";
-import { BalanceItem } from "./BalanceItem";
 
 export class DocumentTemplate extends Model {
     static table = "document_templates";
@@ -74,7 +73,7 @@ export class DocumentTemplate extends Model {
         let missingData = false
 
         const group = await Group.getByID(registration.groupId)
-        const {items, payments, balanceItemPayments} = await BalanceItem.getForRegistration(registration.id)
+        const {payments} = await BalanceItem.getForRegistration(registration.id)
 
         const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : [])
         
@@ -82,7 +81,7 @@ export class DocumentTemplate extends Model {
         const paidAt = paidAtDates.length ? new Date(Math.min(...paidAtDates)) : null
 
         // Some fields are supported by default in linked fields
-        const defaultData = {
+        const defaultData: Record<string, RecordAnswer> = {
             //"registration.startDate": registration.group.settings.startDate,
             //"registration.endDate": registration.group.settings.endDate,   
             "group.name": RecordTextAnswer.create({
@@ -199,7 +198,7 @@ export class DocumentTemplate extends Model {
                                 clone.settings = field
 
                                 found = true
-                                fieldAnswers.push(clone)
+                                fieldAnswers.push(clone )
                                 break;
                             } else {
                                 console.warn("Found type mismatch for default data: " + linkedToMemberAnswerSettingsId + " - " + field.id)

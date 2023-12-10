@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import { column,Model } from '@simonbackx/simple-database';
+import { PartialWithoutMethods, PlainObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { MollieProfile, MollieOnboarding,MollieStatus } from '@stamhoofd/structures';
+import { MollieOnboarding,MollieProfile, MollieStatus } from '@stamhoofd/structures';
 import { IncomingMessage } from "http";
 import https from "https";
 
@@ -60,7 +60,7 @@ export class MollieToken extends Model {
         MollieToken.knownTokens.delete(this.organizationId)
     }
 
-    private static objectToQueryString(obj) {
+    private static objectToQueryString(obj: Record<string, string>) {
         const str: string[] = [];
         // eslint-disable-next-line no-prototype-builtins
         for (const p in obj)
@@ -86,7 +86,7 @@ export class MollieToken extends Model {
         }
     }
 
-    async authRequest(method: string, path: string, data = {}) {
+    async authRequest(method: string, path: string, data: PlainObject = {}) {
         if (this.expiresOn < new Date()) {
             await this.refresh()
             await sleep(200)
@@ -98,13 +98,13 @@ export class MollieToken extends Model {
     /**
      * Do a post request on the API.
      */
-    private static request(method: string, path: string, data = {}, type = "json", auth: string | null = null): Promise<any> {
+    private static request(method: string, path: string, data: PlainObject = {}, type = "json", auth: string | null = null): Promise<any> {
         return new Promise((resolve, reject) => {
-            let jsonData;
+            let jsonData: string;
             if (type == "json") {
                 jsonData = JSON.stringify(data);
             } else {
-                jsonData = this.objectToQueryString(data);
+                jsonData = this.objectToQueryString(data as Record<string, string>);
             }
 
             if (this.verbose) {
@@ -299,7 +299,7 @@ export class MollieToken extends Model {
     async getProfiles(): Promise<MollieProfile[]> {
         try {
             const response = await this.authRequest("GET", "/v2/profiles?limit=250")
-            const profiles = response._embedded.profiles;
+            const profiles = response._embedded.profiles as PartialWithoutMethods<MollieProfile>[];
             return profiles.map(p => MollieProfile.create(p))
         } catch(e) {
             console.error('Failed to parse mollie profiles', e)

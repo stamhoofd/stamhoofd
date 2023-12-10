@@ -2,6 +2,7 @@ import { column, Model } from "@simonbackx/simple-database";
 import { Email } from "@stamhoofd/email";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
+
 import { Organization, RegisterCode, STCredit } from "./";
 
 export class UsedRegisterCode extends Model {
@@ -51,7 +52,7 @@ export class UsedRegisterCode extends Model {
     })
     updatedAt: Date
 
-    static async getFor(organizationId: string): Promise<UsedRegisterCode | undefined> {
+    static async getFor(organizationId: string): Promise<UsedRegisterCode | undefined> {
         const code = await this.where({ organizationId }, { limit: 1 })
         return code[0] ?? undefined
     }

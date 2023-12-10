@@ -1,6 +1,7 @@
 import { EmailAddress, EmailBuilder } from "@stamhoofd/email";
 import { Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
+
 import { Organization, PasswordToken, User } from "../models";
 
 export async function getEmailBuilder(organization: Organization, email: {
@@ -91,7 +92,6 @@ export async function getEmailBuilder(organization: Organization, email: {
             replacedSubject = replacedSubject.replaceAll("{{"+replacement.token+"}}", replacement.value)
         }
 
-        let to = recipient.email
         return {
             from: email.from,
             replyTo: email.replyTo,

@@ -1,6 +1,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { STInvoiceItem } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
+
 import { STInvoice } from "./";
 
 export class STCredit extends Model {
@@ -91,7 +92,7 @@ export class STCredit extends Model {
         return {balance: balance - balanceTransactions, balanceTransactions}
     }
 
-    static async applyCredits(organizationId, invoice: STInvoice, dryRun: boolean) {
+    static async applyCredits(organizationId: string, invoice: STInvoice, dryRun: boolean) {
         // Apply credits
         const {balance, balanceTransactions} = await STCredit.getBalance(organizationId)
         if (balance > 0 || balanceTransactions > 0) {

@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { I18n } from "@stamhoofd/backend-i18n";
+import { Email } from "@stamhoofd/email";
 import basex from "base-x";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 
-import { I18n } from "@stamhoofd/backend-i18n";
-import { Email } from "@stamhoofd/email";
 import { Organization, User, UserWithOrganization } from "./";
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = basex(ALPHABET)

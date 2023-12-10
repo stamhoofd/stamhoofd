@@ -3,11 +3,12 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, PrivatePaymentConfiguration, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuidv4 } from "uuid";
+
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Group, StripeAccount, UserWithOrganization, Webshop } from "./";
@@ -64,7 +65,7 @@ export class Organization extends Model {
      * @deprecated
      */
     @column({ type: "string" })
-    publicKey: string = '';
+    publicKey = '';
 
     @column({
         type: "string", beforeSave: function (this: Organization) {

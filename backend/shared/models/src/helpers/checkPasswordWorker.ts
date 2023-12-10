@@ -1,6 +1,6 @@
 import { KeyConstantsHelper, Sodium } from "@stamhoofd/crypto";
-
-import { workerData, parentPort } from 'worker_threads';
+import { KeyConstants } from "@stamhoofd/structures";
+import { parentPort,workerData } from 'worker_threads';
 
 (async function() {
     console.log('[WORKER] Checking password for ', workerData.email);
@@ -8,9 +8,9 @@ import { workerData, parentPort } from 'worker_threads';
     const authSignKeyConstants = workerData.keyConstants;
     const publicAuthSignKey = workerData.publicAuthSignKey;
 
-    const authSignKeys = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
+    const authSignKeys = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants as KeyConstants, password as string)
     console.log('[WORKER] Got keys for password', authSignKeys)
-    parentPort?.postMessage(await Sodium.isMatchingSignPublicPrivate(publicAuthSignKey, authSignKeys.privateKey));
+    parentPort?.postMessage(await Sodium.isMatchingSignPublicPrivate(publicAuthSignKey as string, authSignKeys.privateKey));
 })().catch((e) => {
     console.error('[WORKER ERROR]', e);
     parentPort?.postMessage(false);

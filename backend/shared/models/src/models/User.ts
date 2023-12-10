@@ -1,13 +1,14 @@
-import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version, User as UserStruct, UserMeta, LoginProviderType, ApiUser } from "@stamhoofd/structures";
-import argon2 from "argon2";
 import { Worker } from 'node:worker_threads';
+
+import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { EmailInterfaceRecipient } from "@stamhoofd/email";
+import { QueueHandler } from "@stamhoofd/queues";
+import { ApiUser,KeyConstants, LoginProviderType, NewUser, Organization as OrganizationStruct, Permissions, User as UserStruct, UserMeta, Version } from "@stamhoofd/structures";
+import argon2 from "argon2";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 
-import { QueueHandler } from "@stamhoofd/queues";
 import { Organization, Token } from "./";
-import { EmailInterfaceRecipient } from "@stamhoofd/email";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };
@@ -204,7 +205,7 @@ export class User extends Model {
                     resolve(false);
                     resolved = true;
                     
-                    worker.terminate();
+                    worker.terminate().catch(console.error);
                 }, 20 * 1000);
                 
                 worker.on('message', (m) => {
