@@ -2,7 +2,7 @@
     <div>
         <div
             class="seat-selection-box"
-            :class="{'can-select': !!setSeats}"
+            :class="{'can-select': !!setSeats || !!onClickSeat}"
             :style="{
                 '--sw': size.width + 'px',
                 '--sh': size.height + 'px',
@@ -23,8 +23,8 @@
                             '--ry': row.y + 'px',
                         }"
                     >
-                        <span class="row-label left">{{ row.id }}</span>
-                        <span class="row-label right">{{ row.id }}</span>
+                        <span class="row-label left">{{ row.label }}</span>
+                        <span class="row-label right">{{ row.label }}</span>
 
                         <div>
                             <button 
@@ -46,10 +46,11 @@
                                     '--h': seat.height + 'px',
                                     '--x': seat.x + 'px',
                                     '--y': seat.y + 'px',
+                                    '--color': getSeatColor(seat),
                                 }"
-                                @click="onClick(row, seat) || isHighlighted(row, seat)"
+                                @click="onClick(row, seat)"
                             >
-                                <span class="nr">{{ seat.id }}</span>
+                                <span class="nr">{{ seat.label }}</span>
                                 <span v-if="isDisabledPersonSeat(seat)" class="icon disabled-person" />
                             </button>
                         </div>
@@ -62,7 +63,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings } from "@stamhoofd/structures";
+import { CartReservedSeat, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings } from "@stamhoofd/structures";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { Toast } from "../overlays/Toast";
@@ -74,6 +75,9 @@ import { Toast } from "../overlays/Toast";
     },
 })
 export default class SeatSelectionBox extends Mixins(NavigationMixin) {
+    @Prop({ default: false })
+        admin: boolean
+        
     @Prop({ required: false, default: null})
         sizeConfig: SeatingSizeConfiguration|null
 
@@ -86,7 +90,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
     @Prop({ required: false, default: null })
         amount: number|null
 
-    @Prop({ required: true })
+    @Prop({ required: false, default: () => []  })
         seats!: ReservedSeat[]
 
     /**
@@ -101,46 +105,57 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
     @Prop({ required: false })
         setSeats?: (seats: ReservedSeat[]) => void
 
+    @Prop({ required: false })
+        onClickSeat?: (seat: ReservedSeat) => void
+
     created() {
         this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig)
 
         // Default selection
-        if (this.amount) {
-            if (this.seats.length < this.amount) {
-                let seats: ReservedSeat[] = []
-                const plan = this.seatingPlan
-                for (const section of plan.sections) {
-                    for (const row of section.rows) {
-                        for (const seat of row.seats) {
-                            if (seats.length >= this.amount) {
-                                break
-                            }
+        if (this.amount && this.setSeats) {
+            // if (this.seats.length < this.amount) {
+            //     let seats: ReservedSeat[] = []
+            //     const plan = this.seatingPlan
+            //     for (const section of plan.sections) {
+            //         for (const row of section.rows) {
+            //             for (const seat of row.seats) {
+            //                 if (seats.length >= this.amount) {
+            //                     break
+            //                 }
+            // 
+            //                 if (seat.isSpace) {
+            //                     continue
+            //                 }
+            // 
+            //                 const s = ReservedSeat.create({
+            //                     section: section.id,
+            //                     row: row.label,
+            //                     seat: seat.label
+            //                 })
+            // 
+            //                 if (this.reservedSeats.find(r => r.equals(s))) {
+            //                     continue
+            //                 }
+            // 
+            //                 seats.push(
+            //                     s
+            //                 )
+            //             }
+            //         }
+            //     }
+            //     this.setSeats?.(seats)
+            // }
+            let updatedSeats = this.seats.slice()
 
-                            if (seat.isSpace) {
-                                continue
-                            }
+            // Remove invalid seats
+            updatedSeats = updatedSeats.filter(seat => {
+                return this.seatingPlan.isValidSeat(seat, this.reservedSeats)
+            })
 
-                            const s = ReservedSeat.create({
-                                sId: section.id,
-                                r: row.id,
-                                s: seat.id
-                            })
-
-                            if (this.reservedSeats.find(r => r.equals(s))) {
-                                continue
-                            }
-
-                            seats.push(
-                                s
-                            )
-                        }
-                    }
-                }
-                this.setSeats?.(seats)
-            }
-
-            if (this.seats.length > this.amount) {
-                this.setSeats?.(this.seats.slice(0, this.amount))
+            if (updatedSeats.length > this.amount) {
+                this.setSeats(updatedSeats.slice(0, this.amount))
+            } else {
+                this.setSeats(updatedSeats)
             }
         }
     }
@@ -206,15 +221,14 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
     }  
 
     isSelected(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+        const s = ReservedSeat.create({
+            section: this.seatingPlanSection.id,
+            row: row.label,
+            seat: seat.label
+        })
+        
         for (const reservedSeat of this.seats) {
-            if (reservedSeat.sId !== this.seatingPlanSection.id) {
-                continue
-            }
-
-            if (reservedSeat.r !== row.id) {
-                continue
-            }
-            if (reservedSeat.s === seat.id) {
+            if (reservedSeat.equals(s)) {
                 return true
             }
         }
@@ -223,23 +237,40 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 
     isHighlighted(row: SeatingPlanRow, seat: SeatingPlanSeat) {
         const s = ReservedSeat.create({
-            sId: this.seatingPlanSection.id,
-            r: row.id,
-            s: seat.id
+            section: this.seatingPlanSection.id,
+            row: row.label,
+            seat: seat.label
         })
-        return this.highlightSeats.find(r => r.equals(s))
+        return !!this.highlightSeats.find(r => r.equals(s))
     }
 
     isOccupied(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+        const category = this.seatingPlan.categories.find(c => c.id === seat.category)
+        if (!this.admin && category && category.adminOnly) {
+            return true;
+        }
+
         const s = ReservedSeat.create({
-            sId: this.seatingPlanSection.id,
-            r: row.id,
-            s: seat.id
+            section: this.seatingPlanSection.id,
+            row: row.label,
+            seat: seat.label
         })
-        return this.reservedSeats.find(r => r.equals(s))
+        return !!this.reservedSeats.find(r => r.equals(s))
+    }
+
+    getSeatColor(seat: SeatingPlanSeat) {
+        return this.seatingPlan.getSeatColor(seat)
     }
 
     onClick(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+        if (this.onClickSeat) {
+            this.onClickSeat(ReservedSeat.create({
+                section: this.seatingPlanSection.id,
+                row: row.label,
+                seat: seat.label
+            }))
+            return
+        }
         if (!this.setSeats) {
             return
         }
@@ -257,14 +288,14 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         if (selected) {
             // deselect
             this.setSeats(
-                this.seats.filter(s => s.sId !== this.seatingPlanSection.id || s.r !== row.id || s.s !== seat.id)
+                this.seats.filter(s => s.section !== this.seatingPlanSection.id || s.row !== row.label || s.seat !== seat.label)
             )
         } else {
             // select
             const addedSeat = ReservedSeat.create({
-                sId: this.seatingPlanSection.id,
-                r: row.id,
-                s: seat.id
+                section: this.seatingPlanSection.id,
+                row: row.label,
+                seat: seat.label
             })
 
             let seats = [...this.seats, addedSeat]
@@ -279,16 +310,16 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
                     if (s.equals(addedSeat)) {
                         continue
                     }
-                    if (s.sId !== this.seatingPlanSection.id) {
+                    if (s.section !== this.seatingPlanSection.id) {
                         continue
                     }
 
-                    const row = this.seatingPlanSection.rows.find(r => r.id === s.r)
+                    const row = this.seatingPlanSection.rows.find(r => r.label === s.row)
                     if (!row) {
                         continue
                     }
 
-                    const seat = row.seats.find(ss => ss.id === s.s)
+                    const seat = row.seats.find(ss => ss.label === s.seat)
                     if (!seat) {
                         continue
                     }
@@ -321,6 +352,9 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     position: relative;
     overflow-x: scroll;
+    
+    // Fixes drawing issues
+    transform: translate3d(0, 0, 0);
 
     .padding-container {
         // Padding should be here (otherwise won't be included in scollable area)
@@ -367,6 +401,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         height: var(--sh);
     }
 
+
     .seat {
         position: absolute;
         display: block;
@@ -379,12 +414,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         @extend .style-interactive-small;
         line-height: var(--h);
         color: $color-dark;
-
-        .can-select & {
-            touch-action: manipulation;
-            user-select: none;
-            cursor: pointer;
-        }
+        color: var(--color, $color-dark);
 
         &.disabledPerson > .nr {
             position: absolute;
@@ -468,6 +498,9 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
                 background: $color-primary;
                 animation: increase 0.2s;
                 border-color: $color-primary;
+                
+                background: var(--color, $color-primary);
+                border-color: var(--color, $color-primary);
             }
 
             .nr {
@@ -501,17 +534,10 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         }
     }
 
-    .stage {
-        width: 60%;
-        height: 40px;
-        margin: 0 auto;
-        background: $color-border;
-        border-radius: 5px;
-        text-align: center;
-        line-height: 40px;
-        @extend .style-description;
-        position: relative;
-        margin-top: 60px;
+    &.can-select .seat {
+        touch-action: manipulation;
+        user-select: none;
+        cursor: pointer;
     }
 
     .seat > .icon {

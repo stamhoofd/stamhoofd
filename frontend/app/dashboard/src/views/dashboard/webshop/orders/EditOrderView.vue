@@ -146,8 +146,15 @@
 
                     <footer>
                         <p class="price">
-                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
+                            <template v-if="cartItem.product.allowMultiple">
+                                {{ cartItem.amount }} x
+                            </template>
+                            {{ formatFreePrice(cartItem.getUnitPrice(patchedOrder.data.cart)) }}
+                            <template v-if="cartItem.getAdditionalPrices()">
+                                + {{ formatFreePrice(cartItem.getAdditionalPrices()) }}
+                            </template>
                         </p>
+
                         <div @click.stop>
                             <button type="button" class="button icon trash gray" @click="deleteItem(cartItem)" />
                         </div>
@@ -283,6 +290,13 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             // Force selection of method
             this.selectedMethod = this.checkoutMethods[0]
         }
+    }
+
+    formatFreePrice(price: number) {
+        if (price === 0) {
+            return ''
+        }
+        return Formatter.price(price)
     }
 
     get recordCategories(): RecordCategory[] {

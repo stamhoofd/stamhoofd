@@ -21,6 +21,9 @@
             <p v-if="isSingle && order" class="description" v-text="'Bestelling #'+order.number" />
             <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
             <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
+            <p v-if="changedSeatString" class="warning-box">
+                {{ changedSeatString }}
+            </p>
 
             <STList>
                 <STListItem v-if="cartItem.product.location">
@@ -51,7 +54,7 @@
                     </button>
                 </STListItem>
 
-                <STListItem v-if="cartItem.product.location">
+                <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
                         Wanneer?
                     </h3>
@@ -130,6 +133,10 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
 
     get indexDescription() {
         return this.ticket.getIndexDescription(this.webshop)
+    }
+
+    get changedSeatString() {
+        return this.ticket.getChangedSeatString(this.webshop, true)
     }
 
     get organization() {

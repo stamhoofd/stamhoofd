@@ -25,12 +25,24 @@
                                 {{ cartItem.amount }} x
                             </template> 
                             {{ formatFreePrice(cartItem.getUnitPrice(cart)) }}
+                            <template v-if="cartItem.getAdditionalPrices()">
+                                + {{ formatFreePrice(cartItem.getAdditionalPrices()) }}
+                            </template>
                         </p>
                         <div @click.stop>
                             <button class="button icon trash" type="button" @click="deleteItem(cartItem)" />
-                            <StepperInput v-if="cartItem.seats.length == 0 && maximumRemainingFor(cartItem) > 1" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
+                            <StepperInput v-if="!cartItem.cartError && cartItem.seats.length == 0 && maximumRemainingFor(cartItem) > 1" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
                         </div>
                     </footer>
+
+                    <p v-if="cartItem.cartError" class="error-box small">
+                        {{ cartItem.cartError.getHuman() }}
+
+                        <span class="button text">
+                            <span>Corrigeren</span>
+                            <span class="icon arrow-right-small" />
+                        </span>
+                    </p>
 
                     <figure v-if="imageSrc(cartItem)" slot="right">
                         <img :src="imageSrc(cartItem)" :width="imageResolution(cartItem).width" :height="imageResolution(cartItem).height">

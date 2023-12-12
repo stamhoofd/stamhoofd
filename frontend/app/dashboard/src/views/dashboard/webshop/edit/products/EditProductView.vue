@@ -94,7 +94,7 @@
             <h2 class="style-with-button">
                 <div>Tekstvelden / open vragen</div>
                 <div>
-                    <button class="button icon add only-icon-smartphone" type="button" @click="addField" />
+                    <button class="button icon add" type="button" @click="addField" />
                 </div>
             </h2>
 
@@ -106,6 +106,20 @@
         <hr>
 
         <STList>
+            <STListItem v-if="seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
+                <span slot="left" class="icon seat gray" />
+                <h3 class="style-title-list">
+                    Zaalplan
+                </h3>
+
+                <p class="style-description-small">
+                    {{ seatingPlan.name }}
+                </p>
+
+                <span slot="right" class="icon success primary" />
+                <span slot="right" class="icon arrow-right-small gray" />
+            </STListItem>
+
             <STListItem :selectable="true" element-name="button" @click="addOptionMenu">
                 <span slot="left" class="icon add gray" />
 
@@ -128,7 +142,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-if="getFeatureFlag('seating-plans') && isTicket" :selectable="true" element-name="button" @click="chooseSeatingPlan">
+            <STListItem v-if="getFeatureFlag('seating-plans') && isTicket && !seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
                 <span slot="left" class="icon seat gray" />
                 <h3 class="style-title-list">
                     Zetelselectie instellen
@@ -323,8 +337,8 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
+import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, SeatSelectionBox, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton, Validator } from "@stamhoofd/components";
+import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
@@ -357,7 +371,8 @@ import ProductSelectLocationInput from "./ProductSelectLocationInput.vue";
         ProductSelectDateRangeInput,
         Dropdown,
         DateSelection,
-        TimeInput
+        TimeInput,
+        SeatSelectionBox
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {
@@ -394,6 +409,13 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     get patchedProduct() {
         return this.product.patch(this.patchProduct)
+    }
+
+    get seatingPlan() {
+        if (!this.patchedProduct.seatingPlanId) {
+            return null
+        }
+        return this.patchedWebshop.meta.seatingPlans.find(p => p.id === this.patchedProduct.seatingPlanId) ?? null
     }
 
     get typeName(): string {

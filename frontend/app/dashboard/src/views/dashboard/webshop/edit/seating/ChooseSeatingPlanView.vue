@@ -8,7 +8,7 @@
         </p>
 
         <p class="info-box icon gift">
-            De zetelselectie functie is nu nog even gratis voor alle webshops die je nu al aanmaakt. Als er webshops met zetelselectie na 1 juli 2024 aangemaakt worden zal hiervoor een bescheiden kost van 9 euro per jaar voor aangerekend worden. Hiermee kan je zoveel webshops aanmaken met zetelverkoop als je wilt.
+            De zetelselectie functie is nu nog even gratis voor alle webshops die je nu al aanmaakt.
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
@@ -51,7 +51,7 @@
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { PrivateWebshop, Product, SeatingPlan, Version, WebshopMetaData } from "@stamhoofd/structures";
+import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, Version, WebshopMetaData } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
@@ -137,10 +137,62 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
     }
 
     addSeatingPlan() {
-        const seatingPlan = SeatingPlan.create({});
+        const seatingPlan = SeatingPlan.create({
+            name: "",
+            categories: [
+                SeatingPlanCategory.create({
+                    id: '0',
+                    name: "Standaard",
+                    price: 0
+                })
+            ],
+            sections: [
+                SeatingPlanSection.create({
+                    name: "",
+                    rows: [
+                        SeatingPlanRow.create({
+                            label: 'B',
+                            seats: [
+                                SeatingPlanSeat.create({
+                                    label: '1',
+                                    category: '0'
+                                })
+                            ]
+                        }),
+                        SeatingPlanRow.create({
+                            label: 'A',
+                            seats: [
+                                SeatingPlanSeat.create({
+                                    label: '1',
+                                    category: '0'
+                                })
+                            ]
+                        }),
+                        // Empty row
+                        SeatingPlanRow.create({
+                            seats: []
+                        }),
+                        // Podium
+                        SeatingPlanRow.create({
+                            seats: [
+                                SeatingPlanSeat.create({
+                                    label: 'Podium',
+                                    grow: 1,
+                                    type: SeatType.Space
+                                })
+                            ]
+                        })
+                    ]
+                })
+            ]
+        });
+        
+        
         const webshopMetaPatch = WebshopMetaData.patch({})
         webshopMetaPatch.seatingPlans.addPut(seatingPlan)
         const webshopPatch = PrivateWebshop.patch({meta: webshopMetaPatch})
+
+
         this.present({
             components: [
                 new ComponentWithProperties(EditSeatingPlanView, {

@@ -1,0 +1,1 @@
+ALTER TABLE `webshop_tickets` ADD COLUMN `originalSeat` json NULL AFTER `seat`, LOCK=EXCLUSIVE;

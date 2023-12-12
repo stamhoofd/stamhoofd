@@ -62,6 +62,8 @@ button.st-list-item {
     margin: 0;
     display: flex !important;
     flex-direction: row;
+    width: 100%; // fix for buttons
+    box-sizing: border-box;
 
     @extend .style-normal;
 

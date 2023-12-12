@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Ticket, Token, Webshop } from '@stamhoofd/models';
 import { PermissionLevel, TicketPrivate } from "@stamhoofd/structures";
 
@@ -53,14 +53,17 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         const tickets: Ticket[] = []
+        const errors = new SimpleErrors()
 
         for (const patch of request.body) {
             const model = await Ticket.getByID(patch.id)
             if (!model || model.webshopId !== webshop.id) {
-                throw new SimpleError({
-                    code: "not_found",
+                errors.addError(new SimpleError({
+                    code: "ticket_not_found",
+                    field: patch.id,
                     message: "Ticket with id "+patch.id+" does not exist"
-                })
+                }))
+                continue
             }
 
             if (patch.scannedAt !== undefined) {
@@ -76,6 +79,7 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
             tickets.push(model)
         }
 
+        errors.throwIfNotEmpty();
         return new Response(
             tickets.map(ticket => TicketPrivate.create(ticket))
         );

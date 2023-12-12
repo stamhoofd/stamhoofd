@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from '../addresses/Address';
 import { Image } from '../files/Image';
 import { ReservedSeat } from '../SeatingPlan';
+import { Webshop } from './Webshop';
 import { WebshopField } from './WebshopField';
 
 export class ProductPrice extends AutoEncoder {
@@ -239,6 +240,22 @@ export class Product extends AutoEncoder {
             return null
         }
         return Math.max(0, this.stock - this.usedStock)
+    }
+
+    getRemainingSeats(webshop: Webshop, isAdmin: boolean): number | null {
+        if (this.seatingPlanId === null) {
+            return null
+        }
+        const seatingPlan = webshop.meta.seatingPlans.find(p => p.id === this.seatingPlanId)
+        if (!seatingPlan) {
+            return null
+        }
+
+        if (isAdmin) {
+            return seatingPlan.seatCount - this.reservedSeats.length
+        }
+
+        return seatingPlan.seatCount - seatingPlan.adminSeatCount - this.reservedSeats.filter(r => !seatingPlan.isAdminSeat(r)).length
     }
 
     /**

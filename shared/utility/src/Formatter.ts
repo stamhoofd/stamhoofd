@@ -297,6 +297,14 @@ export class Formatter {
         return number+"e"
     }
 
+    static pluralText(num: number, singular: string, plural: string): string {
+        if (num === 1) {
+            return 'één ' + singular
+        }
+
+        return num + ' ' + plural
+    }
+
     static groupNamesByFamily(names: {firstName: string, lastName: string}[]): string {
         const n = names.slice().sort((a, b) => Sorter.stack(a.lastName.localeCompare(b.lastName), a.firstName.localeCompare(b.firstName)));
         const firstNames = this.uniqueArray(n.map(n => n.firstName))

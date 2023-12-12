@@ -1,5 +1,9 @@
 <template>
     <div class="edit-seating-plan-section-box" data-disable-enter-focus>
+        <div class="undo-buttons">
+            <button type="button" class="button icon undo gray" :disabled="!canUndo()" @click="undo" />
+            <button type="button" class="button icon redo gray" :disabled="!canRedo()" @click="redo" />
+        </div>
         <div class="seating-plan-section">
             <div class="padding-box">
                 <p class="button-row">
@@ -19,7 +23,8 @@
                     <div 
                         v-for="row of rows" 
                         :key="row.uuid" 
-                        class="seating-plan-row" 
+                        :ref="'row-' + row.uuid"
+                        class="seating-plan-row"
                         :style="{
                             '--rw': row.width + 'px',
                             '--rh': row.height + 'px',
@@ -35,14 +40,16 @@
                             @keydown.delete.stop="backspaceRow(row, $event)"
                         />
                         <input 
-                            v-model="row.id" 
+                            v-model="row.label" 
                             class="row-label left"
-                            @click.prevent="selectInput" 
+                            @click.prevent="selectInput"
+                            @input="emitChange()"
                         >
                         <input 
-                            v-model="row.id" 
+                            v-model="row.label" 
                             class="row-label right"
                             @click.prevent="selectInput" 
+                            @input="emitChange()"
                         >
                         <button 
                             v-if="isRowSelected(row)" 
@@ -69,6 +76,7 @@
                                     '--h': seat.height + 'px',
                                     '--x': seat.x + 'px',
                                     '--y': seat.y + 'px',
+                                    '--color': getSeatColor(seat)
                                 }"
                                 @click.prevent="selectInput" 
                                 @contextmenu.prevent.stop="openContextMenu($event, row, seat)"
@@ -76,7 +84,7 @@
                                 <input 
                                     :ref="'seat-input-' + seat.uuid" 
                                     :data-uuid="seat.uuid"
-                                    :value="seat.id" 
+                                    :value="seat.label" 
                                     :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat)}" 
                                     @focus.prevent="selectInput"
                                     @input="setSeat(row, seat, $event.target.value)"
@@ -91,7 +99,7 @@
             </div>
         </div>
         <p class="style-description-small">
-            Gebruik de rechtermuisknop op een rij of stoel om deze te verwijderen of te dupliceren. Wijzig een stoelnummer door deze aan te klikken en te typen. Maak het stoelnummer leeg om een gang te maken. Klik een rijnummer aan om die te wijzigen.
+            Klik op een rij om een rij te selecteren. Vervolgens kan je op een stoel of gang klikken om het nummer of tekst in de gang te wijzigen. Je kan sneller werken door de ENTER en BACKSPACE toetsen te gebruiken, in combinatie met de pijltjes en de rechtermuisknop (dupliceren, invoegen, verplaatsen...).
         </p>
     </div>
 </template>
@@ -100,7 +108,115 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components';
 import { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings, SeatType } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+
+function getNextPattern(examples: string[]): string {
+    if (examples.length === 0) {
+        return "1"
+    }
+    if (examples.length === 1) {
+        const v = examples[0]
+        return incrementString(v)
+    }
+
+    if (examples.length === 2) {
+        const v = examples[examples.length - 2]
+        const v2 = examples[examples.length - 1]
+        
+        const difference = stringToNumber(v2) - stringToNumber(v)
+        return incrementString(v2, difference)
+    }
+
+    // Detect pattern:
+    // 17 19 20 -> 18
+    // 17 19 18 -> 16
+    const v = examples[examples.length - 3]
+    const v2 = examples[examples.length - 2]
+    const v3 = examples[examples.length - 1]
+    const diff1 = stringToNumber(v2) - stringToNumber(v)
+    const diff2 = stringToNumber(v3) - stringToNumber(v2)
+    if (diff1 === diff2 * 2 || diff1 === -diff2*2) {
+        // Return back
+        return incrementString(v3, -diff1)
+    }
+
+    // Normal
+    return incrementString(v3, diff2)
+}
+
+function stringToNumber(str: string) {
+    // check is numeric
+    if (parseInt(str) > 0) {
+        return parseInt(str)
+    }
+
+    // check alphabetical
+    // a = 1
+    // b = 2
+    // z = 26
+    // aa = 27
+    // ab = 28
+    // az = 52
+    // ba = 53
+    const aCharCode = 'a'.charCodeAt(0)
+    const zCharCode = 'z'.charCodeAt(0)
+
+    // Convert into an array with min-max values aCharCode - zCharCode
+    const chars = str.toLowerCase().split("").map(c => c.charCodeAt(0)).filter(c => c >= aCharCode && c <= zCharCode)
+
+    // Calculate numeric value of this string
+    let val = 0;
+    for (let i = 0; i < chars.length; i++) {
+        const char = chars[i] - aCharCode + 1
+        const index = chars.length - i
+        val += char * Math.pow(26, index - 1)
+    }
+    return val
+}
+
+function numberToAlpha(num: number) {
+    // 1 = a
+    // 2 = b
+    // 26 = z
+    // 27 = aa
+    // 28 = ab
+    // 52 = az
+    // 53 = ba
+    const aCharCode = 'a'.charCodeAt(0)
+
+    // Convert into an array with min-max values aCharCode - zCharCode
+    const chars: number[] = []
+
+    // Calculate numeric value of this string
+    let val = num;
+    while (val > 0) {
+        const char = (val - 1) % 26
+        chars.unshift(char + aCharCode)
+        val = Math.floor((val - 1)/ 26)
+    }
+
+    return chars.map(c => String.fromCharCode(c)).join("")
+}
+
+function incrementString(string: string, value = 1) {
+    // check is numeric
+    if (parseInt(string) > 0) {
+        const val = parseInt(string) + value
+        if (val <= 0) {
+            return ''
+        }
+        return (val).toString()
+    }
+
+    if (string.length === 0) {
+        return ""
+    }
+
+    const isAllCaps = string.toUpperCase() === string
+
+    const val = stringToNumber(string) + value
+    return isAllCaps ? numberToAlpha(val).toUpperCase() : numberToAlpha(val)
+}
 
 
 @Component({
@@ -118,20 +234,71 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     clonedSeatingPlanSection = this.seatingPlanSection.clone()
 
     selectedRow: SeatingPlanRow | null = null
+
+    historyStack: SeatingPlanSection[] = []
+    redoHistoryStack: SeatingPlanSection[] = []
+    maxHistoryStack = 5000
+
+    //@Watch('seatingPlanSection')
+    //onSeatingPlanSectionChanged() {
+    //    this.clonedSeatingPlanSection = this.seatingPlanSection.clone()
+    //    this.clonedSeatingPlanSection.updatePositions(this.sizeConfig)
+    //}
     
     activated() {
+        console.log('activated')
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.addEventListener("keydown", this.onKey);
+        document.addEventListener("click", this.onDocumentClick);
     }
 
     deactivated() {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.removeEventListener("keydown", this.onKey);
+        document.removeEventListener("click", this.onDocumentClick);
+    }
+
+    mounted() {
+        this.clonedSeatingPlanSection.updatePositions(this.sizeConfig)
+
+        document.addEventListener("keydown", this.onKey);
+        document.addEventListener("click", this.onDocumentClick);
+    }
+
+    beforeDestroy() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        document.removeEventListener("keydown", this.onKey);
+        document.removeEventListener("click", this.onDocumentClick);
+        
+    }
+
+    onDocumentClick(event: MouseEvent) {
+        if (!this.selectedRow) {
+            return;
+        }
+        const selectedRowElements = this.$refs["row-" + this.selectedRow.uuid] as HTMLElement[]
+        
+        // Check event is inside the selected row
+        if (selectedRowElements && selectedRowElements.length === 1 && event.target && !selectedRowElements[0].contains(event.target as Node)) {
+            this.selectedRow = null
+        } 
     }
 
     onKey(event: KeyboardEvent) {
         if (event.key === "Backspace" && this.selectedRow !== null) {
             this.backspaceRow(this.selectedRow, event)
+        }
+
+        // Arrow down
+        if (event.key === "Enter" && this.selectedRow !== null) {
+            const seat = this.getSelectedSeat()
+            if (seat) {
+                // Default behaviour
+                return;
+            } 
+            // Insert new seat in row
+            this.insertSeat(this.selectedRow, null, event)
+            return;
         }
 
         // Arrow down
@@ -218,17 +385,16 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         return null
     }
 
-    getSeatAt(x: number, y: number) {
-        console.log("get seat at", x, y)
+    getSeatColor(seat: SeatingPlanSeat) {
+        return this.seatingPlan.getSeatColor(seat)
+    }
 
+    getSeatAt(x: number, y: number) {
         for (const row of this.rows) {
             if (row.y <= y && row.y + row.height >= y) {
-                console.log("found row", row)
-
                 // It should be this row, no other
                 for (const seat of row.seats) {
                     if (seat.x + seat.width >= x) {
-                        console.log("found seat", seat)
                         return seat
                     }
                 }
@@ -240,16 +406,55 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         return null
     }
 
-    mounted() {
-        this.clonedSeatingPlanSection.updatePositions(this.sizeConfig)
+    emitChange(options: {adjustHistory?: boolean} = {}) {
+        // We use seatingPlanSection for the history stack because this one won't be changed already
+        if (options.adjustHistory !== false) {
+            this.historyStack.push(this.seatingPlanSection.clone())
+
+            // clear redo stack
+            this.redoHistoryStack = []
+        }
+
+        this.clonedSeatingPlanSection.updatePositions(this.sizeConfig);
+
+        const seatingPlanPatch = SeatingPlan.patch({id: this.seatingPlan.id})
+        seatingPlanPatch.sections.addPatch(SeatingPlanSection.patch({
+            id: this.seatingPlanSection.id,
+            rows: this.clonedSeatingPlanSection.rows.map(r => r.clone()) as any
+        }))
+        this.$emit("patch", seatingPlanPatch)
     }
 
-    emitChange() {
-        this.clonedSeatingPlanSection.updatePositions(this.sizeConfig);
-        const seatingPlanPatch = SeatingPlan.patch({id: this.seatingPlan.id})
-        seatingPlanPatch.sections.addDelete(this.seatingPlanSection.id)
-        seatingPlanPatch.sections.addPut(this.clonedSeatingPlanSection)
-        this.$emit("patch", seatingPlanPatch)
+    canUndo() {
+        return this.historyStack.length > 0
+    }
+
+    undo() {
+        if (!this.canUndo()) {
+            return
+        }
+        const last = this.historyStack.pop()
+        if (last) {
+            this.redoHistoryStack.push(this.clonedSeatingPlanSection.clone())
+            this.clonedSeatingPlanSection = last
+            this.emitChange({adjustHistory: false})
+        }
+    }
+
+    canRedo() {
+        return this.redoHistoryStack.length > 0
+    }
+
+    redo() {
+        if (!this.canRedo()) {
+            return
+        }
+        const last = this.redoHistoryStack.pop()
+        if (last) {
+            this.historyStack.push(this.clonedSeatingPlanSection.clone())
+            this.clonedSeatingPlanSection = last
+            this.emitChange({adjustHistory: false})
+        }
     }
 
     get sizeConfig() {
@@ -273,107 +478,36 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         return this.clonedSeatingPlanSection.rows
     }
 
-    calculateNextRow(row?: SeatingPlanRow) {
-        // Search a pattern in the rows
-        if (!row) {
-            return "A"
-        }
-
-        const lastRow = row
-        const lastRowLabel = lastRow.id
-
-        if (lastRowLabel.length === 0) {
-            return ""
-        }
-
-        let nextRow = this.getNextRowFor(lastRowLabel)
-
-        // Make sure it is unique
-        while (this.clonedSeatingPlanSection.rows.find(r => r.id === nextRow)) {
-            nextRow = this.getNextRowFor(nextRow)
-        }
-        return nextRow
-    }
-
-    calculatePreviousRow(row?: SeatingPlanRow) {
-        // Search a pattern in the rows
-        if (!row) {
-            return "A"
-        }
-
-        const lastRow = row
-        const lastRowLabel = lastRow.id
-
-        if (lastRowLabel.length === 0) {
-            return ""
-        }
-
-        let nextRow = this.getPreviousRowFor(lastRowLabel)
-
-        // Make sure it is unique
-        while (this.clonedSeatingPlanSection.rows.find(r => r.id === nextRow)) {
-            nextRow = this.getPreviousRowFor(nextRow)
-        }
-        return nextRow
-    }
-
-    getNextRowFor(lastRowLabel: string) {
-        if (parseInt(lastRowLabel) > 0) {
-            return (parseInt(lastRowLabel) + 1).toString()
-        }
-        const wasUppercase = lastRowLabel.toUpperCase() === lastRowLabel
-        lastRowLabel = lastRowLabel.toLowerCase()
-
-        // Return a, b, c ..., z, aa, ab, ac, ...
-        let nextRow = ""
-        for (let i = lastRowLabel.length - 1; i >= 0; i--) {
-            const char = lastRowLabel[i]
-            if (char === "z") {
-                nextRow = "a" + nextRow
-            } else {
-                nextRow = String.fromCharCode(char.charCodeAt(0) + 1) + nextRow
-                break
-            }
-        }
-
-        return wasUppercase ? nextRow.toUpperCase() : nextRow
-    }
-
-    getPreviousRowFor(lastRowLabel: string) {
-        if (parseInt(lastRowLabel) > 0) {
-            return (parseInt(lastRowLabel) - 1).toString()
-        }
-        const wasUppercase = lastRowLabel.toUpperCase() === lastRowLabel
-        lastRowLabel = lastRowLabel.toLowerCase()
-
-        // Return a, b, c ..., z, aa, ab, ac, ...
-        let nextRow = ""
-        for (let i = lastRowLabel.length - 1; i >= 0; i--) {
-            const char = lastRowLabel[i]
-            if (char === "a") {
-                nextRow = "z" + nextRow
-            } else {
-                nextRow = String.fromCharCode(char.charCodeAt(0) - 1) + nextRow
-                break
-            }
-        }
-
-        return wasUppercase ? nextRow.toUpperCase() : nextRow
-    }
-
     addRow() {
+        const lastIds = this.clonedSeatingPlanSection.rows.map(r => r.label).reverse()
+        const label = getNextPattern(lastIds)
+
         const row = SeatingPlanRow.create({
-            id: this.calculateNextRow(this.clonedSeatingPlanSection.rows[this.clonedSeatingPlanSection.rows.length - 1]),
+            label,
             seats: []
         });
-        this.clonedSeatingPlanSection.rows.push(row)
+        this.clonedSeatingPlanSection.rows.unshift(row)
         this.emitChange()
     }
 
     addRightSeat(row: SeatingPlanRow) {
+        const lastIds = row.seats.map(s => s.label)
+        const label = getNextPattern(lastIds)
+
         row.seats.push(SeatingPlanSeat.create({
-            // todo
-            id: (row.seats.length + 1).toString()
+            label,
+            category: this.seatingPlan.categories[0]?.id ?? null
+        }))
+        this.emitChange()
+    }
+
+    addLeftSeat(row: SeatingPlanRow) {
+        const lastIds = row.seats.map(s => s.label).reverse()
+        const label = getNextPattern(lastIds)
+
+        row.seats.unshift(SeatingPlanSeat.create({
+            label,
+            category: this.seatingPlan.categories[0]?.id ?? null
         }))
         this.emitChange()
     }
@@ -387,7 +521,6 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     selectInput(event: Event) {
-        console.log("select input")
         const input = event.target as HTMLInputElement
         // Check input is INPUT otherwise select child
         if (input.tagName !== "INPUT") {
@@ -401,21 +534,24 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     isSeatInvalid(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        return !seat.isSpace && row.seats.filter(s => !s.isSpace && s.id === seat.id).length > 1
+        return !seat.isSpace && row.seats.filter(s => !s.isSpace && s.label === seat.label).length > 1
     }
 
     setSeat(row: SeatingPlanRow, seat: SeatingPlanSeat, value: string) {
-        seat.id = value
+        seat.label = value
         this.emitChange()
     }
 
-    insertSeat(row: SeatingPlanRow, seat: SeatingPlanSeat, event: KeyboardEvent) {
+    insertSeat(row: SeatingPlanRow, seat: SeatingPlanSeat|null, event: KeyboardEvent) {
         // Insert a seat in the row
-        const index = row.seats.indexOf(seat)
-        if (index >= 0) {
+        const index = seat === null ? (row.seats.length - 1) : row.seats.indexOf(seat)
+        if (seat === null || index >= 0) {
+            const previousIds = row.seats.slice(0, index + 1).map(s => s.label)
+            const label = getNextPattern(previousIds)
+
             const newSeat = SeatingPlanSeat.create({
-                // todo: change algorithm
-                id: (index + 2).toString()
+                label,
+                category: seat?.category ?? this.seatingPlan.categories[0]?.id ?? null
             })
             row.seats.splice(index + 1, 0, newSeat)
             this.emitChange()
@@ -464,7 +600,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     backspaceSeat(row: SeatingPlanRow, seat: SeatingPlanSeat, event: KeyboardEvent) {
-        if (seat.isSpace || seat.id.length > 0) {
+        if (seat.isSpace || seat.label.length > 0) {
             return
         }
         // Delete the seat from the row
@@ -500,29 +636,23 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             [
                 new ContextMenuItem({
                     name: 'Zetel',
-                    childMenu: new ContextMenu([
-                        [
-                            new ContextMenuItem({
-                                name: 'Eén',
-                                action: () => {
-                                    if (seatIndex >= 0) {
-                                        row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
-                                            id: (seatIndex + 1).toString()
-                                        }))
-                                        this.emitChange()
-                                    }
-                                    return true;
-                                }
-                            }),
-                            new ContextMenuItem({
-                                name: 'Meerdere...',
-                                action: () => {
-                                    // todo: input menu
-                                    return true;
-                                }
-                            })
-                        ]
-                    ])
+                    icon: 'seat',
+                    action: () => {
+                        if (seatIndex >= 0) {
+                            let previousIds = row.seats.slice(0, seatIndex).map(s => s.label)
+                            if (previousIds.length === 0) {
+                                // next ids, reversed
+                                previousIds = row.seats.slice(seatIndex).map(s => s.label).reverse()
+                            }
+                            const label = getNextPattern(previousIds)
+                            row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
+                                label,
+                                category: this.seatingPlan.categories[0]?.id ?? null
+                            }))
+                            this.emitChange()
+                        }
+                        return true;
+                    }
                 }),
                 new ContextMenuItem({
                     name: 'Gang',
@@ -533,8 +663,8 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 action: () => {
                                     if (seatIndex >= 0) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
-                                            id: '',
                                             type: SeatType.Space,
+                                            category: this.seatingPlan.categories[0]?.id ?? null
                                         }))
                                         this.emitChange()
                                     }
@@ -546,9 +676,9 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 action: () => {
                                     if (seatIndex >= 0) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
-                                            id: '',
                                             blockWidth: 4,
                                             type: SeatType.Space,
+                                            category: this.seatingPlan.categories[0]?.id ?? null
                                         }))
                                         this.emitChange()
                                     }
@@ -560,9 +690,9 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 action: () => {
                                     if (seatIndex >= 0) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
-                                            id: '',
                                             blockWidth: 6,
                                             type: SeatType.Space,
+                                            category: this.seatingPlan.categories[0]?.id ?? null
                                         }))
                                         this.emitChange()
                                     }
@@ -574,9 +704,9 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 action: () => {
                                     if (seatIndex >= 0) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
-                                            id: '',
                                             blockWidth: 8,
                                             type: SeatType.Space,
+                                            category: this.seatingPlan.categories[0]?.id ?? null
                                         }))
                                         this.emitChange()
                                     }
@@ -589,9 +719,9 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                                 action: () => {
                                     if (seatIndex >= 0) {
                                         row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
-                                            id: '',
                                             grow: 1,
                                             type: SeatType.Space,
+                                            category: this.seatingPlan.categories[0]?.id ?? null
                                         }))
                                         this.emitChange()
                                     }
@@ -606,84 +736,54 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     openContextMenu(event, row: SeatingPlanRow, seat?: SeatingPlanSeat) {
-        if (!seat) {
-            this.selectRow(event, row)
-        }
-
         const contextMenu = new ContextMenu([
             [
                 new ContextMenuItem({
                     name: 'Rij dupliceren',
                     icon: 'copy',
-                    childMenu: new ContextMenu([
-                        [
-                            new ContextMenuItem({
-                                name: 'Boven',
-                                icon: 'arrow-up',
-                                action: () => {
-                                    const clonedRow = row.clone()
-                                    clonedRow.id = this.calculateNextRow(clonedRow)
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                                    if (index >= 0) {
-                                        this.clonedSeatingPlanSection.rows.splice(index + 1, 0, clonedRow)
-                                        this.emitChange()
-                                    }
-                                    return true;
-                                }
-                            }),
-                            new ContextMenuItem({
-                                name: 'Onder',
-                                icon: 'arrow-down',
-                                action: () => {
-                                    const clonedRow = row.clone()
-                                    clonedRow.id = this.calculatePreviousRow(clonedRow)
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                                    if (index >= 0) {
-                                        this.clonedSeatingPlanSection.rows.splice(index, 0, clonedRow)
-                                        this.emitChange()
-                                    }
-                                    return true;
-                                }
-                            })
-                        ]
-                    ])
+                    action: () => {
+                        const clonedRow = row.clone()
+
+                        const previousIds = this.clonedSeatingPlanSection.rows.slice(0, this.clonedSeatingPlanSection.rows.indexOf(row)).map(r => r.label)
+                        const label = getNextPattern(previousIds)
+                        clonedRow.label = label
+                        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                        if (index >= 0) {
+                            this.clonedSeatingPlanSection.rows.splice(index + 1, 0, clonedRow)
+                            this.emitChange()
+                        }
+                        return true;
+                    }
+                }),
+
+                new ContextMenuItem({
+                    name: 'Verplaats rij naar boven',
+                    icon: 'arrow-up',
+                    disabled: this.clonedSeatingPlanSection.rows.indexOf(row) <= 0,
+                    action: () => {
+                        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                        if (index >= 0 && index > 0) {
+                            this.clonedSeatingPlanSection.rows.splice(index - 1, 0, row)
+                            this.clonedSeatingPlanSection.rows.splice(index + 1, 1)
+                            this.emitChange()
+                        }
+                        return true;
+                        
+                    }
                 }),
                 new ContextMenuItem({
-                    name: 'Rij verplaatsen',
-                    icon: 'copy',
-                    childMenu: new ContextMenu([
-                        [
-                            new ContextMenuItem({
-                                name: 'Boven',
-                                icon: 'arrow-up',
-                                disabled: this.clonedSeatingPlanSection.rows.indexOf(row) >= this.clonedSeatingPlanSection.rows.length - 1,
-                                action: () => {
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                                    if (index >= 0 && index < this.clonedSeatingPlanSection.rows.length - 1) {
-                                        this.clonedSeatingPlanSection.rows.splice(index + 2, 0, row)
-                                        this.clonedSeatingPlanSection.rows.splice(index, 1)
-                                        this.emitChange()
-                                    }
-                                    return true;
-                                }
-                            }),
-                            new ContextMenuItem({
-                                name: 'Onder',
-                                icon: 'arrow-down',
-                                disabled: this.clonedSeatingPlanSection.rows.indexOf(row) <= 0,
-                                action: () => {
-                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                                    if (index >= 0 && index > 0) {
-                                        this.clonedSeatingPlanSection.rows.splice(index - 1, 0, row)
-                                        this.clonedSeatingPlanSection.rows.splice(index + 1, 1)
-                                        this.emitChange()
-                                    }
-                                    return true;
-                                    
-                                }
-                            })
-                        ]
-                    ])
+                    name: 'Verplaats rij naar beneden',
+                    icon: 'arrow-down',
+                    disabled: this.clonedSeatingPlanSection.rows.indexOf(row) >= this.clonedSeatingPlanSection.rows.length - 1,
+                    action: () => {
+                        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                        if (index >= 0 && index < this.clonedSeatingPlanSection.rows.length - 1) {
+                            this.clonedSeatingPlanSection.rows.splice(index + 2, 0, row)
+                            this.clonedSeatingPlanSection.rows.splice(index, 1)
+                            this.emitChange()
+                        }
+                        return true;
+                    }
                 }),
                 new ContextMenuItem({
                     name: 'Rij verwijderen',
@@ -746,52 +846,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                             new ContextMenuItem({
                                 name: 'Rechts',
                                 childMenu: this.getInsertMenu(row, row.seats.indexOf(seat) + 1)
-                            }),
-                            new ContextMenuItem({
-                                name: 'Onder',
-                                childMenu: new ContextMenu([
-                                    [
-                                        new ContextMenuItem({
-                                            name: 'Dupliceer rij',
-                                            action: () => {
-                                                const clonedRow = row.clone()
-                                                clonedRow.id = this.calculateNextRow(clonedRow)
-                                                const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                                                if (index >= 0) {
-                                                    this.clonedSeatingPlanSection.rows.splice(index + 1, 0, clonedRow)
-                                                    this.emitChange()
-                                                }
-                                                return true;
-                                            }
-                                        }),
-                                        new ContextMenuItem({
-                                            name: 'Gang / lege rij',
-                                            action: () => {
-                                                const newRow = SeatingPlanRow.create({
-                                                    id: '',
-                                                    seats: []
-                                                })
-                                                const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                                                if (index >= 0) {
-                                                    this.clonedSeatingPlanSection.rows.splice(index + 1, 0, newRow)
-                                                    this.emitChange()
-                                                }
-                                                return true;
-                                            }
-                                        }),
-                                    ]
-                                ])
-                            }),
-                            new ContextMenuItem({
-                                name: 'Boven',
-                                childMenu: this.getInsertMenu(row, row.seats.indexOf(seat) + 1)
                             })
                         ]
                     ])
                 }),
                 new ContextMenuItem({
                     name: 'Breedte',
-                    icon: 'add',
                     childMenu: new ContextMenu([
                         [
                             new ContextMenuItem({
@@ -901,7 +961,44 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                         return true;
                     }
                 }),
-            ] : [])
+            ] : []),
+            this.seatingPlan.categories.map(category => {
+                let allMatching = true;
+                let oneMatching = false;
+
+                if (!seat) {
+                    for (const seat of row.seats) {
+                        if (seat.category !== category.id) {
+                            allMatching = false;
+                        } else {
+                            oneMatching = true;
+                        }
+                    }
+                } else {
+                    if (seat.category !== category.id) {
+                        allMatching = false;
+                    } else {
+                        oneMatching = true;
+                    }
+                }
+
+
+                return new ContextMenuItem({
+                    name: category.name,
+                    selected: allMatching||oneMatching,
+                    action: () => {
+                        if (!seat) {
+                            for (const seat of row.seats) {
+                                seat.category = category.id
+                            }
+                        } else {
+                            seat.category = category.id
+                        }
+                        this.emitChange()
+                        return true;
+                    }
+                });
+            })
         ])
         contextMenu.show({
             clickEvent: event
@@ -914,6 +1011,14 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+.edit-seating-plan-section-box {
+    .undo-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+}
 
 .seating-plan-section {
     background: $color-background-shade;
@@ -938,7 +1043,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
 
     .row-label {
         position: absolute;
-        bottom: var(--ry);
+        top: var(--ry);
         width: 40px;
         height: var(--rh);
         line-height: var(--rh);
@@ -1077,6 +1182,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         box-sizing: border-box;
         contain: layout size;
         z-index: 1;
+        color: var(--color);
 
         &.disabledPerson:not(:focus) {
             font-size: 12px;
@@ -1107,20 +1213,6 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         &:last-child {
             margin-left: auto;
         }
-    }
-
-    .stage {
-        background: white;
-        width: 80%;
-        height: 40px;
-        margin: 0 auto;
-        margin-top: 30px;
-        border-top-left-radius: $border-radius;
-        border-top-right-radius: $border-radius;
-        text-align: center;
-        line-height: 40px;
-        @extend .style-description;
-        
     }
 
     .button-row {

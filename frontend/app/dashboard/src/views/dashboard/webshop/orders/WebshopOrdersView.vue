@@ -44,7 +44,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     loading = false;
     orders: PrivateOrderWithTickets[] = []
-    nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
 
     get estimatedRows() {
         if (this.isLoadingOrders) {

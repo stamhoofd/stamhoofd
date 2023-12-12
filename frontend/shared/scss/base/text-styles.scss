@@ -283,6 +283,11 @@
     }
 }
 
+.inline-size {
+    // The width of the description should not affect the width of the parent
+    contain: inline-size;
+}
+
 .style-description-large {
     font-size: 16px;
     line-height: 1.5;

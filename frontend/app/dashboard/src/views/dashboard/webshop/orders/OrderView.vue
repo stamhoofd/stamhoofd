@@ -27,7 +27,7 @@
             </div>
 
             <STList class="info">
-                <STListItem>
+                <STListItem v-if="order.data.totalPrice || !webshop.isAllFree">
                     <h3 class="style-definition-label">
                         Totaalbedrag
                     </h3>
@@ -284,7 +284,13 @@
 
                     <footer>
                         <p class="price">
-                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(order.data.cart) | price }}
+                            <template v-if="cartItem.product.allowMultiple">
+                                {{ cartItem.amount }} x
+                            </template>
+                            {{ formatFreePrice(cartItem.getUnitPrice(order.data.cart)) }}
+                            <template v-if="cartItem.getAdditionalPrices()">
+                                + {{ formatFreePrice(cartItem.getAdditionalPrices()) }}
+                            </template>
                         </p>
                     </footer>
 
@@ -404,6 +410,13 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (n === PaymentStatus.Succeeded && old !== PaymentStatus.Succeeded) {
             this.downloadNewTickets()
         }
+    }
+
+    formatFreePrice(price: number) {
+        if (price === 0) {
+            return ''
+        }
+        return Formatter.price(price)
     }
 
     get tickets() {

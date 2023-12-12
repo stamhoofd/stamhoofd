@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Request } from "@simonbackx/simple-networking";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
+import { Request, RequestResult } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
@@ -503,7 +503,11 @@ export class WebshopManager {
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                this.deleteDatabase();
+                try {
+                    this.deleteDatabase();
+                } catch (e) {
+                    console.error(e)
+                }
                 reject(event)
             };
 
@@ -515,8 +519,15 @@ export class WebshopManager {
                 const cursor = event.target.result;
                 if (cursor) {
                     const rawOrder = cursor.value
-                    const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
-                    callback(order)
+                    try {
+                        const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
+                        callback(order)
+                    } catch (e) {
+                        // Decoding error: ignore
+                        // force fetch all again
+                        this.clearLastFetchedOrder().catch(console.error)
+
+                    }
                     cursor.continue();
                 } else {
                     // no more results
@@ -658,6 +669,11 @@ export class WebshopManager {
         await this.storeSettingKey("lastFetchedOrder", this.lastFetchedOrder)
     }
 
+    async clearLastFetchedOrder() {
+        this.lastFetchedOrder = null
+        await this.storeSettingKey("lastFetchedOrder", null)
+    }
+
     async addTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
         if (patches.length === 0) {
             return;
@@ -703,14 +719,37 @@ export class WebshopManager {
 
     async patchTickets(patches: AutoEncoderPatchType<TicketPrivate>[]) {
         // Then make one try for a request (might fail if we don't have internet)
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
-            method: "PATCH",
-            path: "/webshop/"+this.preview.id+"/tickets/private",
-            decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
-            body: patches,
-            shouldRetry: false,
-            owner: this
-        })
+        let response: RequestResult<TicketPrivate[]>
+        try {
+            response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "PATCH",
+                path: "/webshop/"+this.preview.id+"/tickets/private",
+                decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
+                body: patches,
+                shouldRetry: false,
+                owner: this
+            })
+        } catch (e) {
+            if (isSimpleErrors(e)) {
+                for (const error of e.errors) {
+                    if (error.hasCode('ticket_not_found')) {
+                        const id = error.field
+
+                        // remove patch for this ticket
+                        const patch = patches.find(i => i.id === id)
+                        if (patch && patch.secret) {
+                            console.info('Deleted invalid patch for deleted ticket ' + patch.secret)
+                            try {
+                                await this.removeTicketPatch(patch.secret)
+                            } catch (q) {
+                                console.error(q)
+                            }
+                        }
+                    }
+                }
+            }
+            throw e;
+        }
 
         // Move all data to original order
         try {
@@ -797,6 +836,28 @@ export class WebshopManager {
         } finally {
             this.isLoadingOrders = false
         }
+    }
+
+    /// TICKETS
+    async removeTicketPatch(secret: string) {
+        const db = await this.getDatabase()
+
+        return new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["ticketPatches"], "readwrite");
+
+            transaction.oncomplete = () => {
+                resolve()
+            };
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const ticketPatches = transaction.objectStore("ticketPatches");
+            ticketPatches.delete(secret);
+        })
     }
 
 

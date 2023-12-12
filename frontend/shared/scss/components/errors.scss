@@ -72,6 +72,18 @@
 
     min-height: 49px;
 
+    &.small {
+        padding: 10px 15px 10px 40px;
+        min-height: 39px;
+
+        &::before {
+            font-size: 20px;
+            line-height: 20px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -80,7 +92,7 @@
     text-align: left; // In case of button element
 
     box-sizing: border-box;
-    margin: 15px 0;
+    margin: 10px 0;
     position: relative;
 
     &:link, &:visited, &:active, &:hover, &:focus {
