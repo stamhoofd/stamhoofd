@@ -23,6 +23,7 @@ export class PaymentsExcelExport {
         const wsData: RowValue[][] = [
             [
                 "ID",
+                "Naam",
                 "Omschrijving",
                 "Bestelnummer",
                 "Betaalmethode",
@@ -87,8 +88,11 @@ export class PaymentsExcelExport {
                 }
             }
 
+            const name = payment.orders ? payment.orders[0].data.customer.name : (payment.memberNames || 'Onbekend')
+
             wsData.push([
                 payment.id,
+                name,
                 webshop ? webshop : (groups.length ? groups.join(', ') : payment.balanceItemPayments.map(bip => bip.balanceItem.description).join(", ")),
                 {
                     value: (payment.balanceItemPayments[0]?.balanceItem?.order?.number ?? '/'),
