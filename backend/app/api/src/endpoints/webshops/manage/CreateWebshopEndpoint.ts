@@ -110,22 +110,33 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.uri = request.body.uri.length > 0 ? Formatter.slug(request.body.uri) : Formatter.slug(webshop.meta.name)
 
         // Check if this uri is inique
-        const original = webshop.uri
-        const possibleSuffixes = [Formatter.slug(user.organization.uri), new Date().getFullYear().toString()]
+        let original = webshop.uri
+        const possibleSuffixes = [new Date().getFullYear().toString(), Formatter.slug(user.organization.uri)]
+
+        // Remove possible suffices from original
+        for (const suffix of possibleSuffixes) {
+            if (original.endsWith("-" + suffix)) {
+                original = original.slice(0, -suffix.length - 1)
+            }
+        }
+
         let tried = 0
-        while (await Webshop.getByURI(webshop.uri) !== undefined) {
+        while (webshop.uri.length > 100 || await Webshop.getByURI(webshop.uri) !== undefined) {
+
             console.log("Webshop already exists", webshop.uri)
 
+            let suffix = ""
             if (tried < possibleSuffixes.length) {
-                webshop.uri = original + "-" + possibleSuffixes[tried]
+                suffix = "-" + possibleSuffixes[tried]
             } else if (tried > 9) {
-                webshop.uri = original + "-" + Math.floor(Math.random() * 100000)
+                 suffix = "-" + Math.floor(Math.random() * 100000)
             } else {
-                webshop.uri = original + "-" + (tried - possibleSuffixes.length + 2)
+                 suffix = "-" + (tried - possibleSuffixes.length + 2)
             }
             
+            webshop.uri = original.slice(0, 100 - suffix.length) + suffix;
+            
             tried++
-
             if (tried > 15) {
                 console.log("Failed to generate unique webshop uri")
 
