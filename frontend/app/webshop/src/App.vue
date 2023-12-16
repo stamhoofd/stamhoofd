@@ -117,14 +117,6 @@ export default class App extends Vue {
                 await SessionManager.setCurrentSession(session)
 
                 if (!response.data.webshop) {
-                    if (response.data.webshops.length == 0) {
-                        const marketingWebshops = "https://"+this.$t('shared.domains.marketing')+"/webshops"
-                        if (isPrerender) {
-                            return new ComponentWithProperties(PrerenderRedirectView, { location: marketingWebshops })
-                        }
-                        //window.location.href = marketingWebshops
-                        return new ComponentWithProperties(InvalidWebshopView, {})
-                    }
                     return new ComponentWithProperties(NavigationController, { 
                         root: new ComponentWithProperties(ChooseWebshopView, {
                             organization: response.data.organization,

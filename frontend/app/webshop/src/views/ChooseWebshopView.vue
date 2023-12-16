@@ -38,7 +38,7 @@
                 <main>
                     <h1>Onze webshops</h1>
                     <p class="info-box">
-                        We organiseren momenteel helaas geen verkopen. Kom later nog eens terug.
+                        We organiseren momenteel helaas geen verkoop. Kom later nog eens terug.
                     </p>
                 </main>
             </div>
