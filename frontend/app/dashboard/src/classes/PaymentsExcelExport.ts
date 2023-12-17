@@ -88,7 +88,7 @@ export class PaymentsExcelExport {
                 }
             }
 
-            const name = payment.orders ? payment.orders[0].data.customer.name : (payment.memberNames || 'Onbekend')
+            const name = payment.orders.length > 0 ? payment.orders[0].data.customer.name : (payment.memberNames || 'Onbekend')
 
             wsData.push([
                 payment.id,
