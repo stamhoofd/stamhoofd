@@ -66,7 +66,7 @@ export class TicketPublic extends Ticket {
         }
         const item = this.items[0];
         if (!item || !item.product.seatingPlanId) {
-            return []
+            return null
         }
         if (!this.originalSeat) {
             return null
