@@ -71,11 +71,11 @@ export default class ShowSeatsView extends Mixins(NavigationMixin){
         if (!plan) {
             return null
         }
-        const seat = this.ticket.getSeat()
+        const seat = this.ticket.seat
         if (!seat) {
             return plan.sections[0]
         }
-        return plan.sections.find(s => s.id === seat.sId) ?? null
+        return plan.sections.find(s => s.id === seat.section) ?? null
     }
 
     get seatingPlan() {
@@ -84,7 +84,7 @@ export default class ShowSeatsView extends Mixins(NavigationMixin){
     }
 
     get seats() {
-        const seat = this.ticket.getSeat()
+        const seat = this.ticket.seat
         if (!seat) {
             return []
         }
@@ -92,7 +92,7 @@ export default class ShowSeatsView extends Mixins(NavigationMixin){
     }
 
     get seatDescription() {
-        const seat = this.ticket.getSeat()
+        const seat = this.ticket.seat
         const product =  this.ticket.items[0]?.product
         if (!seat || !product) {
             return []
@@ -116,8 +116,11 @@ export default class ShowSeatsView extends Mixins(NavigationMixin){
         if (!this.order) {
             return []
         }
-
-        return this.order.data.cart.items.filter(i => i.product.seatingPlanId === this.seatingPlan?.id).flatMap(i => i.seats)
+        const product = this.ticket.items[0]?.product
+        if (!product) {
+            return []
+        }
+        return this.order.data.cart.items.filter(i => i.product.seatingPlanId === this.seatingPlan?.id && i.product.id === product.id).flatMap(i => i.seats)
     }
 }
 </script>

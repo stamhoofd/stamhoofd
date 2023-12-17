@@ -32,6 +32,11 @@
     @media (max-width: 450px) {
         --st-horizontal-padding: 15px;
     }    
+
+    --color-primary: #{$color-primary-original};
+    --color-secundary: #{$color-secundary-original};
+    --color-tertiary: #{$color-tertiary-original};
+    --color-warning: #{$color-warning};
 }
 
 body {

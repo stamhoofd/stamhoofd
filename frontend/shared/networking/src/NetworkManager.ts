@@ -91,7 +91,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
         if (navigator.onLine) {
             // Normal timeout behaviour: browser probably doesn't know about network issues, so we need to 'poll'
-            await sleep(Math.min(((request as any).retryCount ?? 0) * 1000, 7000));
+            await sleep(Math.min(((request as any).retryCount ?? 0) * 1000, 10 * 1000));
             return Promise.resolve(true);
         } else {
             // Wait for network or 10 seconds (the fastest one)
@@ -170,7 +170,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
                     if (AppManager.shared.isNative) {
                         new Toast("Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.", "yellow download").setHide(null).show()
                         AppManager.shared.checkUpdates({
-                            checkTimeout: 10 * 1000
+                            checkTimeout: 15 * 1000
                         }).catch(console.error)
                     } else {
                         new Toast("Er is een update beschikbaar. Herlaad de pagina zodra het kan om te vermijden dat bepaalde zaken stoppen met werken.", "yellow download").setHide(null).show()

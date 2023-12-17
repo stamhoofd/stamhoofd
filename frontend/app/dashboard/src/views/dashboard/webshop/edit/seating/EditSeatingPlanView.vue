@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges" class="edit-seating-plan-view" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges" class="edit-seating-plan-view" :loading="saving" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -17,9 +17,55 @@
             >
         </STInputBox>
 
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="requireOptimalReservation" />
+
+                <h3 class="style-title-list">
+                    Verplicht optimale zaalbezetting
+                </h3>
+                <p class="style-description-small">
+                    Zorg dat het niet mogelijk is om maar één plaats tussen te laten.
+                </p>
+            </STListItem>
+        </STList>
+
+        <hr>
+        <h2>Zetelcategorieën</h2>
+        <p>Maak een zetelcategorie aan om een meerprijs in rekening te brengen voor sommige zetels of bepaalde zetels te reserveren. Selecteer daarna een rij of een zetel en klik op rechtermuisknop om de categorie van die rij of zetel te wijzigen.</p>
+        <STList>
+            <STListItem v-for="category in patchedSeatingPlan.categories" :key="category.id" :selectable="true" element-name="button" @click="editCategory(category)">
+                <span slot="left" class="icon dot gray custom-color" :style="{'--color': patchedSeatingPlan.getCategoryColor(category.id)}" />
+                <h3 class="style-title-list">
+                    {{ category.name }}
+                </h3>
+            </STListItem>
+            <STListItem :selectable="true" element-name="button" @click="addCategory">
+                <span slot="left" class="icon add gray" />
+                <h3 class="style-title-list">
+                    Nieuwe categorie
+                </h3>
+            </STListItem>
+        </STList>
+
         <div v-for="section of patchedSeatingPlan.sections" :key="section.id" class="container">
             <hr>
-            <h2>{{ section.name || 'Sectie' }}</h2>
+            <h2 v-if="patchedSeatingPlan.sections.length > 1">
+                {{ section.name||'Blok' }}
+            </h2>
+
+            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" title="Naam" :error-box="errorBox">
+                <input
+                    :value="section.name"
+                    class="input"
+                    type="text"
+                    :placeholder="'bv. Middenplein'"
+                    autocomplete=""
+                    enterkeyhint="next"
+                    @input="setSectionName(section, $event.target.value)"
+                >
+            </STInputBox>
+
             <EditSeatingPlanSectionBox 
                 :seating-plan="patchedSeatingPlan"
                 :seating-plan-section="section"
@@ -27,12 +73,12 @@
             />
         </div>
 
-        <hr>
+        <hr v-if="false">
 
-        <p>
+        <p v-if="false">
             <button class="button text" type="button" @click="addSection">
                 <span class="icon add" />
-                <span>Sectie toevoegen</span>
+                <span>Blok toevoegen</span>
             </button>
         </p>
 
@@ -60,13 +106,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges, VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton,Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { PrivateWebshop, SeatingPlan, SeatingPlanSection, Version, WebshopMetaData } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox,ErrorBox, LoadingButton,Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanSection, Version, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+import EditSeatingPlanCategoryView from './EditSeatingPlanCategoryView.vue';
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
 
 @Component({
@@ -78,12 +125,14 @@ import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
         STList,
         STListItem,
         EditSeatingPlanSectionBox,
-        LoadingButton
+        LoadingButton,
+        Checkbox
     },
 })
 export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
+    saving = false
 
     @Prop({ required: true })
         isNew!: boolean
@@ -102,7 +151,7 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void | Promise<void>;
 
     get patchedWebshop() {
         return this.webshop.patch(this.patchWebshop)
@@ -135,6 +184,20 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
         this.addPatch(SeatingPlan.patch({ name: value }));
     }
 
+    get requireOptimalReservation() {
+        return this.patchedSeatingPlan.requireOptimalReservation
+    }
+
+    set requireOptimalReservation(value: boolean) {
+        this.addPatch(SeatingPlan.patch({ requireOptimalReservation: value }));
+    }
+
+    setSectionName(section: SeatingPlanSection, value: string) {
+        const p = SeatingPlan.patch({});
+        p.sections.addPatch(SeatingPlanSection.patch({ id: section.id, name: value }))
+        this.addPatch(p)
+    }
+
     async save() {
         const isValid = await this.validator.validate()
         if (!isValid) {
@@ -151,13 +214,21 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
             );
             return
         }
+        this.saving = true;
 
         const p = PrivateWebshop.patch(this.patchWebshop)
         const meta = WebshopMetaData.patch({})
         meta.seatingPlans.addPatch(this.patchSeatingPlan)
         const patchedWebshop = p.patch({meta})
-        this.saveHandler(patchedWebshop)
-        this.pop({ force: true })
+
+        try {
+            await this.saveHandler(patchedWebshop)
+            this.pop({ force: true })
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
+        this.saving = false;
     }
 
     get hasChanges() {
@@ -211,6 +282,50 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
         } finally {
             this.downloadingSettings = false
         }
+    }
+
+    addCategory() {
+        // We choose a short id
+        let id = this.patchedSeatingPlan.categories.length + 1
+        while (this.patchedSeatingPlan.categories.find(c => c.id === id.toString())) {
+            id++
+        }
+        const category = SeatingPlanCategory.create({
+            id: id.toString(),
+            name: 'Naamloos'
+        })
+        const patch = SeatingPlan.patch({})
+        patch.categories.addPut(category)
+        
+        this.present({
+            components: [
+                new ComponentWithProperties(EditSeatingPlanCategoryView, {
+                    seatingPlan: this.patchedSeatingPlan.patch(patch),
+                    isNew: true,
+                    category,
+                    saveHandler: (p: AutoEncoderPatchType<SeatingPlan>) => {
+                        this.addPatch(patch.patch(p))
+                    }
+                })
+            ],
+            modalDisplayStyle: 'sheet'
+        })
+    }
+
+    editCategory(category: SeatingPlanCategory) {
+        this.present({
+            components: [
+                new ComponentWithProperties(EditSeatingPlanCategoryView, {
+                    seatingPlan: this.patchedSeatingPlan,
+                    isNew: false,
+                    category,
+                    saveHandler: (p: AutoEncoderPatchType<SeatingPlan>) => {
+                        this.addPatch(p)
+                    }
+                })
+            ],
+            modalDisplayStyle: 'sheet'
+        })
     }
     
 }

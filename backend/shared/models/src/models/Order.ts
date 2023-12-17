@@ -309,6 +309,10 @@ export class Order extends Model {
                         ticket.index = offset + index + 1
                         ticket.total = item.getTotalAmount(this.data.cart)
 
+                        // Seat
+                        ticket.seat = item.seats.length > 0 ? item.seats[index] : null
+                        ticket.originalSeat = ticket.seat
+
                         // Do not save yet
                         tickets.push(ticket)
                     }
@@ -346,6 +350,7 @@ export class Order extends Model {
                     const existing = existingTickets.find(existing => existing.itemId === ticket.itemId && ticket.index === existing.index)
                     if (existing) {
                         existing.total = ticket.total
+                        existing.seat = ticket.seat
                         mergedTickets.push(existing)
                     } else {
                         didCreateTickets = true

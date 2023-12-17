@@ -13,12 +13,21 @@
             </figure>
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
 
+            <p v-if="oldItem && oldItem.cartError" class="error-box small">
+                {{ oldItem.cartError.getHuman() }}
+            </p>
+
+
             <p v-if="!cartItem.product.isEnabled" class="info-box">
                 {{ cartItem.product.isEnabledTextLong }}
             </p>
 
             <p v-else-if="cartItem.product.isSoldOut" class="warning-box">
                 Dit artikel is uitverkocht.
+            </p>
+
+            <p v-else-if="areSeatsSoldOut" class="warning-box">
+                Alle plaatsen zijn volzet.
             </p>
 
             <p v-else-if="!canOrder" class="warning-box">
@@ -92,10 +101,10 @@
                     Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
                 </p>
 
-                <button v-if="withSeats && oldItem" class="button text" type="button" @click="chooseSeats">
-                    <span>Wijzig plaatsen</span>
-                    <span class="icon arrow-right-small" />
-                </button>
+                <p v-if="maximumRemainingSeats !== null && cartItem.amount + 1 >= maximumRemainingSeats" class="st-list-description">
+                    <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
+                    Er {{ remainingSeats == 1 ? 'is' : 'zijn' }} nog maar {{ pluralText(remainingSeats, 'plaats', 'plaatsen') }} beschikbaar<template v-if="otherCartItemsSeatCount > 0">, waarvan er al {{ otherCartItemsSeatCount }} in jouw winkelmandje {{ otherCartItemsSeatCount == 1 ? 'zit' : 'zitten' }}</template>
+                </p>
             </template>
 
             <div v-if="!cartEnabled && (administrationFee || (canSelectAmount && !webshop.isAllFree))" class="pricing-box max">
@@ -198,7 +207,11 @@ export default class CartItemView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
 
     get willNeedSeats() {
-        return this.withSeats && (!this.oldItem || this.oldItem.amount !== this.cartItem.amount)
+        return this.withSeats
+    }
+
+    pluralText(num: number, singular: string, plural: string) {
+        return Formatter.pluralText(num, singular, plural)
     }
 
     addToCart() {
@@ -290,6 +303,18 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     /**
+     * Return the total seat amount of this same product in the cart, that is not this item (if it is editing)
+     */
+    get otherCartItemsSeatCount() {
+        return this.cart.items.reduce((prev, item) => {
+            if (item.product.id != this.product.id) {
+                return prev
+            }
+            return prev + item.seats.length
+        }, 0)  - (this.oldItem?.seats?.length ?? 0)
+    }
+
+    /**
      * Return the total reserved amount for the same product in this cart, without the current item included (if editing)
      */
     get reservedAmountFromOthers() {
@@ -301,12 +326,39 @@ export default class CartItemView extends Mixins(NavigationMixin){
         }, 0)  - (this.oldItem?.reservedAmount ?? 0)
     }
 
+    get otherCartItemsReservedSeatCount() {
+        return this.cart.items.reduce((prev, item) => {
+            if (item.product.id != this.product.id) {
+                return prev
+            }
+            return prev + item.reservedSeats.length
+        }, 0)  - (this.oldItem?.reservedSeats.length ?? 0)
+    }
+
     get maximumRemainingStock() {
         if (this.product.remainingStock === null) {
             return null
         }
 
         return this.product.remainingStock + (this.oldItem?.reservedAmount ?? 0) - this.count + this.reservedAmountFromOthers
+    }
+
+    get maximumRemainingSeats() {
+        const remaining = this.product.getRemainingSeats(this.webshop, this.admin)
+        if (remaining === null) {
+            return null;
+        }
+    
+        return remaining + (this.oldItem?.reservedSeats.length ?? 0) - this.otherCartItemsSeatCount + this.otherCartItemsReservedSeatCount
+    }
+
+    get remainingSeats() {
+        const remaining = this.product.getRemainingSeats(this.webshop, this.admin)
+        if (remaining === null) {
+            return null;
+        }
+    
+        return remaining + (this.oldItem?.reservedSeats.length ?? 0) + this.otherCartItemsReservedSeatCount
     }
 
     get maximumRemainingOrder() {
@@ -318,17 +370,17 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get maximumRemaining() {
+        let minArr = [this.maximumRemainingStock, this.maximumRemainingSeats, this.maximumRemainingOrder].filter(v => v !== null) as number[]
+
         if (this.admin) {
+            minArr = [this.maximumRemainingSeats].filter(v => v !== null) as number[]
+        }
+
+        if (minArr.length === 0) {
             return null
         }
-        
-        if (this.maximumRemainingStock === null) {
-            return this.maximumRemainingOrder
-        }
-        if (this.maximumRemainingOrder === null) {
-            return this.maximumRemainingStock
-        }
-        return Math.min(this.maximumRemainingStock, this.maximumRemainingOrder)
+
+        return Math.min(...minArr)
     }
 
     get remainingStock() {
@@ -343,8 +395,12 @@ export default class CartItemView extends Mixins(NavigationMixin){
         return Formatter.capitalizeFirstLetter(dateRange.toString())
     }
 
+    get areSeatsSoldOut() {
+        return this.maximumRemainingSeats === 0
+    }
+
     get canOrder() {
-        return this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0 || !!this.oldItem) && this.product.isEnabled)
+        return (this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0 || !!this.oldItem) && this.product.isEnabled)) && !this.areSeatsSoldOut
     }
 
     get canSelectAmount() {

@@ -270,12 +270,16 @@
                 {{ ticket.secret }}
             </p>
 
+            <p v-if="order.status == 'Canceled'" class="error-box">
+                Deze bestelling werd geannuleerd
+            </p>
+            
             <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
                 Opgelet: deze bestelling werd nog niet betaald.
             </p>
 
-            <p v-if="order.status == 'Canceled'" class="error-box">
-                Deze bestelling werd geannuleerd
+            <p v-if="changedSeatString" class="warning-box">
+                {{ changedSeatString }}
             </p>
 
             <div v-if="hasWarnings" class="hover-box container">
@@ -294,6 +298,28 @@
             </div>
 
             <STList class="info">
+                <STListItem v-if="item.product.dateRange">
+                    <h3 class="style-definition-label">
+                        Wanneer?
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ formatDateRange(item.product.dateRange) }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="indexDescription.length">
+                    <div class="split-info">
+                        <div v-for="(row, index) in indexDescription" :key="index">
+                            <h3 class="style-definition-label">
+                                {{ row.title }}
+                            </h3>
+                            <p class="style-definition-text">
+                                {{ row.value }}
+                            </p>
+                        </div>
+                    </div>
+                </STListItem>
+
                 <STListItem :selectable="true" @click="openOrder">
                     <h3 class="style-definition-label">
                         Bestelling
@@ -354,7 +380,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, ColorHelper, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
+import { OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -405,6 +431,18 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         return this.warnings.length > 0
     }
 
+    get publicTicket() {
+        return this.ticket.getPublic(this.order);
+    }
+
+    get indexDescription() {
+        return this.publicTicket.getIndexDescription(this.webshop)
+    }
+
+    get changedSeatString() {
+        return this.publicTicket.getChangedSeatString(this.webshop, false)
+    }
+
     get warnings(): RecordWarning[] {
         const warnings: RecordWarning[] = []
 
@@ -425,6 +463,10 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
     get item() {
         return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
+    }
+
+    formatDateRange(dateRange: ProductDateRange) {
+        return Formatter.capitalizeFirstLetter(dateRange.toString())
     }
 
     getName(paymentMethod: PaymentMethod): string {

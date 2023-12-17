@@ -178,6 +178,18 @@ export class Webshop extends AutoEncoder {
                 }
             }
         }
+
+        for (const plan of this.meta.seatingPlans) {
+            for (const category of plan.categories) {
+                if (category.price) {
+                    return false
+                }
+            }
+        }
+
+        if (this.meta.paymentConfiguration.administrationFee.fixed) {
+            return false;
+        }
         
         return true
     }

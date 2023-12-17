@@ -1,4 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { CartReservedSeat } from "@stamhoofd/structures";
 import basex from "base-x";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
@@ -78,6 +79,18 @@ export class Ticket extends Model {
      */
     @column({ type: "number" })
     total = 0
+
+    /**
+     * If multiple items are made for the same product, this contains the index
+     */
+    @column({ type: "json", nullable: true, decoder: CartReservedSeat })
+    seat: CartReservedSeat | null = null
+
+    /**
+     * In case the seat is changed, this contains the first assigned seat
+     */
+    @column({ type: "json", nullable: true, decoder: CartReservedSeat })
+    originalSeat: CartReservedSeat | null = null
 
     @column({
         type: "datetime", beforeSave(old?: any) {

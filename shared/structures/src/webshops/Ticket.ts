@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDe
 import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { ReservedSeat } from "../SeatingPlan";
+import { CartReservedSeat, ReservedSeat } from "../SeatingPlan";
 import { CartItem } from "./Cart";
 import { Order } from "./Order";
 import { Webshop, WebshopPreview } from "./Webshop";
@@ -32,6 +32,12 @@ export class Ticket extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     total: number
+
+    @field({ decoder: CartReservedSeat, nullable: true, version: 216 })
+    seat: CartReservedSeat | null = null
+
+    @field({ decoder: CartReservedSeat, nullable: true, version: 216 })
+    originalSeat: CartReservedSeat | null = null
 }
 
 /** 
@@ -54,6 +60,33 @@ export class TicketPublic extends Ticket {
         return this.items[0].product.name
     }
 
+    getChangedSeatString(webshop: Webshop|WebshopPreview, isCustomer: boolean) {
+        if (!this.isSingle) {
+            return null;
+        }
+        const item = this.items[0];
+        if (!item || !item.product.seatingPlanId) {
+            return []
+        }
+        if (!this.originalSeat) {
+            return null
+        }
+        if (!this.seat) {
+            return null
+        }
+        if (this.seat.equals(this.originalSeat)) {
+            return null
+        }
+
+        const to = this.seat.getNameString(webshop, item.product)
+        const from = this.originalSeat.getNameString(webshop, item.product)
+
+        if (isCustomer) {
+            return "Jouw zitplaats werd gewijzigd van " + from + " naar " + to
+        }
+        return "Deze zitplaats werd gewijzigd van " + from + " naar " + to
+    }
+
     getIndexDescriptionString(webshop: Webshop|WebshopPreview) {
         if (!this.isSingle) {
             return '';
@@ -71,7 +104,7 @@ export class TicketPublic extends Ticket {
             return []
         }
 
-        const seat = this.getSeat()
+        const seat = this.seat
         if (seat) {
             const r = seat.getName(webshop, item.product)
             if (r.length > 0) {
@@ -91,22 +124,6 @@ export class TicketPublic extends Ticket {
             return null
         }
         return this.items[0].product.seatingPlanId
-    }
-
-    getSeat(): ReservedSeat | null {
-        if (!this.isSingle) {
-            return null
-        }
-        const item = this.items[0];
-        if (!item || !item.product.seatingPlanId) {
-            return null
-        }
-
-        const index = this.index - 1
-        if (item.seats[index]) {
-            return item.seats[index]
-        } 
-        return null
     }
 
     getIndexText(): string | null {

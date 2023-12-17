@@ -368,6 +368,12 @@
             color: $color-primary;
         }
 
+        &:disabled,
+        &.disabled {
+            color: $color-gray-2;
+            cursor: not-allowed;
+        }
+
         &:after {
             // Breakout region
             // Increase touch area by 15pixels

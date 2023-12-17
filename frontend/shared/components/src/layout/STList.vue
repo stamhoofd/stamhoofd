@@ -55,7 +55,7 @@ export default class STList extends Vue {
         margin: 0;
     }
 
-    > .st-list-item {
+    > .st-list-item {        
         &.list-move {
             transition: transform 0.2s;
         }

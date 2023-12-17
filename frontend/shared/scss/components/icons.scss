@@ -100,6 +100,10 @@
         color: #EE0000;
     }
 
+    &.custom-color, .button &.custom-color {
+        color: var(--color);
+    }
+
     &.middle {
         vertical-align: middle;
     }

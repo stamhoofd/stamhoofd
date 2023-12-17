@@ -39,6 +39,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { LegacyRecordTypePriority } from "@stamhoofd/structures";
 import { Cart, CartItem, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -128,13 +129,28 @@ export default class ProductBox extends Mixins(NavigationMixin){
     }
 
     onClicked() {
-        const editExisting = this.product.isUnique
+        const editExisting = this.product.isUnique || !this.webshop.shouldEnableCart
         const oldItem = editExisting ? this.cart.items.find(i => i.product.id == this.product.id) : undefined
 
-        const cartItem = oldItem?.clone() ?? CartItem.create({
+        let cartItem = oldItem?.clone() ?? CartItem.create({
             product: this.product,
             productPrice: this.product.prices[0]
         })
+
+        // refresh: to make sure we display the latest data
+        if (oldItem) {
+            try {
+                cartItem.refresh(this.webshop)
+            } catch (e) {
+                console.error(e)
+
+                // Not recoverable
+                cartItem = CartItem.create({
+                    product: this.product,
+                    productPrice: this.product.prices[0]
+                })
+            }
+        }
 
         if (this.canDismiss) {
             this.show(new ComponentWithProperties(CartItemView, { 

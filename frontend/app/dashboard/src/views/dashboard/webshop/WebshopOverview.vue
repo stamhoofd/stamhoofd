@@ -25,6 +25,17 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
+                <STListItem v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center" @click="openSeating(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/seating-plan.svg">
+                    <h2 class="style-title-list">
+                        Zaaloverzicht
+                    </h2>
+                    <p class="style-description">
+                        Bekijk welke plaatsen door welke personen zijn ingenomen.
+                    </p>
+                    <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+
                 <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" @click="openTickets(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/scanner.svg">
                     <h2 class="style-title-list">
@@ -320,6 +331,7 @@ import EditWebshopPermissionsView from './edit/EditWebshopPermissionsView.vue';
 import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
 import EditWebshopRecordSettings from './edit/EditWebshopRecordSettings.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
+import WebshopSeatingView from './orders/WebshopSeatingView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
@@ -340,7 +352,24 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     @Prop()
         preview!: WebshopPreview;
 
+    loading = false
+
     webshopManager = new WebshopManager(this.preview)
+
+    reload() {
+        this.loading = true;
+
+        this.webshopManager.loadWebshopIfNeeded().catch((e) => {
+            console.error(e)
+            Toast.fromError(e).show()
+        }).finally(() => {
+            this.loading = false
+        })
+    }
+
+    get webshop() {
+        return this.webshopManager.webshop
+    }
 
     get isOpen() {
         return !this.webshopManager.preview.isClosed()
@@ -397,6 +426,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     get hasTickets() {
         return this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None
     }
+
+    get hasSeating() {
+        return !!this.webshop?.products?.find(p => p.seatingPlanId !== null)
+    }
    
     openOrders(animated = true) {
         this.show({
@@ -404,6 +437,18 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
             adjustHistory: animated,
             components: [
                 new ComponentWithProperties(WebshopOrdersView, {
+                    webshopManager: this.webshopManager
+                })
+            ]
+        })
+    }
+
+    openSeating(animated = true) {
+        this.show({
+            animated,
+            adjustHistory: animated,
+            components: [
+                new ComponentWithProperties(WebshopSeatingView, {
                     webshopManager: this.webshopManager
                 })
             ]
@@ -522,6 +567,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
             this.openOrders(false)
         }
 
+        if (parts.length == 3 && parts[0] == 'webshops' && parts[2] == 'seating') {
+            this.openSeating(false)
+        }
+
         if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'tickets') {
             this.openTickets(false)
         }
@@ -529,6 +578,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'statistics') {
             this.openStatistics(false)
         }
+    }
+
+    created() {
+        this.reload();
     }
 
     get canCreateWebshops() {

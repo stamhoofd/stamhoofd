@@ -112,6 +112,7 @@ export class OrdersExcelExport {
                 "Notities",
                 "Aantal",
                 "Stukprijs",
+                "Eenmalige extra kost",
                 "Prijs",
                 "Artikel",
                 ...optionNames,
@@ -215,6 +216,10 @@ export class OrdersExcelExport {
                     },
                     {
                         value: (item.getUnitPrice(order.data.cart) ?? 0) / 100,
+                        format: '€0.00'
+                    },
+                    {
+                        value: (item.getAdditionalPrices() ?? 0) / 100,
                         format: '€0.00'
                     },
                     {

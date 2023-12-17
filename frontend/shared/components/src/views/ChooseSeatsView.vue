@@ -1,8 +1,18 @@
 <template>
     <form class="st-view choose-seats-view shade" @submit.prevent="save">
-        <STNavigationBar title="Plaatsen" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss" />
         <main>
-            <h1>Kies je plaatsen</h1>
+            <h1>
+                {{ title }}
+                <span v-if="amount" class="title-suffix">
+                    {{ selectedAmount }} / {{ amount }}
+                </span>
+            </h1>
+            <p class="inline-size style-description">
+                {{ description }}
+            </p>
+            
+
             <STErrorsDefault :error-box="errorBox" />
 
             <SeatSelectionBox 
@@ -14,19 +24,14 @@
                 :reserved-seats="reservedSeats"
                 :highlight-seats="highlighedSeats"
                 :set-seats="setSeats"
+                :admin="admin"
             />
         </main>
 
         <STToolbar>
-            <button v-if="oldItem && cartEnabled" slot="right" class="button primary" type="submit">
-                <span class="icon basket" />
-                <span>Opslaan</span>
-            </button>
-            <button v-else slot="right" class="button primary" type="submit">
-                <span v-if="cartEnabled" class="icon basket" />
-                <span v-if="cartEnabled">Toevoegen</span>
-                <span v-else>Doorgaan</span>
-                <span v-if="!cartEnabled" class="icon arrow-right" />
+            <button slot="right" class="button primary" type="submit" :disabled="selectedAmount !== amount">
+                <span>Bevestigen</span>
+                <span class="icon arrow-right" />
             </button>
         </STToolbar>
     </form>
@@ -34,9 +39,10 @@
 
 
 <script lang="ts">
+import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Cart, CartItem, ReservedSeat, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, CartReservedSeat, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from 'vue-property-decorator';
 
@@ -91,6 +97,33 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin){
 
     errorBox: ErrorBox | null = null
 
+    get amount() {
+        return this.cartItem.amount
+    }
+
+    get selectedAmount() {
+        return this.cartItem.seats.length
+    }
+
+    get remainingAmount() {
+        return this.amount - this.selectedAmount
+    }
+
+    get title() {
+        if (this.remainingAmount === 0) {
+            return 'Bevestig je plaatsen'
+        }
+
+        if (this.remainingAmount === this.amount) {
+            return `Kies ${Formatter.pluralText(this.remainingAmount, 'plaats', 'plaatsen')}`
+        }
+
+        return `Kies nog ${Formatter.pluralText(this.remainingAmount, 'plaats', 'plaatsen')}`
+    }
+
+    get description() {
+        return 'Kies in totaal ' + Formatter.pluralText(this.amount, 'plaats', 'plaatsen') + ' door de plaatsen één voor één aan te klikken. Je kan een plaats deselecteren door er nog eens op te klikken.'
+    }
     
     get seatingPlanSection() {
         const plan = this.seatingPlan
@@ -101,25 +134,27 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin){
         if (!seat) {
             return plan.sections[0]
         }
-        return plan.sections.find(s => s.id === seat.sId) ?? null
+        return plan.sections.find(s => s.id === seat.section) ?? null
     }
 
     setSeats(seats: ReservedSeat[]) {
-        this.cartItem.seats = seats
+        // todo: attach prices
+        this.cartItem.seats = seats.map(s => CartReservedSeat.create(s))
     }
 
     get reservedSeats() {
         const planId = this.cartItem.product.seatingPlanId
+        
         // All reserved seats, except the ones that are already reserved by this item
         return [
             ...this.cartItem.product.reservedSeats, 
-            ...this.cart.items.filter(i => i.product.seatingPlanId === planId).flatMap(i => i.seats).filter(r => !this.oldItem?.seats.find(rr => rr.equals(r)))
+            ...this.cart.items.filter(i => i.product.seatingPlanId === planId && i.product.id === this.cartItem.product.id).flatMap(i => i.seats).filter(r => !this.oldItem?.seats.find(rr => rr.equals(r)))
         ].filter(r => !this.cartItem.reservedSeats.find(rr => rr.equals(r)))
     }
 
     get highlighedSeats() {
         const planId = this.cartItem.product.seatingPlanId
-        return this.cart.items.filter(i => i.product.seatingPlanId === planId).flatMap(i => i.seats).filter(r => !this.oldItem?.seats.find(rr => rr.equals(r)))
+        return this.cart.items.filter(i => i.product.seatingPlanId === planId && i.product.id === this.cartItem.product.id).flatMap(i => i.seats).filter(r => !this.oldItem?.seats.find(rr => rr.equals(r)))
     }
 
     get cartEnabled() {
@@ -131,6 +166,21 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin){
     }
 
     save() {
+        // Check seats are optimal
+        if (this.seatingPlan && this.seatingPlan.requireOptimalReservation && !this.admin) {
+            const adjusted = this.seatingPlan?.adjustSeatsForBetterFit(this.cartItem.seats, this.reservedSeats)
+
+            if (adjusted) {
+                this.setSeats(adjusted)
+
+                this.errorBox = new ErrorBox(new SimpleError({
+                    code: 'adjusted',
+                    message: 'We hebben jouw gekozen plaatsen aangepast zodat er minder enkele plaatsen overblijven. Klik opnieuw op "Bevestigen" om verder te gaan.'
+                }))
+                return;
+            }
+        }
+
         try {
             this.saveHandler(this.cartItem, this.oldItem, this)
         } catch (e) {
