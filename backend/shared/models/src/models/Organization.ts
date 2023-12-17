@@ -647,6 +647,14 @@ export class Organization extends Model {
      */
     async getAdminToEmails(): Promise<EmailInterfaceRecipient[]> {
         const filtered = await this.getAdmins()
+
+        if (filtered.length > 1) {
+            // remove stamhoofd email addresses
+            const f = filtered.flatMap(f => f.getEmailTo() ).filter(e => !e.email.endsWith("@stamhoofd.be") && !e.email.endsWith("@stamhoofd.nl"))
+            if (f.length > 0) {
+                return f
+            }
+        }
         return filtered.flatMap(f => f.getEmailTo() )
     }
 
