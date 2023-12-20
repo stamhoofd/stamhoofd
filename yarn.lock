@@ -2437,10 +2437,15 @@
   dependencies:
     chalk "^4.1.2"
 
-"@simonbackx/simple-networking@1.15.0":
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.15.0.tgz#b06422cec97a7c5d477bc31b0f1a6a01b745c8bc"
-  integrity sha512-XiQCeOu2hmokNB3pXSrD5L1ABd4aKO+UGnXfrkURuNY45t31LqOgr47YJ8Nkfu+npDsPelL91JLIlVFb9BC0eQ==
+"@simonbackx/simple-networking@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.16.0.tgz#9df760744ffde43363056e1ffe276668cbcb7fbf"
+  integrity sha512-41u4f+sR91YmEAyHoqLvqNmrrHZknwGBbs73QToV5vk4bCTam9eE4XQCBjcLBpVCbmWgDWdodzXChfMBV86e6A==
+
+"@simonbackx/vue-app-navigation@1.24.2":
+  version "1.24.2"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.24.2.tgz#96baa26df08595cbc8920e161df99fab9ecb301f"
+  integrity sha512-BIZjKXkpGmdXMV5j2ieuDiG4GaWQEXhe4F5DeuesbEq1bBsj5bNiMTtKpf0awerbbgzE1wrLKxA9zaDt309wew==
 
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"
