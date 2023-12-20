@@ -253,12 +253,12 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                     width: 50
                 })
             ] : []),
-            ...(this.groups.length > 1 ? [
-                new ExcelMemberProperty({
-                    name: "Inschrijvingen (specifiek)",
-                    description: 'Opsomming van alle inschrijvingen voor de groepen ' + Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' of '),
+            ...(OrganizationManager.organization.getCategoryTree({admin: true}).getAllCategories().map(category => {
+                return new ExcelMemberProperty({
+                    name: category.settings.name,
+                    description: `Opsomming van alle inschrijvingen in de categorie ${category.settings.name}`,
                     getValue: (member: MemberWithRegistrations) => {
-                        const registrations = member.filterRegistrations({groups: this.groups, cycleOffset: this.cycleOffset})
+                        const registrations = member.filterRegistrations({groups: category.getAllGroups(), cycleOffset: this.cycleOffset})
                         const groups = registrations.map(r =>{
                             return  OrganizationManager.organization.groups.find(g => g.id === r.groupId)
                         }).filter(g => g !== undefined) as Group[]
@@ -266,7 +266,7 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                     },
                     width: 50
                 })
-            ] : []),
+            })),
             ...(this.groups.length === 1 ? [
                 new ExcelMemberProperty({
                     name: "Inschrijvingsdatum ("+Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' of ')+")",
