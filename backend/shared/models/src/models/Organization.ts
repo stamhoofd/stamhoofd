@@ -681,13 +681,13 @@ export class Organization extends Model {
         return '"'+this.name.replace("\"", "\\\"")+'" <'+ ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
     }
 
-    getEmail(id: string | null): { from: string; replyTo: string | undefined } {
+    getEmail(id: string | null, strongDefault = false): { from: string; replyTo: string | undefined } {
         if (id === null) {
-            return this.getDefaultEmail()
+            return this.getDefaultEmail(strongDefault)
         }
         
         // Send confirmation e-mail
-        let from = this.uri+"@stamhoofd.email";
+        let from = strongDefault ? this.getStrongEmail(this.i18n) : this.uri+"@stamhoofd.email";
         const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.id === id)
         let replyTo: string | undefined = undefined
 
@@ -716,16 +716,16 @@ export class Organization extends Model {
             }
             return { from, replyTo }
         }
-        return this.getDefaultEmail()
+        return this.getDefaultEmail(strongDefault)
     }
 
     getGroupEmail(group: Group) {
         return this.getEmail(group.privateSettings.defaultEmailId)
     }
 
-    getDefaultEmail(): { from: string; replyTo: string | undefined } {
+    getDefaultEmail(strongDefault = false): { from: string; replyTo: string | undefined } {
         // Send confirmation e-mail
-        let from = this.uri+"@stamhoofd.email";
+        let from = strongDefault ? this.getStrongEmail(this.i18n) : this.uri+"@stamhoofd.email";
         const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
         let replyTo: string | undefined = undefined
 

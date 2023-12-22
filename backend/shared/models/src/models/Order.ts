@@ -444,7 +444,7 @@ export class Order extends Model {
 
     async sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
-        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
+        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId, true)
 
         await this.sendEmailTemplate({
             type: EmailTemplateType.OrderReceivedTransfer,
@@ -455,7 +455,7 @@ export class Order extends Model {
 
     async sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
-        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
+        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId, true)
 
         await this.sendEmailTemplate({
             type: EmailTemplateType.TicketsReceivedTransfer,
@@ -554,7 +554,7 @@ export class Order extends Model {
             const webshop = this.webshop
             const organization = webshop.organization
             
-            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId)
+            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true)
         
             if (tickets.length > 0) {
                 // Also send a copy
@@ -609,7 +609,7 @@ export class Order extends Model {
         if (this.webshop.privateMeta.notificationEmails) {
             const webshop = this.webshop
             const organization = webshop.organization
-            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId)
+            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true)
             const i18n = organization.i18n;
 
             const webshopDashboardUrl = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale + '/webshops/'+Formatter.slug(webshop.meta.name)+'/orders';
