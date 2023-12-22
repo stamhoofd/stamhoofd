@@ -419,6 +419,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     metadata: {
                         organization: organization.id,
                         user: user.id,
+                        payment: payment.id
                     },
                     i18n: request.i18n,
                     lineItems: itemPayments,

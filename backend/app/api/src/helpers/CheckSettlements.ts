@@ -200,7 +200,8 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
                     console.log("Missing payment "+mp.paymentId)
                 }
             } else {
-                console.log("No mollie payment found for id "+mollie.id)
+                // Probably a payment in a different system/platform
+                //console.log("No mollie payment found for id "+mollie.id)
             }
         }
 
