@@ -2,7 +2,7 @@
     <div class="wysiwyg-text-input">
         <editor-content :editor="editor" class="editor-content" />
 
-        <div class="tools" @mousedown.prevent>
+        <div class="tools">
             <form v-if="showLinkEditor" class="editor-button-bar sticky link" autocomplete="off" novalidate data-submit-last-field @submit.prevent="saveLink()">
                 <STList>
                     <STListItem class="no-padding right-stack">
@@ -14,7 +14,7 @@
                         <button slot="right" class="button text" type="submit" @mousedown.prevent>
                             {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
                         </button>
-                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.prevent="clearLink()" />
+                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
                     </STListItem>
                 </STList>
             </form>
@@ -28,7 +28,7 @@
                 
                 <button v-tooltip="'Titel'" class="button icon text-style" type="button" @click="openTextStyles" />
                 <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
+                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent.stop="openLinkEditor()" @mousedown.prevent />
             </div>
         </div>
     </div>
@@ -311,6 +311,12 @@ export default class WYSIWYGTextInput extends Vue {
         padding: 0 15px 12px 15px;
         position: sticky;
         bottom: -15px; // compensate main padding
+
+        &:focus-within {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0px);
+        }
     }
 
     &:focus-within {

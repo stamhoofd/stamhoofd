@@ -57,7 +57,7 @@
                         <button slot="right" class="button text" type="submit" @mousedown.prevent>
                             {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
                         </button>
-                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.prevent="clearLink()" />
+                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
                     </STListItem>
                 </STList>
             </form>
