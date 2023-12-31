@@ -9268,10 +9268,10 @@ jsprim@^1.2.2:
     json-schema "0.4.0"
     verror "1.10.0"
 
-jsvat@^2.5.3:
-  version "2.5.3"
-  resolved "https://registry.yarnpkg.com/jsvat/-/jsvat-2.5.3.tgz#44d41d80b8d04a6b98cf721668a872ab35b6009e"
-  integrity sha512-jra/1qujP+vrrCgLcGRRHwLrKj69cLvWUMeFwhwoD/AeHSZ9BY9Bf59GNOtDdDmGhchNwasrWjnKBTbL19FHsg==
+jsvat-next@3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/jsvat-next/-/jsvat-next-3.0.2.tgz#b170c831316181baee5e17df0745c4f4a6b77015"
+  integrity sha512-ADWFwExeA7d7u3v7z/qRtbeT6j2UmVIAcUIT7Hc/aKCrJRLbWcRDDUIZ2xLIJkLd55HXQqGzf+1zS52dsQ6UNQ==
 
 jszip@^3.7.1:
   version "3.7.1"

@@ -17,28 +17,28 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 })
 export default class VATNumberInput extends Vue {
     @Prop({ required: true }) 
-    country!: Country;
+        country!: Country;
     
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
     
     VATNumberRaw = "";
     valid = true;
 
     @Prop({ default: null })
-    value!: string | null
+        value!: string | null
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     @Prop({ default: "Vul jouw BTW-nummer hier in" })
-    placeholder!: string
+        placeholder!: string
 
     @Prop({ default: "vat number" })
-    autocomplete!: string
+        autocomplete!: string
 
     errorBox: ErrorBox | null = null
 
@@ -80,7 +80,7 @@ export default class VATNumberInput extends Vue {
             this.VATNumberRaw = this.country+this.VATNumberRaw
         }
 
-        const jsvat = await import(/* webpackChunkName: "jsvat" */ 'jsvat');
+        const jsvat = await import(/* webpackChunkName: "jsvat-next" */ 'jsvat-next');
         const result = jsvat.checkVAT(this.VATNumberRaw, this.country === Country.Belgium ? [jsvat.belgium] : [jsvat.netherlands]);
         
         if (!result.isValid) {
