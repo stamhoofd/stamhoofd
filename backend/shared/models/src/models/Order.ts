@@ -527,7 +527,8 @@ export class Order extends Model {
             html: template.html,
             // text: template.text,
             from: data.from,
-            replyTo: data.replyTo
+            replyTo: data.replyTo,
+            type: 'transactional'
         })
 
         Email.schedule(builder)

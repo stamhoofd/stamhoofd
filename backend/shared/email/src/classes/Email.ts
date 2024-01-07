@@ -292,7 +292,14 @@ class EmailStatic {
         }
 
         try {
+            if (!data.from.includes('@stamhoofd.be') && !data.from.includes('@stamhoofd.nl')) {
+                // Not supported
+                data.type = 'broadcast'
+            }
+
             const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
+
+            
             const info = await transporter.sendMail(mail);
             console.log("Message sent:", to, data.subject, info.messageId, data.type);
         } catch (e) {
@@ -300,8 +307,12 @@ class EmailStatic {
             console.error(e);
             console.error(mail);
 
-            // Sleep 3 seconds to give servers some time to fix possible rate limits
-            await sleep(3000);
+            if (STAMHOOFD.environment === 'development') {
+                return;
+            }
+
+            // Sleep 1 second to give servers some time to fix possible rate limits
+            await sleep(1000);
 
             // Reschedule twice (at maximum) to fix temporary connection issues
             data.retryCount = (data.retryCount ?? 0) + 1;

@@ -115,6 +115,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                         to: admins,
                         bcc: "simon@stamhoofd.be",
                         subject: organization.name+" heeft jullie doorverwijzingslink gebruikt 🥳",
+                        type: "transactional",
                         text: "Dag "+otherOrganization.name+",\n\nGoed nieuws! "+organization.name+" heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
                     })
                 }

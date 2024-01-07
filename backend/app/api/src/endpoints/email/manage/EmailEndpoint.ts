@@ -2,13 +2,43 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { getEmailBuilder, Token } from '@stamhoofd/models';
+import { getEmailBuilder, RateLimiter,Token } from '@stamhoofd/models';
 import { EmailRequest, Recipient } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = EmailRequest
 type ResponseBody = undefined;
+
+export const paidEmailRateLimiter = new RateLimiter({
+    limits: [
+        {   
+            // Max 5.000 emails a day
+            limit: 5000,
+            duration: 24 * 60 * 1000 * 60
+        },
+        {   
+            // 10.000 requests per week
+            limit: 10000,
+            duration: 24 * 60 * 1000 * 60 * 7
+        }
+    ]
+});
+
+export const freeEmailRateLimiter = new RateLimiter({
+    limits: [
+        {   
+            // Max 100 a day
+            limit: 100,
+            duration: 24 * 60 * 1000 * 60
+        },
+        {   
+            // Max 1000 a week
+            limit: 1000,
+            duration: 7 * 24 * 60 * 1000 * 60
+        }
+    ]
+});
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -50,6 +80,30 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
                 field: "recipients"
             })
         }
+
+        // For non paid organizations, the limit is 10
+        if (request.body.recipients.length > 10 && !user.organization.meta.packages.isPaid) {
+            throw new SimpleError({
+                code: "too_many_emails",
+                message: "Too many e-mails",
+                human: "Zolang je de demo versie van Stamhoofd grebruikt kan je maar maximaal een email sturen naar 10 emailadressen. Als je het pakket aankoopt zal deze limiet er niet zijn. Dit is om misbruik te voorkomen met spammers die spam email versturen via Stamhoofd.",
+                field: "recipients"
+            })
+        }
+
+        const limiter = user.organization.meta.packages.isPaid ? paidEmailRateLimiter : freeEmailRateLimiter
+
+        try {
+            limiter.track(user.organization.id, request.body.recipients.length);
+        } catch (e) {
+            throw new SimpleError({
+                code: "too_many_emails_period",
+                message: "Too many e-mails limited",
+                human: "Oops! Om spam te voorkomen limiteren we het aantal emails die je per dag/week kan versturen. Neem contact met ons op om deze limiet te verhogen.",
+                field: "recipients"
+            })
+        }
+       
 
         // Validate email
         const sender = user.organization.privateMeta.emails.find(e => e.id == request.body.emailId)
