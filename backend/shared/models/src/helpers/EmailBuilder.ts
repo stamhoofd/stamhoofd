@@ -16,7 +16,8 @@ export async function getEmailBuilder(organization: Organization, email: {
         content: string;
         contentType: string | undefined;
         encoding: string;
-    }[]
+    }[],
+    type?: "transactional" | "broadcast"
 }) {
     // Update recipients
     const cleaned: Recipient[] = []
@@ -105,7 +106,8 @@ export async function getEmailBuilder(organization: Organization, email: {
             subject: replacedSubject,
             html: replacedHtml ?? undefined,
             attachments: email.attachments,
-            headers: recipient.headers
+            headers: recipient.headers,
+            type: email.type
         }
     }
     return builder;

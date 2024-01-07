@@ -27,7 +27,7 @@ export class RateLimitWindow {
         return Date.now() - this.start.getTime()
     }
 
-    track(key: string) {
+    track(key: string, amount = 1) {
         if (this.isExpired()) {
             // We have a shared window
             this.start = new Date()
@@ -35,7 +35,7 @@ export class RateLimitWindow {
         }
 
         let w = this.windows.get(key) ?? 0
-        w += 1
+        w += amount
 
         if (w > this.limit) {
             const retryAfter = Math.ceil((this.duration - this.age) / 1000)
@@ -67,9 +67,9 @@ export class RateLimiter {
         }
     }
 
-    track(key: string) {
+    track(key: string, amount = 1) {
         for (const window of this.windows) {
-            window.track(key)
+            window.track(key, amount)
         }
     }
 }
