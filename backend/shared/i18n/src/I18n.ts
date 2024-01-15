@@ -69,6 +69,7 @@ export class I18n {
     constructor(language: string, country: string) {
         this.language = language
         this.country = country
+        this.correctLanguageCountryCombination()
 
         const m = I18n.loadedLocales.get(this.locale)
         if (!m) {
@@ -78,12 +79,43 @@ export class I18n {
         this.messages = m
     }
 
+    correctLanguageCountryCombination() {
+         if (I18n.isValidLocale(this.locale)) {
+            return;
+         }
+
+        // Check language is valid
+        if (!languages.includes(this.language)) {
+            this.language = I18n.defaultLanguage
+
+            if (I18n.isValidLocale(this.locale)) {
+                return;
+            }
+            this.country = I18n.defaultCountry
+            return;
+        }
+
+        // Loop countries until valid
+        this.country = I18n.defaultCountry
+        while (!I18n.isValidLocale(this.locale)) {
+            const index = countries.indexOf(this.country)
+            if (index == countries.length - 1) {
+                // Last country
+                this.language = I18n.defaultLanguage
+                this.country = I18n.defaultCountry
+                return;
+            }
+            this.country = countries[index + 1]
+        }
+    }
+
     switchToLocale(options: {
             language?: string,
             country?: string
     }) {
         this.country = options.country ?? this.country
         this.language = options.language ?? this.language
+        this.correctLanguageCountryCombination()
         
         const m = I18n.loadedLocales.get(this.locale)
         if (!m) {

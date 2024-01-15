@@ -43,6 +43,7 @@ export class I18nController {
         this.namespace = namespace
         this.language = language
         this.country = country
+        this.correctLocale()
         Vue.prototype.$country = this.country
     }
 
@@ -69,6 +70,7 @@ export class I18nController {
         }
         this.country = options.country ?? this.country
         this.language = options.language ?? this.language
+        this.correctLocale()
 
         // Update url's
         this.updateUrl()
@@ -85,15 +87,51 @@ export class I18nController {
         UrlHelper.setUrl(current.getPath({ removeLocale: true }))
     }
 
+    correctLocale() {
+        // Some locales are invalid
+        const validLocales = {
+            [Country.Belgium]: ["nl", "en"],
+            [Country.Netherlands]: ["nl", "en"],
+        }
+
+        if (!validLocales[this.country]) {
+            // Find first coutnry with same language
+            for (const country of countries) {
+                if (validLocales[country]?.includes(this.language)) {
+                    this.country = country as Country
+                    console.info("[I18n] Corrected country to "+country)
+                    return
+                }
+            }
+
+            // Fallback
+            this.country = countries[0] as Country
+            this.language = validLocales[this.country][0]
+            console.info("[I18n] Corrected country to "+this.country + " and language to "+this.language)
+            return;
+        }
+
+        if (!validLocales[this.country].includes(this.language)) {
+            if (validLocales[this.country].includes("en")) {
+                this.language = "en"
+                console.info("[I18n] Corrected language to en")
+                return
+            }
+
+            this.language = validLocales[this.country][0]
+            console.info("[I18n] Corrected language to "+this.language)
+        }
+    }
+
     async loadLocale() {
         Vue.prototype.$country = this.country
 
         const locale = this.locale
-        console.info("Loading locale "+locale)
+        console.info("[I18n] Loading locale "+locale)
         // If the same language
 
         if (this.loadedLocale === locale) {
-            console.warn("Locale already loaded")
+            console.warn("[I18n] Locale already loaded")
             return
         }
 
@@ -106,7 +144,7 @@ export class I18nController {
         i18n.fallbackLocale = [this.language, "en"]
         this.loadedLocale = locale
 
-        console.log("Successfully loaded locale", locale)
+        console.log("[I18n] Successfully loaded locale", locale)
     }
 
     static async getLocaleFromStorage(): Promise<{ language?: string, country?: string }> {
@@ -123,7 +161,7 @@ export class I18nController {
         await Storage.keyValue.setItem("language", this.language)
         await Storage.keyValue.setItem("country", this.country)
 
-        console.info("Saved locale to storage", this.locale)
+        console.info("[I18n] Saved locale to storage", this.locale)
     }
 
     static isValidLocale(locale: string) {
@@ -150,37 +188,36 @@ export class I18nController {
 
         // Check country if passed
         if (country && !this.isValidCountry(country)) {
-            console.error("Invalid forced country", country)
+            console.error("[I18n] Invalid forced country", country)
             country = undefined
         }
 
         // 1: check the URL. Does it start with a locale or not?
         const parts = UrlHelper.initial.getParts({ removeLocale: false })
-        console.log(parts);
         if (parts.length >= 1 && this.isValidLocale(parts[0])) {
             const l = parts[0].substr(0, 2).toLowerCase()
             const c = parts[0].substr(3, 2).toUpperCase()
 
             if (!language) {
-                console.info("Using language from url", l)
+                console.info("[I18n] Using language from url", l)
                 language = l
                 needsSave = true
             }
 
             if (!country && this.isValidCountry(c)) {
-                console.info("Using country from url", c)
+                console.info("[I18n] Using country from url", c)
                 country = c
                 needsSave = true
             } else {
                 if (country !== c) {
-                    console.warn("Ignored country from url", c)
+                    console.warn("[I18n] Ignored country from url", c)
                 }
             }
         } else if (parts.length >= 1 && this.fixedCountry && parts[0].length == 2) {
             const l = parts[0].substr(0, 2).toLowerCase()
 
             if (!language && languages.includes(l)) {
-                console.info("Using language from url", l)
+                console.info("[I18n] Using language from url", l)
                 language = l
                 needsSave = true
             }
@@ -236,9 +273,9 @@ export class I18nController {
                 const l = navigator.language.substr(0, 2).toLowerCase()
                 if (languages.includes(l)) {
                     language = l
-                    console.info("Using browser language", l)
+                    console.info("[I18n] Using browser language", l)
                 } else {
-                    console.warn("Browser language "+language+" is not supported")
+                    console.warn("[I18n] Browser language "+language+" is not supported")
                 }
 
             }
@@ -246,10 +283,10 @@ export class I18nController {
             if (!country && navigator.language && navigator.language.length === 5) {
                 const c = navigator.language.substr(3, 2).toUpperCase()
                 if (this.isValidCountry(c)) {
-                    console.info("Using browser country", c)
+                    console.info("[I18n] Using browser country", c)
                     country = c
                 } else {
-                    console.warn("Browser country "+c+" is not supported")
+                    console.warn("[I18n] Browser country "+c+" is not supported")
                 }
             }
         }
@@ -267,20 +304,20 @@ export class I18nController {
                 }
 
                 if (language) {
-                    console.info("Using default language from TLD", "."+tld, language)
+                    console.info("[I18n] Using default language from TLD", "."+tld, language)
                 } else {
-                    console.info("Using fallback language nl")
+                    console.info("[I18n] Using fallback language nl")
                     language = "nl"
                 }
             } else {
-                console.info("Using default language", defaultLanguage)
+                console.info("[I18n] Using default language", defaultLanguage)
                 language = defaultLanguage
             }
         }
 
         // Default country
         if (!country) {
-            console.log("Using default country", defaultCountry ?? Country.Belgium)
+            console.log("[I18n] Using default country", defaultCountry ?? Country.Belgium)
             country = defaultCountry ?? Country.Belgium
         }
 
