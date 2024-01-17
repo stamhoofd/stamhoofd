@@ -10,6 +10,10 @@ import { Formatter } from '@stamhoofd/utility';
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 import { StripeHelper } from '../../helpers/StripeHelper';
 
+function calculateFee(totalPrice: number, fixed: number, percentageTimes100: number) {
+    return Math.round(fixed + Math.max(1, totalPrice * percentageTimes100 / 100 / 100)); // € 0,21 + 0,2%
+}
+
 type Params = {id: string};
 class Query extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
@@ -109,13 +113,22 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
                 // Charge transaction fees
-                const transactionFee = 25
+                let fee = 0
+
+                if (payment.method === PaymentMethod.iDEAL) {
+                    fee = calculateFee(payment.price, 21, 20); // € 0,21 + 0,2%
+                } else if (payment.method === PaymentMethod.Bancontact) {
+                    fee = calculateFee(payment.price, 24, 20); // € 0,24 + 0,2%
+                } else {
+                    fee = calculateFee(payment.price, 25, 150); // € 0,25 + 1,5%
+                }
+
                 const name = "Transactiekosten voor "+PaymentMethodHelper.getName(payment.method)
                 const item = STInvoiceItem.create({
                     name,
                     description: "Via Buckaroo",
                     amount: 1,
-                    unitPrice: transactionFee,
+                    unitPrice: fee,
                     canUseCredits: false
                 })
                 console.log("Scheduling transaction fee charge for ", payment.id, item)
