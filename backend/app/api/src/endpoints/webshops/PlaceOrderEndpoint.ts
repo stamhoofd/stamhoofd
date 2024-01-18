@@ -2,16 +2,32 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@molli
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, Token, Webshop } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, RateLimiter, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct, WebshopAuthType } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 import { StripeHelper } from '../../helpers/StripeHelper';
+
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData
 type ResponseBody = OrderResponse
+
+export const demoOrderLimiter = new RateLimiter({
+    limits: [
+        {   
+            // Max 10 per hour
+            limit: 10,
+            duration: 60 * 1000 * 60
+        },
+        {   
+            // Max 20 a day
+            limit: 20,
+            duration: 24 * 60 * 1000 * 60
+        }
+    ]
+});
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
@@ -60,12 +76,18 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             // For non paid organizations, the limit is 10
             if (!organization.meta.packages.isPaid) {
-                throw new SimpleError({
-                    code: "too_many_emails",
-                    message: "Too many e-mails",
-                    human: "Het plaatsen van bestellingen op demo webshops is tijdelijk geblokkeerd doordat we te maken hebben met spammers die dit systeem misbruiken.",
-                    field: "recipients"
-                })
+                const limiter = demoOrderLimiter
+
+                try {
+                    limiter.track(organization.id, 1);
+                } catch (e) {
+                    throw new SimpleError({
+                        code: "too_many_emails_period",
+                        message: "Too many e-mails limited",
+                        human: "Oeps! Om spam te voorkomen limiteren we het aantal test bestellingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.",
+                        field: "recipients"
+                    })
+                }
             }
 
             const webshopStruct = WebshopStruct.create(webshop)
