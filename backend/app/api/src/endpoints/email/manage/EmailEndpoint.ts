@@ -1,6 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { getEmailBuilder, RateLimiter,Token } from '@stamhoofd/models';
 import { EmailRequest, Recipient } from "@stamhoofd/structures";
@@ -29,7 +30,7 @@ export const freeEmailRateLimiter = new RateLimiter({
     limits: [
         {   
             // Max 100 a day
-            limit: 100,
+            limit: STAMHOOFD.environment === 'development' ? 1 : 100,
             duration: 24 * 60 * 1000 * 60
         },
         {   
@@ -96,6 +97,12 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         try {
             limiter.track(user.organization.id, request.body.recipients.length);
         } catch (e) {
+            Email.sendInternal({
+                to: "hallo@stamhoofd.be",
+                subject: "[Limiet] Limiet bereikt voor aantal e-mails",
+                text: "Beste, \nDe limiet werd bereikt voor het aantal e-mails per dag. \nVereniging: "+user.organization.id+" ("+user.organization.name+")" + "\n\n" + e.message + "\n\nStamhoofd"
+            }, new I18n("nl", "BE"))
+
             throw new SimpleError({
                 code: "too_many_emails_period",
                 message: "Too many e-mails limited",
