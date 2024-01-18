@@ -117,7 +117,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 if (payment.method === PaymentMethod.iDEAL) {
                     fee = calculateFee(payment.price, 21, 20); // € 0,21 + 0,2%
-                } else if (payment.method === PaymentMethod.Bancontact) {
+                } else if (payment.method === PaymentMethod.Bancontact || payment.method === PaymentMethod.Payconiq) {
                     fee = calculateFee(payment.price, 24, 20); // € 0,24 + 0,2%
                 } else {
                     fee = calculateFee(payment.price, 25, 150); // € 0,25 + 1,5%
