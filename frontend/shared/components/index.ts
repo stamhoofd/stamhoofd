@@ -33,6 +33,7 @@ export { default as CenteredMessageView } from "./src/overlays/CenteredMessageVi
 export { default as ContextMenuItemView } from "./src/overlays/ContextMenuItemView.vue"
 export { default as ContextMenuLine } from "./src/overlays/ContextMenuLine.vue"
 export { default as ContextMenuView } from "./src/overlays/ContextMenuView.vue"
+export { default as InputSheet } from "./src/overlays/InputSheet.vue"
 export * from "./src/overlays/Toast"
 export { default as ToastBox } from "./src/overlays/ToastBox.vue"
 export { default as ToastView } from "./src/overlays/ToastView.vue"

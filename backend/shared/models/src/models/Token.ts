@@ -2,8 +2,8 @@ import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-d
 import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import crypto from "crypto";
-import { RateLimiter } from "../helpers/RateLimiter";
 
+import { RateLimiter } from "../helpers/RateLimiter";
 import { Organization, User, UserWithOrganization } from './';
 
 export type TokenWithUser = Token & { user: User };

@@ -89,6 +89,12 @@
             <Checkbox :checked="getFeatureFlag('seating-plans')" @change="setFeatureFlag('seating-plans', !!$event)">
                 Zetelselectie
             </Checkbox>
+
+            <hr>
+
+            <button class="button text" type="button" @click="applyDiscountCode">
+                <span class="icon gift" /><span>Kortingscode toepassen</span>
+            </button>
         </div>
     </SaveView>
 </template>
@@ -98,8 +104,8 @@ import { AutoEncoder, AutoEncoderPatchType, Decoder, ObjectData, patchContainsCh
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
+import { CenteredMessage, Checkbox, ErrorBox, InputSheet, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -399,6 +405,29 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
         // Send to server
         await OrganizationManager.patch(organizationPatch)
+    }
+
+    applyDiscountCode() {
+        this.present({
+            components: [
+                new ComponentWithProperties(InputSheet, {
+                    title: 'Kortingscode toepassen',
+                    description: 'De kortingscode zal meteen worden toegepast op deze vereniging. De andere vereniging ontvangt een e-mail dat de kortingscode is gebruikt, en zal meteen tegoed ontvangen als de vereniging al een betalende klant is (in het andere geval pas later).',
+                    placeholder: 'Vul hier de code in',
+                    saveHandler: async (code: string) => {
+                        await SessionManager.currentSession!.authenticatedServer.request({
+                            method: 'POST',
+                            path: '/organization/register-code',
+                            body: {
+                                registerCode: code
+                            }
+                        })
+                        new Toast('De kortingscode is toegepast', "success green").show()
+                    }   
+                })
+            ],
+            modalDisplayStyle: 'sheet'
+        })
     }
 
 }
