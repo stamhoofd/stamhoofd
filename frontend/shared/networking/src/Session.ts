@@ -58,9 +58,8 @@ export class Session implements RequestMiddleware {
             if (json) {
                 try {
                     const parsed = JSON.parse(json)
-                    this.token = new ManagedToken(Token.decode(new ObjectData(parsed, { version: Version })), () => {
-                        this.onTokenChanged()
-                    })
+                    const token = Token.decode(new ObjectData(parsed, { version: Version }))
+                    this.setToken(token)
                 } catch (e) {
                     console.error(e)
                 }
@@ -472,6 +471,8 @@ export class Session implements RequestMiddleware {
 
     // Logout without clearing this token
     temporaryLogout() {
+        console.log('temporary logout');
+
         // We do not call ontoken changed -> prevent saving!!!!
         // Might still be able to login after a reload (because the error was caused by data errors)
         if (this.token) {
@@ -484,6 +485,8 @@ export class Session implements RequestMiddleware {
     }
 
     logout() {
+        console.log('logout');
+
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
