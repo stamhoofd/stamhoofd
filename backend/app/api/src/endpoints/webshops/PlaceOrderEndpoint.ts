@@ -57,6 +57,17 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     statusCode: 401
                 })
             }
+
+            // For non paid organizations, the limit is 10
+            if (!organization.meta.packages.isPaid) {
+                throw new SimpleError({
+                    code: "too_many_emails",
+                    message: "Too many e-mails",
+                    human: "Het plaatsen van bestellingen op demo webshops is tijdelijk geblokkeerd doordat we te maken hebben met spammers die dit systeem misbruiken.",
+                    field: "recipients"
+                })
+            }
+
             const webshopStruct = WebshopStruct.create(webshop)
 
             request.body.validate(webshopStruct, organization.meta, request.i18n, false, token?.user?.getStructure())
