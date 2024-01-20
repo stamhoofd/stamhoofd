@@ -1,1 +1,0 @@
-ALTER TABLE `groups` ADD COLUMN `settings` json NOT NULL COMMENT '' AFTER `name`;

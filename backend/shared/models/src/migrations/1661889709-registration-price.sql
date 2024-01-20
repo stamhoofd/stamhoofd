@@ -1,1 +1,0 @@
-ALTER TABLE `registrations` ADD COLUMN `price` int NULL AFTER `paymentId`;

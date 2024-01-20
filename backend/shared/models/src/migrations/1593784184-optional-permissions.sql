@@ -1,1 +1,0 @@
-ALTER TABLE `users` CHANGE `permissions` `permissions` json NULL COMMENT '';

@@ -1,3 +1,4 @@
+process.env.DB_MULTIPLE_STATEMENTS="true"
 require('@stamhoofd/backend-env').load()
 import { Column, Migration } from "@simonbackx/simple-database";
 import { Version } from "@stamhoofd/structures";

@@ -1,1 +1,0 @@
-ALTER TABLE `challenges` CHANGE `challenge` `challenge` varchar(255) CHARACTER SET ascii  NULL COMMENT '';

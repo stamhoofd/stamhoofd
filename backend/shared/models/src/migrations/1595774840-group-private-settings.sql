@@ -1,1 +1,0 @@
-ALTER TABLE `groups` ADD COLUMN `privateSettings` json NOT NULL DEFAULT (json_object());

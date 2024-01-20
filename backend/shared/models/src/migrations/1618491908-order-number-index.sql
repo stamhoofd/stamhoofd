@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX `orderNumberForWebshop` ON `webshop_orders` (`webshopId`,`number`) USING BTREE;

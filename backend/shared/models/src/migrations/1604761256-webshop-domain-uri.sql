@@ -1,1 +1,0 @@
-ALTER TABLE `webshops` ADD COLUMN `domainUri` varchar(100) NULL COMMENT '';
