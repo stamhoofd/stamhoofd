@@ -1,4 +1,5 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from "@stamhoofd/queues";
 import { EmailTemplateType, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
@@ -471,7 +472,13 @@ export class Order extends Model {
     async getStructure()  {
         if (this.paymentId) {
             if (Order.payment.isLoaded(this)) {
-                return OrderStruct.create(Object.assign({...this}, { payment: PaymentStruct.create((this as unknown as (Order & {payment: Payment})).payment) }));
+                return OrderStruct.create(
+                    Object.assign(
+                        {...this}, 
+                        { 
+                            payment: PaymentStruct.create((this as unknown as (Order & {payment: Payment})).payment) 
+                        }
+                    ));
             }
             const payment = await Payment.getByID(this.paymentId)
             if (!payment) {
@@ -509,7 +516,10 @@ export class Order extends Model {
 
         const template = templates[0]
 
-        let recipient = (await this.getStructure()).getRecipient(await this.webshop.organization.getStructure(), WebshopPreview.create(this.webshop))
+        let recipient = (await this.getStructure()).getRecipient(
+            await this.webshop.organization.getStructure(), 
+            WebshopPreview.create(this.webshop)
+        )
 
         if (data.to) {
             // Clear first and last name
@@ -539,6 +549,9 @@ export class Order extends Model {
      * Include any tickets that are generated and should be included in the e-mail
      */
     async markValid(this: Order & { webshop: Webshop & { organization: Organization } }, payment: Payment | null, tickets: Ticket[]) {
+        const webshop = this.webshop
+        const organization = webshop.organization
+
         console.log("Marking as valid: order "+this.id)
         const wasValid = this.validAt !== null
 
@@ -549,6 +562,27 @@ export class Order extends Model {
         this.validAt = new Date() // will get flattened AFTER calculations
         this.validAt.setMilliseconds(0)
         this.number = await WebshopCounter.getNextNumber(this.webshopId, this.webshop.privateMeta.numberingType)
+
+        if (payment && !Order.payment.isLoaded(this)) {
+            this.setRelation(Order.payment, payment)
+        }
+
+        // Now we have a number, update the payment
+        if (payment && payment.method === PaymentMethod.Transfer) {
+            // Only now we can update the transfer description, since we need the order number as a reference
+            payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings)
+
+            if (!payment.transferSettings.iban) {
+                throw new SimpleError({
+                    code: "no_iban",
+                    message: "No IBAN",
+                    human: "Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder."
+                })
+            }
+            payment.generateDescription(organization, this.number.toString(), this.getTransferReplacements())
+            await payment.save();
+        }
+
         await this.save()
 
         if (this.data.customer.email.length > 0) {
