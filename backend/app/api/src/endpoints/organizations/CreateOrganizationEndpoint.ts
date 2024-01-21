@@ -1,3 +1,4 @@
+import { Model } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -75,58 +76,13 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.name = request.body.organization.name;
 
         // Delay save until after organization is saved, but do validations before the organization is saved
-        let credit: STCredit | undefined = undefined
-        let usedCode: UsedRegisterCode | undefined = undefined
-        const delayEmails: EmailInterfaceBase[] = []
+        let registerCodeModels: Model[] = []
+        let delayEmails: EmailInterfaceBase[] = []
 
-        if (request.body.registerCode !== null && request.body.registerCode.length > 0) {
-            const code = await RegisterCode.getByID(request.body.registerCode)
-            if (!code) {
-                throw new SimpleError({
-                    code: "invalid_field",
-                    message: "You can only add the organization's keypair to the keychain",
-                    human: "De doorverwijzingscode die je hebt opgegeven is niet langer geldig",
-                    field: "registerCode",
-                });
-            }
-
-            const otherOrganization = code.organizationId ? await Organization.getByID(code.organizationId) : undefined
-
-            if (code.value > 0 && otherOrganization) {
-                // Create initial credit
-                credit = new STCredit()
-                credit.organizationId = organization.id
-                credit.change = code.value
-                credit.description = otherOrganization ? ("Tegoed gekregen van "+otherOrganization.name) : code.description
-
-                // Expire in one year (will get extended for every purchase or activation)
-                credit.expireAt = new Date()
-                credit.expireAt.setFullYear(credit.expireAt.getFullYear() + 1)
-                credit.expireAt.setMilliseconds(0)
-
-                // Save later
-            }
-
-            if (otherOrganization) {
-                const admins = await otherOrganization.getAdminToEmails()
-                if (admins) {
-                    // Delay email until everything is validated and saved
-                    delayEmails.push({
-                        to: admins,
-                        bcc: "simon@stamhoofd.be",
-                        subject: organization.name+" heeft jullie doorverwijzingslink gebruikt 🥳",
-                        type: "transactional",
-                        text: "Dag "+otherOrganization.name+",\n\nGoed nieuws! "+organization.name+" heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
-                    })
-                }
-            }
-
-            // Save that we used this code (so we can reward the other organization)
-            usedCode = new UsedRegisterCode()
-            usedCode.organizationId = organization.id
-            usedCode.code = code.code
-
-            // Save later
+        if (request.body.registerCode) {
+            const applied = await RegisterCode.applyRegisterCode(organization, request.body.registerCode)
+            registerCodeModels = applied.models
+            delayEmails = applied.emails
         }
 
         organization.uri = uri;
@@ -162,12 +118,8 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         user.permissions = Permissions.create({ level: PermissionLevel.Full })
         await user.save()
 
-        if (credit) {
-            await credit.save()
-        }
-
-        if (usedCode) {
-            await usedCode.save()
+        for (const model of registerCodeModels) {
+            await model.save()
         }
 
         const code = await EmailVerificationCode.createFor(user, user.email)

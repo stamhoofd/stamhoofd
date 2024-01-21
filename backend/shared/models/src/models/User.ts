@@ -342,6 +342,10 @@ export class User extends Model {
         return !this.email.includes('@') && this.email.endsWith('.api') && this.verified
     }
 
+    isPlatformAdmin(this: UserWithOrganization) {
+        return (this.email.endsWith('@stamhoofd.be') || this.email.endsWith('@stamhoofd.nl')) && this.verified && this.hasFullAccess()
+    }
+
     async toApiUserStruct() {
         const [lastToken] = await Token.where({
             userId: this.id
