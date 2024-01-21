@@ -33,8 +33,8 @@ export const freeEmailRateLimiter = new RateLimiter({
             duration: 24 * 60 * 1000 * 60
         },
         {   
-            // Max 1000 a week
-            limit: 1000,
+            // Max 200 a week
+            limit: 200,
             duration: 7 * 24 * 60 * 1000 * 60
         }
     ]
@@ -72,11 +72,11 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             })
         }
 
-        if (request.body.recipients.length > 1000) {
+        if (request.body.recipients.length > 5000) {
             throw new SimpleError({
                 code: "too_many_recipients",
                 message: "Too many recipients",
-                human: "Je kan maar een mail naar maximaal 1000 personen tergelijk versturen. Contacteer ons om deze limiet te verhogen indien dit nodig is.",
+                human: "Je kan maar een mail naar maximaal 5000 personen tergelijk versturen. Contacteer ons om deze limiet te verhogen indien dit nodig is.",
                 field: "recipients"
             })
         }
@@ -86,7 +86,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new SimpleError({
                 code: "too_many_emails",
                 message: "Too many e-mails",
-                human: "Zolang je de demo versie van Stamhoofd grebruikt kan je maar maximaal een email sturen naar 10 emailadressen. Als je het pakket aankoopt zal deze limiet er niet zijn. Dit is om misbruik te voorkomen met spammers die spam email versturen via Stamhoofd.",
+                human: "Zolang je de demo versie van Stamhoofd gebruikt kan je maar maximaal een email sturen naar 10 emailadressen. Als je het pakket aankoopt zal deze limiet er niet zijn. Dit is om misbruik te voorkomen met spammers die spam email versturen via Stamhoofd.",
                 field: "recipients"
             })
         }
@@ -99,7 +99,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new SimpleError({
                 code: "too_many_emails_period",
                 message: "Too many e-mails limited",
-                human: "Oops! Om spam te voorkomen limiteren we het aantal emails die je per dag/week kan versturen. Neem contact met ons op om deze limiet te verhogen.",
+                human: "Oeps! Om spam te voorkomen limiteren we het aantal emails die je per dag/week kan versturen. Neem contact met ons op om deze limiet te verhogen.",
                 field: "recipients"
             })
         }

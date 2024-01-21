@@ -3,7 +3,7 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Document, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, Registration, Token } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, RateLimiter,Registration, Token} from '@stamhoofd/models';
 import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, MemberBalanceItem, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -14,6 +14,21 @@ type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout
 type ResponseBody = RegisterResponse
+
+export const demoLimiter = new RateLimiter({
+    limits: [
+        {   
+            // Max 10 per hour
+            limit: 10,
+            duration: 60 * 1000 * 60
+        },
+        {   
+            // Max 20 a day
+            limit: 20,
+            duration: 24 * 60 * 1000 * 60
+        }
+    ]
+});
 
 export type RegistrationWithMemberAndGroup = Registration & { member: Member } & { group: Group }
 
@@ -55,6 +70,22 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const user = token.user
 
         const organization = user.organization
+
+        // For non paid organizations, limit amount of tests
+        if (!organization.meta.packages.isPaid) {
+            const limiter = demoLimiter
+
+            try {
+                limiter.track(organization.id, 1);
+            } catch (e) {
+                throw new SimpleError({
+                    code: "too_many_emails_period",
+                    message: "Too many e-mails limited",
+                    human: "Oeps! Om spam te voorkomen limiteren we het aantal test inschrijvingen die je per uur of dag kan plaatsen. Probeer over een uur opnieuw of schakel over naar een betaald abonnement.",
+                    field: "recipients"
+                })
+            }
+        }
 
         const members = await Member.getMembersWithRegistrationForUser(user)
         const groups = await Group.getAll(user.organizationId)
