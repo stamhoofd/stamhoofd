@@ -26,6 +26,8 @@ export default class ColorInput extends Vue {
     @Prop({ default: null }) 
         validator: Validator | null
     
+    @Prop({ default: () => [] }) 
+        disallowed: string[]
 
     colorRaw = "";
     hasColor = "";
@@ -122,16 +124,36 @@ export default class ColorInput extends Vue {
             }
             return false
 
-        } else {
-            this.hasColor = this.colorRaw
-            if (this.colorRaw !== this.value) {
-                this.$emit("input", this.colorRaw)
-            }
-            if (!silent) {
-                this.errorBox = null
-            }
-            return true
         }
+
+        if (this.disallowed.includes(this.colorRaw)) {
+            this.hasColor = ""
+
+            if (!silent) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    "code": "invalid_field",
+                    "message": "Deze kleur is niet toegelaten. Kies een andere kleur.",
+                    "field": "color"
+                }))
+            }
+
+            if (this.value !== null) {
+                this.$emit("input", null)
+            }
+            
+            return false
+        }
+
+        this.hasColor = this.colorRaw
+
+        if (this.colorRaw !== this.value) {
+            this.$emit("input", this.colorRaw)
+        }
+        if (!silent) {
+            this.errorBox = null
+        }
+        return true
+        
     }
 }
 </script>

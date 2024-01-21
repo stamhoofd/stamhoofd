@@ -90,7 +90,7 @@
             Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.
         </p>
 
-        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Standaardkleur" :required="false" />
+        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Standaardkleur" :required="false" :disallowed="['#FFFFFF']" />
         <p class="style-description-small">
             Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je vereniging te behouden (bij algemene instellingen > personalisatie).
         </p>
