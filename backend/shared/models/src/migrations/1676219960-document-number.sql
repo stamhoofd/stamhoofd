@@ -1,1 +1,0 @@
-ALTER TABLE `documents` ADD COLUMN `number` bigint unsigned NULL;

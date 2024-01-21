@@ -1,1 +1,0 @@
-ALTER TABLE `payments` ADD COLUMN `provider` varchar(36) NULL AFTER `method`;

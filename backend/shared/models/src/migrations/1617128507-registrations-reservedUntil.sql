@@ -1,2 +1,0 @@
-ALTER TABLE `registrations` ADD COLUMN `reservedUntil` datetime NULL COMMENT '' AFTER `updatedAt`;
-CREATE INDEX `groupOccupancy` ON `registrations` (`groupId`,`cycle`,`registeredAt`,`reservedUntil`) USING BTREE;
