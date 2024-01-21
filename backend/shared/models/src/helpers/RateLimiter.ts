@@ -41,7 +41,7 @@ export class RateLimitWindow {
             const retryAfter = Math.ceil((this.duration - this.age) / 1000)
             throw new SimpleError({
                 code: 'rate_limit',
-                message: `Rate limit exceeded (${w} requests in ${Math.round(this.age/1000)}s). Retry after ${retryAfter}s. Check your code and try to reduce the number of (parallel) requests you make. Add waiting periods if needed.`,
+                message: `Rate limit exceeded (${w} ${amount > 1 ? '('+amount+' added)' : ''} requests in ${Math.round(this.age/1000)}s). Retry after ${retryAfter}s. Check your code and try to reduce the number of (parallel) requests you make. Add waiting periods if needed.`,
                 statusCode: 429
             })
         }

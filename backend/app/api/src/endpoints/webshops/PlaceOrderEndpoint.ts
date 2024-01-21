@@ -2,6 +2,8 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@molli
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n';
+import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, RateLimiter, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct, WebshopAuthType } from "@stamhoofd/structures";
@@ -18,7 +20,7 @@ export const demoOrderLimiter = new RateLimiter({
     limits: [
         {   
             // Max 10 per hour
-            limit: 10,
+            limit: STAMHOOFD.environment === 'development' ? 1 : 10,
             duration: 60 * 1000 * 60
         },
         {   
@@ -81,6 +83,12 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 try {
                     limiter.track(organization.id, 1);
                 } catch (e) {
+                    Email.sendInternal({
+                        to: "hallo@stamhoofd.be",
+                        subject: "[Limiet] Limiet bereikt voor aantal bestellingen",
+                        text: "Beste, \nDe limiet werd bereikt voor het aantal bestellingen per dag. \nVereniging: "+organization.id+" ("+organization.name+")" + "\n\n" + e.message + "\n\nStamhoofd"
+                    }, new I18n("nl", "BE"))
+                    
                     throw new SimpleError({
                         code: "too_many_emails_period",
                         message: "Too many e-mails limited",

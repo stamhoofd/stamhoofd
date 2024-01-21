@@ -3,6 +3,8 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from '@stamhoofd/backend-i18n';
+import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, RateLimiter,Registration, Token} from '@stamhoofd/models';
 import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, MemberBalanceItem, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
@@ -78,6 +80,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             try {
                 limiter.track(organization.id, 1);
             } catch (e) {
+                Email.sendInternal({
+                    to: "hallo@stamhoofd.be",
+                    subject: "[Limiet] Limiet bereikt voor aantal inschrijvingen",
+                    text: "Beste, \nDe limiet werd bereikt voor het aantal inschrijvingen per dag. \nVereniging: "+organization.id+" ("+organization.name+")" + "\n\n" + e.message + "\n\nStamhoofd"
+                }, new I18n("nl", "BE"))
+
                 throw new SimpleError({
                     code: "too_many_emails_period",
                     message: "Too many e-mails limited",
