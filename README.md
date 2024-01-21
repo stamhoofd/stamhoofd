@@ -38,8 +38,9 @@ To run everything locally, we need to glue all the packages together and build t
 2. When switching branches, cloning the repo or when pulling changes, run `yarn install && yarn build` first in the project root. We use yarn workspaces to glue all packages together in the monorepo. We don't publish individual packages (not anymore, we used to do that).
 3. Use `yarn build` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
 4. Install all needed vscode extensions: vetur & eslint. Please use VSCode because that makes sure all the developer tools are the same (e.g. eslint).
-5. Make sure you create `/backend/.env` based on `/backend/.env.template`
-6. Run tests before creating a pull request.
+5. Make sure you create all `/backend/app.*/.env.json` based on `/backend/app/*/.env.template.json`
+6. Make sure you create `/frontend/.env.json` based on `/frontend/.env.template.json`
+7. Run tests before creating a pull request.
 
 You can run all services at once locally by running `yarn dev` in the root directory. Do note that you need to set up Caddy (start caddy service, run `yarn caddy`, update `caddy.dev.watch.json` file and run `yarn caddy:update` to set that config in caddy) and local DNS (because Stamhoofd depends on wildcard DNS domains) to get everything working correctly. 
 
