@@ -62,8 +62,8 @@
                 </STList>
             </STInputBox>
 
-            <p v-if="transferType === 'Fixed'" class="warning-box">
-                <span>De mededeling kan niet gewijzigd worden door <span v-if="type === 'webshop'">bestellers</span><span v-else>leden</span>. Voorzie dus zelf geen eigen vervangingen zoals <em class="style-em">bestelling + naam</em> waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de beschikbare automatische vervangingen hieronder.</span>
+            <p v-if="transferType !== 'Structured'" class="warning-box">
+                <span>De mededeling kan niet gewijzigd worden door <span v-if="type === 'webshop'">bestellers</span><span v-else>leden</span>. Voorzie dus zelf geen eigen vervangingen zoals <em class="style-em">bestelling + naam</em> waarbij je ervan uitgaat dat de betaler manueel de mededeling kan invullen en wijzigen. Gebruik in plaats daarvan de 'Vaste mededeling' met de beschikbare automatische vervangingen.</span>
             </p>
 
             <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
