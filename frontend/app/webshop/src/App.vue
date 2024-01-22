@@ -96,9 +96,6 @@ export default class App extends Vue {
                 }
 
                 I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
-                if (response.data.webshop) {
-                    I18nController.forceCanonicalHostProtocolAndPrefix = "https://"+response.data.webshop.getUrl(response.data.organization)
-                }
                 await I18nController.loadDefault("webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
 
                 // Set color

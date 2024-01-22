@@ -18,6 +18,7 @@
     "license": "AGPL-3.0-only",
     "scripts": {
         "dev": "concurrently -r 'yarn build:shared:watch' 'lerna run dev --stream --parallel'",
+        "dev:server": "concurrently -r 'yarn dev' 'yarn caddy' 'yarn dns'",
         "app:release": "cd devops && yarn build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
         "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json --exec yarn build:shared",
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
@@ -28,10 +29,8 @@
         "build:shared:full": "yarn build:full && cd backend/shared/queues && yarn build:full && cd ../email && yarn build:full && cd ../models && yarn build:full && cd ../logging && yarn build:full && cd ../middleware && yarn build:full && cd ../i18n && yarn build:full && cd ../env && yarn build:full && cd ../..",
         "build:locales": "cd shared/locales && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
-        "caddy": "export $(cat .env | xargs) && caddy run --resume",
-        "caddy:update": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json",
-        "get-version": "node -e 'process.stdout.write(require(\"./package.json\").version);'",
-        "version": "yarn workspaces run -s version --no-git-tag-version --new-version \"$npm_package_version\" 2>&1 >/dev/null"
+        "caddy": "caddy run --config .development/caddy.json",
+        "dns": "cd .development && coredns"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",

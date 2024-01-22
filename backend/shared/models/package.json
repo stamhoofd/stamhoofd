@@ -22,7 +22,8 @@
     },
     "dependencies": {
         "pdfkit": "^0.13.0",
-        "@stamhoofd/crypto": "*"
+        "@stamhoofd/crypto": "*",
+        "argon2": "^0.28.3"
     },
     "devDependencies": {
         "@types/pdfkit": "^0.12.3",

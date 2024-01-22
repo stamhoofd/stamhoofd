@@ -32,17 +32,22 @@ This is what you need to know:
 
 ## Development
 
-To run everything locally, we need to glue all the packages together and build them. We only publish packages to the NPM registry during a release.
+To run everything locally, we run everything on a fake TLD domain and host the dashboard on dashboard.stamhoofd. We use Caddy and Coredns to wire everything together. You can follow the following steps to run everything:
 
-1. We use `yarn`. Do not use `npm`. That will break things. Use `yarn policies set-version 1.19.0` to set the version of yarn to the one used in the project (and the server). Replace 1.19.0 with the version in package.json > engines > yarn. We use version version 1.19.0 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
+1. We use `yarn`. Do not use `npm`. That will break things. Use `yarn policies set-version 1.22.19` to set the version of yarn to the one used in the project (and the server). Replace 1.22.19 with the version in package.json > engines > yarn. We use version version 1.22.19 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
 2. When switching branches, cloning the repo or when pulling changes, run `yarn install && yarn build` first in the project root. We use yarn workspaces to glue all packages together in the monorepo. We don't publish individual packages (not anymore, we used to do that).
-3. Use `yarn build` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
+3. Use `yarn build:shared` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
 4. Install all needed vscode extensions: vetur & eslint. Please use VSCode because that makes sure all the developer tools are the same (e.g. eslint).
-5. Make sure you create all `/backend/app.*/.env.json` based on `/backend/app/*/.env.template.json`
+5. Make sure you create all `/backend/app/*/.env.json` based on `/backend/app/*/.env.template.json` (make sure you create the required MySQL8 database and start MySQL)
 6. Make sure you create `/frontend/.env.json` based on `/frontend/.env.template.json`
-7. Run tests before creating a pull request.
+7. Run migrations by running `yarn migrations` in the `backend/app/api` folder
+8. Run `yarn dev`. This will start all servers. If something fails, try to run it again and/or fix the error.
+9. Install and run caddy via `yarn caddy` (this serves the app on the default development domains)
+10. Install (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
+11. Update your computer's DNS-server to 127.0.0.1 (in case coredns is not running). On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
+12. Next time you can run `yarn dev`, `yarn caddy` and `yarn dns` in one go by running `yarn dev:server`
 
-You can run all services at once locally by running `yarn dev` in the root directory. Do note that you need to set up Caddy (start caddy service, run `yarn caddy`, update `caddy.dev.watch.json` file and run `yarn caddy:update` to set that config in caddy) and local DNS (because Stamhoofd depends on wildcard DNS domains) to get everything working correctly. 
+Everything should run fine now and you should be able to visit `https://dashboard.stamhoofd` (make sure to enter http(s):// manually because the browser won't recognize the TLD by default and will default to search otherwise) to create your first organization.
 
 Feel free to contact us via hello@stamhoofd.be if you have questions about development and how to set it up.
 

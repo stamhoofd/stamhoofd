@@ -14,7 +14,6 @@ export class I18nController {
     static shared: I18nController
     static addUrlPrefix = true
     static skipUrlPrefixForLocale?: string
-    static forceCanonicalHostProtocolAndPrefix?: string
 
     /**
      * Whether only one country is enabled for the whole domain
@@ -373,9 +372,8 @@ export class I18nController {
         const listCountries = I18nController.fixedCountry ? [this.country] : countries
         const url = new UrlHelper()
         const path = url.getPath()
-        const hostProtocol = I18nController.forceCanonicalHostProtocolAndPrefix ?? url.getHostWithProtocol()
-
-        const addPrefix  = I18nController.forceCanonicalHostProtocolAndPrefix ? false : true
+        const hostProtocol = url.getHostWithProtocol()
+        const addPrefix = true
 
         const links: MetaInfo["link"] = []
         const meta: MetaInfo["meta"] = []

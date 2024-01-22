@@ -22,7 +22,7 @@
                         }
                     ]
                 },
-                "stamhoofd.dev": {
+                "stamhoofd": {
                     "listen": [
                         ":443"
                     ],
@@ -31,7 +31,7 @@
                             "match": [
                                 {
                                     "host": [
-                                        "api.admin.stamhoofd.dev"
+                                        "api.admin.stamhoofd"
                                     ]
                                 }
                             ],
@@ -59,7 +59,7 @@
                             "match": [
                                 {
                                     "host": [
-                                        "renderer.stamhoofd.dev"
+                                        "renderer.stamhoofd"
                                     ]
                                 }
                             ],
@@ -87,8 +87,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "api.stamhoofd.dev",
-                                        "*.api.stamhoofd.dev"
+                                        "api.stamhoofd",
+                                        "*.api.stamhoofd"
                                     ]
                                 }
                             ],
@@ -116,7 +116,7 @@
                             "match": [
                                 {
                                     "host": [
-                                        "dashboard.stamhoofd.dev"
+                                        "dashboard.stamhoofd"
                                     ]
                                 }
                             ],
@@ -200,7 +200,7 @@
                             "match": [
                                 {
                                     "host": [
-                                        "admin.stamhoofd.dev"
+                                        "admin.stamhoofd"
                                     ]
                                 }
                             ],
@@ -284,8 +284,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "dev.stamhoofd.be",
-                                        "dev.stamhoofd.nl"
+                                        "www.be.stamhoofd",
+                                        "www.nl.stamhoofd"
                                     ],
                                     "path": [
                                         "/shop/*"
@@ -372,9 +372,9 @@
                             "match": [
                                 {
                                     "host": [
-                                        "*.shop.stamhoofd.dev",
-                                        "shop.dev.stamhoofd.be",
-                                        "shop.dev.stamhoofd.nl"
+                                        "*.shop.stamhoofd",
+                                        "shop.be.stamhoofd",
+                                        "shop.nl.stamhoofd"
                                     ]
                                 }
                             ],
@@ -458,9 +458,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "*.dev.stamhoofd.nl",
-                                        "*.dev.stamhoofd.be",
-                                        "*.stamhoofd.dev"
+                                        "*.be.stamhoofd",
+                                        "*.nl.stamhoofd"
                                     ]
                                 }
                             ],
@@ -517,38 +516,27 @@
                 "policies": [
                     {
                         "subjects": [
-                            "stamhoofd.dev",
-                            "dev.stamhoofd.be",
-                            "dev.stamhoofd.nl",
-                            "*.dev.stamhoofd.be",
-                            "*.dev.stamhoofd.nl",
-                            "*.shop.stamhoofd.dev",
-                            "login.sgv.stamhoofd.dev",
-                            "groepsadmin.sgv.stamhoofd.dev"
+                            "*.stamhoofd",
+                            "*.shop.stamhoofd",
+                            "shop.be.stamhoofd",
+                            "shop.nl.stamhoofd",
+                            "www.be.stamhoofd",
+                            "www.nl.stamhoofd",
+                            "dashboard.stamhoofd",
+                            "*.be.stamhoofd",
+                            "*.nl.stamhoofd",
+                            "api.stamhoofd",   
+                            "*.api.stamhoofd",
+                            "api.admin.stamhoofd",
+                            "admin.stamhoofd",
+                            "renderer.stamhoofd"
                         ],
                         "on_demand": false,
-                        "issuers": [{
-                            "module": "internal"
-                        }]
-                    },
-                    {
-                        "subjects": [
-                            "*.stamhoofd.dev",
-                            "*.api.stamhoofd.dev",
-                            "api.admin.stamhoofd.dev"
-                        ],
-                        "on_demand": false,
-                        "issuers": [{
-                            "module": "acme",
-                            "challenges": {
-                                "dns": {
-                                    "provider": {
-                                        "name": "digitalocean",
-                                        "auth_token": "{env.DO_AUTH_TOKEN}"
-                                    }
-                                }
+                        "issuers": [
+                            {
+                                "module": "internal"
                             }
-                        }]
+                        ]
                     },
                     {
                         "on_demand": true,
