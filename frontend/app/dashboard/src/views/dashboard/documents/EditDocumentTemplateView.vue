@@ -612,7 +612,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
         let period = cycleOffset + ' inschrijvingsperiodes geleden'
         if (cycleOffset === 0) {
-            period = 'Huidige inschrijvinsgperiode'
+            period = 'Huidige inschrijvingsperiode'
         } else if (cycleOffset === 1) {
             period = 'Vorige inschrijvingsperiode'
         }
