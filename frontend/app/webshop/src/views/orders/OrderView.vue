@@ -336,7 +336,6 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
-import TicketBox from '../products/TicketBox.vue';
 import TicketListItem from '../products/TicketListItem.vue';
 import DetailedTicketView from './DetailedTicketView.vue';
 
@@ -353,7 +352,6 @@ import DetailedTicketView from './DetailedTicketView.vue';
         BackButton,
         OrganizationLogo,
         Spinner,
-        TicketBox,
         TicketListItem,
         RecordCategoryAnswersBox
     },

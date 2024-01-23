@@ -63,10 +63,6 @@ export default class TicketListItem extends Mixins(NavigationMixin){
         return !!navigator.share
     }
 
-    get price() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? (this.order ? this.order.data.totalPrice : Math.max(0, this.ticket.items.reduce((c, item) => c + (item.price ?? 0), 0))) : (this.cartItem?.unitPrice ?? 0)
-    }
-
     get isSingle() {
         return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
     }
