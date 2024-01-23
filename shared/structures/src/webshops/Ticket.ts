@@ -53,6 +53,18 @@ export class TicketPublic extends Ticket {
         return this.items.length === 1 && this.items[0].product.isTicket
     }
 
+    getPrice(order?: Order|null|undefined) {
+        if (!this.isSingle) {
+            if (order) {
+                return order.data.totalPrice
+            }
+            return Math.max(0, this.items.reduce((c, item) => c + (item.price ?? 0), 0))
+        }
+
+        const item = this.items[0];
+        return (item.unitPrice ?? 0) + (this.seat?.price ?? 0)
+    }
+
     getTitle() {
         if (!this.isSingle) {
             return "Ticket"
