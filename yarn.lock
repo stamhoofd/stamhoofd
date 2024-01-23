@@ -1834,7 +1834,7 @@
     write-pkg "4.0.0"
     yargs "16.2.0"
 
-"@mapbox/node-pre-gyp@^1.0.1", "@mapbox/node-pre-gyp@^1.0.7":
+"@mapbox/node-pre-gyp@^1.0.7":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.8.tgz#32abc8a5c624bc4e46c43d84dfb8b26d33a96f58"
   integrity sha512-CMGKi28CF+qlbXh26hDe6NxCd7amqeAzEqnS6IHeO6LoaKyM/n+Xw3HT1COdq8cuioOdlKdqn/hCmqPUOMOywg==
@@ -2442,10 +2442,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.16.0.tgz#9df760744ffde43363056e1ffe276668cbcb7fbf"
   integrity sha512-41u4f+sR91YmEAyHoqLvqNmrrHZknwGBbs73QToV5vk4bCTam9eE4XQCBjcLBpVCbmWgDWdodzXChfMBV86e6A==
 
-"@simonbackx/vue-app-navigation@1.24.2":
-  version "1.24.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.24.2.tgz#96baa26df08595cbc8920e161df99fab9ecb301f"
-  integrity sha512-BIZjKXkpGmdXMV5j2ieuDiG4GaWQEXhe4F5DeuesbEq1bBsj5bNiMTtKpf0awerbbgzE1wrLKxA9zaDt309wew==
+"@simonbackx/vue-app-navigation@1.24.3":
+  version "1.24.3"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.24.3.tgz#a4301e1c1119cce4aaec9cd2e280c0b9b56b4d18"
+  integrity sha512-WCe1fJQlDQ5mtYYKo4oEijpwtARfBaEZi72lq9PjqQDWqdfnYVg/HwQzBLPHt/W19gd7Ve0rZPhY5Gn16oFexw==
 
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"
@@ -3825,16 +3825,6 @@ arg@^4.1.0:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
   integrity sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==
-
-argon2@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.yarnpkg.com/argon2/-/argon2-0.27.2.tgz#f334ca15aee748739ac81f76b85d197841e8cdcc"
-  integrity sha512-evnzS/Q9rj6ahaaCJjLDoJo9ZuXHhVL2BrBz3wFHb5/i9zAJovBuIY+5t2En7tJjhFXs4O3rUZDeGZxBiDOLwQ==
-  dependencies:
-    "@mapbox/node-pre-gyp" "^1.0.1"
-    "@phc/format" "^1.0.0"
-    node-addon-api "^3.0.2"
-    opencollective-postinstall "^2.0.3"
 
 argon2@^0.28.3:
   version "0.28.3"
@@ -10410,7 +10400,7 @@ node-abi@^3.3.0:
   dependencies:
     semver "^7.3.5"
 
-node-addon-api@^3.0.2, node-addon-api@^3.2.0, node-addon-api@^3.2.1:
+node-addon-api@^3.2.0, node-addon-api@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.2.1.tgz#81325e0a2117789c0128dab65e7e38f07ceba161"
   integrity sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==
