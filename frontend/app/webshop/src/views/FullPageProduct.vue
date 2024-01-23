@@ -51,10 +51,7 @@ export default class FullPageProduct extends Mixins(NavigationMixin){
             return this.oldItem.clone()
         }
         
-        return CartItem.create({
-            product: this.product,
-            productPrice: this.product.prices[0]
-        })
+        return CartItem.createDefault(this.product, {admin: this.admin})
     }
 
     get oldItem() {

@@ -54,7 +54,7 @@
                 {{ section.name||'Blok' }}
             </h2>
 
-            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" title="Naam" :error-box="errorBox">
+            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" title="Naam" :error-box="errorBox" :error-fields="'sections['+section.id+'].name'">
                 <input
                     :value="section.name"
                     class="input"
@@ -69,13 +69,14 @@
             <EditSeatingPlanSectionBox 
                 :seating-plan="patchedSeatingPlan"
                 :seating-plan-section="section"
+                :validator="validator"
                 @patch="addPatch($event)"
             />
         </div>
 
-        <hr v-if="false">
+        <hr>
 
-        <p v-if="false">
+        <p>
             <button class="button text" type="button" @click="addSection">
                 <span class="icon add" />
                 <span>Blok toevoegen</span>
@@ -108,7 +109,7 @@ import { AutoEncoderPatchType, patchContainsChanges, VersionBox } from '@simonba
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,ErrorBox, LoadingButton,Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanSection, Version, WebshopMetaData } from "@stamhoofd/structures";
+import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -214,6 +215,33 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
             );
             return
         }
+
+        if (this.patchedSeatingPlan.sections.length > 1) {
+            // Check unique names and non empty
+            for (const section of this.patchedSeatingPlan.sections) {
+                if (section.name.length < 1) {
+                    this.errorBox = new ErrorBox(
+                        new SimpleError({
+                            code: 'invalid_field',
+                            message: 'De naam van een blok mag niet leeg zijn',
+                            field: 'sections['+section.id+'].name',
+                        })
+                    );
+                    return
+                }
+                if (this.patchedSeatingPlan.sections.filter(s => s.name === section.name).length > 1) {
+                    this.errorBox = new ErrorBox(
+                        new SimpleError({
+                            code: 'invalid_field',
+                            message: 'De naam van een blok moet uniek zijn',
+                            field: 'sections['+section.id+'].name',
+                        })
+                    );
+                    return
+                }
+            }
+        }
+
         this.saving = true;
 
         const p = PrivateWebshop.patch(this.patchWebshop)
@@ -236,7 +264,13 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
     }
 
     addSection() {
-        const section = SeatingPlanSection.create({})
+        const section = SeatingPlanSection.create({
+            rows: [
+                SeatingPlanRow.create({
+                    label: 'A'
+                })
+            ]
+        })
         const patch = SeatingPlan.patch({})
         patch.sections.addPut(section)
         this.addPatch(patch)

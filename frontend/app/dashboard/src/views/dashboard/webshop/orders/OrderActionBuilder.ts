@@ -172,7 +172,7 @@ export class OrderActionBuilder {
                 handler: async (orders: PrivateOrder[]) => {
                     const order = orders[0]
                     // copy the link to clipboard
-                    await navigator.clipboard.writeText(this.webshopManager.preview.getUrl(OrganizationManager.organization)+"/order/"+order!.id)
+                    await navigator.clipboard.writeText("https://" + this.webshopManager.preview.getUrl(OrganizationManager.organization)+"/order/"+order!.id)
                     new Toast("Link gekopieerd naar klembord", 'success').show()
                 }
             }),

@@ -3,9 +3,9 @@
         <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="isFirst" :value="true" :disabled="true" />
         <Checkbox v-else slot="left" :disabled="true" />
 
-        <h2 class="style-title-list">
+        <h3 class="style-title-list">
             {{ option.name || 'Naamloos' }}
-        </h2>
+        </h3>
 
         <template slot="right">
             <span>{{ option.price | priceChange }}</span>

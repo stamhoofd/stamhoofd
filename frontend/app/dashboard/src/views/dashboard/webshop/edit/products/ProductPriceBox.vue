@@ -15,29 +15,45 @@
             <PriceInput v-model="price" placeholder="Gratis" :min="null" />
         </STInputBox>
 
-        <Checkbox v-model="useDiscount">
-            Korting vanaf een bepaald aantal stuks
-        </Checkbox>
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="useDiscount" />
 
-        <template v-if="useDiscount">
-            <STInputBox title="Prijs met korting" error-fields="discountPrice" :error-box="errorBox">
-                <PriceInput v-model="discountPrice" placeholder="Gratis" :min="null" />
-            </STInputBox>
+                <h3 class="style-title-list">
+                    Korting vanaf een bepaald aantal stuks
+                </h3>
+                <p v-if="useDiscount" class="style-description-small" @click.stop.prevent>
+                    De prijs wordt op het totale aantal toegepast. Als je keuzemenu's en meerdere prijzen hebt, dan tellen we de aantallen met andere keuzes op om het totaal te bepalen (bv. één grote spaghetti met kaas en één kleine spaghetti zonder kaas → telt als twee spaghetti's). Als je dat niet wilt voeg je beter verschillende producten toe.
+                </p>
 
-            <STInputBox title="Vanaf ... aantal stuks*" error-fields="discountAmount" :error-box="errorBox">
-                <NumberInput v-model="discountAmount" placeholder="Gratis" :min="2" :stepper="true" />
-            </STInputBox>
+                <div v-if="useDiscount" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox title="Prijs met korting" error-fields="discountPrice" :error-box="errorBox">
+                        <PriceInput v-model="discountPrice" placeholder="Gratis" :min="null" />
+                    </STInputBox>
 
-            <p class="style-description-small">
-                * De prijs wordt op het totale aantal toegepast. Als je keuzemenu's en meerdere prijzen hebt, dan tellen we de aantallen met andere keuzes op om het totaal te bepalen (bv. één grote spaghetti met kaas en één kleine spaghetti zonder kaas → telt als twee spaghetti's). Als je dat niet wilt voeg je beter verschillende producten toe.
-            </p>
-        </template>
+                    <STInputBox title="Vanaf ... aantal stuks*" error-fields="discountAmount" :error-box="errorBox">
+                        <NumberInput v-model="discountAmount" placeholder="Gratis" :min="2" :stepper="true" />
+                    </STInputBox>
+                </div>
+            </STListItem>
+
+            <STListItem v-if="!isSingle" :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="hidden" />
+
+                <h3 class="style-title-list">
+                    Verbergen op webshop
+                </h3>
+                <p v-if="hidden" class="style-description-small">
+                    Deze keuze wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.
+                </p>
+            </STListItem>
+        </STList>
     </div>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox } from "@stamhoofd/components";
+import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem } from "@stamhoofd/components";
 import { Product, ProductPrice } from "@stamhoofd/structures"
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -46,18 +62,20 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         STInputBox,
         PriceInput,
         Checkbox,
-        NumberInput
+        NumberInput,
+        STList,
+        STListItem
     },
 })
 export default class ProductPriceBox extends Vue {
     @Prop({ required: true })
-    errorBox: ErrorBox
+        errorBox: ErrorBox
 
     @Prop({ required: true })
-    productPrice: ProductPrice
+        productPrice: ProductPrice
 
     @Prop({ required: true })
-    product: Product
+        product: Product
 
     get patchedProduct() {
         return this.product
@@ -112,6 +130,14 @@ export default class ProductPriceBox extends Vue {
         } else {
             this.discountPrice = null
         }
+    }
+
+    get hidden() {
+        return this.patchedProductPrice.hidden
+    }
+
+    set hidden(hidden: boolean) {
+        this.addPricePatch(ProductPrice.patch({ hidden }))
     }
 
     addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {

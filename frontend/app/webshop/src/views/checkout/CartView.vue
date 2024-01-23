@@ -21,13 +21,7 @@
 
                     <footer>
                         <p class="price">
-                            <template v-if="cartItem.product.allowMultiple">
-                                {{ cartItem.amount }} x
-                            </template> 
-                            {{ formatFreePrice(cartItem.getUnitPrice(cart)) }}
-                            <template v-if="cartItem.getAdditionalPrices()">
-                                + {{ formatFreePrice(cartItem.getAdditionalPrices()) }}
-                            </template>
+                            {{ cartItem.getFormattedPriceAmount(cart) }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash" type="button" @click="deleteItem(cartItem)" />
