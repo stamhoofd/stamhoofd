@@ -1254,19 +1254,24 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         color: var(--color);
 
         &.disabledPerson:not(:focus) {
-            font-size: 12px;
+            font-size: 10px;
             text-align: left;
-            line-height: 18px;
-            height: 18px;
-            padding: 4px;
+            line-height: 15px;
+            height: 15px;
+            padding: 2px;
         }
     }
 
     .seat > .icon {
         position: absolute;
-        left: calc((var(--w) - 24px) / 2);
-        top: calc((var(--h) - 24px) / 2);
+        left: calc((var(--w) - 18px) / 2 + 3px);
+        top: calc((var(--h) - 18px) / 2 + 2px);
         z-index: 0;
+        font-size: 18px;
+
+        &:before {
+            font-size: 18px;
+        }
     }
 
     .seat > input:focus + .icon {

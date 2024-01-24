@@ -64,6 +64,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartReservedSeat, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { Toast } from "../overlays/Toast";
@@ -107,6 +108,8 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 
     @Prop({ required: false })
         onClickSeat?: (seat: ReservedSeat) => void
+
+    lastPriceToast: Toast|null = null
 
     created() {
         this.seatingPlanSection.updatePositions(this.sizeConfig ?? this.defaultSizeConfig)
@@ -283,6 +286,11 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             return
         }
 
+        if (this.lastPriceToast) {
+            this.lastPriceToast.hide()
+            this.lastPriceToast = null
+        }
+
         // select/deselect this seat
         const selected = this.isSelected(row, seat)
         if (selected) {
@@ -339,6 +347,15 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             }
 
             this.setSeats(seats)
+
+            // Show a toast if price is higher
+            const cartReservedSeat = CartReservedSeat.create(addedSeat)
+            cartReservedSeat.calculatePrice(this.seatingPlan)
+
+            if (cartReservedSeat.price > 0) {
+                this.lastPriceToast = new Toast('Deze plaats heeft een meerprijs van ' + Formatter.price(cartReservedSeat.price), 'info')
+                this.lastPriceToast.show()
+            }
         }
     }
 }
@@ -421,7 +438,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             display: block;
             left: 0;
             top: 0;
-            font-size: 8px;
+            font-size: 10px;
             text-align: left;
             line-height: 15px;
             height: 15px;
@@ -542,8 +559,8 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 
     .seat > .icon {
         position: absolute;
-        left: calc((var(--w) - 18px) / 2);
-        top: calc((var(--h) - 18px) / 2);
+        left: calc((var(--w) - 18px) / 2 + 3px);
+        top: calc((var(--h) - 18px) / 2 + 2px);
         z-index: 0;
         font-size: 18px;
 

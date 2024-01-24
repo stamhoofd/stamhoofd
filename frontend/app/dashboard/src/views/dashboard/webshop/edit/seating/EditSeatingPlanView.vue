@@ -50,8 +50,12 @@
 
         <div v-for="section of patchedSeatingPlan.sections" :key="section.id" class="container">
             <hr>
-            <h2 v-if="patchedSeatingPlan.sections.length > 1">
-                {{ section.name||'Blok' }}
+
+            <h2 v-if="patchedSeatingPlan.sections.length > 1" class="style-with-button">
+                <div>{{ section.name||'Zone' }}</div>
+                <div>
+                    <button type="button" class="button icon trash" @click="deleteSection(section)" />
+                </div>
             </h2>
 
             <STInputBox v-if="patchedSeatingPlan.sections.length > 1" title="Naam" :error-box="errorBox" :error-fields="'sections['+section.id+'].name'">
@@ -79,7 +83,7 @@
         <p>
             <button class="button text" type="button" @click="addSection">
                 <span class="icon add" />
-                <span>Blok toevoegen</span>
+                <span>Zone toevoegen</span>
             </button>
         </p>
 
@@ -223,7 +227,7 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
                     this.errorBox = new ErrorBox(
                         new SimpleError({
                             code: 'invalid_field',
-                            message: 'De naam van een blok mag niet leeg zijn',
+                            message: 'De naam van een zone mag niet leeg zijn',
                             field: 'sections['+section.id+'].name',
                         })
                     );
@@ -233,7 +237,7 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
                     this.errorBox = new ErrorBox(
                         new SimpleError({
                             code: 'invalid_field',
-                            message: 'De naam van een blok moet uniek zijn',
+                            message: 'De naam van een zone moet uniek zijn',
                             field: 'sections['+section.id+'].name',
                         })
                     );
@@ -273,6 +277,16 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
         })
         const patch = SeatingPlan.patch({})
         patch.sections.addPut(section)
+        this.addPatch(patch)
+    }
+
+    async deleteSection(section: SeatingPlanSection) {
+        if (!(await CenteredMessage.confirm("Ben je zeker dat je deze zone wilt verwijderen?", "Verwijderen"))) {
+            return;
+        }
+
+        const patch = SeatingPlan.patch({})
+        patch.sections.addDelete(section.id)
         this.addPatch(patch)
     }
 
