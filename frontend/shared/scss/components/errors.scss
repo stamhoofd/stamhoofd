@@ -66,11 +66,11 @@
 .error-box, .success-box, .info-box, .warning-box, .loading-box {
     border-radius: $border-radius;
     font-size: 14px;
-    line-height: 1.4;
+    line-height: 1.5;
     font-weight: $font-weight-default;
-    padding: 15px 15px 15px 50px;
+    padding: 11px 15px 11px 50px;
 
-    min-height: 49px;
+    min-height: 43px;
 
     &.small {
         padding: 10px 15px 10px 40px;
@@ -104,7 +104,7 @@
     }
 
     +.error-box, +.success-box, +.info-box, +.warning-box, +.loading-box  {
-        margin-top: -10px;
+        margin-top: -7px;
     }
 
     > .button {
