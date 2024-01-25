@@ -12,6 +12,8 @@
         <p v-if="cartItem && cartItem.description" class="style-description-small pre-wrap" v-text="cartItem.description" />
         <p v-if="cartItem && cartItem.product.location" class="style-description-small" v-text="cartItem.product.location.name" />
         <p v-if="cartItem && cartItem.product.location && cartItem.product.location.address" class="style-description-small" v-text="cartItem.product.location.address" />
+        <p v-if="ticket.getIndexDescriptionString(webshop)" class="style-description-small pre-wrap" v-text="ticket.getIndexDescriptionString(webshop)" />
+
         <p v-if="scannedAtDescription" class="style-description-small" v-text="scannedAtDescription" />
 
         <button slot="right" class="button text" type="button" @click="markAs">
