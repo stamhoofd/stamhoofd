@@ -4,6 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
 import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, PrivatePaymentConfiguration, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
@@ -306,6 +307,8 @@ export class Organization extends Model {
         reachable.set(this.meta.rootCategoryId, true)
         let shouldSave = false;
 
+        const usedGroupIds = new Set<string>()
+
         while (queue.length > 0) {
             const id = queue.shift()
             if (!id) {
@@ -324,12 +327,20 @@ export class Organization extends Model {
                 }
             }
 
-            // Remove groupIds that no longer exist
-            const filtered = category.groupIds.filter(id => groups.find(g => g.id === id))
+            // Remove groupIds that no longer exist or are in a different category already
+            let filtered = category.groupIds.filter(id => !!groups.find(g => g.id === id) && !usedGroupIds.has(id))
+
+            // Remove duplicate groups
+            filtered = Formatter.uniqueArray(filtered)
+
             if (filtered.length !== category.groupIds.length) {
                 shouldSave = true;
-                console.log("Deleted "+ (filtered.length -  category.groupIds.length) +" group ids from category " + category.id + ", in organization "+this.id)
+                console.log("Deleted "+ (category.groupIds.length - filtered.length) +" group ids from category " + category.id + ", in organization "+this.id)
                 category.groupIds = filtered
+            }
+
+            for (const groupId of category.groupIds) {
+                usedGroupIds.add(groupId)
             }
         }
 
