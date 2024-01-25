@@ -1,5 +1,5 @@
 <template>
-    <draggable v-if="draggable" v-model="list" handle=".drag" tag="div" class="st-list" animation="200" ghost-class="is-dragging" :group="group" :force-fallback="true">
+    <draggable v-if="draggable" v-model="list" handle=".drag" tag="div" class="st-list" :class="{'is-dragging': dragging}" animation="200" ghost-class="is-dragging" :group="group" :force-fallback="true" @start="onStart" @end="onEnd">
         <slot />
     </draggable>
     <transition-group v-else-if="withAnimation" tag="div" name="list" class="st-list">
@@ -32,13 +32,27 @@ export default class STList extends Vue {
     @Prop({ default: false })
         withAnimation!: boolean;
 
+    dragging = false;
+
     get list() {
         return this.value;
     }
 
     set list(changed: any[] | null) {
-        console.log('set list', changed)
         this.$emit('input', changed);
+    }
+
+    onStart() {
+        this.dragging = true;
+    }
+
+    onEnd(event) {
+        // On firefox we need to cancel all click events that happen after a drag
+        // otherwise it will click one of the elements that was dragged
+
+        setTimeout(() => {
+            this.dragging = false;
+        }, 100)
     }
 }
 </script>
@@ -68,13 +82,30 @@ export default class STList extends Vue {
 
         &.sortable-drag {
             opacity: 0.8 !important;
+            cursor: grabbing !important;
         }
     }
+
 
     +.style-button-bar {
         margin-top: 15px;
     }
-        
+
+    .icon.drag {
+        cursor: grab;
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+
+    &.is-dragging {
+        * {
+            cursor: grabbing !important;
+        }
+    }
+   
 
 }
 </style>
