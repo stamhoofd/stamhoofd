@@ -1,0 +1,10 @@
+# All domains with the stamhoofd TLD are resolved to localhost
+stamhoofd {
+    whoami
+    log
+}
+
+# Forward other DNS requests to Google DNS, or Quad9 DNS
+. {
+    forward . 8.8.8.8 9.9.9.9
+}

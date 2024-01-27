@@ -71,11 +71,7 @@ export class WebshopPreview extends AutoEncoder {
 
         return this.getDefaultUrl(organization)
     }
-
-    getCanonicalUrl(organization: Organization): string {
-        return (STAMHOOFD.domains.marketing[organization.address.country] ?? STAMHOOFD.domains.marketing[""])+"/"+STAMHOOFD.domains.webshopPrefix+this.getDefaultSuffix()
-    }
-
+    
     getLegacyUrl(organization: Organization): string | null {
         if (this.legacyUri === null) {
             return null
@@ -231,10 +227,6 @@ export class Webshop extends AutoEncoder {
         return this.getDefaultUrl(organization)
     }
     
-    getCanonicalUrl(organization: Organization): string {
-        return (STAMHOOFD.domains.marketing[organization.address.country] ?? STAMHOOFD.domains.marketing[""])+"/"+STAMHOOFD.domains.webshopPrefix+this.getDefaultSuffix()
-    }
-
     getLegacyUrl(organization: Organization): string | null {
         if (this.legacyUri === null) {
             return null
