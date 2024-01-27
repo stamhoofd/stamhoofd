@@ -152,7 +152,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
     }
 
     get price() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? (this.order ? this.order.data.totalPrice : Math.max(0, this.ticket.items.reduce((c, item) => c + (item.price ?? 0), 0))) : (this.cartItem?.unitPrice ?? 0)
+        return this.ticket.getPrice(this.order)
     }
 
     get isSingle() {

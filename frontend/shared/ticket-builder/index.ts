@@ -240,7 +240,7 @@ export class TicketBuilder {
             }
         }
 
-        const price = this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? (this.order ? this.order.data.totalPrice : Math.max(0, ticket.items.reduce((c, item) => c + (item.price ?? 0), 0))) : (ticket.items[0]?.unitPrice ?? 0)
+        const price = ticket.getPrice(this.order)
         if (!dryRun) {
             this.document.text(Formatter.price(price).replace(/ /g, " ").replace(/,00/g, ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
         }
@@ -251,7 +251,7 @@ export class TicketBuilder {
         MAX_COLUMN_HEIGHT = height - initialColumnHeight
 
         // SECOND COLUMN
-        let description = ticket.items.map(item => (ticket.isSingle ? '' : item.amount+"x "+item.product.name)+(item.descriptionWithoutDate ? ("\n"+item.descriptionWithoutDate) : "")).join("\n")
+        let description = ticket.items.map(item => (ticket.isSingle ? '' : item.amount+"x "+item.product.name)+(item.descriptionWithoutDate ? ((!ticket.isSingle ? "\n" : '')+item.descriptionWithoutDate) : "")).join("\n")
 
         // Index description
         const indexDescription = ticket.getIndexDescription(this.webshop)

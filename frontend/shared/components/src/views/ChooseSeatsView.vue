@@ -1,7 +1,7 @@
 <template>
     <form class="st-view choose-seats-view shade" @submit.prevent="save">
         <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss" />
-        <main>
+        <main v-if="seatingPlan">
             <h1>
                 {{ title }}
                 <span v-if="amount" class="title-suffix">
@@ -15,17 +15,24 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <SeatSelectionBox 
-                v-if="seatingPlan && seatingPlanSection"
-                :seating-plan="seatingPlan"
-                :seating-plan-section="seatingPlanSection"
-                :seats="cartItem.seats"
-                :amount="cartItem.amount"
-                :reserved-seats="reservedSeats"
-                :highlight-seats="highlighedSeats"
-                :set-seats="setSeats"
-                :admin="admin"
-            />
+
+            <div v-for="(seatingPlanSection, index) of seatingPlan.sections" :key="seatingPlanSection.id" class="container">
+                <hr v-if="index > 0">
+                <h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
+                    {{ seatingPlanSection.name }}
+                </h2>
+
+                <SeatSelectionBox 
+                    :seating-plan="seatingPlan"
+                    :seating-plan-section="seatingPlanSection"
+                    :seats="cartItem.seats"
+                    :amount="cartItem.amount"
+                    :reserved-seats="reservedSeats"
+                    :highlight-seats="highlighedSeats"
+                    :set-seats="setSeats"
+                    :admin="admin"
+                />
+            </div>
         </main>
 
         <STToolbar>
