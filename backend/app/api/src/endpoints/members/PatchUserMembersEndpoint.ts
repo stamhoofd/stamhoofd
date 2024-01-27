@@ -72,7 +72,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 throw new SimpleError({
                     code: "invalid_data",
                     message: "No details provided",
-                    human: "Opgelet! Je gebruikt een oudere versie van de inschrijvinsgpagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
+                    human: "Opgelet! Je gebruikt een oudere versie van de inschrijvingspagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
                     field: "details"
                 })
             }
@@ -117,7 +117,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 throw new SimpleError({
                     code: "invalid_data",
                     message: "No details provided",
-                    human: "Opgelet! Je gebruikt een oudere versie van de inschrijvinsgpagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
+                    human: "Opgelet! Je gebruikt een oudere versie van de inschrijvingspagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
                     field: "details"
                 })
             }
