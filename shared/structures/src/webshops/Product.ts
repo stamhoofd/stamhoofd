@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from '../addresses/Address';
 import { Image } from '../files/Image';
 import { ReservedSeat } from '../SeatingPlan';
+import { CartItem } from './Cart';
 import { Webshop } from './Webshop';
 import { WebshopField } from './WebshopField';
 
@@ -28,6 +29,9 @@ export class ProductPrice extends AutoEncoder {
     // Only used if discountPrice is not null
     @field({ decoder: IntegerDecoder, version: 93 })
     discountAmount = 2
+
+    @field({ decoder: BooleanDecoder, version: 219 })
+    hidden = false
 }
 
 export class Option extends AutoEncoder {
@@ -345,5 +349,13 @@ export class Product extends AutoEncoder {
             }
         }
         return null
+    }
+
+    filteredPrices(options: {admin: boolean}): ProductPrice[] {
+        if (options.admin) {
+            return this.prices
+        }
+
+        return this.prices.filter(p => !p.hidden)
     }
 }

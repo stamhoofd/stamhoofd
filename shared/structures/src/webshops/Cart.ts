@@ -71,6 +71,13 @@ export class CartItem extends AutoEncoder {
         return this.unitPrice ? (this.unitPrice * this.amount) : null
     }
 
+    static createDefault(product: Product, options: {admin: boolean}): CartItem {
+        return CartItem.create({
+            product: product,
+            productPrice: product.filteredPrices(options)[0]
+        })
+    }
+
     static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T>  {
         const c = super.create(object) as CartItem
 
@@ -159,13 +166,80 @@ export class CartItem extends AutoEncoder {
     /**
      * Prices that are not unit based
      */
-    getAdditionalPrices() {
-        return this.getSeatPrice()
+    getAdditionalPrice() {
+        return 0
+    }
+
+    /**
+     * Prices that are only applicable to some amount, but not all (e.g. seat extra prices)
+     */
+    getPartialExtraPrice() {
+        return this.seats.reduce((c, seat) => c + seat.price, 0)
     }
 
     getPrice(cart: Cart): number {
-        return this.getUnitPrice(cart) * this.amount + this.getAdditionalPrices()
+        return Math.max(0, this.getUnitPrice(cart) * this.amount + this.getAdditionalPrice() + this.getPartialExtraPrice())
     }
+
+    getFormattedPriceAmount(cart: Cart) {
+        if (this.getPrice(cart) === 0) {
+            if (!this.product.allowMultiple && this.amount <= 1) {
+                return ""
+            }
+            return this.amount + " x ";
+        }
+
+        // Group by seats
+        const priceCombinations = new Map<number, number>()
+        const unitPrice = this.getUnitPrice(cart)
+        for (const seat of this.seats) {
+            const seatPrice = unitPrice + seat.price
+            priceCombinations.set(seatPrice, (priceCombinations.get(seatPrice) || 0) + 1)
+        }
+
+        // Others (non seats)
+        const remaining = this.amount - this.seats.length
+        if (remaining > 0) {
+            priceCombinations.set(unitPrice, (priceCombinations.get(unitPrice) || 0) + remaining)
+        }
+
+        // Sort map by amount, keeping the price amount combination
+        const sorted = [...priceCombinations.entries()].map(([price, amount]) => ({ price, amount })).sort((a, b) => b.amount - a.amount)
+
+        // Format
+        const parts: string[] = []
+        for (const { price, amount } of sorted) {
+            if (parts.length > 0 || price < 0) {
+                if (price >= 0) {
+                    parts.push("+")
+                } else {
+                    parts.push("-")
+                }
+            }
+
+            if (!this.product.allowMultiple && amount === 1) {
+                parts.push(Formatter.price(Math.abs(price)))
+                continue
+            }
+
+            parts.push(amount + " x " + Formatter.price(Math.abs(price)))
+        }
+
+        // Additional price (= without amount)
+        const additionalPrice = this.getAdditionalPrice()
+        if (additionalPrice !== 0) {
+            if (additionalPrice >= 0) {
+                parts.push("+")
+            } else {
+                parts.push("-")
+            }
+
+            parts.push(Formatter.price(Math.abs(additionalPrice)))
+        }
+
+        return parts.join(" ")
+    }
+
     /**
      * Used for statistics
      */
@@ -356,6 +430,14 @@ export class CartItem extends AutoEncoder {
                 })
             }
 
+            if (this.productPrice.hidden) {
+                throw new SimpleError({
+                    code: "product_price_unavailable",
+                    message: "Product price unavailable",
+                    human: this.productPrice.name+" is niet meer beschikbaar"
+                })
+            }
+
             if (product.isSoldOut && this.amount > this.reservedAmount) {
                 throw new SimpleError({
                     code: "product_unavailable",
@@ -379,7 +461,8 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: "product_unavailable",
                     message: "No remaining stock",
-                    human: product.remainingStock === 1 ? ("Er is nog maar één stuk beschikbaar van " +this.product.name) : ("Er zijn nog maar "+product.remainingStock+" stuks beschikbaar van "+this.product.name)
+                    human: product.remainingStock === 1 ? ("Er is nog maar één stuk beschikbaar van " +this.product.name) : ("Er zijn nog maar "+product.remainingStock+" stuks beschikbaar van "+this.product.name),
+                    meta: {recoverable: product.remainingStock > 0}
                 })
             }
 
@@ -399,7 +482,8 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: "product_unavailable",
                         message: "Maximum amount reached",
-                        human: "Je kan niet meer dan "+product.maxPerOrder+" stuks van "+this.product.name+" bestellen"
+                        human: "Je kan niet meer dan "+product.maxPerOrder+" stuks van "+this.product.name+" bestellen",
+                        meta: {recoverable: true}
                     })
                 }
             }

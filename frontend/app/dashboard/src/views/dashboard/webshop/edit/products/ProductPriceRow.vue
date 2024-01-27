@@ -1,6 +1,12 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editPrice()" @contextmenu.prevent="showContextMenu">
-        {{ productPrice.name || 'Naamloos' }}
+        <h3 class="style-title-list">
+            {{ productPrice.name || 'Naamloos' }}
+        </h3>
+        <p v-if="productPrice.hidden" class="style-description-small">
+            Verborgen
+        </p>
+
         <template slot="right">
             <span><template v-if="productPrice.discountPrice">
                       {{ productPrice.discountPrice | price }} /
@@ -45,7 +51,7 @@ export default class ProductPriceRow extends Mixins(NavigationMixin) {
             this.$emit("patch", patch)
 
             // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-        }}).setDisplayStyle("sheet"))
+        }}).setDisplayStyle("popup"))
     }
 
     moveUp() {

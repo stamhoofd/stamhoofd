@@ -67,10 +67,10 @@
                 </STListItem>
             </STList>
 
-            <div v-if="cartItem.product.prices.length > 1" class="container">
+            <div v-if="cartItem.product.filteredPrices({admin}).length > 1" class="container">
                 <hr>
                 <STList>
-                    <STListItem v-for="price in cartItem.product.prices" :key="price.id" class="no-border right-price" :selectable="true" element-name="label">
+                    <STListItem v-for="price in cartItem.product.filteredPrices({admin})" :key="price.id" class="no-border right-price" :selectable="true" element-name="label">
                         <Radio slot="left" v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" />
                         <h4 class="style-title-list">
                             {{ price.name || 'Naamloos' }}

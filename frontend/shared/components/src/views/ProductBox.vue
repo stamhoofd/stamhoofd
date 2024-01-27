@@ -79,7 +79,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
     }
 
     get priceString() {
-        const priceRanges = Formatter.uniqueArray(this.product.prices.map(p => p.price))
+        const priceRanges = Formatter.uniqueArray(this.product.filteredPrices({admin: this.admin}).map(p => p.price))
         if (priceRanges.length == 1) {
             if (priceRanges[0] === 0) {
                 if (this.webshop.isAllFree) {
@@ -132,10 +132,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
         const editExisting = this.product.isUnique || !this.webshop.shouldEnableCart
         const oldItem = editExisting ? this.cart.items.find(i => i.product.id == this.product.id) : undefined
 
-        let cartItem = oldItem?.clone() ?? CartItem.create({
-            product: this.product,
-            productPrice: this.product.prices[0]
-        })
+        let cartItem = oldItem?.clone() ?? CartItem.createDefault(this.product, {admin: this.admin})
 
         // refresh: to make sure we display the latest data
         if (oldItem) {
@@ -145,10 +142,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 console.error(e)
 
                 // Not recoverable
-                cartItem = CartItem.create({
-                    product: this.product,
-                    productPrice: this.product.prices[0]
-                })
+                cartItem = CartItem.createDefault(this.product, {admin: this.admin})
             }
         }
 

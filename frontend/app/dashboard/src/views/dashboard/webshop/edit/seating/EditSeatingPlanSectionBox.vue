@@ -42,12 +42,14 @@
                         <input 
                             v-model="row.label" 
                             class="row-label left"
+                            :class="{error: isRowInvalid(row)}"
                             @click.prevent="selectInput"
                             @input="emitChange()"
                         >
                         <input 
                             v-model="row.label" 
                             class="row-label right"
+                            :class="{error: isRowInvalid(row)}"
                             @click.prevent="selectInput" 
                             @input="emitChange()"
                         >
@@ -99,16 +101,19 @@
             </div>
         </div>
         <p class="style-description-small">
-            Klik op een rij om een rij te selecteren. Vervolgens kan je op een stoel of gang klikken om het nummer of tekst in de gang te wijzigen. Je kan sneller werken door de ENTER en BACKSPACE toetsen te gebruiken, in combinatie met de pijltjes en de rechtermuisknop (dupliceren, invoegen, verplaatsen...).
+            Klik op een rij om een rij te selecteren. Vervolgens kan je op een stoel of gang klikken om het nummer of tekst in de gang te wijzigen. Je kan sneller werken door de ENTER en BACKSPACE toetsen te gebruiken, in combinatie met de pijltjes en de rechtermuisknop (dupliceren, invoegen, verplaatsen...). Als je tekst in je zaal wenst kan je een lege rij toevoegen met daarin één of meerdere gangen. Zo kan je bijvoorbeeld links en rechts andere tekst plaatsen door 3 gangzitjes toe te voegen in een lege rij en de breedte op automatisch te zetten van alle 3 de gangzitjes.
         </p>
+        <STErrorsDefault :error-box="errorBox" />
     </div>
 </template>
 
 <script lang="ts">
+import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, ErrorBox, STErrorsDefault, Validator } from '@stamhoofd/components';
 import { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings, SeatType } from "@stamhoofd/structures";
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Formatter } from "@stamhoofd/utility";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 function getNextPattern(examples: string[]): string {
     if (examples.length === 0) {
@@ -221,7 +226,7 @@ function incrementString(string: string, value = 1) {
 
 @Component({
     components: {
-        
+        STErrorsDefault
     },
 })
 export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
@@ -230,6 +235,11 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
         seatingPlanSection!: SeatingPlanSection
+
+    @Prop({ default: null }) 
+        validator: Validator | null
+
+    errorBox: ErrorBox | null = null
 
     clonedSeatingPlanSection = this.seatingPlanSection.clone()
 
@@ -259,6 +269,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        if (this.validator) {
+            this.validator.addValidation(this, () => {
+                return this.validate()
+            })
+        }
+
         this.clonedSeatingPlanSection.updatePositions(this.sizeConfig)
 
         document.addEventListener("keydown", this.onKey);
@@ -266,10 +282,46 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     beforeDestroy() {
+        if (this.validator) {
+            this.validator.removeValidation(this)
+        }
+
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.removeEventListener("keydown", this.onKey);
         document.removeEventListener("click", this.onDocumentClick);
         
+    }
+
+    validate() {
+        this.errorBox = null
+        const errors = new SimpleErrors()
+
+        for (const [index, row] of this.rows.entries()) {
+            if (this.isRowInvalid(row)) {
+
+                errors.addError(new SimpleError({
+                    code: "invalid_row",
+                    message: `De ${index + 1}${index > 2 ? 'de' : 'ste'} rij (van boven) is ongeldig. Kijk of de rij een letter/cijfer heeft gekregen en of die uniek is.`
+                }))
+            } else {
+                for (const [seatIndex, seat] of row.seats.entries()) {
+                    if (this.isSeatInvalid(row, seat)) {
+                        errors.addError(new SimpleError({
+                            code: "invalid_seat",
+                            message: `De ${index + 1}${index > 2 ? 'de' : 'ste'} rij (van boven) bevat een ongeldige zetel op plaats ${seatIndex + 1} vanaf links. Kijk of de zetel een letter/cijfer heeft gekregen en of die uniek is.`
+                        }))
+                    }
+                
+                }
+            }
+        }
+
+        if (errors.errors.length > 0) {
+            this.errorBox = new ErrorBox(errors)
+            return false
+        }
+
+        return true;
     }
 
     onDocumentClick(event: MouseEvent) {
@@ -533,8 +585,19 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         input.select()
     }
 
+    isRowInvalid(row: SeatingPlanRow,) {
+        if (!row.label) {
+            // Should have no non-space seats
+            return !!row.seats.find(s => !s.isSpace)
+        }
+
+        // Should not have a row with the same label
+        const slug = Formatter.slug(row.label)
+        return this.clonedSeatingPlanSection.rows.filter(r => Formatter.slug(r.label) === slug).length > 1 // Row is also included, so should be 1
+    }
+
     isSeatInvalid(row: SeatingPlanRow, seat: SeatingPlanSeat) {
-        return !seat.isSpace && row.seats.filter(s => !s.isSpace && s.label === seat.label).length > 1
+        return !seat.isSpace && (Formatter.slug(seat.label).length === 0 || row.seats.filter(s => !s.isSpace && Formatter.slug(s.label) === Formatter.slug(seat.label)).length > 1)
     }
 
     setSeat(row: SeatingPlanRow, seat: SeatingPlanSeat, value: string) {
@@ -744,12 +807,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                     action: () => {
                         const clonedRow = row.clone()
 
-                        const previousIds = this.clonedSeatingPlanSection.rows.slice(0, this.clonedSeatingPlanSection.rows.indexOf(row)).map(r => r.label)
+                        const previousIds = this.clonedSeatingPlanSection.rows.slice(this.clonedSeatingPlanSection.rows.indexOf(row)).map(r => r.label).reverse()
                         const label = getNextPattern(previousIds)
                         clonedRow.label = label
                         const index = this.clonedSeatingPlanSection.rows.indexOf(row)
                         if (index >= 0) {
-                            this.clonedSeatingPlanSection.rows.splice(index + 1, 0, clonedRow)
+                            this.clonedSeatingPlanSection.rows.splice(index, 0, clonedRow)
                             this.emitChange()
                         }
                         return true;
@@ -1067,6 +1130,12 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             right: -80px;
             text-align: left;
             padding-left: 10px;
+        }
+
+        &.error {
+            border: $color-error-border;
+            box-shadow: 0 0 0 1px $color-error-border;
+            color: $color-error;
         }
     }
 

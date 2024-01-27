@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? 'Prijskeuze toevoegen' : productPrice.name+' bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? 'Prijskeuze toevoegen' : 'Prijskeuze bewerken'" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             Prijskeuze toevoegen
         </h1>
         <h1 v-else>
-            {{ productPrice.name || 'Prijs' }} bewerken
+            Prijskeuze bewerken
         </h1>
           
         <STErrorsDefault :error-box="errorBox" />
@@ -47,13 +47,13 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    productPrice: ProductPrice
+        productPrice: ProductPrice
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-    product: Product
+        product: Product
     
     patchProduct: AutoEncoderPatchType<Product> = Product.patch({})
 
@@ -61,7 +61,7 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<Product>) => void);
+        saveHandler: ((patch: AutoEncoderPatchType<Product>) => void);
 
     get patchedProduct() {
         return this.product.patch(this.patchProduct)

@@ -284,13 +284,7 @@
 
                     <footer>
                         <p class="price">
-                            <template v-if="cartItem.product.allowMultiple">
-                                {{ cartItem.amount }} x
-                            </template>
-                            {{ formatFreePrice(cartItem.getUnitPrice(order.data.cart)) }}
-                            <template v-if="cartItem.getAdditionalPrices()">
-                                + {{ formatFreePrice(cartItem.getAdditionalPrices()) }}
-                            </template>
+                            {{ cartItem.getFormattedPriceAmount(order.data.cart) }}
                         </p>
                     </footer>
 

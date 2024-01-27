@@ -125,8 +125,8 @@ export default class TicketListItem extends Mixins(NavigationMixin){
             overflow: hidden;
             display: -webkit-box;
             white-space: pre-wrap;
-            line-clamp: 2; /* number of lines to show */
-            -webkit-line-clamp: 2; /* number of lines to show */
+            line-clamp: 3; /* number of lines to show */
+            -webkit-line-clamp: 3; /* number of lines to show */
             -webkit-box-orient: vertical;
 
             + .description {

@@ -20,12 +20,12 @@ export const demoOrderLimiter = new RateLimiter({
     limits: [
         {   
             // Max 10 per hour
-            limit: STAMHOOFD.environment === 'development' ? 1 : 10,
+            limit: STAMHOOFD.environment === 'development' ? 100 : 10,
             duration: 60 * 1000 * 60
         },
         {   
             // Max 20 a day
-            limit: 20,
+            limit: STAMHOOFD.environment === 'development' ? 1000 : 20,
             duration: 24 * 60 * 1000 * 60
         }
     ]
