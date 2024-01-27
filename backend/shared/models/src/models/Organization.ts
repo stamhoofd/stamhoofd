@@ -677,7 +677,10 @@ export class Organization extends Model {
     /**
      * Return default e-mail address for important e-mails that should have the highest deliverability
      */
-    getStrongEmail(i18n: I18n) {
+    getStrongEmail(i18n: I18n, withName = true) {
+        if (!withName) {
+            return ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email"));
+        }
         return '"'+this.name.replace("\"", "\\\"")+'" <'+ ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
     }
 
@@ -687,7 +690,7 @@ export class Organization extends Model {
         }
         
         // Send confirmation e-mail
-        let from = strongDefault ? this.getStrongEmail(this.i18n) : this.uri+"@stamhoofd.email";
+        let from = strongDefault ? this.getStrongEmail(this.i18n, false) : this.uri+"@stamhoofd.email";
         const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.id === id)
         let replyTo: string | undefined = undefined
 
@@ -725,7 +728,7 @@ export class Organization extends Model {
 
     getDefaultEmail(strongDefault = false): { from: string; replyTo: string | undefined } {
         // Send confirmation e-mail
-        let from = strongDefault ? this.getStrongEmail(this.i18n) : this.uri+"@stamhoofd.email";
+        let from = strongDefault ? this.getStrongEmail(this.i18n, false) : this.uri+"@stamhoofd.email";
         const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
         let replyTo: string | undefined = undefined
 
