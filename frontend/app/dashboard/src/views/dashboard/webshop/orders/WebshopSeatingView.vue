@@ -144,6 +144,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                     name: product.name,
                     action: () => {
                         this.selectedProduct = product
+                        this.highlightedSeats = []
                         return true;
                     }
                 })
@@ -155,6 +156,9 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
     onClickSeat(seat: ReservedSeat) {
         for (const order of this.orders) {
             for (const item of order.data.cart.items) {
+                if (item.product.id !== this.selectedProduct?.id) {
+                    continue
+                }
                 for (const s of item.reservedSeats) {
                     if (s.equals(seat)) {
                         this.openOrder(order)
