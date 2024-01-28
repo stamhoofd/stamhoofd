@@ -7,14 +7,16 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <STInputBox v-if="isNew" title="Type document" error-fields="type" :error-box="errorBox">
-            <Dropdown v-model="editingType">
-                <option :value="null" disabled>
-                    Maak een keuze
-                </option>
-                <option v-for="_type in availableTypes" :key="_type.value" :value="_type.value">
-                    {{ _type.definition.name }}
-                </option>
-            </Dropdown>
+            <LoadingButton :loading="loadingHtml || loadingXml">
+                <Dropdown v-model="editingType">
+                    <option :value="null" disabled>
+                        Maak een keuze
+                    </option>
+                    <option v-for="_type in availableTypes" :key="_type.value" :value="_type.value">
+                        {{ _type.definition.name }}
+                    </option>
+                </Dropdown>
+            </LoadingButton>
         </STInputBox>
         <template v-if="editingType || !isNew">
             <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
@@ -79,24 +81,20 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager } from "@stamhoofd/networking";
-import { Country, RecordAnswer, RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
-import { ResolutionFit } from "@stamhoofd/structures";
-import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
-import { FilterGroupEncoded, GroupFilterMode, PropertyFilter, Version } from "@stamhoofd/structures";
-import { DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordChoice, RecordSettings, RecordType } from "@stamhoofd/structures";
+import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType, Version } from "@stamhoofd/structures";
 import { StringCompare } from "@stamhoofd/utility";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import ChooseDocumentTemplateGroup from "./ChooseDocumentTemplateGroup.vue";
 import { fiscal } from "./definitions/fiscal";
-import {participation} from "./definitions/participation";
+import { participation } from "./definitions/participation";
 
 @Component({
     components: {
@@ -108,7 +106,8 @@ import {participation} from "./definitions/participation";
         RecordAnswerInput,
         NumberInput,
         STErrorsDefault,
-        MultiSelectInput
+        MultiSelectInput,
+        LoadingButton
     }
 })
 export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
@@ -128,6 +127,10 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     saving = false
     editingAnswers = this.document.settings.fieldAnswers.map(a => a.clone())
+
+    loadingHtml = false;
+    loadingXml  = false;
+
     get patchedDocument() {
         return this.document.patch(this.patchDocument)
     }
@@ -162,7 +165,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     }
 
     get isComplete() {
-        return !!this.patchedDocument.html && (!!this.patchedDocument.privateSettings.templateDefinition.xmlExport || !this.patchedDocument.privateSettings.templateDefinition.xmlExport)
+        return !!this.patchedDocument.html && (!!this.patchedDocument.privateSettings.templateDefinition.xmlExport || !this.patchedDocument.privateSettings.templateDefinition.xmlExportDescription)
     }
 
     get editingType() {
@@ -186,10 +189,18 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                     })
                 })
                 this.autoLink();
-                this.loadHtml(type).catch(console.error)
+                this.loadHtml(type).catch((e) => {
+                    console.error(e)
 
-                if (definition.xmlExport) {
-                    this.loadXML(type).catch(console.error)
+                    new Toast('Er ging iets mis bij het laden van dit document type. Controleer jouw internetverbinding en probeer de pagina opnieuw te laden.', 'error red').setHide(null).show()
+                })
+
+                if (definition.xmlExportDescription) {
+                    this.loadXML(type).catch((e) => {
+                        console.error(e)
+
+                        new Toast('Er ging iets mis bij het laden van dit document type. Controleer jouw internetverbinding en probeer de pagina opnieuw te laden.', 'error red').setHide(null).show()
+                    })
                 }
             }
         }
@@ -481,6 +492,8 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     }
 
     async loadHtml(type: string) {
+        this.loadingHtml = true;
+
         console.log('loadHtml', type)
         const imported = ((await import(/* webpackChunkName: "attest-html" */ "!!raw-loader!./templates/"+type+".html")).default)
         if (typeof imported !== "string") {
@@ -489,9 +502,11 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         this.patchDocument = this.patchDocument.patch({
             html: imported
         })
+        this.loadingHtml = false;
     }
 
     async loadXML(type: string) {
+        this.loadingXml = true;
         const imported = ((await import(/* webpackChunkName: "attest-html" */ "!!raw-loader!./templates/"+type+".xml")).default)
         if (typeof imported !== "string") {
             throw new Error("Imported attest xml is not a string")
@@ -503,6 +518,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 })
             })
         })
+        this.loadingXml = false;
     }
 
     get isBelgium() {
