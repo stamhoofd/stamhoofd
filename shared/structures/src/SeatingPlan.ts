@@ -486,7 +486,7 @@ export class ReservedSeat extends AutoEncoder {
 
         const section = seatingPlan.sections.find(s => s.id === this.section)
 
-        if (seatingPlan.sections.length === 1 || !section) {
+        if (seatingPlan.sections.length === 1 || !section || section.name.length === 0) {
             // Don't mention the section
             return [
                 {
@@ -502,7 +502,7 @@ export class ReservedSeat extends AutoEncoder {
 
         return [
             {
-                title: 'Sectie',
+                title: 'Zone',
                 value: section.name
             },
             {
