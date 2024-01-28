@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="st-list-item" :class="{selectable, disabled, button: elementName === 'button'}" :type="elementName === 'button' ? 'button' : undefined" @click="$emit('click', $event)" @contextmenu="$emit('contextmenu', $event)">
+    <component :is="elementName" class="st-list-item" :class="{selectable, disabled, button: elementName === 'button'}" :type="elementName === 'button' ? 'button' : undefined" @click="onClick" @contextmenu="$emit('contextmenu', $event)">
         <div class="left">
             <slot name="left" />
         </div>
@@ -30,6 +30,16 @@ export default class STListItem extends Vue {
 
     @Prop({ default: false, type: Boolean })
         disabled!: boolean;
+
+    onClick(event) {
+        const isDragging = this.$parent.$parent.$el.className.indexOf('is-dragging') !== -1;
+        console.log(this.$parent.$el.className)
+        if (isDragging) {
+            console.log('canceled list item click because of drag');
+            return;
+        }
+        this.$emit('click', event);
+    }
 }
 </script>
 
