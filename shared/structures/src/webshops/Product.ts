@@ -230,6 +230,7 @@ export class Product extends AutoEncoder {
 
     clearStock() {
         this.usedStock = 0
+        this.reservedSeats = []
     }
 
     get isSoldOut(): boolean {
