@@ -30,7 +30,7 @@
         "build:locales": "cd shared/locales && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
         "caddy": "caddy run --config .development/caddy.json",
-        "dns": "cd .development && coredns"
+        "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",

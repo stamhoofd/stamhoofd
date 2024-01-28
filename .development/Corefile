@@ -1,7 +1,14 @@
 # All domains with the stamhoofd TLD are resolved to localhost
 stamhoofd {
-    whoami
     log
+
+    template IN A  {
+      answer "{{ .Name }} 60 IN A {$SERVER_IP}"
+    }
+
+    template IN AAAA  {
+      answer "{{ .Name }} 60 IN AAAA {$SERVER_IP}"
+    }
 }
 
 # Forward other DNS requests to Google DNS, or Quad9 DNS
