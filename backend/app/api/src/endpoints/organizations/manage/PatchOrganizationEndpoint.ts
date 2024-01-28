@@ -290,6 +290,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     }
 
                     if (allowedIds.length > 0) {
+                        deleteUnreachable = true
                         await organization.save()
                     }
                 }
@@ -315,7 +316,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
-                    throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to delete this group", statusCode: 403 })
+                    errors.addError(
+                        new SimpleError({ code: "permission_denied", message: "You do not have permissions to delete this group", statusCode: 403 })
+                    )
+                    continue;
                 }
                 model.deletedAt = new Date()
                 await model.save()
@@ -338,11 +342,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             // Check if current user has permissions to this new group -> else fail with error
             if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
-                throw new SimpleError({
-                    code: "missing_permissions",
-                    message: "You cannot restrict your own permissions",
-                    human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep (stel dit in via het tabblad toegang)"
-                })
+                errors.addError(
+                    new SimpleError({
+                        code: "missing_permissions",
+                        message: "You cannot restrict your own permissions",
+                        human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep (stel dit in via het tabblad toegang)"
+                    })
+                )
+                continue;
             }
 
             await model.updateOccupancy()
@@ -360,7 +367,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
-                throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this group", statusCode: 403 })
+                errors.addError(
+                    new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this group", statusCode: 403 })
+                )
+                continue;
             }
 
             if (struct.settings) {
@@ -375,11 +385,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 model.privateSettings.patchOrPut(struct.privateSettings)
 
                 if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
-                    throw new SimpleError({
-                        code: "missing_permissions",
-                        message: "You cannot restrict your own permissions",
-                        human: "Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen (stel dit in via het tabblad toegang). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
-                    })
+                    errors.addError(
+                        new SimpleError({
+                            code: "missing_permissions",
+                            message: "You cannot restrict your own permissions",
+                            human: "Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen (stel dit in via het tabblad toegang). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
+                        })
+                    )
+                    continue;
                 }
             }
 
@@ -408,7 +421,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
 
             if (!model.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
-                throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this webshop", statusCode: 403 })
+                errors.addError(
+                    new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this webshop", statusCode: 403 })
+                )
+                continue;
             }
 
             if (struct.meta) {
