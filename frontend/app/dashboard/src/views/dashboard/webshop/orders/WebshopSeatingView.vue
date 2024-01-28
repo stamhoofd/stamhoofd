@@ -26,6 +26,7 @@
                         :seating-plan-section="section"
                         :reserved-seats="reservedSeats"
                         :seats="highlightedSeats"
+                        :highlight-seats="scannedSeats"
                         :on-click-seat="onClickSeat"
                         :admin="true"
                     />
@@ -41,7 +42,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox,STNavigationBar, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
+import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -81,6 +82,9 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
         this.webshopManager.ordersEventBus.addListener(this, "deleted", this.onDeleteOrders.bind(this))
 
+        this.webshopManager.ticketsEventBus.addListener(this, "fetched", this.onNewTickets.bind(this))
+        this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
+
         this.reload();
         this.loadOrders().catch(console.error)
     }
@@ -116,6 +120,20 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
 
     get reservedSeats() {
         return this.selectedProduct?.reservedSeats ?? []
+    }
+
+    get scannedSeats() {
+        return this.orders.flatMap(o => o.tickets.flatMap(t => {
+            const ticket = t.getPublic(o);
+            if (!ticket.isSingle || !ticket.items[0]) {
+                return []
+            }
+            const item = ticket.items[0]
+            if (item.product.id !== this.selectedProduct?.id) {
+                return []
+            }
+            return t.scannedAt ? [t.seat] : []
+        }))
     }
 
     highlightedSeats: ReservedSeat[] = []
@@ -208,6 +226,43 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         return Promise.resolve()
     }
 
+    async onNewTickets(tickets: TicketPrivate[]) {
+        console.log("Received new tickets from network")
+        
+        for (const ticket of tickets) {
+            const order = this.orders.find(o => o.id === ticket.orderId)
+            if (order) {
+                const existing = order.tickets.find(t => t.id === ticket.id);
+                if (existing) {
+                    existing.set(ticket)
+                } else {
+                    order.tickets.push(ticket)
+                }
+            } else {
+                console.warn('Couldn\'t find order for ticket', ticket)
+            }
+        }
+
+        return Promise.resolve()
+    }
+
+    onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        console.log("Received new tickets from network")
+        
+        mainLoop: for (const patch of patches) {
+            for (const order of this.orders) {
+                for (const ticket of order.tickets) {
+                    if (ticket.id === patch.id) {
+                        ticket.set(ticket.patch(patch))
+                        continue mainLoop;
+                    }
+                }
+            }
+        }
+
+        return Promise.resolve()
+    }
+
     get hasWrite() {
         const p = SessionManager.currentSession?.user?.permissions
         if (!p) {
@@ -239,6 +294,28 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                 )
             }, false)
 
+            let ticketBuffer: TicketPrivate[] = []
+
+            await this.webshopManager.streamTickets((ticket) => {
+                ticketBuffer.push(ticket)
+            }, false)
+
+            await this.webshopManager.streamTicketPatches((patch) => {
+                const ticket = ticketBuffer.find(o => o.id === patch.id)
+                if (ticket) {
+                    ticket.set(ticket.patch(patch))
+                }
+            })
+
+            for (const ticket of ticketBuffer) {
+                const order = arrayBuffer.find(o => o.id === ticket.orderId)
+                if (order) {
+                    order.tickets.push(ticket)
+                } else {
+                    console.warn('Couldn\'t find order for ticket', ticket)
+                }
+            }
+
             if (arrayBuffer.length > 0) {
                 this.orders = arrayBuffer
                 this.isLoadingOrders = false
@@ -248,6 +325,10 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
             console.error(e)
         }
         await this.refresh(false) 
+    }
+
+    get hasTickets() {
+        return this.preview.hasTickets
     }
 
     async refresh(reset = false) {
@@ -264,6 +345,23 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         } catch (e) {
             // Fetching failed
             Toast.fromError(e).show()
+        }
+
+
+        // And preload the tickets if needed
+        if (this.hasTickets) {
+            try {
+                await this.webshopManager.fetchNewTickets(false, false)
+            } catch (e) {
+                // Fetching failed
+                Toast.fromError(e).show()
+            }
+            
+            // Do we still have some missing patches that are not yet synced with the server?
+            this.webshopManager.trySavePatches().catch((e) => {
+                console.error(e)
+                Toast.fromError(e).show()
+            })
         }
 
         this.isLoadingOrders = false
