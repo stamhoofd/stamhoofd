@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges" class="edit-seating-plan-view" :loading="saving" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-seating-plan-view" :loading="saving" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -87,24 +87,26 @@
             </button>
         </p>
 
-        <hr>
+        <template v-if="!isNew">
+            <hr>
 
-        <h2>Acties</h2>
+            <h2>Acties</h2>
 
-        <STList class="illustration-list">    
-            <STListItem :selectable="true" class="left-center" @click="downloadSettings(true)">
-                <img slot="left" src="~@stamhoofd/assets/images/illustrations/box-download.svg">
-                <h2 class="style-title-list">
-                    Exporteer zaalplan
-                </h2>
-                <p class="style-description">
-                    Sla een kopie van jouw zaalplan op zodat je het kan delen met andere verenigingen.
-                </p>
-                <LoadingButton slot="right" :loading="downloadingSettings">
-                    <span class="icon download gray" />
-                </LoadingButton>
-            </STListItem>
-        </STList>
+            <STList class="illustration-list">    
+                <STListItem :selectable="true" class="left-center" @click="downloadSettings(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/box-download.svg">
+                    <h2 class="style-title-list">
+                        Exporteer zaalplan
+                    </h2>
+                    <p class="style-description">
+                        Sla een kopie van jouw zaalplan op zodat je het kan delen met andere verenigingen.
+                    </p>
+                    <LoadingButton slot="right" :loading="downloadingSettings">
+                        <span class="icon download gray" />
+                    </LoadingButton>
+                </STListItem>
+            </STList>
+        </template>
     </SaveView>
 </template>
 
@@ -322,7 +324,7 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
 
             // TODO: include json with type information
 
-            const zipBlob = await zip.generateAsync({type:"blob"})
+            const zipBlob = await zip.generateAsync({type:"blob", compression: "DEFLATE", compressionOptions : {level:6}})
             saveAs(zipBlob, Formatter.fileSlug(this.patchedSeatingPlan.name)+ '.plan');
         } catch (e) {
             console.error(e)
