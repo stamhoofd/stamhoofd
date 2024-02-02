@@ -102,7 +102,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, PaymentGeneral, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -726,7 +726,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     get orderButtonType() {
         for (const order of this.orders) {
-            if (order.payment?.paidAt !== null) {
+            if (order.payment?.paidAt !== null || order.payment?.method === PaymentMethod.PointOfSale) {
                 if (!this.webshop || this.webshop.meta.ticketType === WebshopTicketType.None) {
                     return "order"
                 }
