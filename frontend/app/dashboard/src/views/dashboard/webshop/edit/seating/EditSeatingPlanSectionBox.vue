@@ -1452,7 +1452,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         position: relative;
         width: var(--sw);
         height: var(--sh);
-        margin: 0 auto;
+        margin: 20px auto;
         contain: layout size;
         will-change: width, height;
     }
@@ -1652,6 +1652,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 15px;
     }
 }
 
