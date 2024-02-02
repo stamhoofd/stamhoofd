@@ -428,7 +428,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     get hasSeating() {
-        return !!this.webshop?.products?.find(p => p.seatingPlanId !== null)
+        return this.webshopManager.preview.meta.seatingPlans.length > 0 && (!this.webshop || !!this.webshop?.products?.find(p => p.seatingPlanId !== null))
     }
    
     openOrders(animated = true) {

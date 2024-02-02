@@ -116,7 +116,7 @@ export async function downloadDocuments(documents: Document[], owner?: any) {
 
         pendingToast?.hide()
         pendingToast = new Toast("Documenten bundelen in een .zip...", "spinner").setHide(null).show()
-        const blob = await zip.generateAsync({type:"blob"})
+        const blob = await zip.generateAsync({type:"blob", compression: "DEFLATE", compressionOptions : {level:6}})
         saveAs(blob, "documenten.zip");
         pendingToast?.hide()
     } catch (e) {
