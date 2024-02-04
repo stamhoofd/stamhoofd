@@ -142,7 +142,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-if="getFeatureFlag('seating-plans') && isTicket && !seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
+            <STListItem v-if="isTicket && !seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
                 <span slot="left" class="icon seat gray" />
                 <h3 class="style-title-list">
                     Zetelselectie instellen

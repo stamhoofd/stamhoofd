@@ -86,10 +86,6 @@
                 Webshop auth
             </Checkbox>
 
-            <Checkbox :checked="getFeatureFlag('seating-plans')" @change="setFeatureFlag('seating-plans', !!$event)">
-                Zetelselectie
-            </Checkbox>
-
             <hr>
 
             <button class="button text" type="button" @click="applyDiscountCode">
