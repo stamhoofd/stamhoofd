@@ -7,10 +7,6 @@
             Je kan een zaalplan aanmaken of een bestaand zaalplan kiezen. Je kan in de loop van een evenement wijzigingen maken aan een zaalplan of zelfs een ander zaalplan kiezen op voorwaarde dat dezelfde rij en zetelnummers gebruikt worden.
         </p>
 
-        <p class="info-box icon gift">
-            De zetelselectie functie is voorlopig nog zonder meerkost te gebruiken voor alle webshops die je nu al aanmaakt. Dit zal in de toekomst in een apart pakket worden ondergebracht, de meerkost zal wel beperkt blijven.
-        </p>
-
         <STErrorsDefault :error-box="errorBox" />
 
         <STList>
