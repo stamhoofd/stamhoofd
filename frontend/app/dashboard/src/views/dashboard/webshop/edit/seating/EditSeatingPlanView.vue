@@ -5,6 +5,10 @@
         </h1>
         <STErrorsDefault :error-box="errorBox" />
 
+        <p v-if="$isMobile" class="warning-box">
+            We raden aan om een zaalplan op te bouwen via een computer of tablet met toetsenbord.
+        </p>
+
         <STInputBox title="Naam zaal" error-fields="name" :error-box="errorBox">
             <input
                 ref="firstInput"
@@ -321,9 +325,6 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
             const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
             const zip = new JSZip();
             zip.file('plan.json', blob);
-
-            // TODO: include json with type information
-
             const zipBlob = await zip.generateAsync({type:"blob", compression: "DEFLATE", compressionOptions : {level:6}})
             saveAs(zipBlob, Formatter.fileSlug(this.patchedSeatingPlan.name)+ '.plan');
         } catch (e) {

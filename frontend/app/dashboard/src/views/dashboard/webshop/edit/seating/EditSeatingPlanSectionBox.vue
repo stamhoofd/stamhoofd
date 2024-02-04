@@ -70,7 +70,8 @@
                             <div 
                                 v-for="seat of row.seats" 
                                 :key="seat.uuid" 
-                                class="seat" 
+                                v-long-press="(e) => openContextMenu(e, seat)" 
+                                class="seat"
                                 :class="{error: isSeatInvalid(row, seat), space: seat.isSpace, disabledPerson: isDisabledPersonSeat(seat), selected: isSeatSelected(seat)}"
                                 :style="{
                                     '--w': seat.width + 'px',
@@ -78,8 +79,9 @@
                                     '--x': seat.x + 'px',
                                     '--y': seat.y + 'px',
                                     '--color': getSeatColor(seat)
-                                }"
-                                @pointerdown.left="selectSeat(seat, $event)" 
+                                }" 
+                                @click.left="selectSeat(seat, $event)"
+                                @pointerdown.left="preventIfNotSelected(seat, $event)"
                                 @contextmenu.prevent.stop="openContextMenu($event, seat)"
                             >
                                 <input 
@@ -110,8 +112,12 @@
                 </p>
             </div>
         </div>
-        <p class="style-description-small">
-            Klik op een rij om een rij te selecteren. Vervolgens kan je op een stoel of gang klikken om het nummer of tekst in de gang te wijzigen. Je kan sneller werken door de ENTER en BACKSPACE toetsen te gebruiken, in combinatie met de pijltjes en de rechtermuisknop (dupliceren, invoegen, verplaatsen...). Als je tekst in je zaal wenst kan je een lege rij toevoegen met daarin één of meerdere gangen. Zo kan je bijvoorbeeld links en rechts andere tekst plaatsen door 3 gangzitjes toe te voegen in een lege rij en de breedte op automatisch te zetten van alle 3 de gangzitjes.
+        <p v-if="!$isMobile" class="style-description-small">
+            Voeg rijen en gangen toe. Binnen een rij kan je verticale gangen maken door een stoel aan te klikken met je rechtermuisknop en een gang links of rechts in te voegen. Je kan ook een stoel selecteren en wijzigen in een gang. Je kan tekst in een gang plaatsen ter informatie, bijvoorbeeld om ingangen en het podium aan te geven. Je kan de breedte van een gang of stoel wijzigen met je rechtermuisknop. Hou <template v-if="$isMac || $isIOS">
+                Command(⌘)
+            </template><template v-else>
+                Ctrl
+            </template> en/of Shift(⇧) ingedrukt om meerdere stoelen te selecteren. Gebruik de Enter(⏎) toetst om snel stoelen toe te voegen. Gebruik Backspace(⌫) om een stoel of rij te verwijderen. Gebruik de pijltjestoetsen om snel te navigeren.
         </p>
         <STErrorsDefault :error-box="errorBox" />
     </div>
@@ -273,6 +279,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.addEventListener("keydown", this.onKey);
         document.addEventListener("keyup", this.onKeyUp);
+        document.addEventListener("keydown", this.onKeyDown);
         document.addEventListener("click", this.onDocumentClick);
         document.addEventListener("visibilitychange", this.onVisibilityChange);
         window.addEventListener("blur", this.onVisibilityChange);
@@ -282,6 +289,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.removeEventListener("keydown", this.onKey);
         document.removeEventListener("keyup", this.onKeyUp);
+        document.removeEventListener("keydown", this.onKeyDown);
         document.removeEventListener("click", this.onDocumentClick);
         document.removeEventListener("visibilitychange", this.onVisibilityChange);
         window.removeEventListener("blur", this.onVisibilityChange);
@@ -295,6 +303,13 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         }
 
         this.clonedSeatingPlanSection.updatePositions(this.sizeConfig)
+
+        document.addEventListener("keydown", this.onKey);
+        document.addEventListener("keyup", this.onKeyUp);
+        document.addEventListener("keydown", this.onKeyDown);
+        document.addEventListener("click", this.onDocumentClick);
+        document.addEventListener("visibilitychange", this.onVisibilityChange);
+        window.addEventListener("blur", this.onVisibilityChange);
     }
 
     beforeDestroy() {
@@ -397,6 +412,28 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         }
     }
 
+    onKeyDown(event: KeyboardEvent) {
+        if (event.key === "Meta") {
+            this.metaPressed = true
+        }
+        if (event.key === "Shift") {
+            this.shiftPressed = true
+        }
+        
+        if ((event.key === 'z'||event.key === 'Z') && this.hasFocus) {
+            if ((event.metaKey||event.ctrlKey) && !event.shiftKey) {
+                this.undo()
+                event.preventDefault()
+                return
+            }
+            if ((event.metaKey||event.ctrlKey) && event.shiftKey) {
+                this.redo()
+                event.preventDefault()
+                return
+            }
+        }
+    }
+
     onKey(event: KeyboardEvent) {
         if (event.key === "Meta") {
             this.metaPressed = true
@@ -419,9 +456,16 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         if (event.key === "Backspace" && this.selectedSeats.length) {
             // Delete the seats
             if (this.selectedSeats.length > 1) {
+                const allowedEmptyRows = this.rows.filter(r => r.seats.length === 0)
+
                 for (const seat of this.selectedSeats) {
                     this.deleteSeat(seat)
                 }
+
+                // Delete all rows that have been emptied completely
+                this.clonedSeatingPlanSection.rows = this.clonedSeatingPlanSection.rows.filter(r => r.seats.length > 0 && !allowedEmptyRows.includes(r))
+                this.emitChange()
+
                 // Prevent default: don't delete input text
                 event.preventDefault()
             } else {
@@ -667,6 +711,14 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     get sizeConfig() {
+        if ((this as any).$isMobile) {
+            return new SeatingSizeConfiguration({
+                seatWidth: 35,
+                seatHeight: 35,
+                seatXSpacing: 3 / 4 * 5,
+                seatYSpacing: 10 / 4 * 5
+            })
+        }
         return new SeatingSizeConfiguration({
             seatWidth: 28,
             seatHeight: 28,
@@ -761,31 +813,66 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         return this.selectedSeats.includes(seat)
     }
 
-    selectSeat(seat: SeatingPlanSeat, event: Event) {
+    preventIfNotSelected(seat: SeatingPlanSeat, event: Event) {
+        if (!this.selectedSeats.includes(seat)) {
+            event.preventDefault()
+        }
+    }
+
+    selectSeat(seat: SeatingPlanSeat, event: Event) {        
         let seats = [seat]
         if (this.shiftPressed) {
             if (this.selectedSeats.length === 0) {
                 // Select first behaviour
             } else {
                 const lastSelectedSeat = this.selectedSeats[this.selectedSeats.length - 1]
-                const lastSelectedRow = this.rows.find(r => r.seats.includes(lastSelectedSeat))
-                const currentRow = this.rows.find(r => r.seats.includes(seat))
-                if (lastSelectedRow && currentRow && lastSelectedRow === currentRow) {
-                    // Select all seats between
-                    const lastIndex = lastSelectedRow.seats.indexOf(lastSelectedSeat)
-                    const currentIndex = lastSelectedRow.seats.indexOf(seat)
-                    if (lastIndex >= 0 && currentIndex >= 0) {
-                        seats = lastSelectedRow.seats.slice(Math.min(lastIndex, currentIndex), Math.max(lastIndex, currentIndex) + 1)
-                        
-                        // Make sure we keep pervious lastSelectedSeat at the end of the array
-                        seats = seats.filter(s => s !== lastSelectedSeat)
-                        if (!this.metaPressed) {
-                            seats.push(lastSelectedSeat)
-                        }
-                    }
-                } else {
-                    // Select all rows in between + seats in between (left to right)
+                const lastSelectedRowIndex = this.rows.findIndex(r => r.seats.includes(lastSelectedSeat))
+                const currentRowIndex = this.rows.findIndex(r => r.seats.includes(seat))
 
+                if (lastSelectedRowIndex === -1 || currentRowIndex === -1) {
+                    // Not possible
+                    return;
+                }
+
+                const lastSelectedRow = this.rows[lastSelectedRowIndex]
+                const currentRow = this.rows[currentRowIndex]
+
+                const lastIndex = lastSelectedRow.seats.indexOf(lastSelectedSeat)
+                const currentIndex = currentRow.seats.indexOf(seat)
+
+                const firstSeat = lastSelectedRowIndex === currentRowIndex ? (lastIndex < currentIndex ? lastSelectedSeat : seat) : (lastSelectedRowIndex < currentRowIndex ? lastSelectedSeat : seat)
+                const lastSeat = firstSeat === lastSelectedSeat ? seat : lastSelectedSeat
+                
+                const firstSeatRowIndex = this.rows.findIndex(r => r.seats.includes(firstSeat))
+                const lastSeatRowIndex = this.rows.findIndex(r => r.seats.includes(lastSeat))
+
+                const firstSeatRow = this.rows[firstSeatRowIndex]
+                const lastSeatRow = this.rows[lastSeatRowIndex]
+                
+                const firstSeatIndex = firstSeatRow.seats.indexOf(firstSeat)
+                const lastSeatIndex = lastSeatRow.seats.indexOf(lastSeat)
+
+                // Start at the first seat (seat by seat and row by row), and loop all seats until the last seat
+                let seatIndex = firstSeatIndex
+                let rowIndex = firstSeatRowIndex
+
+                while (rowIndex < lastSeatRowIndex || (rowIndex === lastSeatRowIndex && seatIndex <= lastSeatIndex)) {
+                    const row = this.rows[rowIndex]
+                    const seat = row.seats[seatIndex]
+                    seats.push(seat)
+
+                    if (seatIndex >= row.seats.length - 1) {
+                        rowIndex++
+                        seatIndex = 0
+                    } else {
+                        seatIndex++
+                    }
+                }
+
+                // Make sure we keep pervious lastSelectedSeat at the end of the array (consistent behaviour when choosing a different seat)
+                seats = seats.filter(s => s !== lastSelectedSeat)
+                if (!this.metaPressed) {
+                    seats.push(lastSelectedSeat)
                 }
             }
         }
@@ -812,30 +899,30 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                 this.blurInput(event)
             }
 
-            // Prevent focusing input or setting caret position randomly
-            event.preventDefault()
             return
         }
 
-        if (!this.selectedSeats.includes(seat)) {
-            // On first click, select the full content (prevent setting caret position)
-            event.preventDefault()
-        }
         this.selectedSeats = seats
         this.selectInput(event)
     }
 
     selectInput(event: Event) {
+        console.log('select input', event.currentTarget)
         const input = event.currentTarget as HTMLInputElement
         // Check input is INPUT otherwise select child
         if (input.tagName !== "INPUT") {
             const childInput = input.querySelector("input")
             if (childInput) {
-                childInput.select()
+                // Only select if not yet focused
+                if (document.activeElement !== childInput) {
+                    childInput.select()
+                }
             }
             return
         }
-        input.select()
+        if (document.activeElement !== input) {
+            input.select()
+        }
     }
 
     blurInput(event: Event) {
@@ -1083,6 +1170,10 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
     }
 
     openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) {
+        if ((this as any).$isMobile) {
+            this.blurAll();
+        }
+
         // If seat is outside selection: select only this seat
         if (!this.selectedSeats.includes(seat)) {
             this.selectSeat(seat, event)
@@ -1097,85 +1188,72 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             // Single row menu
             items.push([
                 new ContextMenuItem({
-                    name: 'Rij dupliceren',
-                    icon: 'copy',
-                    action: () => {
-                        const clonedRow = row.clone()
+                    name: 'Rij',
+                    childMenu: new ContextMenu([
+                        [
+                            new ContextMenuItem({
+                                name: 'Dupliceren',
+                                icon: 'copy',
+                                action: () => {
+                                    const clonedRow = row.clone()
 
-                        const previousIds = this.clonedSeatingPlanSection.rows.slice(this.clonedSeatingPlanSection.rows.indexOf(row)).map(r => r.label).reverse()
-                        const label = getNextPattern(previousIds)
-                        clonedRow.label = label
-                        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                        if (index >= 0) {
-                            this.clonedSeatingPlanSection.rows.splice(index, 0, clonedRow)
-                            this.emitChange()
-                        }
-                        return true;
-                    }
-                }),
-
-                new ContextMenuItem({
-                    name: 'Verplaats rij naar boven',
-                    icon: 'arrow-up',
-                    disabled: this.clonedSeatingPlanSection.rows.indexOf(row) <= 0,
-                    action: () => {
-                        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                        if (index >= 0 && index > 0) {
-                            this.clonedSeatingPlanSection.rows.splice(index - 1, 0, row)
-                            this.clonedSeatingPlanSection.rows.splice(index + 1, 1)
-                            this.emitChange()
-                        }
-                        return true;
-                        
-                    }
-                }),
-                new ContextMenuItem({
-                    name: 'Verplaats rij naar beneden',
-                    icon: 'arrow-down',
-                    disabled: this.clonedSeatingPlanSection.rows.indexOf(row) >= this.clonedSeatingPlanSection.rows.length - 1,
-                    action: () => {
-                        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                        if (index >= 0 && index < this.clonedSeatingPlanSection.rows.length - 1) {
-                            this.clonedSeatingPlanSection.rows.splice(index + 2, 0, row)
-                            this.clonedSeatingPlanSection.rows.splice(index, 1)
-                            this.emitChange()
-                        }
-                        return true;
-                    }
-                }),
-                new ContextMenuItem({
-                    name: 'Rij verwijderen',
-                    icon: 'trash',
-                    action: () => {
-                        const index = this.clonedSeatingPlanSection.rows.indexOf(row)
-                        if (index >= 0) {
-                            this.clonedSeatingPlanSection.rows.splice(index, 1)
-                            this.emitChange()
-                        }
-                        return true;
-                    }
-                })
-            ])
-        }
-
-        if (selectedRows.length > 0) {            
-            // Multi row items
-            items.push([
-                new ContextMenuItem({
-                    name: 'Selecteer volledige rij',
-                    icon: 'success',
-                    action: () => {
-                        for (const row of selectedRows) {
-                            for (const seat of row.seats) {
-                                if (!this.selectedSeats.includes(seat)) {
-                                    this.selectedSeats.push(seat)
+                                    const previousIds = this.clonedSeatingPlanSection.rows.slice(this.clonedSeatingPlanSection.rows.indexOf(row)).map(r => r.label).reverse()
+                                    const label = getNextPattern(previousIds)
+                                    clonedRow.label = label
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    if (index >= 0) {
+                                        this.clonedSeatingPlanSection.rows.splice(index, 0, clonedRow)
+                                        this.emitChange()
+                                    }
+                                    return true;
                                 }
-                            }
-                        }
-                        return true;
-                    }
+                            }),
+
+                            new ContextMenuItem({
+                                name: 'Verplaats naar boven',
+                                icon: 'arrow-up',
+                                disabled: this.clonedSeatingPlanSection.rows.indexOf(row) <= 0,
+                                action: () => {
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    if (index >= 0 && index > 0) {
+                                        this.clonedSeatingPlanSection.rows.splice(index - 1, 0, row)
+                                        this.clonedSeatingPlanSection.rows.splice(index + 1, 1)
+                                        this.emitChange()
+                                    }
+                                    return true;
+                                    
+                                }
+                            }),
+                            new ContextMenuItem({
+                                name: 'Verplaats naar beneden',
+                                icon: 'arrow-down',
+                                disabled: this.clonedSeatingPlanSection.rows.indexOf(row) >= this.clonedSeatingPlanSection.rows.length - 1,
+                                action: () => {
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    if (index >= 0 && index < this.clonedSeatingPlanSection.rows.length - 1) {
+                                        this.clonedSeatingPlanSection.rows.splice(index + 2, 0, row)
+                                        this.clonedSeatingPlanSection.rows.splice(index, 1)
+                                        this.emitChange()
+                                    }
+                                    return true;
+                                }
+                            }),
+                            new ContextMenuItem({
+                                name: 'Verwijderen',
+                                icon: 'trash',
+                                action: () => {
+                                    const index = this.clonedSeatingPlanSection.rows.indexOf(row)
+                                    if (index >= 0) {
+                                        this.clonedSeatingPlanSection.rows.splice(index, 1)
+                                        this.emitChange()
+                                    }
+                                    return true;
+                                }
+                            })
+                        ]
+                    ])
                 })
-            ])
+            ]);
         }
 
         // Single seat items
@@ -1313,6 +1391,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                     [
                         new ContextMenuItem({
                             name: 'Zetel',
+                            selected: !!this.selectedSeats.find(seat => seat.type === SeatType.Seat),
                             action: () => {
                                 for (const seat of this.selectedSeats) {
                                     seat.type = SeatType.Seat
@@ -1323,6 +1402,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                         }),
                         new ContextMenuItem({
                             name: 'Gang',
+                            selected: !!this.selectedSeats.find(seat => seat.type === SeatType.Space),
                             action: () => {
                                 for (const seat of this.selectedSeats) {
                                     seat.type = SeatType.Space
@@ -1398,13 +1478,18 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
                 icon: 'trash',
                 action: () => {
                     for (const seat of this.selectedSeats) {
-                        const row = this.clonedSeatingPlanSection.rows.find(r => r.seats.includes(seat))
-                        if (!row) {
+                        const rowIndex = this.clonedSeatingPlanSection.rows.findIndex(r => r.seats.includes(seat))
+                        if (rowIndex === -1) {
                             continue
                         }
+                        const row = this.clonedSeatingPlanSection.rows[rowIndex]
                         const index = row.seats.indexOf(seat)
                         if (index >= 0) {
                             row.seats.splice(index, 1)
+                        }
+                        // Became empty?
+                        if (row.seats.length === 0) {
+                            this.clonedSeatingPlanSection.rows.splice(rowIndex, 1)
                         }
                     }
                     this.emitChange()
@@ -1557,6 +1642,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         border-radius: 5px;
         contain: strict;
         will-change: transform, width, height;
+        touch-action: manipulation;
 
         &.selected {
             border-color: $color-primary;
@@ -1619,6 +1705,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
             height: 15px;
             padding: 2px;
         }
+        
     }
 
     .seat > .icon {

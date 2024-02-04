@@ -3,7 +3,7 @@ import { AppManager } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
 import Vue from "vue";
 
-import { CopyableDirective, TooltipDirective } from "..";
+import { CopyableDirective, LongPressDirective,TooltipDirective } from "..";
 
 declare module "vue/types/vue" {
     interface Vue {
@@ -82,6 +82,7 @@ export class VueGlobalHelper {
 
         Vue.prototype.$isAndroid = Vue.prototype.$OS === "android"
         Vue.prototype.$isIOS = Vue.prototype.$OS === "iOS"
+        Vue.prototype.$isMac = Vue.prototype.$OS === "macOS"
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;
@@ -110,7 +111,8 @@ export class VueGlobalHelper {
         Vue.mixin({
             directives: {
                 tooltip: TooltipDirective,
-                copyable: CopyableDirective
+                copyable: CopyableDirective,
+                LongPress: LongPressDirective
             },
             filters: {
                 price: Formatter.price.bind(Formatter),

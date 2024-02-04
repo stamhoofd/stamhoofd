@@ -168,16 +168,26 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
             if (this.$refs.selectedSeats) {
                 const selectedSeats = this.$refs.selectedSeats as HTMLElement[]
                 if (selectedSeats.length > 0) {
-                    selectedSeats[0].scrollIntoView({
-                        behavior: "smooth",
-                        block: "nearest",
-                        inline: "center"
-                    })
-                    // iOS fix:
-                    document.documentElement.scrollTop = 0;
+                    const bounds = selectedSeats[0].getBoundingClientRect()
+                    const scrollHeight = selectedSeats[0].closest('main')?.clientHeight
+
+                    if (!scrollHeight) {
+                        return
+                    }
+
+                    if (bounds.top + bounds.height > scrollHeight - 30) {
+                        selectedSeats[0].scrollIntoView({
+                            behavior: "smooth",
+                            block: "center",
+                            inline: "center"
+                        })
+
+                        // iOS fix:
+                        document.documentElement.scrollTop = 0;
+                    }
                 }
             }
-        }, 300);
+        }, 400);
     }
 
     @Watch('seatingPlanSection')

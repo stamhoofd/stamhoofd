@@ -45,6 +45,21 @@
         white-space: nowrap;
     }
 
+    @keyframes blink_input_opacity_to_prevent_scrolling_when_focus {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    // This fixes scrolling the input on iOS when focusing, which fixes glitches on iOS that scrolls the body when that is not allowed
+    body.web-iOS &:focus {
+        animation: blink_input_opacity_to_prevent_scrolling_when_focus 0.01s;
+    }
+
     @media (hover: hover) {
         &:hover {
             border-color: $color-primary-gray-light;
