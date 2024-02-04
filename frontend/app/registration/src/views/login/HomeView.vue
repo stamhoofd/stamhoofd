@@ -157,7 +157,7 @@ export default class HomeView extends Mixins(NavigationMixin){
 
             if (email) {
                 if (hasAccount === null || hasAccount === "1") {
-                    this.login(false, email, "Je moet op dit account inloggen om jouw gegevens te kunnen wijzigen. Maak zeker geen nieuw aan.")
+                    this.login(false, email, "Dit adres is verbonden met jouw gegevens. Je kan jouw e-mailadres na het inloggen wijzigen. Gebruik de wachtwoord vergeten knop als je jouw wachtwoord niet meer weet.")
                 } else {
                     this.createAccount(false, email, "Je kan jouw e-mailadres pas wijzigen nadat je een account hebt aangemaakt.")
                 }
