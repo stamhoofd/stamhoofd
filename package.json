@@ -18,7 +18,7 @@
     "license": "AGPL-3.0-only",
     "scripts": {
         "dev": "concurrently -r 'yarn build:shared:watch' 'lerna run dev --stream --parallel'",
-        "dev:server": "concurrently -r 'yarn dev' 'yarn caddy' 'yarn dns'",
+        "dev:server": "concurrently -r 'yarn dev' 'yarn caddy' 'yarn dns' 'yarn mail'",
         "app:release": "cd devops && yarn build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
         "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json --exec yarn build:shared",
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
@@ -30,7 +30,8 @@
         "build:locales": "cd shared/locales && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
         "caddy": "caddy run --config .development/caddy.json",
-        "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
+        "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
+        "mail": "maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",
@@ -88,6 +89,7 @@
         "jest": "^27.4.5",
         "jest-extended": "^1.2.0",
         "lerna": "^6.6.2",
+        "maildev": "^2.1.0",
         "mini-css-extract-plugin": "^2.4.5",
         "nodemon": "^2.0.22",
         "postcss": "^8.4.5",
