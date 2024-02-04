@@ -254,7 +254,11 @@ export class OrderActionBuilder {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../../mail/MailView.vue"), {
             defaultSubject: "Bestelling {{nr}}",
             orders: orders,
-            webshop: this.webshopManager.preview
+            webshop: this.webshopManager.preview,
+            defaultReplacements: [
+                ...this.webshopManager.preview.meta.getEmailReplacements(),
+                ...OrganizationManager.organization.meta.getEmailReplacements()
+            ]
         });
         this.component.present(displayedComponent.setDisplayStyle("popup"));
     }

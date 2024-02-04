@@ -676,6 +676,7 @@ export default class EditorView extends Vue {
 
                 &.primary {
                     background-color: var(--editor-primary-color, #{$color-primary});
+                    color: var(--editor-primary-color-contrast, #{$color-primary-contrast});
                 }
             }
 

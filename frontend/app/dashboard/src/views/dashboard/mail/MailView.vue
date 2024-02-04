@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" :disabled="!emailId" class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor}" @save="send">
+    <EditorView ref="editorView" :disabled="!emailId" class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor, '--editor-primary-color-contrast': primaryColorContrast}" @save="send">
         <h1 class="style-navigation-title">
             Nieuwe e-mail
         </h1>
@@ -171,6 +171,9 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     @Prop({ default: () => []})
         otherRecipients: { firstName?: string; lastName?: string; email: string }[]
+    
+    @Prop({ required: false, default: () => [] })
+        defaultReplacements: Replacement[]
 
     sending = false
 
@@ -1515,7 +1518,11 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get primaryColor() {
-        return OrganizationManager.organization.meta.color ?? "#0053ff"
+        return this.defaultReplacements.find(r => r.token === 'primaryColor')?.value ?? "#0053ff"
+    }
+
+    get primaryColorContrast() {
+        return this.defaultReplacements.find(r => r.token === 'primaryColorContrast')?.value ?? "#fff"
     }
 
     async getHTML() {
@@ -1560,7 +1567,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         // Replacements
         const recipient = this.recipients[0]
         if (recipient) {
-            const extra = this.organization.meta.getEmailReplacements()
+            const extra = this.defaultReplacements
             for (const replacement of [...recipient.replacements, ...extra]) {
                 if (html) {
                     html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
@@ -1629,7 +1636,8 @@ export default class MailView extends Mixins(NavigationMixin) {
                 recipients: this.recipients,
                 subject: this.subject,
                 html,
-                attachments
+                attachments,
+                defaultReplacements: this.defaultReplacements
             })
 
             await SessionManager.currentSession!.authenticatedServer.request({

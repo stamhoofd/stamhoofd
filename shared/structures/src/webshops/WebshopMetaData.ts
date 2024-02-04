@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from '@stamhoofd/utility';
+import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from '../addresses/Address';
@@ -8,6 +8,7 @@ import { City } from '../addresses/City';
 import { Country, CountryDecoder } from '../addresses/CountryDecoder';
 import { Province } from '../addresses/Province';
 import { DNSRecord, DNSRecordType } from '../DNSRecord';
+import { Replacement } from '../endpoints/EmailRequest';
 import { Image } from '../files/Image';
 import { RecordCategory } from '../members/records/RecordCategory';
 import { PaymentConfiguration, PrivatePaymentConfiguration } from '../PaymentConfiguration';
@@ -527,6 +528,24 @@ export class WebshopMetaData extends AutoEncoder {
 
     get hasSingleTickets() {
         return this.ticketType === WebshopTicketType.SingleTicket
+    }
+
+    getEmailReplacements() {
+        // Do not return a replacement in case we don't have a color (= default to organization color)
+        if (!this.color) {
+            return []
+        }
+        
+        return [
+            Replacement.create({
+                token: "primaryColor",
+                value: this.color
+            }),
+            Replacement.create({
+                token: "primaryColorContrast",
+                value: this.color ? Colors.getContrastColor(this.color) : "#fff"
+            }),
+        ]
     }
 }
 

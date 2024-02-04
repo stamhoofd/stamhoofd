@@ -329,7 +329,8 @@ export class MemberActionBuilder {
             root: new ComponentWithProperties(MailView, {
                 members,
                 group: this.groups.length === 1 ? this.groups[0] : undefined,
-                defaultSubject: subject
+                defaultSubject: subject,
+                defaultReplacements: OrganizationManager.organization.meta.getEmailReplacements()
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));

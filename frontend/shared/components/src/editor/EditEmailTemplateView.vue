@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor}" @save="save">
+    <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor, '--editor-primary-color-contrast': primaryColorContrast}" @save="save">
         <h1 v-if="isNew" class="style-navigation-title">
             Nieuwe template
         </h1>
@@ -53,30 +53,30 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    template: EmailTemplate
+        template: EmailTemplate
 
     @Prop({ required: true })
-    isNew: boolean
+        isNew: boolean
 
     @Prop({ required: false, default: () => [] })
-    smartVariables: EditorSmartVariable[]
+        smartVariables: EditorSmartVariable[]
 
     @Prop({ required: false, default: () => [] })
-    smartButtons: EditorSmartButton[]
+        smartButtons: EditorSmartButton[]
 
     @Prop({ required: false, default: () => [] })
-    defaultReplacements: Replacement[]
+        defaultReplacements: Replacement[]
 
     // Used to determine default from address
     @Prop({ default: null})
-    webshop!: WebshopPreview | null
+        webshop!: WebshopPreview | null
 
     @Prop({ required: true })
-    saveHandler: (patch: AutoEncoderPatchType<EmailTemplate>) => Promise<void>;
+        saveHandler: (patch: AutoEncoderPatchType<EmailTemplate>) => Promise<void>;
     
     // Used to determine default from address
     @Prop({ default: null })
-    group!: Group | null
+        group!: Group | null
 
     templatePatch = EmailTemplate.patch({})
     
@@ -110,6 +110,10 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
 
     get primaryColor() {
         return this.defaultReplacements.find(r => r.token === 'primaryColor')?.value ?? "#0053ff"
+    }
+
+    get primaryColorContrast() {
+        return this.defaultReplacements.find(r => r.token === 'primaryColorContrast')?.value ?? "#fff"
     }
 
     async getHTML() {

@@ -130,4 +130,7 @@ export class EmailRequest extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(EmailAttachment), version: 11 })
     attachments: EmailAttachment[] = []
+
+    @field({ decoder: new ArrayDecoder(Replacement), version: 220 })
+    defaultReplacements: Replacement[] = []
 }
