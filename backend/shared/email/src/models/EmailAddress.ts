@@ -92,7 +92,7 @@ export class EmailAddress extends Model {
     static async getByEmails(emails: string[], organizationId: string | null): Promise<EmailAddress[]> {
         if (emails.length > 30) {
             // Normally an organization will never have so much bounces, so we'll request all emails and filter in them
-            const all = await this.where({ organizationId }, { limit: 500 })
+            const all = await this.where({ organizationId }, { limit: 1000 })
             return all.filter(e => emails.includes(e.email))
         }
 

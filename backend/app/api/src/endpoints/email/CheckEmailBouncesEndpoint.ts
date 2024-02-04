@@ -38,11 +38,11 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        if (request.body.length > 1000) {
+        if (request.body.length > 10000) {
             throw new SimpleError({
                 code: "too_many_recipients",
                 message: "Too many recipients",
-                human: "Je kan maar maximaal 1000 adressen tergelijk controleren.",
+                human: "Je kan maar maximaal 10.000 adressen tergelijk controleren.",
                 field: "recipients"
             })
         }
