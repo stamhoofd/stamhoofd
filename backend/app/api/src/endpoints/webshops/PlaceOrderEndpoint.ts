@@ -292,7 +292,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             } catch (e) {
                 // Mark order as failed to release stock
                 if (order) {
-                    await order.onPaymentFailed()
+                    await order.onPaymentFailed(null, organization)
                 }
                 throw e;
             }

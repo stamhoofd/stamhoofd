@@ -110,7 +110,7 @@ export class Order extends Model {
         return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
     }
 
-    async undoPaymentFailed(this: Order) {
+    async undoPaymentFailed(this: Order, _payment: Payment | null, _organization: Organization) {
         if (this.status !== OrderStatus.Deleted && this.status !== OrderStatus.Canceled) {
             return
         }
@@ -132,7 +132,7 @@ export class Order extends Model {
         })
     }
 
-    async onPaymentFailed(this: Order) {
+    async onPaymentFailed(this: Order, payment: Payment | null, organization: Organization) {
         if (this.shouldIncludeStock()) {
             this.status = this.number !== null ? OrderStatus.Canceled : OrderStatus.Deleted
             await this.save()
@@ -148,6 +148,33 @@ export class Order extends Model {
                 
                 await this.setRelation(Order.webshop, webshop).updateStock() // remove reserved stock
             })
+
+            // Send an email if the payment failed after 15 minutes being pending
+            const difference = new Date().getTime() - this.createdAt.getTime()
+            if (difference > 1000 * 60 * 10 && difference < 1000 * 60 * 60 * 24) {
+
+                if (payment && payment.method !== PaymentMethod.Transfer && payment.method !== PaymentMethod.PointOfSale) {
+                    console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Sending email.')
+                    const webshop = await Webshop.getByID(this.webshopId)
+
+                    if (!webshop) {
+                        console.error("Missing organization or webshop for order "+this.id)
+                        return
+                    }
+
+                    const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true)
+
+                    await this.setRelation(Order.webshop, webshop.setRelation(Order.organization, organization)).sendEmailTemplate({
+                        type: EmailTemplateType.OrderOnlinePaymentFailed,
+                        from,
+                        replyTo
+                    })
+                } else {
+                    console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Payment method not matching.')
+                }
+            } else {
+                console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Not sending email.')
+            }
         }
     }
 
@@ -418,7 +445,7 @@ export class Order extends Model {
         }
 
         if (this.status === OrderStatus.Deleted) {
-            await this.undoPaymentFailed()
+            await this.undoPaymentFailed(payment, organization)
         }
 
         const { tickets, didCreateTickets } = await this.setRelation(Order.webshop, webshop).updateTickets()

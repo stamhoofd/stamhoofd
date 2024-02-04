@@ -2,6 +2,7 @@ import { column, Model } from '@simonbackx/simple-database';
 import { BalanceItemStatus, MemberBalanceItem, MemberBalanceItemPayment, OrderStatus, Payment as PaymentStruct, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
+
 import { Organization, Payment, Webshop } from './';
 
 /**
@@ -138,13 +139,13 @@ export class BalanceItem extends Model {
         }
     }
 
-    async markFailed() {
+    async markFailed(payment: Payment, organization: Organization) {
         // If order
         if (this.orderId) {
             const {Order} = await import("./Order");
             const order = await Order.getByID(this.orderId);
             if (order) {
-                await order.onPaymentFailed()
+                await order.onPaymentFailed(payment, organization)
 
                 if (order.status === OrderStatus.Deleted) {
                     this.status = BalanceItemStatus.Hidden
@@ -154,13 +155,13 @@ export class BalanceItem extends Model {
         }
     }
 
-    async undoFailed() {
+    async undoFailed(payment: Payment, organization: Organization) {
         // If order
         if (this.orderId) {
             const {Order} = await import("./Order");
             const order = await Order.getByID(this.orderId);
             if (order) {
-                await order.undoPaymentFailed()
+                await order.undoPaymentFailed(payment, organization)
             }
         }
     }

@@ -394,6 +394,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
                                 }
                             } else {
                                 this.dismiss({force: true})
+                                
+                                // Force reload webshop (stock will have changed: prevent invalidating the cart)
+                                // Update stock in background
+                                WebshopManager.reload().catch(e => {
+                                    console.error(e)
+                                })
+
                                 new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton(undefined, async () => {
                                     await me.resumeStep('/checkout/payment');
                                 }).show()
