@@ -22,7 +22,24 @@
                         Bedankt voor jouw bestelling, je ontvangt via e-mail ook een bevestiging.
                     </p>
 
-                    <p v-if="isCanceled" class="error-box">
+                    <p v-if="isFailed && !closed" class="error-box selectable with-button" @click="pop">
+                        Deze bestelling is mislukt. Probeer je bestelling opnieuw te plaatsen als je dat nog niet had gedaan.
+
+                        <button class="button text" type="button">
+                            Opnieuw
+                        </button>
+                    </p>
+                    <p v-else-if="isFailed" class="error-box selectable with-button" @click="pop">
+                        Deze bestelling is mislukt
+
+                        <button class="button text" type="button">
+                            Terug
+                        </button>
+                    </p>
+                    <p v-else-if="isDeleted" class="error-box">
+                        Deze bestelling werd verwijderd
+                    </p>
+                    <p v-else-if="isCanceled" class="error-box">
                         Deze bestelling werd geannuleerd
                     </p>
 
@@ -110,7 +127,7 @@
                     </p>
 
                     <STList class="info">
-                        <STListItem class="right-description">
+                        <STListItem v-if="order.number" class="right-description">
                             <h3 class="style-definition-label">
                                 Bestelnummer
                             </h3>
@@ -410,8 +427,21 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.order && this.order.payment !== null && this.order.payment.method === PaymentMethod.Transfer
     }
 
+    get closed() {
+        // 2 minutes in advance already
+        return this.webshop.isClosed(2*60*1000) || !this.organization.meta.packages.useWebshops
+    }
+
+    get isFailed() {
+        return !this.order || this.order.number === null
+    }
+
     get isCanceled() {
         return !this.order || this.order.status === OrderStatus.Canceled || this.order.status === OrderStatus.Deleted
+    }
+
+    get isDeleted() {
+        return !this.order || this.order.status === OrderStatus.Deleted
     }
 
     get hasTickets() {
@@ -423,6 +453,9 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get statusName() {
+        if (this.isFailed) {
+            return 'Mislukt'
+        }
         return this.order ? OrderStatusHelper.getName(this.order.status) : ""
     }
 
