@@ -21,6 +21,7 @@ export enum EmailTemplateType {
     OrderConfirmationTransfer = "OrderConfirmationTransfer",
     OrderConfirmationPOS = "OrderConfirmationPOS",
     OrderReceivedTransfer = "OrderReceivedTransfer",
+    OrderOnlinePaymentFailed = "OrderOnlinePaymentFailed",
 
     /**
      * Tickets sent immediately after ordering
@@ -129,7 +130,6 @@ export class EmailTemplate extends AutoEncoder {
             ]
         }
         const sharedReplacements = [
-            "nr",
             "orderPrice",
             "orderStatus",
             "orderDetailsTable",
@@ -141,6 +141,12 @@ export class EmailTemplate extends AutoEncoder {
             "webshopName",
             "unsubscribeUrl"
         ]
+
+        if (type !== EmailTemplateType.OrderOnlinePaymentFailed) {
+            sharedReplacements.push(
+                "nr"
+            )
+        }
 
         if (type !== EmailTemplateType.OrderNotification) {
             sharedReplacements.push(

@@ -1,6 +1,7 @@
 import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+
 import { BalanceItem, Organization, Payment } from './';
 
 /**
@@ -90,12 +91,12 @@ export class BalanceItemPayment extends Model {
 
     async markFailed(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
         // Do logic of balance item
-        await this.balanceItem.markFailed()
+        await this.balanceItem.markFailed(this.payment, organization)
     }
 
     async undoFailed(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
         // Reactivate deleted items
-        await this.balanceItem.undoFailed()
+        await this.balanceItem.undoFailed(this.payment, organization)
     }
 
 }
