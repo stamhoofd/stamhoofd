@@ -8,12 +8,12 @@
         <main>
             <h1 class="style-navigation-title">
                 Zaaloverzicht
-
-                <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">
-                    <span>{{ selectedProduct.name }}</span>
-                    <span class="icon arrow-down-small" />
-                </button>
             </h1>
+
+            <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">
+                <span>{{ selectedProduct.name }}</span>
+                <span class="icon arrow-down-small" />
+            </button>
 
             <div v-for="section of sections" :key="section.id" class="container">
                 <hr>
