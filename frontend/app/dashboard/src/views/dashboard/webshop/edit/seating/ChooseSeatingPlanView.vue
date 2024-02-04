@@ -8,7 +8,7 @@
         </p>
 
         <p class="info-box icon gift">
-            De zetelselectie functie is nu nog even gratis voor alle webshops die je nu al aanmaakt.
+            De zetelselectie functie is voorlopig nog zonder meerkost te gebruiken voor alle webshops die je nu al aanmaakt. Dit zal in de toekomst in een apart pakket worden ondergebracht, de meerkost zal wel beperkt blijven.
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
