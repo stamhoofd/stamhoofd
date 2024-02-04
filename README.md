@@ -51,6 +51,10 @@ Everything should run fine now and you should be able to visit `https://dashboar
 
 Feel free to contact us via hello@stamhoofd.be if you have questions about development and how to set it up.
 
+### E-mails
+
+Stamhoofd bundles with maildev to test emails in development. This is automatically started when using the `yarn dev:server` command or `yarn mail` manually. This starts an SMTP server and web client at `http://0.0.0.0:1080/` (to see all incoming emails).
+
 ### Backend
 
 Use these commands in `/backend`
