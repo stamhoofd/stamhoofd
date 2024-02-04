@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Colors } from '@stamhoofd/utility';
 
 import { Address } from './addresses/Address';
 import { STPackageStatus, STPackageType } from './billing/STPackage';
@@ -351,7 +352,11 @@ export class OrganizationMetaData extends AutoEncoder {
             Replacement.create({
                 token: "primaryColor",
                 value: this.color ? this.color : "#0053ff"
-            })
+            }),
+            Replacement.create({
+                token: "primaryColorContrast",
+                value: this.color ? Colors.getContrastColor(this.color) : "#fff"
+            }),
         ]
     }
 }

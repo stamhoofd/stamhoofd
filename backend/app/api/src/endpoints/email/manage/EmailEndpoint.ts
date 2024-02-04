@@ -30,7 +30,7 @@ export const freeEmailRateLimiter = new RateLimiter({
     limits: [
         {   
             // Max 100 a day
-            limit: STAMHOOFD.environment === 'development' ? 1 : 100,
+            limit: 100,
             duration: 24 * 60 * 1000 * 60
         },
         {   
@@ -203,7 +203,8 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             ...email,
             from,
             replyTo,
-            attachments
+            attachments,
+            defaultReplacements: request.body.defaultReplacements ?? []
         })
 
         Email.schedule(builder)

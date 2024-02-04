@@ -538,7 +538,8 @@ export class Order extends Model {
             // text: template.text,
             from: data.from,
             replyTo: data.replyTo,
-            type: 'transactional'
+            type: 'transactional',
+            defaultReplacements: this.webshop.meta.getEmailReplacements()
         })
 
         Email.schedule(builder)

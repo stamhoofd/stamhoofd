@@ -153,7 +153,8 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
 
     async mail(payments: PaymentGeneral[]) {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../mail/MailView.vue"), {
-            payments
+            payments,
+            defaultReplacements: OrganizationManager.organization.meta.getEmailReplacements()
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }

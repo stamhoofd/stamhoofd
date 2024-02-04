@@ -1,3 +1,4 @@
+export * from "./src/Colors"
 export * from "./src/DataValidator"
 export * from "./src/Formatter"
 export * from "./src/GoogleTranslateHelper"

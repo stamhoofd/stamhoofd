@@ -4,13 +4,14 @@ export class EmailStyler {
 
         // Force replacement value
         const primaryColor = "{{primaryColor}}";
+        const primaryColorContrast = "{{primaryColorContrast}}";
         const scss = imported[0][1].replaceAll("#0053ff", primaryColor) as string
 
         let styles = scss;
         const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";
         styles += " hr {"+hrCSS+"}";
             
-        const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: white; padding: 0 27px; line-height: 42px; background: "+primaryColor+"; text-align: center; border-radius: 7px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
+        const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: "+primaryColorContrast+"; padding: 0 27px; line-height: 42px; background: "+primaryColor+"; text-align: center; border-radius: 7px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
         styles += " .button.primary { "+buttonCSS+" } .button.primary:active { transform: scale(0.95, 0.95); } ";
 
         const inlineLinkCSS = "margin: 0; text-decoration: underline; font-size: inherit; font-weight: inherit; color: inherit; touch-action: manipulation;";
@@ -60,30 +61,31 @@ export class EmailStyler {
         // add force add padding and margin inline
         const blocks = element.querySelectorAll("h1,h2,h3,h4")
         for (const el of blocks) {
-            (el as any).style.cssText = "margin: 0; padding: 0;"
+            (el as any).setAttribute("style", "margin: 0; padding: 0;");
         }
 
         const ps = element.querySelectorAll("p")
         for (const el of ps) {
-            (el as any).style.cssText = "margin: 0; padding: 0; line-height: 1.4;"
+            (el as any).setAttribute("style", "margin: 0; padding: 0; line-height: 1.4;");
         }
 
         // Force HR
         const hrElements = element.querySelectorAll("hr")
         for (const el of hrElements) {
-            (el as any).style.cssText = hrCSS
+            (el as any).setAttribute("style", hrCSS); // style.cssText doesn't work reliably (skips some properties)
         }
 
         // Force HR
         const inlineLinkElements = element.querySelectorAll(".inline-link")
         for (const el of inlineLinkElements) {
-            (el as any).style.cssText = inlineLinkCSS
+            (el as any).setAttribute("style", inlineLinkCSS); // style.cssText doesn't work reliably (skips some properties)
         }
 
         // Replace all buttons with tables
         const buttons = element.querySelectorAll(".button.primary")
         for (const el of buttons) {
-            (el as any).style.cssText = buttonCSS
+            (el as any).setAttribute("style", buttonCSS); // style.cssText doesn't work reliably (skips some properties)
+
             // Old e-mail client fix for buttons
             el.insertAdjacentHTML("beforebegin", `<table width="100%" cellspacing="0" cellpadding="0" style="margin: 5px 0;">
 <tr>
@@ -105,7 +107,7 @@ export class EmailStyler {
         // Force button
         const buttonDescriptionElements = element.querySelectorAll(".description")
         for (const el of buttonDescriptionElements) {
-            (el as any).style.cssText = descriptionCSS
+            (el as any).setAttribute("style", descriptionCSS); // style.cssText doesn't work reliably (skips some properties)
         }
 
         // add empty paragraph <br>'s
