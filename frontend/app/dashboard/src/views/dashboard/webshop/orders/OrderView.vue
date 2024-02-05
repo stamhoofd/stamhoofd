@@ -336,6 +336,7 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
@@ -595,7 +596,6 @@ export default class OrderView extends Mixins(NavigationMixin){
                 this.loadingTickets = false
             }).catch(e => {
                 console.error(e)
-                new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt", "error red").show()
                 this.loadingTickets = false
             }).finally(() => {
                 this.downloadNewTickets()
@@ -735,7 +735,16 @@ export default class OrderView extends Mixins(NavigationMixin){
                     }
                 }
             }
-        }).catch(console.error);
+        }).catch((e) => {
+            if (this.tickets.length === 0) {
+                if (Request.isNetworkError(e)) {
+                    new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.", "error red").show()
+                } else {
+                    Toast.fromError(e).show()
+                    new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt", "error red").show()
+                }
+            }
+        });
     }
 
     get recordCategories(): RecordCategory[] {

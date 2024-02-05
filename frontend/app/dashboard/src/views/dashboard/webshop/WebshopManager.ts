@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Request, RequestResult } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
@@ -235,10 +235,16 @@ export class WebshopManager {
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
             const version = Version
+            let resolved = false;
 
             const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
+
+                if (resolved) {
+                    return;
+                }
+                resolved = true;
                 resolve(DBOpenRequest.result)
             }
 
@@ -249,12 +255,18 @@ export class WebshopManager {
 
             DBOpenRequest.onerror = (event) => {
                 console.error(event)
-                
+
+                if (resolved) {
+                    return;
+                }
+
                 // Try to delete this database if something goes wrong
                 //if (STAMHOOFD.environment == "development") {
                 this.deleteDatabase();
                 //}
 
+
+                resolved = true;
                 reject(new SimpleError({
                     code: "not_supported",
                     message: "Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken."
@@ -287,6 +299,18 @@ export class WebshopManager {
                     }
                 }
             };
+
+            // Timeout
+            // Sometimes a browser hangs when trying to open a database. We cannot wait forever...
+            setTimeout(() => {
+                if (!resolved) {
+                    // Abort 
+                    reject(new SimpleError({
+                        code: "not_supported",
+                        message: "Kijk na of je nog een ander tabblad open hebt staan met Stamhoofd en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken."
+                    }))
+                }
+            }, 2000);
         })
 
         return this.databasePromise.then(database => {
@@ -425,33 +449,40 @@ export class WebshopManager {
     }
 
     async streamTickets(callback: (ticket: TicketPrivate) => void, networkFetch = true): Promise<void> {
-        const db = await this.getDatabase()
+        try {
+            const db = await this.getDatabase()
 
-        await new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["tickets"], "readonly");
+            await new Promise<void>((resolve, reject) => {
+                const transaction = db.transaction(["tickets"], "readonly");
 
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                reject(event)
-            };
+                transaction.onerror = (event) => {
+                    // Don't forget to handle errors!
+                    reject(event)
+                };
 
-            // Do the actual saving
-            const objectStore = transaction.objectStore("tickets");
+                // Do the actual saving
+                const objectStore = transaction.objectStore("tickets");
 
-            const request = objectStore.openCursor()
-            request.onsuccess = (event: any) => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    const rawOrder = cursor.value
-                    const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
-                    callback(ticket)
-                    cursor.continue();
-                } else {
-                    // no more results
-                    resolve()
+                const request = objectStore.openCursor()
+                request.onsuccess = (event: any) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        const rawOrder = cursor.value
+                        const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
+                        callback(ticket)
+                        cursor.continue();
+                    } else {
+                        // no more results
+                        resolve()
+                    }
                 }
+            })
+        } catch (e) {
+            console.error(e);
+            if (!networkFetch) {
+                throw e;
             }
-        })
+        }
 
         if (networkFetch) {
             await this.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
@@ -496,45 +527,52 @@ export class WebshopManager {
      * Warning: might stream same orders multiple times if they have been changed
      */
     async streamOrders(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
-        const db = await this.getDatabase()
+        try {
+            const db = await this.getDatabase()
 
-        await new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(["orders"], "readonly");
+            await new Promise<void>((resolve, reject) => {
+                const transaction = db.transaction(["orders"], "readonly");
 
-            transaction.onerror = (event) => {
-                // Don't forget to handle errors!
-                try {
-                    this.deleteDatabase();
-                } catch (e) {
-                    console.error(e)
-                }
-                reject(event)
-            };
-
-            // Do the actual saving
-            const objectStore = transaction.objectStore("orders");
-
-            const request = objectStore.openCursor()
-            request.onsuccess = (event: any) => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    const rawOrder = cursor.value
+                transaction.onerror = (event) => {
+                    // Don't forget to handle errors!
                     try {
-                        const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
-                        callback(order)
+                        this.deleteDatabase();
                     } catch (e) {
-                        // Decoding error: ignore
-                        // force fetch all again
-                        this.clearLastFetchedOrder().catch(console.error)
-
+                        console.error(e)
                     }
-                    cursor.continue();
-                } else {
-                    // no more results
-                    resolve()
+                    reject(event)
+                };
+
+                // Do the actual saving
+                const objectStore = transaction.objectStore("orders");
+
+                const request = objectStore.openCursor()
+                request.onsuccess = (event: any) => {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        const rawOrder = cursor.value
+                        try {
+                            const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
+                            callback(order)
+                        } catch (e) {
+                            // Decoding error: ignore
+                            // force fetch all again
+                            this.clearLastFetchedOrder().catch(console.error)
+
+                        }
+                        cursor.continue();
+                    } else {
+                        // no more results
+                        resolve()
+                    }
                 }
+            })
+        } catch (e) {
+            console.error(e);
+            if (!networkFetch) {
+                throw e;
             }
-        })
+        }
 
         if (networkFetch) {
             const owner = {}
