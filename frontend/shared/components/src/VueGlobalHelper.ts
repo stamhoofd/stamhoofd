@@ -84,6 +84,10 @@ export class VueGlobalHelper {
         Vue.prototype.$isIOS = Vue.prototype.$OS === "iOS"
         Vue.prototype.$isMac = Vue.prototype.$OS === "macOS"
 
+        Vue.prototype.pluralText = function(num: number, singular: string, plural: string) {
+            return Formatter.pluralText(num, singular, plural)
+        }
+
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;
             if (element && (element.tagName === 'INPUT' || element.tagName === 'SELECT') && element.form && !element.closest('[data-disable-enter-focus]')) {

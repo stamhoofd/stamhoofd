@@ -32,6 +32,29 @@ export class ProductPrice extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 219 })
     hidden = false
+
+    /**
+     * Total stock, excluding already sold items into account
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 221 })
+    stock: number | null = null
+
+    @field({ decoder: IntegerDecoder, version: 221 })
+    usedStock = 0
+
+    get isSoldOut(): boolean {
+        if (this.stock === null) {
+            return false
+        }
+        return this.usedStock >= this.stock
+    }
+
+    get remainingStock(): number | null {
+        if (this.stock === null) {
+            return null
+        }
+        return Math.max(0, this.stock - this.usedStock)
+    }
 }
 
 export class Option extends AutoEncoder {
@@ -46,6 +69,29 @@ export class Option extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder })
     price = 0;
+
+    /**
+     * Total stock, excluding already sold items into account
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 221 })
+    stock: number | null = null
+
+    @field({ decoder: IntegerDecoder, version: 221 })
+    usedStock = 0
+
+    get isSoldOut(): boolean {
+        if (this.stock === null) {
+            return false
+        }
+        return this.usedStock >= this.stock
+    }
+
+    get remainingStock(): number | null {
+        if (this.stock === null) {
+            return null
+        }
+        return Math.max(0, this.stock - this.usedStock)
+    }
 }
 
 export class OptionMenu extends AutoEncoder {
@@ -234,6 +280,20 @@ export class Product extends AutoEncoder {
     }
 
     get isSoldOut(): boolean {
+        // If all prices are sold out
+        if (this.prices.every(p => p.isSoldOut)) {
+            return true
+        }
+
+        for (const menu of this.optionMenus) {
+            if (!menu.multipleChoice) {
+                // Required to choose one
+                if (menu.options.every(o => o.isSoldOut)) {
+                    return true
+                }
+            }
+        }
+
         if (this.stock === null) {
             return false
         }

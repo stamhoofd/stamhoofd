@@ -6,6 +6,12 @@
         <p v-if="productPrice.hidden" class="style-description-small">
             Verborgen
         </p>
+        <p v-if="productPrice.isSoldOut" class="style-description-small">
+            Uitverkocht
+        </p>
+        <p v-else-if="productPrice.stock" class="style-description-small">
+            Nog {{ pluralText(productPrice.remainingStock, 'stuk', 'stuks') }} beschikbaar
+        </p>
 
         <template slot="right">
             <span><template v-if="productPrice.discountPrice">

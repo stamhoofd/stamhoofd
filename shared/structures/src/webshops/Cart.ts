@@ -8,6 +8,14 @@ import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Produc
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 
+type StockDefinition = {
+    /**
+     * The maximum amount we can select with the current options when editing our item
+     */
+    remaining: number;
+    text: string;
+}
+
 export class CartItemOption extends AutoEncoder {
     @field({ decoder: Option })
     option: Option;
@@ -412,6 +420,84 @@ export class CartItem extends AutoEncoder {
     }
 
     /**
+     * 
+     * @param oldItem The item that is being edited, or null if it is a new item. It should be included in the cart.
+     * @param cart 
+     * @returns 
+     */
+    getAvailableStock(oldItem: CartItem|null|undefined, cart: Cart, webshop: Webshop, admin: boolean): StockDefinition[] {
+        const definitions: StockDefinition[] = []
+
+        // General product amount
+        if (this.product.remainingStock !== null) {
+            const inCart = cart.items.reduce((prev, item) => {
+                if (item.product.id != this.product.id) {
+                    return prev
+                }
+                return prev + item.amount
+            }, 0)  - (oldItem?.amount ?? 0);
+
+            const reserved = cart.items.reduce((prev, item) => {
+                if (item.product.id != this.product.id) {
+                    return prev
+                }
+                return prev + item.reservedAmount
+            }, 0);
+
+            const remainingStock = this.product.remainingStock + reserved;
+            const remaining = remainingStock - inCart;
+
+            let more = '';
+            if (inCart > 0) {
+                more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
+            }
+            const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${this.product.getRemainingStockText(remainingStock)} beschikbaar${more}`
+
+            definitions.push({
+                remaining,
+                text
+            })
+        }
+
+        // Todo: price and option stock
+
+        // Seats stock
+        const remainingSeats = this.product.getRemainingSeats(webshop, admin)
+        if (remainingSeats !== null) {
+            const inCart = cart.items.reduce((prev, item) => {
+                if (item.product.id != this.product.id) {
+                    return prev
+                }
+                return prev + item.seats.length
+            }, 0)  - (oldItem?.seats.length ?? 0);
+
+            const reserved = cart.items.reduce((prev, item) => {
+                if (item.product.id != this.product.id) {
+                    return prev
+                }
+                return prev + item.reservedSeats.length
+            }, 0);
+
+            const remainingStock = remainingSeats + reserved;
+            const remaining = remainingStock - inCart;
+
+            let more = '';
+            if (inCart > 0) {
+                more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
+            }
+            const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${Formatter.pluralText(remainingStock, 'plaats', 'plaatsen')} beschikbaar${more}`
+
+            definitions.push({
+                remaining,
+                text
+            })
+        }
+
+
+        return definitions
+    }
+
+    /**
      * Update self to the newest available data and throw if it was not able to recover
      */
     validate(webshop: Webshop, cart: Cart, refresh = true, asAdmin = false) {
@@ -592,6 +678,8 @@ export class CartItem extends AutoEncoder {
         // Update prices
         this.calculateUnitPrice(cart)
     }
+
+
 
 }
 

@@ -47,6 +47,24 @@
                     Deze keuze wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.
                 </p>
             </STListItem>
+
+            <STListItem v-if="useStock !== null || !isSingle" :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="useStock" />
+
+                <h3 class="style-title-list">
+                    Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
+                </h3>
+
+                <p v-if="useStock" class="style-description-small">
+                    Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                </p>
+
+                <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox title="" error-fields="stock" :error-box="errorBox">
+                        <NumberInput v-model="stock" />
+                    </STInputBox>
+                </div>
+            </STListItem>
         </STList>
     </div>
 </template>
@@ -138,6 +156,26 @@ export default class ProductPriceBox extends Vue {
 
     set hidden(hidden: boolean) {
         this.addPricePatch(ProductPrice.patch({ hidden }))
+    }
+
+    get useStock() {
+        return this.patchedProductPrice.stock !== null
+    }
+
+    set useStock(useStock: boolean) {
+        this.addPricePatch(ProductPrice.patch({ stock: useStock ? (this.patchedProductPrice.stock ?? this.patchedProductPrice.stock ?? (this.patchedProductPrice.usedStock || 10)) : null }))
+    }
+
+    get stock() {
+        return this.patchedProductPrice.stock
+    }
+
+    set stock(stock: number | null) {
+        this.addPricePatch(ProductPrice.patch({ stock }))
+    }
+
+    get usedStock() {
+        return this.patchedProductPrice.usedStock
     }
 
     addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {

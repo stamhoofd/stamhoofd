@@ -80,6 +80,10 @@
                             {{ price.discountPrice | price }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount == 1 ? 'stuk' : 'stuks' }}
                         </p>
 
+                        <p v-if="price.remainingStock !== null && price.remainingStock < cartItem.amount + 30" class="style-description-small">
+                            Nog {{ pluralText(price.remainingStock, 'stuk', 'stuks') }} beschikbaar
+                        </p>
+
                         <template slot="right">
                             {{ price.price | price }}
                         </template>
@@ -349,7 +353,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
             return null;
         }
     
-        return remaining + (this.oldItem?.reservedSeats.length ?? 0) - this.otherCartItemsSeatCount + this.otherCartItemsReservedSeatCount
+        return remaining + (this.oldItem?.reservedSeats.length ?? 0) + this.otherCartItemsReservedSeatCount - this.otherCartItemsSeatCount
     }
 
     get remainingSeats() {
