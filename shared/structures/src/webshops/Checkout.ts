@@ -358,7 +358,7 @@ export class Checkout extends AutoEncoder {
     validatePayment(webshop: Webshop, organizationMeta: OrganizationMetaData) {
         if (!this.paymentMethod) {
             throw new SimpleError({
-                code: "missing_payment_ethod",
+                code: "missing_payment_method",
                 message: "Missing payment method",
                 human: "Kies een betaalmethode",
                 field: "paymentMethod"
@@ -366,8 +366,8 @@ export class Checkout extends AutoEncoder {
         }
         if (!webshop.meta.paymentMethods.includes(this.paymentMethod)) {
             throw new SimpleError({
-                code: "missing_payment_ethod",
-                message: "Missing payment method",
+                code: "invalid_payment_method",
+                message: "Invalid payment method",
                 human: "Deze betaalmethode is niet meer beschikbaar. Herlaad eventueel de pagina en probeer opnieuw.",
                 field: "paymentMethod"
             })
@@ -401,7 +401,7 @@ export class Checkout extends AutoEncoder {
             this.validateCustomer(webshop, organizationMeta, i18n, asAdmin, user)
             this.validateRecordAnswers(webshop)
 
-            if (this.totalPrice != 0 && !asAdmin) {
+            if (this.totalPrice !== 0 && !asAdmin) {
                 this.validatePayment(webshop, organizationMeta)
             } else if (this.totalPrice === 0) {
                 this.paymentMethod = PaymentMethod.Unknown

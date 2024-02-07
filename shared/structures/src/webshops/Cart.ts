@@ -140,7 +140,7 @@ export class CartItem extends AutoEncoder {
             price += option.option.price
         }
 
-        if (price >= 0) {
+        if (this.productPrice.price >= 0) {
             this.unitPrice = Math.max(0, price)
         } else {
             // Allow negative
@@ -178,7 +178,12 @@ export class CartItem extends AutoEncoder {
     }
 
     getPrice(cart: Cart): number {
-        return Math.max(0, this.getUnitPrice(cart) * this.amount + this.getAdditionalPrice() + this.getPartialExtraPrice())
+        const price = this.getUnitPrice(cart) * this.amount + this.getAdditionalPrice() + this.getPartialExtraPrice();
+        if (this.productPrice.price < 0) {
+            // Allow virtal negative price to other items
+            return price
+        }
+        return Math.max(0, price)
     }
 
     getFormattedPriceAmount(cart: Cart) {
