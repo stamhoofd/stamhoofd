@@ -22,6 +22,10 @@
                 Je ontvangt 25 euro tegoed van {{ registerCode.organization }} als je nu registreert
             </p>
 
+            <p v-if="reuseRegisterCode" class="warning-box">
+                Je probeert een doorverwijzingslink met korting van een andere vereniging te gebruiken, maar je hebt al een vereniging geregistreerd. Een doorverwijzingslink is enkel geldig voor de eerste vereniging die je op Stamhoofd aansluit.
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
@@ -111,7 +115,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
+import { NetworkManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -158,6 +162,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         initialRegisterCode!: { code: string; organization: string } | null;
 
     registerCode = this.initialRegisterCode
+    reuseRegisterCode = false;
     loading = false
 
     // Make reactive
@@ -167,50 +172,62 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     umbrellaOrganization: UmbrellaOrganization | null = null
 
     mounted() {
+        UrlHelper.setUrl("/aansluiten")   
+        this.loadRegisterCode().catch(e => {
+            console.error(e)
+        })
+    }
+
+    async loadRegisterCode() {
         if (this.initialRegisterCode) {
             try {
-                localStorage.setItem("savedRegisterCode", JSON.stringify(this.initialRegisterCode))
-                localStorage.setItem("savedRegisterCodeDate", new Date().getTime()+"")
+                await Storage.keyValue.setItem("savedRegisterCode", JSON.stringify(this.initialRegisterCode))
+                await Storage.keyValue.setItem("savedRegisterCodeDate", new Date().getTime()+"")
             } catch (e) {
                 console.error(e)
             }
             //UrlHelper.setUrl("/aansluiten/?code="+encodeURIComponent(this.initialRegisterCode.code)+"&org="+encodeURIComponent(this.initialRegisterCode.organization))
         }
-        UrlHelper.setUrl("/aansluiten")   
-
-        if (!this.initialRegisterCode) {
-            try {
-                const currentCount = localStorage.getItem("what-is-new")
-                const saved = localStorage.getItem("savedRegisterCode")
-                const dString = localStorage.getItem("savedRegisterCodeDate")
-                if (currentCount === null && saved !== null && dString !== null) {
-                    const d = parseInt(dString)
-                    if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
-                        const parsed = JSON.parse(saved)
-                        if (parsed.code && parsed.organization) {
+        try {
+            const currentCount = await Storage.keyValue.getItem("what-is-new")
+            const saved = await Storage.keyValue.getItem("savedRegisterCode")
+            const dString = await Storage.keyValue.getItem("savedRegisterCodeDate")
+            if (saved !== null && dString !== null) {
+                const d = parseInt(dString)
+                if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
+                    const parsed = JSON.parse(saved)
+                    if (parsed.code && parsed.organization) {
+                        if (currentCount === null) {
                             this.registerCode = JSON.parse(saved)
+                        } else {
+                            this.reuseRegisterCode = true
+                            this.registerCode = null
                         }
-                    } else {
-                        // Expired or invalid
-                        localStorage.removeItem("savedRegisterCode")
-                        localStorage.removeItem("savedRegisterCodeDate")
                     }
                 } else {
-                    localStorage.removeItem("savedRegisterCode")
-                    localStorage.removeItem("savedRegisterCodeDate")
+                    // Expired or invalid
+                    await Storage.keyValue.removeItem("savedRegisterCode")
+                    await Storage.keyValue.removeItem("savedRegisterCodeDate")
+                    this.registerCode = null
                 }
-            } catch (e) {
-                console.error(e)
+            } else {
+                await Storage.keyValue.removeItem("savedRegisterCode")
+                await Storage.keyValue.removeItem("savedRegisterCodeDate")
+                this.registerCode = null
             }
+        } catch (e) {
+            console.error(e)
         }
 
         if (this.registerCode) {
-            this.validateCode().catch(e => {
+            try {
+                await this.validateCode()
+            } catch (e) {
                 this.errorBox = new ErrorBox(e)
                 this.registerCode = null
-                localStorage.removeItem("savedRegisterCode")
-                localStorage.removeItem("savedRegisterCodeDate")
-            })
+                await Storage.keyValue.removeItem("savedRegisterCode")
+                await Storage.keyValue.removeItem("savedRegisterCodeDate")
+            }
         }
     }
 

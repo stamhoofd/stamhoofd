@@ -183,16 +183,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
             try {
-                const currentCount = localStorage.getItem("what-is-new")
-
                 let code = queryString.get("code")
                 let organization = queryString.get("org")
-
-                if (currentCount !== null && (code || organization)) {
-                    console.warn("Already has an organization. Skip referral discount.")
-                    code = null;
-                    organization = null;
-                }
                 this.present({
                     url: UrlHelper.transformUrl("/aansluiten"),
                     adjustHistory: false,

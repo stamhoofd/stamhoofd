@@ -78,7 +78,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { LoginHelper, Session } from "@stamhoofd/networking"
+import { LoginHelper, Session, Storage } from "@stamhoofd/networking"
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -202,6 +202,13 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 
                 const session = new Session(this.organization.id)
                 this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
+
+                try {
+                    Storage.keyValue.removeItem("savedRegisterCode").catch(console.error)
+                    Storage.keyValue.removeItem("savedRegisterCodeDate").catch(console.error)
+                } catch (e) {
+                    console.error(e)
+                }
                 
             } catch (e) {
                 this.loading = false;
