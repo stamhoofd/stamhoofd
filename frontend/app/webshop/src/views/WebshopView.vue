@@ -302,7 +302,12 @@ export default class WebshopView extends Mixins(NavigationMixin){
     
     onAddItem(cartItem: CartItem, oldItem: CartItem | null, component) {
         if (this.cartEnabled) {
-            cartItem.validate(this.webshop, CheckoutManager.cart)
+            const clonedCart = CheckoutManager.cart.clone()
+            if (oldItem) {
+                clonedCart.removeItem(oldItem)
+            }
+
+            cartItem.validate(this.webshop, clonedCart)
             if (component) {
                 component.dismiss({force: true})
             }

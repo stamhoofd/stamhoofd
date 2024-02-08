@@ -261,7 +261,7 @@ export class CheckoutStepsManager {
                     // A cart error: force a reload and go back to the cart.
                     await WebshopManager.reload()
                     
-                    if (webshop.meta.cartEnabled) {
+                    if (webshop.shouldEnableCart) {
                         component.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
                     } else {
                         component.dismiss({ force: true })
@@ -271,7 +271,7 @@ export class CheckoutStepsManager {
                     // A cart error: force a reload and go back to the cart.
                     await WebshopManager.reload()
 
-                    if (webshop.meta.cartEnabled) {
+                    if (webshop.shouldEnableCart) {
                         component.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
                     } else {
                         component.dismiss({ force: true })

@@ -1,20 +1,13 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, ObjectData, PartialWithoutMethods, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, PartialWithoutMethods, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { CartReservedSeat, ReservedSeat } from '../SeatingPlan';
+import { CartReservedSeat } from '../SeatingPlan';
+import { CartStockHelper, StockDefinition } from './CartStockHelper';
 import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product';
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
-
-type StockDefinition = {
-    /**
-     * The maximum amount we can select with the current options when editing our item
-     */
-    remaining: number;
-    text: string;
-}
 
 export class CartItemOption extends AutoEncoder {
     @field({ decoder: Option })
@@ -58,6 +51,18 @@ export class CartItem extends AutoEncoder {
     reservedAmount = 0;
 
     /**
+     * Holds a list of what we reserved a stock for (which produce prices and which options specifically so we don't reserve the same thing multiple times or revert when it wasn't reserved earlier)
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, IntegerDecoder), version: 224 })
+    reservedOptions = new Map<string, number>();
+
+    /**
+     * Holds a list of what we reserved a stock for (which produce prices and which options specifically so we don't reserve the same thing multiple times or revert when it wasn't reserved earlier)
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, IntegerDecoder), version: 224 })
+    reservedPrices = new Map<string, number>();
+
+    /**
      * When the seats are successfully reserved, we store them here
      * This makes editing seats possible because we know we can still use these seats even if they are blocked normally
      */
@@ -79,10 +84,62 @@ export class CartItem extends AutoEncoder {
         return this.unitPrice ? (this.unitPrice * this.amount) : null
     }
 
-    static createDefault(product: Product, options: {admin: boolean}): CartItem {
+    getReservedAmountPrice(priceId: string) {
+        return this.reservedPrices.get(priceId) || 0
+    }
+
+    getReservedAmountOption(optionId: string) {
+        return this.reservedOptions.get(optionId) || 0
+    }
+
+    static createDefault(product: Product, cart: Cart, webshop: Webshop, data: {admin: boolean}): CartItem {
+        // Return the first that still has stock or the first if none has stock
+        const options: CartItemOption[] = []
+
+        // Fill in all default options here
+        for (const optionMenu of product.optionMenus) {
+            if (optionMenu.multipleChoice) {
+                continue;
+            }
+
+            let cartItemOption: CartItemOption|null = null
+
+            // Add first option with remaining stock
+            for (const option of optionMenu.options) {
+                const stock = CartStockHelper.getOptionStock({ product, option, oldItem: null, cart, webshop, admin: data.admin })
+                if (!stock || stock.remaining === null || stock.remaining > 0) {
+                    cartItemOption = CartItemOption.create({
+                        option,
+                        optionMenu
+                    })
+                    break;
+                }
+            }
+
+            // Add (default if no stock for all)
+            options.push(cartItemOption ?? CartItemOption.create({
+                option: optionMenu.options[0],
+                optionMenu
+            }))
+        }
+        
+        const prices = product.filteredPrices(data);
+        let chosenPrice: ProductPrice|null = null
+
+        for (const productPrice of prices) {
+            const stock = CartStockHelper.getPriceStock({ product, productPrice, oldItem: null, cart, webshop, admin: data.admin })
+            
+            if (!stock || stock.remaining === null || stock.remaining > 0) {
+                chosenPrice = productPrice
+                break;
+            }
+        }
+
+        // Default
         return CartItem.create({
             product: product,
-            productPrice: product.filteredPrices(options)[0]
+            productPrice: chosenPrice ?? product.filteredPrices(data)[0],
+            options
         })
     }
 
@@ -419,82 +476,20 @@ export class CartItem extends AutoEncoder {
         errors.throwIfNotEmpty()
     }
 
+    getFixedStockDefinitions(oldItem: CartItem|null|undefined, cart: Cart, webshop: Webshop, admin: boolean): StockDefinition[] {
+        return CartStockHelper.getFixedStockDefinitions({ oldItem, cart, product: this.product, webshop, admin, amount: this.amount })
+    }
+
     /**
-     * 
-     * @param oldItem The item that is being edited, or null if it is a new item. It should be included in the cart.
-     * @param cart 
-     * @returns 
+     * Return all the stock definitions for this cart item with the currently selected options
+     * = calculate how much you can order with these options
      */
     getAvailableStock(oldItem: CartItem|null|undefined, cart: Cart, webshop: Webshop, admin: boolean): StockDefinition[] {
-        const definitions: StockDefinition[] = []
+        return CartStockHelper.getAvailableStock({ oldItem, cart, product: this.product, webshop, admin, amount: this.amount, productPrice: this.productPrice, options: this.options })
+    }
 
-        // General product amount
-        if (this.product.remainingStock !== null) {
-            const inCart = cart.items.reduce((prev, item) => {
-                if (item.product.id != this.product.id) {
-                    return prev
-                }
-                return prev + item.amount
-            }, 0)  - (oldItem?.amount ?? 0);
-
-            const reserved = cart.items.reduce((prev, item) => {
-                if (item.product.id != this.product.id) {
-                    return prev
-                }
-                return prev + item.reservedAmount
-            }, 0);
-
-            const remainingStock = this.product.remainingStock + reserved;
-            const remaining = remainingStock - inCart;
-
-            let more = '';
-            if (inCart > 0) {
-                more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
-            }
-            const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${this.product.getRemainingStockText(remainingStock)} beschikbaar${more}`
-
-            definitions.push({
-                remaining,
-                text
-            })
-        }
-
-        // Todo: price and option stock
-
-        // Seats stock
-        const remainingSeats = this.product.getRemainingSeats(webshop, admin)
-        if (remainingSeats !== null) {
-            const inCart = cart.items.reduce((prev, item) => {
-                if (item.product.id != this.product.id) {
-                    return prev
-                }
-                return prev + item.seats.length
-            }, 0)  - (oldItem?.seats.length ?? 0);
-
-            const reserved = cart.items.reduce((prev, item) => {
-                if (item.product.id != this.product.id) {
-                    return prev
-                }
-                return prev + item.reservedSeats.length
-            }, 0);
-
-            const remainingStock = remainingSeats + reserved;
-            const remaining = remainingStock - inCart;
-
-            let more = '';
-            if (inCart > 0) {
-                more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
-            }
-            const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${Formatter.pluralText(remainingStock, 'plaats', 'plaatsen')} beschikbaar${more}`
-
-            definitions.push({
-                remaining,
-                text
-            })
-        }
-
-
-        return definitions
+    getMaximumRemaining(oldItem: CartItem|null|undefined, cart: Cart, webshop: Webshop, admin: boolean) {
+        return CartStockHelper.getRemaining(this.getAvailableStock(oldItem, cart, webshop, admin))
     }
 
     /**
@@ -537,8 +532,21 @@ export class CartItem extends AutoEncoder {
                 })
             }
 
+            const remaining = this.getAvailableStock(this, cart, webshop, asAdmin)
+            const minimumRemaining = CartStockHelper.getRemaining(remaining)
+            if (minimumRemaining !== null && minimumRemaining < this.amount) {
+                // Search for appropriate message in stock definitions
+                const stockDefinition = remaining.find(r => r.remaining === minimumRemaining)
+                throw new SimpleError({
+                    code: "product_unavailable",
+                    message: "Product unavailable",
+                    human: stockDefinition?.text || "Er zijn nog maar "+minimumRemaining+" stuks beschikbaar van "+this.product.name,
+                    meta: {recoverable: minimumRemaining > 0}
+                })
+            }
+
             // Count the increase in stock for the whole cart and this product
-            const pending = cart.items.reduce((prev, item) => {
+            /*const pending = cart.items.reduce((prev, item) => {
                 if (item.product.id != this.product.id) {
                     return prev
                 }
@@ -577,7 +585,7 @@ export class CartItem extends AutoEncoder {
                         meta: {recoverable: true}
                     })
                 }
-            }
+            }*/
         }
 
         if (this.product.seatingPlanId) {
@@ -635,7 +643,7 @@ export class CartItem extends AutoEncoder {
             }
 
             // Check other cart items have same seats
-            const otherItems = cart.items.filter(i => i.product.id === this.product.id && i.id < this.id)
+            const otherItems = cart.items.filter(i => i.product.id === this.product.id && i.id != this.id)
             for (const item of otherItems) {
                 for (const seat of item.seats) {
                     if (this.seats.find(s => s.equals(seat))) {
@@ -772,11 +780,18 @@ export class Cart extends AutoEncoder {
                     break;
                 }
             } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace('cart')
+                }
                 errors.addError(e)
 
                 if (isSimpleError(e) && (e.meta as any)?.recoverable) {
                     item.cartError = e;
                     newItems.push(item)
+
+                    if (!webshop.meta.cartEnabled) {
+                        break;
+                    }
                 }
             }
         }

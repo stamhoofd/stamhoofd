@@ -23,6 +23,26 @@
             <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
         </STInputBox>
 
+        <STList>
+            <STListItem v-if="useStock !== null" :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="useStock" />
+
+                <h3 class="style-title-list">
+                    Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
+                </h3>
+
+                <p v-if="useStock" class="style-description-small">
+                    Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                </p>
+
+                <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox title="" error-fields="stock" :error-box="errorBox">
+                        <NumberInput v-model="stock" />
+                    </STInputBox>
+                </div>
+            </STListItem>
+        </STList>
+
         <div v-if="!isNew && !isSingle" class="container">
             <hr>
             <h2>
@@ -40,7 +60,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox, NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { Option, OptionMenu, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -50,6 +70,10 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         STInputBox,
         STErrorsDefault,
         PriceInput,
+        NumberInput,
+        STList,
+        STListItem,
+        Checkbox
     },
 })
 export default class EditOptionView extends Mixins(NavigationMixin) {
@@ -57,13 +81,13 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    optionMenu: OptionMenu
+        optionMenu: OptionMenu
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-    option: Option
+        option: Option
     
     patchOptionMenu: AutoEncoderPatchType<OptionMenu> = OptionMenu.patch({})
 
@@ -71,7 +95,7 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<OptionMenu>) => void);
+        saveHandler: ((patch: AutoEncoderPatchType<OptionMenu>) => void);
 
     get patchedOptionMenu() {
         return this.optionMenu.patch(this.patchOptionMenu)
@@ -99,6 +123,26 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
 
     set price(price: number) {
         this.addOptionPatch(Option.patch({ price }))
+    }
+
+    get useStock() {
+        return this.patchedOption.stock !== null
+    }
+
+    set useStock(useStock: boolean) {
+        this.addOptionPatch(Option.patch({ stock: useStock ? (this.patchedOption.stock ?? this.patchedOption.stock ?? (this.patchedOption.usedStock || 10)) : null }))
+    }
+
+    get stock() {
+        return this.patchedOption.stock
+    }
+
+    set stock(stock: number | null) {
+        this.addOptionPatch(Option.patch({ stock }))
+    }
+
+    get usedStock() {
+        return this.patchedOption.usedStock
     }
 
     addOptionPatch(patch: AutoEncoderPatchType<Option>) {

@@ -5,11 +5,18 @@
             {{ optionMenu.name || 'Maak een keuze' }}
         </h2>
         <STList>
-            <STListItem v-for="option in optionMenu.options" :key="option.id" class="no-border right-price" :selectable="true" element-name="label">
-                <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" />
-                <Checkbox v-else slot="left" :checked="isOptionSelected(option)" @change="selectOption(option, $event)" />
+            <STListItem v-for="option in optionMenu.options" :key="option.id" class="no-border right-price" :selectable="canSelectOption(option)" :disabled="!canSelectOption(option)" element-name="label">
+                <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" :disabled="!canSelectOption(option)" />
+                <Checkbox v-else slot="left" :checked="isOptionSelected(option)" :disabled="!canSelectOption(option)" @change="selectOption(option, $event)" />
 
-                {{ option.name || 'Naamloos' }}
+
+                <h4 class="style-title-list">
+                    {{ option.name || 'Naamloos' }}
+                </h4>
+
+                <p v-if="getOptionStockText(option)" class="style-description-small">
+                    {{ getOptionStockText(option) }}
+                </p>
 
                 <template v-if="option.price != 0" slot="right">
                     {{ option.price | priceChange }}
@@ -22,7 +29,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, Radio, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { CartItem, CartItemOption, Option, OptionMenu } from '@stamhoofd/structures';
+import { Cart, CartItem, CartItemOption, CartStockHelper,Option, OptionMenu, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -42,11 +49,23 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class OptionMenuBox extends Mixins(NavigationMixin){
     @Prop({ required: true })
+        webshop: Webshop
+
+    @Prop({ required: true })
+        cart: Cart
+
+    @Prop({ required: true })
         cartItem: CartItem
 
     @Prop({ required: true })
         optionMenu: OptionMenu
 
+    @Prop({ default: null })
+        oldItem: CartItem | null
+    
+    @Prop({ default: false })
+        admin: boolean
+        
     isOptionSelected(option: Option) {
         return !!this.cartItem.options.find(o => o.optionMenu.id == this.optionMenu.id && o.option.id == option.id)
     }
@@ -71,6 +90,51 @@ export default class OptionMenuBox extends Mixins(NavigationMixin){
         const filtered = this.cartItem.options.filter(o => o.optionMenu.id != this.optionMenu.id)
         filtered.push(CartItemOption.create({ optionMenu: this.optionMenu, option }))
         this.cartItem.options = filtered
+    }
+
+    get product() {
+        return this.cartItem.product
+    }
+
+    get maximumRemainingAcrossOptions() {
+        return CartStockHelper.getRemainingAcrossOptions({
+            product: this.product,
+            oldItem: this.oldItem,
+            cart: this.cart,
+            webshop: this.webshop,
+            admin: this.admin,
+            amount: this.cartItem.amount
+        }, false)
+    }
+
+    getOptionStock(option: Option) {
+        const optionStock = CartStockHelper.getOptionStock({product: this.product, oldItem: this.oldItem, cart: this.cart, option, webshop: this.webshop, admin: this.admin, amount: this.cartItem.amount})
+        if (!optionStock) {
+            return null
+        }
+
+        if (optionStock.remaining !== null && this.maximumRemainingAcrossOptions !== null && optionStock.remaining > this.maximumRemainingAcrossOptions) {
+            // Doesn't matter to show this
+            return null;
+        }
+        return optionStock
+    }
+
+    getOptionStockText(option: Option) {
+        // Don't show text if all options are sold out
+        if (this.maximumRemainingAcrossOptions === 0) {
+            return null
+        }
+
+        return this.getOptionStock(option)?.shortText
+    }
+
+    canSelectOption(option: Option) {
+        if (this.maximumRemainingAcrossOptions === 0) {
+            return false
+        }
+
+        return this.getOptionStock(option)?.remaining !== 0
     }
 }
 </script>

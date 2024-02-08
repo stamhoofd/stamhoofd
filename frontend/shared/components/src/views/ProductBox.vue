@@ -20,7 +20,7 @@
                     <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ product.enableAfter | dateTime }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">Onbeschikbaar</span>
                     <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
-                    <span v-else-if="product.stockText !== null" class="style-tag warn">{{ product.stockText }}</span>
+                    <span v-else-if="stockText !== null" class="style-tag" :class="stockText.style">{{ stockText.text }}</span>
                 </p>
             </div>
             <figure v-if="imageSrc">
@@ -39,8 +39,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { LegacyRecordTypePriority } from "@stamhoofd/structures";
-import { Cart, CartItem, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, CartStockHelper, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -128,11 +127,60 @@ export default class ProductBox extends Mixins(NavigationMixin){
         return this.imageResolution?.height
     }
 
+    get stockText() {
+        // How much we can still order from this product
+        const remaining = CartStockHelper.getRemainingAcrossOptions({ cart: this.cart, product: this.product, webshop: this.webshop, admin: this.admin}, true);
+        
+        if (remaining === null) {
+            return null
+        }
+
+        if (remaining > 25) {
+            return null
+        }
+        
+        const remainingWithoutCart = CartStockHelper.getRemainingAcrossOptions({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin}, true);
+        if (remainingWithoutCart === 0) {
+            return {
+                text: "Uitverkocht",
+                style: "error"
+            }
+        }
+
+        if (this.editExisting) {
+            // Report only total stock
+            if (remainingWithoutCart === null || remainingWithoutCart > 25) {
+                return null
+            }
+
+            return {
+                text:  'Nog ' + this.product.getRemainingStockText(remainingWithoutCart),
+                style: "warn"
+            }
+        }
+
+        if (remaining === 0 ) {
+            return {
+                text: "Maximum bereikt",
+                style: "error"
+            }
+        }
+
+        return {
+            text:  'Nog ' + this.product.getRemainingStockText(remaining),
+            style: "warn"
+        }
+    }
+
+    get editExisting() {
+        return this.product.isUnique || !this.webshop.shouldEnableCart
+    }
+
     onClicked() {
-        const editExisting = this.product.isUnique || !this.webshop.shouldEnableCart
+        const editExisting = this.editExisting
         const oldItem = editExisting ? this.cart.items.find(i => i.product.id == this.product.id) : undefined
 
-        let cartItem = oldItem?.clone() ?? CartItem.createDefault(this.product, {admin: this.admin})
+        let cartItem = oldItem?.clone() ?? CartItem.createDefault(this.product, this.cart, this.webshop, {admin: this.admin})
 
         // refresh: to make sure we display the latest data
         if (oldItem) {
@@ -142,7 +190,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 console.error(e)
 
                 // Not recoverable
-                cartItem = CartItem.createDefault(this.product, {admin: this.admin})
+                cartItem = CartItem.createDefault(this.product, this.cart, this.webshop, {admin: this.admin})
             }
         }
 
@@ -172,10 +220,6 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 modalDisplayStyle: "sheet"
             });
         }
-    }
-
-    get remainingStock() {
-        return this.product.remainingStock
     }
 
     formatDateRange(dateRange: ProductDateRange) {

@@ -23,15 +23,15 @@
             </p>
 
             <p v-else-if="cartItem.product.isSoldOut" class="warning-box">
-                Dit artikel is uitverkocht.
+                Dit artikel is uitverkocht
             </p>
 
             <p v-else-if="areSeatsSoldOut" class="warning-box">
-                Alle plaatsen zijn volzet.
+                Alle plaatsen zijn volzet
             </p>
 
             <p v-else-if="!canOrder" class="warning-box">
-                Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel.
+                Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel
             </p>
 
             <p v-else-if="cartItem.product.closesSoonText" class="info-box">
@@ -70,8 +70,8 @@
             <div v-if="cartItem.product.filteredPrices({admin}).length > 1" class="container">
                 <hr>
                 <STList>
-                    <STListItem v-for="price in cartItem.product.filteredPrices({admin})" :key="price.id" class="no-border right-price" :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" />
+                    <STListItem v-for="price in cartItem.product.filteredPrices({admin})" :key="price.id" class="no-border right-price" :selectable="canSelectPrice(price)" :disabled="!canSelectPrice(price)" element-name="label">
+                        <Radio slot="left" v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
                         <h4 class="style-title-list">
                             {{ price.name || 'Naamloos' }}
                         </h4>
@@ -80,8 +80,8 @@
                             {{ price.discountPrice | price }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount == 1 ? 'stuk' : 'stuks' }}
                         </p>
 
-                        <p v-if="price.remainingStock !== null && price.remainingStock < cartItem.amount + 30" class="style-description-small">
-                            Nog {{ pluralText(price.remainingStock, 'stuk', 'stuks') }} beschikbaar
+                        <p v-if="getPriceStockText(price)" class="style-description-small">
+                            {{ getPriceStockText(price) }}
                         </p>
 
                         <template slot="right">
@@ -91,7 +91,7 @@
                 </STList>
             </div>
 
-            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" />
+            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" :cart="cart" :old-item="oldItem" :admin="admin" :webshop="webshop" />
 
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errorBox" />
 
@@ -100,15 +100,8 @@
                 <h2>Aantal</h2>
 
                 <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
-                <p v-if="maximumRemainingStock !== null && cartItem.amount + 1 >= maximumRemainingStock" class="st-list-description">
-                    <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
-                    Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
-                </p>
 
-                <p v-if="maximumRemainingSeats !== null && cartItem.amount + 1 >= maximumRemainingSeats" class="st-list-description">
-                    <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
-                    Er {{ remainingSeats == 1 ? 'is' : 'zijn' }} nog maar {{ pluralText(remainingSeats, 'plaats', 'plaatsen') }} beschikbaar<template v-if="otherCartItemsSeatCount > 0">, waarvan er al {{ otherCartItemsSeatCount }} in jouw winkelmandje {{ otherCartItemsSeatCount == 1 ? 'zit' : 'zitten' }}</template>
-                </p>
+                <p v-for="text in stockTexts" :key="text" class="st-list-description" v-text="text" />
             </template>
 
             <div v-if="!cartEnabled && (administrationFee || (canSelectAmount && !webshop.isAllFree))" class="pricing-box max">
@@ -154,11 +147,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton,ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Cart,CartItem, ProductDateRange, ProductType, Webshop } from '@stamhoofd/structures';
+import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { Cart, CartItem, CartStockHelper, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop } from 'vue-property-decorator';
-import { Mixins } from 'vue-property-decorator';
+import { Component, Mixins, Prop } from 'vue-property-decorator';
 
 import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
@@ -306,93 +298,58 @@ export default class CartItemView extends Mixins(NavigationMixin){
         }, 0)  - (this.oldItem?.amount ?? 0)
     }
 
-    /**
-     * Return the total seat amount of this same product in the cart, that is not this item (if it is editing)
-     */
-    get otherCartItemsSeatCount() {
-        return this.cart.items.reduce((prev, item) => {
-            if (item.product.id != this.product.id) {
-                return prev
-            }
-            return prev + item.seats.length
-        }, 0)  - (this.oldItem?.seats?.length ?? 0)
-    }
-
-    /**
-     * Return the total reserved amount for the same product in this cart, without the current item included (if editing)
-     */
-    get reservedAmountFromOthers() {
-        return this.cart.items.reduce((prev, item) => {
-            if (item.product.id != this.product.id) {
-                return prev
-            }
-            return prev + item.reservedAmount
-        }, 0)  - (this.oldItem?.reservedAmount ?? 0)
-    }
-
-    get otherCartItemsReservedSeatCount() {
-        return this.cart.items.reduce((prev, item) => {
-            if (item.product.id != this.product.id) {
-                return prev
-            }
-            return prev + item.reservedSeats.length
-        }, 0)  - (this.oldItem?.reservedSeats.length ?? 0)
-    }
-
-    get maximumRemainingStock() {
-        if (this.product.remainingStock === null) {
-            return null
-        }
-
-        return this.product.remainingStock + (this.oldItem?.reservedAmount ?? 0) - this.count + this.reservedAmountFromOthers
-    }
-
-    get maximumRemainingSeats() {
-        const remaining = this.product.getRemainingSeats(this.webshop, this.admin)
-        if (remaining === null) {
-            return null;
-        }
-    
-        return remaining + (this.oldItem?.reservedSeats.length ?? 0) + this.otherCartItemsReservedSeatCount - this.otherCartItemsSeatCount
-    }
-
-    get remainingSeats() {
-        const remaining = this.product.getRemainingSeats(this.webshop, this.admin)
-        if (remaining === null) {
-            return null;
-        }
-    
-        return remaining + (this.oldItem?.reservedSeats.length ?? 0) + this.otherCartItemsReservedSeatCount
-    }
-
-    get maximumRemainingOrder() {
-        if (this.product.maxPerOrder === null) {
-            return null
-        }
-
-        return this.product.maxPerOrder - this.count
+    get availableStock() {
+        return this.cartItem.getAvailableStock(this.oldItem, this.cart, this.webshop, this.admin)
     }
 
     get maximumRemaining() {
-        let minArr = [this.maximumRemainingStock, this.maximumRemainingSeats, this.maximumRemainingOrder].filter(v => v !== null) as number[]
+        return this.cartItem.getMaximumRemaining(this.oldItem, this.cart, this.webshop, this.admin)
+    }
 
-        if (this.admin) {
-            minArr = [this.maximumRemainingSeats].filter(v => v !== null) as number[]
-        }
+    get maximumRemainingAcrossOptions() {
+        return CartStockHelper.getRemainingAcrossOptions({
+            product: this.product,
+            oldItem: this.oldItem,
+            cart: this.cart,
+            webshop: this.webshop,
+            admin: this.admin,
+            amount: this.cartItem.amount
+        }, false)
+    }
 
-        if (minArr.length === 0) {
+    get stockTexts() {
+        const maximumRemaining = this.maximumRemaining
+        return this.availableStock.filter(v => v.text !== null && (!v.remaining || !maximumRemaining || v.remaining <= maximumRemaining)).map(s => s.text) as string[]
+    }
+
+    getPriceStock(price: ProductPrice) {
+        const priceStock = CartStockHelper.getPriceStock({product: this.product, oldItem: this.oldItem, cart: this.cart, productPrice: price, webshop: this.webshop, admin: this.admin, amount: this.cartItem.amount})
+        if (!priceStock) {
             return null
         }
 
-        return Math.min(...minArr)
+        if (priceStock.remaining !== null && this.maximumRemainingAcrossOptions !== null && priceStock.remaining > this.maximumRemainingAcrossOptions) {
+            // Doesn't matter to show this
+            return null;
+        }
+        return priceStock
     }
 
-    get remainingStock() {
-        return (this.product.remainingStock ?? 0) + (this.oldItem?.reservedAmount ?? 0) + this.reservedAmountFromOthers
+    getPriceStockText(price: ProductPrice) {
+        // Don't show text if all options are sold out
+        if (this.maximumRemainingAcrossOptions === 0) {
+            return null
+        }
+
+        return this.getPriceStock(price)?.shortText
     }
 
-    get remainingStockText() {
-        return this.product.getRemainingStockText(this.remainingStock)
+    canSelectPrice(price: ProductPrice) {
+        if (this.maximumRemainingAcrossOptions === 0) {
+            return false
+        }
+
+        return this.getPriceStock(price)?.remaining !== 0
     }
 
     formatDateRange(dateRange: ProductDateRange) {
@@ -400,11 +357,12 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get areSeatsSoldOut() {
-        return this.maximumRemainingSeats === 0
+        return CartStockHelper.getSeatsStock({product: this.product, oldItem: this.oldItem, cart: this.cart, webshop: this.webshop, admin: this.admin, amount: this.cartItem.amount})?.stock === 0
     }
 
     get canOrder() {
-        return (this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0 || !!this.oldItem) && this.product.isEnabled)) && !this.areSeatsSoldOut
+        return (this.maximumRemaining === null || this.maximumRemaining > 0) && this.product.isEnabled
+        //return (this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0 || !!this.oldItem) && this.product.isEnabled)) && !this.areSeatsSoldOut
     }
 
     get canSelectAmount() {

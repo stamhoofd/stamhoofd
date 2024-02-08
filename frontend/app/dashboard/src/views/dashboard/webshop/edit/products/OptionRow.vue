@@ -6,6 +6,12 @@
         <h3 class="style-title-list">
             {{ option.name || 'Naamloos' }}
         </h3>
+        <p v-if="option.isSoldOut" class="style-description-small">
+            Uitverkocht
+        </p>
+        <p v-else-if="option.stock" class="style-description-small">
+            Nog {{ pluralText(option.remainingStock, 'stuk', 'stuks') }} beschikbaar
+        </p>
 
         <template slot="right">
             <span>{{ option.price | priceChange }}</span>

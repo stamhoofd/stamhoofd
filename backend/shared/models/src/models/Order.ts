@@ -205,6 +205,30 @@ export class Order extends Model {
                         changed = true
                     }
 
+                    // Product price
+                    for (const [priceId, amount] of item.reservedPrices) {
+                        const productPrice = product.prices.find(p => p.id === priceId)
+                        if (productPrice) {
+                            productPrice.usedStock -= amount
+                            if (productPrice.usedStock < 0) {
+                                productPrice.usedStock = 0
+                            }
+                            changed = true
+                        }
+                    }
+
+                    // Options
+                    for (const [optionId, amount] of item.reservedOptions) {
+                        const option = product.optionMenus.flatMap(om => om.options).find(o => o.id === optionId)
+                        if (option) {
+                            option.usedStock -= amount
+                            if (option.usedStock < 0) {
+                                option.usedStock = 0
+                            }
+                            changed = true
+                        }
+                    }
+
                     // Seats
                     if (item.reservedSeats.length > 0) {
                         product.reservedSeats = product.reservedSeats.filter(s => !item.reservedSeats.find(s2 => s2.equals(s)))
@@ -218,8 +242,11 @@ export class Order extends Model {
             if (previousData !== null) {
                 // If we have previousData, we already removed the stock from the old items, so reservedAmount is always zero
                 item.reservedAmount = 0
+                item.reservedPrices = new Map()
+                item.reservedOptions = new Map()
                 changed = true
             }
+
             const difference = add ? (item.amount - item.reservedAmount) : -item.reservedAmount
             if (difference !== 0) {
                 const product = this.webshop.products.find(p => p.id === item.product.id)
@@ -232,6 +259,31 @@ export class Order extends Model {
                     // Keep track that we included this order in the stock already
                     item.reservedAmount += difference
                     changed = true
+
+                    const productPrice = product.prices.find(p => p.id === item.productPrice.id)
+                    if (productPrice) {
+                        productPrice.usedStock += difference
+                        if (productPrice.usedStock < 0) {
+                            productPrice.usedStock = 0
+                        }
+
+                        // Keep track that we included this order in the stock already
+                        item.reservedPrices.set(productPrice.id, (item.reservedPrices.get(productPrice.id) ?? 0) + difference)
+                    }
+
+                    // Options
+                    for (const cartItemOption of item.options) {
+                        const option = product.optionMenus.find(om => om.id === cartItemOption.optionMenu.id)?.options.find(o => o.id === cartItemOption.option.id)
+                        if (option) {
+                            option.usedStock += difference
+                            if (option.usedStock < 0) {
+                                option.usedStock = 0
+                            }
+
+                            // Keep track that we included this order in the stock already
+                            item.reservedOptions.set(option.id, (item.reservedOptions.get(option.id) ?? 0) + difference)
+                        }
+                    }
                 }
             }
         }

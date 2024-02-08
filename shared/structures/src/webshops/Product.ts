@@ -280,32 +280,73 @@ export class Product extends AutoEncoder {
     }
 
     get isSoldOut(): boolean {
-        // If all prices are sold out
-        if (this.prices.every(p => p.isSoldOut)) {
-            return true
-        }
-
-        for (const menu of this.optionMenus) {
-            if (!menu.multipleChoice) {
-                // Required to choose one
-                if (menu.options.every(o => o.isSoldOut)) {
-                    return true
-                }
-            }
-        }
-
-        if (this.stock === null) {
-            return false
-        }
-        return this.usedStock >= this.stock
+        return this.remainingStockWithOptions === 0
     }
 
+    /**
+     * Only accounts for the stock of the product itself, not the stock of the options
+     */
     get remainingStock(): number | null {
         if (this.stock === null) {
             return null
         }
         return Math.max(0, this.stock - this.usedStock)
     }
+
+    /**
+     * Accounts for options and prices too
+     */
+    get remainingStockWithOptions(): number | null {
+        const stocks: number[] = [];
+
+        if (this.remainingStock !== null) {
+            stocks.push(this.remainingStock)
+        }
+
+        let priceStocks: number[] = [];
+
+        for (const price of this.prices) {
+            if (price.remainingStock !== null) {
+                priceStocks.push(price.remainingStock)
+            } else {
+                // Infinite stock for at least one price = no price stock
+                priceStocks = [];
+                break;
+            }
+        }
+
+        if (priceStocks.length) {
+            stocks.push(Math.max(...priceStocks))
+        }
+
+        for (const menu of this.optionMenus) {
+            if (!menu.multipleChoice) {
+                // Required to pick one
+                // We need to pick the maximum of the option stock
+                let menuStocks: number[] = [];
+                for (const option of menu.options) {
+                    if (option.remainingStock !== null) {
+                        menuStocks.push(option.remainingStock)
+                    } else {
+                        // Infinite stock for at least one option = no menu stock
+                        menuStocks = [];
+                        break;
+                    }
+                }
+
+                if (menuStocks.length) {
+                    stocks.push(Math.max(...menuStocks))
+                }
+            }
+        }
+
+        if (stocks.length === 0) {
+            return null
+        }
+
+        return Math.min(...stocks)
+    }
+
 
     getRemainingSeats(webshop: Webshop, isAdmin: boolean): number | null {
         if (this.seatingPlanId === null) {
@@ -362,15 +403,15 @@ export class Product extends AutoEncoder {
     }
 
     get stockText(): string | null {
-        if (this.remainingStock === null || this.remainingStock > 25) {
+        if (this.remainingStockWithOptions === null || this.remainingStockWithOptions > 25) {
             return null
         }
 
-        if (this.remainingStock === 0) {
+        if (this.remainingStockWithOptions === 0) {
             return "Uitverkocht"
         }
 
-        return "Nog "+this.getRemainingStockText(this.remainingStock)
+        return "Nog "+this.getRemainingStockText(this.remainingStockWithOptions)
     }
 
     get isEnabledTextLong() {
