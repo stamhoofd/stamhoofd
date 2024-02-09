@@ -104,7 +104,7 @@ export default class OptionMenuBox extends Mixins(NavigationMixin){
             webshop: this.webshop,
             admin: this.admin,
             amount: this.cartItem.amount
-        }, false)
+        }, {inMultipleCartItems: false})
     }
 
     getOptionStock(option: Option) {

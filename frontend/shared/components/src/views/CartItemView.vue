@@ -101,7 +101,7 @@
 
                 <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
 
-                <p v-for="text in stockTexts" :key="text" class="st-list-description" v-text="text" />
+                <p v-if="stockText" class="st-list-description" v-text="stockText" />
             </template>
 
             <div v-if="!cartEnabled && (administrationFee || (canSelectAmount && !webshop.isAllFree))" class="pricing-box max">
@@ -146,7 +146,7 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Cart, CartItem, CartStockHelper, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -227,18 +227,30 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     chooseSeats() {
-        this.show({
-            components: [
-                new ComponentWithProperties(ChooseSeatsView, {
-                    cartItem: this.cartItem,
-                    oldItem: this.oldItem,
-                    webshop: this.webshop,
-                    admin: this.admin,
-                    cart: this.cart,
-                    saveHandler: this.saveHandler
-                })
-            ]
-        })
+        const component = new ComponentWithProperties(ChooseSeatsView, {
+            cartItem: this.cartItem,
+            oldItem: this.oldItem,
+            webshop: this.webshop,
+            admin: this.admin,
+            cart: this.cart,
+            saveHandler: this.saveHandler
+        });
+
+        if (!this.canDismiss) {
+            this.present({
+                components: [
+                    component
+                ],
+                modalDisplayStyle: "sheet"
+            })
+        } else {
+            // Sheet
+            this.show({
+                components: [
+                    component
+                ]
+            })
+        }
     }
 
     get cartEnabled() {
@@ -314,12 +326,12 @@ export default class CartItemView extends Mixins(NavigationMixin){
             webshop: this.webshop,
             admin: this.admin,
             amount: this.cartItem.amount
-        }, false)
+        }, {inMultipleCartItems: false})
     }
 
-    get stockTexts() {
+    get stockText() {
         const maximumRemaining = this.maximumRemaining
-        return this.availableStock.filter(v => v.text !== null && (!v.remaining || !maximumRemaining || v.remaining <= maximumRemaining)).map(s => s.text) as string[]
+        return this.availableStock.filter(v => v.text !== null && (!v.remaining || !maximumRemaining || v.remaining <= maximumRemaining)).map(s => s.text)[0]
     }
 
     getPriceStock(price: ProductPrice) {

@@ -128,18 +128,8 @@ export default class ProductBox extends Mixins(NavigationMixin){
     }
 
     get stockText() {
-        // How much we can still order from this product
-        const remaining = CartStockHelper.getRemainingAcrossOptions({ cart: this.cart, product: this.product, webshop: this.webshop, admin: this.admin}, true);
-        
-        if (remaining === null) {
-            return null
-        }
+        const remainingWithoutCart = CartStockHelper.getRemainingAcrossOptions({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin}, {inMultipleCartItems: true, excludeOrder: true});
 
-        if (remaining > 25) {
-            return null
-        }
-        
-        const remainingWithoutCart = CartStockHelper.getRemainingAcrossOptions({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin}, true);
         if (remainingWithoutCart === 0) {
             return {
                 text: "Uitverkocht",
@@ -148,9 +138,14 @@ export default class ProductBox extends Mixins(NavigationMixin){
         }
 
         if (this.editExisting) {
-            // Report only total stock
             if (remainingWithoutCart === null || remainingWithoutCart > 25) {
                 return null
+            }
+
+            const maxOrder = CartStockHelper.getOrderMaximum({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin});
+            if (maxOrder && maxOrder.remaining !== null && maxOrder.remaining < remainingWithoutCart) {
+                // No point in showing stock: you can only order x items in one order
+                return null;
             }
 
             return {
@@ -159,6 +154,27 @@ export default class ProductBox extends Mixins(NavigationMixin){
             }
         }
 
+
+        // How much we can still order from this product
+        const maxOrder = CartStockHelper.getOrderMaximum({ cart: this.cart, product: this.product, webshop: this.webshop, admin: this.admin});
+        const remaining = CartStockHelper.getRemainingAcrossOptions({ cart: this.cart, product: this.product, webshop: this.webshop, admin: this.admin}, {inMultipleCartItems: true, excludeOrder: true});
+
+        if (maxOrder && maxOrder.remaining === 0) {
+            return {
+                text: "Maximum bereikt",
+                style: "error"
+            }
+        }
+        
+        if (remaining === null) {
+            return null
+        }
+
+        if (remaining > 25 || (maxOrder && maxOrder.remaining !== null && remaining > maxOrder.remaining)) {
+            // No point in showing stock: you can only order x items in one order
+            return null
+        }
+    
         if (remaining === 0 ) {
             return {
                 text: "Maximum bereikt",

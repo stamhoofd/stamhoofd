@@ -25,7 +25,7 @@
                         </p>
                         <div @click.stop>
                             <button class="button icon trash" type="button" @click="deleteItem(cartItem)" />
-                            <StepperInput v-if="!cartItem.cartError && cartItem.seats.length == 0 && maximumRemainingFor(cartItem) > 1" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
+                            <StepperInput v-if="!cartItem.cartError && cartItem.seats.length == 0 && (maximumRemainingFor(cartItem) === null || maximumRemainingFor(cartItem) > 1)" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
                         </div>
                     </footer>
 
@@ -96,7 +96,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { CartItemView, ErrorBox, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
-import { CartItem } from '@stamhoofd/structures';
+import { CartItem, CartStockHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from 'vue-property-decorator';
 
@@ -244,12 +244,9 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     maximumRemainingFor(cartItem: CartItem) {
-        const maxStock = this.maximumRemainingStockFor(cartItem)
-        const maxOrder = this.maximumRemainingOrderFor(cartItem)
-        const maxMultiple = cartItem.product.allowMultiple ? null : 1
-
-        const arr = [maxStock, maxOrder, maxMultiple].filter((v) => v !== null) as number[]
-        return Math.min(...arr)
+        const admin = false;
+        const remaining = cartItem.getMaximumRemaining(cartItem, this.cart, this.webshop, admin);
+        return remaining
     }
 }
 </script>

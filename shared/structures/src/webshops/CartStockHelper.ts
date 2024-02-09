@@ -233,10 +233,42 @@ export class CartStockHelper {
         };
     }
 
+    static getAllowMultiple({ amount, oldItem, cart, product, admin }: StockLookupData): StockDefinition|null {
+        if (product.allowMultiple) {
+            return null;
+        }
+
+        const inCart = cart.items.reduce((prev, item) => {
+            if (item.id === oldItem?.id) {
+                return prev
+            }
+            if (item.product.id != product.id) {
+                return prev
+            }
+            if (item.code !== oldItem?.code) {
+                return prev
+            }
+            return prev + item.amount
+        }, 0);
+
+        if (inCart > 0) {
+            return {
+                stock: 1,
+                remaining: 0,
+                text: 'Je kan maximaal 1 van dit product bestellen',
+                shortText: 'Maximum bereikt'
+            }
+        }
+
+        return {
+            stock: 1,
+            remaining: 1,
+            text: null
+        }
+    }
 
 
-
-    static getFixedStockDefinitions(data: StockLookupData): StockDefinition[] {
+    static getFixedStockDefinitions(data: StockLookupData, options: {excludeOrder?: boolean} = {}): StockDefinition[] {
         const definitions: StockDefinition[] = []
 
         // General product amount
@@ -252,9 +284,16 @@ export class CartStockHelper {
         }
 
         // Maximum per order
-        const orderMaximum = CartStockHelper.getOrderMaximum(data)
-        if (orderMaximum) {
-            definitions.push(orderMaximum)
+        if (!options.excludeOrder) {
+            const orderMaximum = CartStockHelper.getOrderMaximum(data)
+            if (orderMaximum) {
+                definitions.push(orderMaximum)
+            }
+
+            const allowMultiple = CartStockHelper.getAllowMultiple(data)
+            if (allowMultiple) {
+                definitions.push(allowMultiple)
+            }
         }
 
         return definitions
@@ -282,8 +321,8 @@ export class CartStockHelper {
         return definitions
     }
 
-    static getRemainingAcrossOptions(data: StockLookupData, inMultipleCartItems = true): number|null {
-        let remaining = this.getRemaining(this.getFixedStockDefinitions(data))
+    static getRemainingAcrossOptions(data: StockLookupData, options: {inMultipleCartItems?: boolean, excludeOrder?: boolean} = {}): number|null {
+        let remaining = this.getRemaining(this.getFixedStockDefinitions(data, options))
 
         // We sum the amount of product price stock remaining
         // We can for example order 5 medium + 10 large, so total stock is 15 remaining
@@ -291,7 +330,7 @@ export class CartStockHelper {
         for (const productPrice of data.product.filteredPrices({ admin: data.admin })) {
             const priceStock = CartStockHelper.getPriceStock({ ...data, productPrice })
             if (priceStock && priceStock.remaining !== null) {
-                if (inMultipleCartItems) {
+                if (options.inMultipleCartItems) {
                     maximumPriceStock += priceStock.remaining
                 } else {
                     if (priceStock.remaining > maximumPriceStock) {
@@ -323,7 +362,7 @@ export class CartStockHelper {
             for (const option of optionMenu.options) {
                 const optionStock = CartStockHelper.getOptionStock({ ...data, option })
                 if (optionStock && optionStock.remaining !== null) {
-                    if (inMultipleCartItems) {
+                    if (options.inMultipleCartItems) {
                         maximumOptionStock += optionStock.remaining
                     } else {
                         if (optionStock.remaining > maximumOptionStock) {

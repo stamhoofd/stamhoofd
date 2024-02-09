@@ -71,8 +71,8 @@ export default class FullPageProduct extends Mixins(NavigationMixin){
         return null;
     }
 
-    mappedSaveHandler(newItem: CartItem, oldItem: CartItem | null) {
-        this.saveHandler(newItem, oldItem, null) // no component dismiss
+    mappedSaveHandler(newItem: CartItem, oldItem: CartItem | null, component) {
+        this.saveHandler(newItem, oldItem, component.canDismiss ? component : null) // no component dismiss
 
         // Clear the cart item if needed
         this.cartItem = this.getCartItem()

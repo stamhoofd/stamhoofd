@@ -22,7 +22,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, SaveView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { UrlHelper } from '@stamhoofd/networking';
@@ -33,7 +33,6 @@ import { Component, Mixins } from "vue-property-decorator";
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import OrderView from '../orders/OrderView.vue';
-import CartView from './CartView.vue';
 import { CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -106,6 +105,12 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     goToOrder(id: string, component: NavigationMixin) {
+        // Force reload webshop (stock will have changed: prevent invalidating the cart)
+        // Update stock in background
+        WebshopManager.reload().catch(e => {
+            console.error(e)
+        })
+        
         if (this.modalNavigationController) {
             // We are not in a popup: on mobile
             // So replace with a force instead of dimissing
