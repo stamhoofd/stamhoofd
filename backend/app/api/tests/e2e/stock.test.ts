@@ -175,11 +175,13 @@ describe("E2E.Stock", () => {
             // Now check the stock has changed for the product
             await refreshAll();
             expect(product.usedStock).toBe(5);
+            expect(product.prices[0].usedStock).toBe(5);
             expect(slot1.usedOrders).toBe(1);
             expect(slot1.usedPersons).toBe(0);
 
             // Check order reserved stock set correctly
             expect(order.data.cart.items[0].reservedAmount).toBe(5);
+            expect(order.data.cart.items[0].reservedPrices.get(product.prices[0].id)).toBe(5);
         });
 
         test.todo("Orders placed by an admin reserve the stock");
@@ -252,13 +254,17 @@ describe("E2E.Stock", () => {
             // Now check the stock has changed for the product
             await refreshAll();
             expect(product.usedStock).toBe(5);
+            expect(product.prices[0].usedStock).toBe(5);
             expect(personProduct.usedStock).toBe(2);
+            expect(personProduct.prices[0].usedStock).toBe(2);
             expect(slot1.usedOrders).toBe(1);
             expect(slot1.usedPersons).toBe(2);
 
             // Check order reserved stock set correctly
             expect(orderStruct.data.cart.items[0].reservedAmount).toBe(5);
+            expect(orderStruct.data.cart.items[0].reservedPrices.get(product.prices[0].id)).toBe(5);
             expect(orderStruct.data.cart.items[1].reservedAmount).toBe(2);
+            expect(orderStruct.data.cart.items[1].reservedPrices.get(personProduct.prices[0].id)).toBe(2);
 
             // Get the order
             order = (await Order.getByID(orderStruct.id))!;
@@ -291,7 +297,9 @@ describe("E2E.Stock", () => {
 
                 await refreshAll();
                 expect(product.usedStock).toBe(0);
+                expect(product.prices[0].usedStock).toBe(0);
                 expect(personProduct.usedStock).toBe(2);
+                expect(personProduct.prices[0].usedStock).toBe(2);
                 expect(slot1.usedOrders).toBe(1);
                 expect(slot1.usedPersons).toBe(2);
 
@@ -327,7 +335,9 @@ describe("E2E.Stock", () => {
 
                 await refreshAll();
                 expect(product.usedStock).toBe(30);
+                expect(product.prices[0].usedStock).toBe(30);
                 expect(personProduct.usedStock).toBe(0);
+                expect(personProduct.prices[0].usedStock).toBe(0);
                 expect(slot1.usedOrders).toBe(1);
                 expect(slot1.usedPersons).toBe(0);
 
@@ -363,7 +373,9 @@ describe("E2E.Stock", () => {
 
             await refreshAll();
             expect(product.usedStock).toBe(6);
+            expect(product.prices[0].usedStock).toBe(6);
             expect(personProduct.usedStock).toBe(13);
+            expect(personProduct.prices[0].usedStock).toBe(13);
             expect(slot1.usedOrders).toBe(1);
             expect(slot1.usedPersons).toBe(13);
 
@@ -394,7 +406,9 @@ describe("E2E.Stock", () => {
 
             await refreshAll();
             expect(product.usedStock).toBe(5);
+            expect(product.prices[0].usedStock).toBe(5);
             expect(personProduct.usedStock).toBe(2);
+            expect(personProduct.prices[0].usedStock).toBe(2);
 
             expect(slot1.usedOrders).toBe(0);
             expect(slot1.usedPersons).toBe(0);
@@ -436,7 +450,9 @@ describe("E2E.Stock", () => {
 
             await refreshAll();
             expect(product.usedStock).toBe(5);
+            expect(product.prices[0].usedStock).toBe(5);
             expect(personProduct.usedStock).toBe(2);
+            expect(personProduct.prices[0].usedStock).toBe(2);
 
             expect(slot1.usedOrders).toBe(0);
             expect(slot1.usedPersons).toBe(0);
@@ -472,7 +488,9 @@ describe("E2E.Stock", () => {
 
                 await refreshAll();
                 expect(product.usedStock).toBe(0);
+                expect(product.prices[0].usedStock).toBe(0);
                 expect(personProduct.usedStock).toBe(0);
+                expect(personProduct.prices[0].usedStock).toBe(0);
                 expect(slot1.usedOrders).toBe(0);
                 expect(slot1.usedPersons).toBe(0);
 
@@ -502,7 +520,9 @@ describe("E2E.Stock", () => {
 
                 await refreshAll();
                 expect(product.usedStock).toBe(5);
+                expect(product.prices[0].usedStock).toBe(5);
                 expect(personProduct.usedStock).toBe(2);
+                expect(personProduct.prices[0].usedStock).toBe(2);
                 expect(slot1.usedOrders).toBe(1);
                 expect(slot1.usedPersons).toBe(2);
 
@@ -533,7 +553,9 @@ describe("E2E.Stock", () => {
 
                 await refreshAll();
                 expect(product.usedStock).toBe(0);
+                expect(product.prices[0].usedStock).toBe(0);
                 expect(personProduct.usedStock).toBe(0);
+                expect(personProduct.prices[0].usedStock).toBe(0);
                 expect(slot1.usedOrders).toBe(0);
                 expect(slot1.usedPersons).toBe(0);
 
@@ -563,7 +585,9 @@ describe("E2E.Stock", () => {
 
                 await refreshAll();
                 expect(product.usedStock).toBe(5);
+                expect(product.prices[0].usedStock).toBe(5);
                 expect(personProduct.usedStock).toBe(2);
+                expect(personProduct.prices[0].usedStock).toBe(2);
                 expect(slot1.usedOrders).toBe(1);
                 expect(slot1.usedPersons).toBe(2);
 
