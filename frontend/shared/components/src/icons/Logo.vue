@@ -57,7 +57,7 @@
 }
 
 .stamhoofd-logo {
-    display: inline-block;
+    display: block;
 
     .text {
         fill: $color-dark;

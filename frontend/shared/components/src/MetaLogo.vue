@@ -1,6 +1,6 @@
 <template>
     <div>
-        <picture v-if="horizontalLogo" class="organization-logo horizontal hide-smartphone" :class="{expand }">
+        <picture v-if="horizontalLogo" class="organization-logo horizontal" :class="{expand, 'hide-smartphone': !!squareLogo}">
             <source 
                 v-if="horizontalLogoDark && (darkMode === 'Auto' || darkMode === 'On')"
                 :srcset="logoHorizontalSrcSet(horizontalLogoDark)"
@@ -17,7 +17,7 @@
             >
         </picture>
 
-        <picture v-if="squareLogo" class="organization-logo only-smartphone" :class="{expand }">
+        <picture v-if="squareLogo" class="organization-logo" :class="{expand, 'only-smartphone': !!horizontalLogo}">
             <source 
                 v-if="darkMode === 'Auto' || darkMode === 'On'"
                 :srcset="logoSrcSet(squareLogoDark)"
@@ -77,19 +77,19 @@ export default class OrganizationLogo extends Vue {
     }
 
     get horizontalLogo() {
-        return this.metaData.horizontalLogo ?? this.metaData.squareLogo ?? this.metaData.horizontalLogoDark ?? this.metaData.squareLogoDark
+        return this.metaData.horizontalLogo ?? this.metaData.horizontalLogoDark;
     }
 
     get horizontalLogoDark() {
-        return this.metaData.horizontalLogoDark ?? this.metaData.squareLogoDark ?? this.metaData.horizontalLogo ?? this.metaData.squareLogo
+        return this.metaData.horizontalLogoDark ?? this.metaData.horizontalLogo;
     }
 
     get squareLogo() {
-        return this.metaData.squareLogo ?? this.metaData.horizontalLogo ?? this.metaData.squareLogoDark ?? this.metaData.horizontalLogoDark
+        return this.metaData.squareLogo ?? this.metaData.squareLogoDark
     }
 
     get squareLogoDark() {
-        return this.metaData.squareLogoDark ?? this.metaData.horizontalLogoDark ?? this.metaData.squareLogo ?? this.metaData.horizontalLogo
+        return this.metaData.squareLogoDark ?? this.metaData.squareLogo
     }
 
     get logoSrc() {
@@ -97,9 +97,9 @@ export default class OrganizationLogo extends Vue {
             return null
         }
         if (this.metaData.expandLogo) {
-            return this.metaData.squareLogo.getPathForSize(undefined, 70)
+            return this.metaData.squareLogo.getPathForSize(100, 70)
         }
-        return this.metaData.squareLogo.getPathForSize(undefined, 50)
+        return this.metaData.squareLogo.getPathForSize(70, 50)
     }
 
     get logoHorizontalSrc() {
@@ -109,35 +109,35 @@ export default class OrganizationLogo extends Vue {
         if (this.metaData.expandLogo) {
             return this.metaData.horizontalLogo.getPathForSize(undefined, 70)
         }
-        return this.metaData.horizontalLogo.getPathForSize(undefined, 50)
+        return this.metaData.horizontalLogo.getPathForSize(150, 50)
     }
 
     getHorizontalResolution(image: Image) {
         if (this.expand) {
             return image.getResolutionForSize(undefined, 70)
         }
-        return image.getResolutionForSize(undefined, 40)
+        return image.getResolutionForSize(150, 50)
     }
 
     getResolution(image: Image) {
         if (this.expand) {
-            return image.getResolutionForSize(undefined, 70)
+            return image.getResolutionForSize(100, 70)
         }
-        return image.getResolutionForSize(undefined, 50)
+        return image.getResolutionForSize(70, 50)
     }
 
     logoHorizontalSrcSet(image) {
         if (this.expand) {
             return image.getPathForSize(undefined, 70) + " 1x, "+image.getPathForSize(undefined, 70*2)+" 2x, "+image.getPathForSize(undefined, 70*3)+" 3x"
         }
-        return image.getPathForSize(undefined, 40) + " 1x, "+image.getPathForSize(undefined, 40*2)+" 2x, "+image.getPathForSize(undefined, 40*3)+" 3x"
+        return image.getPathForSize(150, 50) + " 1x, "+image.getPathForSize(150*2, 50*2)+" 2x, "+image.getPathForSize(150*3, 50*3)+" 3x"
     }
 
     logoSrcSet(image) {
         if (this.expand) {
-            return image.getPathForSize(undefined, 70) + " 1x, "+image.getPathForSize(undefined, 70*2)+" 2x, "+image.getPathForSize(undefined, 70*3)+" 3x"
+            return image.getPathForSize(100, 70) + " 1x, "+image.getPathForSize(100*2, 70*2)+" 2x, "+image.getPathForSize(100*3, 70*3)+" 3x"
         }
-        return image.getPathForSize(undefined, 50) + " 1x, "+image.getPathForSize(undefined, 50*2)+" 2x, "+image.getPathForSize(undefined, 50*3)+" 3x"
+        return image.getPathForSize(70, 50) + " 1x, "+image.getPathForSize(70*2, 50*2)+" 2x, "+image.getPathForSize(70*3, 50*3)+" 3x"
     }
 }
 </script>
@@ -159,33 +159,34 @@ export default class OrganizationLogo extends Vue {
 
 .organization-logo {
     img {
-        height: auto;
-        width: auto;
-
-        max-height: 50px;
-        max-width: 70px;
+        object-fit: contain;
+        object-position: left center;
+        height: 50px;
+        width: 70px;
     }
 
     &.expand {
         img {
-            max-height: 70px;
-            max-width: 100px;
+            height: 70px;
+            width: 100px;
 
             @media (max-width: 300px) {
-                max-width: 35vw;
+                width: 40vw;
             }
         }
     }
 
     &.horizontal {
         img {
-            max-height: 50px;
-            max-width: 35vw;
+            height: 50px;
+            width: 38vw;
+            width: min(150px, 38vw);
         }
 
         &.expand {
             img {
-                max-height: 70px;
+                height: 70px;
+                width: 38vw;
             }
         }
     }

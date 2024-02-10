@@ -9,6 +9,9 @@
         </STNavigationBar>
 
         <main>
+            <p class="stamhoofd-header">
+                <a :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw je betaalbare webshop via</span>  <Logo /></a>
+            </p>
             <div class="box">
                 <main>
                     <h1 v-if="success">
@@ -347,7 +350,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Payment, RecordCategory } from '@stamhoofd/structures';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
@@ -373,7 +376,8 @@ import DetailedTicketView from './DetailedTicketView.vue';
         OrganizationLogo,
         Spinner,
         TicketListItem,
-        RecordCategoryAnswersBox
+        RecordCategoryAnswersBox,
+        Logo
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -648,7 +652,68 @@ export default class OrderView extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .order-view {
-    .cart-item-row {
+    .stamhoofd-header {
+        --color-primary: #{$color-primary-original};
+        @extend .style-description-small;
+        max-width: var(--box-width, 800px);
+        margin: 0 auto;
+        padding-bottom: 20px;
+
+        @media (max-width: 800px) {
+            padding: 15px;
+            background: $color-background-shade;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        a {
+            white-space: normal;
+            text-overflow: initial;
+            height: auto;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            min-width: 0;
+            max-width: none;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+
+            @media (max-width: 800px) {
+                justify-content: center;
+                text-align: center;
+            }
+
+            &,
+                &:hover,
+                &:link,
+                &:active,
+                &:visited {
+                    color: $color-gray-text;
+                    font-weight: 600;
+                    text-decoration: none;
+                }
+        }
+
+        .stamhoofd-logo-container {    
+            display: block;      
+
+            svg {
+                width: 140px;
+            }
+        }
+
+         @media (max-width: 500px) {
+             .stamhoofd-logo-container {
+                 svg {
+                     width: 120px;
+                 }
+             }
+         }
+    }
+
+.cart-item-row {
         h3 {
             padding-top: 5px;
             @extend .style-title-3;

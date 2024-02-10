@@ -5,7 +5,7 @@
     @extend .style-description-small;
     margin-top: auto;
     line-height: 1.6;
-    padding: 0 15px 20px 15px;
+    padding: 0 0 20px 0;
 
     .st-view > main > & {
         margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
@@ -29,13 +29,16 @@
     }
 
      >div {
-         display: flex;
-         flex-direction: row;
-         justify-content: space-between;
-         align-items: center;
-         flex-wrap: wrap-reverse;
+        padding: 15px;
 
-        .stamhoofd-logo-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap-reverse;
+        min-width: 0;
+
+        .stamhoofd-logo-container {            
             svg {
                 width: 140px;
             }
@@ -51,23 +54,25 @@
 
          >div,
          >aside {
-             &:first-child {
-                 padding-right: 10px;
-             }
+            padding-bottom: 20px;
+            min-width: 0;
+
+            &:first-child {
+                padding-right: 15px;
+            }
 
              &:last-child {
-                 --color-primary: #{$color-primary-original};
-                 flex-shrink: 0;
-                 text-align: right;
+                --color-primary: #{$color-primary-original};
+                text-align: right;
 
                  a {
-                     display: flex;
-                     flex-direction: row;
-                     align-items: center;
-
-                     > :last-child {
-                         margin-left: 10px;
-                     }
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    min-width: 0;
+                    max-width: none;
+                    flex-wrap: wrap;
+                    gap: 10px;
 
                      &,
                      &:hover,

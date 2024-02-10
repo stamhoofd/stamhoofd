@@ -38,9 +38,9 @@
                 {{ organization.meta.companyAddress || organization.address }}
             </aside>
             <div>
-                <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'/ticketverkoop'">Ticketverkoop via <Logo /></a>
-                <a v-else-if="isWebshop" :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
-                <a v-else :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'">Ledenadministratie via <Logo /></a>
+                <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'">Verkoop ook tickets via <Logo /></a>
+                <a v-else-if="isWebshop" :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'">Bouw je betaalbare webshop via <Logo /></a>
+                <a v-else :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie?utm_medium=ledenportaal'">Ledenadministratie via <Logo /></a>
             </div>
         </div>
     </div>
