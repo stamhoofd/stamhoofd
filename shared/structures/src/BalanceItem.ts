@@ -1,11 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
-import { Member } from "./members/Member";
-import { Payment } from "./members/Payment";
-import { PaymentGeneral } from "./members/PaymentGeneral";
-import { Registration } from "./members/Registration";
-import { Order } from "./webshops/Order";
+import { Payment, PrivatePayment } from "./members/Payment";
 
 export enum BalanceItemStatus {
     /**
@@ -56,66 +52,30 @@ export class BalanceItemPayment extends AutoEncoder {
     price: number
 }
 
-export class BalanceItemDetailed extends BalanceItem {
-    @field({ decoder: Registration, nullable: true })
-    registration: Registration | null = null
-
-    @field({ decoder: Member, nullable: true })
-    member: Member | null = null
-
-    @field({ decoder: Order, nullable: true })
-    order: Order | null = null
-
-    get memberId() {
-        return this.member?.id ?? null
-    }
-}
-
-export class BalanceItemPaymentDetailed extends BalanceItemPayment {
-    @field({ decoder: BalanceItemDetailed })
-    balanceItem: BalanceItemDetailed
-}
-
-//
 export class MemberBalanceItemPayment extends BalanceItemPayment {
     @field({ decoder: Payment })
     payment: Payment
 }
 
-export class MemberBalanceItem extends BalanceItem {
+export class BalanceItemPaymentWithPrivatePayment extends BalanceItemPayment {
+    @field({ decoder: PrivatePayment })
+    payment: PrivatePayment
+}
+
+export class BalanceItemWithPayments extends BalanceItem {
     @field({ decoder: new ArrayDecoder(MemberBalanceItemPayment) })
     payments: MemberBalanceItemPayment[] = []
 
-    @field({ decoder: StringDecoder, nullable: true })
-    memberId: string | null = null
-
-    @field({ decoder: StringDecoder, nullable: true })
-    userId: string | null = null
-
-    @field({ decoder: Registration, nullable: true })
-    registration: Registration | null = null
-
-    @field({ decoder: Order, nullable: true })
-    order: Order | null = null
-
-    /**
-     * Return whether a payment has been initiated for this balance item
-     */
-    get hasPendingPayment() {
-        return !!this.payments.find(p => p.payment.isPending)
+    updatePricePaid() {
+        this.pricePaid = this.payments.reduce((total, payment) => total + (payment.payment.isSucceeded ? payment.price : 0), 0);
     }
+}
 
-    static getOutstandingBalance(items: MemberBalanceItem[]) {
-        // Get sum of balance payments
-        const totalPending = items.flatMap(b => b.payments).filter(p => p.payment.isPending).map(p => p.price).reduce((t, total) => total + t, 0)
+export class BalanceItemWithPrivatePayments extends BalanceItem {
+    @field({ decoder: new ArrayDecoder(BalanceItemPaymentWithPrivatePayment) })
+    payments: BalanceItemPaymentWithPrivatePayment[] = []
 
-        const total = items.map(p => p.price - p.pricePaid).reduce((t, total) => total + t, 0)
-        const totalOpen = total - totalPending;
-
-        return {
-            totalPending, // Pending payment
-            totalOpen, // Not yet started
-            total: totalPending + totalOpen // total not yet paid
-        }
-    }
+    updatePricePaid() {
+        this.pricePaid = this.payments.reduce((total, payment) => total + (payment.payment.isSucceeded ? payment.price : 0), 0);
+    } 
 }

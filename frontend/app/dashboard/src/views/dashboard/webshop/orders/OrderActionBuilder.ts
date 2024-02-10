@@ -321,30 +321,28 @@ export class OrderActionBuilder {
         let willSendEmail = false
 
         for (const order of orders) {
-            const payment = order.payment
-            if (!payment) {
-                continue
-            }
-
-            if (paid) {
-                if (payment.status != PaymentStatus.Succeeded || order.data.totalPrice != payment.price) {
-                    data.addPatch(Payment.patch({
-                        id: payment.id,
-                        price: order.data.totalPrice,
-                        status: PaymentStatus.Succeeded
-                    }))
-
-                    if (payment.method === PaymentMethod.Transfer && order.data.shouldSendPaymentUpdates) {
-                        willSendEmail = true
-                    }
+            for (const payment of order.payments) {
+                if (!payment.canChangeStatus) {
+                    continue;
                 }
-            } else {
-                if (payment.status == PaymentStatus.Succeeded || order.data.totalPrice != payment.price) {
-                    data.addPatch(Payment.patch({
-                        id: payment.id,
-                        status: PaymentStatus.Created,
-                        price: order.data.totalPrice
-                    }))
+                if (paid) {
+                    if (payment.status != PaymentStatus.Succeeded) {
+                        data.addPatch(Payment.patch({
+                            id: payment.id,
+                            status: PaymentStatus.Succeeded
+                        }))
+
+                        if (payment.method === PaymentMethod.Transfer && order.data.shouldSendPaymentUpdates) {
+                            willSendEmail = true
+                        }
+                    }
+                } else {
+                    if (payment.status == PaymentStatus.Succeeded) {
+                        data.addPatch(Payment.patch({
+                            id: payment.id,
+                            status: PaymentStatus.Created
+                        }))
+                    }
                 }
             }
         }
@@ -367,13 +365,12 @@ export class OrderActionBuilder {
 
                 // Update data of existing objects
                 for (const order of orders) {
-                    const payment = order.payment
-                    if (!payment) {
-                        continue
-                    }
-                    const p = response.data.find(pp => pp.id === payment.id)
-                    if (p) {
-                        payment.set(p)
+                    for (const payment of order.payments) {
+                        const p = response.data.find(pp => pp.id === payment.id)
+                        if (p) {
+                            payment.set(p)
+                            order.updatePricePaid();
+                        }
                     }
                 }
                 new Toast("Betaalstatus gewijzigd", "success").setHide(1000).show()

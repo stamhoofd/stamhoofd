@@ -8,8 +8,11 @@
                 <span>Bestelling #{{ order.number }}</span>
             </h1>
 
-            <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
-                Opgelet: deze bestelling werd nog niet betaald.
+            <p v-if="order.pricePaid < order.totalToPay" class="warning-box">
+                Deze bestelling werd nog niet (volledig) betaald.
+            </p>
+            <p v-if="order.pricePaid > order.totalToPay" class="warning-box">
+                Er werd te veel betaald voor de bestelling (waarschijnlijk gewijzigd na betaling). Er is een terugbetaling nodig.
             </p>
 
             <p v-if="order.status == 'Completed'" class="warning-box">
@@ -18,6 +21,11 @@
             <p v-if="order.status == 'Canceled'" class="error-box">
                 Deze bestelling werd geannuleerd
             </p>
+
+            <button v-if="order.pricePaid != order.totalToPay && hasPaymentsWrite && isMissingPayments" class="button text" type="button" @click="createPayment">
+                <span class="icon add" />
+                <span>Betaling / terugbetaling registreren</span>
+            </button>
 
             <div v-if="hasWarnings" class="hover-box container">
                 <hr>
@@ -53,13 +61,21 @@
             <h2>Informatie</h2>
 
             <STList>
-                <STListItem>
+                <STListItem v-if="order.totalToPay || !webshop.isAllFree">
                     <h3 class="style-definition-label">
-                        Totaalbedrag
+                        Totaal te betalen
                     </h3>
                     <p class="style-definition-text">
-                        <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-                        {{ order.data.totalPrice | price }}<template v-if="order.payment && (order.payment.price != order.data.totalPrice || !order.payment && order.data.totalPrice > 0)">*</template>
+                        {{ order.totalToPay | price }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="(order.totalToPay || !webshop.isAllFree) && (order.pricePaid > 0 && order.pricePaid !== order.totalToPay)">
+                    <h3 class="style-definition-label">
+                        Betaald bedrag
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.pricePaid | price }}
                     </p>
                 </STListItem>
 
@@ -84,18 +100,22 @@
                 </STListItem>
 
                 <STListItem
-                    v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
-                    @click="openPayment" @contextmenu.prevent="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null"
+                    v-for="(payment, index) in order.payments"
+                    :key="payment.id"
+                    v-long-press="(e) => (hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    class="right-description" @click="openPayment(payment)"
+                    @contextmenu.prevent="hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
                 >
                     <h3 class="style-definition-label">
-                        Betaling
+                        {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
                     <p class="style-definition-text">
-                        <span>{{ getName(order.payment.method) }}</span>
-                        <span v-if="order.payment.status == 'Succeeded'" class="icon primary success" />
+                        <span>{{ getName(payment.method) }}</span>
+                        <span v-if="payment.status == 'Succeeded'" class="icon primary success" />
                         <span v-else class="icon clock" />
                     </p>
 
+                    <span v-if="order.payments.length > 1" slot="right">{{ payment.price | price }}</span>
                     <span v-if="hasPaymentsWrite" slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>
@@ -320,17 +340,6 @@
                     </div>
                 </STListItem>
 
-                <STListItem :selectable="true" @click="openOrder">
-                    <h3 class="style-definition-label">
-                        Bestelling
-                    </h3>
-                    <p class="style-definition-text">
-                        {{ order.number }}
-                    </p>
-
-                    <span slot="right" class="icon arrow-right-small gray" />
-                </STListItem>
-
                 <STListItem v-if="item.product.prices.length > 1">
                     <p class="style-definition-text">
                         {{ item.productPrice.name }}
@@ -353,6 +362,17 @@
                     <p class="style-definition-text">
                         {{ option.option.name }}
                     </p>
+                </STListItem>
+
+                <STListItem :selectable="true" @click="openOrder">
+                    <h3 class="style-definition-label">
+                        Bestelling
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.number }}
+                    </p>
+
+                    <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>
         </main>
@@ -377,14 +397,16 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder,AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ColorHelper, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
+import { BackButton, Checkbox, ColorHelper, GlobalEventBus, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
+import { BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+import EditPaymentView from "../../../member/EditPaymentView.vue";
 import PaymentView from "../../../payments/PaymentView.vue";
 import { OrderActionBuilder } from "../../orders/OrderActionBuilder";
 import OrderView from "../../orders/OrderView.vue";
@@ -425,6 +447,10 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
     get recordAnswers() {
         return this.order.data.recordAnswers
+    }
+
+    get isMissingPayments() {
+        return this.order.payments.reduce((a, b) => a + b.price, 0) !== this.order.totalToPay
     }
 
     get hasWarnings() {
@@ -511,14 +537,14 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
-    openPayment() {
+    openPayment(payment: Payment) {
         if (!this.hasPaymentsWrite) {
             return;
         }
         this.present({
             components: [
                 new ComponentWithProperties(PaymentView, {
-                    initialPayment: this.order.payment
+                    initialPayment: payment
                 })
             ],
             modalDisplayStyle: "popup"
@@ -598,6 +624,64 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
     mounted() {
         ColorHelper.setColor("#0CBB69", this.$el as HTMLElement)
+    }
+
+    created() {
+        // Listen for patches in payments
+        GlobalEventBus.addListener(this, "paymentPatch", async (payment) => {
+            if (payment && payment.id && this.order.payments.find(p => p.id === payment.id as string)) {
+                await this.webshopManager.fetchNewOrders(false, false)
+            }
+            return Promise.resolve()
+        })
+
+        this.webshopManager.ordersEventBus.addListener(this, "fetched", (orders: PrivateOrder[]) => {
+            for (const order of orders) {
+                if (order.id === this.order.id) {
+                    this.order.set(order)
+                }
+            }
+            return Promise.resolve()
+        })
+    }
+
+    beforeDestroy() {
+        this.webshopManager.ordersEventBus.removeListener(this)
+    }
+
+    createPayment() {
+        const payment = PaymentGeneral.create({
+            method: PaymentMethod.PointOfSale,
+            status: PaymentStatus.Succeeded,
+            paidAt: new Date()
+        })
+
+        const component = new ComponentWithProperties(EditPaymentView, {
+            payment,
+            balanceItems: this.order.balanceItems.map(b => BalanceItemDetailed.create({
+                ...b, 
+                order: this.order
+            })),
+            isNew: true,
+            saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
+                const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+                arr.addPut(payment.patch(patch))
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/organization/payments',
+                    body: arr,
+                    decoder: new ArrayDecoder(PaymentGeneral),
+                    shouldRetry: false
+                });
+                
+                // Update order
+                await this.webshopManager.fetchNewOrders(false, false)
+            }
+        })
+        this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        })
     }
 }
 </script>

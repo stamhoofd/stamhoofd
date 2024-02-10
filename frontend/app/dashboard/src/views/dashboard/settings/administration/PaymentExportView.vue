@@ -82,9 +82,7 @@
                 <h3 class="style-title-list">
                     {{ detail.name }}
                 </h3>
-                <p v-if="detail.description" class="style-description-small">
-                    {{ detail.description }}
-                </p>
+                <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
 
                 <template slot="right">
                     {{ formatPrice(detail.price) }}
@@ -98,9 +96,7 @@
                 <h3 class="style-title-list">
                     {{ detail.name }}
                 </h3>
-                <p v-if="detail.description" class="style-description-small">
-                    {{ detail.description }}
-                </p>
+                <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
 
                 <template slot="right">
                     {{ formatPrice(detail.price) }}
@@ -116,9 +112,7 @@
                         {{ detail.count }} ×
                     </template>{{ detail.name }}
                 </h3>
-                <p v-if="detail.description" class="style-description-small">
-                    {{ detail.description }}
-                </p>
+                <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
 
                 <template slot="right">
                     {{ formatPrice(detail.price) }}
@@ -253,25 +247,6 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
     }
 
     doesMatchFilter(balanceItem: BalanceItemPaymentDetailed) {
-        /*if (this.webshopFilter !== null) {
-            const order = balanceItem.balanceItem.order
-            if (order) {
-                if (!this.webshopFilter.find(w => w.id === order.webshopId)) {
-                    return false;
-                }
-            }
-        }
-
-        if (this.groupFilter !== null) {
-            if (balanceItem.balanceItem.registration) {
-                const registration = balanceItem.balanceItem.registration
-                if (!this.groupFilter.find(g => g.id === registration.groupId && (g.cycle === undefined || g.cycle === registration.cycle))) {
-                    return false;
-                }
-            }
-        }*/
-
-        
         if (this.filterBalanceItems) {
             return this.filterBalanceItems(balanceItem)
         }
@@ -461,6 +436,27 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
                 if (!balanceItem.order) {
                     // Order details not available: should all be related to an order
                     return [];
+                }
+
+                if (bp.price !== balanceItem.order.data.totalPrice) {
+                    let id = bp.price < 0 ? 'reimbured-order' : 'edited-order'
+                    let name = bp.price < 0 ? 'Terugbetaling bestelling' : 'Gewijzigde bestelling'
+                    let description = ''
+
+                    if (!details.has(id)) {                    
+                        details.set(id, new Detail({
+                            id,
+                            name,
+                            description,
+                            price: 0,
+                            count: 0
+                        }))
+                    }
+                    const detail = details.get(id)!
+                    detail.price += bp.price ?? 0
+                    detail.count = (detail.count ?? 0) + 1
+
+                    continue;
                 }
 
                 for (const item of balanceItem.order.data.cart.items) {

@@ -3,7 +3,7 @@ import { AppManager } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
 import Vue from "vue";
 
-import { CopyableDirective, LongPressDirective,TooltipDirective } from "..";
+import { CopyableDirective, GlobalEventBus, LongPressDirective,TooltipDirective } from "..";
 
 declare module "vue/types/vue" {
     interface Vue {
@@ -125,6 +125,7 @@ export class VueGlobalHelper {
             },
             beforeDestroy() {
                 // Clear all pending requests
+                GlobalEventBus.removeListener(this)
                 Request.cancelAll(this)
             }
         })

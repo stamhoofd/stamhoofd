@@ -260,7 +260,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { calculateVATPercentage, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
+import { BalanceItemDetailed, calculateVATPercentage, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -596,15 +596,15 @@ export default class PaymentView extends Mixins(NavigationMixin) {
         this.markingPaid = false;
     }
 
-    editBalanceItem(balanceItem: MemberBalanceItem) {
+    editBalanceItem(balanceItem: BalanceItemDetailed) {
         if (!this.canWrite) {
             return
         }
         const component = new ComponentWithProperties(EditBalanceItemView, {
             balanceItem,
             isNew: false,
-            saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
-                const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
+            saveHandler: async (patch: AutoEncoderPatchType<BalanceItemDetailed>) => {
+                const arr: PatchableArrayAutoEncoder<BalanceItemDetailed> = new PatchableArray();
                 patch.id = balanceItem.id;
                 arr.addPatch(patch)
                 await SessionManager.currentSession!.authenticatedServer.request({

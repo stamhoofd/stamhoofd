@@ -154,17 +154,20 @@
                                 {{ order.data.customer.email }}
                             </p>
                         </STListItem>
-                        <STListItem v-if="order.payment" class="right-description right-stack" :selectable="order.payment.status != 'Succeeded'" @click="openTransferView">
+                        <STListItem v-for="(payment, index) in order.payments" :key="payment.id" class="right-description right-stack" :selectable="isPaymentTransfer(payment)" @click="openTransferView(payment)">
                             <h3 class="style-definition-label">
-                                Betaalmethode
+                                {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                             </h3>
 
                             <p class="style-definition-text">
-                                <span>{{ getName(order.payment.method) }}</span>
+                                <span>{{ getName(payment.method) }}</span>
 
-                                <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
-                                <span v-else-if="isTransfer" class="icon help" />
+                                <span v-if="payment.status == 'Succeeded'" class="icon green success" />
+                                <span v-else-if="isPaymentTransfer(payment)" class="icon help" />
+                                <span v-else class="icon clock" />
                             </p>
+
+                            <span v-if="order.payments.length > 1" slot="right">{{ payment.price | price }}</span>
                         </STListItem>
                         <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
                             <h3 class="style-definition-label">
@@ -330,7 +333,7 @@
                             <span class="icon share" />
                             <span>Delen</span>
                         </button>
-                        <button v-if="!isPaid && isTransfer" class="button primary" type="button" @click="openTransferView">
+                        <button v-if="!isPaid && isTransfer" class="button primary" type="button" @click="openTransferView(getDefaultTransferPayment())">
                             <span class="icon card" />
                             <span>Betaalinstructies</span>
                         </button>
@@ -346,7 +349,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { RecordCategory } from '@stamhoofd/structures';
+import { Payment, RecordCategory } from '@stamhoofd/structures';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -424,7 +427,11 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get isTransfer() {
-        return this.order && this.order.payment !== null && this.order.payment.method === PaymentMethod.Transfer
+        return this.getDefaultTransferPayment() !== null
+    }
+
+    isPaymentTransfer(payment: Payment) {
+        return payment.method === PaymentMethod.Transfer
     }
 
     get closed() {
@@ -504,18 +511,23 @@ export default class OrderView extends Mixins(NavigationMixin){
         return PaymentMethodHelper.getName(paymentMethod, this.order?.data.paymentContext)
     }
 
-    openTransferView() {
-        if (this.order && this.order.payment && this.order.payment.method == PaymentMethod.Transfer) {
+    openTransferView(payment: Payment) {
+        if (payment.method == PaymentMethod.Transfer) {
             this.present(new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(TransferPaymentView, {
                     type: "order",
-                    payment: this.order.payment,
+                    payment,
                     organization: WebshopManager.organization,
                     settings: WebshopManager.webshop.meta.transferSettings,
                     isPopup: true
                 })
             }).setDisplayStyle("popup"))
         }
+    }
+
+    getDefaultTransferPayment() {
+        const payments = this.order?.payments.filter(p => p.method === PaymentMethod.Transfer && p.price >= 0) ?? []
+        return payments[0] ?? null
     }
 
     async checkTickets() {

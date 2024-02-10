@@ -176,7 +176,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     await order.markValid(payment, [])
 
                     if (order.number) {
-                        balanceItem.description = 'Bestelling #' + order.number.toString() + ' - ' + webshop.meta.name
+                        balanceItem.description = order.generateBalanceDescription(webshop)
                     }
 
                     balanceItem.status = BalanceItemStatus.Pending;
@@ -187,7 +187,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     await order.markPaid(payment, organization, webshop)
 
                     if (order.number) {
-                        balanceItem.description = 'Bestelling #' + order.number.toString() + ' - ' + webshop.meta.name
+                        balanceItem.description = order.generateBalanceDescription(webshop)
                     }
                     
                     balanceItem.status = BalanceItemStatus.Pending;

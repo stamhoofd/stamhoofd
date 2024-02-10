@@ -1,7 +1,7 @@
 import { ArrayDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding'
 import { Formatter } from '@stamhoofd/utility'
 
-import { BalanceItemPaymentDetailed } from '../BalanceItem'
+import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed'
 import { Payment, Settlement } from './Payment'
 
 export class PaymentGeneral extends Payment {

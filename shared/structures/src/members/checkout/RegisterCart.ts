@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from "@simonbackx/simple-encoding"
 import { SimpleErrors } from "@simonbackx/simple-errors"
 
-import { MemberBalanceItem } from "../../BalanceItem"
+import { MemberBalanceItem } from "../../BalanceItemDetailed"
 import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
 // eslint bug marks types as "unused"

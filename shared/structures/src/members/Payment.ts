@@ -60,6 +60,10 @@ export class Payment extends AutoEncoder {
         return this.status === PaymentStatus.Failed
     }
 
+    get canChangeStatus() {
+        return this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown
+    }
+
     matchQuery(query: string): boolean {
         const lowerQuery = query.toLowerCase();
         if (

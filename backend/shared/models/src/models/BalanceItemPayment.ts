@@ -1,4 +1,4 @@
-import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
@@ -64,13 +64,14 @@ export class BalanceItemPayment extends Model {
 
         // Update status
         const old = this.balanceItem.status;
-        this.balanceItem.status = this.balanceItem.pricePaid >= this.balanceItem.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
-
+        this.balanceItem.updateStatus();
         await this.balanceItem.save();
 
         // Do logic of balance item
         if (this.balanceItem.status === BalanceItemStatus.Paid && old !== BalanceItemStatus.Paid) {
             await this.balanceItem.markPaid(this.payment, organization)
+        } else {
+            await this.balanceItem.markUpdated(this.payment, organization)
         }
     }
 

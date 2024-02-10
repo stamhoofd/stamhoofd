@@ -1,12 +1,11 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, Group, Member, Registration, Token, User, UserWithOrganization } from '@stamhoofd/models';
+import { BalanceItem, Group, Member, Order, Registration, Token, User, UserWithOrganization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, MemberBalanceItem } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-import { ExchangePaymentEndpoint } from '../ExchangePaymentEndpoint';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -142,6 +141,14 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 }
                 model.description = patch.description ?? model.description;
                 model.price = patch.price ?? model.price;
+
+                if (model.orderId) {
+                    // Not allowed to change this
+                    const order = await Order.getByID(model.orderId)
+                    if (order) {
+                        model.price = order.totalToPay
+                    }
+                }
 
                 if (patch.status && patch.status === BalanceItemStatus.Hidden) {
                     if (model.pricePaid === 0) {

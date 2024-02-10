@@ -23,7 +23,7 @@
                 </STInputBox>
 
                 <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
-                    <PriceInput v-model="price" placeholder="Gratis" :min="null" />
+                    <PriceInput v-model="price" placeholder="Gratis" :min="null" :disabled="!!balanceItem.order" />
                 </STInputBox>
             </div>
             <div>

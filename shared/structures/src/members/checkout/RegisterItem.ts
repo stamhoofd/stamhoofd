@@ -1,8 +1,7 @@
 import { AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from '@stamhoofd/utility';
 
-import { BalanceItem, MemberBalanceItem } from '../../BalanceItem';
+import { MemberBalanceItem } from '../../BalanceItemDetailed';
 import { Group } from '../../Group';
 import { GroupCategory } from '../../GroupCategory';
 import { Organization } from '../../Organization';

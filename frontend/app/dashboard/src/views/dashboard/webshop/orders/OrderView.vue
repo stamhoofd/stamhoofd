@@ -27,13 +27,21 @@
             </div>
 
             <STList class="info">
-                <STListItem v-if="order.data.totalPrice || !webshop.isAllFree">
+                <STListItem v-if="order.totalToPay || !webshop.isAllFree">
                     <h3 class="style-definition-label">
-                        Totaalbedrag
+                        Totaal te betalen
                     </h3>
                     <p class="style-definition-text">
-                        <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-                        {{ order.data.totalPrice | price }}<template v-if="order.payment && (order.payment.price != order.data.totalPrice || !order.payment && order.data.totalPrice > 0)">*</template>
+                        {{ order.totalToPay | price }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="(order.totalToPay || !webshop.isAllFree) && (isMissingPayments || (order.pricePaid > 0 && order.pricePaid !== order.totalToPay))">
+                    <h3 class="style-definition-label">
+                        Betaald bedrag
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.pricePaid | price }}
                     </p>
                 </STListItem>
 
@@ -58,18 +66,22 @@
                 </STListItem>
 
                 <STListItem
-                    v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
-                    @click="openPayment" @contextmenu.prevent="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null"
+                    v-for="(payment, index) in order.payments"
+                    :key="payment.id"
+                    v-long-press="(e) => (hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    class="right-description" @click="openPayment(payment)"
+                    @contextmenu.prevent="hasPaymentsWrite && (payment.method == 'Transfer' || payment.method == 'PointOfSale') && order.payments.length === 1 ? changePaymentStatus($event) : null"
                 >
                     <h3 class="style-definition-label">
-                        Betaling
+                        {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
                     <p class="style-definition-text">
-                        <span>{{ getName(order.payment.method) }}</span>
-                        <span v-if="order.payment.status == 'Succeeded'" class="icon primary success" />
+                        <span>{{ getName(payment.method) }}</span>
+                        <span v-if="payment.status == 'Succeeded'" class="icon primary success" />
                         <span v-else class="icon clock" />
                     </p>
 
+                    <span v-if="order.payments.length > 1" slot="right">{{ payment.price | price }}</span>
                     <span v-if="hasPaymentsWrite" slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
@@ -106,13 +118,18 @@
                 </STListItem>
             </STList>
 
-            <p v-if="!order.payment && order.data.totalPrice > 0" class="warning-box">
-                *Er werd geen betaling aangemaakt voor deze bestelling. Je moet zelf de betaalinformatie communiceren.
+            <p v-if="didChangePrice" class="warning-box">
+                Het te betalen bedrag van deze bestelling is gewijzigd nadat de bestelling geplaatst werd.
             </p>
 
-            <p v-if="order.payment && order.payment.price != order.data.totalPrice" class="warning-box">
-                *De totaalprijs van deze bestelling is gewijzigd nadat de bestelling geplaatst werd. De betaling die daardoor aangemaakt is is dus enkel van toepassing op het oorspronkelijke bedrag. Je moet zelf de communicatie in orde brengen voor het overige gedeelte.
+            <p v-if="hasPaymentsWrite && isMissingPayments" class="warning-box">
+                Er werd nog geen betaling aangemaakt voor alle producten in deze bestelling. Registreer een betaling/terugbetaling
             </p>
+
+            <button v-if="hasPaymentsWrite && isMissingPayments" class="button text" type="button" @click="createPayment">
+                <span class="icon add" />
+                <span>Betaling / terugbetaling registreren</span>
+            </button>
             
             <template v-if="order.data.checkoutMethod">
                 <hr>
@@ -335,16 +352,17 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
+import { ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import { BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import EditPaymentView from "../../member/EditPaymentView.vue";
 import PaymentView from "../../payments/PaymentView.vue";
 import { WebshopManager } from "../WebshopManager";
 import { OrderActionBuilder } from "./OrderActionBuilder";
@@ -389,6 +407,14 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get webshop() {
         return this.webshopManager.preview
+    }
+
+    get didChangePrice() {
+        return this.order.balanceItems.flatMap(b => b.payments).length > 1 || this.isMissingPayments
+    }
+
+    get isMissingPayments() {
+        return this.order.payments.reduce((a, b) => a + b.price, 0) !== this.order.totalToPay
     }
 
     order: PrivateOrderWithTickets = this.initialOrder
@@ -448,14 +474,14 @@ export default class OrderView extends Mixins(NavigationMixin){
         })
     }
 
-    openPayment() {
+    openPayment(payment: PaymentGeneral) {
         if (!this.hasPaymentsWrite) {
             return;
         }
         this.present({
             components: [
                 new ComponentWithProperties(PaymentView, {
-                    initialPayment: this.order.payment
+                    initialPayment: payment
                 })
             ],
             modalDisplayStyle: "popup"
@@ -586,6 +612,16 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (this.hasTickets) {
             this.recheckTickets()
         }
+
+        // Listen for patches in payments
+        GlobalEventBus.addListener(this, "paymentPatch", async (payment) => {
+            if (payment && payment.id && this.order.payments.find(p => p.id === payment.id as string)) {
+                // Reload tickets and order
+                await this.downloadNewOrders()
+                this.downloadNewTickets()
+            }
+            return Promise.resolve()
+        })
     }
 
     recheckTickets() {
@@ -720,6 +756,10 @@ export default class OrderView extends Mixins(NavigationMixin){
         return cartItem.product.images[0]?.getPathForSize(100, 100)
     }
 
+    async downloadNewOrders() {
+        await this.webshopManager.fetchNewOrders(false, false);
+    }
+
     downloadNewTickets() {
         if (!this.hasTickets) {
             return
@@ -756,6 +796,41 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get recordAnswers() {
         return this.order.data.recordAnswers
+    }
+
+    createPayment() {
+        const payment = PaymentGeneral.create({
+            method: PaymentMethod.PointOfSale,
+            status: PaymentStatus.Succeeded,
+            paidAt: new Date()
+        })
+
+        const component = new ComponentWithProperties(EditPaymentView, {
+            payment,
+            balanceItems: this.order.balanceItems.map(b => BalanceItemDetailed.create({
+                ...b, 
+                order: this.order
+            })),
+            isNew: true,
+            saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
+                const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+                arr.addPut(payment.patch(patch))
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/organization/payments',
+                    body: arr,
+                    decoder: new ArrayDecoder(PaymentGeneral),
+                    shouldRetry: false
+                });
+                
+                // Update order
+                await this.downloadNewOrders()
+            }
+        })
+        this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        })
     }
 }
 </script>

@@ -2,13 +2,13 @@ import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from "@stamhoofd/queues";
-import { EmailTemplateType, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPrivatePayment,BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, MemberBalanceItemPayment, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { WebshopCounter } from '../helpers/WebshopCounter';
-import { EmailTemplate, Organization, Payment, Ticket, Webshop } from './';
+import { BalanceItem, EmailTemplate, Organization, Payment, Ticket, Webshop } from './';
 
 export class Order extends Model {
     static table = "webshop_orders";
@@ -91,6 +91,13 @@ export class Order extends Model {
         return "https://"+this.webshop.getHost()+locale+"/order/"+this.id
     }
 
+    generateBalanceDescription(webshop: Webshop) {
+        if (!this.number) {
+            return 'Bestelling - ' + webshop.meta.name
+        }
+        return 'Bestelling #' + this.number.toString() + ' - ' + webshop.meta.name
+    }
+
     /**
      * Fetch an order
      */
@@ -110,12 +117,22 @@ export class Order extends Model {
         return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
     }
 
+    get totalToPay() {
+        if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted) {
+            return 0
+        }
+        return this.data.totalPrice
+    }
+
     async undoPaymentFailed(this: Order, _payment: Payment | null, _organization: Organization) {
         if (this.status !== OrderStatus.Deleted && this.status !== OrderStatus.Canceled) {
+            this.markUpdated()
+            await this.save()
             return
         }
 
         console.log('Undoing payment failed for order '+this.id)
+        this.markUpdated()
         this.status = OrderStatus.Created
         await this.save()
 
@@ -134,7 +151,10 @@ export class Order extends Model {
 
     async onPaymentFailed(this: Order, payment: Payment | null, organization: Organization) {
         if (this.shouldIncludeStock()) {
-            this.status = this.number !== null ? OrderStatus.Canceled : OrderStatus.Deleted
+            this.markUpdated()
+            if (this.number === null) {
+                this.status = OrderStatus.Deleted
+            }
             await this.save()
 
             await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
@@ -175,6 +195,9 @@ export class Order extends Model {
             } else {
                 console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Not sending email.')
             }
+        } else {
+            this.markUpdated()
+            await this.save()
         }
     }
 
@@ -478,6 +501,14 @@ export class Order extends Model {
         this.forceSaveProperty("updatedAt")
     }
 
+    /**
+     * A payment changed the total paid amount
+     */
+    async paymentChanged(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+        this.markUpdated()
+        await this.save()
+    }
+
     async undoPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
         this.markUpdated()
         await this.save()
@@ -545,29 +576,98 @@ export class Order extends Model {
     }
 
     getStructureWithoutPayment()  {
-        return OrderStruct.create(Object.assign({}, this, { payment: null }));
+        return OrderStruct.create({...this});
     }
 
-    async getStructure()  {
-        if (this.paymentId) {
-            if (Order.payment.isLoaded(this)) {
-                return OrderStruct.create(
-                    Object.assign(
-                        {...this}, 
-                        { 
-                            payment: PaymentStruct.create((this as unknown as (Order & {payment: Payment})).payment) 
-                        }
-                    ));
-            }
-            const payment = await Payment.getByID(this.paymentId)
-            if (!payment) {
-                throw new Error("Failed to load relation payment")
-            }
-            this.setRelation(Order.payment, payment)
-            return OrderStruct.create(Object.assign({...this}, { payment: PaymentStruct.create(payment) }));
+    static async getStructures(orders: Order[]): Promise<OrderStruct[]> {
+        if (orders.length === 0) {
+            return []
         }
-        
-        return OrderStruct.create(Object.assign({}, this, { payment: null }));
+
+        // Balance items
+        const allBalanceItems = await BalanceItem.where({ orderId: {
+            sign: "IN",
+            value: orders.map(o => o.id)
+        } })
+
+        const {payments, balanceItemPayments} = await BalanceItem.loadPayments(allBalanceItems)
+
+        const structures: OrderStruct[] = []
+        for (const order of orders) {
+            const balanceItems = allBalanceItems.filter(b => b.orderId === order.id)
+
+            const balanceItemStructures = balanceItems.map((balanceItem) => {
+                return BalanceItemWithPayments.create({
+                    ...balanceItem,
+                    payments: balanceItemPayments.filter(b => b.balanceItemId === balanceItem.id).map(balanceItemPayment => {
+                        const payment = payments.find(pp => pp.id === balanceItemPayment.paymentId)!
+                        return MemberBalanceItemPayment.create({
+                            ...balanceItemPayment,
+                            payment: PaymentStruct.create(payment)
+                        })
+                    })
+                });
+            })
+
+            structures.push(
+                OrderStruct.create({
+                    ...order,
+                    balanceItems: balanceItemStructures,
+                    // Compatibility
+                    payment: balanceItemStructures[0]?.payments[0]?.payment ?? null
+                })
+            )
+        }
+
+        return structures
+    }
+
+    static async getPrivateStructures(orders: Order[]): Promise<PrivateOrder[]> {
+        if (orders.length === 0) {
+            return []
+        }
+
+        // Balance items
+        const allBalanceItems = await BalanceItem.where({ orderId: {
+            sign: "IN",
+            value: orders.map(o => o.id)
+        } })
+
+        const {payments, balanceItemPayments} = await BalanceItem.loadPayments(allBalanceItems)
+
+        const structures: PrivateOrder[] = []
+        for (const order of orders) {
+            const balanceItems = allBalanceItems.filter(b => b.orderId === order.id)
+
+            const balanceItemStructures = balanceItems.map((balanceItem) => {
+                return BalanceItemWithPrivatePayments.create({
+                    ...balanceItem,
+                    payments: balanceItemPayments.filter(b => b.balanceItemId === balanceItem.id).map(balanceItemPayment => {
+                        const payment = payments.find(pp => pp.id === balanceItemPayment.paymentId)!
+                        return BalanceItemPaymentWithPrivatePayment.create({
+                            ...balanceItemPayment,
+                            payment: PrivatePayment.create(payment)
+                        })
+                    })
+                });
+            })
+
+            structures.push(
+                PrivateOrder.create({
+                    ...order,
+                    balanceItems: balanceItemStructures,
+                    // Compatibility
+                    payment: balanceItemStructures[0]?.payments[0]?.payment ?? null
+                })
+            )
+        }
+
+        return structures
+    }
+
+
+    async getStructure()  {
+       return (await Order.getStructures([this]))[0]!
     }
 
     async sendEmailTemplate(this: Order & { webshop: Webshop & { organization: Organization } }, data: {

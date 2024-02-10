@@ -21,8 +21,8 @@
                 <main>
                     <div class="split-login-view">
                         <div class="container login-view">
-                            <h1>Begin met inschrijven</h1>
-                            <p>Onderaan deze pagina vind je meer informatie over waar je zoal voor kan inschrijven.</p>
+                            <h1>Ledenportaal</h1>
+                            <p>Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.</p>
                             
                             <div class="button-box">
                                 <button class="button primary full" type="button" @click="login()">

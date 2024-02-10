@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
+import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem';
 import { Recipient, Replacement } from '../endpoints/EmailRequest';
 import { Payment, PrivatePayment } from '../members/Payment';
 import { Organization } from '../Organization';
@@ -133,11 +134,14 @@ export class Order extends AutoEncoder {
     @field({ decoder: OrderData })
     data: OrderData = OrderData.create({})
 
+    @field({ decoder: new ArrayDecoder(BalanceItemWithPayments), version: 225 })
+    balanceItems: BalanceItemWithPayments[] = []
+
     /**
      * @deprecated: replaced by balance items
      */
     @field({ decoder: Payment, nullable: true })
-    payment: Payment | null // no default to prevent errors
+    payment: Payment | null = null
 
     @field({ decoder: DateDecoder })
     createdAt: Date = new Date()
@@ -182,6 +186,27 @@ export class Order extends AutoEncoder {
 
     get shouldIncludeStock() {
         return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
+    }
+
+    get pricePaid() {
+        return this.balanceItems.reduce((total, item) => total + item.pricePaid, 0)
+    }
+
+    get totalToPay() {
+        if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted) {
+            return 0
+        }
+        return this.data.totalPrice
+    }
+
+    updatePricePaid() {
+        for (const item of this.balanceItems) {
+            item.updatePricePaid()
+        }
+    }
+
+    get payments() {
+        return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
     }
 
     matchQuery(query: string): boolean {
@@ -435,8 +460,18 @@ export class Order extends AutoEncoder {
 }
 
 export class PrivateOrder extends Order {
+    /**
+     * @deprecated
+     */
     @field({ decoder: PrivatePayment, nullable: true })
-    payment: PrivatePayment | null
+    payment: PrivatePayment | null = null
+
+    @field({ decoder: new ArrayDecoder(BalanceItemWithPrivatePayments), nullable: true, version: 225 })
+    balanceItems: BalanceItemWithPrivatePayments[] = []
+
+    get payments() {
+        return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+    }
 }
 
 export class PrivateOrderWithTickets extends PrivateOrder {

@@ -79,6 +79,17 @@ export class BalanceItem extends Model {
     })
     updatedAt: Date
 
+    async markUpdated(payment: Payment, organization: Organization) {
+        // For orders: mark order as changed (so they are refetched in front ends)
+        if (this.orderId) {
+            const {Order} = await import("./Order");
+            const order = await Order.getByID(this.orderId);
+            if (order) {
+                await order.paymentChanged(payment, organization)
+            }
+        }
+    }
+
     async markPaid(payment: Payment, organization: Organization) {
         // status and pricePaid changes are handled inside balanceitempayment
 
@@ -120,7 +131,7 @@ export class BalanceItem extends Model {
                     const webshop = await Webshop.getByID(order.webshopId)
 
                     if (webshop) {
-                        this.description = 'Bestelling #' + order.number.toString() + ' - ' + webshop.meta.name
+                        this.description = order.generateBalanceDescription(webshop)
                         await this.save()
                     }
                 }
@@ -164,6 +175,10 @@ export class BalanceItem extends Model {
                 await order.undoPaymentFailed(payment, organization)
             }
         }
+    }
+
+    updateStatus() {
+        this.status = this.pricePaid >= this.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
     }
 
     static async deleteItems(items: BalanceItem[]) {

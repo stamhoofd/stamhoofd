@@ -74,7 +74,7 @@
         margin-top: 7px
     }
 
-    &:disabled {
+    &:disabled, &.disabled {
         color: $color-gray-1;
         cursor: not-allowed;
 

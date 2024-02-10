@@ -143,16 +143,20 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         }
 
         if (this.preview.meta.paymentMethods.length > 1){
-            cols.push(new Column<PrivateOrder, PrivateOrder>({
+            cols.push(new Column<PrivateOrder, string[]>({
                 name: "Betaalmethode", 
-                getValue: (order) => order, 
-                format: (order: PrivateOrder) => {
-                    if (order.data.paymentMethod === PaymentMethod.Unknown) {
+                getValue: (order) => {
+                    return Formatter.uniqueArray(order.balanceItems.flatMap(b => b.payments.map(p => p.payment.method))).map(m => PaymentMethodHelper.getNameCapitalized(m, order.data.checkoutMethod?.type ?? null)).sort()
+                }, 
+                format: (methods) => {
+                    if (methods.length === 0) {
                         return "Geen"
                     }
-                    return PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod, order.data.checkoutMethod?.type ?? null)
+
+                    return methods.join(', ')
                 },
-                compare: (a, b) => Sorter.byStringValue(a.data.paymentMethod, b.data.paymentMethod),
+                compare: (a, b) => Sorter.byStringValue(a.join(','), b.join(',')),
+                getStyle: (methods) => methods.length === 0 ? "gray" : "",
                 minimumWidth: 100,
                 recommendedWidth: 120,
                 enabled: false
@@ -285,11 +289,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         )
 
         cols.push(
-            new Column<PrivateOrder, number | undefined>({
+            new Column<PrivateOrder, number>({
                 name: "Bedrag", 
                 enabled: false,
-                getValue: (order) => order.payment?.price,
-                format: (price) => price ? Formatter.price(price) : "Onbekend",
+                getValue: (order) => order.data.totalPrice,
+                format: (price) => Formatter.price(price),
                 compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
                 getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
                 minimumWidth: 70,
@@ -299,13 +303,13 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         )
 
         cols.push(
-            new Column<PrivateOrder, number | undefined>({
+            new Column<PrivateOrder, number>({
                 name: "Te betalen", 
-                enabled: this.preview.meta.paymentMethods.includes(PaymentMethod.Transfer), // keep it available because should be able to enable it when payment methods are changed
-                getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.data.totalPrice : (order.payment && order.payment.price < order.data.totalPrice ? order.data.totalPrice - order.payment.price : undefined),
-                format: (price) => price ? Formatter.price(price) : "Betaald",
+                enabled: this.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Transfer) || this.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.PointOfSale), // keep it available because should be able to enable it when payment methods are changed
+                getValue: (order) => order.totalToPay - order.pricePaid,
+                format: (price) => price !== 0 ? Formatter.price(price) : "Betaald",
                 compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
-                getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
+                getStyle: (price) => (price === 0 ? "gray" : ""),
                 minimumWidth: 70,
                 recommendedWidth: 80,
                 index: 1
@@ -771,7 +775,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }),
             defaultMode: ChoicesFilterMode.Or,
             getValue: (order) => {
-                return [order.data.paymentMethod]
+                return order.payments.map(p => p.method)
             }
         })
 
@@ -784,7 +788,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             ],
             defaultMode: ChoicesFilterMode.Or,
             getValue: (order) => {
-                return [order.payment?.status == PaymentStatus.Succeeded ? "paid" : "not_paid"]
+                return [order.pricePaid >= order.totalToPay ? "paid" : "not_paid"]
             }
         })
 
@@ -849,26 +853,26 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             })
         )
 
-        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Transfer)) {
-            definitions.push(new DateFilterDefinition<PrivateOrder>({
-                id: "order_paidAt",
-                name: "Betaaldatum",
-                time: false,
-                getValue: (order) => {
-                    return order.payment?.paidAt ?? new Date(1900, 0, 1)
-                }
-            }))
-        }
+        definitions.push(new DateFilterDefinition<PrivateOrder>({
+            id: "order_paidAt",
+            name: "Betaaldatum",
+            time: false,
+            getValue: (order) => {
+                const time = Math.min(new Date(2100, 0, 1).getTime(), ...order.payments.map(p => (p.paidAt ?? new Date(2100, 0, 1)).getTime()))
+                return new Date(time)
+            }
+        }))
 
-        if (this.organization.privateMeta?.mollieOnboarding?.canReceivePayments && (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.CreditCard))) {
+        if (this.webshop?.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.iDEAL) || this.webshop?.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.CreditCard)) {
             definitions.push(
                 new DateFilterDefinition<PrivateOrder>({
                     id: "order_settledAt",
-                    name: "Uitbetalingsdatum Mollie",
-                    description: "Voor betaalmethodes Bancontact en iDEAL",
+                    name: "Uitbetalingsdatum",
+                    description: "Voor online betalingen met uitbetalingsinformatie",
                     time: false,
                     getValue: (order) => {
-                        return order.payment?.settlement?.settledAt ?? new Date(1900, 0, 1)
+                        const time = Math.min(new Date(2100, 0, 1).getTime(), ...order.payments.map(p => (p.settlement?.settledAt ?? new Date(2100, 0, 1)).getTime()))
+                        return new Date(time)
                     }
                 })
             )

@@ -1,5 +1,5 @@
 <template>
-    <label class="price-input input" :class="{ error: !valid }">
+    <label class="price-input input" :class="{ error: !valid, disabled }">
         <!-- 
             We use type = text here because the specs of number inputs ensure that we can't get 
             the raw string value, but we need this for our placeholder logic.
@@ -12,6 +12,7 @@
             type="text"
             inputmode="decimal"
             step="any"
+            :disabled="disabled"
             @blur="clean"
             @keydown.up.prevent="step(100)"
             @keydown.down.prevent="step(-100)"
@@ -33,26 +34,29 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 export default class PriceInput extends Vue {
     /** Price in cents */
     @Prop({ default: 0 })
-    min!: number | null
+        min!: number | null
 
     /** Price in cents */
     @Prop({ default: null })
-    max!: number | null
+        max!: number | null
 
     valueString = "40";
     valid = true;
 
     /** Price in cents */
     @Prop({ default: null })
-    value!: number | null
+        value!: number | null
 
     currency = "euro";
 
     @Prop({ default: "" })
-    placeholder!: string
+        placeholder!: string
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
+
+    @Prop({ default: false })
+        disabled!: boolean
 
     @Watch('value')
     onRealValueChanged(val: number | null, old: number | null) {

@@ -148,6 +148,9 @@ export class PaymentsExcelExport {
             ],
         ];
 
+        // Some orders have multiple payments, avoid adding them twice to the Excel
+        const addedOrders = new Set<string>()
+
         for (const payment of payments) {
             for (const item of payment.balanceItemPayments) {
                 if (this.filterBalanceItems && !this.filterBalanceItems(item)) {
@@ -156,7 +159,9 @@ export class PaymentsExcelExport {
 
                 const balanceItem = item.balanceItem
 
-                if (balanceItem.order) {
+                if (balanceItem.order && !addedOrders.has(balanceItem.order.id) && item.price === balanceItem.order.data.totalPrice) {
+                    addedOrders.add(balanceItem.order.id);
+
                     for (const orderItem of balanceItem.order.data.cart.items) {
                         wsData.push([
                             payment.id,
@@ -210,7 +215,7 @@ export class PaymentsExcelExport {
                             payment.id,
                             balanceItem.description,
                             1,
-                            'Gewijzigde bestelling, verschil in prijs - positief als teveel betaald',
+                            difference > 0 ? 'Verwijderde items uit bestelling' : 'Items toegevoegd aan bestelling',
                             '',
                             {
                                 value: (difference ?? 0) / 100,
@@ -237,6 +242,22 @@ export class PaymentsExcelExport {
                         }
                     ]);
 
+                    continue;
+                }
+
+                // Gewijzigde bestelling
+                if (balanceItem.order) {
+                    wsData.push([
+                        payment.id,
+                        balanceItem.description,
+                        1,
+                        item.price < 0 ? 'Terugbetaling bestelling' : 'Gewijzigde bestelling',
+                        '',
+                        {
+                            value: (item.price ?? 0) / 100,
+                            format: "€0.00"
+                        }
+                    ]);
                     continue;
                 }
 

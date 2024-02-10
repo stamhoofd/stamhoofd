@@ -1,8 +1,8 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Order, Payment, Token, Webshop } from '@stamhoofd/models';
-import { PaginatedResponse, PermissionLevel, PrivateOrder, PrivatePayment, WebshopOrdersQuery } from "@stamhoofd/structures";
+import { Order, Token, Webshop } from '@stamhoofd/models';
+import { PaginatedResponse, PermissionLevel, PrivateOrder, WebshopOrdersQuery } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = WebshopOrdersQuery
@@ -66,25 +66,24 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             orders = await Order.select("WHERE webshopId = ? AND number is not null ORDER BY updatedAt, number LIMIT ?", [webshop.id, limit])
         }
 
-        const paymentIds = orders.map(o => o.paymentId).filter(p => !!p) as string[]
-        if (paymentIds.length > 0) {
-            const payments = await Payment.getByIDs(...paymentIds)
-            for (const order of orders) {
-                const payment = payments.find(p => p.id === order.paymentId)
-                order.setOptionalRelation(Order.payment, payment ?? null)
-            }
-        } else {
-             for (const order of orders) {
-                order.setOptionalRelation(Order.payment, null)
-            }
-        }
+        //const paymentIds = orders.map(o => o.paymentId).filter(p => !!p) as string[]
+        //if (paymentIds.length > 0) {
+        //    const payments = await Payment.getByIDs(...paymentIds)
+        //    for (const order of orders) {
+        //        const payment = payments.find(p => p.id === order.paymentId)
+        //        order.setOptionalRelation(Order.payment, payment ?? null)
+        //    }
+        //} else {
+        //     for (const order of orders) {
+        //        order.setOptionalRelation(Order.payment, null)
+        //    }
+        //}
+
+        const structures = await Order.getPrivateStructures(orders)
        
         return new Response(
             new PaginatedResponse({ 
-                results: (orders as (Order & { payment: Payment | null })[])
-                    .map(order => PrivateOrder.create({
-                        ...order, payment: order.payment ? PrivatePayment.create(order.payment) : null }
-                    )),
+                results: structures,
                 next: orders.length >= limit ? WebshopOrdersQuery.create({
                     updatedSince: orders[orders.length - 1].updatedAt ?? undefined,
                     afterNumber: orders[orders.length - 1].number ?? undefined

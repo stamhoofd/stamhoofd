@@ -9,6 +9,9 @@
             <h1 v-else-if="created">
                 Gelukt! Schrijf nu het bedrag over
             </h1>
+            <h1 v-else-if="payment.price < 0">
+                Terugbetaling via overschrijving
+            </h1>
             <h1 v-else>
                 Bedrag overschrijven
             </h1>
@@ -18,6 +21,13 @@
             <p v-if="payment.price > 0 && payment.status != 'Succeeded' && !created">
                 We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
             </p>
+            <p v-if="payment.price < 0 && payment.status != 'Succeeded' && !created">
+                Je ontvangt dit bedrag binnenkort terug op jouw rekening.
+            </p>
+            <p v-if="payment.price < 0 && payment.status === 'Succeeded'" class="success-box">
+                We hebben dit bedrag terug op jouw rekening gestort.
+            </p>
+
 
             <div class="payment-split">
                 <div class="rectangle">

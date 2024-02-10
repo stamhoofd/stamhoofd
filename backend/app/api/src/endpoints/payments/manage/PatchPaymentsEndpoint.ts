@@ -149,12 +149,16 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             // Mark paid or failed
-            if (put.status !== PaymentStatus.Created) {
+            if (put.status !== PaymentStatus.Created && put.status !== PaymentStatus.Pending) {
                 await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, user.organization, put.status)
 
                 if (put.status === PaymentStatus.Succeeded) {
                     payment.paidAt = put.paidAt
                     await payment.save()
+                }
+            } else {
+                for (const balanceItem of balanceItems) {
+                    await balanceItem.markUpdated(payment, user.organization)
                 }
             }
 

@@ -383,7 +383,7 @@ export class OrdersExcelExport {
                     format: "€0.00"
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald",
+                order.pricePaid < order.totalToPay ? "Nog niet betaald" : "Betaald",
                 OrderStatusHelper.getName(order.status),
                 ...(shouldIncludeSettements ? 
                     (order.payment?.settlement ? [Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.payment.settlement.settledAt)), order.payment.settlement.reference] : ["/", "/"])

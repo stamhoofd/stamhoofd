@@ -151,3 +151,4 @@ export * from "./src/filters/StringFilter";
 
 // Balance
 export * from "./src/BalanceItem"
+export * from "./src/BalanceItemDetailed"

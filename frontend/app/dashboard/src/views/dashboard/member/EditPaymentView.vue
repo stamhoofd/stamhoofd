@@ -4,9 +4,13 @@
             {{ title }}
         </h1>
 
-        <p>
-            Kies hieronder wat er precies betaald of terugbetaald (negatief bedrag invullen) werd. 
+        <p v-if="price >= 0">
+            Kies hieronder wat er precies betaald werd. 
         </p>
+        <p v-else>
+            Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd. Let op dat Stamhoofd momenteel geen automatische terugbetalingen doet voor online betalingen. Je moet dus zelf het bedrag manueel terugbetalen of storten.
+        </p>
+
         <STErrorsDefault :error-box="errorBox" />
 
         <STList>
@@ -83,8 +87,14 @@
             </Dropdown>
         </STInputBox>
 
-        <p v-if="status !== 'Succeeded'" class="info-box">
-            We raden aan enkel betalingen aan te maken die je hebt ontvangen. Een lid kan zelf namelijk ook altijd het openstaande bedrag betalen via het ledenportaal.
+        <p v-if="status !== 'Succeeded' && price >= 0" class="info-box">
+            We raden aan enkel betalingen aan te maken die je hebt ontvangen. <template v-if="familyManager">
+                Een lid kan zelf namelijk ook altijd het openstaande bedrag betalen via het ledenportaal.
+            </template>
+        </p>
+
+        <p v-if="status !== 'Succeeded' && price < 0" class="info-box">
+            We raden aan enkel terugbetalingen aan te maken die je al hebt terugbetaald.
         </p>
 
         <template v-if="method === 'Transfer'">
@@ -154,21 +164,21 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    payment: PaymentGeneral
+        payment: PaymentGeneral
 
     @Prop({ required: true })
-    balanceItems: BalanceItemDetailed[]
+        balanceItems: BalanceItemDetailed[]
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
-    @Prop()
-    familyManager!: FamilyManager;
+    @Prop({default: null})
+        familyManager!: FamilyManager|null;
     
     patchPayment: AutoEncoderPatchType<PaymentGeneral> = PaymentGeneral.patch({})
 
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<PaymentGeneral>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<PaymentGeneral>) => Promise<void>);
 
     availableMethods = [
         PaymentMethod.PointOfSale,
@@ -182,11 +192,11 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     ];
 
     getMember(id: string) {
-        return this.familyManager.members.find(m => m.id == id)
+        return this.familyManager?.members.find(m => m.id == id)
     }
 
     get multipleMembers() {
-        return this.familyManager.members.length > 1
+        return (this.familyManager?.members.length ?? 0) > 1
     }
 
     get organization() {
@@ -228,7 +238,15 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
             return
         }
 
-        const transferSettings = this.organization.meta.transferSettings.fillMissing(TransferSettings.create({creditor: this.organization.name}));
+        let transferSettings = this.organization.meta.registrationPaymentConfiguration.transferSettings.fillMissing(TransferSettings.create({creditor: this.organization.name}));
+        const webshopId = this.balanceItems.find(b => b.order)?.order?.webshopId
+        if (webshopId) {
+            const webshop = this.organization.webshops.find(w => w.id == webshopId)
+            if (webshop) {
+                transferSettings = webshop.meta.paymentConfiguration.transferSettings.fillMissing(transferSettings);
+            }
+        }
+
         this.addPatch({
             method,
             transferDescription: method === PaymentMethod.Transfer ? transferSettings.generateDescription('', I18nController.shared.country) : undefined,

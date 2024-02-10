@@ -186,10 +186,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         throw new Error("Unsupported payment method")
                     }
 
-                    if (order.number) {
-                        balanceItem.description = 'Bestelling #' + order.number.toString() + ' - ' + webshop.meta.name
-                        await balanceItem.save()
-                    }
+                    balanceItem.description = order.generateBalanceDescription(webshop)
+                    await balanceItem.save()
                 }
                 
                 orders.push(order)
@@ -229,51 +227,53 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 }
 
                 if (model.status === OrderStatus.Deleted || model.status === OrderStatus.Canceled) {
+                    model.markUpdated()
                     // Cancel payment if still pending
                     await BalanceItem.deleteForDeletedOrders([model.id])
                 } else {
                     if (previousStatus === OrderStatus.Canceled || previousStatus === OrderStatus.Deleted) {
+                        model.markUpdated()
                         // Undo deletion
                         await BalanceItem.undoForDeletedOrders([model.id])
                     }
                 }
 
+                // Update balance item prices for this order if price has changed
+                if (previousData.totalPrice !== model.totalToPay) {
+                    const items = await BalanceItem.where({ orderId: model.id })
+                    if (items.length === 1) {
+                        model.markUpdated()
+                        items[0].price = model.totalToPay
+                        items[0].description = model.generateBalanceDescription(webshop)
+                        items[0].updateStatus();
+                        await items[0].save()
+                    } else if (items.length === 0 && model.totalToPay > 0) {
+                        model.markUpdated()
+                        const balanceItem = new BalanceItem();
+                        balanceItem.orderId = model.id;
+                        balanceItem.price = model.totalToPay
+                        balanceItem.description = model.generateBalanceDescription(webshop)
+                        balanceItem.pricePaid = 0
+                        balanceItem.organizationId = organization.id;
+                        balanceItem.status = BalanceItemStatus.Pending;
+                        await balanceItem.save();
+                    }
+                }
+
                 await model.save()
                 await model.setRelation(Order.webshop, webshop).updateStock(previousData)
+
+                if (model.number !== null) {
+                    await model.setRelation(Order.webshop, webshop).updateTickets()
+                }
             }
 
             const mapped = orders.map(order => order.setRelation(Order.webshop, webshop))
             return mapped
         })
 
-        // Load payments
-        const paymentIds = orders.map(o => o.paymentId).filter(p => !!p) as string[]
-        if (paymentIds.length > 0) {
-            const payments = await Payment.getByIDs(...paymentIds)
-            for (const order of orders) {
-                const payment = payments.find(p => p.id === order.paymentId)
-                order.setOptionalRelation(Order.payment, payment ?? null)
-
-                if (!payment || payment.status === PaymentStatus.Succeeded || payment.method === PaymentMethod.PointOfSale) {
-                    await order.updateTickets()
-                }
-            }
-        } else {
-            for (const order of orders) {
-                order.setOptionalRelation(Order.payment, null)
-
-                if (order.paymentId === null) {
-                    await order.updateTickets()
-                }
-            }
-        }
-    
         return new Response(
-            (orders as (Order & Record<"webshop", Webshop> & { payment: Payment | null })[])
-                .map(order => PrivateOrder.create({
-                    ...order, 
-                    payment: order.payment ? PrivatePayment.create(order.payment) : null }
-                )),
+            await Order.getPrivateStructures(orders)
         );
     }
 }
