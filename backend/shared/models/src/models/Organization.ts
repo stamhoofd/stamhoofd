@@ -786,6 +786,9 @@ export class Organization extends Model {
         }
         const provider = this.privateMeta.getPaymentProviderFor(method, stripeAccount?.meta)
         if (provider === null && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(method)) {
+            if (!stripeAccount && config.stripeAccountId) {
+                console.warn('Missing stripe account id ' + config.stripeAccountId);
+            }
             throw new SimpleError({
                 code: 'payment_provider_not_configured',
                 message: 'Payment provider not configured for '+method,

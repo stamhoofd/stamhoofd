@@ -4,6 +4,10 @@ import { Database, Migration } from "@simonbackx/simple-database";
 import path from "path";
 const emailPath = require.resolve("@stamhoofd/email")
 const modelsPath = require.resolve("@stamhoofd/models")
+import nock from "nock";
+
+// Disable network requests
+nock.disableNetConnect()
 
 // Set timezone!
 process.env.TZ = "UTC";

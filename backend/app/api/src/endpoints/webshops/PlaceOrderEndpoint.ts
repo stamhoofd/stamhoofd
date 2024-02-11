@@ -77,7 +77,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             // For non paid organizations, the limit is 10
-            if (!organization.meta.packages.isPaid) {
+            if (!organization.meta.packages.isPaid && STAMHOOFD.environment !== 'test') {
                 const limiter = demoOrderLimiter
 
                 try {

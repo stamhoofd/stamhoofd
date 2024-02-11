@@ -1,12 +1,14 @@
+/* eslint-disable jest/expect-expect */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable jest/no-standalone-expect */
 import { PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-endpoints";
-import { Order, Organization, OrganizationFactory, Token, UserFactory, Webshop,WebshopFactory } from "@stamhoofd/models";
-import { Address, Cart, CartItem, Country, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, Product, ProductType, Token as TokenStruct, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop,WebshopFactory } from "@stamhoofd/models";
+import { Address, Cart, CartItem, CartItemOption, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, Token as TokenStruct, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
 
 import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/webshops/manage/PatchWebshopOrdersEndpoint";
 import { PlaceOrderEndpoint } from '../../src/endpoints/webshops/PlaceOrderEndpoint';
+import { StripeMocker } from "../helpers/StripeMocker";
 
 const address = Address.create({
     street: 'Demostraat',
@@ -40,6 +42,20 @@ describe("E2E.Stock", () => {
     let slot3: WebshopTimeSlot;
     let slot4: WebshopTimeSlot;
 
+    let productPrice1: ProductPrice;
+    let productPrice2: ProductPrice;
+    let freeProductPrice: ProductPrice;
+    let personProductPrice: ProductPrice;
+
+    let multipleChoiceOptionMenu: OptionMenu;
+    let chooseOneOptionMenu: OptionMenu;
+    let checkboxOption1: Option;
+    let checkboxOption2: Option;
+    let radioOption1: Option;
+    let radioOption2: Option;
+    let stripeMocker: StripeMocker
+    let stripeAccount: StripeAccount
+
     async function refreshAll() {
         webshop = (await Webshop.getByID(webshop.id))!;
         product = webshop.products.find(p => p.id == product.id)!;
@@ -51,18 +67,196 @@ describe("E2E.Stock", () => {
         slot2 = takeoutMethod.timeSlots.timeSlots.find(s => s.id == slot2.id)!;
         slot3 = deliveryMethod.timeSlots.timeSlots.find(s => s.id == slot3.id)!;
         slot4 = onSiteMethod.timeSlots.timeSlots.find(s => s.id == slot4.id)!;
+        productPrice1 = product.prices.find(p => p.id == productPrice1.id)!;
+        productPrice2 = product.prices.find(p => p.id == productPrice2.id)!;
+        freeProductPrice = product.prices.find(p => p.id == freeProductPrice.id)!;
+        multipleChoiceOptionMenu = product.optionMenus.find(m => m.id == multipleChoiceOptionMenu.id)!;
+        chooseOneOptionMenu = product.optionMenus.find(m => m.id == chooseOneOptionMenu.id)!;
+        checkboxOption1 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption1.id)!;
+        checkboxOption2 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption2.id)!;
+        radioOption1 = chooseOneOptionMenu.options.find(o => o.id == radioOption1.id)!;
+        radioOption2 = chooseOneOptionMenu.options.find(o => o.id == radioOption2.id)!;
+        personProductPrice = personProduct.prices.find(p => p.id == personProductPrice.id)!;
+    }
+
+    async function refreshCartItems(orderId: string, cartItems: CartItem[]): Promise<Order> {
+        const order = (await Order.getByID(orderId))!;
+
+        for (const item of cartItems) {
+            const i = order.data.cart.items.find(i => i.id == item.id)!;
+            item.set(i);
+        }
+        return order;
+    }
+
+    async function checkStock(orderId: string, cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
+        await refreshAll();
+        const order = await refreshCartItems(orderId, [...cartItems, ...excludedCartItems]);
+
+        const products = [product, personProduct];
+        for (const product of products) {
+            let used = 0;
+            for (const item of cartItems) {
+                if (item.product.id == product.id) {
+                    used += item.amount;
+                }
+            }
+            expect(product.usedStock).toBe(used);
+        }
+
+        const productPrices = [productPrice1, productPrice2, freeProductPrice, personProductPrice];
+        for (const price of productPrices) {
+            let used = 0;
+            for (const item of cartItems) {
+                if (item.productPrice.id == price.id) {
+                    used += item.amount;
+                }
+            }
+            expect(price.usedStock).toBe(used);
+        }
+
+        const options = [checkboxOption1, checkboxOption2, radioOption1, radioOption2];
+        for (const option of options) {
+            let used = 0;
+            for (const item of cartItems) {
+                for (const o of item.options) {
+                    if (o.option.id == option.id) {
+                        used += item.amount;
+                    }
+                }
+            }
+            expect(option.usedStock).toBe(used);
+        }
+
+        // Now check reserved for each item
+        for (const item of cartItems) {
+            expect(item.reservedAmount).toBe(item.amount);
+            
+            for (const price of productPrices) {
+                if (item.productPrice.id == price.id) {
+                    expect(item.reservedPrices.get(price.id)).toBe(item.amount);
+                } else {
+                    expect(item.reservedPrices.get(price.id) ?? 0).toBe(0);
+                }
+            }
+
+            for (const option of options) {
+                let reserved = 0;
+                for (const o of item.options) {
+                    if (o.option.id == option.id) {
+                        reserved += item.amount;
+                    }
+                }
+                expect(item.reservedOptions.get(option.id) ?? 0).toBe(reserved);
+            }
+        }
+
+        for (const item of excludedCartItems) {
+            expect(item.reservedAmount).toBe(0);
+            
+            for (const price of productPrices) {
+                expect(item.reservedPrices.get(price.id) ?? 0).toBe(0);
+            }
+
+            for (const option of options) {
+                expect(item.reservedOptions.get(option.id) ?? 0).toBe(0);
+            }
+        }
+
+        // Check order stock
+        let persons = 0;
+        for (const item of cartItems) {
+            if (item.product.type === ProductType.Person) {
+                persons += item.amount;
+            }
+        }
+        expect(order.data.reservedPersons).toBe(persons);
+        expect(order.data.reservedOrder).toBe(cartItems.length > 0);
+
+        const timeslots = [slot1, slot2, slot3, slot4];
+        for (const slot of timeslots) {
+            if (order.data.timeSlot?.id === slot.id) {
+                expect(slot.usedOrders).toBe(cartItems.length > 0 ? 1 : 0);
+                expect(slot.usedPersons).toBe(persons);
+            } else {
+                expect(slot.usedOrders).toBe(0);
+                expect(slot.usedPersons).toBe(0);
+            }
+        }
+
+        return order;
     }
 
     beforeAll(async () => {
+        stripeMocker = new StripeMocker();
+        stripeMocker.start();
         organization = await new OrganizationFactory({}).create()
+        stripeAccount = await stripeMocker.createStripeAccount(organization.id)
+    });
+
+    afterAll(() => {
+        stripeMocker.stop();
     });
 
     beforeEach(async () => {
         let meta = WebshopMetaData.patch({});
 
+        productPrice1 = ProductPrice.create({
+            price: 100,
+            stock: 100
+        })
+
+        productPrice2 = ProductPrice.create({
+            price: 150,
+            stock: 100
+        })
+
+        freeProductPrice = ProductPrice.create({
+            price: 0,
+            stock: 100
+        })
+
+        checkboxOption1 = Option.create({
+            name: 'Checkbox 1',
+            price: 10,
+            stock: 100
+        })
+
+        checkboxOption2 = Option.create({
+            name: 'Checkbox 2',
+            price: 0,
+            stock: 100
+        })
+
+        radioOption1 = Option.create({
+            name: 'Radio 1',
+            price: 10,
+            stock: 100
+        })
+
+        radioOption2 = Option.create({
+            name: 'Radio 2',
+            price: 0,
+            stock: 100
+        })
+
+        multipleChoiceOptionMenu = OptionMenu.create({
+            name: 'Multiple choice',
+            multipleChoice: true,
+            options: [checkboxOption1, checkboxOption2]
+        })
+
+        chooseOneOptionMenu = OptionMenu.create({
+            name: 'Choose one',
+            multipleChoice: false,
+            options: [radioOption1, radioOption2]
+        })
+
         product = Product.create({
             name: 'Test product',
-            stock: 100
+            stock: 100,
+            prices: [productPrice1, productPrice2, freeProductPrice],
+            optionMenus: [multipleChoiceOptionMenu, chooseOneOptionMenu]
         })
 
         personProduct = Product.create({
@@ -70,6 +264,7 @@ describe("E2E.Stock", () => {
             type: ProductType.Person,
             stock: 100
         })
+        personProductPrice = personProduct.prices[0]
 
         // Takeout
         takeoutMethod = WebshopTakeoutMethod.create({
@@ -125,41 +320,62 @@ describe("E2E.Stock", () => {
         onSiteMethod.timeSlots.timeSlots.push(slot4)
         meta.checkoutMethods.addPut(onSiteMethod)
         
-        const paymentConfigurationPatch = PaymentConfiguration.patch({})
+        const paymentConfigurationPatch = PaymentConfiguration.patch({
+            transferSettings: TransferSettings.create({
+                iban: 'BE56587127952688' // = random IBAN
+            }),
+        })
         paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.PointOfSale)
+        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.Transfer)
+        paymentConfigurationPatch.paymentMethods.addPut(PaymentMethod.Bancontact)
+
+        const privatePaymentConfiguration = PrivatePaymentConfiguration.patch({
+            stripeAccountId: stripeAccount.id
+        })
 
         meta = meta.patch({
-            paymentConfiguration: paymentConfigurationPatch
+            paymentConfiguration: paymentConfigurationPatch,
+        })
+
+        const privateMeta = WebshopPrivateMetaData.patch({
+            paymentConfiguration: privatePaymentConfiguration
         })
 
         webshop = await new WebshopFactory({
             organizationId: organization.id,
             name: 'Test webshop',
             meta,
+            privateMeta,
             products: [product, personProduct]
         }).create()
     });
 
     describe('Reserving stock', () => {
-        //test.todo("Online payments reserve the stock", async () => {
-        //    //
-        //});
-//
-        //test.todo("Transfer payments reserve the stock", async () => {
-        //    //
-        //});
-
-        test("POS payments reserve the stock", async () => {
+        test("Online payments reserve the stock and remain if they succeed", async () => {
             const orderData = OrderData.create({
-                paymentMethod: PaymentMethod.PointOfSale,
-                checkoutMethod: takeoutMethod,
-                timeSlot: slot1,
+                paymentMethod: PaymentMethod.Bancontact,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
                 cart: Cart.create({
                     items: [
                         CartItem.create({
                             product,
-                            productPrice: product.prices[0],
-                            amount: 5
+                            productPrice: productPrice2,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption1
+                                }),
+                                 CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption2
+                                })
+                            ]
                         })
                     ]
                 }),
@@ -172,16 +388,126 @@ describe("E2E.Stock", () => {
             expect(response.body).toBeDefined();
             const order = response.body.order;
 
-            // Now check the stock has changed for the product
-            await refreshAll();
-            expect(product.usedStock).toBe(5);
-            expect(product.prices[0].usedStock).toBe(5);
-            expect(slot1.usedOrders).toBe(1);
-            expect(slot1.usedPersons).toBe(0);
+            await checkStock(order.id, order.data.cart.items);
 
-            // Check order reserved stock set correctly
-            expect(order.data.cart.items[0].reservedAmount).toBe(5);
-            expect(order.data.cart.items[0].reservedPrices.get(product.prices[0].id)).toBe(5);
+            // Cancel the payment
+            await stripeMocker.succeedPayment(stripeMocker.getLastIntent())
+
+            const updatedOrder = await checkStock(order.id, order.data.cart.items);
+            expect(updatedOrder.status).toBe(OrderStatus.Created);
+            expect(updatedOrder.number).toBeDefined();
+        });
+
+        test("Free payments reserve the stock", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Unknown,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: freeProductPrice,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption2
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            const response = await endpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body.order;
+
+            await checkStock(order.id, order.data.cart.items);
+        });
+
+        test("Transfer payments reserve the stock", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Transfer,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice2,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption1
+                                }),
+                                 CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption2
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            const response = await endpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body.order;
+
+            await checkStock(order.id, order.data.cart.items);
+        });
+
+        test("POS payments reserve the stock", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption1
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            const response = await endpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body.order;
+
+            await checkStock(order.id, order.data.cart.items);
         });
 
         test.todo("Orders placed by an admin reserve the stock");
@@ -203,9 +529,104 @@ describe("E2E.Stock", () => {
     });
 
     describe('Cleaning up stock', () => {
-        test.todo("Stock is returned when a payment failed");
+        test("Stock is returned when a payment failed", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Bancontact,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice2,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption1
+                                }),
+                                 CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption2
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-        test.todo("Stock is added again if a failed payment succeeds unexpectedly");
+            const response = await endpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body.order;
+
+            await checkStock(order.id, order.data.cart.items);
+
+            // Cancel the payment
+            await stripeMocker.failPayment(stripeMocker.getLastIntent())
+
+            const updatedOrder = await checkStock(order.id, [], order.data.cart.items);
+            expect(updatedOrder.status).toBe(OrderStatus.Deleted);
+        });
+
+        test("Stock is added again if a failed payment succeeds unexpectedly", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Bancontact,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice2,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption1
+                                }),
+                                 CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption2
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            const response = await endpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body.order;
+
+            await checkStock(order.id, order.data.cart.items);
+
+            // Cancel the payment
+            await stripeMocker.failPayment(stripeMocker.getLastIntent())
+
+            let updatedOrder = await checkStock(order.id, [], order.data.cart.items);
+            expect(updatedOrder.status).toBe(OrderStatus.Deleted);
+
+            // Succeed the payment unexpectedly
+            await stripeMocker.succeedPayment(stripeMocker.getLastIntent())
+            updatedOrder = await refreshCartItems(order.id, order.data.cart.items)
+            expect(updatedOrder.status).toBe(OrderStatus.Created);
+            updatedOrder = await checkStock(order.id, order.data.cart.items);
+            expect(updatedOrder.status).toBe(OrderStatus.Created);
+        });
     });
 
     describe('Modifying orders', () => {
@@ -215,20 +636,29 @@ describe("E2E.Stock", () => {
         let personCartItem: CartItem|undefined;
 
         async function refreshOrder() {
-            order = (await Order.getByID(order.id))!;
-            productCartItem = order.data.cart.items.find(i => i.product.id == product.id);
-            personCartItem = order.data.cart.items.find(i => i.product.id == personProduct.id);
+            order = await refreshCartItems(order.id, [productCartItem!, personCartItem!]);
         }
 
         beforeEach(async () => {
             productCartItem = CartItem.create({
                 product,
-                productPrice: product.prices[0],
-                amount: 5
+                productPrice: productPrice1,
+                amount: 5,
+                options: [
+                    CartItemOption.create({
+                        optionMenu: multipleChoiceOptionMenu,
+                        option: checkboxOption1
+                    }),
+                    CartItemOption.create({
+                        optionMenu: chooseOneOptionMenu,
+                        option: radioOption1
+                    })
+                ]
             })
+
             personCartItem = CartItem.create({
                 product: personProduct,
-                productPrice: personProduct.prices[0],
+                productPrice: personProductPrice,
                 amount: 2
             })
 
@@ -252,23 +682,7 @@ describe("E2E.Stock", () => {
             const orderStruct = response.body.order;
 
             // Now check the stock has changed for the product
-            await refreshAll();
-            expect(product.usedStock).toBe(5);
-            expect(product.prices[0].usedStock).toBe(5);
-            expect(personProduct.usedStock).toBe(2);
-            expect(personProduct.prices[0].usedStock).toBe(2);
-            expect(slot1.usedOrders).toBe(1);
-            expect(slot1.usedPersons).toBe(2);
-
-            // Check order reserved stock set correctly
-            expect(orderStruct.data.cart.items[0].reservedAmount).toBe(5);
-            expect(orderStruct.data.cart.items[0].reservedPrices.get(product.prices[0].id)).toBe(5);
-            expect(orderStruct.data.cart.items[1].reservedAmount).toBe(2);
-            expect(orderStruct.data.cart.items[1].reservedPrices.get(personProduct.prices[0].id)).toBe(2);
-
-            // Get the order
-            order = (await Order.getByID(orderStruct.id))!;
-            await refreshOrder();
+            order = await checkStock(orderStruct.id, [productCartItem, personCartItem]);
 
             const user = await new UserFactory({
                 organization,
@@ -280,7 +694,7 @@ describe("E2E.Stock", () => {
 
         });
 
-        test("Stock is removed when a product is removed or added", async () => {
+        test("Stock is removed when a product is removed or added in two steps", async () => {
             {
                 const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
 
@@ -295,20 +709,7 @@ describe("E2E.Stock", () => {
 
                 await patchWebshopOrdersEndpoint.test(r);
 
-                await refreshAll();
-                expect(product.usedStock).toBe(0);
-                expect(product.prices[0].usedStock).toBe(0);
-                expect(personProduct.usedStock).toBe(2);
-                expect(personProduct.prices[0].usedStock).toBe(2);
-                expect(slot1.usedOrders).toBe(1);
-                expect(slot1.usedPersons).toBe(2);
-
-                // Check order
-                await refreshOrder();
-                expect(productCartItem).toBeUndefined();
-                expect(personCartItem!.reservedAmount).toBe(2);
-                expect(order.data.reservedOrder).toBe(true);
-                expect(order.data.reservedPersons).toBe(2);
+                await checkStock(order.id, [personCartItem!]);
             }
 
             {
@@ -316,12 +717,20 @@ describe("E2E.Stock", () => {
 
                 const cartPatch = Cart.patch({})
                 cartPatch.items.addDelete(personCartItem!.id)
+                const newItem = CartItem.create({
+                    product,
+                    productPrice: productPrice2,
+                    amount: 30,
+                    options: [
+                        CartItemOption.create({
+                            optionMenu: chooseOneOptionMenu,
+                            option: radioOption2
+                        })
+                    ]
+                });
+
                 cartPatch.items.addPut(
-                    CartItem.create({
-                        product,
-                        productPrice: product.prices[0],
-                        amount: 30
-                    })
+                    newItem
                 )
 
                 const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
@@ -333,21 +742,44 @@ describe("E2E.Stock", () => {
 
                 await patchWebshopOrdersEndpoint.test(r);
 
-                await refreshAll();
-                expect(product.usedStock).toBe(30);
-                expect(product.prices[0].usedStock).toBe(30);
-                expect(personProduct.usedStock).toBe(0);
-                expect(personProduct.prices[0].usedStock).toBe(0);
-                expect(slot1.usedOrders).toBe(1);
-                expect(slot1.usedPersons).toBe(0);
-
-                // Check order
-                await refreshOrder();
-                expect(personCartItem).toBeUndefined();
-                expect(productCartItem!.reservedAmount).toBe(30);
-                expect(order.data.reservedOrder).toBe(true);
-                expect(order.data.reservedPersons).toBe(0);
+                await checkStock(order.id, [newItem]);
             }
+        });
+
+        test("Stock is removed when a product is removed or added in single step", async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const cartPatch = Cart.patch({})
+            cartPatch.items.addDelete(productCartItem!.id)
+            cartPatch.items.addDelete(personCartItem!.id)
+            cartPatch.items.addPut(personCartItem!)
+            
+            const newItem = CartItem.create({
+                product,
+                productPrice: productPrice2,
+                amount: 40,
+                options: [
+                    CartItemOption.create({
+                        optionMenu: chooseOneOptionMenu,
+                        option: radioOption2
+                    })
+                ]
+            });
+
+            cartPatch.items.addPut(
+                newItem
+            )
+
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            order = await checkStock(order.id, [personCartItem!, newItem]);
         });
 
         test("Stock is adjusted if product amount is changed", async () => {
@@ -371,20 +803,7 @@ describe("E2E.Stock", () => {
 
             await patchWebshopOrdersEndpoint.test(r);
 
-            await refreshAll();
-            expect(product.usedStock).toBe(6);
-            expect(product.prices[0].usedStock).toBe(6);
-            expect(personProduct.usedStock).toBe(13);
-            expect(personProduct.prices[0].usedStock).toBe(13);
-            expect(slot1.usedOrders).toBe(1);
-            expect(slot1.usedPersons).toBe(13);
-
-            // Check order
-            await refreshOrder();
-            expect(productCartItem!.reservedAmount).toBe(6);
-            expect(personCartItem!.reservedAmount).toBe(13);
-            expect(order.data.reservedOrder).toBe(true);
-            expect(order.data.reservedPersons).toBe(13);
+            await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
         test("Stock is changed if timeslot is changed", async () => {
@@ -404,24 +823,118 @@ describe("E2E.Stock", () => {
 
             await patchWebshopOrdersEndpoint.test(r);
 
-            await refreshAll();
-            expect(product.usedStock).toBe(5);
-            expect(product.prices[0].usedStock).toBe(5);
-            expect(personProduct.usedStock).toBe(2);
-            expect(personProduct.prices[0].usedStock).toBe(2);
+            await checkStock(order.id, [personCartItem!, productCartItem!]);
+        });
 
-            expect(slot1.usedOrders).toBe(0);
-            expect(slot1.usedPersons).toBe(0);
+        test('Stock is changed if productPrice is changed', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+            
+            const cartPatch = Cart.patch({})
+            cartPatch.items.addPatch(CartItem.patch({
+                id: productCartItem!.id,
+                productPrice: productPrice2
+            }))
 
-            expect(slot2.usedOrders).toBe(1);
-            expect(slot2.usedPersons).toBe(2);
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
 
-            // Check order
-            await refreshOrder();
-            expect(personCartItem!.reservedAmount).toBe(2);
-            expect(productCartItem!.reservedAmount).toBe(5);
-            expect(order.data.reservedOrder).toBe(true);
-            expect(order.data.reservedPersons).toBe(2);
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            await checkStock(order.id, [personCartItem!, productCartItem!]);
+        });
+
+        test('Stock is changed when option is removed', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+            
+            const cartPatch = Cart.patch({})
+            cartPatch.items.addPatch(CartItem.patch({
+                id: productCartItem!.id,
+                options: [
+                    CartItemOption.create({
+                        optionMenu: chooseOneOptionMenu,
+                        option: radioOption1
+                    })
+                ]
+            }))
+
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            await checkStock(order.id, [personCartItem!, productCartItem!]);
+        });
+
+        test('Stock is changed when option is changed', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+            
+            const cartPatch = Cart.patch({})
+            cartPatch.items.addPatch(CartItem.patch({
+                id: productCartItem!.id,
+                options: [
+                    CartItemOption.create({
+                        optionMenu: chooseOneOptionMenu,
+                        option: radioOption2
+                    }),
+                    CartItemOption.create({
+                        optionMenu: multipleChoiceOptionMenu,
+                        option: checkboxOption2
+                    })
+                ]
+            }))
+
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            await checkStock(order.id, [personCartItem!, productCartItem!]);
+        });
+
+        test('Stock is changed when option is added', async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+            
+            const cartPatch = Cart.patch({})
+            cartPatch.items.addPatch(CartItem.patch({
+                id: productCartItem!.id,
+                options: [
+                    CartItemOption.create({
+                        optionMenu: chooseOneOptionMenu,
+                        option: radioOption1
+                    }),
+                    CartItemOption.create({
+                        optionMenu: multipleChoiceOptionMenu,
+                        option: checkboxOption1
+                    }),
+                    CartItemOption.create({
+                        optionMenu: multipleChoiceOptionMenu,
+                        option: checkboxOption2
+                    })
+                ]
+            }))
+
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
         test("Stock is changed if delivery method is changed", async () => {
@@ -447,25 +960,7 @@ describe("E2E.Stock", () => {
             r.headers.authorization = "Bearer " + token.accessToken
 
             await patchWebshopOrdersEndpoint.test(r);
-
-            await refreshAll();
-            expect(product.usedStock).toBe(5);
-            expect(product.prices[0].usedStock).toBe(5);
-            expect(personProduct.usedStock).toBe(2);
-            expect(personProduct.prices[0].usedStock).toBe(2);
-
-            expect(slot1.usedOrders).toBe(0);
-            expect(slot1.usedPersons).toBe(0);
-
-            expect(slot3.usedOrders).toBe(1);
-            expect(slot3.usedPersons).toBe(2);
-
-            // Check order
-            await refreshOrder();
-            expect(personCartItem!.reservedAmount).toBe(2);
-            expect(productCartItem!.reservedAmount).toBe(5);
-            expect(order.data.reservedOrder).toBe(true);
-            expect(order.data.reservedPersons).toBe(2);
+            await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
         test.todo("Reserved seats are changed when seats are switched");
@@ -486,20 +981,7 @@ describe("E2E.Stock", () => {
 
                 await patchWebshopOrdersEndpoint.test(r);
 
-                await refreshAll();
-                expect(product.usedStock).toBe(0);
-                expect(product.prices[0].usedStock).toBe(0);
-                expect(personProduct.usedStock).toBe(0);
-                expect(personProduct.prices[0].usedStock).toBe(0);
-                expect(slot1.usedOrders).toBe(0);
-                expect(slot1.usedPersons).toBe(0);
-
-                // Check order
-                await refreshOrder();
-                expect(personCartItem!.reservedAmount).toBe(0);
-                expect(productCartItem!.reservedAmount).toBe(0);
-                expect(order.data.reservedOrder).toBe(false);
-                expect(order.data.reservedPersons).toBe(0);
+                await checkStock(order.id, [], [personCartItem!, productCartItem!]);
             }
 
             // Uncancel
@@ -518,20 +1000,7 @@ describe("E2E.Stock", () => {
 
                 await patchWebshopOrdersEndpoint.test(r);
 
-                await refreshAll();
-                expect(product.usedStock).toBe(5);
-                expect(product.prices[0].usedStock).toBe(5);
-                expect(personProduct.usedStock).toBe(2);
-                expect(personProduct.prices[0].usedStock).toBe(2);
-                expect(slot1.usedOrders).toBe(1);
-                expect(slot1.usedPersons).toBe(2);
-
-                // Check order
-                await refreshOrder();
-                expect(personCartItem!.reservedAmount).toBe(2);
-                expect(productCartItem!.reservedAmount).toBe(5);
-                expect(order.data.reservedOrder).toBe(true);
-                expect(order.data.reservedPersons).toBe(2);
+                await checkStock(order.id, [personCartItem!, productCartItem!]);
             }
         });
 
@@ -551,20 +1020,7 @@ describe("E2E.Stock", () => {
 
                 await patchWebshopOrdersEndpoint.test(r);
 
-                await refreshAll();
-                expect(product.usedStock).toBe(0);
-                expect(product.prices[0].usedStock).toBe(0);
-                expect(personProduct.usedStock).toBe(0);
-                expect(personProduct.prices[0].usedStock).toBe(0);
-                expect(slot1.usedOrders).toBe(0);
-                expect(slot1.usedPersons).toBe(0);
-
-                // Check order
-                await refreshOrder();
-                expect(personCartItem!.reservedAmount).toBe(0);
-                expect(productCartItem!.reservedAmount).toBe(0);
-                expect(order.data.reservedOrder).toBe(false);
-                expect(order.data.reservedPersons).toBe(0);
+                await checkStock(order.id, [], [personCartItem!, productCartItem!]);
             }
 
             // Undelete
@@ -583,20 +1039,7 @@ describe("E2E.Stock", () => {
 
                 await patchWebshopOrdersEndpoint.test(r);
 
-                await refreshAll();
-                expect(product.usedStock).toBe(5);
-                expect(product.prices[0].usedStock).toBe(5);
-                expect(personProduct.usedStock).toBe(2);
-                expect(personProduct.prices[0].usedStock).toBe(2);
-                expect(slot1.usedOrders).toBe(1);
-                expect(slot1.usedPersons).toBe(2);
-
-                // Check order
-                await refreshOrder();
-                expect(personCartItem!.reservedAmount).toBe(2);
-                expect(productCartItem!.reservedAmount).toBe(5);
-                expect(order.data.reservedOrder).toBe(true);
-                expect(order.data.reservedPersons).toBe(2);
+                await checkStock(order.id, [personCartItem!, productCartItem!]);
             }
         });
     });

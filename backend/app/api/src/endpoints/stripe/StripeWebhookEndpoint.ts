@@ -58,7 +58,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     statusCode: 400
                 })
             }
-            event = stripe.webhooks.constructEvent(await request.request.bodyPromise!, sig, STAMHOOFD.STRIPE_ENDPOINT_SECRET);
+            event = await stripe.webhooks.constructEventAsync(await request.request.bodyPromise!, sig, STAMHOOFD.STRIPE_ENDPOINT_SECRET);
         } catch (err) {
             throw new SimpleError({
                 code: "invalid_signature",

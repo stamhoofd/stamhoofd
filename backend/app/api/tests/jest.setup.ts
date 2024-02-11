@@ -6,9 +6,13 @@ import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
 import { Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
+import nock from "nock";
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
+
+// Disable network requests
+nock.disableNetConnect()
 
 // Automatically set endpoint default version to latest one (only in tests!)
 Request.defaultVersion = Version

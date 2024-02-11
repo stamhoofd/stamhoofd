@@ -1,16 +1,16 @@
 import { Factory } from "@simonbackx/simple-database";
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { Address,Country,OrganizationMetaData, OrganizationType, Product, WebshopMetaData } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility"; 
-import { Webshop } from "../models";
+import { Product, WebshopMetaData, WebshopPrivateMetaData } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
-import { Organization } from "../models/Organization";
+import { Webshop } from "../models";
 import { OrganizationFactory } from "./OrganizationFactory";
 
 class Options {
     organizationId?: string
     name?: string
     meta?: WebshopMetaData|AutoEncoderPatchType<WebshopMetaData>
+    privateMeta?: WebshopPrivateMetaData|AutoEncoderPatchType<WebshopPrivateMetaData>
     products?: Product[]
 }
 
@@ -27,6 +27,10 @@ export class WebshopFactory extends Factory<Options, Webshop> {
 
         if (this.options.meta) {
             webshop.meta.patchOrPut(this.options.meta);
+        }
+
+        if (this.options.privateMeta) {
+            webshop.privateMeta.patchOrPut(this.options.privateMeta);   
         }
 
         if (this.options.products) {

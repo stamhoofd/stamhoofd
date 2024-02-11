@@ -34,6 +34,9 @@ export class PayconiqAccount extends AutoEncoder {
  * Should remain private
  */
 export class PrivatePaymentConfiguration extends AutoEncoder {
+    /**
+     * Warning: internal id is used instead of the stripe id
+     */
     @field({ decoder: StringDecoder, nullable: true, version: 174 })
     stripeAccountId: string | null = null
 }
