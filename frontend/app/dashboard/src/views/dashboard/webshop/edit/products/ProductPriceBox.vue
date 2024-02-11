@@ -48,7 +48,7 @@
                 </p>
             </STListItem>
 
-            <STListItem v-if="useStock !== null || !isSingle" :selectable="true" element-name="label">
+            <STListItem v-if="useStock || !isSingle" :selectable="true" element-name="label">
                 <Checkbox slot="left" v-model="useStock" />
 
                 <h3 class="style-title-list">

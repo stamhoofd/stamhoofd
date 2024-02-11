@@ -24,7 +24,7 @@
         </STInputBox>
 
         <STList>
-            <STListItem v-if="useStock !== null" :selectable="true" element-name="label">
+            <STListItem :selectable="true" element-name="label">
                 <Checkbox slot="left" v-model="useStock" />
 
                 <h3 class="style-title-list">
