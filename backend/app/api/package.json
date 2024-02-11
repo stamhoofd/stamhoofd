@@ -11,7 +11,7 @@
         "clear": "rm -rf ./dist",
         "start": "yarn build && node --enable-source-maps ./dist/index.js",
         "test": "jest --runInBand",
-        "test:reset": "yarn build:full && jest",
+        "test:reset": "yarn build:full && jest --runInBand",
         "migrations": "yarn build:full && node ./dist/migrations.js",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
