@@ -28,7 +28,7 @@ export type StockDefinition = {
 }
 
 export class CartStockHelper {
-    static getProductStock({ oldItem, cart, product, admin }: StockLookupData): StockDefinition|null {
+    static getProductStock({ oldItem, cart, product, admin, amount }: StockLookupData): StockDefinition|null {
         if (product.remainingStock === null) {
             return null
         }
@@ -57,16 +57,15 @@ export class CartStockHelper {
         if (inCart > 0) {
             more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
         }
-        const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} beschikbaar${more}`
-
+        const text: string|null = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} beschikbaar${more}`
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(product.name)} is uitverkocht`: text,
+            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(product.name)} is uitverkocht`: (remaining < 25 || (amount && remaining <= amount) ? text : null),
         }
     }
 
-    static getPriceStock({ productPrice, oldItem, cart, product, admin }: StockLookupData & {productPrice: ProductPrice}): StockDefinition|null {
+    static getPriceStock({ productPrice, oldItem, cart, product, admin, amount }: StockLookupData & {productPrice: ProductPrice}): StockDefinition|null {
         if (productPrice.remainingStock === null) {
             return null
         }
@@ -102,16 +101,15 @@ export class CartStockHelper {
             more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
         }
         const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} van ${productPrice.name} beschikbaar${more}`
-
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(productPrice.name)} is uitverkocht`: text,
-            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : `Nog ${product.getRemainingStockText(remaining)}`)
+            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(productPrice.name)} is uitverkocht`: (remaining < 25 || (amount && remaining <= amount) ? text : null),
+            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null))
         }
     }
 
-    static getOptionStock({ option, oldItem, cart, product, admin }: StockLookupData & {option: Option}): StockDefinition|null {
+    static getOptionStock({ option, oldItem, cart, product, admin, amount }: StockLookupData & {option: Option}): StockDefinition|null {
         if (option.remainingStock === null) {
             return null
         }
@@ -155,12 +153,12 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht`: text,
-            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : `Nog ${product.getRemainingStockText(remaining)}`)
+            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht`: (remaining < 25 || (amount && remaining <= amount) ? text : null),
+            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null))
         }
     }
 
-    static getSeatsStock({ oldItem, cart, product, webshop, admin }: StockLookupData): StockDefinition|null {
+    static getSeatsStock({ oldItem, cart, product, webshop, admin, amount }: StockLookupData): StockDefinition|null {
         const remainingSeats = product.getRemainingSeats(webshop, admin)
         if (remainingSeats === null) {
             return null;
@@ -194,7 +192,7 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining,
-            text: remainingStock === 0 ? 'Er zijn geen plaatsen meer beschikbaar': text
+            text: remainingStock === 0 ? 'Er zijn geen plaatsen meer beschikbaar': (remaining < 25 || (amount && remaining <= amount) ? text : null)
         }
     }
 
