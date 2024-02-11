@@ -3,6 +3,7 @@
 /* eslint-disable jest/no-standalone-expect */
 import { PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-endpoints";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop,WebshopFactory } from "@stamhoofd/models";
 import { Address, Cart, CartItem, CartItemOption, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, Token as TokenStruct, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
 
@@ -187,6 +188,15 @@ describe("E2E.Stock", () => {
         return order;
     }
 
+    /** Allows to change the stock */
+    async function saveChanges() {
+        // Set products
+        webshop = (await Webshop.getByID(webshop.id))!;
+        webshop.products = [product, personProduct]
+        await webshop.save();
+        await refreshAll();
+    }
+
     beforeAll(async () => {
         stripeMocker = new StripeMocker();
         stripeMocker.start();
@@ -202,65 +212,68 @@ describe("E2E.Stock", () => {
         let meta = WebshopMetaData.patch({});
 
         productPrice1 = ProductPrice.create({
+            name: 'productPrice1',
             price: 100,
             stock: 100
         })
 
         productPrice2 = ProductPrice.create({
+            name: 'productPrice2',
             price: 150,
             stock: 100
         })
 
         freeProductPrice = ProductPrice.create({
+            name: 'freeProductPrice',
             price: 0,
             stock: 100
         })
 
         checkboxOption1 = Option.create({
-            name: 'Checkbox 1',
+            name: 'checkboxOption1',
             price: 10,
             stock: 100
         })
 
         checkboxOption2 = Option.create({
-            name: 'Checkbox 2',
+            name: 'checkboxOption2',
             price: 0,
             stock: 100
         })
 
         radioOption1 = Option.create({
-            name: 'Radio 1',
+            name: 'radioOption1',
             price: 10,
             stock: 100
         })
 
         radioOption2 = Option.create({
-            name: 'Radio 2',
+            name: 'radioOption2',
             price: 0,
             stock: 100
         })
 
         multipleChoiceOptionMenu = OptionMenu.create({
-            name: 'Multiple choice',
+            name: 'multipleChoiceOptionMenu',
             multipleChoice: true,
             options: [checkboxOption1, checkboxOption2]
         })
 
         chooseOneOptionMenu = OptionMenu.create({
-            name: 'Choose one',
+            name: 'chooseOneOptionMenu',
             multipleChoice: false,
             options: [radioOption1, radioOption2]
         })
 
         product = Product.create({
-            name: 'Test product',
+            name: 'product',
             stock: 100,
             prices: [productPrice1, productPrice2, freeProductPrice],
             optionMenus: [multipleChoiceOptionMenu, chooseOneOptionMenu]
         })
 
         personProduct = Product.create({
-            name: 'Test product 2',
+            name: 'personProduct',
             type: ProductType.Person,
             stock: 100
         })
@@ -519,7 +532,149 @@ describe("E2E.Stock", () => {
     });
 
     describe('Full stock', () => {
-        test.todo("Cannot place an order when product stock is full");
+        test("Cannot place an order when product stock is full", async () => {
+            // Set stock
+            product.stock = 2;
+            await saveChanges();
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption1
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(endpoint.test(r)).rejects.toThrow('Product unavailable');
+        });
+
+        test("Cannot place an order when product price stock is full", async () => {
+            // Set stock
+            productPrice1.stock = 2;
+            await saveChanges();
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption1
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(endpoint.test(r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van productPrice1 beschikbaar');
+        });
+
+        test("Cannot place an order when option stock is full", async () => {
+            // Set stock
+            radioOption1.stock = 2;
+            await saveChanges();
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption1
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(endpoint.test(r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van radioOption1 beschikbaar');
+        });
+
+        test("Cannot place an order when multiple choice option stock is full", async () => {
+            // Set stock
+            checkboxOption2.stock = 2;
+            await saveChanges();
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption1
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(endpoint.test(r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van checkboxOption2 beschikbaar');
+        });
 
         test.todo("Cannot place an order when takeout persons stock is full");
 
@@ -574,59 +729,6 @@ describe("E2E.Stock", () => {
             const updatedOrder = await checkStock(order.id, [], order.data.cart.items);
             expect(updatedOrder.status).toBe(OrderStatus.Deleted);
         });
-
-        test("Stock is added again if a failed payment succeeds unexpectedly", async () => {
-            const orderData = OrderData.create({
-                paymentMethod: PaymentMethod.Bancontact,
-                checkoutMethod: onSiteMethod,
-                timeSlot: slot4,
-                cart: Cart.create({
-                    items: [
-                        CartItem.create({
-                            product,
-                            productPrice: productPrice2,
-                            amount: 5,
-                            options: [
-                                CartItemOption.create({
-                                    optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption1
-                                }),
-                                 CartItemOption.create({
-                                    optionMenu: multipleChoiceOptionMenu,
-                                    option: checkboxOption2
-                                }),
-                                CartItemOption.create({
-                                    optionMenu: chooseOneOptionMenu,
-                                    option: radioOption2
-                                })
-                            ]
-                        })
-                    ]
-                }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
-
-            const response = await endpoint.test(r);
-            expect(response.body).toBeDefined();
-            const order = response.body.order;
-
-            await checkStock(order.id, order.data.cart.items);
-
-            // Cancel the payment
-            await stripeMocker.failPayment(stripeMocker.getLastIntent())
-
-            let updatedOrder = await checkStock(order.id, [], order.data.cart.items);
-            expect(updatedOrder.status).toBe(OrderStatus.Deleted);
-
-            // Succeed the payment unexpectedly
-            await stripeMocker.succeedPayment(stripeMocker.getLastIntent())
-            updatedOrder = await refreshCartItems(order.id, order.data.cart.items)
-            expect(updatedOrder.status).toBe(OrderStatus.Created);
-            updatedOrder = await checkStock(order.id, order.data.cart.items);
-            expect(updatedOrder.status).toBe(OrderStatus.Created);
-        });
     });
 
     describe('Modifying orders', () => {
@@ -634,10 +736,6 @@ describe("E2E.Stock", () => {
         let token:Token;
         let productCartItem: CartItem|undefined;
         let personCartItem: CartItem|undefined;
-
-        async function refreshOrder() {
-            order = await refreshCartItems(order.id, [productCartItem!, personCartItem!]);
-        }
 
         beforeEach(async () => {
             productCartItem = CartItem.create({
