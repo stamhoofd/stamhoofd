@@ -17,26 +17,18 @@ export class StripeMocker {
             .get(/v1\/.*/)
             .reply((uri, body) => {
                 const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/?(\w+)){0,2}/) || [null];
-                console.error('GET', uri, body);
 
                 if (!match) {
                     return [500];
                 }
 
                 if (resource === 'payment_intents') {
-                    console.info('Getting payment intent', id)
                     return this.#getPaymentIntent(id);
                 }
 
                 if (resource === 'charges') {
-                    console.info('Getting charge', id)
                     return this.#getCharge(id);
                 }
-
-                //if (resource === 'checkout' && id === 'sessions') {
-                //    return this.#postData(this.checkoutSessions, null, body, resource);
-                //}
-
 
                 return [500];
             });
@@ -47,7 +39,6 @@ export class StripeMocker {
             .reply((uri, body: string) => {
                 const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/?(\w+)){0,2}/) || [null];
 
-                console.error('POST', uri, body);
                 if (!match) {
                     return [500];
                 }
@@ -63,11 +54,6 @@ export class StripeMocker {
                 if (resource === 'payment_intents') {
                     return this.#createPaymentIntent();
                 }
-
-                //if (resource === 'checkout' && id === 'sessions') {
-                //    return this.#postData(this.checkoutSessions, null, body, resource);
-                //}
-
 
                 return [500];
             });

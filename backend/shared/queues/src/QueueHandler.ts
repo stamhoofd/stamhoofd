@@ -79,8 +79,10 @@ export class QueueHandler {
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
             next.reject(e)
-            console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Rejected "+queue+" ("+q.items.length+" remaining)")
-            console.error(e)
+            if (STAMHOOFD.environment !== 'test') {
+                console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Rejected "+queue+" ("+q.items.length+" remaining)")
+                console.error(e)
+            }
         }
 
         q.runCount -= 1

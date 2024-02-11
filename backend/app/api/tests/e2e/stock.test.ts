@@ -6,6 +6,7 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop,WebshopFactory } from "@stamhoofd/models";
 import { Address, Cart, CartItem, CartItemOption, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, Token as TokenStruct, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
+import { v4 as uuidv4 } from "uuid";
 
 import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/webshops/manage/PatchWebshopOrdersEndpoint";
 import { PlaceOrderEndpoint } from '../../src/endpoints/webshops/PlaceOrderEndpoint';
@@ -56,6 +57,7 @@ describe("E2E.Stock", () => {
     let radioOption2: Option;
     let stripeMocker: StripeMocker
     let stripeAccount: StripeAccount
+    let token: Token;
 
     async function refreshAll() {
         webshop = (await Webshop.getByID(webshop.id))!;
@@ -201,7 +203,15 @@ describe("E2E.Stock", () => {
         stripeMocker = new StripeMocker();
         stripeMocker.start();
         organization = await new OrganizationFactory({}).create()
-        stripeAccount = await stripeMocker.createStripeAccount(organization.id)
+        stripeAccount = await stripeMocker.createStripeAccount(organization.id);
+
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.Full
+            })
+        }).create()
+        token = await Token.createToken(user)
     });
 
     afterAll(() => {
@@ -523,7 +533,51 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
-        test.todo("Orders placed by an admin reserve the stock");
+        test("Orders placed by an admin reserve the stock", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption1
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const orderPatch = PrivateOrder.create({
+                id: uuidv4(),
+                data: orderData,
+                webshopId: webshop.id
+            });
+            patchArray.addPut(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            const response = await patchWebshopOrdersEndpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body[0];
+            await checkStock(order.id, order.data.cart.items);
+        });
 
         test.todo("Amount of persons and orders for a takeout method is calculated correctly");
 
@@ -733,7 +787,6 @@ describe("E2E.Stock", () => {
 
     describe('Modifying orders', () => {
         let order: Order;
-        let token:Token;
         let productCartItem: CartItem|undefined;
         let personCartItem: CartItem|undefined;
 
@@ -781,15 +834,6 @@ describe("E2E.Stock", () => {
 
             // Now check the stock has changed for the product
             order = await checkStock(orderStruct.id, [productCartItem, personCartItem]);
-
-            const user = await new UserFactory({
-                organization,
-                permissions: Permissions.create({
-                    level: PermissionLevel.Full
-                })
-            }).create()
-            token = await Token.createToken(user)
-
         });
 
         test("Stock is removed when a product is removed or added in two steps", async () => {
