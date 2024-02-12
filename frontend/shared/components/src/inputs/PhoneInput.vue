@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="phone" :error-box="errorBox">
-        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" @change="validate(false)" @input="emailRaw = $event.target.value; onTyping();">
+        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" @change="validate(false)" @input="phoneRaw = $event.target.value; onTyping();">
     </STInputBox>
 </template>
 
@@ -18,29 +18,29 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 })
 export default class PhoneInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     phoneRaw = "";
     valid = true;
 
     @Prop({ default: null })
-    value!: string | null
+        value!: string | null
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-    nullable!: boolean
+        nullable!: boolean
 
     @Prop({ default: "" })
-    placeholder!: string
+        placeholder!: string
 
     errorBox: ErrorBox | null = null
 

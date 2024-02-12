@@ -3,7 +3,7 @@ import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metrop
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2'
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { AppManager } from '@stamhoofd/networking';
-import { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
+import { Order, Organization, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 // PDFKit is used! Wrong warning below!
 //import PDFKit from "pdfkit"
@@ -50,10 +50,6 @@ export class TicketBuilder {
         this.organization = organization
         this.order = order
         this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN});
-    }
-
-    get primaryColor() {
-        return this.webshop.meta.color ?? this.organization.meta.color ?? COLOR_PRIMARY
     }
 
     async download() {
@@ -131,115 +127,31 @@ export class TicketBuilder {
                 this.document.path("M1.5 2.5C1.5 1.94772 1.94772 1.5 2.5 1.5C3.05228 1.5 3.5 1.94772 3.5 2.5C3.5 3.05228 3.05228 3.5 2.5 3.5C1.94772 3.5 1.5 3.05228 1.5 2.5ZM2.5 0.5C1.39543 0.5 0.5 1.39543 0.5 2.5C0.5 3.60457 1.39543 4.5 2.5 4.5C2.81987 4.5 3.1222 4.42491 3.39033 4.29139L4.81676 4.95654L3.29712 5.66516C3.05289 5.55891 2.78333 5.5 2.5 5.5C1.39543 5.5 0.5 6.39543 0.5 7.5C0.5 8.60457 1.39543 9.5 2.5 9.5C3.60457 9.5 4.5 8.60457 4.5 7.5C4.5 7.23871 4.44989 6.98912 4.35876 6.76032C4.39438 6.44286 4.59265 6.16442 4.88508 6.02806L5.99986 5.50823L9.79731 7.27901C10.5481 7.62912 11.4406 7.30429 11.7907 6.55348L8.36606 4.95654L11.7907 3.35961C11.4406 2.6088 10.5481 2.28397 9.79731 2.63407L5.99986 4.40485L4.88508 3.88503C4.6122 3.75778 4.42131 3.50682 4.36807 3.21588C4.4533 2.99361 4.5 2.75226 4.5 2.5C4.5 1.39543 3.60457 0.5 2.5 0.5ZM1.5 7.5C1.5 6.94772 1.94772 6.5 2.5 6.5C3.05228 6.5 3.5 6.94772 3.5 7.5C3.5 8.05228 3.05228 8.5 2.5 8.5C1.94772 8.5 1.5 8.05228 1.5 7.5Z").fill(COLOR_DARK)
                 
                 this.document.restore()
-
-                // Add extra margin
-                this.document.y += 5*MM
             }
             isFirst = false
-            this.document.y = this.document.y + await this.drawItem(ticket, false)
+            await this.drawItem(ticket, false)
         }
     }
 
     async drawItem(ticket: TicketPublic, dryRun: boolean) {
-        const QR_WIDTH = 50*MM
-        const QR_MARGIN = 5*MM
-        const QR_COLUMN_WIDTH = QR_WIDTH + QR_MARGIN
-        const COLUMN_MAX_WIDTH = (PAGE_WIDTH - PAGE_MARGIN*2 - QR_COLUMN_WIDTH) / 2
-
-        let height = 10 * MM // Initial QR margin
+        let height = 5 * MM // Initial margin
         const y = this.document.y
-
-        const x = PAGE_WIDTH - PAGE_MARGIN - QR_COLUMN_WIDTH
-        if (!dryRun) {
-            // Generate QR
-            const url = "https://"+this.webshop.getUrl(this.organization) + "/tickets/"+ticket.secret
-            const imgUrl = await QRCode.toDataURL(url, { margin: 0, width: QR_WIDTH*2, height: QR_WIDTH*2 })
-            this.document.image(imgUrl, x + QR_MARGIN, y + height, {
-                width: QR_WIDTH,
-                height: QR_WIDTH
-            })
-            this.document.link(x + QR_MARGIN, y + height, QR_WIDTH, QR_WIDTH, url)
-        }
-        height += QR_WIDTH + 2*MM
-        
-        this.document.fontSize(6);
-        this.document.fillColor(COLOR_GRAY);
-
-        if (!dryRun) {
-            this.document.text(ticket.secret, x + QR_MARGIN, y + height, { align: 'center', width: QR_WIDTH })
-        }
-        height += 2; // Height of text
-        console.log('qrheight', height)
-        const qrHeight = height 
-        
-        height = 0
-
-        // Logo
-        const logo = (this.webshop.meta.useLogo ? (this.webshop.meta.horizontalLogo ?? this.webshop.meta.squareLogo) : null) ?? (this.organization.meta.horizontalLogo ?? this.organization.meta.squareLogo)
-        const expandLogo = this.webshop.meta.useLogo ? this.webshop.meta.expandLogo : this.organization.meta.expandLogo
-
-        if (logo) {
-            const DPI = 300;
-
-            let preferredWidth = 50*MM; // = Postscript points = 72dpi = 1 point = 1/72 of an inch
-            let preferredMaxHeight = 10*MM;
-
-            if (expandLogo) {
-                preferredMaxHeight = 20*MM;
-            }
-            const preferredWidthInPixels = preferredWidth / 72 * DPI;
-            const resolution = logo.getResolutionForSize(preferredWidthInPixels, undefined)
-
-            let calculatedHeight = preferredWidth / resolution.width * resolution.height
-
-            // Adjust width based on available height
-            if (calculatedHeight > preferredMaxHeight) {
-                calculatedHeight = preferredMaxHeight
-                preferredWidth = calculatedHeight / resolution.height * resolution.width;
-            }
-
-            if (!dryRun) {
-                // Download image
-                const imgResponse = await fetch(resolution.file.getPublicPath(), {
-                    credentials: 'omit',
-                    cache: 'force-cache'
-                })
-                const imgBuffer = await imgResponse.arrayBuffer()                
-                this.document.image(imgBuffer, PAGE_MARGIN, y + height, {
-                    width: preferredWidth,
-                    height: calculatedHeight
-                })
-                const webshopUrl = 'https://'+this.webshop.getUrl(this.organization);
-                this.document.link(PAGE_MARGIN, y + height, preferredWidth, calculatedHeight, webshopUrl)
-            }
-
-            height += calculatedHeight
-            height += 7.5*MM;
-        } else {
-            height += 5 * MM // Initial margin
-        }
-
-        const repeatWebshopName = !this.webshop.meta.useLogo || !this.webshop.meta.horizontalLogo;
 
         // Title
         this.document.fontSize(8);
-        this.document.fillColor(this.primaryColor);
+        this.document.fillColor(this.organization.meta.color ?? COLOR_PRIMARY);
         this.document.font('Metropolis-SemiBold');
 
         if (!dryRun) {
-            if (repeatWebshopName) {
-                this.document.text(this.webshop.meta.name.toLocaleUpperCase(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 })
-            }
+            this.document.text(this.webshop.meta.name.toLocaleUpperCase(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 })
 
             const indexText = ticket.getIndexText()
             if (indexText) {
-                this.document.text(indexText.toLocaleUpperCase(), PAGE_WIDTH - PAGE_MARGIN  - 40*MM, y, { align: "right", width: 40*MM })
+                this.document.text(indexText.toLocaleUpperCase(), PAGE_WIDTH - PAGE_MARGIN  - 40*MM, y + height, { align: "right", width: 40*MM })
             }
         }
-        if (repeatWebshopName) {
-            height += this.document.heightOfString(this.webshop.meta.name.toLocaleUpperCase(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 }) - 2
-            height += 3
-        }
+        height += this.document.heightOfString(this.webshop.meta.name.toLocaleUpperCase(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 }) - 2
+        height += 3
 
         this.document.fontSize(17);
         this.document.fillColor(COLOR_DARK);
@@ -252,12 +164,27 @@ export class TicketBuilder {
         // Margin
         height += 5*MM
 
+        // Draw horizontal line
+        if (!dryRun) {
+            this.document.lineWidth(0.5);
+            this.document.strokeColor(COLOR_BORDER);
+            this.document.moveTo(0, y + height).lineTo(PAGE_WIDTH, y + height).stroke()   
+        }
+        height += 0.5
+
         // Save height
         const initialColumnHeight = height
         let MAX_COLUMN_HEIGHT = 0
         
+        const QR_WIDTH = 30*MM
+        const QR_MARGIN = 5*MM
+        const QR_COLUMN_WIDTH = QR_WIDTH + QR_MARGIN
+        const COLUMN_MAX_WIDTH = (PAGE_WIDTH - PAGE_MARGIN*2 - QR_COLUMN_WIDTH - 2) / 2
+
         // START LEFT COLUMN
         // Draw left text
+       
+        height += 5*MM
         this.document.fontSize(8);
         this.document.font('Metropolis-Medium');
 
@@ -318,6 +245,7 @@ export class TicketBuilder {
             this.document.text(Formatter.price(price).replace(/ /g, " ").replace(/,00/g, ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
         }
         height += this.document.heightOfString(Formatter.price(price).replace(/ /g, " ").replace(/,00/g, ""), { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
+        height += 5*MM
 
         // END LEFT COLUMN
         MAX_COLUMN_HEIGHT = height - initialColumnHeight
@@ -337,183 +265,112 @@ export class TicketBuilder {
         if (description) {
             // Second column
             height = initialColumnHeight
+            height += 5*MM
 
             if (!dryRun) {
-                this.document.text(description, PAGE_MARGIN + COLUMN_MAX_WIDTH + 5*MM, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM, lineGap: 2, paragraphGap: 2 })
+                this.document.text(description, PAGE_MARGIN + COLUMN_MAX_WIDTH + 5*MM, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 10*MM, lineGap: 2, paragraphGap: 2 })
             }
-            height += this.document.heightOfString(description, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM, lineGap: 2, paragraphGap: 2 })
+            height += this.document.heightOfString(description, { align: 'left', width: COLUMN_MAX_WIDTH - 10*MM, lineGap: 2, paragraphGap: 2 })
+            height += 5*MM
 
             MAX_COLUMN_HEIGHT = Math.max(height - initialColumnHeight, MAX_COLUMN_HEIGHT)
         }
 
-        // END COLUMN
+        // END SECOND COLUMN
+
+        // QR CODE COLUMN
+        height = initialColumnHeight
+        height += QR_MARGIN
+
+        const x = PAGE_WIDTH - PAGE_MARGIN - QR_COLUMN_WIDTH
+        if (!dryRun) {
+            //this.document.rect(x + QR_MARGIN, y + height, QR_WIDTH, QR_WIDTH).fill(COLOR_GRAY)
+
+            // Generate QR
+            const url = "https://"+this.webshop.getUrl(this.organization) + "/tickets/"+ticket.secret
+            const imgUrl = await QRCode.toDataURL(url, { margin: 0, width: QR_WIDTH*2, height: QR_WIDTH*2 })
+            this.document.image(imgUrl, x + QR_MARGIN, y + height, {
+                width: QR_WIDTH,
+                height: QR_WIDTH
+            })
+        }
+        height += QR_WIDTH
+        
+        this.document.fontSize(6);
+        this.document.fillColor(COLOR_GRAY);
+
+        if (!dryRun) {
+            this.document.text(ticket.secret, x + QR_MARGIN, y + height + 2*MM, { align: 'center', width: QR_WIDTH })
+        }
+        // ignore text height here
+        height += 2*MM
+        height += QR_MARGIN
+        
+        MAX_COLUMN_HEIGHT = Math.max(height - initialColumnHeight, MAX_COLUMN_HEIGHT)
+
+        // END QR CODE COLUMN
 
         // End of columns
         height = initialColumnHeight + MAX_COLUMN_HEIGHT
-      
-        height += 5*MM
 
-        // Sponsors
-        const sponsors = (this.webshop.meta.sponsors?.sponsors ?? []).filter(s => s.onTickets && (s.banner||s.logo))
-        if (sponsors.length > 0) {
-            height += 15*MM
-             
-            const DPI = 300;
-
-            let currentSponsorMaxHeight = 0;
-            let sponsorX = PAGE_MARGIN
-            const sponsorMarginX = 7.5*MM;
-            const sponsorMarginY = 5*MM;
-            const maximumSponsorX = PAGE_WIDTH - PAGE_MARGIN - QR_COLUMN_WIDTH;
-            const remainingSponsors = sponsors.slice();
-
-            const calculateNextLineMaxHeight = (remainingSponsors: Sponsor[]) => {
-                let xx = PAGE_MARGIN
-                let current = 0
-
-                for (const sponsor of remainingSponsors) {
-                    if (!sponsor.logo && !sponsor.banner) {
-                        continue;
-                    }
-
-                    let preferredWidth = 35*MM; // = Postscript points = 72dpi = 1 point = 1/72 of an inch
-                    let preferredMaxHeight = 10*MM;
-
-                    if (!sponsor.logo) {
-                        // Banners are allowed to be a bit larger
-                        preferredMaxHeight = 25*MM;
-                        preferredWidth = 50*MM;
-                    }
-
-                    if (sponsors.length === 1) {
-                        preferredWidth += 20*MM;
-                        preferredMaxHeight += 10*MM;
-                    }
-
-                    const preferredWidthInPixels = preferredWidth / 72 * DPI;
-                    const resolution = (sponsor.logo || sponsor.banner)!.getResolutionForSize(preferredWidthInPixels, undefined)
-
-                    let calculatedHeight = preferredWidth / resolution.width * resolution.height
-
-                    // Adjust width based on available height
-                    if (calculatedHeight > preferredMaxHeight) {
-                        calculatedHeight = preferredMaxHeight
-                        preferredWidth = calculatedHeight / resolution.height * resolution.width;
-                    }
-
-                    if (xx + preferredWidth > maximumSponsorX) {
-                        return current;
-                    }
-
-                    xx += preferredWidth + sponsorMarginX
-
-                    if (calculatedHeight > current) {
-                        current = calculatedHeight
-                    }
-                }
-                return current;
-            }
-
-            let currentHeightExpectedHeight = calculateNextLineMaxHeight(remainingSponsors);
-
-            while (remainingSponsors.length) {
-                const sponsor = remainingSponsors.shift();
-
-                if (!sponsor) {
-                    break;
-                }
-
-                if (!sponsor.logo && !sponsor.banner) {
-                    continue;
-                }
-
-                let preferredWidth = 35*MM; // = Postscript points = 72dpi = 1 point = 1/72 of an inch
-                let preferredMaxHeight = 10*MM;
-
-                if (!sponsor.logo) {
-                    // Banners are allowed to be a bit larger
-                    preferredMaxHeight = 25*MM;
-                    preferredWidth = 50*MM;
-                }
-
-                if (sponsors.length === 1) {
-                    preferredWidth += 20*MM;
-                    preferredMaxHeight += 10*MM;
-                }
-
-                const preferredWidthInPixels = preferredWidth / 72 * DPI;
-                const resolution = (sponsor.logo || sponsor.banner)!.getResolutionForSize(preferredWidthInPixels, undefined)
-
-                let calculatedHeight = preferredWidth / resolution.width * resolution.height
-
-                // Adjust width based on available height
-                if (calculatedHeight > preferredMaxHeight) {
-                    calculatedHeight = preferredMaxHeight
-                    preferredWidth = calculatedHeight / resolution.height * resolution.width;
-                }
-
-                if (sponsorX + preferredWidth > maximumSponsorX) {
-                    height += currentSponsorMaxHeight;
-                    height += sponsorMarginY
-
-                    // Next sponsor line
-                    currentSponsorMaxHeight = 0;
-                    sponsorX = PAGE_MARGIN;
-                    currentHeightExpectedHeight = calculateNextLineMaxHeight([sponsor, ...remainingSponsors]);
-                }
-
-
-                if (!dryRun) {
-                    // Download image
-                    const imgResponse = await fetch(resolution.file.getPublicPath(), {
-                        credentials: 'omit',
-                        cache: 'force-cache'
-                    })
-                    const imgBuffer = await imgResponse.arrayBuffer()                
-                    this.document.image(imgBuffer, sponsorX, y + height + currentHeightExpectedHeight/2 - calculatedHeight/2, {
-                        width: preferredWidth,
-                        height: calculatedHeight
-                    });
-
-                    if (sponsor.url) {
-                        this.document.link(sponsorX,  y + height, preferredWidth, calculatedHeight, sponsor.url)
-                    }
-                }
-
-                sponsorX += preferredWidth + sponsorMarginX
-
-                if (calculatedHeight > currentSponsorMaxHeight) {
-                    currentSponsorMaxHeight = calculatedHeight
-                }
-            }
-
-            height += currentSponsorMaxHeight
-            height += 7.5*MM;
+        // Draw vertical lines
+        if (!dryRun) {
+            this.document.lineWidth(0.5);
+            this.document.strokeColor(COLOR_BORDER);
+            this.document.moveTo(PAGE_WIDTH - PAGE_MARGIN - QR_COLUMN_WIDTH, y + initialColumnHeight - 1).lineTo(PAGE_WIDTH - PAGE_MARGIN - QR_COLUMN_WIDTH, y + height).stroke()   
         }
+
+        // Draw vertical lines
+        if (!dryRun && description) {
+            this.document.lineWidth(0.5);
+            this.document.strokeColor(COLOR_BORDER);
+            this.document.moveTo(PAGE_MARGIN + COLUMN_MAX_WIDTH, y + initialColumnHeight - 1).lineTo(PAGE_MARGIN + COLUMN_MAX_WIDTH, y + height).stroke()   
+        }
+
+        // Draw horizontal line
+        if (!dryRun) {
+            this.document.lineWidth(0.5);
+            this.document.strokeColor(COLOR_BORDER);
+            this.document.moveTo(0, y + height).lineTo(PAGE_WIDTH, y + height).stroke()   
+        }
+        height += 0.5
+        height += 5*MM
 
         // Share and download text
         this.document.fontSize(8);
         this.document.font('Metropolis-Medium');
         this.document.fillColor(COLOR_GRAY);
 
-        const shareText = "Sla dit ticket op door de QR-code te scannen.\nTicketverkoop via Stamhoofd. Verkoop zelf ook tickets zonder commissies."
+        const shareText = "Scan de QR-code om op te slaan op jouw smartphone of om te delen.\nTicketverkoop via Stamhoofd. Software voor verenigingen."
         const expectedHeight = this.document.heightOfString(shareText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 }) - 2
-        height = Math.max(height, qrHeight - expectedHeight)
-
         if (!dryRun) {
-            this.document.text("Sla dit ticket op door de QR-code te scannen.\nTicketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 , lineGap: 2, paragraphGap: 2, continued: true })
+            const badgeWidth = (PAGE_WIDTH - PAGE_MARGIN*2) * 3/7
+            const appleWalletWidth = badgeWidth / 3
+            const badgesHeight = appleWalletWidth*0.308
+            const gpWidth = badgesHeight/0.153
+
+            this.document.text("Scan de QR-code om op te slaan op jouw smartphone of om te delen.\nTicketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - badgeWidth - 4*MM , lineGap: 2, paragraphGap: 2, continued: true })
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
             this.document.text("Stamhoofd", { continued: true, link: 'https://'+I18nController.i18n.t("shared.domains.marketing"), })
             
             this.document.font('Metropolis-Medium');
             this.document.fillColor(COLOR_GRAY);
-            this.document.text(". Verkoop zelf ook tickets zonder commissies.")
-        }
+            this.document.text(". Software voor verenigingen.")
 
+            // TODO:
+            /*const appleWallet = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/apple-wallet-nl.png')).default
+            const googlePayPass = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/google-pay-pass-nl.png')).default
+
+            this.document.image(appleWallet,   PAGE_WIDTH - PAGE_MARGIN - appleWalletWidth,  y + height + expectedHeight/2 - badgesHeight/2, { width: appleWalletWidth })
+            this.document.image(googlePayPass, PAGE_WIDTH - PAGE_MARGIN - badgeWidth - 2*MM, y + height + expectedHeight/2 - badgesHeight/2, { width: gpWidth })
+
+            this.document.link(PAGE_WIDTH - PAGE_MARGIN - appleWalletWidth,  y + height + expectedHeight/2 - badgesHeight/2, appleWalletWidth, badgesHeight, "https://api.stamhoofd.app/tickets/download/apple/"+ticket.secret)
+            this.document.link(PAGE_WIDTH - PAGE_MARGIN - badgeWidth - 2*MM, y + height + expectedHeight/2 - badgesHeight/2, gpWidth, badgesHeight, "https://api.stamhoofd.app/tickets/download/google/"+ticket.secret)
+            */
+        }
         height += expectedHeight + 2
 
-        height = Math.max(height, qrHeight)
 
         // Add end margin
         height += 5*MM

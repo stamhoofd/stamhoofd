@@ -2,7 +2,7 @@
     <LoadingView v-if="!order" />
     <div v-else class="st-view order-view box-shade">
         <STNavigationBar :large="true" :sticky="false">
-            <OrganizationLogo slot="left" :organization="organization" />
+            <OrganizationLogo slot="left" :organization="organization" :webshop="webshop" />
             <button slot="right" class="text button" type="button" @click="pop">
                 Sluiten
             </button>
@@ -81,7 +81,7 @@
                             </button>
 
                             <STList v-else>
-                                <TicketListItem v-for="ticket in publicTickets" :key="ticket.id" :ticket="ticket" :webshop="webshop" :order="order" />
+                                <TicketListItem v-for="ticket in publicTickets" :key="ticket.id" :ticket="ticket" :webshop="webshop" :organization="organization" :order="order" />
                             </STList>
                         </template>
 
@@ -350,7 +350,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Payment, RecordCategory } from '@stamhoofd/structures';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
@@ -360,7 +360,6 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import TicketListItem from '../products/TicketListItem.vue';
-import DetailedTicketView from './DetailedTicketView.vue';
 
 @Component({
     components: {
@@ -633,7 +632,8 @@ export default class OrderView extends Mixins(NavigationMixin){
                     root: new ComponentWithProperties(DetailedTicketView, {
                         ticket: ticket,
                         order: this.order,
-                        webshop: this.webshop
+                        webshop: this.webshop,
+                        organization: this.organization
                     })
                 })
             ],

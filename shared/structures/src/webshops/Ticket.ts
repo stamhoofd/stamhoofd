@@ -15,10 +15,10 @@ export class Ticket extends AutoEncoder {
     scannedAt: Date | null = null;
 
     @field({ decoder: DateDecoder})
-    createdAt: Date
+    createdAt: Date = new Date()
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date
+    updatedAt: Date= new Date()
 
     /**
      * Unique secret (per webshop) that is printed on the ticket and is required for lookups

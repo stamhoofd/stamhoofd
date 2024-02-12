@@ -15,6 +15,10 @@
         "label": "Mobiel nummer",
         "invalidMessage": "Ongeldig GSM-nummer",
         "invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31."
+      },
+      "url": {
+        "labelOptional": "Website (optioneel)",
+        "invalidMessage": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens."
       }
     },
     "domains": {

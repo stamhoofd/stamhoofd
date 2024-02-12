@@ -11,6 +11,13 @@
                     <div class="placeholder" />
                 </div>
             </figure>
+
+            <aside v-if="sponsors.length" class="sponsor-box">
+                <component :is="sponsor.url ? 'a' : 'div'" v-for="(sponsor, index) of sponsors" :key="sponsor.id" class="sponsor" :class="{visible: visibleSponsor === index, isLogo: !sponsor.banner}" :href="sponsor.url" target="_blank">
+                    <ImageComponent v-if="sponsor.banner || sponsor.logo" :image="sponsor.banner || sponsor.logo" :auto-height="true" />
+                </component>
+            </aside>
+
             <p class="event-name">
                 {{ webshop.meta.name }}
             </p>
@@ -85,13 +92,11 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { OrganizationLogo,ShowSeatsView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Order, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ImageComponent, OrganizationLogo, ShowSeatsView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { Order, Organization, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from 'vue-property-decorator';
-
-import { WebshopManager } from "../../classes/WebshopManager";
 
 
 @Component({
@@ -101,7 +106,8 @@ import { WebshopManager } from "../../classes/WebshopManager";
         STErrorsDefault,
         OrganizationLogo,
         STList,
-        STListItem
+        STListItem,
+        ImageComponent
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -116,6 +122,9 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         webshop: Webshop
 
     @Prop({ required: true })
+        organization: Organization
+
+    @Prop({ required: true })
         ticket: TicketPublic
 
     @Prop({ required: false, default: null })
@@ -125,6 +134,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         allowDismiss: boolean
 
     QRCodeUrl: string | null = null
+    visibleSponsor = 0;
 
     get cartItem() {
         // TODO: multiple item support needed!
@@ -139,8 +149,8 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         return this.ticket.getChangedSeatString(this.webshop, true)
     }
 
-    get organization() {
-        return WebshopManager.organization
+    get sponsors() {
+        return (this.webshop.meta.sponsors?.sponsors ?? []).filter(s => s.onTickets && (s.banner||s.logo))
     }
 
     get name() {
@@ -189,11 +199,27 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
     }
 
     get qrMessage() {
-        return "https://"+this.webshop.getUrl(WebshopManager.organization) + "/tickets/"+this.ticket.secret
+        return "https://"+this.webshop.getUrl(this.organization) + "/tickets/"+this.ticket.secret
     }
+
+    timer: NodeJS.Timer;
 
     mounted() {
         this.generateQRCode().catch(console.error)
+        this.visibleSponsor = Math.floor(Math.random() * Math.max(0, this.sponsors.length - 1))
+
+        this.timer = setInterval(() => {
+            console.log('tick')
+            if (this.visibleSponsor + 1 >= this.sponsors.length) {
+                this.visibleSponsor = 0;
+            } else {
+                this.visibleSponsor = this.visibleSponsor+1
+            }
+        }, 3000)
+    }
+
+    beforeDestroy() {
+        clearInterval(this.timer);
     }
 
     async download() {
@@ -203,7 +229,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
             '@stamhoofd/ticket-builder'
         )).TicketBuilder
 
-        const builder = new TicketBuilder([this.ticket], this.webshop, WebshopManager.organization, this.order ?? undefined)
+        const builder = new TicketBuilder([this.ticket], this.webshop, this.organization, this.order ?? undefined)
         await builder.download()
     }
 
@@ -241,6 +267,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
 
         > .event-name {
             @extend .style-definition-label;
+            padding-top: var(--st-horizontal-padding, 30px);
         }
 
         .ticket-index {
@@ -283,23 +310,10 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         }
     }
 
-    figure {
-        padding-bottom: calc(var(--st-horizontal-padding, 30px));
+    .qr-box {
         max-width: calc(100vh - 200px);
         max-width: calc(100dvh - 200px);
         margin: 0 auto;
-
-        body.dark & {
-            padding-top: 30px;
-            padding-bottom: calc(var(--st-horizontal-padding, 30px) + 10px);
-        }
-
-        body:not(.light) & {
-            @media (prefers-color-scheme: dark) {
-                padding-top: 30px;
-                padding-bottom: calc(var(--st-horizontal-padding, 30px) + 10px);
-            }
-        }
 
         > div {
             position: relative;
@@ -313,6 +327,27 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
                 bottom: -30px;
                 border-radius: $border-radius;
                 background: white; // no variable here, because should be white (qr code)
+                display: none;
+            }
+        }
+
+        body.dark & {
+            padding-top: 30px;
+            padding-bottom: 10px;
+
+            > div:before {
+                display: block;
+            }
+        }
+
+        body:not(.light) & {
+            @media (prefers-color-scheme: dark) {
+                padding-top: 30px;
+                padding-bottom: 10px;
+
+                > div:before {
+                    display: block;
+                }
             }
         }
 
@@ -339,6 +374,60 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
             color: $color-gray-text;
             font-size: 10px;
             font-weight: bold;
+        }
+    }
+
+    .sponsor-box {
+        margin-top: 10px;
+        margin-bottom: -10px;
+        width: 100%;
+
+        body.dark & {
+            // We need more white space around the logo in dark mode
+            margin-top: 30px;
+        }
+
+        body:not(.light) & {
+            @media (prefers-color-scheme: dark) {
+                // We need more white space around the logo in dark mode
+                margin-top: 30px;
+            }
+        }
+
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-rows: 1fr;
+    }
+
+    .sponsor {
+        grid-area: 1 / 1 / 1 / 1;
+        align-self: stretch;
+        opacity: 0;
+        transition: opacity 0.2s;
+        border-radius: $border-radius;
+        pointer-events: none;
+
+        &.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        > .image-component {
+            max-height: 150px;
+        }
+
+        &.isLogo {
+            box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+            border: $border-width solid $color-border;
+            background: white;
+            display: grid;
+            align-items: center;
+
+            >.image-component {
+                max-height: 80px;
+                margin: 15px 50px;
+                border-radius: 0;
+            }
         }
     }
 }

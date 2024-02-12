@@ -24,14 +24,8 @@
             </div>
 
             <div>
-                <STInputBox title="Website (optioneel)" error-fields="website" :error-box="errorBox">
-                    <input
-                        v-model="website"
-                        class="input"
-                        type="url"
-                        :placeholder="$t('dashboard.inputs.website.placeholder')"
-                    >
-                </STInputBox>
+                <UrlInput v-model="website" :title="$t('shared.inputs.url.labelOptional')" :placeholder="$t('dashboard.inputs.website.placeholder')" :validator="validator" :required="false" />
+
                 <p class="style-description-small">
                     De link naar de website van jouw vereniging.
                 </p>
@@ -82,7 +76,7 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator, VATNumberInput } from "@stamhoofd/components";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, UrlInput,Validator, VATNumberInput } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -104,7 +98,8 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
         AddressInput,
         LoadingButton,
         VATNumberInput,
-        CompanyNumberInput
+        CompanyNumberInput,
+        UrlInput
     },
 })
 export default class GeneralSettingsView extends Mixins(NavigationMixin) {
@@ -131,11 +126,11 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     get website() {
-        return this.organization.website ?? ""
+        return this.organization.website
     }
 
-    set website(website: string) {
-        this.$set(this.organizationPatch, "website", website.length == 0 ? null : website)
+    set website(website: string|null) {
+        this.$set(this.organizationPatch, "website", website)
     }
 
     get address() {
@@ -238,10 +233,6 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
                 message: "Vul een geldige naam in voor je vereniging",
                 field: "name"
             }))
-        }
-
-        if (this.organization.website && this.organization.website.length > 0 && !this.organization.website.startsWith("http://") && !this.organization.website.startsWith("https://")) {
-            this.website = "http://"+this.organization.website
         }
 
         let valid = false

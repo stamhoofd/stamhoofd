@@ -69,10 +69,7 @@
         <h2 class="style-with-button">
             <div>Externe links</div>
             <div>
-                <button type="button" class="button text only-icon-smartphone" @click="addPolicy">
-                    <span class="icon add" />
-                    <span>Toevoegen</span>
-                </button>
+                <button type="button" class="button icon add" @click="addPolicy" />
             </div>
         </h2>
         <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
@@ -87,7 +84,7 @@
         <hr>
         <h2>Kleuren</h2>
         <p>
-            Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.
+            Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen → Personaliseren. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.
         </p>
 
         <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Standaardkleur" :required="false" :disallowed="['#FFFFFF']" />
@@ -119,16 +116,31 @@
         </p>
 
         <LogoEditor :meta-data="webshop.meta" :validator="validator" :default-to-organization="true" :dark-mode="darkMode" @patch="addMetaPatch" />
+
+        <template v-if="hasTickets">
+            <hr>
+            <EditSponsorsBox :config="sponsorConfig" @patch="patchSponsorConfig" />
+
+            <p v-if="sponsorConfig" class="style-button-bar">
+                <button type="button" class="button text" @click="previewTicket">
+                    <span class="icon eye" /><span>Ticketvoorbeeld</span>
+                </button>
+            </p>
+        </template>
     </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ColorInput, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
-import { DarkMode, Image, Policy, PrivateWebshop, ResolutionRequest, RichText, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
+import { Cart, CartReservedSeat, TicketPublic } from "@stamhoofd/structures";
+import { CartItem } from "@stamhoofd/structures";
+import { DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import EditSponsorsBox from "../../sponsors/EditSponsorsBox.vue"
 import EditPolicyBox from "./EditPolicyBox.vue";
 import EditWebshopMixin from "./EditWebshopMixin";
 
@@ -145,7 +157,8 @@ import EditWebshopMixin from "./EditWebshopMixin";
         RadioGroup,
         WYSIWYGTextInput,
         LogoEditor,
-        ColorInput
+        ColorInput,
+        EditSponsorsBox
     }
 })
 export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
@@ -155,6 +168,10 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
 
     get viewTitle() {
         return "Webshop pagina wijzigen"
+    }
+
+    get hasTickets() {
+        return this.webshop.hasTickets
     }
 
     addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
@@ -280,6 +297,59 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     get coverImageHeight() {
         return this.coverPhotoResolution?.height
     }
+
+    get sponsorConfig() {
+        return this.webshop.meta.sponsors
+    }
+
+    patchSponsorConfig(config: AutoEncoderPatchType<SponsorConfig>|null) {
+        this.addMetaPatch(WebshopMetaData.patch({sponsors: config}))
+    }
+
+    previewTicket() {
+        // Example product:
+        const product = this.webshop.products.find(p => p.type === ProductType.Ticket) ?? this.webshop.products[0];
+        const cart = Cart.create({})
+        const item = CartItem.createDefault(product, cart, this.webshop, {admin: true})
+
+        const seatingPlan = product.seatingPlanId ? this.webshop.meta.seatingPlans.find(s => s.id === product.seatingPlanId) : null
+        const section = seatingPlan ? seatingPlan.sections[0] : null;
+        const row = section ? section.rows.filter(r => r.label && r.seatCount > 0)[Math.floor(section.rows.filter(r => r.label && r.seatCount > 0).length / 2)] : null;
+        const seat = row ? row.seats.filter(s => s.isValidSeat)[Math.floor(row.seats.filter(s => s.isValidSeat).length/2)] : null;
+
+        const reservedSeat = seat ? CartReservedSeat.create({
+            section: section!.id,
+            row: row!.label,
+            seat: seat.label
+        }) : null;
+
+
+        if (reservedSeat && seatingPlan) {
+            reservedSeat.calculatePrice(seatingPlan)
+        }
+
+        const ticket = TicketPublic.create({
+            items: [item],
+            secret: 'VRBLDTICKET',
+            index: 1,
+            total: 1,
+            seat: reservedSeat
+        })
+
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(DetailedTicketView, {
+                        organization: this.organization,
+                        webshop: this.webshop,
+                        ticket
+                    })
+                })
+            ],
+            modalDisplayStyle: "sheet"
+        })
+    }
+
 }
 </script>
 

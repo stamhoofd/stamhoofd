@@ -10,13 +10,12 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { BackButton, DetailedTicketView,LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { TicketPublic } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from '../../classes/WebshopManager';
-import DetailedTicketView from './DetailedTicketView.vue';
 
 
 @Component({
@@ -31,8 +30,7 @@ import DetailedTicketView from './DetailedTicketView.vue';
         LoadingView,
         BackButton,
         OrganizationLogo,
-        Spinner,
-        DetailedTicketView
+        Spinner
     }
 })
 export default class TicketView extends Mixins(NavigationMixin){
@@ -80,6 +78,7 @@ export default class TicketView extends Mixins(NavigationMixin){
                     root: new ComponentWithProperties(DetailedTicketView, {
                         ticket: this.tickets[0],
                         webshop: this.webshop,
+                        organization: this.organization,
                         allowDismiss: false,
                         logo: !!(this as any).$isMobile
                     })

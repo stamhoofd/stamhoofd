@@ -17,6 +17,7 @@ import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
 import { RichText } from '../RichText';
 import { SeatingPlan } from '../SeatingPlan';
+import { SponsorConfig } from '../SponsorConfig';
 import { TransferSettings } from './TransferSettings';
 import { WebshopField } from './WebshopField';
 
@@ -468,6 +469,9 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Policy), version: 116 })
     policies: Policy[] = []
+
+    @field({ decoder: SponsorConfig, version: 226, nullable: true })
+    sponsors: SponsorConfig|null = null
 
     @field({ decoder: DateDecoder, nullable: true, version: 43 })
     availableUntil: Date | null = null

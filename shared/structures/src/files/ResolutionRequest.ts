@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder,field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder,field, IntegerDecoder } from '@simonbackx/simple-encoding';
 
 export enum ResolutionFit {
     Contain = "contain",

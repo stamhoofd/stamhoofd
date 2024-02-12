@@ -41,40 +41,35 @@ export class Image extends Model {
             fileType = "svg";
         }
 
-        const neededResolutions: sharp.ResizeOptions[] = resolutions.map((r) => {
-            return {
-                width: r.width ?? undefined,
-                height: r.height ?? undefined,
-                fit: r.fit,
-                withoutEnlargement: type !== "image/svg+xml"
-            }
-        })
-
         const supportsTransparency = fileType == "png" || fileType == "svg"
         const promises: Promise<{data: Buffer;info: sharp.OutputInfo}>[] = [];
 
-        if (neededResolutions.length) {
+        if (resolutions.length) {
             let sharpStream = sharp(fileContent, fileType === 'svg' ? {density: 600} : {}).rotate(); 
             if (!supportsTransparency) {
                 sharpStream = sharpStream.flatten({background: {r: 255, g: 255, b: 255}});
             }
 
-            for(const size of neededResolutions) {
+            for(const r of resolutions) {
+                const size = {
+                    width: r.width ?? undefined,
+                    height: r.height ?? undefined,
+                    fit: r.fit,
+                    withoutEnlargement: type !== "image/svg+xml"
+                }
+
+                let t = sharpStream.resize(size);
+
                 // Generate the image data
                 if (!supportsTransparency) {
-                    promises.push(sharpStream
-                        .resize(size)
-                        .jpeg({
+                    t = t.jpeg({
                             quality: 80,
-                        })
-                        .toBuffer({ resolveWithObject: true }));
+                        });
                 } else {
-                    promises.push(sharpStream
-                        .resize(size)
-                        .png()
-                        .toBuffer({ resolveWithObject: true }));
+                    t = t.png();
                 }
-                
+
+                promises.push(t.toBuffer({ resolveWithObject: true }));
             }
         }
 

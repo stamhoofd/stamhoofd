@@ -890,6 +890,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+        overflow: hidden;
 
         img.image {
             margin: 5px;

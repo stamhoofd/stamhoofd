@@ -20,13 +20,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { Order, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
+import { Checkbox, DetailedTicketView,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Order, Organization, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import DetailedTicketView from "../orders/DetailedTicketView.vue";
-
 
 @Component({
     components: {
@@ -41,6 +38,9 @@ import DetailedTicketView from "../orders/DetailedTicketView.vue";
 export default class TicketListItem extends Mixins(NavigationMixin){
     @Prop({ required: true })
         webshop: Webshop
+
+    @Prop({ required: true })
+        organization: Organization
 
     @Prop({ required: true })
         ticket: TicketPublic
@@ -74,7 +74,8 @@ export default class TicketListItem extends Mixins(NavigationMixin){
                     root: new ComponentWithProperties(DetailedTicketView, {
                         ticket: this.ticket,
                         order: this.order,
-                        webshop: this.webshop
+                        webshop: this.webshop,
+                        organization: this.organization
                     })
                 })
             ],
