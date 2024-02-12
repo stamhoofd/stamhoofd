@@ -373,7 +373,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get canOrder() {
-        return (this.maximumRemaining === null || this.maximumRemaining > 0) && this.product.isEnabled
+        return (this.maximumRemaining === null || this.maximumRemaining > 0) && (this.product.isEnabled || this.admin)
         //return (this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0 || !!this.oldItem) && this.product.isEnabled)) && !this.areSeatsSoldOut
     }
 
