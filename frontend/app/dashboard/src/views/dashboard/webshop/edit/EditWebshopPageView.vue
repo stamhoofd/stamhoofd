@@ -121,7 +121,7 @@
             <hr>
             <EditSponsorsBox :config="sponsorConfig" @patch="patchSponsorConfig" />
 
-            <p v-if="sponsorConfig" class="style-button-bar">
+            <p class="style-button-bar">
                 <button type="button" class="button text" @click="previewTicket">
                     <span class="icon eye" /><span>Ticketvoorbeeld</span>
                 </button>
@@ -133,7 +133,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
+import { ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
 import { Cart, CartReservedSeat, TicketPublic } from "@stamhoofd/structures";
 import { CartItem } from "@stamhoofd/structures";
 import { DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
@@ -309,6 +309,11 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     previewTicket() {
         // Example product:
         const product = this.webshop.products.find(p => p.type === ProductType.Ticket) ?? this.webshop.products[0];
+
+        if (!product) {
+            new Toast('Voeg ten minste één ticket toe aan je webshop om een voorbeeld van een ticket te bekijken', 'error red').show()
+            return;
+        }
         const cart = Cart.create({})
         const item = CartItem.createDefault(product, cart, this.webshop, {admin: true})
 

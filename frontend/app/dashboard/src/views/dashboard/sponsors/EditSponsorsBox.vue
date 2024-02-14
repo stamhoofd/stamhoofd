@@ -7,7 +7,7 @@
             </div>
         </h2>
 
-        <p>Het is mogelijk om het logo van sponsors op je webshop en/of tickets te plaatsen.</p>
+        <p>Het is mogelijk om het logo van sponsors op je tickets te plaatsen.</p>
 
         <STList v-model="draggableSponsors" :draggable="true">
             <STListItem v-for="sponsor in sponsors" :key="sponsor.id" :selectable="true" @click="editSponsor(sponsor)">
