@@ -19,19 +19,29 @@
                 Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).
             </p>
 
-
-            <template v-if="shouldFilter && !isLoading && ticketProducts.length > 1">
-                <STList>
-                    <STListItem v-for="product in ticketProducts" :key="product.id" :selectable="true" element-name="label">
-                        <Checkbox slot="left" :checked="isProductSelected(product)" @change="setProductSelected(product, $event)" />
-                        {{ product.name }}
-                    </STListItem>
-                </STList>
-            </template>
-
             <a class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
                 Download de checklist voor het scannen van tickets
             </a>
+
+            <template v-if="shouldFilter && !isLoading && ticketProducts.length > 1">
+                <div v-for="category of categories" :key="category.id" class="container">
+                    <hr v-if="categories.length > 1">
+                    <h2 v-if="categories.length > 1">
+                        {{ category.name }}
+                    </h2>
+                    <STList>
+                        <STListItem v-for="product in getCategoryProducts(category)" :key="product.id" :selectable="true" element-name="label">
+                            <Checkbox slot="left" :checked="isProductSelected(product)" @change="setProductSelected(product, $event)" />
+
+                            <h3 class="style-title-list">
+                                {{ product.name }}
+                            </h3>
+                            <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.location" class="style-description-small" v-text="product.location.name" />
+                            <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.dateRange" class="style-description-small" v-text="formatDateRange(product.dateRange)" />
+                        </STListItem>
+                    </STList>
+                </div>
+            </template>
         </main>
 
         <STToolbar v-if="!noDatabaseSupport">
@@ -47,7 +57,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Product, ProductType, WebshopTicketType } from "@stamhoofd/structures";
+import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -101,6 +111,10 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
         document.title = this.webshopManager.preview.meta.name+" - Tickets scannen"
     }
 
+    formatDateRange(dateRange: ProductDateRange) {
+        return Formatter.capitalizeFirstLetter(dateRange.toString())
+    }
+
     get isLoading() {
         return this.webshopManager.webshop === null
     }
@@ -113,7 +127,30 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
     }
 
     get ticketProducts() {
-        return this.webshopManager.webshop?.products.filter(p => p.type === ProductType.Ticket || p.type === ProductType.Voucher)
+        return this.webshopManager.webshop?.products.filter(p => p.type === ProductType.Ticket || p.type === ProductType.Voucher) ?? []
+    }
+
+    get categories() {
+        const categories = this.webshopManager.webshop?.categories.filter(c => this.getCategoryProducts(c).length > 0) ?? []
+        if (categories.length <= 0) {
+            return [
+                Category.create({
+                    name: '',
+                    productIds: this.ticketProducts.map(p => p.id)
+                })
+            ]
+        }
+        return categories;
+    }
+
+    getCategoryProducts(category: Category) {
+        return category.productIds.flatMap(p => {
+            const product = this.ticketProducts.find(pp => pp.id === p)
+            if (product) {
+                return [product]
+            }
+            return []
+        })
     }
 
     isProductSelected(product: Product) {
