@@ -85,7 +85,7 @@
         "favicons": "^6.2.2",
         "favicons-webpack-plugin": "^5.0.2",
         "file-loader": "^6.2.0",
-        "fork-ts-checker-webpack-plugin": "^6.5.0",
+        "fork-ts-checker-webpack-plugin": "7.3.0",
         "html-webpack-plugin": "^5.5.0",
         "jest": "^27.4.5",
         "jest-extended": "^1.2.0",

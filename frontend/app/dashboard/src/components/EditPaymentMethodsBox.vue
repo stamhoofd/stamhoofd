@@ -103,6 +103,10 @@
                 </STInputBox>
             </div>
 
+            <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
+                Reken geen administratiekosten aan als het totaalbedrag 0 euro is
+            </Checkbox>
+
             <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
                 Voorbeeld: de aangerekende administratiekost bedraagt {{ exampleAdministrationFee1 | price }} op een bedrag van {{ exampleAdministrationFeeValue1 | price }}, en {{ exampleAdministrationFee2 | price }} op een bedrag van {{ exampleAdministrationFeeValue2 | price }}.
             </p>
@@ -497,6 +501,18 @@ export default class EditPaymentMethodsBox extends Vue {
         }))
     }
 
+    get zeroIfZero() {
+        return this.config.administrationFee.zeroIfZero
+    }
+
+    set zeroIfZero(zeroIfZero: boolean) {
+        this.patchConfig(PaymentConfiguration.patch({
+            administrationFee: AdministrationFeeSettings.patch({
+                zeroIfZero
+            })
+        }))
+    }
+
     get exampleAdministrationFeeValue1() {
         return 500;
     }
@@ -506,6 +522,9 @@ export default class EditPaymentMethodsBox extends Vue {
     }
 
     get exampleAdministrationFeeValue2() {
+        if (this.zeroIfZero) {
+            return 0;
+        }
         return 1000;
     }
 

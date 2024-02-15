@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { PaymentMethod } from "./PaymentMethod";
@@ -54,12 +54,18 @@ export class AdministrationFeeSettings extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     fixed = 0
 
+    @field({ decoder: BooleanDecoder, version: 228 })
+    zeroIfZero = true
+
     calculate(price: number) {
+        if (price <= 0 && this.zeroIfZero) {
+            return 0;
+        }
         return Math.round(price * this.percentage / 10000) + this.fixed
     }
 
     isEqual(other: AdministrationFeeSettings) {
-        return this.percentage === other.percentage && this.fixed === other.fixed
+        return this.percentage === other.percentage && this.fixed === other.fixed && this.zeroIfZero === other.zeroIfZero
     }
 
     isZero() {
