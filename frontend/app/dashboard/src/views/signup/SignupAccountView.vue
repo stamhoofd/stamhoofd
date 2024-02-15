@@ -148,6 +148,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             errors.throwIfNotEmpty()
 
             if (this.password != this.passwordRepeat) {
+                plausible('passwordsNotMatching'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
                     code: "password_do_not_match",
                     message: "De ingevoerde wachtwoorden komen niet overeen",
@@ -165,6 +166,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
 
             if (!this.acceptPrivacy) {
+                plausible('termsNotAccepted'); // track how many people try to create a sorter one (to reevaluate this restriction)
                 throw new SimpleError({
                     code: "read_privacy",
                     message: "Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken."
@@ -172,6 +174,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
 
             if (!this.acceptTerms) {
+                plausible('termsNotAccepted');
                 throw new SimpleError({
                     code: "read_privacy",
                     message: "Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken."
@@ -179,6 +182,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
 
             if (!this.acceptDataAgreement) {
+                plausible('termsNotAccepted');
                 throw new SimpleError({
                     code: "read_privacy",
                     message: "Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken."
@@ -192,36 +196,19 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 return;
             }
         
-            plausible('signupKeys');
+            const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code)
+            plausible('signup');
+
+            this.loading = false;
+
+            const session = new Session(this.organization.id)
+            this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
+
             try {
-
-                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code)
-                plausible('signup');
-
-                this.loading = false;
-
-                const session = new Session(this.organization.id)
-                this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
-
-                try {
-                    Storage.keyValue.removeItem("savedRegisterCode").catch(console.error)
-                    Storage.keyValue.removeItem("savedRegisterCodeDate").catch(console.error)
-                } catch (e) {
-                    console.error(e)
-                }
-                
+                Storage.keyValue.removeItem("savedRegisterCode").catch(console.error)
+                Storage.keyValue.removeItem("savedRegisterCodeDate").catch(console.error)
             } catch (e) {
-                this.loading = false;
-
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    // Show normal errors
-                    throw e;
-                }
-
-                plausible('signupAccountKeyError');
-
-                new CenteredMessage("Er ging iets mis", "Het is niet gelukt om een account aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
-                return;
+                console.error(e)
             }
         } catch (e) {
             this.loading = false
