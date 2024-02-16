@@ -1,12 +1,12 @@
 <template>
-    <form class=" st-view login-view" autocomplete="off" data-submit-last-field @submit.prevent="submit">
+    <form class=" st-view login-view" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar title="Inloggen" :pop="canPop" :dismiss="canDismiss" />
         <main>
             <h1>Inloggen</h1>
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" enterkeyhint="next" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>

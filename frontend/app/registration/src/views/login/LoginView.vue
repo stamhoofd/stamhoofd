@@ -1,5 +1,5 @@
 <template>
-    <form class="login-view st-view auto" autocomplete="off" data-submit-last-field @submit.prevent="submit">
+    <form class="login-view st-view auto" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
@@ -7,7 +7,7 @@
             <h1>Inloggen</h1>
             <STErrorsDefault :error-box="errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" class="max" name="username" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>

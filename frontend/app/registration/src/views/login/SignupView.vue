@@ -9,7 +9,7 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" title="E-mailadres" name="username" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>

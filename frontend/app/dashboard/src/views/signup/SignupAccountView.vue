@@ -14,7 +14,7 @@
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" name="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" name="username" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
                 </div>
 
                 <div>
