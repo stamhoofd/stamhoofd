@@ -394,6 +394,18 @@ export class DocumentTemplate extends Model {
                         await document.save();
                     }
                 }
+
+                // Generate numbers for all documents
+                if (generateNumbers) {
+                    let nextNumber = Math.max(0, ...documents.map(d => d.number).filter(n => n !== null) as number[]) + 1
+                    for (const document of documents) {
+                        if (document.number === null && document.status === DocumentStatus.Published) {
+                            document.number = nextNumber;
+                            await document.save();
+                            nextNumber++;
+                        }
+                    }
+                }
                 return documents
             }
             
