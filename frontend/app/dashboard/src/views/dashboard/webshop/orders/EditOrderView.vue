@@ -160,7 +160,7 @@
                 </STListItem>
             </STList>
 
-            <p>
+            <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
                 <button class="button text" type="button" @click="addProduct">
                     <span class="icon add" />
                     <span>Nieuw</span>
@@ -336,6 +336,10 @@ export default class EditOrderView extends Mixins(NavigationMixin){
 
     get webshop() {
         return this.webshopManager.preview
+    }
+
+    get webshopFull() {
+        return this.webshopManager.webshop
     }
 
     get fields() {
