@@ -27,10 +27,14 @@
                 <h3 class="style-title-list">
                     {{ plan.name }}
                 </h3>
+                <p v-if="plan.seatCount > 1" class="style-description-small">
+                    {{ plan.seatCount }} plaatsen
+                </p>
 
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
                     Dit zaalplan is van een andere webshop. Door het te kiezen wordt een kopie toegevoegd aan deze webshop. Aanpassingen worden niet overgenomen in bestaande webshops.
                 </p>
+                
 
                 <template slot="right">
                     <button class="button icon edit gray" type="button" @click="editSeatingPlan(plan)" />
