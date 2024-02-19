@@ -182,14 +182,21 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                     if (s.equals(seat)) {
                         this.openOrder(order)
 
-                        this.highlightedSeats = order.data.cart.items.flatMap(i => item.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
+                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
                         return
                     }
                 }
             }
         }
         this.highlightedSeats = []
-        new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
+
+        // Check if this seat is reserved in the product
+        if (this.selectedProduct?.reservedSeats.find(r => r.equals(seat))) {
+            new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller de betaling nog aan het afrekenen is.', 'info').show();
+        } else {
+            new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
+        }
+
     }
 
     onHoverSeat(seat: ReservedSeat) {
@@ -200,7 +207,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                 }
                 for (const s of item.reservedSeats) {
                     if (s.equals(seat)) {
-                        this.highlightedSeats = order.data.cart.items.flatMap(i => item.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
+                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
                         return
                     }
                 }
