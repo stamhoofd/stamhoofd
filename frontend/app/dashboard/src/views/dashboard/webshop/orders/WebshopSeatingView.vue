@@ -15,6 +15,10 @@
                 <span class="icon arrow-down-small" />
             </button>
 
+            <p v-if="duplicateSeats.length" class="error-box">
+                Dubbele boekingen gedetecteerd voor plaatsen: {{ duplicateSeats.map(s => s.getNameString(webshop, selectedProduct)).join(', ') }}
+            </p>
+
             <div v-for="section of sections" :key="section.id" class="container">
                 <hr>
                 <h2>{{ section.name }}</h2>
@@ -77,7 +81,15 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
 
     loading = false;
     orders: PrivateOrderWithTickets[] = []
-    selectedProduct: Product | null = null
+    selectedProductId: string | null = null
+
+    get selectedProduct() {
+        return this.webshop?.products?.find(p => p.id === this.selectedProductId) ?? null
+    }
+
+    set selectedProduct(product: Product | null) {
+        this.selectedProductId = product?.id ?? null;
+    }
 
     created() {
         this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
@@ -121,6 +133,25 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
 
     get reservedSeats() {
         return this.selectedProduct?.reservedSeats ?? []
+    }
+
+    get duplicateSeats() {
+        // Try to find all seats that are reserved twice
+        const duplicateSeats = new Map<string, ReservedSeat>()
+        const foundSeats = new Set<string>()
+
+        // We need to look at the reserved seats of orders, not of the product
+        const correctedReservedSeats = this.orders.flatMap(o => o.data.cart.items.flatMap(item => item.product.id === this.selectedProduct?.id ? item.reservedSeats : []))
+
+        for (const seat of correctedReservedSeats ?? []) {
+            const id = seat.section + ':::' + seat.row + ':::' + seat.seat;
+            if (foundSeats.has(id)) {
+                duplicateSeats.set(id, seat);
+            }
+            foundSeats.add(id)
+        }
+
+        return [...duplicateSeats.values()]
     }
 
     get scannedSeats() {
@@ -216,7 +247,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         this.highlightedSeats = []
     }
 
-    onDeleteOrders(orders: PrivateOrder[]): Promise<void> {
+    async onDeleteOrders(orders: PrivateOrder[]): Promise<void> {
         // Delete these orders from the loaded orders instead of doing a full reload
         for (const order of orders) {
             const index = this.orders.findIndex(o => o.id === order.id)
@@ -224,6 +255,12 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                 this.orders.splice(index, 1)
             }
         }
+
+        // If we received new orders, the webshop will also have changed reserved seats for the products
+        await this.webshopManager.loadWebshopIfNeeded(false, true);
+
+        // Remove highlight (order might have changed)
+        this.highlightedSeats = []
 
         return Promise.resolve()
     }
@@ -247,6 +284,12 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         for (const order of orders) {
             this.putOrder(order)
         }
+
+        // If we received new orders, the webshop will also have changed reserved seats for the products
+        await this.webshopManager.loadWebshopIfNeeded(false, true);
+
+        // Remove highlight (order might have changed)
+        this.highlightedSeats = []
 
         return Promise.resolve()
     }
@@ -407,6 +450,8 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
             this.selectedProduct = this.selectedProduct ?? this.availableProducts[0] ?? null
+            console.log(this.selectedProduct?.reservedSeats)
+
         })
     }
     
