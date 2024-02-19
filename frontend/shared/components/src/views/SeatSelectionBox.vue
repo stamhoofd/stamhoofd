@@ -49,6 +49,7 @@
                                     '--color': getSeatColor(seat),
                                 }"
                                 @click="onClick(row, seat)"
+                                @mouseover="onHover(row, seat)"
                             >
                                 <span class="nr">{{ seat.label }}</span>
                                 <span v-if="isDisabledPersonSeat(seat)" class="icon disabled-person" />
@@ -108,6 +109,9 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 
     @Prop({ required: false })
         onClickSeat?: (seat: ReservedSeat) => void
+
+    @Prop({ required: false })
+        onHoverSeat?: (seat: ReservedSeat) => void
 
     lastPriceToast: Toast|null = null
 
@@ -273,6 +277,17 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 
     getSeatColor(seat: SeatingPlanSeat) {
         return this.seatingPlan.getSeatColor(seat)
+    }
+
+    onHover(row: SeatingPlanRow, seat: SeatingPlanSeat) {
+        if (this.onHoverSeat) {
+            this.onHoverSeat(ReservedSeat.create({
+                section: this.seatingPlanSection.id,
+                row: row.label,
+                seat: seat.label
+            }))
+            return
+        }
     }
 
     onClick(row: SeatingPlanRow, seat: SeatingPlanSeat) {

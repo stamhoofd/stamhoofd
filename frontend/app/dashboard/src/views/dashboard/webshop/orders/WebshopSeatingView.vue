@@ -28,6 +28,7 @@
                         :seats="highlightedSeats"
                         :highlight-seats="scannedSeats"
                         :on-click-seat="onClickSeat"
+                        :on-hover-seat="onHoverSeat"
                         :admin="true"
                     />
                 </div>
@@ -181,7 +182,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                     if (s.equals(seat)) {
                         this.openOrder(order)
 
-                        this.highlightedSeats = order.data.cart.items.flatMap(i => i.reservedSeats)
+                        this.highlightedSeats = order.data.cart.items.flatMap(i => item.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
                         return
                     }
                 }
@@ -189,6 +190,23 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         }
         this.highlightedSeats = []
         new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
+    }
+
+    onHoverSeat(seat: ReservedSeat) {
+        for (const order of this.orders) {
+            for (const item of order.data.cart.items) {
+                if (item.product.id !== this.selectedProduct?.id) {
+                    continue
+                }
+                for (const s of item.reservedSeats) {
+                    if (s.equals(seat)) {
+                        this.highlightedSeats = order.data.cart.items.flatMap(i => item.product.id !== this.selectedProduct?.id ? [] : i.reservedSeats)
+                        return
+                    }
+                }
+            }
+        }
+        this.highlightedSeats = []
     }
 
     onDeleteOrders(orders: PrivateOrder[]): Promise<void> {
