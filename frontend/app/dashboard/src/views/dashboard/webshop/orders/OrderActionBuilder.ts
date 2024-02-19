@@ -264,6 +264,14 @@ export class OrderActionBuilder {
     }
 
     async exportToExcel(orders: PrivateOrder[]) {
+        const hasCanceledOrders = !!orders.find(o => o.status === OrderStatus.Canceled);
+        const hasNotCanceled = !!orders.find(o => o.status !== OrderStatus.Canceled);
+        if (hasCanceledOrders && hasNotCanceled) {
+            const excludeCanceled = await CenteredMessage.confirm('Je exporteert ook geannuleerde bestellingen', 'Zonder exporteren',  'Momenteel heb je ook bestellingen geselecteerd die geannuleerd zijn. Als je die mee exporteert komen die bestellingen ook in de totalen van de Excel, dat wil je meestal niet.', 'Mee exporteren', true);
+            if (excludeCanceled) {
+                orders = orders.filter(o => o.status !== OrderStatus.Canceled)
+            }
+        }
         const d = await import(/* webpackChunkName: "OrdersExcelExport" */ "../../../../classes/OrdersExcelExport");
         const OrdersExcelExport = d.OrdersExcelExport
         OrdersExcelExport.export(orders);
