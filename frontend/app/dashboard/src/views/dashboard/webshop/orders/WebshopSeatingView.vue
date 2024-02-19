@@ -192,7 +192,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
 
         // Check if this seat is reserved in the product
         if (this.selectedProduct?.reservedSeats.find(r => r.equals(seat))) {
-            new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller de betaling nog aan het afrekenen is.', 'info').show();
+            new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller nog aan het afrekenen is.', 'info').show();
         } else {
             new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
         }
