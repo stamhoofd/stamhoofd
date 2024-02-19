@@ -3,9 +3,8 @@
 /* eslint-disable jest/no-standalone-expect */
 import { PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop,WebshopFactory } from "@stamhoofd/models";
-import { Address, Cart, CartItem, CartItemOption, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, Token as TokenStruct, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop, WebshopFactory } from "@stamhoofd/models";
+import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/webshops/manage/PatchWebshopOrdersEndpoint";
@@ -35,6 +34,7 @@ describe("E2E.Stock", () => {
     let organization: Organization;
     let webshop: Webshop;
     let product: Product;
+    let seatProduct: Product;
     let personProduct: Product;
     let takeoutMethod: WebshopTakeoutMethod;
     let deliveryMethod: WebshopDeliveryMethod;
@@ -48,6 +48,8 @@ describe("E2E.Stock", () => {
     let productPrice2: ProductPrice;
     let freeProductPrice: ProductPrice;
     let personProductPrice: ProductPrice;
+    let seatProductPrice: ProductPrice;
+    let seatingPlan: SeatingPlan;
 
     let multipleChoiceOptionMenu: OptionMenu;
     let chooseOneOptionMenu: OptionMenu;
@@ -62,6 +64,7 @@ describe("E2E.Stock", () => {
     async function refreshAll() {
         webshop = (await Webshop.getByID(webshop.id))!;
         product = webshop.products.find(p => p.id == product.id)!;
+        seatProduct = webshop.products.find(p => p.id == seatProduct.id)!;
         personProduct = webshop.products.find(p => p.id == personProduct.id)!;
         takeoutMethod = webshop.meta.checkoutMethods.find(m => m.id == takeoutMethod.id)! as WebshopTakeoutMethod;
         deliveryMethod = webshop.meta.checkoutMethods.find(m => m.id == deliveryMethod.id)! as WebshopDeliveryMethod;
@@ -80,6 +83,8 @@ describe("E2E.Stock", () => {
         radioOption1 = chooseOneOptionMenu.options.find(o => o.id == radioOption1.id)!;
         radioOption2 = chooseOneOptionMenu.options.find(o => o.id == radioOption2.id)!;
         personProductPrice = personProduct.prices.find(p => p.id == personProductPrice.id)!;
+        seatProductPrice = seatProduct.prices.find(p => p.id == seatProductPrice.id)!;
+        seatingPlan = webshop.meta.seatingPlans.find(s => s.id === seatingPlan.id)!;
     }
 
     async function refreshCartItems(orderId: string, cartItems: CartItem[]): Promise<Order> {
@@ -96,15 +101,22 @@ describe("E2E.Stock", () => {
         await refreshAll();
         const order = await refreshCartItems(orderId, [...cartItems, ...excludedCartItems]);
 
-        const products = [product, personProduct];
+        const products = [product, seatProduct, personProduct];
         for (const product of products) {
             let used = 0;
+            const seats: ReservedSeat[] = []
+
             for (const item of cartItems) {
                 if (item.product.id == product.id) {
                     used += item.amount;
+                    // All seats should be reserved
+                    expect(item.reservedSeats).toIncludeSameMembers(item.seats);
+                    seats.push(...item.seats.map(s => ReservedSeat.create(s)));
                 }
             }
             expect(product.usedStock).toBe(used);
+            expect(product.reservedSeats.length).toBe(seats.length);
+            expect(product.reservedSeats).toIncludeSameMembers(seats);
         }
 
         const productPrices = [productPrice1, productPrice2, freeProductPrice, personProductPrice];
@@ -156,6 +168,7 @@ describe("E2E.Stock", () => {
 
         for (const item of excludedCartItems) {
             expect(item.reservedAmount).toBe(0);
+            expect(item.reservedSeats.length).toBe(0);
             
             for (const price of productPrices) {
                 expect(item.reservedPrices.get(price.id) ?? 0).toBe(0);
@@ -194,7 +207,7 @@ describe("E2E.Stock", () => {
     async function saveChanges() {
         // Set products
         webshop = (await Webshop.getByID(webshop.id))!;
-        webshop.products = [product, personProduct]
+        webshop.products = [product, seatProduct, personProduct]
         await webshop.save();
         await refreshAll();
     }
@@ -289,6 +302,58 @@ describe("E2E.Stock", () => {
         })
         personProductPrice = personProduct.prices[0]
 
+        seatingPlan = SeatingPlan.create({
+            name: 'Testzaal',
+            sections: [
+                SeatingPlanSection.create({
+                    rows: [
+                        SeatingPlanRow.create({
+                            label: 'A',
+                            seats: [
+                                SeatingPlanSeat.create({
+                                    label: '1'
+                                }),
+                                SeatingPlanSeat.create({
+                                    label: '2'
+                                }),
+                                SeatingPlanSeat.create({
+                                    label: '3'
+                                }),
+                                SeatingPlanSeat.create({
+                                    label: '4'
+                                })
+                            ]
+                        }),
+                        SeatingPlanRow.create({
+                            label: 'B',
+                            seats: [
+                                SeatingPlanSeat.create({
+                                    label: '1'
+                                }),
+                                SeatingPlanSeat.create({
+                                    label: '2'
+                                }),
+                                SeatingPlanSeat.create({
+                                    label: '3'
+                                }),
+                                SeatingPlanSeat.create({
+                                    label: '4'
+                                })
+                            ]
+                        })
+                    ]
+                })
+            ]
+        })
+        meta.seatingPlans.addPut(seatingPlan)
+
+        seatProduct = Product.create({
+            name: 'seatProduct',
+            type: ProductType.Ticket,
+            seatingPlanId: seatingPlan.id
+        })
+        seatProductPrice = seatProduct.prices[0]
+
         // Takeout
         takeoutMethod = WebshopTakeoutMethod.create({
             name: 'Bakkerij Test',
@@ -357,7 +422,7 @@ describe("E2E.Stock", () => {
         })
 
         meta = meta.patch({
-            paymentConfiguration: paymentConfigurationPatch,
+            paymentConfiguration: paymentConfigurationPatch
         })
 
         const privateMeta = WebshopPrivateMetaData.patch({
@@ -369,7 +434,7 @@ describe("E2E.Stock", () => {
             name: 'Test webshop',
             meta,
             privateMeta,
-            products: [product, personProduct]
+            products: [product, seatProduct, personProduct]
         }).create()
     });
 
@@ -579,6 +644,119 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, order.data.cart.items);
         });
 
+        test("Chosen seats reserve the stock for POS order", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product: seatProduct,
+                            productPrice: seatProductPrice,
+                            amount: 2,
+                            seats: [
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '1'
+                                }),
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '2'
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            const response = await endpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body.order;
+
+            await checkStock(order.id, order.data.cart.items);
+        });
+
+        test("Chosen seats reserve the stock for an admin order", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product: seatProduct,
+                            productPrice: seatProductPrice,
+                            amount: 2,
+                            seats: [
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '1'
+                                }),
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '2'
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const orderPatch = PrivateOrder.create({
+                id: uuidv4(),
+                data: orderData,
+                webshopId: webshop.id
+            });
+            patchArray.addPut(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            const response = await patchWebshopOrdersEndpoint.test(r);
+            expect(response.body).toBeDefined();
+            const order = response.body[0];
+            await checkStock(order.id, order.data.cart.items);
+        });
+
+        test("Amount of a cart item should match the amount of chosen seats", async () => {
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product: seatProduct,
+                            productPrice: seatProductPrice,
+                            amount: 2,
+                            seats: [
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '1'
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            await expect(endpoint.test(r)).rejects.toThrow('Invalid seats');
+        });
+
         test.todo("Amount of persons and orders for a takeout method is calculated correctly");
 
         test.todo("Amount of persons and orders for a delivery method is calculated correctly");
@@ -620,22 +798,6 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             await expect(endpoint.test(r)).rejects.toThrow('Product unavailable');
-
-            // Try same as admin
-            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
-
-            const orderPatch = PrivateOrder.create({
-                id: uuidv4(),
-                data: orderData,
-                webshopId: webshop.id
-            });
-            patchArray.addPut(orderPatch);
-
-            // Send a patch
-            const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
-            r2.headers.authorization = "Bearer " + token.accessToken
-
-            await expect(endpoint.test(r2)).rejects.toThrow('Product unavailable');
         });
 
         test("Cannot place an order when product price stock is full", async () => {
@@ -750,7 +912,103 @@ describe("E2E.Stock", () => {
 
         test.todo("Cannot place an order when takeout orders stock is full");
 
-        test.todo("Cannot place an order for a reserved seat");
+        test("Cannot place an order for a reserved seat", async () => {
+            // Set stock
+            seatProduct.reservedSeats = [
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '1'
+                })
+            ]
+            await saveChanges();
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product: seatProduct,
+                            productPrice: seatProductPrice,
+                            amount: 2,
+                            seats: [
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '1'
+                                }),
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '2'
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            await expect(endpoint.test(r)).rejects.toThrow('Seats unavailable');
+        });
+
+        test("Admin cannot place an order for a reserved seat", async () => {
+            // Set stock
+            seatProduct.reservedSeats = [
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '1'
+                })
+            ]
+            await saveChanges();
+            
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product: seatProduct,
+                            productPrice: seatProductPrice,
+                            amount: 2,
+                            seats: [
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '1'
+                                }),
+                                CartReservedSeat.create({
+                                    section: seatingPlan.sections[0].id,
+                                    row: 'A',
+                                    seat: '2'
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const orderPatch = PrivateOrder.create({
+                id: uuidv4(),
+                data: orderData,
+                webshopId: webshop.id
+            });
+            patchArray.addPut(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+            await expect(patchWebshopOrdersEndpoint.test(r)).rejects.toThrow('Seats unavailable');
+        });
+
+        test.todo("Admin cannot edit an an order to a reserved seat");
     });
 
     describe('Cleaning up stock', () => {
@@ -828,6 +1086,7 @@ describe("E2E.Stock", () => {
                 productPrice: personProductPrice,
                 amount: 2
             })
+
 
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.PointOfSale,
@@ -1121,8 +1380,6 @@ describe("E2E.Stock", () => {
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
-        test.todo("Reserved seats are changed when seats are switched");
-
         test("Stock is returned when an order is canceled and added when uncanceled again", async () => {
             {
                 const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
@@ -1198,6 +1455,236 @@ describe("E2E.Stock", () => {
                 await patchWebshopOrdersEndpoint.test(r);
 
                 await checkStock(order.id, [personCartItem!, productCartItem!]);
+            }
+        });
+    });
+
+    describe('Modifying seat orders', () => {
+        let order: Order;
+        let seatCartItem: CartItem|undefined;
+
+        beforeEach(async () => {
+            seatCartItem = CartItem.create({
+                product: seatProduct,
+                productPrice: seatProductPrice,
+                amount: 2,
+                seats: [
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'A',
+                        seat: '1'
+                    }),
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'A',
+                        seat: '2'
+                    })
+                ]
+            })
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        seatCartItem
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            const response = await endpoint.test(r);
+            expect(response.body).toBeDefined();
+            const orderStruct = response.body.order;
+
+            // Now check the stock has changed for the product
+            order = await checkStock(orderStruct.id, [seatCartItem]);
+        });
+
+        test("Stock is removed when a product is removed and another is added", async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const cartPatch = Cart.patch({})
+            cartPatch.items.addDelete(seatCartItem!.id)
+
+            const newItem = CartItem.create({
+                product: seatProduct,
+                productPrice: seatProductPrice,
+                amount: 1,
+                seats: [
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'B',
+                        seat: '1'
+                    })
+                ]
+            });
+
+            cartPatch.items.addPut(
+                newItem
+            )
+
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            await checkStock(order.id, [newItem]);
+            
+        });
+
+        test("Stock is adjusted if extra seat is selected", async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const cartPatch = Cart.patch({})
+            const c = CartItem.patch({
+                id: seatCartItem!.id,
+                amount: 3,
+                seats: [
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'A',
+                        seat: '1'
+                    }),
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'A',
+                        seat: '2'
+                    }),
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'A',
+                        seat: '3'
+                    })
+                ]
+            });
+            cartPatch.items.addPatch(c)
+
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            await checkStock(order.id, [seatCartItem!]);
+        });        
+
+        test("Reserved seats are changed when seats are moved", async () => {
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const cartPatch = Cart.patch({})
+            cartPatch.items.addPatch(CartItem.patch({
+                id: seatCartItem?.id,
+                seats: [
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'B',
+                        seat: '1'
+                    }),
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'B',
+                        seat: '2'
+                    })
+                ]
+            }))
+            const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+            patchArray.addPatch(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await patchWebshopOrdersEndpoint.test(r);
+
+            await checkStock(order.id, [seatCartItem!]);
+        });
+
+        test("Stock is returned when an order is canceled and added when uncanceled again", async () => {
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id, 
+                    status: OrderStatus.Canceled
+                });
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                await checkStock(order.id, [], [seatCartItem!]);
+            }
+
+            // Uncancel
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id, 
+                    status: OrderStatus.Created
+                });
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                await checkStock(order.id, [seatCartItem!]);
+            }
+        });
+
+        test("Stock is returned when an order is deleted and added when undeleted", async () => {
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id, 
+                    status: OrderStatus.Deleted
+                });
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                await checkStock(order.id, [], [seatCartItem!]);
+            }
+
+            // Undelete
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id, 
+                    status: OrderStatus.Created
+                });
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                await checkStock(order.id, [seatCartItem!]);
             }
         });
     });

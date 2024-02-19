@@ -103,6 +103,13 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             }) : []
 
             const organization = token.user.organization
+            // We use a getter because we need to have an up to date webshop struct
+            // otherwise we won't validate orders on the latest webshop with the latest stock information
+            const webshopGetter = {
+                get struct() {
+                    return WebshopStruct.create(webshop);
+                }
+            }
 
             // TODO: handle order creation here
             for (const put of body.getPuts()) {
@@ -125,6 +132,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, token.user.organization))
 
                 // TODO: validate before updating stock
+                order.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
                 await order.updateStock()
                 const totalPrice = order.data.totalPrice
 
@@ -192,7 +200,6 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 
                 orders.push(order)
             }
-            const webshopStruct = WebshopStruct.create(webshop)
 
             for (const patch of body.getPatches()) {
                 const model = orders.find(p => p.id == patch.id)
@@ -218,7 +225,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                     if (model.status !== OrderStatus.Deleted) {
                         // Make sure all data is up to date and validated (= possible corrections happen here too)
-                        model.data.validate(webshopStruct, organization.meta, request.i18n, true);
+                        model.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
                     }
                 }
 
