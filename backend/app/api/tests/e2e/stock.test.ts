@@ -620,6 +620,22 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             await expect(endpoint.test(r)).rejects.toThrow('Product unavailable');
+
+            // Try same as admin
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const orderPatch = PrivateOrder.create({
+                id: uuidv4(),
+                data: orderData,
+                webshopId: webshop.id
+            });
+            patchArray.addPut(orderPatch);
+
+            // Send a patch
+            const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r2.headers.authorization = "Bearer " + token.accessToken
+
+            await expect(endpoint.test(r2)).rejects.toThrow('Product unavailable');
         });
 
         test("Cannot place an order when product price stock is full", async () => {
