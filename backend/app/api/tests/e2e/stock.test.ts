@@ -92,14 +92,19 @@ describe("E2E.Stock", () => {
 
         for (const item of cartItems) {
             const i = order.data.cart.items.find(i => i.id == item.id)!;
-            item.set(i);
+            if (i) {
+                item.set(i);
+            }
         }
         return order;
     }
 
-    async function checkStock(orderId: string, cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
+    async function checkStocks(orderIds: string[], cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
         await refreshAll();
-        const order = await refreshCartItems(orderId, [...cartItems, ...excludedCartItems]);
+        const orders: Order[] = [];
+        for (const orderId of orderIds) {
+            orders.push(await refreshCartItems(orderId, [...cartItems, ...excludedCartItems]));
+        }
 
         const products = [product, seatProduct, personProduct];
         for (const product of products) {
@@ -180,27 +185,49 @@ describe("E2E.Stock", () => {
         }
 
         // Check order stock
-        let persons = 0;
-        for (const item of cartItems) {
-            if (item.product.type === ProductType.Person) {
-                persons += item.amount;
+        for (const order of orders) {
+            const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id))
+            let persons = 0;
+            for (const item of filteredItems) {
+                if (item.product.type === ProductType.Person) {
+                    persons += item.amount;
+                }
             }
+            expect(order.data.reservedPersons).toBe(persons);
+            expect(order.data.reservedOrder).toBe(filteredItems.length > 0);
         }
-        expect(order.data.reservedPersons).toBe(persons);
-        expect(order.data.reservedOrder).toBe(cartItems.length > 0);
 
         const timeslots = [slot1, slot2, slot3, slot4];
         for (const slot of timeslots) {
-            if (order.data.timeSlot?.id === slot.id) {
-                expect(slot.usedOrders).toBe(cartItems.length > 0 ? 1 : 0);
-                expect(slot.usedPersons).toBe(persons);
-            } else {
-                expect(slot.usedOrders).toBe(0);
-                expect(slot.usedPersons).toBe(0);
+            let ordersCount = 0;
+            let personsCount = 0;
+
+            for (const order of orders) {
+                if (order.data.timeSlot?.id === slot.id) {
+                    let persons = 0;
+                    const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id))
+
+                    for (const item of filteredItems) {
+                        if (item.product.type === ProductType.Person) {
+                            persons += item.amount;
+                        }
+                    }
+
+                    ordersCount += filteredItems.length > 0 ? 1 : 0
+                    personsCount += persons;
+                }
             }
+
+            expect(slot.usedOrders).toBe(ordersCount);
+            expect(slot.usedPersons).toBe(personsCount);
         }
 
-        return order;
+        return orders;
+    }
+
+    async function checkStock(orderId: string, cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
+        const otherOrders = (await Order.where({webshopId: webshop.id})).filter(o => o.id !== orderId)
+        return (await checkStocks([orderId, ...otherOrders.map(o => o.id)], [...cartItems, ...otherOrders.flatMap(o => o.data.cart.items)], excludedCartItems))[0]!
     }
 
     /** Allows to change the stock */
@@ -1061,6 +1088,7 @@ describe("E2E.Stock", () => {
 
     describe('Modifying orders', () => {
         let order: Order;
+        let baseOrder: Order;
         let productCartItem: CartItem|undefined;
         let personCartItem: CartItem|undefined;
 
@@ -1087,28 +1115,91 @@ describe("E2E.Stock", () => {
                 amount: 2
             })
 
+            {
+                const orderData = OrderData.create({
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    checkoutMethod: takeoutMethod,
+                    timeSlot: slot1,
+                    cart: Cart.create({
+                        items: [
+                            productCartItem,
+                            personCartItem
+                        ]
+                    }),
+                    customer
+                })
+                
+                const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const orderData = OrderData.create({
-                paymentMethod: PaymentMethod.PointOfSale,
-                checkoutMethod: takeoutMethod,
-                timeSlot: slot1,
-                cart: Cart.create({
-                    items: [
-                        productCartItem,
-                        personCartItem
-                    ]
-                }),
-                customer
-            })
-            
-            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                const response = await endpoint.test(r);
+                expect(response.body).toBeDefined();
+                const orderStruct = response.body.order;
 
-            const response = await endpoint.test(r);
-            expect(response.body).toBeDefined();
-            const orderStruct = response.body.order;
 
-            // Now check the stock has changed for the product
-            order = await checkStock(orderStruct.id, [productCartItem, personCartItem]);
+                // Now check the stock has changed for the product
+                order = await checkStock(orderStruct.id, [productCartItem, personCartItem]);
+            }
+
+            // Make sure all items in the cart, options etc, have at least a usedStock of 1, to also test they don't decrease when making 
+            // changes to roders
+            {
+                const orderData = OrderData.create({
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    checkoutMethod: takeoutMethod,
+                    timeSlot: slot1,
+                    cart: Cart.create({
+                        items: [
+                            CartItem.create({
+                                product,
+                                productPrice: productPrice1,
+                                amount: 1,
+                                options: [
+                                    CartItemOption.create({
+                                        optionMenu: multipleChoiceOptionMenu,
+                                        option: checkboxOption1
+                                    }),
+                                    CartItemOption.create({
+                                        optionMenu: chooseOneOptionMenu,
+                                        option: radioOption1
+                                    })
+                                ]
+                            }),
+                            CartItem.create({
+                                product,
+                                productPrice: productPrice2,
+                                amount: 1,
+                                options: [
+                                    CartItemOption.create({
+                                        optionMenu: multipleChoiceOptionMenu,
+                                        option: checkboxOption2
+                                    }),
+                                    CartItemOption.create({
+                                        optionMenu: chooseOneOptionMenu,
+                                        option: radioOption2
+                                    })
+                                ]
+                            }),
+                            CartItem.create({
+                                product: personProduct,
+                                productPrice: personProductPrice,
+                                amount: 1
+                            })
+                        ]
+                    }),
+                    customer
+                })
+                
+                const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+                const response = await endpoint.test(r);
+                expect(response.body).toBeDefined();
+                const orderStruct = response.body.order;
+
+
+                // Now check the stock has changed for the product
+                const orders = await checkStocks([order.id, orderStruct.id], [productCartItem, personCartItem, ...orderStruct.data.cart.items]);
+                baseOrder = orders.find(o => o.id === orderStruct.id)!
+            }
         });
 
         test("Stock is removed when a product is removed or added in two steps", async () => {
@@ -1686,6 +1777,216 @@ describe("E2E.Stock", () => {
 
                 await checkStock(order.id, [seatCartItem!]);
             }
+        });
+
+        test("Correctly handles duplicate seat booking recovery", async () => {
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id, 
+                    status: OrderStatus.Canceled
+                });
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                await checkStock(order.id, [], [seatCartItem!]);
+            }
+
+            // Place an order for the same seats
+            const newItem = CartItem.create({
+                product: seatProduct,
+                productPrice: seatProductPrice,
+                amount: 2,
+                seats: [
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'A',
+                        seat: '1'
+                    }),
+                    CartReservedSeat.create({
+                        section: seatingPlan.sections[0].id,
+                        row: 'A',
+                        seat: '2'
+                    })
+                ]
+            })
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        newItem
+                    ]
+                }),
+                customer
+            })
+            let orders: Order[];
+
+            {
+                const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+                const response = await endpoint.test(r);
+                expect(response.body).toBeDefined();
+                const orderStruct = response.body.order;
+
+                // Now check the stock has changed for the product
+                orders = await checkStocks([order.id, orderStruct.id], [newItem], [seatCartItem!]);
+            }
+
+            // Uncancel
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id, 
+                    status: OrderStatus.Created
+                });
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                orders = await checkStocks(orders.map(o => o.id), [newItem, seatCartItem!]);
+            }
+
+            // Now we are in a duplicate seat selected situation.
+            // To recover, move seats of one of the orders
+            // and check in the final result, all seats are still correctly reserved (once)
+            
+            // Manual check
+            expect(seatProduct.reservedSeats).toHaveLength(4);
+            expect(seatProduct.reservedSeats).toIncludeSameMembers([
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '1'
+                }),
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '1'
+                }),
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '2'
+                }),
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '2'
+                }),
+            ])
+
+            // Move seats of first order
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const cartPatch = Cart.patch({})
+                cartPatch.items.addPatch(CartItem.patch({
+                    id: seatCartItem?.id,
+                    seats: [
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'B',
+                            seat: '1'
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'B',
+                            seat: '2'
+                        })
+                    ]
+                }))
+                const orderPatch = PrivateOrder.patch({id: order.id, data: OrderData.patch({cart: cartPatch})});
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                await checkStocks(orders.map(o => o.id), [newItem, seatCartItem!]);
+            }
+
+            // Manual check
+            expect(seatProduct.reservedSeats).toHaveLength(4);
+            expect(seatProduct.reservedSeats).toIncludeSameMembers([
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '1'
+                }),
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'B',
+                    seat: '1'
+                }),
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '2'
+                }),
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'B',
+                    seat: '2'
+                }),
+            ])
+        });
+
+        test("Patching an order triggers an auto recovery of not reserved seats", async () => {
+            // This is required to recover from bugs in stock changes.
+            // Simply patching all orders will fix the stock.
+
+            // Manually remove all reserved seats = caused by a past bug
+            seatProduct.reservedSeats = []
+            await saveChanges();
+
+            {
+                const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id, 
+                    status: OrderStatus.Completed
+                });
+                patchArray.addPatch(orderPatch);
+
+                // Send a patch
+                const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                r.headers.authorization = "Bearer " + token.accessToken
+
+                await patchWebshopOrdersEndpoint.test(r);
+
+                await checkStock(order.id, [seatCartItem!]);
+            }
+
+            // Manual check
+            expect(seatProduct.reservedSeats).toHaveLength(2);
+            expect(seatProduct.reservedSeats).toIncludeSameMembers([
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '1'
+                }),
+                ReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '2'
+                }),
+            ])
         });
     });
 });

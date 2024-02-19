@@ -597,6 +597,7 @@ export class CartItem extends AutoEncoder {
                     human: "Het zaalplan van "+this.product.name+" is niet meer beschikbaar. Herlaad de pagina en probeer opnieuw. Neem contact met ons op als het probleem zich herhaalt."
                 })
             }
+
             // Check seats taken already?
             const reservedSeats = this.product.reservedSeats
 

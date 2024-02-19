@@ -338,11 +338,12 @@ export class SeatingPlan extends AutoEncoder {
                             if (seat.label === s.seat && seat.isValidSeat) {
 
                                 if (reservedSeats) {
-                                    const isReserved = !!reservedSeats.find(s2 => s2.equals(s))
-                                    if (isReserved) {
+                                    // We count the elements, because it is possible a seat is reserved multiple times (due to a previous bug)
+                                    const isReservedCount = reservedSeats.filter(s2 => s2.equals(s)).length
+                                    if (isReservedCount > 0) {
                                         if (allowedSeats) {
-                                            const isAllowed = !!allowedSeats?.find(s2 => s2.equals(s))
-                                            return isAllowed
+                                            const isAllowedCount = allowedSeats.filter(s2 => s2.equals(s)).length
+                                            return isAllowedCount >= isReservedCount
                                         }
                                         return false
                                     }

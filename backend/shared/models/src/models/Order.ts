@@ -254,8 +254,15 @@ export class Order extends Model {
 
                     // Seats
                     if (item.reservedSeats.length > 0) {
-                        product.reservedSeats = product.reservedSeats.filter(s => !item.reservedSeats.find(s2 => s2.equals(s)))
-                        changed = true
+                        for (const seat of item.reservedSeats) {
+                            // Only remove each seat once
+                            const reservedIndex = product.reservedSeats.findIndex(s => s.equals(seat))
+                            if (reservedIndex !== -1) {
+                                product.reservedSeats.splice(reservedIndex, 1)
+                                changed = true
+                            }
+                        }
+                        item.reservedSeats = [];
                     }
                 }
             }
@@ -343,11 +350,23 @@ export class Order extends Model {
             if (item.seats.length > 0) {
                 const product = this.webshop.products.find(p => p.id === item.product.id)
                 if (product) {
-                    // First remove all, to avoid duplicates
-                    for (const seat of item.seats) {
-                        product.reservedSeats = product.reservedSeats.filter(s => !s.equals(seat))
+                    if (previousData !== null) {
+                        // Already removed
+                        item.reservedSeats = []
+                        changed = true
+                    }
 
-                        if (add) {
+                    // First remove all (but only once!), to avoid duplicates
+                    for (const seat of item.reservedSeats) {
+                        const reservedIndex = product.reservedSeats.findIndex(s => s.equals(seat))
+                        if (reservedIndex !== -1) {
+                            product.reservedSeats.splice(reservedIndex, 1)
+                        }
+                    }
+
+                    // First remove all (but only once!), to avoid duplicates
+                    if (add) {
+                        for (const seat of item.seats) {
                             product.reservedSeats.push(seat)
                         }
                     }
