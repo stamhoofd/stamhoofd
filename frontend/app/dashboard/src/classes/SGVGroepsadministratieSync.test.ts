@@ -2,7 +2,7 @@ import { Address, Country, Group, GroupSettings, MemberDetails, Parent, ParentTy
 import { Formatter } from "@stamhoofd/utility";
 
 import groepFuncties from './SGVDefaultFuncties.json';
-import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
+import { getPatch, isManaged, splitStreetNumber } from './SGVGroepsadministratieSync';
 
 describe("Groepsadministratie Sync", () => {
     test("Reuse the address id", () => {
@@ -771,5 +771,72 @@ describe("Groepsadministratie Sync", () => {
 
         const secondPatch = getPatch(details, {...sgv, ...p}, "groepnummer", [interneGroep], groepFuncties)
         expect(secondPatch.functies).toBeUndefined();
+    });
+
+    test("Kapoenleiding is niet managed", () => {
+        const sgv = {
+            "links": [],
+            persoonsgegevens: {},
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "d5f75b320b812440010b812555e603a4", // kapoenenleiding
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        expect(isManaged(sgv, groepFuncties)).toBe(false);
+    });
+
+    test("Kapoenen is managed", () => {
+        const sgv = {
+            "links": [],
+            persoonsgegevens: {},
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "d5f75b320b812440010b812555de03a2", // kapoenen
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        expect(isManaged(sgv, groepFuncties)).toBe(true);
+    });
+
+    test("Gestopte kapoen is niet managed", () => {
+        const sgv = {
+            "links": [],
+            persoonsgegevens: {},
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "d5f75b320b812440010b812555de03a2", // kapoenen
+                    "begin": "123",
+                    "einde": "586"
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        expect(isManaged(sgv, groepFuncties)).toBe(false);
     });
 });

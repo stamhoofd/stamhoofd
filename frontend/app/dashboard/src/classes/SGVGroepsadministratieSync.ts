@@ -268,6 +268,25 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
     return patch
 }
 
+export function isManaged(lid: any, groepFuncties: GroepFunctie[]): any {
+    const managedFuncties = getManagedFuncties(groepFuncties);
+
+    for (const lidFunctie of (lid.functies ?? []) as LidFunctie[]) {
+        // Keep all functies that have been ended
+        if (lidFunctie.einde) {
+            continue;
+        }
+
+        const id = lidFunctie.functie;
+        const managedFunctie = managedFuncties.find(m => m.id === id)
+
+        if (managedFunctie) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Geeft een lijst van alle groepsadministratie functie ids die door Stamhoofd worden beheerd.
  */

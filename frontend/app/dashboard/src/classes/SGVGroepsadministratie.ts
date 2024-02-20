@@ -12,7 +12,7 @@ import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
-import { getPatch, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
+import { getPatch, isManaged, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
 import { SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
 
 class SGVGroepsadministratieStatic implements RequestMiddleware {
@@ -447,7 +447,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         for (const member of this.leden) {
             const found = matched.find(m => m.sgvId == member.id)
             if (!found) {
-                oldMembers.push(member)
+                if (isManaged(member, this.functies)) {
+                    // Alleen vragen om leden te schrappen die een vaste functie hebben in de groepsadministratie
+                    oldMembers.push(member)
+                }
             }
         }
 
