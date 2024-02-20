@@ -12,8 +12,8 @@ import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
-import { buildGroupMapping, getPatch, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
-import { SGVFoutenDecoder, SGVFunctie,SGVGFunctieResponse,SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures"
+import { getPatch, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
+import { SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
 
 class SGVGroepsadministratieStatic implements RequestMiddleware {
     token: {accessToken: string; refreshToken: string; validUntil: Date} | null = null // null to keep reactive
@@ -30,7 +30,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     functies: SGVFunctie[] = []
 
     get hasToken() {
-        return !!this.token || this.dryRun
+        return !!this.token //|| this.dryRun
     }
 
     /**
@@ -184,15 +184,12 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async setManagedFilter() {
-        // alleen leden met functies downloaden waarvoor Stamhoofd verantwoordelijk is
-        const mapping = buildGroupMapping(null, [], OrganizationManager.organization.groups, this.functies)
-        
         await this.authenticatedServer.request({
             method: "PATCH",
             path: "/ledenlijst/filter/huidige",
             body: {
                 "criteria":{
-                    "functies": Array.from(mapping.keys()),
+                    "functies": this.functies.map(f => f.id),
                     "groepen": [this.groupNumber ],
                     "oudleden": false,
                 },
@@ -568,17 +565,18 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async schrapLid(lid: SGVLid, report: SGVSyncReport) {
+        // Fetch full member from SGV
+        const response = await this.authenticatedServer.request<any>({
+            method: "GET",
+            path: "/lid/"+lid.id
+        })
+
+        const lidData = response.data;
+        const patch = schrappen(lidData, this.functies)
+
+        await sleep(250);
+            
         if (!this.dryRun) {
-            // Fetch full member from SGV
-            const response = await this.authenticatedServer.request<any>({
-                method: "GET",
-                path: "/lid/"+lid.id
-            })
-
-            const lidData = response.data;
-            const patch = schrappen(lidData, OrganizationManager.organization.groups, this.functies)
-
-            await sleep(250);
 
             try {
                 await this.authenticatedServer.request<any>({
@@ -591,11 +589,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 console.error(e)
                 throw e;
             }
-        } else {
-            throw new SimpleError({
-                code: "DRY_RUN",
-                message: "Dry run: skipped"
-            })
         }
 
         await sleep(250);
@@ -604,26 +597,26 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
         const details = match.stamhoofd.details!
 
-        if (!this.dryRun) {
-            // Fetch full member from SGV
-            const response = await this.authenticatedServer.request<any>({
-                method: "GET",
-                path: "/lid/"+match.sgvId
+        // Fetch full member from SGV
+        const response = await this.authenticatedServer.request<any>({
+            method: "GET",
+            path: "/lid/"+match.sgvId
+        })
+
+        const lid = response.data;
+
+        const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, this.functies, report)
+
+        if (patch.adressen && patch.adressen.length == 0) {
+            throw new SimpleError({
+                code: "",
+                message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
             })
+        }
 
-            const lid = response.data;
+        await sleep(250);
 
-            const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, OrganizationManager.organization.groups, this.functies, report)
-
-            if (patch.adressen && patch.adressen.length == 0) {
-                throw new SimpleError({
-                    code: "",
-                    message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
-                })
-            }
-
-            await sleep(250);
-
+        if (!this.dryRun) {
             try {
                 const updateResponse = await this.authenticatedServer.request<any>({
                     method: "PATCH",
@@ -654,7 +647,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             adressen: [],
             contacten: [],
             functies: []
-        }, this.groupNumber!, member.groups, OrganizationManager.organization.groups, this.functies, report)
+        }, this.groupNumber!, member.groups, this.functies, report)
 
         if (!post.adressen || post.adressen.length == 0) {
             throw new SimpleError({

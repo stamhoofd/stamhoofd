@@ -3,6 +3,19 @@ import { Formatter,StringCompare } from '@stamhoofd/utility';
 
 import { SGVLid } from './SGVStructures';
 
+export type GroepFunctie = {
+    id: string;
+    beschrijving: string;
+    code?: string|null;
+}
+
+export type LidFunctie = {
+    functie: string; // id of groupFunctie
+    einde?: string|null;
+    begin?: string|null;
+    groep: string;
+}
+
 function deepEqual(x, y) {
     if (x === y) {
         return true;
@@ -34,6 +47,7 @@ function trim(t: string) {
 export class SGVSyncReport {
     warnings: string[] = []
     errors: Error[] = []
+    info: string[] = []
 
     created: MemberWithRegistrations[] = []
     synced: MemberWithRegistrations[] = []
@@ -42,6 +56,10 @@ export class SGVSyncReport {
 
     addWarning(text: string) {
         this.warnings.push(text)
+    }
+
+    addInfo(text: string) {
+        this.info.push(text)
     }
 
     addError(text: Error) {
@@ -65,36 +83,33 @@ export class SGVSyncReport {
     }
 }
 
-export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any {
-    const newFunctions: any[] = []
-    const mapping = buildGroupMapping(null, [], allGroups, groepFuncties)
+export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
+    const managedFuncties = getManagedFuncties(groepFuncties);
 
-    for (const functie of lid.functies ?? []) {
+    const newFunctions: LidFunctie[] = []
+
+    // Keep all functies that are not in managedFuncties or are ended
+    for (const lidFunctie of (lid.functies ?? []) as LidFunctie[]) {
         // Keep all functies that have been ended
-        if (functie.einde) {
-            newFunctions.push(functie)
+        if (lidFunctie.einde) {
+            newFunctions.push(lidFunctie)
             continue;
-        } 
-
-        // Keep all functies that are not managed by Stamhoofd
-        const info = groepFuncties.find(f => f.id == functie.functie)
-        if (!info) {
-            // Keep.
-            console.warn("Unknown functie "+functie.functie)
-            newFunctions.push(functie)
-            continue
         }
 
-        if (mapping.has(functie.functie)) {
-            // Managed by stamhoofd
-            // => end this
-            functie.einde = Formatter.dateIso(new Date())
-            newFunctions.push(functie)
-        } else {
-            newFunctions.push(functie)
-            continue
+        const id = lidFunctie.functie;
+        const managedFunctie = managedFuncties.find(m => m.id === id)
+
+        if (!managedFunctie) {
+            // Not managed by Stamhoofd
+            newFunctions.push(lidFunctie)
+            continue;
         }
 
+        // End this function
+        newFunctions.push({
+            ...lidFunctie,
+            einde: Formatter.dateIso(new Date())
+        });
     }
 
     // Construct the patch: compare and check the fields that need changes
@@ -105,7 +120,7 @@ export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any
     return patch
 }
 
-export function getPatch(details: MemberDetails, lid: any, groepNummer: string, groups: Group[], allGroups: Group[], groepFuncties: any, report?: SGVSyncReport): any {
+export function getPatch(details: MemberDetails, lid: any, groepNummer: string, groups: Group[], groepFuncties: GroepFunctie[], report?: SGVSyncReport): any {
     const newAddresses: any[] = []
     const newContacts: any[] = []
 
@@ -152,87 +167,64 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         newAddresses[0].postadres = true
     }
 
-    const newFunctions: any[] = []
-    let hasActiveFunctie = false // True als we een active functie hebben (zonder einde)
-    const mapping = buildGroupMapping(details, groups, allGroups, groepFuncties)
-    const endedFunctions: any[] = []
-
-    for (const functie of lid.functies ?? []) {
-        // Keep all functies that have been ended
-        if (functie.einde) {
-            newFunctions.push(functie)
-            continue;
-        } 
-
-        // Keep all functies that are not managed by Stamhoofd
-        const info = groepFuncties.find(f => f.id == functie.functie)
-        if (!info) {
-            // Keep.
-            console.warn("Unknown functie "+functie.functie)
-            newFunctions.push(functie)
-            hasActiveFunctie = true
-            continue
-        }
-
-        if (mapping.has(functie.functie)) {
-            // Managed by stamhoofd
-        } else {
-            newFunctions.push(functie)
-            hasActiveFunctie = true
-            continue
-        }
-
-        // All functies that should end, unless we add them again
-        endedFunctions.push(functie)
-    }
-
-
-    // Map all groepen
-    for (const group of groups) {
-        // Find a match in groepsadmin
-        for (const [functieId, _groeps] of mapping) {
-            for (const _groep of _groeps) {
-                if (group.id == _groep.id) {
-                    const functie =  groepFuncties.find(f => f.id == functieId)
-                    const endedFunctionIndex = endedFunctions.findIndex(f => f.functie == functie.id && !f.einde)
-                    const alreadyAdded = newFunctions.find(f => f.functie == functie.id && !f.einde)
-                    if (alreadyAdded) {
-                        continue;
-                    }
-
-                    if (endedFunctionIndex != -1) {
-                        const [spl] = endedFunctions.splice(endedFunctionIndex, 1)
-                        newFunctions.push(spl)
-                        hasActiveFunctie = true
-                    } else {
-                        newFunctions.push({
-                            groep: groepNummer,
-                            functie: functie.id,
-                            begin: Formatter.dateIso(new Date()),
-                        })
-                        hasActiveFunctie = true
-                    }
-                    // keep looping, a group can be connected to multiple functies if needed
-                }
-            }
-        }
-    }
-
-    // Add all remaining functies, but end them
-    for (const functie of endedFunctions) {
-        newFunctions.push(Object.assign({}, functie, { einde: Formatter.dateIso(new Date()), }))
-    }
-
-    if (!hasActiveFunctie) {
-        if (!lid.persoonsgegevens) {
-            // New members need a functie
-            throw new Error(details.firstName+" "+details.lastName+": we konden niet automatisch bepalen welke functies we moeten toekennen. Ten minste één functie in de groepsadministratie is verplicht om een lid te kunnen toevoegen in de groepsadministratie. Voor nieuwe leiding moet je zelf eerst de leiding toevoegen met de juiste functies, daarna kan je de andere gegevens synchroniseren.")
-        }
-        report?.addWarning(details.firstName+" "+details.lastName+" moet nog een functie toegekend krijgen in de groepsadministratie, we konden niet automatisch bepalen welke functies we moeten toekennen.")
-    }
-
     if (!details.birthDay) {
         throw new Error("Een geboortedatum is noodzakelijk voor de groepsadministratie")
+    }
+
+    const managedFuncties = getManagedFuncties(groepFuncties);
+    const lidManagedFunctie = getFunctie(details, groups, groepFuncties);
+    let functieAlreadyPresent = false;
+
+    const newFunctions: LidFunctie[] = []
+
+    // Keep all functies that are not in managedFuncties or are ended
+    for (const lidFunctie of (lid.functies ?? []) as LidFunctie[]) {
+        // Keep all functies that have been ended
+        if (lidFunctie.einde) {
+            newFunctions.push(lidFunctie)
+            continue;
+        }
+
+        const id = lidFunctie.functie;
+        const managedFunctie = managedFuncties.find(m => m.id === id)
+
+        if (!managedFunctie) {
+            // Not managed by Stamhoofd
+            newFunctions.push(lidFunctie)
+            continue;
+        }
+
+        if (lidManagedFunctie && id === lidManagedFunctie.id) {
+            // Already registered
+            functieAlreadyPresent = true;
+            newFunctions.push(lidFunctie)
+            continue;
+        }
+
+        // End this function
+        newFunctions.push({
+            ...lidFunctie,
+            einde: Formatter.dateIso(new Date())
+        });
+        report?.addInfo(details.name + ': functie verwijderd ' + managedFunctie.beschrijving)
+    }
+
+    if (!functieAlreadyPresent && lidManagedFunctie) {
+        // Start
+        newFunctions.push({
+            groep: groepNummer,
+            functie: lidManagedFunctie.id,
+            begin: Formatter.dateIso(new Date()),
+        })
+        report?.addInfo(details.name + ': functie toegekend ' + lidManagedFunctie.beschrijving)
+    }
+
+    if (!lidManagedFunctie) {
+        if (!lid.persoonsgegevens) {
+            // New members need a functie
+            throw new Error(details.firstName+" "+details.lastName+": we konden niet automatisch bepalen welke functie we moeten toekennen. Ten minste één functie in de groepsadministratie is verplicht om een lid te kunnen toevoegen in de groepsadministratie. Voor nieuwe leiding moet je zelf eerst de leiding toevoegen met de juiste functies, daarna kan je de andere gegevens synchroniseren.")
+        }
+        report?.addWarning("Je moet zelf de functies (kapoenenleiing...) voor " + details.firstName+" "+details.lastName+" beheren in de groepsadministratie. Voor leiding en vrijwilligers synchroniseert Stamhoofd enkel de gegevens, niet de functies.")
     }
 
     // Construct the patch: compare and check the fields that need changes
@@ -277,153 +269,108 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 }
 
 /**
- * Returns a list of groepsadmin ids => group that Stamhoofd will handle for this group
+ * Geeft een lijst van alle groepsadministratie functie ids die door Stamhoofd worden beheerd.
  */
-export function buildGroupMapping(details: MemberDetails|null, memberGroups: Group[], groups: Group[], groepFuncties: any): Map<string, Group[]> {
-    const mapping = {
+export function getManagedFuncties(groepFuncties: GroepFunctie[]): GroepFunctie[] {
+    return [...getGroepCodeMapping(groepFuncties).values()]
+}
+
+/**
+ * Mapt alle fucntie codes op een functie id van SGV
+ */
+export function getGroepCodeMapping(groepFuncties: GroepFunctie[]): Map<string, GroepFunctie> {
+    const codes = [
+        "KAP",
+        "KW",
+        "JGJV",
+        "GVE",
+        "AKAB",
+        "JIN"
+    ];
+
+    const ids = new Map<string, GroepFunctie>();
+
+    for (const code of codes) {
+        for (const functie of groepFuncties) {
+            if (functie.code === code) {
+                ids.set(code, functie)
+            }
+        }
+
+        if (!ids.has(code)) {
+            throw new Error('Er ging iets fout. We konden geen functie in de groepsadministratie vinden voor ' + code)
+        }
+    }
+
+    return ids;
+}
+
+/**
+ * Geeft de functie die dit lid moet krijgen in de groepsadministratie
+ */
+export function getFunctie(details: MemberDetails, memberGroups: Group[], groepFuncties: GroepFunctie[]): GroepFunctie|null {
+    const mapping = getGroepCodeMapping(groepFuncties);
+
+    // If the member is registered in one of these, and only one of these: use the provided code
+    const allowedExactMatches: Record<string, string[]> = {
         "KAP": ["kapoenen"],
-        "KW": ["kabouters", "welpen", "wouters", "woudlopers", "kawellen", "wolven", "pioniers"],
+        "KW": ["kabouters", "welpen", "wouters"],
         "JGJV": ["jonggidsen", "jongverkenners", "jonggivers", "jong-verkenners", "jong-givers", "jong-gidsen"],
         "GVE": ["gidsen", "verkenners", "givers"],
         "AKAB": ["akabe"],
         "JIN": ["jin"]
     }
+    
+    const matches = new Set<string>()
+    for (const code of Object.keys(allowedExactMatches)) {
+        const words = allowedExactMatches[code];
+        for (const word of words) {
+            for (const group of memberGroups) {
+                if (StringCompare.typoCount(word, group.settings.name) == 0) {
+                    matches.add(code);
+                    
+                }
+            }
+        }
+    }
 
-    const defaultAgeMapping = [
+    if (matches.size === 1) {
+        // More than 1 -> not clear so use age
+        // Exactly one -> very clear
+        return mapping.get([...matches.values()][0])!
+    }
+
+    // Check age
+    const ageMapping = [
         {code: "KAP", minAge: 5, maxAge: 7},
         {code: "KW",minAge: 8, maxAge: 10},
         {code: "JGJV",minAge: 11, maxAge: 13},
         {code: "GVE",minAge: 14, maxAge: 16},
         {code: "JIN",minAge: 17, maxAge: 17},
-    ]
-    const looseMatches = [
-        ["woudloper", "woudlopers"],
-        ["pionier", "pioniers"],
-        ["los lid", "losse leden"]
-    ]
-    const map = new Map<string, Group[]>()
-    main: for (const groep of groups) {
+    ];
 
-        // Find exact name matches
-        for (const functie of groepFuncties) {
-            // Als naam exact overeenkomt in de groepsadministratie => we nemen deze over
-            if (StringCompare.typoCount(functie.beschrijving, groep.settings.name) == 0) {
-                map.set(functie.id, [...(map.get(functie.id) ?? []), groep])
+    // Bepaal het huidige scoutsjaar (einde 31 augustus)
+    let year = new Date().getFullYear()
+    const month = new Date().getMonth() + 1
 
-                // We blijven doorlopen, want sommige takken moeten matchen op meerdere functies (bv. wolven kan matchen op groepseigen wolven + welpen van SGV)
-                //continue main;
-                break;
-            }
-        }
+    if (month <= 8) {
+        // Still in last year
+        year -= 1;
+    }
 
-        // Als we een loose map ondersteunen
-        loose: for (const matchgroup of looseMatches) {
-            for (const groupName of matchgroup) {
-                if (StringCompare.typoCount(groupName, groep.settings.name) == 0) {
-                    // we got a match group
+    const age = details.ageForYear(year);
+    if (!age) {
+        throw new Error('Dit lid heeft geen geboortedatum ingesteld. Vul dit eerst aan.')
+    }
 
-                    for (const functie of groepFuncties) {
-                        for (const groupName2 of matchgroup) {
-                            // Als naam exact overeenkomt in de groepsadministratie => we nemen deze over
-                            if (StringCompare.typoCount(functie.beschrijving, groupName2) == 0) {
-
-                                const current = map.get(functie.id) ?? []
-                                if (!current.find(g => g.id == groep.id)) {
-                                    map.set(functie.id, [...current, groep])
-                                }
-                                //continue main;
-                                break loose;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Find a match in groepsadmin
-        for (const code in mapping) {
-            if (Object.prototype.hasOwnProperty.call(mapping, code)) {
-                const names = mapping[code];
-
-                for (const name of names) {
-                    if (StringCompare.typoCount(groep.settings.name, name) == 0) {
-                        const functie =  groepFuncties.find(f => f.code == code)
-                        if (!functie) {
-                            throw new Error(code+" niet gevonden :(")
-                        }
-
-                        const current = map.get(functie.id) ?? []
-                        if (!current.find(g => g.id == groep.id)) {
-                            map.set(functie.id, [...current, groep])
-                        }
-                        continue main;
-                    }
-                }
-            }
-        }
-
-        // And also add based on age if we didn't find a match in groepsadmin
-        if (groep.settings.minAge !== null && groep.settings.minAge <= 18 && groep.settings.maxAge !== null && groep.settings.maxAge <= 18) {
-            // find a match for normal members
-
-            for (const age of defaultAgeMapping) {
-                if (groep.settings.minAge >= age.minAge && groep.settings.minAge <= age.maxAge) {
-                    // Found one
-                    const functie =  groepFuncties.find(f => f.code == age.code)
-                    if (!functie) {
-                        throw new Error( age.code+" niet gevonden :(")
-                    }
-
-                    const current = map.get(functie.id) ?? []
-                    if (!current.find(g => g.id == groep.id)) {
-                        map.set(functie.id, [...current, groep])
-                    }
-                    continue main;
-                }
-            }
+    for (const map of ageMapping) {
+        if (age >= map.minAge && age <= map.maxAge) {
+            return mapping.get(map.code)!
         }
     }
 
-    // And also based on the current member age
-    if (details) {
-        // find a match for normal members
-        const memberAge = details.age
-
-        if (memberAge !== null) {
-            // Does this group has a matching?
-            for (const age of defaultAgeMapping) {
-                if (memberAge >= age.minAge && memberAge <= age.maxAge) {
-                    // Found one
-                    const functie =  groepFuncties.find(f => f.code == age.code)
-                    if (!functie) {
-                        throw new Error( age.code+" niet gevonden :(")
-                    }
-
-                    for (const group of memberGroups) {
-                        const current = map.get(functie.id) ?? []
-                        if (!current.find(g => g.id == group.id)) {
-                            map.set(functie.id, [...current, group])
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    // always add the keys for each default functie
-    for (const age of defaultAgeMapping) {
-        const functie =  groepFuncties.find(f => f.code == age.code)
-        if (!functie) {
-            throw new Error( age.code+" niet gevonden :(")
-        }
-
-        if (!map.has(functie.id)) {
-            map.set(functie.id, [])
-        }
-    }
-
-    return map
+    // Not managed by Stamhoofd
+    return null;
 }
 
 // Versimpel een huisnummer bus combinatie voor vergelijkingen

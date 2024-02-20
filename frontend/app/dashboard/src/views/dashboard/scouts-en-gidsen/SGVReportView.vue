@@ -24,6 +24,12 @@
                 {{ warning }}
             </div>
 
+            <STList v-if="report.info.length">
+                <STListItem v-for="(info, index) in report.info" :key="index">
+                    {{ info }}
+                </STListItem>
+            </STList>
+
             <template v-if="report.deleted.length > 0">
                 <hr>
                 <h2>Geschrapt in de groepsadministratie</h2>
@@ -137,7 +143,7 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
     loading = false
 
     @Prop({ required: true })
-    report: SGVSyncReport
+        report: SGVSyncReport
 
     goNext() {
         if (this.loading) {

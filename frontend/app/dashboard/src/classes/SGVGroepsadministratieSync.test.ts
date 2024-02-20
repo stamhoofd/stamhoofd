@@ -1,9 +1,8 @@
-import { ObjectData } from "@simonbackx/simple-encoding";
-import { Address, Country, Group, GroupSettings,MemberDetails, Parent, ParentType } from "@stamhoofd/structures";
+import { Address, Country, Group, GroupSettings, MemberDetails, Parent, ParentType } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
 import groepFuncties from './SGVDefaultFuncties.json';
 import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
-import { SGVLid } from "./SGVStructures";
 
 describe("Groepsadministratie Sync", () => {
     test("Reuse the address id", () => {
@@ -15,7 +14,7 @@ describe("Groepsadministratie Sync", () => {
                 postalCode: "9000",
                 country: Country.Belgium
             }),
-            birthDay: new Date(),
+            birthDay: new Date(new Date().getFullYear() - 12, 0, 1),
             parents: [
                 Parent.create({
                     firstName: "",
@@ -32,7 +31,7 @@ describe("Groepsadministratie Sync", () => {
         })
 
         const details2 = MemberDetails.create({
-            birthDay: new Date(),
+            birthDay: new Date(new Date().getFullYear() - 12, 0, 1),
             parents: [
                 Parent.create({
                     firstName: "",
@@ -81,7 +80,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
+        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).toHaveLength(1)
         expect(p.adressen[0]).toMatchObject({
             id: "SGVID",
@@ -94,7 +93,7 @@ describe("Groepsadministratie Sync", () => {
             postadres: true
         })
 
-        const p2 = getPatch(details2, sgv, "groepnummer", [], [], groepFuncties)
+        const p2 = getPatch(details2, sgv, "groepnummer", [], groepFuncties)
         expect(p2.adressen).toHaveLength(2)
 
         expect(p2.adressen[1]).toMatchObject({
@@ -123,7 +122,7 @@ describe("Groepsadministratie Sync", () => {
 
     test("No address change", () => {
         const details = MemberDetails.create({
-            birthDay: new Date(),
+            birthDay: new Date(new Date().getFullYear() - 12, 0, 1),
             address: Address.create({
                 street: "Teststraat",
                 number: "11",
@@ -158,7 +157,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
+        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).not.toBeDefined()
     })
 
@@ -222,7 +221,7 @@ describe("Groepsadministratie Sync", () => {
 
     test("Only one postadres", () => {
         const details = MemberDetails.create({
-            birthDay: new Date(),
+            birthDay: new Date(new Date().getFullYear() - 12, 0, 1),
             address: Address.create({
                 street: "Teststraat",
                 number: "11",
@@ -251,7 +250,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
+        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).toHaveLength(2)
         expect(p.adressen[0]).toMatchObject({
             straat: "Teststraat",
@@ -274,7 +273,7 @@ describe("Groepsadministratie Sync", () => {
 
     test("Keep contact id", () => {
         const details = MemberDetails.create({
-            birthDay: new Date(),
+            birthDay: new Date(new Date().getFullYear() - 12, 0, 1),
             parents: [
                 Parent.create({
                     firstName: "Simon",
@@ -346,7 +345,7 @@ describe("Groepsadministratie Sync", () => {
             ]
         };
 
-        const p = getPatch(details, sgv, "groepnummer", [], [], groepFuncties)
+        const p = getPatch(details, sgv, "groepnummer", [], groepFuncties)
         expect(p.adressen).toHaveLength(2)
         expect(p.contacten).toHaveLength(2)
 
@@ -373,42 +372,16 @@ describe("Groepsadministratie Sync", () => {
         
     })
 
-    test("Keep existing functies, remove managed functies", () => {
+
+    test("Behoud de huidige functie als al ingeschreven", () => {
         const details = MemberDetails.create({
-            birthDay: new Date(),
+            // 18 jaar = jin
+            birthDay: new Date(new Date().getFullYear() - 18, 0, 1),
             parents: []
         })
 
-
         const sgv = {
-            "links": [
-                {
-                    "rel": "self",
-                    "href": "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/lid/123",
-                    "method": "GET",
-                    "secties": []
-                },
-                {
-                    "rel": "self",
-                    "href": "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/lid/123",
-                    "method": "PATCH",
-                    "secties": [
-                        "functies.O2209G",
-                        "adressen",
-                        "groepseigenVelden.O2209G",
-                        "contacten",
-                        "persoonsgegevens",
-                        "vgagegevens",
-                        "email"
-                    ]
-                },
-                {
-                    "rel": "steekkaart",
-                    "href": "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/lid/123/steekkaart",
-                    "method": "GET",
-                    "secties": []
-                }
-            ],
+            "links": [],
             functies: [
                 {
                     "functie": "859",
@@ -419,7 +392,8 @@ describe("Groepsadministratie Sync", () => {
                     "functie": "notmanaged",
                     "begin": "123",
                 },
-                { // will get removed = managed by stamhoofd
+                { 
+                    // = jin
                     "functie": "d5f75b320b812440010b812555c1039b",
                     "begin": "123",
                 }
@@ -428,7 +402,7 @@ describe("Groepsadministratie Sync", () => {
             contacten: []
         };
 
-        const j = Group.create({
+        const jin = Group.create({
             settings: GroupSettings.create({
                 name: "Jin",
                 startDate: new Date(),
@@ -436,9 +410,251 @@ describe("Groepsadministratie Sync", () => {
                 registrationEndDate: new Date(),
                 registrationStartDate: new Date(),
             })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [jin], groepFuncties)
+        expect(p.functies).toBeUndefined();
+    });
+
+    test("Behoud volwassen Akabe functie als al ingeschreven", () => {
+        const details = MemberDetails.create({
+            // 24 jaar en Akabe lid
+            birthDay: new Date(new Date().getFullYear() - 24, 0, 1),
+            parents: []
         })
 
-        const g = Group.create({
+        const sgv = {
+            "links": [],
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                },
+                { 
+                    // = akabe
+                    "functie": "d5f75b320b812440010b812554790354",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const akabe = Group.create({
+            settings: GroupSettings.create({
+                name: "Akabe",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [akabe], groepFuncties)
+        expect(p.functies).toBeUndefined();
+    });
+
+    test("Behoud functies van leiding", () => {
+        const details = MemberDetails.create({
+            // 24 jaar
+            birthDay: new Date(new Date().getFullYear() - 24, 0, 1),
+            parents: []
+        })
+
+        const sgv = {
+            "links": [],
+            persoonsgegevens: {},
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "d5f75b320b812440010b812555e603a4", // kapoenenleiding
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const leiding = Group.create({
+            settings: GroupSettings.create({
+                name: "Leiding",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [leiding], groepFuncties)
+        expect(p.functies).toBeUndefined();
+    });
+
+    test("Schrap Akabe functie indien lid leiding wordt", () => {
+        const details = MemberDetails.create({
+            // 24 jaar en Akabe lid
+            birthDay: new Date(new Date().getFullYear() - 24, 0, 1),
+            parents: []
+        })
+
+        const sgv = {
+            "links": [],
+            persoonsgegevens: {
+
+            },
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                },
+                { 
+                    // = akabe
+                    "functie": "d5f75b320b812440010b812554790354",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const leiding = Group.create({
+            settings: GroupSettings.create({
+                name: "Leiding",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [leiding], groepFuncties)
+        expect(p.functies).toEqual([
+            {"begin": "123", "einde": "586", "functie": "859"}, 
+            {"begin": "123", "functie": "notmanaged"}, 
+            {"begin": "123", "einde": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b812554790354"} // = stopgezet
+        ])
+    });
+
+    test("Voeg Akabe functie toe indien nog niet ingeschreven", () => {
+        const details = MemberDetails.create({
+            // 24 jaar en Akabe lid
+            birthDay: new Date(new Date().getFullYear() - 24, 0, 1),
+            parents: []
+        })
+
+        const sgv = {
+            "links": [],
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const akabe = Group.create({
+            settings: GroupSettings.create({
+                name: "Akabe",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [akabe], groepFuncties)
+        expect(p.functies).toEqual([
+            {"begin": "123", "einde": "586", "functie": "859"}, 
+            {"begin": "123", "functie": "notmanaged"}, 
+            {"begin": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b812554790354", "groep": "groepnummer"} // = akabe gestart
+        ])
+    });
+
+    test("Voeg kapoenen functie toe indien nog niet ingeschreven", () => {
+        const details = MemberDetails.create({
+            birthDay: new Date(new Date().getFullYear() - 6, 0, 1),
+            parents: []
+        })
+
+        const sgv = {
+            "links": [],
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const interneGroep = Group.create({
+            settings: GroupSettings.create({
+                name: "Interne benaming",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [interneGroep], groepFuncties)
+        expect(p.functies).toEqual([
+            {"begin": "123", "einde": "586", "functie": "859"}, 
+            {"begin": "123", "functie": "notmanaged"}, 
+            {"begin": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b812555de03a2", "groep": "groepnummer"} // = kapoenen gestart
+        ])
+    });
+
+    test("Behoud een lid bij kapoenen als de naam in Stamhoofd exact overeenkomt", () => {
+        const details = MemberDetails.create({
+            birthDay: new Date(new Date().getFullYear() - 9, 0, 1),
+            parents: []
+        })
+
+        const sgv = {
+            "links": [],
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const kapoenen = Group.create({
             settings: GroupSettings.create({
                 name: "Kapoenen",
                 startDate: new Date(),
@@ -446,102 +662,114 @@ describe("Groepsadministratie Sync", () => {
                 registrationEndDate: new Date(),
                 registrationStartDate: new Date(),
             })
-        })
+        });
 
-        const wl = Group.create({ // Matcht op woudlopers custom functie + welpen
-            settings: GroupSettings.create({
-                name: "Woudlopers",
-                startDate: new Date(),
-                endDate: new Date(),
-                registrationEndDate: new Date(),
-                registrationStartDate: new Date(),
-            })
-        })
-
-        const wolf = Group.create({ // Moet matchen op givers op basis van leeftijd
-            settings: GroupSettings.create({
-                name: "Onbestaandenaamwolf",
-                startDate: new Date(),
-                endDate: new Date(),
-                minAge: 16,
-                maxAge: 17,
-                registrationEndDate: new Date(),
-                registrationStartDate: new Date(),
-            })
-        })
-
-        const p = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl, j], groepFuncties)
-        const p2 = getPatch(details, sgv, "groepnummer", [g, wolf], [g, wolf], groepFuncties) // only delete jin if jin is inside stamhoofd
-        const p3 = getPatch(details, sgv, "groepnummer", [g, wl], [g, wl, j], groepFuncties.slice(0, groepFuncties.length - 1)) // if woudlopers is nog defined in groepsadmin -> check if to wouters
-
-        expect(p.functies).toHaveLength(6);
-        expect(p2.functies).toHaveLength(5);
-        expect(p3.functies).toHaveLength(5);
-
-        expect(p.functies[0]).toMatchObject({
-            "functie": "859",
-            "begin": "123",
-            "einde": "586"
-        })
-        expect(p2.functies[0]).toMatchObject({
-            "functie": "859",
-            "begin": "123",
-            "einde": "586"
-        })
-        
-        expect(p.functies[1]).toMatchObject({
-            "functie": "notmanaged",
-            "begin": "123",
-        })
-        expect(p2.functies[1]).toMatchObject({
-            "functie": "notmanaged",
-            "begin": "123",
-        })
-        expect(p.functies[1].einde).not.toBeDefined()
-        expect(p2.functies[1].einde).not.toBeDefined()
-
-        expect(p.functies[2]).toMatchObject({
-            "functie": "d5f75b320b812440010b812555de03a2",
-        })
-        expect(p.functies[2].einde).not.toBeDefined()
-        expect(p2.functies[3]).toMatchObject({
-            "functie": "d5f75b320b812440010b812555de03a2",
-        })
-        expect(p2.functies[3].einde).not.toBeDefined()
-
-
-        expect(p.functies[3]).toMatchObject({
-            "functie": "woudloperscustom",
-        })
-        expect(p.functies[3].einde).not.toBeDefined()
-
-        expect(p2.functies[4]).toMatchObject({
-            "functie": "d5f75b320b812440010b8125565203c1", // givers
-        })
-        expect(p2.functies[4].einde).not.toBeDefined()
-
-        expect(p3.functies[3]).toMatchObject({
-            "functie": "d5f75b320b812440010b8125567703cb", // when woudloper is missing in groepsadmin => to wouters
-        })
-        expect(p3.functies[3].einde).not.toBeDefined()
-
-        // Tussentakken ook bij bijhorende leeftijdsgroep inschrijven
-        expect(p.functies[4]).toMatchObject({
-            "functie": "d5f75b320b812440010b8125567703cb",
-        })
-        expect(p.functies[4].einde).not.toBeDefined()
-
-        // Ended functies
-        expect(p.functies[5]).toMatchObject({
-            "functie": "d5f75b320b812440010b812555c1039b",
-            "begin": "123",
-        })
-        expect(p2.functies[2]).toMatchObject({
-            "functie": "d5f75b320b812440010b812555c1039b",
-            "begin": "123",
-        })
-        expect(p.functies[5].einde).toBeDefined()
-        expect(p2.functies[2].einde).not.toBeDefined() // do not end this, since this is managed by stamhoofd
+        const p = getPatch(details, sgv, "groepnummer", [kapoenen], groepFuncties)
+        expect(p.functies).toEqual([
+            {"begin": "123", "einde": "586", "functie": "859"}, 
+            {"begin": "123", "functie": "notmanaged"}, 
+            {"begin": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b812555de03a2", "groep": "groepnummer"} // = kapoenen gestart
+        ])
     });
 
+    test("Als lid onduidelijke groepen heeft nemen we gewoon de leeftijd", () => {
+        const details = MemberDetails.create({
+            birthDay: new Date(new Date().getFullYear() - 9, 0, 1),
+            parents: []
+        })
+
+        const sgv = {
+            "links": [],
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const kapoenen = Group.create({
+            settings: GroupSettings.create({
+                name: "Kapoenen",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const jin = Group.create({
+            settings: GroupSettings.create({
+                name: "Jin",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [kapoenen, jin], groepFuncties)
+        expect(p.functies).toEqual([
+            {"begin": "123", "einde": "586", "functie": "859"}, 
+            {"begin": "123", "functie": "notmanaged"}, 
+            {"begin": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b8125567703cb", "groep": "groepnummer"} // = wouters gestart
+        ])
+    });
+
+    test("Wissel van kapoenen naar wouters functie", () => {
+        const details = MemberDetails.create({
+            birthDay: new Date(new Date().getFullYear() - 9, 0, 1),
+            parents: []
+        })
+
+        const sgv = {
+            "links": [],
+            functies: [
+                {
+                    "functie": "859",
+                    "begin": "123",
+                    "einde": "586"
+                },
+                {
+                    "functie": "notmanaged",
+                    "begin": "123",
+                },
+                { 
+                    // = kapoenen
+                    "functie": "d5f75b320b812440010b812555de03a2",
+                    "begin": "123",
+                }
+            ],
+            adressen: [],
+            contacten: []
+        };
+
+        const interneGroep = Group.create({
+            settings: GroupSettings.create({
+                name: "Interne benaming",
+                startDate: new Date(),
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
+            })
+        });
+
+        const p = getPatch(details, sgv, "groepnummer", [interneGroep], groepFuncties)
+        expect(p.functies).toEqual([
+            {"begin": "123", "einde": "586", "functie": "859"}, 
+            {"begin": "123", "functie": "notmanaged"}, 
+            {"begin": "123", "einde": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b812555de03a2"}, // = kapoenen gestopt
+            {"begin": Formatter.dateIso(new Date()), "functie": "d5f75b320b812440010b8125567703cb", "groep": "groepnummer"} // = wouters gestart
+        ])
+
+        const secondPatch = getPatch(details, {...sgv, ...p}, "groepnummer", [interneGroep], groepFuncties)
+        expect(secondPatch.functies).toBeUndefined();
+    });
 });

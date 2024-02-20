@@ -185,16 +185,16 @@ export class SGVLid {
 
 export class SGVZoekLid extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string;
+        id: string;
 
     @field({ decoder: StringDecoder, field: "voornaam" })
-    firstName: string;
+        firstName: string;
 
     @field({ decoder: StringDecoder, field: "achternaam" })
-    lastName: string;
+        lastName: string;
 
     @field({ decoder: StringDecoder, field: "geboortedatum" }) // format 1995-08-20
-    birthDayString: string;
+        birthDayString: string;
 
     get birthDay() {
         const splitted = this.birthDayString.split("-")
@@ -255,89 +255,88 @@ export class SGVZoekLid extends AutoEncoder {
 
 export class SGVZoekenResponse extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(SGVZoekLid) })
-    leden: SGVZoekLid[];
+        leden: SGVZoekLid[];
 }
 
 export class SGVLedenResponse extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
-    aantal: number;
+        aantal: number;
 
     @field({ decoder: IntegerDecoder })
-    offset: number;
+        offset: number;
 
     @field({ decoder: IntegerDecoder })
-    totaal: number;
+        totaal: number;
 
     @field({ decoder: new ArrayDecoder(SGVLid) })
-    leden: SGVLid[];
+        leden: SGVLid[];
 }
 
 export class SGVAdres extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string;
+        id: string;
 
     @field({ decoder: CountryDecoder })
-    land: Country;
+        land: Country;
 
     @field({ decoder: StringDecoder })
-    postcode: string;
+        postcode: string;
 
     @field({ decoder: StringDecoder })
-    gemeente: string;
+        gemeente: string;
 
     @field({ decoder: StringDecoder })
-    straat: string;
+        straat: string;
 
     @field({ decoder: StringDecoder })
-    nummer: string;
+        nummer: string;
 
     @field({ decoder: StringDecoder })
-    telefoon: string;
+        telefoon: string;
 
     @field({ decoder: BooleanDecoder })
-    postadres: boolean;
+        postadres: boolean;
 }
 
 export class SGVGroep extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string;
+        id: string;
 
     @field({ decoder: StringDecoder })
-    groepsnummer: string;
+        groepsnummer: string;
 
     @field({ decoder: StringDecoder })
-    naam: string;
+        naam: string;
 
     @field({ decoder: new ArrayDecoder(SGVAdres) })
-    adressen: SGVAdres[];
+        adressen: SGVAdres[];
 }
 
 
 export class SGVGroepResponse extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(SGVGroep) })
-    groepen: SGVGroep[];
+        groepen: SGVGroep[];
 }
 
 
 export class SGVFunctie extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string;
+        id: string;
 
     @field({ decoder: StringDecoder })
-    beschrijving: string;
+        beschrijving: string;
 
     @field({ decoder: StringDecoder })
-    type: string;
+        type: string;
 
     @field({ decoder: new ArrayDecoder(StringDecoder) })
-    groepen: string[];
+        groepen: string[];
 
     @field({ decoder: StringDecoder, optional: true })
-    code?: string;
+        code?: string;
 }
-
 
 export class SGVGFunctieResponse extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(SGVFunctie) })
-    functies: SGVFunctie[];
+        functies: SGVFunctie[];
 }
