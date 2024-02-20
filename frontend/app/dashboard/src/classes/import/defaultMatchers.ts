@@ -1,7 +1,6 @@
 
 import { Parent, ParentType } from "@stamhoofd/structures";
 
-import { BirthDayColumnMatcher } from "./default-matchers/BirthDayColumnMatcher";
 import { CityColumnMatcher } from "./default-matchers/CityColumnMatcher";
 import { CityWithZipColumnMatcher } from "./default-matchers/CityWithZipColumnMatcher";
 import { EmailColumnMatcher } from "./default-matchers/EmailColumnMatcher";
@@ -15,13 +14,12 @@ import { PaidColumnMatcher } from "./default-matchers/PaidColumnMatcher";
 import { PaidPriceColumnMatcher } from "./default-matchers/PaidPriceColumnMatcher";
 import { PaymentPriceColumnMatcher } from "./default-matchers/PaymentPriceColumnMatcher";
 import { PhoneColumnMatcher } from "./default-matchers/PhoneColumnMatcher";
-import { RegisterDateColumnMatcher } from "./default-matchers/RegisterDateColumnMatcher";
 import { StreetColumnMatcher } from "./default-matchers/StreetColumnMatcher";
 import { StreetNumberColumnMatcher } from "./default-matchers/StreetNumberColumnMatcher";
 import { StreetWithNumberColumnMatcher } from "./default-matchers/StreetWithNumberColumnMatcher";
 import { ZipColumnMatcher } from "./default-matchers/ZipColumnMatcher";
 import { MatcherCategory } from "./MatcherCategory";
-import { AddressColumnMatcher } from "./matchers";
+import { AddressColumnMatcher, DateColumnMatcher } from "./matchers";
 
 // Always make sure fullname is before lastname!
 export const memberMatchers = [
@@ -29,7 +27,16 @@ export const memberMatchers = [
     new FullNameColumnMatcher(MatcherCategory.Member),
     new FirstNameColumnMatcher(MatcherCategory.Member),
     new LastNameColumnMatcher(MatcherCategory.Member),
-    new BirthDayColumnMatcher(),
+    new DateColumnMatcher({
+        name: 'Geboortedatum',
+        category: MatcherCategory.Member,
+        required: false,
+        possibleMatch: ["geboortedatum", "verjaardag", "birth day"],
+        get: (member) => member.details.birthDay ?? undefined,
+        save: (d, member) => {
+            member.details.birthDay = d
+        }
+    }),
     new GenderColumnMatcher(),
     new GroupColumnMatcher(),
     new PhoneColumnMatcher(MatcherCategory.Member),
@@ -51,7 +58,17 @@ export const memberMatchers = [
             member.details.address = address
         }
     }),
-    new RegisterDateColumnMatcher(),
+    new DateColumnMatcher({
+        name: 'Datum van inschrijving',
+        category: MatcherCategory.Member,
+        required: false,
+        possibleMatch: ["datum", "date"],
+        negativeMatch: ["geboortedatum", "verjaardag", "birth day"],
+        get: (member) => member.registration.date ?? undefined,
+        save: (d, member) => {
+            member.registration.date = d
+        }
+    }),
 ]
 
 export const parentMatchers1 = [

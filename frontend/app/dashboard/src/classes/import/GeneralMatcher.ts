@@ -11,6 +11,20 @@ export abstract class GeneralMatcher<T> extends SharedMatcher implements ColumnM
     
     get?: (member: ImportingMember) => T|undefined
     save: (value: T, member: ImportingMember) => void
+    
+    abstract parse(v: string, current: T|undefined): T
+
+    // Override if you want more custom
+    parseObject(cell: XLSX.CellObject, current: T|undefined): T|undefined {
+        const v = ((cell.w ?? cell.v)+"").trim()
+
+        if (!v) {
+            return;
+        }
+
+        return this.parse(v, current)
+    }
+
 
     constructor({name, category, required, possibleMatch, negativeMatch, save, get}: {
         name: string, 
@@ -65,22 +79,17 @@ export abstract class GeneralMatcher<T> extends SharedMatcher implements ColumnM
             return
         }
 
-        const v = ((cell.w ?? cell.v)+"").trim()
-
-        if (!v) {
+        const value = this.parseObject(cell, this.get ? this.get(member) : undefined)
+        if (!value) {
             if (this.required) {
                 throw new SimpleError({
                     code: "invalid_type",
                     message: "Deze cel is leeg"
                 })
             }
-            // Not required field
             return;
         }
-
-        const value = this.parse(v, this.get ? this.get(member) : undefined)
         this.save(value, member)
     }
 
-    abstract parse(v: string, current: T|undefined): T
 }

@@ -18,6 +18,7 @@
     "license": "AGPL-3.0-only",
     "scripts": {
         "dev": "concurrently -r 'yarn build:shared:watch' 'lerna run dev --stream --parallel'",
+        "test": "jest",
         "dev:server": "concurrently -r 'yarn dev' 'yarn caddy' 'yarn dns' 'yarn mail'",
         "app:release": "cd devops && yarn build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
         "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json --exec yarn build:shared",
@@ -101,7 +102,7 @@
         "speed-measure-webpack-plugin": "^1.5.0",
         "style-loader": "^3.3.1",
         "terser-webpack-plugin": "^5.3.0",
-        "ts-jest": "^27.1.2",
+        "ts-jest": "^29.1.2",
         "ts-loader": "^9.4.2",
         "ts-node": "^10.9.1",
         "typescript": "^4.9.4",

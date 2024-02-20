@@ -112,7 +112,7 @@
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
+import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
 import { Component, Mixins, Vue } from "vue-property-decorator";
 import XLSX from "xlsx";
 
@@ -120,7 +120,7 @@ import { allMatchers } from "../../../../../classes/import/defaultMatchers";
 import { ImportingMember } from "../../../../../classes/import/ImportingMember";
 import { MatchedColumn } from "../../../../../classes/import/MatchedColumn";
 import { MatcherCategory } from '../../../../../classes/import/MatcherCategory';
-import { AddressColumnMatcher, TextColumnMatcher } from "../../../../../classes/import/matchers";
+import { AddressColumnMatcher, DateColumnMatcher,TextColumnMatcher } from "../../../../../classes/import/matchers";
 import { OrganizationManager } from "../../../../../classes/OrganizationManager";
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
@@ -167,6 +167,8 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
             for (const record of category.getAllRecords()) {
                 switch (record.type) {
                     case RecordType.Textarea:
+                    case RecordType.Phone: 
+                    case RecordType.Email: 
                     case RecordType.Text: {
                         this.matchers.push(new TextColumnMatcher({
                             name: record.name,
@@ -210,6 +212,31 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
                                     settings: record
                                 })
                                 answer.address = value
+                                member.details.recordAnswers.push(answer);
+                            }
+                        }));
+                        break;
+                    }
+                    case RecordType.Date: {
+                        this.matchers.push(new DateColumnMatcher({
+                            name: record.name,
+                            category: category.name,
+                            required: false,
+                            save(value: Date, member: ImportingMember) {
+                                if (!value) {
+                                    return;
+                                }
+                                console.log(value)
+
+                                const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
+                                if (index !== -1) {
+                                    member.details.recordAnswers.splice(index, 1)
+                                }
+
+                                const answer = RecordDateAnswer.create({
+                                    settings: record
+                                })
+                                answer.dateValue = value
                                 member.details.recordAnswers.push(answer);
                             }
                         }));
