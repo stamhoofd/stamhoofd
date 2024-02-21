@@ -10,6 +10,17 @@ import { StripeHelper } from "../../src/helpers/StripeHelper";
 export class StripeMocker {
     paymentIntents: {id: string}[] = []
     charges: {id: string}[] = [];
+    #forceFailure = false;
+
+    reset() {
+        this.paymentIntents = [];
+        this.charges = [];
+        this.#forceFailure = false;
+    }
+
+    forceFailure() {
+        this.#forceFailure = true;
+    }
 
     start() {
         nock('https://api.stripe.com')
@@ -41,6 +52,10 @@ export class StripeMocker {
 
                 if (!match) {
                     return [500];
+                }
+
+                if (this.#forceFailure ) {
+                    return [400];
                 }
 
                 if (resource === 'payment_methods') {

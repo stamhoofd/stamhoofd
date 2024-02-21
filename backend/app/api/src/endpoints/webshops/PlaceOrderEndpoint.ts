@@ -117,15 +117,15 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         // The order now is valid, the stock is reserved for now (until the payment fails or expires)
         const totalPrice = request.body.totalPrice
 
-        if (totalPrice == 0) {
-            // Force unknown payment method
-            order.data.paymentMethod = PaymentMethod.Unknown
+        try {
+            if (totalPrice == 0) {
+                // Force unknown payment method
+                order.data.paymentMethod = PaymentMethod.Unknown
 
-            // Mark this order as paid
-            await order.markPaid(null, organization, webshop)
-            await order.save()
-        } else {
-            try {
+                // Mark this order as paid
+                await order.markPaid(null, organization, webshop)
+                await order.save()
+            } else {
                 const payment = new Payment()
                 payment.organizationId = organization.id
                 payment.method = request.body.paymentMethod
@@ -289,13 +289,13 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     paymentUrl: paymentUrl,
                     order: OrderStruct.create({...order, payment: PaymentStruct.create(payment) })
                 }));
-            } catch (e) {
-                // Mark order as failed to release stock
-                if (order) {
-                    await order.onPaymentFailed(null, organization)
-                }
-                throw e;
             }
+        } catch (e) {
+            // Mark order as failed to release stock
+            if (order) {
+                await order.deleteOrderBecauseOfCreationError()
+            }
+            throw e;
         }
         
         return new Response(OrderResponse.create({

@@ -259,6 +259,7 @@ describe("E2E.Stock", () => {
     });
 
     beforeEach(async () => {
+        stripeMocker.reset();
         let meta = WebshopMetaData.patch({});
 
         productPrice1 = ProductPrice.create({
@@ -513,6 +514,44 @@ describe("E2E.Stock", () => {
             expect(updatedOrder.number).toBeDefined();
         });
 
+        test("Online payments do not reserve the stock if creation fails", async () => {
+            stripeMocker.forceFailure();
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Bancontact,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice2,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption1
+                                }),
+                                 CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption2
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(endpoint.test(r)).toReject();
+            await checkStocks([], []);
+        });
+
         test("Free payments reserve the stock", async () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Unknown,
@@ -587,6 +626,46 @@ describe("E2E.Stock", () => {
             const order = response.body.order;
 
             await checkStock(order.id, order.data.cart.items);
+        });
+
+        test("Transfer payments do not reserve the stock if iban is missing and throws on validating", async () => {
+            webshop.meta.paymentConfiguration.transferSettings.iban = null;
+            await webshop.save();
+            
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Transfer,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice2,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption1
+                                }),
+                                 CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption2
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+            
+            const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(endpoint.test(r)).rejects.toThrow('Missing IBAN');
+            await checkStocks([], []);
         });
 
         test("POS payments reserve the stock", async () => {
@@ -669,6 +748,54 @@ describe("E2E.Stock", () => {
             expect(response.body).toBeDefined();
             const order = response.body[0];
             await checkStock(order.id, order.data.cart.items);
+        });
+
+        test("Orders placed by an admin do not reserve the stock if IBAN is missing", async () => {
+
+            webshop.meta.paymentConfiguration.transferSettings.iban = null;
+            await webshop.save();
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Transfer,
+                checkoutMethod: takeoutMethod,
+                timeSlot: slot1,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: productPrice1,
+                            amount: 5,
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu: multipleChoiceOptionMenu,
+                                    option: checkboxOption2
+                                }),
+                                CartItemOption.create({
+                                    optionMenu: chooseOneOptionMenu,
+                                    option: radioOption1
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                customer
+            })
+
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            const orderPatch = PrivateOrder.create({
+                id: uuidv4(),
+                data: orderData,
+                webshopId: webshop.id
+            });
+            patchArray.addPut(orderPatch);
+
+            // Send a patch
+            const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = "Bearer " + token.accessToken
+
+            await expect(patchWebshopOrdersEndpoint.test(r)).rejects.toThrow('Missing IBAN');
+            await checkStocks([], []);
         });
 
         test("Chosen seats reserve the stock for POS order", async () => {

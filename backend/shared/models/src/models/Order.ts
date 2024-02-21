@@ -149,6 +149,23 @@ export class Order extends Model {
         })
     }
 
+    async deleteOrderBecauseOfCreationError(this: Order) {
+        this.status = OrderStatus.Deleted
+        await this.save()
+
+        await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
+            // Fetch webshop inside queue to make sure the stock is up to date
+            const webshop = await Webshop.getByID(this.webshopId);
+            if (!webshop) {
+                // ignore for now
+                console.error("Missing webshop with id "+this.webshopId+" in webshop stock queue for order "+this.id)
+                return
+            }
+            
+            await this.setRelation(Order.webshop, webshop).updateStock() // remove reserved stock
+        })
+    }
+
     async onPaymentFailed(this: Order, payment: Payment | null, organization: Organization) {
         if (this.shouldIncludeStock()) {
             this.markUpdated()
@@ -772,9 +789,10 @@ export class Order extends Model {
             payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings)
 
             if (!payment.transferSettings.iban) {
+                console.log("throw no iban")
                 throw new SimpleError({
-                    code: "no_iban",
-                    message: "No IBAN",
+                    code: "missing_iban",
+                    message: "Missing IBAN",
                     human: "Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder."
                 })
             }
