@@ -1,4 +1,6 @@
 
+import { AsyncLocalStorage } from 'node:async_hooks';
+
 class Queue {
     name: string
     items: QueueItem<any>[] = []
@@ -26,9 +28,16 @@ class QueueItem<T> {
  */
 export class QueueHandler {
     static queues = new Map<string, Queue>()
+    static asyncLocalStorage = new AsyncLocalStorage<string[]>();
 
     static async schedule<T>(queue: string, handler: () => Promise<T>, parallel = 1): Promise<T> {
         // console.log("[QUEUE] Schedule "+queue)
+
+        const currentQueues = this.asyncLocalStorage.getStore();
+        if (currentQueues !== undefined && currentQueues.includes(queue)) {
+            console.warn('Recursive usage of queues detected. Ignored running in queue', queue, currentQueues);
+            return await handler();
+        }
 
         const item = new QueueItem<T>()
         item.handler = handler
@@ -74,7 +83,13 @@ export class QueueHandler {
         // console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
 
         try {
-            const result = await next.handler()
+            // We add an async local storage here to avoid deadlocks
+            // We add a list of queues to the context
+            const currentQueues = this.asyncLocalStorage.getStore() ?? [];
+            const result = await this.asyncLocalStorage.run([...currentQueues, queue], async () => {
+                return await next.handler()
+            });
+
             next.resolve(result)
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
