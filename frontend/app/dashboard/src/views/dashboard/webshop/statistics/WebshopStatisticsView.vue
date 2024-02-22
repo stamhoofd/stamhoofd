@@ -50,12 +50,12 @@
                 </template>
             </div>
 
-            <div v-if="!loading && totalByProduct.length > 0" class="container">
+            <div v-for="category of totalByCategory" :key="category.name" class="container">
                 <hr>
-                <h2>Per productcombinatie</h2>
+                <h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
 
                 <STList>
-                    <STListItem v-for="(info, index) in totalByProduct" :key="index" class="right-small">
+                    <STListItem v-for="(info, index) in category.products" :key="index" class="right-small">
                         <h3>{{ info.name }}</h3>
                         <p v-if="info.description" class="style-description-small pre-wrap" v-text="info.description" />
 
@@ -428,7 +428,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     totalVouchers = 0
     totalScannedVouchers = 0
 
-    totalByProduct: { amount: number, name: string, description: string, price: number }[] = []
+    totalByProduct: { amount: number, name: string, description: string, price: number, category: Category|null }[] = []
 
     reviewTimer: NodeJS.Timeout | null = null
 
@@ -438,6 +438,37 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
         // Set url
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/statistics")
         document.title = this.preview.meta.name+" - Statistieken"
+    }
+
+    get totalByCategory(): {name: string, products: { amount: number, name: string, description: string, price: number, category: Category|null }[]}[] {
+        const categories = this.webshop?.categories.map(category => {
+            return {
+                id: category.id,
+                name: category.name,
+                products: [] as { amount: number, name: string, description: string, price: number, category: Category|null }[]
+            }
+        }) ?? []
+
+        const other = {
+            id: 'other',
+            name: 'Overige',
+            products: [] as { amount: number, name: string, description: string, price: number, category: Category|null }[]
+        };
+        
+        for (const product of this.totalByProduct) {
+            const category = product.category ? categories.find(c => c.id === product.category!.id) : null;
+
+            if (!category) {
+                other.products.push(product);
+                continue;
+            }
+            
+            category.products.push(product)
+        }
+
+        categories.push(other);
+
+        return categories.filter(c => c.products.length > 0)
     }
 
     async reload() {
@@ -456,7 +487,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
             this.firstScannedTicketDate = null
             this.lastScannedTicketDate = null
 
-            const productMap: Map<string, { amount: number, name: string, description: string, price: number }> = new Map()
+            const productMap: Map<string, { amount: number, name: string, description: string, price: number, category: Category|null }> = new Map()
 
             // Keep a Set of all order Id's to prevent duplicate orders (in case an order gets updated, we'll receive it multiple times)
             const orderIds = new Set<string>()
@@ -490,11 +521,14 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                             current.amount += item.amount
                             current.price += item.getPrice(order.data.cart)
                         } else {
+                            const productCategory = this.webshop?.categories.find(c => c.productIds.includes(item.product.id))
+
                             productMap.set(code, {
                                 amount: item.amount,
                                 name: item.product.name,
                                 description: item.descriptionWithoutFields,
                                 price: item.getPrice(order.data.cart),
+                                category: productCategory ?? null
                             })
                         }
 
