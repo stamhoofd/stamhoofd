@@ -160,7 +160,10 @@ interface ObjectFetcher<O> {
         search: string
     }): Promise<O[]>
 
-    fetchCount(): Promise<number>
+    fetchCount(data: {
+        filter: Filter,
+        search: string
+    }): Promise<number>
 }
 
 class TableObjectFetcher<O> {
@@ -177,6 +180,9 @@ class TableObjectFetcher<O> {
     totalCount: number|null = null
     totalFilteredCount: number|null = null
 
+    fetchingCount = false;
+    fetchingFilteredCount = false;
+
     limit = 50
     sort: SortDefinition[] = []
 
@@ -187,6 +193,8 @@ class TableObjectFetcher<O> {
         this.#clearIndex += 1;
         this.objects = []
         this.totalCount = null;
+        this.fetchingCount = false;
+        this.fetchingFilteredCount = false;
         this.fetchIfNeeded().catch(console.error)
     }
 
@@ -215,15 +223,32 @@ class TableObjectFetcher<O> {
     async fetchIfNeeded() {
         const currentClearIndex = this.#clearIndex;
 
-        if (this.totalCount === null) {
+        if (!this.fetchingCount && this.totalCount === null) {
+            this.fetchingCount = true;
+
             // Fetch count in parallel
-            this.objectFetcher.fetchCount().then((c) => {
+            this.objectFetcher.fetchCount({filter: {}, search: ''}).then((c) => {
                 if (currentClearIndex !== this.#clearIndex) {
                     // Discard old requests
                     return;
                 }
                 this.totalCount = c;
+                this.fetchingCount = false;
                 this.fetchIfNeeded().catch(console.error);
+            }).catch(console.error)
+        }
+
+        if (!this.fetchingFilteredCount && this.totalFilteredCount === null) {
+            this.fetchingFilteredCount = true;
+
+            // Fetch count in parallel
+            this.objectFetcher.fetchCount({filter: this.filter, search: this.searchQuery}).then((c) => {
+                if (currentClearIndex !== this.#clearIndex) {
+                    // Discard old requests
+                    return;
+                }
+                this.totalFilteredCount = c;
+                this.fetchingFilteredCount = false;
             }).catch(console.error)
         }
 

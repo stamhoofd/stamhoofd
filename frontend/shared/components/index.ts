@@ -136,14 +136,14 @@ export { default as PaymentSelectionList } from "./src/views/PaymentSelectionLis
 export { default as TransferPaymentView } from "./src/views/TransferPaymentView.vue"
 
 // Filters
-export { default as ChoicesFilterView } from "./src/filters/ChoicesFilterView.vue"
-export { default as FilterEditor } from "./src/filters/FilterEditor.vue"
-export { default as FilterGroupView } from "./src/filters/FilterGroupView.vue"
-export { default as NumberFilterView } from "./src/filters/NumberFilterView.vue"
-export { default as PropertyFilterInput } from "./src/filters/PropertyFilterInput.vue"
-export { default as PropertyFilterView } from "./src/filters/PropertyFilterView.vue"
-export { default as RegistrationsFilterView } from "./src/filters/RegistrationsFilterView.vue"
-export { default as StringFilterView } from "./src/filters/StringFilterView.vue"
+export { default as ChoicesFilterView } from "./src/filters/old/ChoicesFilterView.vue"
+export { default as FilterEditor } from "./src/filters/old/FilterEditor.vue"
+export { default as FilterGroupView } from "./src/filters/old/FilterGroupView.vue"
+export { default as NumberFilterView } from "./src/filters/old/NumberFilterView.vue"
+export { default as PropertyFilterInput } from "./src/filters/old/PropertyFilterInput.vue"
+export { default as PropertyFilterView } from "./src/filters/old/PropertyFilterView.vue"
+export { default as RegistrationsFilterView } from "./src/filters/old/RegistrationsFilterView.vue"
+export { default as StringFilterView } from "./src/filters/old/StringFilterView.vue"
 
 // tables
 export * from "./src/tables/Column"
