@@ -66,9 +66,11 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
             tickets = await Ticket.select("WHERE webshopId = ? ORDER BY updatedAt, id LIMIT ?", [webshop.id, limit])
         }
 
+        const supportsDeletedTickets = request.request.getVersion() >= 229
+
         return new Response(
             new PaginatedResponse({ 
-                results: tickets.map(ticket => TicketPrivate.create(ticket)),
+                results: tickets.map(ticket => TicketPrivate.create(ticket)).filter(ticket => supportsDeletedTickets || !ticket.deletedAt),
                 next: tickets.length >= limit ? WebshopTicketsQuery.create({
                     updatedSince: tickets[tickets.length - 1].updatedAt ?? undefined,
                     lastId: tickets[tickets.length - 1].id ?? undefined
