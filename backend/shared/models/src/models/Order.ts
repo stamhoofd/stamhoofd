@@ -466,7 +466,7 @@ export class Order extends Model {
     async updateTickets(this: Order & { webshop: Webshop }): Promise<{ tickets: Ticket[], didCreateTickets: boolean }> {
         const webshop = this.webshop
 
-        if (webshop.meta.ticketType !== WebshopTicketType.Tickets && webshop.meta.ticketType === WebshopTicketType.SingleTicket) {
+        if (webshop.meta.ticketType !== WebshopTicketType.Tickets && webshop.meta.ticketType !== WebshopTicketType.SingleTicket) {
             return { tickets: [], didCreateTickets: false };
         }
 
