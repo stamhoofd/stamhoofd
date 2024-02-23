@@ -13,7 +13,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Column, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Column, GlobalEventBus, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
@@ -422,6 +422,10 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
 
                 this.setPayments(response.data, true)
                 new Toast("Betaalstatus gewijzigd", "success").setHide(1000).show()
+
+                for (const payment of response.data) {
+                    GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
+                }
             } catch (e) {
                 Toast.fromError(e).show()
             }

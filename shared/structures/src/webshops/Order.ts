@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem';
@@ -477,6 +477,46 @@ export class PrivateOrder extends Order {
 export class PrivateOrderWithTickets extends PrivateOrder {
     @field({ decoder: new ArrayDecoder(TicketPrivate) })
     tickets: TicketPrivate[] = []
+
+    /**
+     * Adds or removes tickets as appropriate
+     */
+    addTickets(tickets: TicketPrivate[]) {
+        for (const ticket of tickets) {
+            if (ticket.orderId == this.id) {
+                if (ticket.deletedAt) {
+                    const existingIndex = this.tickets.findIndex(t => t.id === ticket.id);
+                    if (existingIndex !== -1) {
+                        this.tickets.splice(existingIndex, 1)
+                    }
+                } else {
+                    const existing = this.tickets.find(t => t.id === ticket.id);
+                    if (existing) {
+                        existing.set(ticket)
+                    } else {
+                        this.tickets.push(ticket)
+                    }
+                }
+            }
+        }
+    }
+
+    addTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        PrivateOrderWithTickets.addTicketPatches([this], patches)
+    }
+
+    static addTicketPatches(orders: PrivateOrderWithTickets[], patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        mainLoop: for (const patch of patches) {
+            for (const order of orders) {
+                for (const ticket of order.tickets) {
+                    if (ticket.id === patch.id) {
+                        ticket.set(ticket.patch(patch))
+                        continue mainLoop;
+                    }
+                }
+            }
+        }
+    }
 }
 
 export class OrderResponse extends AutoEncoder {

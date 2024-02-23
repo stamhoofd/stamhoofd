@@ -430,7 +430,8 @@ export class WebshopManager {
                             }
 
                             const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
-                            tickets.push(ticket.patch(patch))
+                            const patched = ticket.patch(patch);
+                            tickets.push(patched)
                             cursor.continue();
                         }
                     } else {
@@ -445,7 +446,7 @@ export class WebshopManager {
             }
         })
         
-        return tickets
+        return tickets.filter(t => !t.deletedAt)
     }
 
     async streamTickets(callback: (ticket: TicketPrivate) => void, networkFetch = true): Promise<void> {
@@ -469,7 +470,9 @@ export class WebshopManager {
                     if (cursor) {
                         const rawOrder = cursor.value
                         const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
-                        callback(ticket)
+                        if (!ticket.deletedAt) {
+                            callback(ticket)
+                        }
                         cursor.continue();
                     } else {
                         // no more results
@@ -693,6 +696,13 @@ export class WebshopManager {
         } catch (e) {
             console.error(e)
             // No db support or other error. Should ignore
+        }
+
+        // Patching orders can result in changed tickets. We'll need to pull those in.
+        try {
+            await this.fetchNewTickets(false, false)
+        } catch (e) {
+            console.error(e)
         }
 
         await this.ordersEventBus.sendEvent("fetched", response.data)
@@ -920,7 +930,11 @@ export class WebshopManager {
             const ticketPatches = transaction.objectStore("ticketPatches");
 
             for (const ticket of tickets) {
-                objectStore.put(ticket.encode({ version: Version }));
+                if (ticket.deletedAt) {
+                    objectStore.delete(ticket.secret);
+                } else {
+                    objectStore.put(ticket.encode({ version: Version }));
+                }
 
                 // Remove any patches we might have saved
                 if (clearPatches) {

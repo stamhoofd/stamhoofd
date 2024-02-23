@@ -115,6 +115,9 @@ export class Ticket extends Model {
     updatedAt: Date
 
     @column({ type: "datetime", nullable: true })
+    deletedAt: Date | null = null
+
+    @column({ type: "datetime", nullable: true })
     scannedAt: Date | null = null
 
     @column({ type: "string", nullable: true })
@@ -126,5 +129,17 @@ export class Ticket extends Model {
 
     getUrl(this: Ticket & { webshop: Webshop & { organization: Organization } }) {
         return "https://"+this.webshop.getHost()+"/ticket/"+this.secret
+    }
+
+    get isDeleted() {
+        return this.deletedAt !== null;
+    }
+
+    async softDelete() {
+        if (this.isDeleted) {
+            return;
+        }
+        this.deletedAt = new Date();
+        await this.save()
     }
 }

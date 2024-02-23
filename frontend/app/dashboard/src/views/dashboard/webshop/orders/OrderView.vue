@@ -607,7 +607,6 @@ export default class OrderView extends Mixins(NavigationMixin){
     created() {
         this.webshopManager.ticketsEventBus.addListener(this, "fetched", this.onNewTickets.bind(this))
         this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
-        this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onPatchedOrders.bind(this))
         
         if (this.hasTickets) {
             this.recheckTickets()
@@ -681,38 +680,13 @@ export default class OrderView extends Mixins(NavigationMixin){
         return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod, this.order.data.paymentContext))
     }
 
-    onPatchedOrders(orders: PrivateOrder[]) {        
-        const order = orders.find(o => o.id === this.order.id);
-        if (order) {
-            this.recheckTickets()
-        }
-    }
-
     async onNewTickets(tickets: TicketPrivate[]) {        
-        for (const ticket of tickets) {
-            if (ticket.orderId == this.order.id) {
-                const existing = this.order.tickets.find(t => t.id === ticket.id);
-                if (existing) {
-                    existing.set(ticket)
-                } else {
-                    this.order.tickets.push(ticket)
-                }
-            }
-        }
-
+        this.order.addTickets(tickets)
         return Promise.resolve()
     }
 
     onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {        
-        for (const patch of patches) {
-            for (const ticket of this.order.tickets) {
-                if (ticket.id === patch.id) {
-                    ticket.set(ticket.patch(patch))
-                    break;
-                }
-            }
-        }
-
+        this.order.addTicketPatches(patches)
         return Promise.resolve()
     }
 
@@ -764,18 +738,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (!this.hasTickets) {
             return
         }
-        this.webshopManager.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
-            for (const ticket of tickets) {
-                if (ticket.orderId === this.order.id) {
-                    const existing = this.tickets.find(t => t.id === ticket.id)
-                    if (existing) {
-                        existing.set(ticket)
-                    } else {
-                        this.order.tickets.push(ticket)
-                    }
-                }
-            }
-        }).catch((e) => {
+        this.webshopManager.fetchNewTickets(false, false).catch((e) => {
             if (this.tickets.length === 0) {
                 if (Request.isNetworkError(e)) {
                     new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.", "error red").show()

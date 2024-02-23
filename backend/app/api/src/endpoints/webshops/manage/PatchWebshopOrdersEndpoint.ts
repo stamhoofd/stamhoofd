@@ -215,7 +215,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         message: "Order with id "+patch.id+" does not exist"
                     })
                 }
-
+                const previousToPay = model.totalToPay;
                 const previousStatus = model.status
 
                 model.status = patch.status ?? model.status
@@ -252,7 +252,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 }
 
                 // Update balance item prices for this order if price has changed
-                if (previousData.totalPrice !== model.totalToPay) {
+                if (previousToPay !== model.totalToPay) {
                     const items = await BalanceItem.where({ orderId: model.id })
                     if (items.length === 1) {
                         model.markUpdated()
@@ -275,10 +275,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 await model.save()
                 await model.setRelation(Order.webshop, webshop).updateStock(previousData)
-
-                if (model.number !== null) {
-                    await model.setRelation(Order.webshop, webshop).updateTickets()
-                }
+                await model.setRelation(Order.webshop, webshop).updateTickets()
             }
 
             const mapped = orders.map(order => order.setRelation(Order.webshop, webshop))

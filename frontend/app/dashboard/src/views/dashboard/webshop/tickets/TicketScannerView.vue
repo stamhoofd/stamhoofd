@@ -402,7 +402,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                         }
                     }
 
-                    if (order.status === OrderStatus.Canceled || order.status === OrderStatus.Deleted) {
+                    if (ticket.deletedAt || order.status === OrderStatus.Canceled || order.status === OrderStatus.Deleted) {
                         this.canceledTicket()
                     } else if (ticket.scannedAt !== null) {
                         this.alreadyScannedTicket(ticket, order)
@@ -451,7 +451,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     canceledTicket() {
-        new Toast("Oeps! Dit ticket werd geannuleerd en is dus niet geldig.", "error red").show()
+        new Toast("Oeps! Dit ticket werd geannuleerd of verwijderd en is dus niet geldig.", "error red").show()
         AppManager.shared.hapticError() 
     }
 

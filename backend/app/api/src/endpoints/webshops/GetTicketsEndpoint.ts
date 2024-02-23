@@ -41,8 +41,11 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         if (request.query.secret) {
-            const [ticket] = await Ticket.where({ secret: request.query.secret, webshopId: request.params.id }, { limit: 1 })
-            if (!ticket || (request.query.orderId && ticket.orderId !== request.query.orderId)) {
+            const [ticket] = await Ticket.where({ 
+                secret: request.query.secret, 
+                webshopId: request.params.id
+            }, { limit: 1 })
+            if (!ticket || (request.query.orderId && ticket.orderId !== request.query.orderId) || ticket.isDeleted) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Ticket not found",
@@ -101,7 +104,11 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 })
             }
 
-            const tickets = await Ticket.where({ orderId: request.query.orderId, webshopId: request.params.id })
+            const tickets = await Ticket.where({ 
+                orderId: request.query.orderId, 
+                webshopId: request.params.id,
+                deletedAt: null
+            })
             return new Response(
                 tickets.map(ticket => TicketOrder.create(ticket))
             ); 

@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
-import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
+import { CenteredMessage, GlobalEventBus, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
 import { OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures"
 
@@ -334,7 +334,7 @@ export class OrderActionBuilder {
                     continue;
                 }
                 if (paid) {
-                    if (payment.status != PaymentStatus.Succeeded) {
+                    if (payment.status !== PaymentStatus.Succeeded) {
                         data.addPatch(Payment.patch({
                             id: payment.id,
                             status: PaymentStatus.Succeeded
@@ -345,7 +345,7 @@ export class OrderActionBuilder {
                         }
                     }
                 } else {
-                    if (payment.status == PaymentStatus.Succeeded) {
+                    if (payment.status === PaymentStatus.Succeeded) {
                         data.addPatch(Payment.patch({
                             id: payment.id,
                             status: PaymentStatus.Created
@@ -381,12 +381,15 @@ export class OrderActionBuilder {
                         }
                     }
                 }
+                for (const payment of response.data) {
+                    GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
+                }
                 new Toast("Betaalstatus gewijzigd", "success").setHide(1000).show()
             } catch (e) {
                 Toast.fromError(e).show()
             }
         } else {
-            new Toast(paid ? "Al gemarkeerd als betaald" : ("Deze "+ (orders.length == 1 ? "bestelling werd" : "bestellingen werden") +" nog niet betaald"), "error red").setHide(1000).show()
+            new Toast(paid ? "Al gemarkeerd als betaald" : ("Deze "+ (orders.length == 1 ? "bestelling werd" : "bestellingen werden") +" nog niet betaald"), "error red").setHide(2000).show()
         }
     }
 

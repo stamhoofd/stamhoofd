@@ -117,6 +117,24 @@ export class Order extends Model {
         return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
     }
 
+    async shouldCreateTickets() {
+        if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted || this.id === undefined || this.id === null) {
+            return false;
+        }
+
+        if (this.data.paymentMethod === PaymentMethod.PointOfSale || this.data.totalPrice === 0) {
+            return true;
+        }
+
+        // Check we paid at least 1 cent
+        const allBalanceItems = await BalanceItem.where({ orderId: this.id })
+        if (allBalanceItems.find(b => b.pricePaid > 0)) {
+            return true;
+        }
+
+        return false;
+    }
+
     get totalToPay() {
         if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted) {
             return 0
@@ -128,6 +146,11 @@ export class Order extends Model {
         if (this.status !== OrderStatus.Deleted && this.status !== OrderStatus.Canceled) {
             this.markUpdated()
             await this.save()
+            
+            const webshop = await Webshop.getByID(this.webshopId);
+            if (webshop) {
+                await this.setRelation(Order.webshop, webshop).updateTickets()
+            }
             return
         }
 
@@ -136,7 +159,7 @@ export class Order extends Model {
         this.status = OrderStatus.Created
         await this.save()
 
-        await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
+        const webshop = await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
             // Fetch webshop inside queue to make sure the stock is up to date
             const webshop = await Webshop.getByID(this.webshopId);
             if (!webshop) {
@@ -146,14 +169,19 @@ export class Order extends Model {
             }
             
             await this.setRelation(Order.webshop, webshop).updateStock() // readd reserved stock
+            return webshop;
         })
+
+        if (webshop) {
+            await this.setRelation(Order.webshop, webshop).updateTickets()
+        }
     }
 
     async deleteOrderBecauseOfCreationError(this: Order) {
         this.status = OrderStatus.Deleted
         await this.save()
 
-        await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
+        const webshop = await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
             // Fetch webshop inside queue to make sure the stock is up to date
             const webshop = await Webshop.getByID(this.webshopId);
             if (!webshop) {
@@ -162,8 +190,13 @@ export class Order extends Model {
                 return
             }
             
-            await this.setRelation(Order.webshop, webshop).updateStock() // remove reserved stock
+            await this.setRelation(Order.webshop, webshop).updateStock() // readd reserved stock
+            return webshop;
         })
+
+        if (webshop) {
+            await this.setRelation(Order.webshop, webshop).updateTickets()
+        }
     }
 
     async onPaymentFailed(this: Order, payment: Payment | null, organization: Organization) {
@@ -174,7 +207,7 @@ export class Order extends Model {
             }
             await this.save()
 
-            await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
+            const webshop = await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
                 // Fetch webshop inside queue to make sure the stock is up to date
                 const webshop = await Webshop.getByID(this.webshopId);
                 if (!webshop) {
@@ -184,7 +217,12 @@ export class Order extends Model {
                 }
                 
                 await this.setRelation(Order.webshop, webshop).updateStock() // remove reserved stock
+                return webshop
             })
+
+            if (webshop) {
+                await this.setRelation(Order.webshop, webshop).updateTickets()
+            }
 
             // Send an email if the payment failed after 15 minutes being pending
             const difference = new Date().getTime() - this.createdAt.getTime()
@@ -216,6 +254,8 @@ export class Order extends Model {
             this.markUpdated()
             await this.save()
         }
+
+        
     }
 
     /**
@@ -426,6 +466,24 @@ export class Order extends Model {
     async updateTickets(this: Order & { webshop: Webshop }): Promise<{ tickets: Ticket[], didCreateTickets: boolean }> {
         const webshop = this.webshop
 
+        if (webshop.meta.ticketType !== WebshopTicketType.Tickets && webshop.meta.ticketType === WebshopTicketType.SingleTicket) {
+            return { tickets: [], didCreateTickets: false };
+        }
+
+        const existingTickets = !this.id ? [] : await Ticket.where({ orderId: this.id })
+
+        if (!(await this.shouldCreateTickets())) {
+            // Delete all existing tickets
+            for (const ticket of existingTickets) {
+                if (ticket.isDeleted) {
+                    continue;
+                }
+                console.log("Deleting ticket for order "+this.id+", ticket id = "+ticket.id)
+                await ticket.softDelete();
+            }
+            return { tickets: [], didCreateTickets: false }
+        }
+
         // Create tickets if needed (we might already be valid in case of transfer payments)
         let tickets: Ticket[] = []
 
@@ -459,7 +517,7 @@ export class Order extends Model {
                     ticketMap.set(item.product.id, offset + item.amount)
                 }
             }
-        } else if (webshop.meta.ticketType === WebshopTicketType.SingleTicket) {
+        } else {
             // Create a shared ticket for the whole order
             const ticket = new Ticket()
             ticket.orderId = this.id
@@ -477,53 +535,85 @@ export class Order extends Model {
 
         let didCreateTickets = false
 
-        if (tickets.length > 0) {
-            // First check if we already have tickets
-            const existingTickets = !this.id ? [] : await Ticket.where({ orderId: this.id })
-            if (existingTickets.length > 0) {
-                // Skip
-                // Check difference: do we need to create new tickets or not?
-                const mergedTickets: Ticket[] = []
-                for (const ticket of tickets) {
-                    // Check if this combination already exists or not. Else create it. Update existing total if needed
-                    const existing = existingTickets.find(existing => existing.itemId === ticket.itemId && ticket.index === existing.index)
-                    if (existing) {
-                        existing.total = ticket.total
-                        existing.seat = ticket.seat
-                        mergedTickets.push(existing)
-                    } else {
-                        didCreateTickets = true
-                        mergedTickets.push(ticket)
-                    }
+        if (!this.id) {
+            await this.save()
+            for (const ticket of tickets) {
+                ticket.orderId = this.id
+            }
+        }
+
+        // First check if we already have tickets
+        const mergedTickets: Ticket[] = []
+        
+        // First try to keep existing tickets
+        for (const existing of existingTickets) {
+            if (existing.originalSeat) {
+                const index = tickets.findIndex(t => t.seat && t.seat.equals(existing.originalSeat!))
+                if (index !== -1) {
+                    const ticket = tickets[index]
+                    tickets.splice(index, 1);
+                    existing.itemId = ticket.itemId;
+                    existing.index = ticket.index;
+                    existing.total = ticket.total
+                    existing.seat = ticket.seat
+                    existing.deletedAt =  null;
+                    mergedTickets.push(existing)
                 }
+                continue;
+            }
+            const index = tickets.findIndex(ticket => existing.itemId === ticket.itemId && ticket.index === existing.index)
+            if (index !== -1) {
+                const ticket = tickets[index]
+                tickets.splice(index, 1);
+                existing.itemId = ticket.itemId;
+                existing.index = ticket.index;
+                existing.total = ticket.total
+                existing.seat = ticket.seat
+                existing.deletedAt =  null;
+                mergedTickets.push(existing)
+            }
+        }
 
-                tickets = mergedTickets
+        // Try to reuse tickets instead of recreating if no match is found
+        for (const existing of existingTickets) {
+            if (mergedTickets.find(m => m.id === existing.id)) {
+                // Already mapped
+                continue;
+            }
+            
+            const index = tickets.findIndex(ticket => existing.itemId === ticket.itemId)
+            if (index !== -1) {
+                const ticket = tickets[index]
+                tickets.splice(index, 1);
+                existing.itemId = ticket.itemId;
+                existing.index = ticket.index;
+                existing.total = ticket.total
+                existing.seat = ticket.seat
+                existing.deletedAt =  null;
+                mergedTickets.push(existing)
+            }
+        }
+        
+        // Remaining tickets that were not reused
+        for (const ticket of tickets) {
+            didCreateTickets = true
+            mergedTickets.push(ticket)
+        }
 
-                // Wait to save them all
-                console.log("Saving merged tickets for order "+this.id)
-                await Promise.all(tickets.map((ticket) => ticket.save()))
+        tickets = mergedTickets
 
-                // Delete others
-                for (const existing of existingTickets) {
-                    if (!mergedTickets.find(m => m.id === existing.id)) {
-                        console.log("Deleting ticket for order "+this.id+", ticket id = "+existing.id)
-                        await existing.delete()
-                    }
+        // Wait to save them all
+        console.log("Saving merged tickets for order "+this.id)
+        await Promise.all(tickets.map((ticket) => ticket.save()))
+
+        // Delete others
+        for (const existing of existingTickets) {
+            if (!mergedTickets.find(m => m.id === existing.id)) {
+                if (existing.isDeleted) {
+                    continue;
                 }
-            } else {
-                // Create the tickets
-                didCreateTickets = true
-
-                if (!this.id) {
-                    await this.save()
-                    for (const ticket of tickets) {
-                        ticket.orderId = this.id
-                    }
-                }
-
-                // Wait to save them all
-                console.log("Saving tickets for order "+this.id)
-                await Promise.all(tickets.map((ticket) => ticket.save()))
+                console.log("Deleting ticket for order "+this.id+", ticket id = "+existing.id)
+                await existing.softDelete()
             }
         }
 
@@ -548,6 +638,14 @@ export class Order extends Model {
     async undoPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
         this.markUpdated()
         await this.save()
+
+        const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
+        if (!webshop) {
+            console.error("Missing webshop for order "+this.id)
+            return
+        }
+        
+        await this.setRelation(Order.webshop, webshop).updateTickets()
     }
 
     /**

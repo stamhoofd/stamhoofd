@@ -10,9 +10,9 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordCategory, TicketPrivate, WebshopOrdersQuery, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordCategory, TicketPrivate, WebshopOrdersQuery, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -328,10 +328,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                         }
                     },
                     format: (stat) => {
+                        if (stat.total === 0) {
+                            return '-'
+                        }
+
                         if (this.hasSingleTickets) {
-                            if (stat.total === 0) {
-                                return '—'
-                            }
                             return stat.scanned === stat.total ? "Gescand" : "Niet gescand"
                         }
                         return stat.scanned.toString() + " / " + stat.total
@@ -511,25 +512,14 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             this.putOrder(order)
         }
 
-        console.log(this.orders)
         return Promise.resolve()
     }
 
     async onNewTickets(tickets: TicketPrivate[]) {
         console.log("Received new tickets from network")
         
-        for (const ticket of tickets) {
-            const order = this.orders.find(o => o.id === ticket.orderId)
-            if (order) {
-                const existing = order.tickets.find(t => t.id === ticket.id);
-                if (existing) {
-                    existing.set(ticket)
-                } else {
-                    order.tickets.push(ticket)
-                }
-            } else {
-                console.warn('Couldn\'t find order for ticket', ticket)
-            }
+        for (const order of this.orders) {
+            order.addTickets(tickets)
         }
 
         return Promise.resolve()
@@ -537,18 +527,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
         console.log("Received new tickets from network")
-        
-        mainLoop: for (const patch of patches) {
-            for (const order of this.orders) {
-                for (const ticket of order.tickets) {
-                    if (ticket.id === patch.id) {
-                        ticket.set(ticket.patch(patch))
-                        continue mainLoop;
-                    }
-                }
-            }
-        }
-
+        PrivateOrderWithTickets.addTicketPatches(this.orders, patches);
         return Promise.resolve()
     }
 
@@ -560,7 +539,15 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
 
         this.reload();
-        this.loadOrders().catch(console.error)
+        this.loadOrders().catch(console.error);
+
+        // Listen for patches in payments
+        GlobalEventBus.addListener(this, "paymentPatch", async (payment: PaymentGeneral) => {
+            if (payment && payment.id && payment.orders.find(o => o.webshopId === this.webshopManager.preview.id)) {
+                await this.webshopManager.fetchNewTickets(false, false);
+            }
+            return Promise.resolve()
+        })
     }
 
     mounted() {
@@ -678,6 +665,14 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
 
         // And preload the tickets if needed
+        await this.refreshTickets();
+
+        this.isLoadingOrders = false
+        this.isRefreshingOrders = false
+    }
+
+    async refreshTickets() {
+        // And preload the tickets if needed
         if (this.hasTickets) {
             try {
                 await this.webshopManager.fetchNewTickets(false, false)
@@ -692,9 +687,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 Toast.fromError(e).show()
             })
         }
-
-        this.isLoadingOrders = false
-        this.isRefreshingOrders = false
     }
 
     get webshopUrl() {

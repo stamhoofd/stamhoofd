@@ -95,9 +95,6 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
         this.webshopManager.ordersEventBus.addListener(this, "deleted", this.onDeleteOrders.bind(this))
 
-        this.webshopManager.ticketsEventBus.addListener(this, "fetched", this.onNewTickets.bind(this))
-        this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
-
         this.reload();
         this.loadOrders().catch(console.error)
     }
@@ -290,43 +287,6 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
 
         // Remove highlight (order might have changed)
         this.highlightedSeats = []
-
-        return Promise.resolve()
-    }
-
-    async onNewTickets(tickets: TicketPrivate[]) {
-        console.log("Received new tickets from network")
-        
-        for (const ticket of tickets) {
-            const order = this.orders.find(o => o.id === ticket.orderId)
-            if (order) {
-                const existing = order.tickets.find(t => t.id === ticket.id);
-                if (existing) {
-                    existing.set(ticket)
-                } else {
-                    order.tickets.push(ticket)
-                }
-            } else {
-                console.warn('Couldn\'t find order for ticket', ticket)
-            }
-        }
-
-        return Promise.resolve()
-    }
-
-    onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
-        console.log("Received new tickets from network")
-        
-        mainLoop: for (const patch of patches) {
-            for (const order of this.orders) {
-                for (const ticket of order.tickets) {
-                    if (ticket.id === patch.id) {
-                        ticket.set(ticket.patch(patch))
-                        continue mainLoop;
-                    }
-                }
-            }
-        }
 
         return Promise.resolve()
     }
