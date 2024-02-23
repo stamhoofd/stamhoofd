@@ -61,7 +61,8 @@
         "vue-i18n": "^8.26.5",
         "vue-meta": "^2.4.0",
         "vue-property-decorator": "^9.1.2",
-        "vuedraggable": "^2.24.3"
+        "vuedraggable": "^2.24.3",
+        "xlsx": "^0.17.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
