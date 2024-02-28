@@ -171,7 +171,7 @@ export class Registration extends Model {
         const count = results[0]['']['c'];
 
         if (Number.isInteger(count)) {
-           return count
+           return count as number
         } else {
             console.error("Unexpected result for occupancy", results)
             throw new Error("Query failed")

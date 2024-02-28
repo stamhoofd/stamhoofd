@@ -1,0 +1,103 @@
+@use "../base/variables" as *;
+@use "../base/text-styles" as *;
+@use "./modal.scss" as *;
+
+.modal-full-height {
+    @extend .modal;
+
+    > div {
+        height: var(--popup-height);
+
+        
+    }
+}
+
+.popup {
+    @extend .modal-full-height;
+    @extend .modal-backdrop;
+
+    @media (min-height: 1100px) {
+        // Limit the total height of the popup to max(50vh, 1000px)
+        --popup-padding-top-outside: max(var(--st-safe-area-top, 0px), calc(calc(50vh - 500px) * var(--keyboard-closed, 1)));
+        --popup-padding-bottom-outside: calc(100vh - 1000px - var(--popup-padding-top-outside, 0px));
+    }
+
+    @media (max-height: 900px) {
+        // 20px on top, 0 bottom, unless the keyboard is open (then reverse)
+        --popup-padding-top-outside: max(var(--st-safe-area-top, 0px), calc(20px * var(--keyboard-closed, 1)));
+        --popup-padding-bottom-outside: calc(20px - var(--popup-padding-top-outside, 0px));
+    }
+
+    @media (max-height: 600px) {
+        --popup-padding-top-outside: 5px;
+        --popup-padding-bottom-outside: 0px;
+    }
+
+    ~.popup:after {
+        display: none;
+    }
+
+    > div {
+        position: absolute;
+        left: 50%;
+        top: 0;
+
+        background: $color-background;
+        border-radius: $border-radius-modals;
+
+        box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        transition: transform 0.3s, opacity 0.3s, visibility step-start 0.3s;
+        
+        transform: translate(-50%, var(--popup-padding-top-outside, 0px));
+        transform-origin: 50% 0%;
+        visibility: visible;
+
+        @media (max-height: 900px) {
+            border-bottom-left-radius: 0px;
+            border-bottom-right-radius: 0px;
+        }
+
+        &:after {
+            background: rgba(black, 0.4);
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            opacity: 0;
+            contain: size layout style paint;
+            will-change: opacity, visibility;
+            visibility: hidden;
+            z-index: 20000;
+            transition: opacity 0.3s, visibility step-end 0.3s;
+        }
+    }
+
+    &.push-down-full {
+        > div {
+            transform: translate3d(-50%, calc(var(--popup-padding-top-outside, 0px) - 15px), 0) scale(0.9, 0.9);
+            visibility: hidden;
+            opacity: 0;
+            transform: scale(0.9, 0.9) translate3d(0, -15px, 0);
+
+            &:after {
+                opacity: 1;
+                visibility: visible;
+                transition: opacity 0.3s, visibility step-start 0.3s;
+            }
+        }
+    }
+
+    &.push-down {
+        > div {
+            transform: translate3d(-50%, calc(var(--popup-padding-top-outside, 0px) - 10px), 0) scale(0.95, 0.95);
+
+            &:after {
+                opacity: 1;
+                visibility: visible;
+                transition: opacity 0.3s, visibility step-start 0.3s;
+            }
+        }
+    }
+}

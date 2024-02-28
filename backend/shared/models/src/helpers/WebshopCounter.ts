@@ -25,7 +25,7 @@ export class WebshopCounter  {
             if (rows.length == 0) {
                 nextNumber = 1
             } else {
-                const previousNumber: number | null = rows[0]['']['previousNumber'];
+                const previousNumber: number | null = rows[0]['']['previousNumber'] as number|null;
                 nextNumber = (previousNumber ?? 0) + 1
             }
 

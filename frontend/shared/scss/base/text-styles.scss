@@ -949,3 +949,9 @@
         min-width: 0;
     }
 }
+
+.styled-description {
+    &.gray {
+        color: $color-gray-1;
+    }
+}

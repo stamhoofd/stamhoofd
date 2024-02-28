@@ -1,0 +1,160 @@
+@use "../base/variables" as *;
+@use "../base/text-styles" as *;
+
+.modal-backdrop {
+    &:after {
+        background: rgba(black, 0.7);
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        opacity: 1;
+        contain: size layout style paint;
+        transition: opacity 0.3s;
+        z-index: 0;
+    }
+}
+
+.modal {
+    // DO NOT ADD MAX HEIGHT HERE! Always add it to the children of the navigation controllers!
+    //background: rgba(black, 0.7);
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    display: block;
+    z-index: 10000;
+    contain: size layout style paint;
+
+    transform: translate3d(0, 0, 0);
+    
+    // Android fix / fix where position fixed is 100vh, and isn't the same as the viewport
+    bottom: auto;
+    height: 100vh;
+    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
+
+    // Prevent scrolling outer areas when touching the overlay
+    @supports not (overscroll-behavior: contain) {
+        touch-action: none;
+    }
+
+    @media (max-height: 900px) {
+        // Reduce navigation bar height if height is limited
+        --navigation-bar-margin: 10px;
+    }
+
+
+    --popup-padding-top-raw: var(--st-safe-area-top, 0px);
+    --popup-padding-bottom-raw: max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px));
+
+    // We use an intermediate value to allow customisation of the calculation without needing the dependency
+    --popup-padding-top-full: var(--popup-padding-top-raw);
+    --popup-padding-bottom-full: var(--popup-padding-bottom-raw);
+                    
+    // Padding visible below the popup (we'll set this to zero if the keyboard is open to save space)
+    --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(40px * var(--keyboard-closed, 1)));
+    --popup-padding-bottom-outside: max(0px, calc(80px - var(--popup-padding-top-outside, 0px)));
+    
+    --popup-height: calc(var(--vh, 1vh) * 100 - var(--popup-padding-top-outside, 0px) - var(--popup-padding-bottom-outside, 0px));
+
+    // Improve performance
+
+    > div {
+        --popup-padding-top-inside: max(0px, calc(var(--popup-padding-top-full, 0px) - var(--popup-padding-top-outside, 0px)));
+        --popup-padding-bottom-inside: max(0px, calc(var(--popup-padding-bottom-full, 0px) - var(--popup-padding-bottom-outside, 0px)));
+        
+        // Rounded corners need overflow hidden on scroll
+        overflow: hidden;
+        overflow: clip; // More modern + disables scrolling
+
+        -webkit-overflow-scrolling: touch;
+
+        box-sizing: border-box;
+
+        will-change: transform, opacity;
+
+        --saved-vh: var(--vh, 1vh);
+
+        z-index: 1;
+
+        width: auto;
+        contain: layout style paint;
+
+        touch-action: auto;
+        overscroll-behavior: contain;
+
+        >.scrollable-container {
+            overflow: hidden;
+            overflow: clip; // More modern + disables scrolling
+
+            height: 100%;
+            //will-change: scroll-position;
+
+            --vh: calc(var(--popup-height, 0px) / 100);
+            --keyboard-height: 0px;
+            --bottom-padding: 0px;
+            --st-safe-area-bottom: var(--popup-padding-bottom-inside, 0px);
+            --st-safe-area-top: var(--popup-padding-top-inside, 0px);
+    
+        }
+
+        &:after {
+            background: rgba(black, 0.4);
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            opacity: 0;
+            contain: size layout style paint;
+            will-change: opacity, visibility;
+            visibility: hidden;
+            z-index: 20000;
+            transition: opacity 0.3s, visibility step-end 0.3s;
+        }
+
+        .st-view {
+            // We set explicit widths on all views inside a sheet, so we can animate width changes
+            width: min(100vw, var(--st-popup-width, 800px));
+        }
+    }
+
+
+    &.fade-enter-active {
+        &:after {
+            transition: opacity 0.3s;
+        }
+
+        &>div {
+            // Decelerated easing
+            transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1), opacity 0.3s;
+        }
+    }
+
+    &.fade-leave-active {
+        &:after {
+            transition: opacity 0.3s;
+        }
+
+        &>div {
+            // Accelerated easing
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 1, 1), opacity 0.3s;
+        }
+    }
+
+    &.fade-enter,
+    &.fade-leave-to {
+        &:after {
+            opacity: 0;
+        }
+
+        &>div {
+            transform: translate(-50%, 50vh);
+            opacity: 0;
+        }
+    }
+}

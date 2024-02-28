@@ -135,7 +135,7 @@ export { default as PaymentPendingView } from "./src/views/PaymentPendingView.vu
 export { default as PaymentSelectionList } from "./src/views/PaymentSelectionList.vue"
 export { default as TransferPaymentView } from "./src/views/TransferPaymentView.vue"
 
-// Filters
+// Filters old
 export { default as ChoicesFilterView } from "./src/filters/old/ChoicesFilterView.vue"
 export { default as FilterEditor } from "./src/filters/old/FilterEditor.vue"
 export { default as FilterGroupView } from "./src/filters/old/FilterGroupView.vue"
@@ -145,10 +145,16 @@ export { default as PropertyFilterView } from "./src/filters/old/PropertyFilterV
 export { default as RegistrationsFilterView } from "./src/filters/old/RegistrationsFilterView.vue"
 export { default as StringFilterView } from "./src/filters/old/StringFilterView.vue"
 
+// Filters new
+export * from "./src/filters/MemberUIFilters"
+export * from "./src/filters/UIFilter"
+
 // tables
 export * from "./src/tables/Column"
+export { default as ModernTableView } from "./src/tables/ModernTableView.vue"
 export * from "./src/tables/TableAction"
 export { default as TableActionsContextMenu } from "./src/tables/TableActionsContextMenu.vue"
+export * from "./src/tables/TableObjectFetcher"
 export { default as TableView } from "./src/tables/TableView.vue"
 export * from "./src/VueGlobalHelper"
 

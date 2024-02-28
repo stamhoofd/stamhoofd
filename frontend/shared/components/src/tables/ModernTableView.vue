@@ -52,7 +52,7 @@
                         <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter" />
                             <span class="hide-small">Filter</span>
-                            <span v-if="filteredCount > 0" class="bubble primary">{{ filteredText }}</span>
+                            <span v-if="hiddenItemsCount > 0" class="bubble primary">{{ filteredText }}</span>
                         </button>
                     </div>
                 </div>
@@ -106,10 +106,18 @@
                 </div>
             </div>
 
-            <p v-if="totalItemsCount == 0 && allValues.length == 0 " class="info-box">
+            <p v-if="errorMessage" class="error-box with-button">
+                {{ errorMessage }}
+
+                <button class="button text" type="button" @click="refresh">
+                    Opnieuw
+                </button>
+            </p>
+
+            <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0" class="info-box">
                 <slot name="empty" />
             </p>
-            <p v-else-if="totalItemsCount == 0" class="info-box with-button">
+            <p v-else-if="totalFilteredCount === 0" class="info-box with-button">
                 Geen resultaten gevonden
 
                 <button class="button text" type="button" @click="resetFilter">
@@ -132,161 +140,22 @@
 
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, PlainObject, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar,STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective, UIFilter } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
-import { Version } from "@stamhoofd/structures";
+import { SortItemDirection, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
+import UIFilterEditor from "../filters/UIFilterEditor.vue";
 import { Column } from "./Column";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
-
-type Filter = any;
-
-type SortDefinition = {
-    key: string;
-    order: 'ASC' | 'DESC'
-}
-
-interface ObjectFetcher<O> {
-    fetch(data: {
-        filter: Filter,
-        limit: number,
-        search: string
-    }): Promise<O[]>
-
-    fetchCount(data: {
-        filter: Filter,
-        search: string
-    }): Promise<number>
-}
-
-class TableObjectFetcher<O> {
-    objectFetcher: ObjectFetcher<O>
-    
-    objects: O[] = []
-    filter: Filter|null = null
-    searchQuery = ''
-    
-    currentStartIndex = 0;
-    currentEndIndex = 0;
-    fetchMargin = 20
-
-    totalCount: number|null = null
-    totalFilteredCount: number|null = null
-
-    fetchingCount = false;
-    fetchingFilteredCount = false;
-
-    limit = 50
-    sort: SortDefinition[] = []
-
-    // todo: add rate limits if scrolling too fast
-    #clearIndex = 0;
-
-    reset() {
-        this.#clearIndex += 1;
-        this.objects = []
-        this.totalCount = null;
-        this.fetchingCount = false;
-        this.fetchingFilteredCount = false;
-        this.fetchIfNeeded().catch(console.error)
-    }
-
-    setSearchQuery(query: string) {
-        this.searchQuery = query;
-        this.reset()
-    }
-    
-    setFilter(filter: Filter) {
-        this.filter = filter;
-        this.reset();
-    }
-
-    setSort(sort: SortDefinition[]) {
-        this.sort = sort;
-        this.reset();
-    }
-
-    setVisible(startIndex: number, endIndex: number) {
-        // Load more if needed
-        this.currentStartIndex = startIndex
-        this.currentEndIndex = endIndex
-        this.fetchIfNeeded().catch(console.error)
-    }
-
-    async fetchIfNeeded() {
-        const currentClearIndex = this.#clearIndex;
-
-        if (!this.fetchingCount && this.totalCount === null) {
-            this.fetchingCount = true;
-
-            // Fetch count in parallel
-            this.objectFetcher.fetchCount({filter: {}, search: ''}).then((c) => {
-                if (currentClearIndex !== this.#clearIndex) {
-                    // Discard old requests
-                    return;
-                }
-                this.totalCount = c;
-                this.fetchingCount = false;
-                this.fetchIfNeeded().catch(console.error);
-            }).catch(console.error)
-        }
-
-        if (!this.fetchingFilteredCount && this.totalFilteredCount === null) {
-            this.fetchingFilteredCount = true;
-
-            // Fetch count in parallel
-            this.objectFetcher.fetchCount({filter: this.filter, search: this.searchQuery}).then((c) => {
-                if (currentClearIndex !== this.#clearIndex) {
-                    // Discard old requests
-                    return;
-                }
-                this.totalFilteredCount = c;
-                this.fetchingFilteredCount = false;
-            }).catch(console.error)
-        }
-
-        const fetchUntil = Math.max(this.totalCount ?? 1, this.currentEndIndex + this.fetchMargin)
-        if (fetchUntil > this.objects.length) {
-            // Fetch next page
-            const lastId = this.objects[this.objects.length - 1];
-            
-            const objects = await this.objectFetcher.fetch({
-                filter: {
-                    $and: [
-                        // todo: this needs a proper definition
-                        {
-                            [this.sort[0].key]: {
-                                '$gt': lastId
-                            }
-                        },
-                        {
-                            id: {
-                                '$gt': lastId
-                            }
-                        },
-                        this.filter
-                    ]
-                },
-                limit: Math.min(this.limit, this.objects.length - fetchUntil),
-                search: this.searchQuery
-            })
-            if (currentClearIndex !== this.#clearIndex) {
-                // Discard old requests
-                return;
-            }
-            this.objects.push(...objects)
-            await this.fetchIfNeeded()
-        }
-    }
-}
-
+import {TableObjectFetcher} from "./TableObjectFetcher"
 
 interface TableListable {
     id: string;
@@ -312,11 +181,6 @@ class VisibleRow<T> {
     skeletonPercentage = Math.random() * 0.5 + 0.5
 }
 
-enum SortDirection {
-    "Ascending" = "ASC",
-    "Descending" = "DESC"
-}
-
 class EnabledColumnConfiguration extends AutoEncoder {
     @field({ decoder: StringDecoder })
         id: string
@@ -338,8 +202,8 @@ class ColumnConfiguration extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
         sortColumnId?: string
 
-    @field({ decoder: new EnumDecoder(SortDirection), optional: true })
-        sortDirection:  SortDirection = SortDirection.Ascending
+    @field({ decoder: new EnumDecoder(SortItemDirection), optional: true })
+        sortDirection:  SortItemDirection = SortItemDirection.ASC
 }
 
 @Component({
@@ -367,13 +231,13 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
     @Prop({ required: false, default: () => [] })
         actions!: TableAction<Value>[]
 
-    @Prop({ required: false, default: null })
-        estimatedRows!: number | null
+    @Prop({ required: false, default: 30 })
+        estimatedRows!: number
 
     @Prop({required: true})
         tableObjectFetcher: TableObjectFetcher<Value>
 
-    selectedFilter: Filter | null = null
+    selectedUIFilter: UIFilter | null = null
     searchQuery = ""
 
     // Where to store the latest column configuration, so we can reload it instead of switching to the defaults each time
@@ -393,7 +257,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         defaultSortColumn!: Column<Value, any> | null
 
     @Prop({ required: false, default: null })
-        defaultSortDirection!: SortDirection | null
+        defaultSortDirection!: SortItemDirection | null
 
     get showPrefix() {
         return this.prefixColumn !== null && this.wrapColumns && this.prefixColumn.enabled
@@ -421,7 +285,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         return this.tableObjectFetcher.totalCount
     }
 
-    get filteredCount() {
+    get hiddenItemsCount() {
         if (this.tableObjectFetcher.totalCount ===  null || this.tableObjectFetcher.totalFilteredCount ===  null) {
             return 0;
         }
@@ -436,7 +300,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
     showSelection = !this.isMobile
 
     sortBy: Column<Value, any> = this.defaultSortColumn ?? this.columns[0]
-    sortDirection: SortDirection = this.defaultSortDirection ?? SortDirection.Ascending
+    sortDirection: SortItemDirection = this.defaultSortDirection ?? SortItemDirection.ASC
 
     visibleRows: VisibleRow<Value>[] = []
 
@@ -458,11 +322,41 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
     isColumnDragActive = false
     dragType: "width" | "order" = "width"
 
+    created() {
+        this.onSortChange()
+    }
+
     @Watch("allColumns")
     onUpdateColumns() {
         console.log('update columns')
         this.loadColumnConfiguration().catch(console.error)
         this.updateVisibleRows()
+    }
+
+    @Watch("sortBy")
+    onSortChange() {
+        this.tableObjectFetcher.setSort([
+            {
+                key: this.sortBy.id,
+                order: this.sortDirection
+            }
+        ])
+    }
+
+    @Watch("sortDirection")
+    onToggleSortDirection() {
+        this.onSortChange()
+    }
+
+    @Watch("selectedUIFilter", {deep: true})
+    onUIFilterChanged() {
+        const filter = this.selectedUIFilter ? this.selectedUIFilter.build() : null;
+        this.tableObjectFetcher.setFilter(filter)
+    }
+
+    @Watch("searchQuery")
+    onSearchQueryChanged() {
+        this.tableObjectFetcher.setSearchQuery(this.searchQuery)
     }
 
     getEventX(event: any) {
@@ -728,6 +622,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         this.getScrollElement(this.$refs["table"] as HTMLElement).removeEventListener("scroll", this.onScroll)
         window.removeEventListener("resize", this.onResize)
         document.removeEventListener("visibilitychange", this.doRefresh)
+        this.tableObjectFetcher.destroy();
     }
 
     lastRefresh = new Date()
@@ -736,17 +631,15 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         document.addEventListener("visibilitychange", this.doRefresh);
     }
 
+    refresh() {
+        this.lastRefresh = new Date()
+        this.tableObjectFetcher.reset()
+    }
+
     doRefresh() {
         if (document.visibilityState === 'visible') {
-            // TODO
             console.info("Window became visible again")
-
-            //if (this.lastRefresh.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
-            // Update when at least 5 minutes inactive
-            console.info("Updating table contents")
-            this.lastRefresh = new Date()
-            this.$emit("refresh")
-            //}
+            this.refresh()
         }
     }
 
@@ -805,7 +698,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
                     const sortBy = this.allColumns.find(c => c.id === decoded.sortColumnId)
                     if (sortBy) {
                         this.sortBy = sortBy
-                        this.sortDirection = decoded.sortDirection ?? SortDirection.Ascending
+                        this.sortDirection = decoded.sortDirection ?? SortItemDirection.ASC
                     }
                 }
 
@@ -1188,7 +1081,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
 
     resetFilter() {
         this.searchQuery = ""
-        this.selectedFilter = null
+        this.selectedUIFilter = null
     }
 
     /**
@@ -1213,16 +1106,22 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
     }
 
     editFilter() {
-        // this.present(new ComponentWithProperties(NavigationController, {
-        //     root: new ComponentWithProperties(FilterEditor, {
-        //         definitions: this.filterDefinitions,
-        //         selectedFilter: this.selectedFilter,
-        //         organization: this.organization,
-        //         setFilter: (filter: Filter<any>) => {
-        //             this.selectedFilter = filter
-        //         }
-        //     })
-        // }).setDisplayStyle("side-view"))
+        const filter = this.selectedUIFilter ?? this.tableObjectFetcher.objectFetcher.uiFilterBuilders[0].create()
+        if (!this.selectedUIFilter) {
+            this.selectedUIFilter = filter;
+        }
+
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(UIFilterEditor, {
+                        filter
+                    })
+                })
+            ],
+            modalDisplayStyle: 'popup',
+            modalClass: 'filter-sheet'
+        })
     }
 
     get values() {
@@ -1242,10 +1141,10 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
             return
         }
         if (this.sortBy === column) {
-            if (this.sortDirection === SortDirection.Ascending) {
-                this.sortDirection = SortDirection.Descending;
+            if (this.sortDirection === SortItemDirection.ASC) {
+                this.sortDirection = SortItemDirection.DESC;
             } else {
-                this.sortDirection = SortDirection.Ascending;
+                this.sortDirection = SortItemDirection.ASC;
             }
         } else {
             this.sortBy = column;
@@ -1529,8 +1428,8 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         // During animations, the scrollTop often jumps temporarily to a negative value
         topOffset = Math.max(0, (scrollElement.scrollTop - this.cachedTableYPosition))
 
-        const totalItems = this.totalItemsCount
-        const extraItems = 5
+        const totalItems = this.totalFilteredCount
+        const extraItems = 10
 
         const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, totalItems - 1))
 
@@ -1578,6 +1477,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         }
 
         //console.log("Rendered rows: "+this.visibleRows.length)
+        this.tableObjectFetcher.setVisible(firstVisibleItemIndex, lastVisibleItemIndex)
     }
 
     get rowHeight() {
@@ -1597,12 +1497,41 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         (this.$refs["table"] as HTMLElement).style.setProperty("--table-row-height", `${this.rowHeight}px`);
     }
 
-    get totalItemsCount() {
+    get totalFilteredCount() {
+        if (this.errorMessage) {
+            return 0;
+        }
         return this.tableObjectFetcher.totalFilteredCount ?? this.estimatedRows ?? 0;
     }
 
+    get totalItemsCount() {
+        return this.tableObjectFetcher.totalCount
+    }
+
     get totalHeight() {
-        return this.rowHeight * this.totalItemsCount
+        return this.rowHeight * this.totalFilteredCount
+    }
+
+    get errorMessage() {
+        if (this.tableObjectFetcher.errorState) {
+            const errors = this.tableObjectFetcher.errorState
+            
+            let simpleErrors!: SimpleErrors
+            if (isSimpleError(errors)) {
+                simpleErrors = new SimpleErrors(errors)
+            } else if (isSimpleErrors(errors)) {
+                simpleErrors = errors
+            } else {
+                simpleErrors = new SimpleErrors(new SimpleError({
+                    code: "unknown_error",
+                    message: errors.message
+                }))
+            }
+
+            return simpleErrors.getHuman();
+        }
+
+        return null;
     }
 
     getPrevious(value: Value): Value | null {

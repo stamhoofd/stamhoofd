@@ -1,0 +1,115 @@
+@use "../base/variables" as *;
+@use "../base/text-styles" as *;
+@use "./modal.scss" as *;
+
+.modal-dynamic-size {
+    @extend .modal;
+
+    .navigation-controller {
+        transition: height 0.25s cubic-bezier(0.4, 0.0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+        will-change: height, width;
+    }
+
+
+    > div {
+        transition: transform 0.3s, opacity 0.3s;
+        will-change: transform, opacity;
+        max-height: var(--popup-height);
+
+        .st-view {
+            contain: content;
+            // We set explicit widths on all views inside a sheet, so we can animate width changes
+            width: min(100vw, var(--st-sheet-width, 400px));
+
+            // Automatic height
+            height: auto;
+            min-height: 0;
+            max-height: calc(var(--vh, 1vh) * 100);
+            contain: content;
+        }
+    }
+}
+
+.sheet {
+    @extend .modal-dynamic-size;
+    @extend .modal-backdrop;
+
+    &.fade-enter,
+    &.fade-leave-to {
+        &>div {
+            transform: translate(-50%, 30vh);
+        }
+    }
+
+    > div {
+        background: $color-background;
+        border-radius: $border-radius-modals;
+
+        position: absolute;
+        left: 50%;
+        top: 50%;
+
+        transform: translate(-50%, -50%) translate(0, calc(var(--popup-padding-top-outside, 0px) / 2 - var(--popup-padding-bottom-outside, 0px) / 2));
+        transform-origin: 50% 50%;
+
+        box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+    }
+}
+
+.filter-sheet {
+    @extend .modal-dynamic-size;
+
+    --filter-offset-top: 180px; // todo: pass from JS
+
+    // We use an intermediate value to allow customisation of the calculation without needing the dependency
+    --popup-padding-top-full: max(var(--popup-padding-top-raw), var(--filter-offset-top, 0px));
+
+    --st-horizontal-padding: 30px;
+    --st-vertical-padding: 30px;
+
+    &.fade-enter,
+    &.fade-leave-to {
+        &>div {
+            transform: translate(0, calc(var(--popup-padding-top-outside, 0px) - 40px));
+        }
+    }
+
+    &.fade-enter-active {
+        &:after {
+            transition: opacity 0.2s;
+        }
+
+        &>div {
+            // Decelerated easing
+            transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), opacity 0.2s;
+        }
+    }
+
+    &.fade-leave-active {
+        &:after {
+            transition: opacity 0.2s;
+        }
+
+        &>div {
+            // Accelerated easing
+            transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1), opacity 0.2s;
+        }
+    }
+
+    > div {
+        background: $color-background-shade;
+        
+        --color-current-background: #{$color-background-shade};
+        --color-current-background-shade: #{$color-background-shade-darker};
+
+        border-radius: $border-radius-modals;
+        border: $border-width-thin solid $color-border;
+        @extend .style-overlay-shadow;
+
+        position: absolute;
+        right: 40px;
+
+        transform: translate(0, var(--popup-padding-top-outside, 0px));
+        transform-origin: 100% 0%;
+    }
+}

@@ -140,6 +140,16 @@ export * from "./src/Graph"
 // Email
 export * from "./src/email/EmailAddressSettings"
 export * from "./src/email/EmailTemplate"
+
+// Filters
+export * from "./src/filters/new/InMemoryFilter"
+export * from "./src/filters/new/InMemorySorter"
+export * from "./src/filters/new/Sorters"
+export * from "./src/filters/new/SortList"
+export * from "./src/filters/new/StamhoofdFilter"
+export * from "./src/filters/new/FilteredRequest"
+
+// Filters old
 export * from "./src/filters/ChoicesFilter"
 export * from "./src/filters/DateFilter"
 export * from "./src/filters/FilterDefinition"

@@ -8,6 +8,8 @@
 
 html.modern {
     overflow: hidden;
+    overflow: clip; // More modern + disables scrolling
+    
     height: 100vh;
     height: 100dvh; // iOS: don't include overlays in height
 }
@@ -20,6 +22,8 @@ body.modern {
     }
 
     overflow: hidden;
+    overflow: clip; // More modern + disables scrolling
+
     height: 100vh;
     height: 100dvh; // iOS: don't include overlays in height
 
@@ -54,6 +58,7 @@ body.modern.web-iOS {
     max-height: 100dvh;
 
     overflow: hidden;
+    overflow: clip; // More modern + disables scrolling
 
     --current-view-safe-area-top: var(--st-safe-area-top, 0px);
     --current-view-safe-area-bottom: var(--st-safe-area-bottom, 0px);
@@ -221,8 +226,7 @@ body.modern.web-iOS {
         }
     }
 
-    .sheet &,
-    .box & {
+    .box {
         height: auto;
         min-height: 0;
         max-height: calc(var(--vh, 1vh) * 100);
@@ -348,10 +352,6 @@ body.modern.web-iOS {
             --color-current-background-shade: #{$color-background-shade-darker};
         }
     }
-}
-
-.sheet .st-view {
-    min-height: auto;
 }
 
 .full-product-box .st-view {

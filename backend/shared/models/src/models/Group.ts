@@ -205,7 +205,7 @@ export class Group extends Model {
         const [results] = await Database.select(query, params)
         const count = results[0]['']['c'];
         if (Number.isInteger(count)) {
-            return count
+            return count as number
         }
         return null
     }
