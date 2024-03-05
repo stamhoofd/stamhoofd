@@ -76,6 +76,10 @@
             <STInputBox title="Maximum leeftijd" error-fields="maxAge" :error-box="errorBox">
                 <NumberInput v-model="maxAge" placeholder="Geen" :required="false" suffix="jaar" />
             </STInputBox>
+
+            <hr>
+            <h2>Bedrag</h2>
+            <Checkbox v-model="paidOnly">Enkel aanmaken indien gekoppelde prijs groter is dan 0 euro</Checkbox>
         </template>
     </SaveView>
 </template>
@@ -85,7 +89,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patch
 import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { Checkbox, CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager } from "@stamhoofd/networking";
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType, Version } from "@stamhoofd/structures";
 import { StringCompare } from "@stamhoofd/utility";
@@ -107,7 +111,8 @@ import { participation } from "./definitions/participation";
         NumberInput,
         STErrorsDefault,
         MultiSelectInput,
-        LoadingButton
+        LoadingButton,
+        Checkbox
     }
 })
 export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
@@ -216,6 +221,26 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 maxAge: age
             })
         })
+    }
+
+    get minPrice() {
+        return this.patchedDocument.settings.minPrice
+    }
+
+    set minPrice(minPrice: number | null) {
+        this.patchDocument = this.patchDocument.patch({
+            settings: DocumentSettings.patch({
+                minPrice
+            })
+        })
+    }
+
+    get paidOnly() {
+        return this.minPrice === 1;
+    }
+
+    set paidOnly(paidOnly: boolean) {
+        this.minPrice = paidOnly ? 1 : 0;
     }
 
     setLinkedFields(linkedField: RecordSettings, recordIds: string[]) {
