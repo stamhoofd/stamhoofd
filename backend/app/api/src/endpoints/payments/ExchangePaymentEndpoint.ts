@@ -362,7 +362,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
      */
     static shouldTryToCancel(status: PaymentStatus, payment: Payment) {
         if ((status == PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
-            let timeout = STAMHOOFD.environment === 'development' ? 60*1000*2 : 60*1000*15;
+            let timeout = STAMHOOFD.environment === 'development' ? 60*1000*2 : 60*1000*30;
 
             // If payconiq and not yet 'identified' (scanned), cancel after 5 minutes
             if (payment.provider === PaymentProvider.Payconiq && status === PaymentStatus.Created) {

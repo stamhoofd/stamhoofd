@@ -225,31 +225,27 @@ export class Order extends Model {
             }
 
             // Send an email if the payment failed after 15 minutes being pending
-            const difference = new Date().getTime() - this.createdAt.getTime()
-            if (difference > 1000 * 60 * 10 && difference < 1000 * 60 * 60 * 24) {
-
-                if (payment && payment.method !== PaymentMethod.Transfer && payment.method !== PaymentMethod.PointOfSale) {
-                    console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Sending email.')
-                    const webshop = await Webshop.getByID(this.webshopId)
-
-                    if (!webshop) {
-                        console.error("Missing organization or webshop for order "+this.id)
-                        return
-                    }
-
-                    const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true)
-
-                    await this.setRelation(Order.webshop, webshop.setRelation(Order.organization, organization)).sendEmailTemplate({
-                        type: EmailTemplateType.OrderOnlinePaymentFailed,
-                        from,
-                        replyTo
-                    })
-                } else {
-                    console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Payment method not matching.')
-                }
-            } else {
-                console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Not sending email.')
-            }
+            // const difference = new Date().getTime() - this.createdAt.getTime()
+            // if (difference > 1000 * 60 * 30 && difference < 1000 * 60 * 60 * 24) {
+            //    if (payment && payment.method !== PaymentMethod.Transfer && payment.method !== PaymentMethod.PointOfSale) {
+            //        console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Sending email.')
+            //        const webshop = await Webshop.getByID(this.webshopId)
+            //        if (!webshop) {
+            //            console.error("Missing organization or webshop for order "+this.id)
+            //            return
+            //        }
+            //        const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId, true)
+            //        await this.setRelation(Order.webshop, webshop.setRelation(Order.organization, organization)).sendEmailTemplate({
+            //            type: EmailTemplateType.OrderOnlinePaymentFailed,
+            //            from,
+            //            replyTo
+            //        })
+            //    } else {
+            //        console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Payment method not matching.')
+            //    }
+            // } else {
+            //     console.log('Marked order '+this.id+' as payment failed after ' + (difference / 1000 / 60).toFixed(1) + ' mins. Not sending email.')
+            // }
         } else {
             this.markUpdated()
             await this.save()
