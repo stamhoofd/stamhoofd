@@ -94,7 +94,7 @@ export class RegisterCode extends Model {
         let credit: STCredit | undefined = undefined
         let usedCode: UsedRegisterCode | undefined = undefined
 
-        if (code.value > 0 && otherOrganization) {
+        if (code.value > 0) {
             // Create initial credit
             credit = new STCredit()
             credit.organizationId = organization.id
@@ -121,6 +121,13 @@ export class RegisterCode extends Model {
                     text: "Dag "+otherOrganization.name+",\n\nGoed nieuws! "+organization.name+" heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
                 })
             }
+        } else {
+            delayEmails.push({
+                to: 'hallo@stamhoofd.be',
+                subject: organization.name+" heeft jullie doorverwijzingslink gebruikt 🥳",
+                type: "transactional",
+                text: "Dag Stamhoofd,\n\nGoed nieuws! "+organization.name+" heeft jullie doorverwijzingslink "+code.code+" gebruikt om zich op Stamhoofd te registreren. \n\n— Stamhoofd"
+            })
         }
 
         // Save that we used this code (so we can reward the other organization)
