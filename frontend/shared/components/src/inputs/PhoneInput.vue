@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="phone" :error-box="errorBox">
-        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" @change="validate(false)" @input="phoneRaw = $event.target.value; onTyping();">
+        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" type="tel" @change="validate(false)" @input="phoneRaw = $event.target.value; onTyping();">
     </STInputBox>
 </template>
 
