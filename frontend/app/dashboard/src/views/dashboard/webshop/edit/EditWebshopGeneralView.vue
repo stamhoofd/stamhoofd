@@ -82,16 +82,19 @@
             <TimeInput v-model="openAt" title="Om" :validator="validator" /> 
         </div>
 
-        <div v-if="isNew" class="container">
+        <div class="container">
             <hr>
             <h2>Nummering</h2>
-            <p class="info-box">
-                Je kan dit achteraf niet meer wijzigen.
+            <p class="warning-box" v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous">
+                Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen). 
+            </p>
+            <p class="warning-box" v-else-if="numberingType == WebshopNumberingType.Random">
+                Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend. 
             </p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" />
+                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
                     <h3 class="style-title-list">
                         Gebruik opeenvolgende bestelnummers
                     </h3>
@@ -100,7 +103,7 @@
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Random" />
+                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Random" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
                     <h3 class="style-title-list">
                         Gebruik willekeurige bestelnummers
                     </h3>
@@ -328,6 +331,10 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         }
 
         this.addPatch(p)
+    }
+
+    get originalNumberingType() {
+        return this.originalWebshop.privateMeta.numberingType
     }
 
     get numberingType() {
