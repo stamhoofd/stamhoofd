@@ -2483,6 +2483,11 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.16.0.tgz#9df760744ffde43363056e1ffe276668cbcb7fbf"
   integrity sha512-41u4f+sR91YmEAyHoqLvqNmrrHZknwGBbs73QToV5vk4bCTam9eE4XQCBjcLBpVCbmWgDWdodzXChfMBV86e6A==
 
+"@simonbackx/vue-app-navigation@1.25.0":
+  version "1.25.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.25.0.tgz#b9e864da3e45ab734f42f78543a3ea980225abb1"
+  integrity sha512-EpxALqiRPlDJecKoX+yyRmp+XJkaZjoao0bTr7y881zO3N34a5MgAb7Y1xbVTP/I2JoaM1pz1MFdNsNF2bckJg==
+
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@simonbackx/webfonts-loader/-/webfonts-loader-0.0.1.tgz#f68497b61c56554c4544ab6235170185bf307252"
