@@ -3,8 +3,8 @@
         <STNavigationBar :add-shadow="wrapColumns" :title="title">
             <template #left>
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
-                <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="setSelectAll(!cachedAllSelected)">
-                    <template v-if="cachedAllSelected">
+                <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="setSelectAll(!isAllSelected)">
+                    <template v-if="isAllSelected">
                         Deselecteer alles
                     </template>
                     <template v-else>
@@ -17,7 +17,7 @@
             </template>
             <template #right>
                 <template v-if="!isIOS || !isMobile">
-                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action, $event)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" @click="handleAction(action, $event)" />
                 </template>
 
                 <template v-if="showSelection && isIOS && canLeaveSelectionMode">
@@ -62,7 +62,7 @@
                 <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
                     <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
-                            <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
+                            <Checkbox :checked="isAllSelected" @change="setSelectAll($event)" />
                         </div>
 
                         <div class="columns">
@@ -127,7 +127,7 @@
         </main>
 
         <STButtonToolbar v-if="isIOS && isMobile">
-            <button v-for="(action, index) of filteredActions" :key="index" type="button" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0 ? undefined : handleAction(action, $event)">
+            <button v-for="(action, index) of filteredActions" :key="index" type="button" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && !hasSelection" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && !hasSelection ? undefined : handleAction(action, $event)">
                 <span :class="'icon '+action.icon" />
             </button>
 
@@ -156,7 +156,7 @@ import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
-import {TableObjectFetcher} from "./TableObjectFetcher"
+import {FetchAllOptions, TableObjectFetcher} from "./TableObjectFetcher"
 
 interface TableListable {
     id: string;
@@ -433,9 +433,14 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: event.changedTouches ? event.changedTouches[0].pageX : event.clientX,
             y: event.changedTouches ? event.changedTouches[0].pageY : event.clientY,
-            focused: [row.value!],
             actions,
-            table: this,
+            selection: {
+                isSingle: true,
+                hasSelection: true,
+                getSelection: () => {
+                    return [row.value!]
+                }
+            }
         });
 
         this.present(displayedComponent.setDisplayStyle("overlay"));
@@ -1206,8 +1211,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         }
 
         // Update cached all selection
-        this.cachedAllSelected = this.getSelectAll()
-        this.cachedSelectionCount = this.markedRowsAreSelected ? this.markedRows.size : (this.filteredValues.length - this.markedRows.size)
+        this.updateHasSelection()
     }
 
     setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
@@ -1233,12 +1237,21 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         
 
         // Update cached all selection
-        this.cachedAllSelected = this.getSelectAll()
-        this.cachedSelectionCount = this.markedRowsAreSelected ? this.markedRows.size : (this.filteredValues.length - this.markedRows.size)
+        this.updateHasSelection()
     }
 
-    cachedAllSelected = false
-    cachedSelectionCount = 0
+    isAllSelected = false
+    hasSelection = false;
+    hasSingleSelection = false;
+
+    /**
+     * Cached because of usage of maps which are not reactive
+     */
+    updateHasSelection() {
+        this.hasSelection = this.markedRowsAreSelected ? this.markedRows.size > 0 : (((this.tableObjectFetcher.totalFilteredCount ?? this.values.length) - this.markedRows.size) > 0)
+        this.isAllSelected = this.getSelectAll()
+        this.hasSingleSelection = this.markedRowsAreSelected && this.markedRows.size === 1
+    }
 
     /**
      * This is not reactive, due to the use of maps, which are not reactive in vue.
@@ -1246,7 +1259,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
      */
     getSelectAll(): boolean {
         if (this.markedRowsAreSelected) {
-            return this.markedRows.size === this.filteredValues.length
+            return this.markedRows.size === (this.tableObjectFetcher.totalFilteredCount ?? this.values.length)
         } else {
             return this.markedRows.size === 0
         }
@@ -1259,29 +1272,49 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         for (const visibleRow of this.visibleRows) {
             visibleRow.cachedSelectionValue = selected
         }
-        this.cachedAllSelected = selected
-        this.cachedSelectionCount = selected ? this.filteredValues.length : 0
+        this.updateHasSelection()
     }
 
-    getSelection(allowAutoSelectAll = true): Value[] {
-        if (!this.showSelection || this.cachedSelectionCount == 0) {
-            return this.sortedValues
+    async getSelection(options?: FetchAllOptions): Promise<Value[]> {
+        if (!this.showSelection || !this.hasSelection) {
+            return await this.tableObjectFetcher.fetchAll(options)
         }
 
         // TODO: fix sorting
 
         if (this.markedRowsAreSelected) {
+            // No async needed
             return Array.from(this.markedRows.values())
         } else {
-            return Array.from(this.tableObjectFetcher.objects).filter(val => !this.markedRows.has(val.id))
+            const all = await this.tableObjectFetcher.fetchAll(options);
+            return Array.from(all).filter(val => !this.markedRows.has(val.id))
+        }
+    }
+
+    getExpectedSelectionLength(): number {
+        if (!this.showSelection || !this.hasSelection) {
+            return this.tableObjectFetcher.totalFilteredCount ?? this.values.length ?? 0
+        }
+
+        // TODO: fix sorting
+
+        if (this.markedRowsAreSelected) {
+            return this.markedRows.size
+        } else {
+            return (this.tableObjectFetcher.totalFilteredCount  ?? this.values.length ?? 0) - this.markedRows.size
         }
     }
 
     handleAction(action: TableAction<Value>, event) {
-        const selection = this.getSelection(action.allowAutoSelectAll)
-        if (selection.length == 0 && action.needsSelection) {
+        if (action.needsSelection && this.getExpectedSelectionLength() === 0) {
             return
         }
+
+        const selection = {
+            isSingle: this.hasSingleSelection,
+            hasSelection: this.hasSelection,
+            getSelection: this.getSelection
+        };
 
         if (action.hasChildActions) {
             const el = event.currentTarget;
@@ -1294,8 +1327,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
                 xPlacement: "right",
                 yPlacement: isOnTop ? "bottom" : "top",
                 actions: action.getChildActions(),
-                table: this,
-                focused: this.showSelection && this.isMobile ? selection : []
+                selection
             });
             this.present(displayedComponent.setDisplayStyle("overlay"));
             return
@@ -1327,7 +1359,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         }
 
         // Add select all action
-        if (!this.cachedAllSelected) {
+        if (!this.isAllSelected) {
             actions.push(new TableAction({
                 name: "Selecteer alles",
                 groupIndex: -1,
@@ -1363,14 +1395,19 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
             childMenu: this.getSortingContextMenu()
         }))
 
+        const selection = {
+            isSingle: this.hasSingleSelection,
+            hasSelection: this.hasSelection,
+            getSelection: this.getSelection
+        };
+
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: bounds.right,
             y: bounds.top + (isOnTop ? el.offsetHeight : 0),
             xPlacement: "left",
             yPlacement: isOnTop ? "bottom" : "top",
             actions,
-            table: this,
-            focused: this.showSelection  && this.isMobile ? this.getSelection() : []
+            selection
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

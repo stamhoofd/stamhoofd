@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from "@stamhoofd/components";
+import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, FetchAllOptions, Toast } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { TableAction } from "./TableAction";
@@ -31,8 +31,8 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
     /**
      * Act only on selection given here
      */
-    @Prop({ default: () => [] })
-    focused!: any[];
+    //@Prop({ default: () => [] })
+    //focused!: any[];
 
     @Prop({ required: false })
     table?: TableView<any>;
@@ -40,23 +40,25 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     actions: TableAction<any>[];
 
+    /**
+     * Act only on selection given here
+     */
+    @Prop({ default: () => [] })
+    selection!: {hasSelection: boolean, isSingle: boolean, getSelection(options?: FetchAllOptions): Promise<any[]>}
+
     isDisabled(action: TableAction<any>) {
-        return !this.hasSelection && action.needsSelection && (!this.table || !action.allowAutoSelectAll)
+        return action.isDisabled(this.hasSelection)//!this.hasSelection && action.needsSelection && (!this.table || !action.allowAutoSelectAll)
     }
 
     get hasSelection() {
-        return this.focused.length > 0 || (this.table && this.table.cachedSelectionCount > 0);
+        return this.selection.hasSelection
     }
 
     handleAction(action: TableAction<any>, event) {
-        if (this.focused.length > 0 || !this.table) {
-            action.handle(this.focused)?.catch((e) => {
-                console.error(e)
-                Toast.fromError(e).show()
-            })
-        } else {
-            this.table.handleAction(action, event)
-        }
+        action.handle(this.selection)?.catch((e) => {
+            console.error(e)
+            Toast.fromError(e).show()
+        })
     }
 
     get groupedActions() {
@@ -66,10 +68,10 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
                 if (!action.enabled) {
                     return false
                 }
-                if (action.singleSelection && this.focused.length != 1) {
+                if (action.singleSelection && !this.selection.isSingle) {
                     return false;
                 }
-                if (!action.needsSelection && this.focused.length > 0) {
+                if (!action.needsSelection && this.selection.hasSelection) {
                     return false;
                 }
 
@@ -104,7 +106,7 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
         return new ComponentWithProperties(TableActionsContextMenu, {
             actions: action.getChildActions(),
             table: this.table,
-            focused: this.focused,
+            selection: this.selection
         })
     }
 }

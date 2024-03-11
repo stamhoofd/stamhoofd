@@ -17,7 +17,6 @@
     width: 24px;
     height: 24px;
     overflow: hidden;
-    contain: strict;
 
     > svg {
         width: 24px;
@@ -37,7 +36,6 @@
 .spinner-container {
     width: 24px;
     height: 24px;
-    contain: strict;
 
     &.inline {
         display: inline-block;

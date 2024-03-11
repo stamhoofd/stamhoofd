@@ -10,6 +10,10 @@ export interface ObjectFetcher<O> {
     destroy(): void
 }
 
+export type FetchAllOptions = {
+    onProgress?: (count: number, total: number) => void
+}
+
 export class TableObjectFetcher<O extends {id: string}> {
     objectFetcher: ObjectFetcher<O>
     
@@ -30,6 +34,7 @@ export class TableObjectFetcher<O extends {id: string}> {
     delayFetchUntil: Date|null = null;
 
     limit = 100
+    maxLimit = 100
     minimumLimit = 20
     sort: SortList = []
 
@@ -52,6 +57,36 @@ export class TableObjectFetcher<O extends {id: string}> {
         Request.cancelAll(this.objectFetcher)
         this.objectFetcher.destroy()
         this.objects = [] // Fast memory cleanup
+    }
+
+    async fetchAll(options?: FetchAllOptions) {
+        // todo: check if we have all or nearly all already.
+
+        let next: LimitedFilteredRequest|null = new LimitedFilteredRequest({
+            filter: this.filter,
+            pageFilter: null,
+            sort: [], // use default most performant sort
+            limit: this.maxLimit,
+            search: this.searchQuery
+        });
+
+        const results: O[] = []
+
+        while (next) {
+            const data = await this.objectFetcher.fetch(next)
+            next = data.next ?? null;
+            results.push(...data.results)
+
+            if (data.results.length === 0) {
+                next = null;
+            }
+
+            if (options?.onProgress) {
+                options.onProgress(results.length, this.totalFilteredCount ?? results.length)
+            }
+        }
+
+        return results;
     }
 
     resetRetryCount() {

@@ -394,12 +394,17 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             }))
         }
 
+        const selection = {
+            isSingle: true,
+            hasSelection: true,
+            getSelection: () => [row.value!]
+        };
+
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: event.changedTouches ? event.changedTouches[0].pageX : event.clientX,
             y: event.changedTouches ? event.changedTouches[0].pageY : event.clientY,
-            focused: [row.value!],
             actions,
-            table: this,
+            selection
         });
 
         this.present(displayedComponent.setDisplayStyle("overlay"));
@@ -1239,10 +1244,16 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     handleAction(action: TableAction<Value>, event) {
-        const selection = this.getSelection(action.allowAutoSelectAll)
-        if (selection.length == 0 && action.needsSelection) {
+        const s = this.getSelection(action.allowAutoSelectAll)
+        if (s.length == 0 && action.needsSelection) {
             return
         }
+
+        const selection = {
+            isSingle: s.length === 1,
+            hasSelection: this.cachedSelectionCount > 0,
+            getSelection: () => s
+        };
 
         if (action.hasChildActions) {
             const el = event.currentTarget;
@@ -1255,8 +1266,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 xPlacement: "right",
                 yPlacement: isOnTop ? "bottom" : "top",
                 actions: action.getChildActions(),
-                table: this,
-                focused: this.showSelection && this.isMobile ? selection : []
+                selection
             });
             this.present(displayedComponent.setDisplayStyle("overlay"));
             return
@@ -1324,14 +1334,20 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             childMenu: this.getSortingContextMenu()
         }))
 
+        const s = this.getSelection()
+        const selection = {
+            isSingle: s.length === 1,
+            hasSelection: this.cachedSelectionCount > 0,
+            getSelection: () => s
+        };
+
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: bounds.right,
             y: bounds.top + (isOnTop ? el.offsetHeight : 0),
             xPlacement: "left",
             yPlacement: isOnTop ? "bottom" : "top",
             actions,
-            table: this,
-            focused: this.showSelection  && this.isMobile ? this.getSelection() : []
+            selection
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

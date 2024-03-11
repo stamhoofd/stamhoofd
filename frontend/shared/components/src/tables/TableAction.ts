@@ -1,6 +1,6 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
-import { Toast } from "../..";
+import { FetchAllOptions, Toast } from "../..";
 
 export class TableAction<T> {
     name: string;
@@ -45,6 +45,10 @@ export class TableAction<T> {
         }
     }
 
+    isDisabled(hasSelection: boolean) {
+        return !hasSelection && this.needsSelection && !this.allowAutoSelectAll
+    }
+
     getChildActions(): TableAction<T>[] {
         if (this.childActions instanceof Array) {
             return this.childActions
@@ -78,26 +82,23 @@ export class TableAction<T> {
         return this
     }
 
-    async handle(item: T[]) {
-        const promise = this.handler(item)
-
-        if (!promise) {
-            return
-        }
-
-        let toast: Toast | null = null
-
+    async handle(data: {getSelection(options?: FetchAllOptions): Promise<T[]>|T[]}) {
+        let toast: Toast = new Toast("Ophalen...", "spinner").setHide(null)
         const timer = setTimeout(() => {
-            toast = new Toast("Actie uitvoeren...", "spinner").setHide(null).show()
+            toast.show()
         }, 2000)
 
-        return promise.then((v) => {
-            if (toast) {
-                toast.hide()
-                toast = null
-            }
+        try {
+            const items = await data.getSelection({
+                onProgress(count, total) {
+                    toast.setProgress(total !== 0 ? (count / total) : 0)
+                }
+            });
+            toast.message = 'Actie uitvoeren...'
+            await this.handler(items);
+        } finally {
             clearTimeout(timer)
-            return v
-        })
+            toast.hide();
+        }
     }
 }

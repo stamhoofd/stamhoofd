@@ -1,7 +1,9 @@
 <template>
     <transition name="fade" appear>
-        <div class="st-view loading-view">
-            <Spinner class="center gray" />
+        <div class="st-view">
+            <div class="loading-view">
+                <Spinner class="center gray" />
+            </div>
         </div>
     </transition>
 </template>

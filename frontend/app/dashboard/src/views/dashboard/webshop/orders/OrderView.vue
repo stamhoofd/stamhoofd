@@ -563,7 +563,13 @@ export default class OrderView extends Mixins(NavigationMixin){
             xPlacement: "right",
             yPlacement: "bottom",
             actions: this.actionBuilder.getActions(),
-            focused: [this.order]
+            selection: {
+                isSingle: true,
+                hasSelection: true,
+                getSelection: () => {
+                    return [this.order]
+                }
+            }
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -576,7 +582,13 @@ export default class OrderView extends Mixins(NavigationMixin){
             xPlacement: "left",
             yPlacement: "bottom",
             actions: this.actionBuilder.getStatusActions(),
-            focused: [this.order]
+            selection: {
+                isSingle: true,
+                hasSelection: true,
+                getSelection: () => {
+                    return [this.order]
+                }
+            }
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -591,7 +603,13 @@ export default class OrderView extends Mixins(NavigationMixin){
             xPlacement: "right",
             yPlacement: "bottom",
             actions: this.actionBuilder.getPaymentActions(),
-            focused: [this.order]
+            selection: {
+                isSingle: true,
+                hasSelection: true,
+                getSelection: () => {
+                    return [this.order]
+                }
+            }
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
