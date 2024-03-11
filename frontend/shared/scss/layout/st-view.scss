@@ -35,7 +35,7 @@ body.modern {
 
 body.modern.web-iOS {
     #app {
-        height: 200vh;
+        //height: 200vh;
     }
 }
 
@@ -86,6 +86,8 @@ body.modern.web-iOS {
         flex-grow: 1;
         min-height: 0;
         overflow-y: auto;
+        overflow-x: hidden;
+        overflow-x: clip;
         -webkit-overflow-scrolling: touch;
     
         // Prevent scrolling outer scroll area's

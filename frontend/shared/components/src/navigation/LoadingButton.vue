@@ -23,13 +23,18 @@ export default class LoadingButton extends Vue {
     // Remove the spinner animation from the dom to save some resources of the browser
     delayLoading = false
 
+
     @Watch('loading')
     onValueChanged(val: boolean, old: boolean) {
         if (!val && old) {
             this.delayLoading = true
             setTimeout(() => {
                 this.delayLoading = false
-            }, 300)
+            }, 500)
+        } else {
+            if (val) {
+                this.delayLoading = true;
+            }
         }
     }
 }
@@ -51,29 +56,36 @@ export default class LoadingButton extends Vue {
     }
 
     > div:first-child {
-        padding-right: 0px;
-        transition: padding-right 0.25s;
+        transition: transform 0.3s;
         display: flex;
         flex-direction: column;
         align-items: stretch;
+        transform: translate(0px, 0px);
     }
 
-     > div:last-child {
+    > div:last-child {
         position: absolute;
         opacity: 0;
         top: 50%;
         right: 0;
-        transform: translate(100%, -50%);
-        transition: transform 0.25s, opacity 0.25s;
+        width: 30px;
+        height: 30px;
+        transform: translate(30px, -50%);
+        transition: transform 0.3s, opacity 0.3s;
+        contain: strict;
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
     }
 
     &.loading {
         > div:first-child {
-            padding-right: 40px;
+            transform: translate(-39px, 0);
         }
         > div:last-child {
             opacity: 1;
-            transform: translate(0, -50%);
+            transform: translate(0px, -50%);
         }
     }
 }

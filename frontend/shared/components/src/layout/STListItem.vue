@@ -74,6 +74,7 @@ button.st-list-item {
     flex-direction: row;
     width: 100%; // fix for buttons
     box-sizing: border-box;
+    contain: style paint;
 
     @extend .style-normal;
 

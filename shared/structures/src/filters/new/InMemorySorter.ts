@@ -39,6 +39,7 @@ export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemo
     }
 }
 
+// EXAMPLE (should move)
 export const memberInMemorySorters: InMemorySortDefinitions<MemberSummary> = {
     'id': {
         getValue(a) {
@@ -71,5 +72,13 @@ export const memberInMemorySorters: InMemorySortDefinitions<MemberSummary> = {
         sort: (a, b) => {
             return Sorter.byStringValue(b.organizationName, a.organizationName);
         }
+    },
+    email: {
+        getValue(a) {
+            return a.email
+        },
+        sort: (a, b) => {
+            return Sorter.byStringValue(b.email ?? '', a.email ?? '');
+        },
     }
 }

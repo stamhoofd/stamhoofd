@@ -3,28 +3,35 @@ import { SQLOrderBy, addOrderByHelpers } from "./SQLOrderBy";
 import { SQLWhere, addWhereHelpers } from "./SQLWhere";
 import {Database, SQLResultNamespacedRow} from "@simonbackx/simple-database"
 import {SQLJoin} from './SQLJoin'
+import { SQLAlias, SQLCount, SQLSelectAs, SQLWildcardSelectExpression } from "./SQLExpressions";
 
 class SelectBase implements SQLExpression {
-    #columns: SQLExpression[]
-    #from: SQLExpression;
+    _columns: SQLExpression[]
+    _from: SQLExpression;
 
-    #limit: number|null = null;
-    #offset: number|null = null;
+    _limit: number|null = null;
+    _offset: number|null = null;
 
     _where: SQLWhere|null = null;
     _orderBy: SQLOrderBy|null = null;
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
 
     constructor(...columns: SQLExpression[]) {
-        this.#columns = columns;
+        this._columns = columns;
     }
 
-    from(table: SQLExpression) {
-        this.#from = table;
+    clone(): this {
+        const c = new SQLSelect(...this._columns)
+        Object.assign(c, this);
+        return c as any;
+    }
+
+    from(table: SQLExpression): this {
+        this._from = table;
         return this;
     }
 
-    join(join: InstanceType<typeof SQLJoin>) {
+    join(join: InstanceType<typeof SQLJoin>): this {
         this._joins.push(join);
         return this;
     }
@@ -35,9 +42,9 @@ class SelectBase implements SQLExpression {
         ]
 
         options = options ?? {}
-        options.defaultNamespace = (this.#from as any).namespace ?? (this.#from as any).table ?? undefined;
+        options.defaultNamespace = (this._from as any).namespace ?? (this._from as any).table ?? undefined;
 
-        const columns = this.#columns.map(c => c.getSQL(options))
+        const columns = this._columns.map(c => c.getSQL(options))
         query.push(
             joinSQLQuery(columns, ', ')
         )
@@ -46,7 +53,7 @@ class SelectBase implements SQLExpression {
             'FROM' 
         )
 
-        query.push(this.#from.getSQL(options));
+        query.push(this._from.getSQL(options));
 
         query.push(...this._joins.map(j => j.getSQL(options)))
 
@@ -60,19 +67,19 @@ class SelectBase implements SQLExpression {
         }
 
 
-        if (this.#limit !== null) {
-            query.push('LIMIT ' + this.#limit)
-            if (this.#offset !== null && this.#offset !== 0) {
-                query.push('OFFSET ' + this.#offset)
+        if (this._limit !== null) {
+            query.push('LIMIT ' + this._limit)
+            if (this._offset !== null && this._offset !== 0) {
+                query.push('OFFSET ' + this._offset)
             }
         }
         
         return joinSQLQuery(query, ' ');
     }
 
-    limit(limit: number|null, offset: number|null = null) {
-        this.#limit = limit;
-        this.#offset = offset;
+    limit(limit: number|null, offset: number|null = null): this {
+        this._limit = limit;
+        this._offset = offset;
         return this;
     }
 
@@ -108,11 +115,42 @@ class SelectBase implements SQLExpression {
         const rows = await this.limit(1).fetch();
         if (rows.length === 0) {
             if (required) {
-                throw new Error('Required ' + this.#from)
+                throw new Error('Required ' + this._from)
             }
             return null;
         }
         return rows[0]
+    }
+
+    async count(): Promise<number> {
+        this._columns = [
+            new SQLSelectAs(
+                new SQLCount(), 
+                new SQLAlias('c')
+            )
+        ]
+        this._offset = null;
+        this._limit = null;
+        this._orderBy = null;
+
+        const {query, params} = normalizeSQLQuery(this.getSQL());
+        console.log(query, params);
+
+        const [rows] = await Database.select(query, params, {nestTables: true});
+        if (rows.length === 1) {
+            const row = rows[0];
+            if ('' in row) {
+                const namespaced = row[''];
+                if ('c' in namespaced) {
+                    const value = namespaced['c'];
+                    if (typeof value === 'number' && Number.isInteger(value)) {
+                        return value;
+                    }
+                }
+            }
+        }
+        console.warn('Invalid count SQL response', rows);
+        return 0;
     }
 }
 

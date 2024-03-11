@@ -17,7 +17,7 @@
     width: 24px;
     height: 24px;
     overflow: hidden;
-
+    contain: strict;
 
     > svg {
         width: 24px;
@@ -37,6 +37,7 @@
 .spinner-container {
     width: 24px;
     height: 24px;
+    contain: strict;
 
     &.inline {
         display: inline-block;
@@ -50,6 +51,7 @@
         width: 100%;
         height: auto;
     }
+    
     &.gray {
         div.spinner > svg > circle {
             stroke: $color-gray-1;

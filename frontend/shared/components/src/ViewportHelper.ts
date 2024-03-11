@@ -47,7 +47,7 @@ export class ViewportHelper {
         if (w.visualViewport) {
             let pendingUpdate = false;
             const viewportHandler = (event) => {
-                if (pendingUpdate) return;
+                //if (pendingUpdate) return;
                 pendingUpdate = true;
 
                 requestAnimationFrame(() => {
@@ -60,6 +60,10 @@ export class ViewportHelper {
             };
             //w.visualViewport.addEventListener('scroll', viewportHandler);
             w.visualViewport.addEventListener('resize', viewportHandler);
+
+            // on iPad resize is not called so we cannot reliably calculate the keyboard height
+            // const resizeObserver = new ResizeObserver(viewportHandler);
+            // resizeObserver.observe(document.body);
         } else {
             // We listen to the resize event
             window.addEventListener(
@@ -142,6 +146,15 @@ export class ViewportHelper {
                 }, { passive: true })
 
                 document.body.addEventListener("touchend", (event) => {
+                    // Scrollby fixes it on iOS
+                    // setTimeout(() => {
+                    //     requestAnimationFrame(() => {
+                    //         window.scrollBy({
+                    //             top: -1000
+                    //         })
+                    //     });
+                    // }, 200)
+
                     if (!clickedElement) {
                         // Force scroll back to top
                         document.body.scrollTop = 0; // window.scrollTo doesn't work on iOS (not always)
@@ -189,10 +202,10 @@ export class ViewportHelper {
         // This can be used to calculate the keyboard height
         if (AppManager.shared.getOS() === "iOS") {
             if (window.visualViewport && this.modern) {
-                const bodyHeight = window.innerHeight ?? document.body.clientHeight;
+                const bodyHeight = (window.innerHeight ?? document.body.clientHeight) + window.scrollY;
                 const bottomPadding = bodyHeight - window.visualViewport.height
 
-                console.log('set vh', viewportHeight, bodyHeight, bottomPadding)
+                console.log('set vh', viewportHeight, bodyHeight, bottomPadding, window.scrollY)
 
                 if (bottomPadding > 200) {
                     // We are showing the keyboard

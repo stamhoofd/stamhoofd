@@ -1,8 +1,5 @@
 <template>
     <div class="container">
-        <h1 v-if="canPop">
-            Filtergroep
-        </h1>
         <p v-if="canPop">
             Met een filtergroep kan je combinaties van 'en' en 'of' maken.
         </p>
@@ -72,7 +69,12 @@ export default class GroupUIFilterView extends Mixins(NavigationMixin)  {
                 new ComponentWithProperties(UIFilterEditor, {
                     filter,
                     saveHandler: (f: UIFilter) => {
-                        this.filters.splice(index, 1, f)
+                        const ff = f.flatten();
+                        if (!ff) {
+                            this.filters.splice(index, 1)
+                            return;
+                        }
+                        this.filters.splice(index, 1, ff)
                     },
                     deleteHandler: () => {
                         this.deleteFilter(index, filter);
@@ -93,7 +95,11 @@ export default class GroupUIFilterView extends Mixins(NavigationMixin)  {
                 new ComponentWithProperties(UIFilterEditor, {
                     filter,
                     saveHandler: (f: UIFilter) => {
-                        this.filters.push(f);
+                        const ff = f.flatten();
+                        if (!ff) {
+                            return;
+                        }
+                        this.filters.push(ff);
                     }
                 })
             ]

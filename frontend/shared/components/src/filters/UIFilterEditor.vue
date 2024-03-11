@@ -1,12 +1,12 @@
 <template>
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
-        <STNavigationBar v-if="!live" :title="filter.name" :dismiss="false" :pop="canPop">
+        <STNavigationBar :title="filter.name" :dismiss="!canPop" :pop="canPop">
             <button v-if="canDelete" slot="right" class="button icon trash" type="button" @click="deleteFilter" />
         </STNavigationBar>
 
         <main>
             <h1 v-if="!live">
-                {{ filter.name }}
+                {{ filter.name ? filter.name : filter.builder.name }}
             </h1>
             
             <FramedComponent :root="filterComponent" />

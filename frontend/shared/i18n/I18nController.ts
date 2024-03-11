@@ -362,7 +362,10 @@ export class I18nController {
     currentUrl: UrlHelper = UrlHelper.initial
 
     updateMetaData() {
-        this.vueMetaApp?.set(this.metaInfo)
+        // Sadly, setting meta tags forces a layout step in the browser
+        // This causes dropped frames during animations and makes the app feels unresponsive
+        // This is mainly noticeable on older devices
+        //this.vueMetaApp?.set(this.metaInfo)
     }
 
     /**

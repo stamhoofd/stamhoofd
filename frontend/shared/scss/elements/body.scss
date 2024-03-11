@@ -60,6 +60,7 @@ html {
     -moz-osx-font-smoothing: grayscale;
     
     -webkit-overflow-scrolling: auto;
+    
     /* Disabel text resize as this doesn't work across animations */
     text-size-adjust: none;
 
@@ -67,4 +68,35 @@ html {
     word-break: break-word;
 
     will-change: scroll-position;
+    
+}
+
+
+body.debug-safe-area {
+    --st-safe-area-top: 50px;
+    --st-safe-area-bottom: 50px;
+
+    &:after {
+        content: '';
+        position: fixed;
+        background-color: red;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: var(--st-safe-area-bottom);
+        opacity: 0.2;
+        z-index: 1000000;
+    }
+
+    &:before {
+        content: '';
+        position: fixed;
+        background-color: red;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--st-safe-area-top);
+        opacity: 0.2;
+        z-index: 1000000;
+    }
 }

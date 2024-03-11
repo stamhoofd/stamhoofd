@@ -1,75 +1,87 @@
-import { PlainObject } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdFilter, StringFilterMode } from "@stamhoofd/structures";
 
-import StringUIFilterView from "./StringUIFilterView.vue"
+import StringUIFilterView from "./StringUIFilterView.vue";
 import { UIFilter, UIFilterBuilder } from "./UIFilter";
 
 export class StringUIFilter extends UIFilter {
-    key = "";
-    name = ""
+    builder: StringFilterBuilder
     value = ""
     mode: StringFilterMode = StringFilterMode.Contains
 
-    build(): StamhoofdFilter {
+    doBuild(): StamhoofdFilter {
         switch (this.mode) {
             case StringFilterMode.Contains: return {
-                [this.key]: {
+                [this.builder.key]: {
                     "$contains": this.value
                 }
             };
 
             case StringFilterMode.NotContains: return {
                 $not: {
-                    [this.key]: {
+                    [this.builder.key]: {
                         "$contains": this.value
                     }
                 }
             };
 
             case StringFilterMode.Equals: return {
-                [this.key]: {
+                [this.builder.key]: {
                     "$eq": this.value
                 }
             };
 
             case StringFilterMode.NotEquals: return {
                 $not: {
-                    [this.key]: {
+                    [this.builder.key]: {
                         "$eq": this.value
                     }
                 }
             };
 
             case StringFilterMode.Empty: return {
-                $or: {
-                    [this.key]: {
-                        "$eq": ''
+                $or: [
+                    {
+                        [this.builder.key]: {
+                            "$eq": ''
+                        }
                     },
-                    [this.key]: {
-                        "$eq": null
+                    {
+                        [this.builder.key]: {
+                            "$eq": null
+                        }
                     }
-                }
+                ]
             };
 
             case StringFilterMode.NotEmpty: return {
                 $not: {
-                    $or: {
-                        [this.key]: {
-                            "$eq": ''
+                    $or: [
+                        {
+                            [this.builder.key]: {
+                                "$eq": ''
+                            }
                         },
-                        [this.key]: {
-                            "$eq": null
+                        {
+                            [this.builder.key]: {
+                                "$eq": null
+                            }
                         }
-                    }
+                    ]
                 }
             };
         }
     }
 
-    constructor(data) {
-        super()
-        Object.assign(this, data);
+    flatten() {
+        if (this.mode === StringFilterMode.Equals && this.value === '') {
+            this.mode = StringFilterMode.Empty
+        }
+        if (this.mode === StringFilterMode.NotEquals && this.value === '') {
+            this.mode = StringFilterMode.NotEmpty
+        }
+
+        return super.flatten()
     }
 
     getComponent(): ComponentWithProperties {
@@ -101,7 +113,7 @@ export class StringUIFilter extends UIFilter {
         if (this.ignoreValue) {
             return [
                 {
-                    text: this.name,
+                    text: this.builder.name,
                     style: ''
                 },
                 {
@@ -113,7 +125,7 @@ export class StringUIFilter extends UIFilter {
 
         return [
             {
-                text: this.name,
+                text: this.builder.name,
                 style: ''
             },
             {
@@ -126,20 +138,22 @@ export class StringUIFilter extends UIFilter {
         ]
     }
 }
+type FilterWrapper = ((value: StamhoofdFilter) => StamhoofdFilter);
 
 export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
-    key: string;
+    key = ""
     name = ""
-    
-    constructor(data: {name: string, key: string}) {
+    wrapFilter?: FilterWrapper
+
+    constructor(data: {key: string, name: string, wrapFilter?: FilterWrapper}) {
         this.key = data.key;
+        this.wrapFilter = data.wrapFilter;
         this.name = data.name;
     }
     
     create(): StringUIFilter {
         return new StringUIFilter({
-            key: this.key,
-            name: this.name,
+            builder: this,
             value: ''
         })
     }

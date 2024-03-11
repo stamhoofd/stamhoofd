@@ -203,6 +203,14 @@ export class Formatter {
         return this.date(date) + " om "+this.time(date)
     }
 
+    static integer(value: number): string {
+        const formatted = new Intl.NumberFormat("nl-BE").format(Math.abs(value));
+
+        const v = (value < 0 ? "- " : "")+formatted;
+
+        return v;
+    }
+
     static price(value: number, removeZeroDecimals = true): string {
         const formatted = new Intl.NumberFormat("nl-BE", {
             style: "currency",

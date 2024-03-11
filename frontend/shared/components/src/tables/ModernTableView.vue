@@ -48,7 +48,7 @@
                             <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="searchQuery = $event.target.value">
                         </form>
                     </div>
-                    <div>
+                    <div v-if="canFilter">
                         <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter" />
                             <span class="hide-small">Filter</span>
@@ -143,9 +143,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, PlainObject, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective, UIFilter } from "@stamhoofd/components";
+import { BackButton, Checkbox, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective, UIFilter, UIFilterBuilders } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { SortItemDirection, Version } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -237,6 +238,9 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
     @Prop({required: true})
         tableObjectFetcher: TableObjectFetcher<Value>
 
+    @Prop({required: false, default: null})
+        UIFilterBuilders: UIFilterBuilders|null
+
     selectedUIFilter: UIFilter | null = null
     searchQuery = ""
 
@@ -282,7 +286,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
             return ''
         }
 
-        return this.tableObjectFetcher.totalCount
+        return Formatter.integer(this.tableObjectFetcher.totalCount)
     }
 
     get hiddenItemsCount() {
@@ -1105,8 +1109,15 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         }).slice(0, 3)
     }
 
+    get canFilter() {
+        return !!this.UIFilterBuilders
+    }
+
     editFilter() {
-        const filter = this.selectedUIFilter ?? this.tableObjectFetcher.objectFetcher.uiFilterBuilders[0].create()
+        if (!this.UIFilterBuilders) {
+            return
+        }
+        const filter = this.selectedUIFilter ?? this.UIFilterBuilders[0].create()
         if (!this.selectedUIFilter) {
             this.selectedUIFilter = filter;
         }
@@ -1435,7 +1446,9 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
 
         const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 
-        const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, totalItems - 1))
+        const unBoundedLastVisibleItemIndex =  Math.max(0, Math.floor((topOffset + vh) / this.rowHeight) + extraItems)
+
+        const lastVisibleItemIndex = Math.min(unBoundedLastVisibleItemIndex, totalItems - 1)
 
         //console.log("First visible item index: " + firstVisibleItemIndex + " Last visible item index: " + lastVisibleItemIndex)
         //console.log("vh: " + vh + " topOffset: " + topOffset + " rowHeight: " + this.rowHeight+" total: "+totalItems)
@@ -1477,7 +1490,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         }
 
         //console.log("Rendered rows: "+this.visibleRows.length)
-        this.tableObjectFetcher.setVisible(firstVisibleItemIndex, lastVisibleItemIndex)
+        this.tableObjectFetcher.setVisible(firstVisibleItemIndex, unBoundedLastVisibleItemIndex)
     }
 
     get rowHeight() {

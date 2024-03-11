@@ -11,9 +11,10 @@
         bottom: 0;
         right: 0;
         opacity: 1;
-        contain: size layout style paint;
+        contain: strict;
         transition: opacity 0.3s;
         z-index: 0;
+        //will-change: opacity;
     }
 }
 
@@ -26,9 +27,9 @@
     right: 0;
     display: block;
     z-index: 10000;
-    contain: size layout style paint;
+    contain: strict;
 
-    transform: translate3d(0, 0, 0);
+    //transform: translate3d(0, 0, 0);
     
     // Android fix / fix where position fixed is 100vh, and isn't the same as the viewport
     bottom: auto;
@@ -48,15 +49,15 @@
 
 
     --popup-padding-top-raw: var(--st-safe-area-top, 0px);
-    --popup-padding-bottom-raw: max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px));
+    --popup-padding-bottom-raw: max(0px, var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px));
 
     // We use an intermediate value to allow customisation of the calculation without needing the dependency
     --popup-padding-top-full: var(--popup-padding-top-raw);
     --popup-padding-bottom-full: var(--popup-padding-bottom-raw);
                     
     // Padding visible below the popup (we'll set this to zero if the keyboard is open to save space)
-    --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(40px * var(--keyboard-closed, 1)));
-    --popup-padding-bottom-outside: max(0px, calc(80px - var(--popup-padding-top-outside, 0px)));
+    --popup-padding-top-outside: var(--popup-padding-top-full, 0px);
+    --popup-padding-bottom-outside: var(--popup-padding-bottom-full, 0px);
     
     --popup-height: calc(var(--vh, 1vh) * 100 - var(--popup-padding-top-outside, 0px) - var(--popup-padding-bottom-outside, 0px));
 
@@ -74,7 +75,7 @@
 
         box-sizing: border-box;
 
-        will-change: transform, opacity;
+        //will-change: transform, opacity;
 
         --saved-vh: var(--vh, 1vh);
 
@@ -89,6 +90,7 @@
         >.scrollable-container {
             overflow: hidden;
             overflow: clip; // More modern + disables scrolling
+            contain: layout style paint;
 
             height: 100%;
             //will-change: scroll-position;
@@ -110,8 +112,8 @@
             bottom: 0;
             right: 0;
             opacity: 0;
-            contain: size layout style paint;
-            will-change: opacity, visibility;
+            contain: strict;
+            //will-change: opacity, visibility;
             visibility: hidden;
             z-index: 20000;
             transition: opacity 0.3s, visibility step-end 0.3s;
@@ -153,8 +155,11 @@
         }
 
         &>div {
-            transform: translate(-50%, 50vh);
             opacity: 0;
+
+            @media not all and (prefers-reduced-motion) {
+                transform: translate(-50%, 50vh);
+            }
         }
     }
 }

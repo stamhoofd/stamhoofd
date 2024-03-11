@@ -11,7 +11,7 @@
                 ref="input"
                 v-model="valueString"
                 type="text"
-                inputmode="decimal"
+                :inputmode="floatingPoint ? 'decimal' : 'numeric'"
                 step="any"
                 @blur="clean"
                 @keydown.up.prevent="step(1)"
@@ -196,7 +196,7 @@ export default class NumberInput extends Vue {
     }
 
     focus() {
-        (this.$refs["input"] as any).focus()
+        //(this.$refs["input"] as any).focus()
     }
 }
 </script>

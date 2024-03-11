@@ -320,7 +320,10 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         opacity: 0;
 
         > .centered-message  {
-            transform: translate(-50%, 50vh);
+            @media (not (prefers-reduced-motion)) {
+                transform: translate(-50%, 50vh);
+            }
+
         }
     }
 }

@@ -146,8 +146,10 @@ export { default as RegistrationsFilterView } from "./src/filters/old/Registrati
 export { default as StringFilterView } from "./src/filters/old/StringFilterView.vue"
 
 // Filters new
-export * from "./src/filters/MemberUIFilters"
 export * from "./src/filters/UIFilter"
+export * from "./src/filters/StringUIFilter"
+export * from "./src/filters/GroupUIFilter"
+export * from "./src/filters/MultipleChoiceUIFilter"
 
 // tables
 export * from "./src/tables/Column"

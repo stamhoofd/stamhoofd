@@ -1,9 +1,11 @@
-import { PlainObject } from "@simonbackx/simple-encoding";
-import { SQL } from "../SQL";
-import { SQLScalarValue, scalarToSQLExpression } from "../SQLExpressions";
-import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from "../SQLWhere";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { StamhoofdFilter, StamhoofdKeyFilterValue } from "@stamhoofd/structures";
+import { SQL } from "../SQL";
 import { SQLExpression } from "../SQLExpression";
+import { SQLArray, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
+import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch } from "../SQLJsonExpressions";
+import { SQLSelect } from "../SQLSelect";
+import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from "../SQLWhere";
 
 export type SQLFilterCompiler = (filter: StamhoofdKeyFilterValue, filters: SQLFilterDefinitions) => SQLWhere|null;
 export type SQLFilterDefinitions = Record<string, SQLFilterCompiler>
@@ -42,8 +44,30 @@ function guardString(s: any): asserts s is string  {
     }
 }
 
-export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null): SQLFilterCompiler {
+export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof SQLSelect> & SQLExpression, definitions: SQLFilterDefinitions): SQLFilterCompiler {
+    return (filter: StamhoofdFilter) => {
+        const f = filter as any;
+
+        if ('$elemMatch' in f) {
+             const w = compileToSQLFilter(f['$elemMatch'], definitions)
+            const q = baseSelect.clone().where(w);
+            return new SQLWhereExists(q)
+        }
+
+        throw new Error('Invalid filter')
+    }
+}
+
+// Already joined, but creates a namespace
+export function createSQLFilterNamespace(definitions: SQLFilterDefinitions): SQLFilterCompiler {
+    return (filter: StamhoofdFilter) => {
+        return andSQLFilterCompiler(filter, definitions)
+    }
+}
+
+export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null, isJSONValue = false, isJSONObject = false): SQLFilterCompiler {
     const norm = normalizeValue ?? ((v) => v);
+    const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression
 
     return (filter: StamhoofdKeyFilterValue, filters: SQLFilterDefinitions) => {
         if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined) {
@@ -59,31 +83,132 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
         
         const f = filter as any;
 
-        if (f.$eq) {
+        if ('$eq' in f) {
             guardScalar(f.$eq);
-            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, scalarToSQLExpression(norm(f.$eq)));
+
+            if (isJSONObject) {
+                const v = norm(f.$eq);
+
+                // if (typeof v === 'string') {
+                //     return new SQLWhereEqual(
+                //         new SQLJsonSearch(sqlExpression, 'one', convertToExpression(v)), 
+                //         SQLWhereSign.NotEqual, 
+                //         new SQLNull()
+                //     );
+                // }
+
+                // else
+                return new SQLWhereEqual(
+                    new SQLJsonContains(
+                        sqlExpression, 
+                        convertToExpression(JSON.stringify(v))
+                    ), 
+                    SQLWhereSign.Equal, 
+                    new SQLSafeValue(1)
+                );
+            }
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, convertToExpression(norm(f.$eq)));
         }
 
-        if (f.$neq) {
+        if ('$in' in f) {
+            if (!Array.isArray(f.$in)) {
+                throw new SimpleError({
+                    code: 'invalid_filter',
+                    message: 'Expected array at $in filter'
+                })
+            }
+
+            const v = f.$in.map(a => norm(a));
+
+            if (isJSONObject) {
+                // else
+                return new SQLWhereEqual(
+                    new SQLJsonOverlaps(
+                        sqlExpression, 
+                        convertToExpression(JSON.stringify(v))
+                    ), 
+                    SQLWhereSign.Equal, 
+                    new SQLSafeValue(1)
+                );
+            }
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(v));
+        }
+
+        if ('$neq' in f) {
             guardScalar(f.$neq);
-            return new SQLWhereEqual(sqlExpression, SQLWhereSign.NotEqual, scalarToSQLExpression(norm(f.$neq)));
+
+            if (isJSONObject) {
+                const v = norm(f.$eq);
+
+                // if (typeof v === 'string') {
+                //     return new SQLWhereEqual(
+                //         new SQLJsonSearch(sqlExpression, 'one', convertToExpression(v)), 
+                //         SQLWhereSign.Equal, 
+                //         new SQLNull()
+                //     );
+                // }
+
+                // else
+                return new SQLWhereEqual(
+                    new SQLJsonContains(
+                        sqlExpression, 
+                        convertToExpression(JSON.stringify(v))
+                    ), 
+                    SQLWhereSign.Equal, 
+                    new SQLSafeValue(0)
+                );
+            }
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.NotEqual, convertToExpression(norm(f.$neq)));
         }
 
-        if (f.$gt) {
-            guardNotNullScalar(f.$gt);
-            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Greater, scalarToSQLExpression(norm(f.$gt)));
+        if ('$gt' in f) {
+            guardScalar(f.$gt);
+
+            if (isJSONObject) {
+                throw new Error('Greater than is not supported in this place')
+            }
+
+            if (f.$gt === null) {
+                // > null is same as not equal to null (everything is larger than null in mysql) - to be consistent with order by behaviour
+                return new SQLWhereEqual(sqlExpression, SQLWhereSign.NotEqual, convertToExpression(null));
+            }
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Greater, convertToExpression(norm(f.$gt)));
         }
 
-        if (f.$lt) {
-            guardNotNullScalar(f.$lt);
-            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Less, scalarToSQLExpression(norm(f.$lt)));
+        if ('$lt' in f) {
+            guardScalar(f.$lt);
+
+            if (isJSONObject) {
+                throw new Error('Less than is not supported in this place')
+            }
+
+            if (f.$lt === null) {
+                // < null is always nothing, there is nothing smaller than null in MySQL - to be consistent with order by behaviour
+                return new SQLWhereEqual(new SQLSafeValue(1), SQLWhereSign.Equal, new SQLSafeValue(0));
+            }
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Less, convertToExpression(norm(f.$lt)));
         }
 
-        if (f.$contains) {
+        if ('$contains' in f) {
             guardString(f.$contains);
+
+            if (isJSONObject) {
+                return new SQLWhereEqual(
+                    new SQLJsonSearch(
+                        sqlExpression, 
+                        'one',
+                        convertToExpression(
+                            '%'+SQLWhereLike.escape(f.$contains)+'%'
+                        )
+                    ), 
+                    SQLWhereSign.NotEqual, 
+                    new SQLNull()
+                );
+            }
+            
             return new SQLWhereLike(
                 sqlExpression, 
-                scalarToSQLExpression(
+                convertToExpression(
                     '%'+SQLWhereLike.escape(f.$contains)+'%'
                 )
             );

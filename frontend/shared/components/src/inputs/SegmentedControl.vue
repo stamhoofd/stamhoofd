@@ -95,6 +95,7 @@ $border-radius: 9px;
     overflow: hidden;
     @extend .style-button-smaller;
     height: $segmented-control-height;
+    contain: strict;
 
     & > .item {
         flex-grow: 1;

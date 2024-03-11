@@ -80,23 +80,23 @@ function createInMemoryFilterCompiler(path: string): InMemoryFilterCompiler {
         return (object) => {
             const val = normalizeValue(objectPathValue(object, splitted));
             
-            if (f.$eq) {
+            if ("$eq" in f) {
                 return val === normalizeValue(f.$eq);
             }
 
-            if (f.$neq) {
+            if ("$neq" in f) {
                 return val !== normalizeValue(f.$neq);
             }
 
-            if (f.$gt) {
+            if ("$gt" in f) {
                 return val > normalizeValue(f.$gt);
             }
 
-            if (f.$lt) {
+            if ("$lt" in f) {
                 return val < normalizeValue(f.$lt);
             }
 
-            if (f.$contains) {
+            if ("$contains" in f) {
                 if (typeof val !== 'string' || typeof f.$contains !== 'string') {
                     return false;
                 }

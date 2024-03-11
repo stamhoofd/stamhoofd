@@ -1,7 +1,8 @@
 import { SQLExpression } from "./SQLExpression";
 import { SQLSelect } from "./SQLSelect";
-import { SQLColumnExpression, SQLTableExpression, SQLWildcardSelectExpression } from "./SQLExpressions";
+import { SQLColumnExpression, SQLSafeValue, SQLTableExpression, SQLWildcardSelectExpression, scalarToSQLExpression } from "./SQLExpressions";
 import { SQLJoin, SQLJoinType } from "./SQLJoin";
+import { SQLJsonExtract } from "./SQLJsonExpressions";
 
 class StaticSQL {
     wildcard(namespace?: string) {
@@ -15,6 +16,10 @@ class StaticSQL {
             return new SQLColumnExpression(namespaceOrColumn)
         }
         return new SQLColumnExpression(namespaceOrColumn, column)
+    }
+
+    jsonValue(column: SQLExpression, path: string) {
+        return new SQLJsonExtract(column, new SQLSafeValue(path))
     }
 
     table(namespace: string, table: string);

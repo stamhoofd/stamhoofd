@@ -11,6 +11,12 @@ stamhoofd {
     }
 }
 
+# This prevents Firefox from using DoH
+# https://support.mozilla.org/en-US/kb/canary-domain-use-application-dnsnet
+use-application-dns.net {
+  log
+}
+
 # Forward other DNS requests to Google DNS, or Quad9 DNS
 . {
     forward . 8.8.8.8 9.9.9.9

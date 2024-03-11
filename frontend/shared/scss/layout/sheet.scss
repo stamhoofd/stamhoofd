@@ -34,6 +34,9 @@
     @extend .modal-dynamic-size;
     @extend .modal-backdrop;
 
+    --popup-padding-top-full: max(15px, var(--popup-padding-top-raw));
+    --popup-padding-bottom-full: max(15px, var(--popup-padding-bottom-raw));
+
     &.fade-enter,
     &.fade-leave-to {
         &>div {

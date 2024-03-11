@@ -43,6 +43,7 @@ export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
                 return this;
             }
             this._where = this._where.and(w);
+            return this;
         }
 
         andWhere(...args: ParseWhereArguments) {
@@ -56,6 +57,31 @@ export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
                 return this;
             }
             this._where = this._where.or(w);
+            return this;
+        }
+
+        whereNot(...args: ParseWhereArguments) {
+            const w = new SQLWhereNot(this.parseWhere(...args));
+            if (!this._where) {
+                this._where = w;
+                return this;
+            }
+            this._where = this._where.and(w);
+            return this;
+        }
+
+        andWhereNot(...args: ParseWhereArguments) {
+            return this.whereNot(...args)
+        }
+
+        orWhereNot(...args: ParseWhereArguments) {
+             const w = new SQLWhereNot(this.parseWhere(...args));
+            if (!this._where) {
+                this._where = w;
+                return this;
+            }
+            this._where = this._where.or(w);
+            return this;
         }
     }
 }
@@ -201,6 +227,44 @@ export class SQLWhereLike extends SQLWhere {
             this.column.getSQL(options),
             ` ${this.notLike ? 'NOT LIKE' : 'LIKE'} `,
             this.value.getSQL(options)
+        ])
+    }
+}
+
+export class SQLWhereExists extends SQLWhere {
+    subquery: SQLExpression;
+    notExists = false;
+    
+    constructor (subquery: SQLExpression)  {
+        super()
+        this.subquery = subquery;
+    }
+
+    clone(): this {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        const c = (new (this.constructor as any)(this.subquery)) as this
+        Object.assign(c, this);
+        return c;
+    }
+
+    get isSingle(): boolean {
+        return true;
+    }
+
+    inverted(): this {
+        return this.clone().invert()
+    }
+
+    invert(): this {
+        this.notExists = !this.notExists
+        return this;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            `${this.notExists ? 'NOT EXISTS' : 'EXISTS'} (`,
+            this.subquery.getSQL({...options}),
+            `)`,
         ])
     }
 }

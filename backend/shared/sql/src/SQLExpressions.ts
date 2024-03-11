@@ -4,6 +4,22 @@ import {Database} from "@simonbackx/simple-database"
 export type SQLScalarValue = string|number|boolean|Date;
 export type SQLDynamicExpression = SQLScalarValue|SQLScalarValue[]|null|SQLExpression
 
+export function scalarToSQLJSONExpression(s: SQLScalarValue|null): SQLExpression {
+    if (s === null) {
+        return new SQLJSONValue(null)
+    }
+
+    if (s === true) {
+        return new SQLJSONValue(true)
+    }
+
+    if (s === false) {
+        return new SQLJSONValue(false)
+    }
+
+    return new SQLScalar(s)
+}
+
 export function scalarToSQLExpression(s: SQLScalarValue|null): SQLExpression {
     if (s === null) {
         return new SQLNull()
@@ -27,6 +43,53 @@ export function readDynamicSQLExpression(s: SQLDynamicExpression): SQLExpression
     return new SQLScalar(s)
 }
 
+export class SQLCount implements SQLExpression {
+    expression: SQLExpression|null
+
+    constructor(expression: SQLExpression|null = null) {
+        this.expression = expression
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'COUNT(',
+                this.expression ? this.expression.getSQL(options) : '*',
+            ')'
+        ])
+    }
+}
+
+export class SQLSelectAs implements SQLExpression {
+    expression: SQLExpression
+    as: SQLAlias
+
+    constructor(expression: SQLExpression, as: SQLAlias) {
+        this.expression = expression
+        this.as = as;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            this.expression.getSQL(options),
+            ' AS ',
+            this.as.getSQL(options)
+        ])
+    }
+}
+
+export class SQLAlias implements SQLExpression {
+    name: string;
+
+    constructor(name: string) {
+        this.name = name
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return Database.escapeId(this.name) ;
+    }
+}
+
+
 export class SQLConcat implements SQLExpression {
     expressions: SQLExpression[];
 
@@ -43,9 +106,27 @@ export class SQLConcat implements SQLExpression {
     }
 }
 
+export class SQLJSONValue implements SQLExpression {
+    value: null|true|false;
+
+    constructor(value: null|true|false) {
+        this.value = value;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return "CAST('"+JSON.stringify(this.value)+"' AS JSON)";
+    }
+}
+
 export class SQLNull implements SQLExpression {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return 'NULL';
+    }
+}
+
+export class SQLNow implements SQLExpression {
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return 'NOW()';
     }
 }
 
@@ -64,6 +145,19 @@ export class SQLScalar implements SQLExpression {
     }
 }
 
+export class SQLSafeValue implements SQLExpression {
+    value: string|number;
+
+    constructor(value: string|number) {
+        this.value = value
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return JSON.stringify(this.value);
+    }
+}
+
+
 export class SQLArray implements SQLExpression {
     value: SQLScalarValue[];
 
@@ -78,7 +172,6 @@ export class SQLArray implements SQLExpression {
         }
     }
 }
-
 
 export class SQLWildcardSelectExpression implements SQLExpression {
     namespace?: string;
