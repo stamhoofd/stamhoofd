@@ -14,6 +14,10 @@
                 Dit document is zichtbaar in het ledenportaal.
             </p>
 
+            <p v-if="!isDraft && template.updatesEnabled" class="warning-box">
+                We raden aan om automatische wijzigingen uit te schakelen zodra alle documenten volledig zijn (of als leden voldoende kans hebben gehad om ontbrekende gegevens aan te vullen). Anders riskeer je dat documenten nog worden gewijzigd of verwijderd als leden worden uitgeschreven.
+            </p>
+
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openDocuments">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/agreement.svg">
