@@ -41,7 +41,16 @@ export enum EmailTemplateType {
     /**
      * Tickets sent after payment is received
      */
-    TicketsReceivedTransfer = "TicketsReceivedTransfer"
+    TicketsReceivedTransfer = "TicketsReceivedTransfer",
+
+    /**
+     * Organization emails:
+     */
+    OrganizationUnstableDNS = "OrganizationUnstableDNS",
+    OrganizationInvalidDNS = "OrganizationInvalidDNS",
+    OrganizationValidDNS = "OrganizationValidDNS",
+    OrganizationStableDNS = "OrganizationStableDNS",
+    OrganizationDNSSetupComplete = "OrganizationDNSSetupComplete"
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -90,6 +99,22 @@ export class EmailTemplate extends AutoEncoder {
                 "signInUrl",
                 "unsubscribeUrl",
                 'loginDetails'
+            ];
+        }
+
+        if ([
+            EmailTemplateType.OrganizationDNSSetupComplete, 
+            EmailTemplateType.OrganizationInvalidDNS,
+            EmailTemplateType.OrganizationStableDNS,
+            EmailTemplateType.OrganizationUnstableDNS,
+            EmailTemplateType.OrganizationValidDNS
+        ].includes(type)) {
+            return [
+                "firstName",
+                "lastName",
+                "email",
+                "organizationName",
+                "mailDomain"
             ];
         }
 

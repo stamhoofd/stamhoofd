@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, PrivatePaymentConfiguration, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, PrivatePaymentConfiguration, TransferSettings, WebshopPreview, EmailTemplateType, Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
@@ -12,7 +12,8 @@ import { v4 as uuidv4 } from "uuid";
 
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { Group, StripeAccount, UserWithOrganization, Webshop } from "./";
+import { EmailTemplate, Group, StripeAccount, UserWithOrganization, Webshop } from "./";
+import { getEmailBuilder } from "../helpers/EmailBuilder";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -404,7 +405,8 @@ export class Organization extends Model {
                 organization.privateMeta.pendingMailDomain = null;
             }
 
-            organization.serverMeta.firstInvalidDNSRecords = undefined
+            const wasUnstable = organization.serverMeta.isDNSUnstable
+            organization.serverMeta.markDNSValid()
 
             const didSendDomainSetupMail = organization.serverMeta.didSendDomainSetupMail
             const didSendWarning = organization.serverMeta.DNSRecordWarningCount > 0
@@ -416,25 +418,25 @@ export class Organization extends Model {
             // yay! Do not Save until after doing AWS changes
             await organization.save()
 
-            if (!wasActive && this.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning)) {
+            if (wasUnstable && !organization.serverMeta.isDNSUnstable) {
+                console.warn('DNS settings became stable for ' + this.name + ' '+this.id)
+
+                await this.sendEmailTemplate({
+                    type: EmailTemplateType.OrganizationStableDNS
+                })
+
+            } else if (!wasActive && this.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning) && !organization.serverMeta.isDNSUnstable) {
                 organization.serverMeta.didSendDomainSetupMail = true
                 await organization.save()
 
-                // Became valid -> send an e-mail to the organization admins
-                const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
-
                 if (!didSendDomainSetupMail) {
-                    Email.sendInternal({
-                        to, 
-                        subject: "Jullie domeinnaam is actief", 
-                        text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via "+this.i18n.$t("shared.emails.general")+"\n\nVeel succes!\n\nSimon van Stamhoofd"
-                    }, this.i18n)
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDNSSetupComplete
+                    })
                 } else {
-                    Email.sendInternal({
-                        to, 
-                        subject: "Domeinnaam instellingen zijn terug geldig", 
-                        text: "Hallo daar!\n\nGoed nieuws! Bij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jullie domeinnaam terug geldig zijn. Vanaf nu is jullie eigen domeinnaam voor Stamhoofd dus terug volledig actief.\n\nMet vriendelijke groeten,\nStamhoofd"
-                    }, this.i18n)
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationValidDNS
+                    })
                 }
             }
         } else {
@@ -444,10 +446,9 @@ export class Organization extends Model {
                 organization.privateMeta.mailDomain = null
             }
 
-            if (!organization.serverMeta.firstInvalidDNSRecords) {
-                console.error("DNS settings became invalid for "+this.name+" ("+this.id+")")
-                organization.serverMeta.firstInvalidDNSRecords = new Date()
-            }
+            const wasDNSUnstable = organization.serverMeta.isDNSUnstable
+
+            organization.serverMeta.markDNSFailure()
 
             // disable AWS emails
             this.privateMeta.mailDomainActive = false
@@ -455,22 +456,57 @@ export class Organization extends Model {
             // save
             await organization.save()
 
-            // Only send a warning once
-            if (organization.serverMeta.DNSRecordWarningCount == 0 && organization.serverMeta.firstInvalidDNSRecords <= new Date(new Date().getTime() - 1000 * 60 * 60 * 24 - (organization.serverMeta.DNSRecordWarningCount * 1000 * 60 * 60 * 24))) {
+            if (!wasDNSUnstable && organization.serverMeta.isDNSUnstable) {
+                // DNS became instable
+                console.warn('DNS settings became instable for ' + this.name + ' '+this.id)
+
+                await this.sendEmailTemplate({
+                    type: EmailTemplateType.OrganizationUnstableDNS
+                })
+            } else if (!organization.serverMeta.isDNSUnstable && organization.serverMeta.didSendDomainSetupMail && organization.serverMeta.DNSRecordWarningCount == 0) {
                 organization.serverMeta.DNSRecordWarningCount += 1
                 await organization.save()
 
-                // Became invalid for longer than 24 hours -> send an e-mail to the organization admins
-                if (STAMHOOFD.environment === "production") {
-                    const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
-                    Email.sendInternal({
-                        to,
-                        subject: "Domeinnaam instellingen ongeldig"+(organization.serverMeta.DNSRecordWarningCount == 2 ? " (herinnering)" : ""),
-                        text: "Hallo daar!\n\nIn Stamhoofd hebben jullie een eigen domeinnaam ("+ organization.privateMeta.pendingMailDomain +") gekoppeld. Bij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jullie domeinnaam niet (meer) geldig zijn. Hierdoor kunnen we e-mails niet langer versturen vanaf jullie domeinnaam, maar moeten we gebruik maken van @stamhoofd.email. "+(this.meta.modules.useMembers && organization.registerDomain === null ? " Ook het ledenportaal is niet meer bereikbaar via jullie domeinnaam." : "")+" Je stuurt deze e-mail best door naar de persoon in jullie vereniging die de technische zaken regelt. Kijken jullie dit zo snel mogelijk na op Stamhoofd?\n\nOp onze website vind je een gids met meer informatie: https://"+ organization.marketingDomain  +"/docs/domeinnaam-koppelen/\n\nBedankt!\n\nHet Stamhoofd team"
-                    }, this.i18n)
-                }
+                await this.sendEmailTemplate({
+                    type: EmailTemplateType.OrganizationInvalidDNS
+                })
             }
         }
+    }
+
+    async sendEmailTemplate(data: {
+        type: EmailTemplateType,
+        replyTo?: string
+    }) {
+        // First fetch template
+        const templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
+
+        if (templates.length == 0) {
+            console.error("Could not find email template for type "+data.type)
+            return
+        }
+
+        const template = templates[0]
+
+        const recipients = await this.getAdminRecipients()
+
+        // Create e-mail builder
+        const builder = await getEmailBuilder(this, {
+            recipients,
+            subject: template.subject,
+            html: template.html,
+            from: Email.getInternalEmailFor(this.i18n),
+            replyTo: data.replyTo,
+            type: 'transactional',
+            defaultReplacements: [
+                Replacement.create({
+                    token: 'mailDomain',
+                    value: this.privateMeta.mailDomain ?? this.privateMeta.pendingMailDomain ?? ''
+                })
+            ]
+        })
+
+        Email.schedule(builder)
     }
 
     async deleteAWSMailIdenitity(mailDomain: string) {
@@ -532,6 +568,7 @@ export class Organization extends Model {
 
         if (STAMHOOFD.environment != "production") {
             // Temporary ignore this
+            this.privateMeta.mailDomainActive = true;
             return;
         }
 
@@ -659,14 +696,57 @@ export class Organization extends Model {
     async getAdminToEmails(): Promise<EmailInterfaceRecipient[]> {
         const filtered = await this.getAdmins()
 
-        if (filtered.length > 1) {
-            // remove stamhoofd email addresses
-            const f = filtered.flatMap(f => f.getEmailTo() ).filter(e => !e.email.endsWith("@stamhoofd.be") && !e.email.endsWith("@stamhoofd.nl"))
-            if (f.length > 0) {
-                return f
+        if (STAMHOOFD.environment === "production") {
+            if (filtered.length > 1) {
+                // remove stamhoofd email addresses
+                const f = filtered.flatMap(f => f.getEmailTo() ).filter(e => !e.email.endsWith("@stamhoofd.be") && !e.email.endsWith("@stamhoofd.nl"))
+                if (f.length > 0) {
+                    return f
+                }
             }
         }
+
         return filtered.flatMap(f => f.getEmailTo() )
+    }
+
+    /**
+     * These email addresess are private
+     */
+    async getAdminRecipients(): Promise<Recipient[]> {
+        let filtered = await this.getAdmins()
+
+        if (STAMHOOFD.environment === "production") {
+            if (filtered.length > 1) {
+                // remove stamhoofd email addresses
+                filtered = filtered.filter(e => !e.email.endsWith("@stamhoofd.be") && !e.email.endsWith("@stamhoofd.nl"))
+            }
+        }
+
+        return filtered.flatMap(f => {
+            return Recipient.create({
+                firstName: f.firstName,
+                lastName: f.lastName,
+                email: f.email,
+                replacements: [
+                    Replacement.create({
+                        token: "firstName",
+                        value: f.firstName ?? ""
+                    }),
+                    Replacement.create({
+                        token: "lastName",
+                        value: f.lastName ?? ""
+                    }),
+                    Replacement.create({
+                        token: "email",
+                        value: f.email
+                    }),
+                    Replacement.create({
+                        token: "organizationName",
+                        value: this.name
+                    })
+                ]
+            })
+        } )
     }
 
     /**
