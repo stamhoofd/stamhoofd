@@ -74,8 +74,12 @@ export class STPackage extends Model {
         return [...pack1, ...pack2]
     }
 
+    static async getForOrganizationIncludingExpired(organizationId: string) {
+        return await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }}, {sort: [{column: 'validAt', direction: 'DESC'}]})
+    }
+
     static async getOrganizationPackagesMap(organizationId: string): Promise<Map<STPackageType, STPackageStatus>> {
-        const packages = await this.getForOrganization(organizationId)
+        const packages = await this.getForOrganizationIncludingExpired(organizationId)
 
         const map = new Map<STPackageType, STPackageStatus>()
         for (const pack of packages) {

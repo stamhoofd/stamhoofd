@@ -1,5 +1,13 @@
-import { ArrayDecoder, AutoEncoder,BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder,BooleanDecoder,DateDecoder,field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { OpenIDClientConfiguration } from '@stamhoofd/structures';
+
+export class DripEmail extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string
+
+    @field({ decoder: DateDecoder })
+    date = new Date()
+}
 
 export class OrganizationServerMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
@@ -44,6 +52,12 @@ export class OrganizationServerMetaData extends AutoEncoder {
     @field({ decoder: OpenIDClientConfiguration, nullable: true, version: 189 })
     ssoConfiguration: OpenIDClientConfiguration | null = null
 
+    /**
+     * List of specific emails that were send to this organization
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, DripEmail), optional: true, version: 230 })
+    dripEmailList: Map<string, DripEmail> = new Map()
+
     markDNSValid() {
         // Reset if longer than 14 days without invalid DNS
         this.isDNSUnstable = this.recalculateIsDNSUnstable()
@@ -71,5 +85,22 @@ export class OrganizationServerMetaData extends AutoEncoder {
     recalculateIsDNSUnstable() {
         const d14 = new Date(Date.now() - 1000 * 60 * 60 * 24 * 14)
         return (this.lastInvalidDNSDates ?? []).filter(d => d > d14).length > (this.isDNSUnstable ? 0 : 4)
+    }
+
+    addEmail(identifier: string) {
+        console.log("Marked email ", identifier)
+        const email = DripEmail.create({id: identifier})
+        this.dripEmailList.set(email.id, email);
+    }
+
+    hasEmail(identifier: string, lastMs: number|null = null) {
+        if (!this.dripEmailList.has(identifier)) {
+            return false;
+        }
+        if (lastMs === null) {
+            return true;
+        }
+        const email = this.dripEmailList.get(identifier)!;
+        return email.date.getTime() > Date.now() - lastMs
     }
 }

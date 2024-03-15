@@ -645,6 +645,52 @@ async function checkBilling() {
     
 }
 
+let lastDripCheck: Date | null = null
+let lastDripId = ""
+async function checkDrips() {
+    if (STAMHOOFD.environment === "development") {
+        //return;
+    }
+
+    if (lastDripCheck && lastDripCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
+        console.log("Skip Drip check")
+        return
+    }
+
+    // Only send emails between 8:00 - 18:00 CET
+    const CETTime = Formatter.timeIso(new Date())
+    if ((CETTime < "08:00" || CETTime > "18:00") && STAMHOOFD.environment === "production") {
+        console.log("Skip Drip check: outside hours")
+        return;
+    }
+    
+    const organizations = await Organization.where({ id: { sign: '>', value: lastDripId } }, {
+        limit: STAMHOOFD.environment === "production" ? 30 : 100,
+        sort: ["id"]
+    })
+
+    if (organizations.length == 0) {
+        // Wait before starting again
+        lastDripId = ""
+        lastDripCheck = new Date()
+        return
+    }
+
+    console.log("Checking drips...")
+
+    for (const organization of organizations) {
+        console.log(organization.name)
+        try {
+            await organization.checkDrips()
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    lastDripId = organizations[organizations.length - 1].id
+    
+}
+
 type CronJobDefinition = {
     name: string,
     method: () => Promise<void>,
@@ -725,6 +771,11 @@ registeredCronJobs.push({
     running: false
 });
 
+registeredCronJobs.push({
+    name: 'checkDrips',
+    method: checkDrips,
+    running: false
+});
 
 async function run(name: string, handler: () => Promise<void>) {
     try {
@@ -779,7 +830,9 @@ export const crons = async () => {
         })
 
         // Prevent starting too many jobs at once
-        await sleep(10 * 1000);
+        if (STAMHOOFD.environment !== "development") {
+            await sleep(10 * 1000);
+        }
     }
     schedulingJobs = false;
 };

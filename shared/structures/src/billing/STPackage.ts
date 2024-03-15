@@ -171,6 +171,15 @@ export class STPackage extends AutoEncoder {
         }
         return false
     }
+
+    get status() {
+        return STPackageStatus.create({
+            startDate: this.meta.startDate,
+            validUntil: this.validUntil,
+            removeAt: this.removeAt,
+            firstFailedPayment: this.meta.firstFailedPayment
+        })
+    }
 }
 
 export class STPackageStatus extends AutoEncoder {
@@ -228,9 +237,9 @@ export class STPackageStatus extends AutoEncoder {
             return false
         }
 
-        if (this.removeAt && this.removeAt < d) {
-            return false
-        }
+        // if (this.removeAt && this.removeAt < d) {
+        //     return false
+        // }
 
         if (this.validUntil && this.validUntil < d) {
             // Passed!

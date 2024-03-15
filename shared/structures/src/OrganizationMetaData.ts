@@ -12,7 +12,7 @@ import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsC
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
 import { PaymentConfiguration } from './PaymentConfiguration';
-import { downgradePaymentMethodArrayV150, PaymentMethod } from './PaymentMethod';
+import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 import { TransferSettings } from './webshops/TransferSettings';
 
@@ -31,6 +31,21 @@ export class OrganizationPackages extends AutoEncoder {
         return true
     }
 
+    /**
+     * Return amount of ms this package has been active for
+     */
+    getActiveTime(type: STPackageType): number|null {
+        const status = this.packages.get(type)
+        if (!status) {
+            return null
+        }
+        if (!status.isActive) {
+            return null
+        }
+
+        return Math.max(0, Date.now() - status.startDate.getTime())
+    }
+
     wasActive(type: STPackageType) {
         const status = this.packages.get(type)
         if (!status) {
@@ -40,6 +55,26 @@ export class OrganizationPackages extends AutoEncoder {
             return false
         }
         return true
+    }
+
+    /**
+     * Return amount of ms this package has been active for
+     */
+    getDeactivatedTime(type: STPackageType): number|null {
+        const status = this.packages.get(type)
+        if (!status) {
+            return null
+        }
+        if (!status.wasActive) {
+            return null
+        }
+
+        const deactivateDate = status.deactivateDate;
+        if (deactivateDate === null) {
+            return null;
+        }
+
+        return Math.max(0, Date.now() - deactivateDate.getTime())
     }
     
     get useMembers() {
@@ -104,6 +139,10 @@ export class OrganizationPackages extends AutoEncoder {
 
     get isPaid() {
         return this.isActive(STPackageType.Members) || this.isActive(STPackageType.LegacyMembers) || this.isActive(STPackageType.Webshops) || this.isActive(STPackageType.SingleWebshop)
+    }
+
+    get wasPaid() {
+        return this.wasActive(STPackageType.Members) || this.wasActive(STPackageType.LegacyMembers) || this.wasActive(STPackageType.Webshops) || this.wasActive(STPackageType.SingleWebshop)
     }
 }
 

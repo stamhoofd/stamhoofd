@@ -50,7 +50,17 @@ export enum EmailTemplateType {
     OrganizationInvalidDNS = "OrganizationInvalidDNS",
     OrganizationValidDNS = "OrganizationValidDNS",
     OrganizationStableDNS = "OrganizationStableDNS",
-    OrganizationDNSSetupComplete = "OrganizationDNSSetupComplete"
+    OrganizationDNSSetupComplete = "OrganizationDNSSetupComplete",
+
+    // Drip emails
+    OrganizationDripWelcome = "OrganizationDripWelcome",
+    OrganizationDripWebshopTrialCheckin = "OrganizationDripWebshopTrialCheckin",
+    OrganizationDripMembersTrialCheckin = "OrganizationDripMembersTrialCheckin",
+    OrganizationDripWebshopTrialExpired = "OrganizationDripWebshopTrialExpired",
+    OrganizationDripMembersTrialExpired = "OrganizationDripMembersTrialExpired",
+    OrganizationDripTrialExpiredReminder = "OrganizationDripTrialExpiredReminder",
+    OrganizationDripWebshopNotRenewed = "OrganizationDripWebshopNotRenewed",
+    OrganizationDripMembersNotRenewed = "OrganizationDripMembersNotRenewed",
 }
 
 export class EmailTemplate extends AutoEncoder {

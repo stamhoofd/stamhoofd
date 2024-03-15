@@ -445,9 +445,9 @@ export class STInvoice extends Model {
     }
 
 
-    static async getBillingStatus(organization: Organization): Promise<STBillingStatus> {
+    static async getBillingStatus(organization: Organization, hideExpired = true): Promise<STBillingStatus> {
         // Get all packages
-        const packages = await STPackage.getForOrganization(organization.id)
+        const packages = hideExpired ? (await STPackage.getForOrganization(organization.id)) : (await STPackage.getForOrganizationIncludingExpired(organization.id))
 
         // GEt all invoices
         const invoices = await STInvoice.where({ organizationId: organization.id, number: { sign: "!=", value: null }})

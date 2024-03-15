@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, PrivatePaymentConfiguration, TransferSettings, WebshopPreview, EmailTemplateType, Recipient, Replacement } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, PrivatePaymentConfiguration, TransferSettings, WebshopPreview, EmailTemplateType, Recipient, Replacement, STPackageType, Country } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
@@ -422,7 +422,8 @@ export class Organization extends Model {
                 console.warn('DNS settings became stable for ' + this.name + ' '+this.id)
 
                 await this.sendEmailTemplate({
-                    type: EmailTemplateType.OrganizationStableDNS
+                    type: EmailTemplateType.OrganizationStableDNS,
+                    bcc: true
                 })
 
             } else if (!wasActive && this.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning) && !organization.serverMeta.isDNSUnstable) {
@@ -461,7 +462,8 @@ export class Organization extends Model {
                 console.warn('DNS settings became instable for ' + this.name + ' '+this.id)
 
                 await this.sendEmailTemplate({
-                    type: EmailTemplateType.OrganizationUnstableDNS
+                    type: EmailTemplateType.OrganizationUnstableDNS,
+                    bcc: true
                 })
             } else if (!organization.serverMeta.isDNSUnstable && organization.serverMeta.didSendDomainSetupMail && organization.serverMeta.DNSRecordWarningCount == 0) {
                 organization.serverMeta.DNSRecordWarningCount += 1
@@ -476,7 +478,9 @@ export class Organization extends Model {
 
     async sendEmailTemplate(data: {
         type: EmailTemplateType,
-        replyTo?: string
+        personal?: boolean,
+        replyTo?: string,
+        bcc?: boolean
     }) {
         // First fetch template
         const templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
@@ -488,14 +492,39 @@ export class Organization extends Model {
 
         const template = templates[0]
 
-        const recipients = await this.getAdminRecipients()
+        const recipients = await this.getAdminRecipients();
+
+        const defaultI18n = new I18n("nl", Country.Belgium)
+        const i18n = this.i18n;
+
+        const replacementStrings = [
+            {
+                from: defaultI18n.$t("shared.domains.marketing"),
+                to: i18n.$t("shared.domains.marketing")
+            },
+            {
+                from: defaultI18n.$t("shared.emails.general"),
+                to: i18n.$t("shared.emails.general")
+            },
+            {
+                from: defaultI18n.$t("shared.domains.email"),
+                to: i18n.$t("shared.domains.email")
+            }
+        ];
+
+        let html = template.html;
+
+        for (const s of replacementStrings) {
+            html = html.replaceAll(s.from, s.to)
+        }
 
         // Create e-mail builder
         const builder = await getEmailBuilder(this, {
             recipients,
             subject: template.subject,
-            html: template.html,
-            from: Email.getInternalEmailFor(this.i18n),
+            html,
+            from: data.personal ? Email.getPersonalEmailFor(this.i18n) : Email.getInternalEmailFor(this.i18n),
+            singleBcc: data.bcc ? 'simon@stamhoofd.be' : undefined,
             replyTo: data.replyTo,
             type: 'transactional',
             defaultReplacements: [
@@ -503,7 +532,9 @@ export class Organization extends Model {
                     token: 'mailDomain',
                     value: this.privateMeta.mailDomain ?? this.privateMeta.pendingMailDomain ?? ''
                 })
-            ]
+            ],
+            unsubscribeType: 'marketing',
+            fromStamhoofd: true
         })
 
         Email.schedule(builder)
@@ -655,6 +686,164 @@ export class Organization extends Model {
         }
     }
 
+    async checkDrips() {
+        const days7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+
+        // Welcome drip
+        // Created 7 days ago
+        if (this.createdAt > days7 && !this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWelcome)) {
+            await this.sendEmailTemplate({
+                type: EmailTemplateType.OrganizationDripWelcome,
+                personal: true
+            })
+
+            this.serverMeta.addEmail(EmailTemplateType.OrganizationDripWelcome);
+            await this.save();
+
+            return; // Never send more than 1 drip email on the same day
+        }
+
+        // Webshop trial checkin
+        if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWebshopTrialCheckin)) {
+            if (this.meta.packages.isWebshopsTrial) {
+                const activeTime = this.meta.packages.getActiveTime(STPackageType.TrialWebshops)
+                if (activeTime !== null && activeTime > 7 * 24 * 60 * 60 * 1000) {
+                    // 7 days checkin
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDripWebshopTrialCheckin,
+                        personal: true
+                    })
+
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripWebshopTrialCheckin);
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripMembersTrialCheckin); // also mark members checkin
+                    await this.save();
+
+                    return; // Never send more than 1 drip email on the same day
+                }
+            }
+        }
+
+        // Members trial checkin
+        if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripMembersTrialCheckin)) {
+            if (this.meta.packages.isMembersTrial) {
+                const activeTime = this.meta.packages.getActiveTime(STPackageType.TrialMembers)
+                if (activeTime !== null && activeTime > 7 * 24 * 60 * 60 * 1000) {
+                    // 7 days checkin
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDripMembersTrialCheckin,
+                        personal: true
+                    })
+
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripMembersTrialCheckin);
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripWebshopTrialCheckin); // Also mark webshop trial checkin
+                    await this.save();
+
+                    return; // Never send more than 1 drip email on the same day
+                }
+            }
+        }
+
+        // Webshop trial expired
+        if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWebshopTrialExpired)) {
+            if (!this.meta.packages.useWebshops) {
+                const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.TrialWebshops)
+                if (deactivatedTime !== null && deactivatedTime < 14 * 24 * 60 * 60 * 1000) {
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDripWebshopTrialExpired,
+                        personal: true
+                    })
+
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripWebshopTrialExpired);
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripMembersTrialExpired); // also mark members
+                    await this.save();
+
+                    return; // Never send more than 1 drip email on the same day
+                }
+            }
+        }
+
+        if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripMembersTrialExpired)) {
+            if (!this.meta.packages.useMembers) {
+                const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.TrialMembers)
+                if (deactivatedTime !== null && deactivatedTime < 14 * 24 * 60 * 60 * 1000) {
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDripMembersTrialExpired,
+                        personal: true
+                    })
+
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripMembersTrialExpired);
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripWebshopTrialExpired); // also mark webshops
+                    await this.save();
+
+                    return; // Never send more than 1 drip email on the same day
+                }
+            }
+        }
+
+        // trial expired reminder (after 10 months)
+        if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripTrialExpiredReminder)) {
+            if (!this.meta.packages.isPaid && !this.meta.packages.wasPaid) {
+                const deactivatedTime1 = this.meta.packages.getDeactivatedTime(STPackageType.TrialWebshops)
+                const deactivatedTime2 = this.meta.packages.getDeactivatedTime(STPackageType.TrialMembers)
+
+                const deactivatedTime = deactivatedTime1 && deactivatedTime2 ? Math.max(deactivatedTime1, deactivatedTime2) : (deactivatedTime1 ? deactivatedTime1 : deactivatedTime2)
+
+                if (deactivatedTime !== null && deactivatedTime > 10 * 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 13 * 31 * 24 * 60 * 60 * 1000) {
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDripTrialExpiredReminder,
+                        personal: true,
+                        bcc: true
+                    })
+
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripTrialExpiredReminder);
+                    await this.save();
+
+                    return; // Never send more than 1 drip email on the same day
+                }
+            }
+        }
+
+        if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWebshopNotRenewed)) {
+            if (!this.meta.packages.useWebshops) {
+                const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.Webshops)
+                
+                console.log('OrganizationDripWebshopNotRenewed', deactivatedTime)
+
+                if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 60 * 24 * 60 * 60 * 1000) {
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDripWebshopNotRenewed,
+                        personal: true,
+                        bcc: true
+                    })
+
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripWebshopNotRenewed);
+                    await this.save();
+
+                    return; // Never send more than 1 drip email on the same day
+                }
+            }
+        }
+
+        if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripMembersNotRenewed)) {
+            if (!this.meta.packages.useMembers) {
+                const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.Members)
+                
+                if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 60 * 24 * 60 * 60 * 1000) {
+                    await this.sendEmailTemplate({
+                        type: EmailTemplateType.OrganizationDripMembersNotRenewed,
+                        personal: true,
+                        bcc: true
+                    })
+
+                    this.serverMeta.addEmail(EmailTemplateType.OrganizationDripMembersNotRenewed);
+                    await this.save();
+
+                    return; // Never send more than 1 drip email on the same day
+                }
+            }
+        }
+    }
+
     /**
      * E-mail address when we receive replies for organization@stamhoofd.email.
      * Note that this sould be private because it can contain personal e-mail addresses if the organization is not configured correctly
@@ -680,7 +869,7 @@ export class Organization extends Model {
     async getAdmins() {
         // Circular reference fix
         const User = (await import('./User')).User;
-        const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
+        const admins = await User.where({ organizationId: this.id, verified: 1, permissions: { sign: "!=", value: null }})
 
         let filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
 

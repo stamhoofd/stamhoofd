@@ -18,21 +18,24 @@ export async function getEmailBuilder(organization: Organization, email: {
         contentType: string | undefined;
         encoding: string;
     }[],
-    type?: "transactional" | "broadcast"
+    type?: "transactional" | "broadcast",
+    unsubscribeType?: 'all'|'marketing',
+    fromStamhoofd?: boolean,
+    singleBcc?: string
 }) {
     // Update recipients
     const cleaned: Recipient[] = []
     for (const recipient of email.recipients) {
         try {
-            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, organization.id)
+            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, email.fromStamhoofd ? null : organization.id)
 
-            if (unsubscribe.unsubscribedAll || unsubscribe.hardBounce || unsubscribe.markedAsSpam || !unsubscribe.token) {
+            if (unsubscribe.unsubscribedAll || unsubscribe.hardBounce || unsubscribe.markedAsSpam || !unsubscribe.token || (unsubscribe.unsubscribedMarketing && email.unsubscribeType === 'marketing')) {
                 // Ignore
                 continue
             }
             recipient.replacements.push(Replacement.create({
                 token: "unsubscribeUrl",
-                value: "https://"+STAMHOOFD.domains.dashboard+"/"+organization.i18n.locale+"/unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type=all"
+                value: "https://"+STAMHOOFD.domains.dashboard+"/"+organization.i18n.locale+"/unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type="+encodeURIComponent(email.unsubscribeType ?? 'all')
             }))
 
             // Override headers
@@ -77,6 +80,8 @@ export async function getEmailBuilder(organization: Organization, email: {
 
     const queue = email.recipients.slice()
 
+    let emailIndex = 0;
+
     // Create e-mail builder
     const builder: EmailBuilder = () => {
         const recipient = queue.shift()
@@ -98,9 +103,12 @@ export async function getEmailBuilder(organization: Organization, email: {
             replacedSubject = replacedSubject.replaceAll("{{"+replacement.token+"}}", replacement.value)
         }
 
+        emailIndex += 1;
+
         return {
             from: email.from,
             replyTo: email.replyTo,
+            bcc: emailIndex === 1 ? email.singleBcc : undefined,
             to: [
                 {
                     // Name will get cleaned by email service
