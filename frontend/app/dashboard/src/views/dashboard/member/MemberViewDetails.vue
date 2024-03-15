@@ -738,7 +738,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             xPlacement: "right",
             yPlacement: "bottom",
             actions: actions,
-            focused: [this.member]
+            selection: {
+                hasSelection: true,
+                isSingle: true,
+                getSelection: () => [this.member]
+            }
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
