@@ -5,17 +5,17 @@
             <dd>{{ record.type }}</dd>
 
             <dt>Naam</dt>
-            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" @click="copyElement">
+            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" v-copyable>
                 {{ record.name }}
             </dd>
 
             <dt>Waarde</dt>
-            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" @click="copyElement">
+            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" v-copyable>
                 {{ record.value }}
             </dd>
 
             <dt>TTL</dt>
-            <dd class="selectable" @click="copyElement">
+            <dd class="selectable" v-copyable>
                 3600
             </dd>
 
@@ -54,32 +54,6 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 export default class DNSRecordBox extends Mixins(NavigationMixin) {
     @Prop({})
     record: DNSRecord
-   
-    copyElement(event) {
-        event.target.contentEditable = true;
-
-        document.execCommand('selectAll', false);
-        document.execCommand('copy')
-
-        event.target.contentEditable = false;
-
-        const el = event.target;
-        const rect = event.target.getBoundingClientRect();
-
-        // Present
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "📋 Gekopieerd!",
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-
-        setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
-        }, 1000);
-    }
-
 
 }
 </script>
