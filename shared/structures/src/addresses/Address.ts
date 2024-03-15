@@ -65,7 +65,9 @@ export class Address extends AutoEncoder {
         }
 
         this.number = this.number.trim()
-        this.street = this.street.trim()
+        this.street = Formatter.capitalizeFirstLetter(this.street.trim())
+        this.city = Formatter.capitalizeFirstLetter(this.city.trim())
+        this.postalCode = this.postalCode.trim().toLocaleUpperCase()
     }
 
     static createFromFields(addressLine1: string, postalCode: string, city: string, country: string): Address {
@@ -87,15 +89,10 @@ export class Address extends AutoEncoder {
             })
         }
 
+        let c: Country;
+
         try {
-            const c = CountryDecoder.decode(new ObjectData(country, { version: 0 }))
-            return Address.create({
-                street,
-                number,
-                postalCode: postalCode,
-                city: city,
-                country: c
-            })
+            c = CountryDecoder.decode(new ObjectData(country, { version: 0 }))
         } catch (e) {
             throw new SimpleError({
                 code: "invalid_field",
@@ -104,6 +101,56 @@ export class Address extends AutoEncoder {
                 field: "country"
             })
         }
+
+        city = city.trim();
+        if (city.match(/[0-9]/)) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Invalid city",
+                human: "De gemeente mag geen cijfers bevatten.",
+                field: "city"
+            })
+        }
+
+        if (c === Country.Belgium) {
+            postalCode = postalCode.trim();
+            if (postalCode.length !== 4 || !postalCode.match(/^[0-9]+$/)) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Invalid postalCode",
+                    human: "Ongeldige postcode. Een postcode moet uit 4 cijfers bestaan.",
+                    field: "postalCode"
+                })
+            }
+        }
+
+        if (c === Country.Netherlands) {
+            postalCode = postalCode.trim();
+            const firstFour = postalCode.substring(0, 4);
+            const remaining = postalCode.substring(4).trim().toLocaleUpperCase();
+
+            if (firstFour.length !== 4 || !firstFour.match(/^[0-9]+$/) || remaining.length !== 2 || !remaining.match(/^[A-Z]+$/) ) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Invalid postalCode",
+                    human: "Ongeldige postcode. Een postcode moet beginnen met 4 cijfers en eindigen op 2 letters, bv. 9000 AB",
+                    field: "postalCode"
+                })
+            }
+
+            postalCode = firstFour + ' ' + remaining;
+        }
+
+        const address = Address.create({
+            street,
+            number,
+            postalCode: postalCode,
+            city: city,
+            country: c
+        })
+        address.cleanData()
+
+        return address;
     }
 
     static splitAddressLine(addressLine1: string) {

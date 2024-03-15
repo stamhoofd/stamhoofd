@@ -85,6 +85,26 @@ export default class AddressInput extends Vue {
 
     @Watch('value', { deep: true })
     onValueChanged(val: Address | null) {
+        if (this.hasFocus) {
+            // don't change while typing
+            return;
+        }
+
+        if (!val) {
+            if (!this.required && !this.pendingErrorBox && !this.errorBox) {
+                this.addressLine1 = ""
+                this.city = ""
+                this.postalCode = ""
+            }
+            return
+        }
+        this.addressLine1 = val.street.length > 0 ? (val.street+" "+val.number) : (val.number+"")
+        this.city = val.city
+        this.postalCode = val.postalCode
+        this.country = val.country
+    }
+
+    updateValues(val: Address | null) {
         if (!val) {
             if (!this.required && !this.pendingErrorBox && !this.errorBox) {
                 this.addressLine1 = ""
@@ -172,9 +192,19 @@ export default class AddressInput extends Vue {
                         decoder: ValidatedAddress as Decoder<ValidatedAddress>,
                         shouldRetry: false
                     })
+                    if (!this.hasFocus) {
+                        this.updateValues(response.data)
+                    }
                     this.$emit("input", response.data)
                 } else {
+                    if (!this.hasFocus) {
+                        this.updateValues(address)
+                    }
                     this.$emit("input", address)
+                }
+            } else {
+                if (!this.hasFocus) {
+                    this.updateValues(address)
                 }
             }
             
