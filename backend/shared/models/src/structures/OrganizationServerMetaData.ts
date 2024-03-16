@@ -55,7 +55,12 @@ export class OrganizationServerMetaData extends AutoEncoder {
     /**
      * List of specific emails that were send to this organization
      */
-    @field({ decoder: new MapDecoder(StringDecoder, DripEmail), optional: true, version: 230 })
+    @field({ decoder: new MapDecoder(StringDecoder, DripEmail), optional: true, version: 230, upgrade: () => {
+        const m = new Map<string, DripEmail>();
+        const identifier = "OrganizationDripWelcome";
+        m.set(identifier, DripEmail.create({id: identifier}))
+        return m
+    } })
     dripEmailList: Map<string, DripEmail> = new Map()
 
     markDNSValid() {
