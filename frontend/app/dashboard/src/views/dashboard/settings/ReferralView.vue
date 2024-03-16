@@ -1,12 +1,17 @@
 <template>
-    <div id="referral-view" class="st-view background">
+    <LoadingView v-if="loading || !status" />
+    <div v-else id="referral-view" class="st-view background">
         <STNavigationBar title="Verdien tegoed" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1>
-                Geef 25 euro, krijg tot 100 euro tegoed* per vereniging
+            <h1 v-if="!status.invoiceValue">
+                Geef {{status.value | price}}, krijg tot 100 euro tegoed* per vereniging
             </h1>
-            <p>Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.</p>
+            <h1 v-else>
+                Jouw doorverwijzingslink van {{status.value | price}}
+            </h1>
+
+            <p v-if="!status.invoiceValue">Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.</p>
 
             <button class="button text" type="button" @click="showBilling">
                 <span class="icon card" />
@@ -48,26 +53,28 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Overzicht van te verdienen tegoed</h2>
-                <p>Het bedrag dat je ontvangt stijgt per vereniging tot maximaal 100 euro per vereniging. Dus als je 6 verenigingen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.</p>
+                <template v-if="!status.invoiceValue">
+                    <hr>
+                    <h2>Overzicht van te verdienen tegoed</h2>
+                    <p>Het bedrag dat je ontvangt stijgt per vereniging tot maximaal 100 euro per vereniging. Dus als je 6 verenigingen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.</p>
 
-                <STList>
-                    <STListItem v-for="n in 9" :key="n">
-                        {{ n }}e vereniging
+                    <STList>
+                        <STListItem v-for="n in 9" :key="n">
+                            {{ n }}e vereniging
 
-                        <span slot="right" class="style-tag large">€ {{ n * 10 }}</span>
-                        <span v-if="referredCount >= n" slot="left" class="icon star yellow" />
-                        <span v-else slot="left" class="icon star-line light-gray" />
-                    </STListItem>
-                    <STListItem>
-                        10e, 11e, 12e... vereniging
+                            <span slot="right" class="style-tag large">€ {{ n * 10 }}</span>
+                            <span v-if="referredCount >= n" slot="left" class="icon star yellow" />
+                            <span v-else slot="left" class="icon star-line light-gray" />
+                        </STListItem>
+                        <STListItem>
+                            10e, 11e, 12e... vereniging
 
-                        <span slot="right" class="style-tag large">€ 100</span>
-                        <span v-if="referredCount >= 10" slot="left" class="icon star yellow" />
-                        <span v-else slot="left" class="icon star-line light-gray" />
-                    </STListItem>
-                </STList>                
+                            <span slot="right" class="style-tag large">€ 100</span>
+                            <span v-if="referredCount >= 10" slot="left" class="icon star yellow" />
+                            <span v-else slot="left" class="icon star-line light-gray" />
+                        </STListItem>
+                    </STList>            
+                </template>    
 
                 <hr>
                 <h2>Geschiedenis</h2>
@@ -80,13 +87,19 @@
                         <h2 class="style-title-list">
                             {{ used.organizationName }}
                         </h2>
-                        <p v-if="used.creditValue !== null" class="style-description">
+                        <p v-if="used.creditValue" class="style-description">
                             Je hebt jouw tegoed ontvangen!
                         </p>
-                        <p v-else class="style-description">
+                        <p v-else-if="used.creditValue !== null && status.invoiceValue" class="style-description">
+                            Aangerekend in je openstaande saldo.
+                        </p>
+                        <p v-else-if="!status.invoiceValue" class="style-description">
                             Registreerde op {{ used.createdAt | date }}. Je ontvangt jouw tegoed zodra deze vereniging 1 euro heeft besteed.
                         </p>
-                        <span v-if="used.creditValue !== null" slot="right" class="style-tag large success">{{ used.creditValue | price }}</span>
+                         <p v-else class="style-description">
+                            Registreerde op {{ used.createdAt | date }}. Er werd nog niets aangekocht of gefactureerd.
+                        </p>
+                        <span v-if="used.creditValue" slot="right" class="style-tag large success">{{ used.creditValue | price }}</span>
                     </STListItem>
                 </STList>
                 
@@ -94,9 +107,8 @@
                     Jouw link werd nog niet gebruikt
                 </p>
 
-                <hr>
-
-                <p class="style-description-small">
+                <hr v-if="!status.invoiceValue">
+                <p class="style-description-small" v-if="!status.invoiceValue">
                     * We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Stamhoofd aan te kopen. Je kan je tegoed niet doorgeven aan een andere vereniging. Je kan geen tegoed krijgen voor een vereniging die al Stamhoofd gebruikt of al heeft geregistreerd. Ook als die persoon al een andere vereniging heeft op Stamhoofd kan je er geen tegoed meer voor krijgen. 
                     Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen.
                     Meerdere verenigingen zelf aanmaken om zo tegoed te krijgen is niet toegestaan.
@@ -110,7 +122,7 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, LoadingView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
@@ -129,7 +141,8 @@ import BillingSettingsView from "./packages/BillingSettingsView.vue";
         BackButton,
         STList,
         STListItem,
-        Spinner
+        Spinner,
+        LoadingView
     },
     directives: {
         tooltip: TooltipDirective
@@ -152,7 +165,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
 
     get href() {
-        return "https://"+this.$t('shared.domains.marketing')+"/?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(OrganizationManager.organization.name)+"&utm_medium=Referral&utm_source="+encodeURIComponent(OrganizationManager.organization.name)
+        return "https://"+STAMHOOFD.domains.dashboard+"/aansluiten?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(OrganizationManager.organization.name)
     }
 
     get isYouth() {

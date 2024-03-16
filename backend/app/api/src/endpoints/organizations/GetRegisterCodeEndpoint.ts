@@ -54,6 +54,8 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
 
         return new Response(RegisterCodeStatus.create({
             code: code.code,
+            value: code.value,
+            invoiceValue: code.invoiceValue,
             usedCodes: usedCodes.map(c => {
                 return UsedRegisterCodeStruct.create({ 
                     id: c.id,

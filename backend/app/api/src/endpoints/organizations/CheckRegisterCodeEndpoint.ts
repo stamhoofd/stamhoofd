@@ -1,11 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors';
-import { RegisterCode } from '@stamhoofd/models';
-
+import { Organization, RegisterCode } from '@stamhoofd/models';
+import {RegisterCode as RegisterCodeStruct } from "@stamhoofd/structures"
 type Params = { code: string };
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = undefined;
+type ResponseBody = RegisterCodeStruct;
 
 export class CheckRegisterCodeEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
@@ -26,7 +26,13 @@ export class CheckRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
         
         const code = await RegisterCode.getByID(request.params.code)
         if (code) {
-            return new Response(undefined)
+            return new Response(RegisterCodeStruct.create({
+                code: code.code,
+                description: code.description,
+                customMessage: code.customMessage,
+                organizationName: code.organizationId ? ((await Organization.getByID(code.organizationId))!.name) : null,
+                value: code.value
+            }))
         }
 
         throw new SimpleError({

@@ -1,25 +1,29 @@
 <template>
-    <form id="signup-general-view" class="st-view" @submit.prevent="goNext">
+    <LoadingView v-if="loadingRegisterCode" />
+    <form v-else id="signup-general-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Nieuwe vereniging">
             <button slot="right" type="button" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         
         <main>
             <h1>
-                Nieuwe vereniging aansluiten bij Stamhoofd
+                Sluit jouw vereniging aan bij Stamhoofd
             </h1>
             <p>
-                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen.
+                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $t('shared.domains.marketing')" target="_blank" class="inline-link" v-if="validatedRegisterCode">Lees hier meer over Stamhoofd.</a>
             </p>
-            <button v-if="visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
+            <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
                 Gebruikt jouw vereniging Stamhoofd al? 
                 <span class="button text" type="button">
                     Log dan hier in
                 </span>
             </button>
 
-            <p v-if="registerCode" class="success-box icon gift">
-                Je ontvangt 25 euro tegoed van {{ registerCode.organization }} als je nu registreert
+            <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
+                Je ontvangt {{formatPrice(validatedRegisterCode.value)}} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
+            </p>
+            <p v-else-if="validatedRegisterCode" class="success-box icon gift">
+                {{validatedRegisterCode.customMessage}}
             </p>
 
             <p v-if="reuseRegisterCode" class="warning-box">
@@ -78,24 +82,28 @@
                 </div>
             </div>
 
-            <hr>
-            <h2>Hoe ken je Stamhoofd?</h2>
+            <template v-if="!validatedRegisterCode">
 
-            <Checkbox :checked="getBooleanType(AcquisitionType.Recommended)" @change="setBooleanType(AcquisitionType.Recommended, $event)">
-                Op aanraden van andere vereniging / persoon
-            </Checkbox>
-            <Checkbox :checked="getBooleanType(AcquisitionType.Seen)" @change="setBooleanType(AcquisitionType.Seen, $event)">
-                Gezien bij andere vereniging
-            </Checkbox>
-            <Checkbox :checked="getBooleanType(AcquisitionType.SocialMedia)" @change="setBooleanType(AcquisitionType.SocialMedia, $event)">
-                Via sociale media
-            </Checkbox>
-            <Checkbox :checked="getBooleanType(AcquisitionType.Search)" @change="setBooleanType(AcquisitionType.Search, $event)">
-                Via opzoekwerk (bv. Google)
-            </Checkbox>
-            <Checkbox :checked="getBooleanType(AcquisitionType.Other)" @change="setBooleanType(AcquisitionType.Other, $event)">
-                Andere
-            </Checkbox>
+                <hr>
+                <h2>Hoe ken je Stamhoofd?</h2>
+
+                <Checkbox :checked="getBooleanType(AcquisitionType.Recommended)" @change="setBooleanType(AcquisitionType.Recommended, $event)">
+                    Op aanraden van andere vereniging / persoon
+                </Checkbox>
+                <Checkbox :checked="getBooleanType(AcquisitionType.Seen)" @change="setBooleanType(AcquisitionType.Seen, $event)">
+                    Gezien bij andere vereniging
+                </Checkbox>
+                <Checkbox :checked="getBooleanType(AcquisitionType.SocialMedia)" @change="setBooleanType(AcquisitionType.SocialMedia, $event)">
+                    Via sociale media
+                </Checkbox>
+                <Checkbox :checked="getBooleanType(AcquisitionType.Search)" @change="setBooleanType(AcquisitionType.Search, $event)">
+                    Via opzoekwerk (bv. Google)
+                </Checkbox>
+                <Checkbox :checked="getBooleanType(AcquisitionType.Other)" @change="setBooleanType(AcquisitionType.Other, $event)">
+                    Andere
+                </Checkbox>
+
+            </template>
         </main>
 
         <STToolbar>
@@ -111,13 +119,14 @@
 </template>
 
 <script lang="ts">
+import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, LoadingView } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
-import { Sorter } from '@stamhoofd/utility';
+import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupAccountView from './SignupAccountView.vue';
@@ -133,7 +142,8 @@ import SignupAccountView from './SignupAccountView.vue';
         AddressInput,
         LoadingButton,
         Checkbox,
-        Dropdown
+        Dropdown,
+        LoadingView
     },
     metaInfo() {
         return {
@@ -162,8 +172,14 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         initialRegisterCode!: { code: string; organization: string } | null;
 
     registerCode = this.initialRegisterCode
+
+    validatedRegisterCode: null|RegisterCode = null;
+
     reuseRegisterCode = false;
+
+
     loading = false
+    loadingRegisterCode = true;
 
     // Make reactive
     I18nController = I18nController.shared
@@ -178,7 +194,13 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         })
     }
 
+    formatPrice(p: number) {
+        return Formatter.price(p)
+    }
+
     async loadRegisterCode() {
+        this.loadingRegisterCode = true;
+
         if (this.initialRegisterCode) {
             try {
                 await Storage.keyValue.setItem("savedRegisterCode", JSON.stringify(this.initialRegisterCode))
@@ -192,6 +214,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             const currentCount = await Storage.keyValue.getItem("what-is-new")
             const saved = await Storage.keyValue.getItem("savedRegisterCode")
             const dString = await Storage.keyValue.getItem("savedRegisterCodeDate")
+            
             if (saved !== null && dString !== null) {
                 const d = parseInt(dString)
                 if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
@@ -229,6 +252,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 await Storage.keyValue.removeItem("savedRegisterCodeDate")
             }
         }
+        this.loadingRegisterCode = false;
     }
 
     get isBelgium() {
@@ -243,10 +267,13 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         // Check register code
         if (this.registerCode) {
             try {
-                await NetworkManager.server.request({
+                const response = await NetworkManager.server.request({
                     method: "GET",
                     path: "/register-code/"+encodeURIComponent(this.registerCode.code.toUpperCase()),
+                    decoder: RegisterCode as Decoder<RegisterCode>
                 })
+                this.validatedRegisterCode = response.data
+                this.acquisitionTypes = [AcquisitionType.Recommended]
             } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     if (e.hasCode("invalid_code")) {

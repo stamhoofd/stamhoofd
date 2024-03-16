@@ -3,7 +3,9 @@ import { Email } from "@stamhoofd/email";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization, RegisterCode, STCredit } from "./";
+import { Organization, RegisterCode, STCredit, STPendingInvoice } from "./";
+import { STInvoiceItem } from "@stamhoofd/structures";
+import { QueueHandler } from "@stamhoofd/queues";
 
 export class UsedRegisterCode extends Model {
     static table = "used_register_codes";
@@ -86,7 +88,7 @@ export class UsedRegisterCode extends Model {
 
         const credit = new STCredit()
         credit.organizationId = code.organizationId
-        credit.change = Math.min(100 * 100, usedCount * 10 * 100)
+        credit.change = code.invoiceValue ? 0 : Math.min(100 * 100, usedCount * 10 * 100)
         credit.description = organization.name+" doorverwezen 🙌"
 
         // Expire in one year (will get extended for every purchase or activation)
@@ -98,18 +100,44 @@ export class UsedRegisterCode extends Model {
         this.creditId = credit.id
         await this.save()
 
+        if (code.invoiceValue) {
+            const name = "Aankoop Stamhoofd voor " + organization.name
+            const item = STInvoiceItem.create({
+                name,
+                description: "Via doorverwijzingscode",
+                amount: 1,
+                unitPrice: code.invoiceValue,
+                canUseCredits: false
+            })
+            console.log("Scheduling code charge for ", code)
+            await QueueHandler.schedule("billing/invoices-"+receivingOrganization.id, async () => {
+                await STPendingInvoice.addItems(receivingOrganization, [item])
+            });
+        }
+
         const admins = await receivingOrganization.getAdminToEmails()
         if (admins) {
-            // Delay email until everything is validated and saved
-            Email.sendInternal({
-                to: admins,
-                bcc: "simon@stamhoofd.be",
-                subject: "Je hebt "+Formatter.price(credit.change)+" tegoed ontvangen 💰",
-                text: "Dag "+receivingOrganization.name+",\n\nGeweldig nieuws! "+organization.name+" had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie "+Formatter.price(credit.change)+" tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). "
-                + (credit.change <= 90*100 ? ("Bij de volgende vereniging ontvangen jullie nog meer: "+Formatter.price(credit.change + 10*100)+". ") : "")
-                + (credit.change <= 80*100 ? ("En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt 🎁 ") : "")
-                + "Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
-            }, organization.i18n)
+            if (code.invoiceValue) {
+                Email.sendInternal({
+                    to: admins,
+                    bcc: "simon@stamhoofd.be",
+                    subject: `${organization.name} heeft jullie tegoed gebruikt`,
+                    text: "Dag "+receivingOrganization.name+",\n\n"+organization.name+" had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze dit ook gebruikt. Zoals afgesproken wordt hiervoor " + Formatter.price(code.invoiceValue)+ " aangerekend via jullie openstaand saldo in jullie Stamhoofd account."
+                    + "\n\n— Stamhoofd"
+                }, organization.i18n)
+
+            } else {
+                // Delay email until everything is validated and saved
+                Email.sendInternal({
+                    to: admins,
+                    bcc: "simon@stamhoofd.be",
+                    subject: "Je hebt "+Formatter.price(credit.change)+" tegoed ontvangen 💰",
+                    text: "Dag "+receivingOrganization.name+",\n\nGeweldig nieuws! "+organization.name+" had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie "+Formatter.price(credit.change)+" tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). "
+                    + (credit.change <= 90*100 ? ("Bij de volgende vereniging ontvangen jullie nog meer: "+Formatter.price(credit.change + 10*100)+". ") : "")
+                    + (credit.change <= 80*100 ? ("En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt 🎁 ") : "")
+                    + "Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
+                }, organization.i18n)
+            }
         }
     }
 
