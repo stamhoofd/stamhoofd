@@ -2,7 +2,7 @@
     <div class="container">
         <hr>
         <h2 class="style-with-button">
-            <div>
+            <div @contextmenu.prevent="showContextMenu">
                 {{ optionMenu.name || 'Naamloos' }}
                 <span class="style-tag inline-first">{{ optionMenu.multipleChoice ? 'Keuzemenu' : 'Keuzemenu' }}</span>
             </div>
@@ -17,10 +17,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, VersionBox } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STListItem } from "@stamhoofd/components";
-import { Option, OptionMenu, Product } from "@stamhoofd/structures"
+import { ContextMenu, ContextMenuItem, STListItem, Toast } from "@stamhoofd/components";
+import { Option, OptionMenu, Product, Version } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -43,6 +43,54 @@ export default class OptionMenuSection extends Mixins(NavigationMixin) {
 
     @Prop({})
         product: Product
+
+    mounted() {
+        this.$el.addEventListener("copy", (event) => {
+            try {
+                (event as any).clipboardData.setData("text/plain", this.optionMenu.name || 'Naamloos');
+                (event as any).clipboardData.setData("web stamhoofd/webshop-option-menu", JSON.stringify(new VersionBox(this.optionMenu).encode({version: Version})));
+                event.preventDefault();
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    }
+
+    showContextMenu(event) {
+        const clipboardSupported = !!navigator.clipboard && !!window.ClipboardItem
+        const menu = new ContextMenu([
+            [
+                ...(clipboardSupported ? [new ContextMenuItem({
+                    name: "Kopiëren",
+                    icon: "copy",
+                    action: () => {
+                        const blob = new Blob([
+                            JSON.stringify(new VersionBox(this.optionMenu).encode({version: Version}))
+                        ], {type: "web stamhoofd/webshop-option-menu"});
+                        navigator.clipboard.write(
+                            [
+                                new ClipboardItem({
+                                    ['web stamhoofd/webshop-option-menu']: blob,
+                                })
+                            ]
+                        ).then(() => {
+                            new Toast((this as any).$isMac ? 'Keuzemenu gekopieërd. Gebruik CMD+V om dit keuzemenu ergens anders te plakken' : 'Keuzemenu gekopieërd. Gebruik CTRL+V om dit keuzemenu ergens anders te plakken', 'copy').show()
+                        }).catch(console.error)
+                        return true;
+                    }
+                })]:[]),
+                new ContextMenuItem({
+                    name: "Verwijderen",
+                    icon: "trash",
+                    action: () => {
+                        this.delete()
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ clickEvent: event }).catch(console.error)
+    }
 
     addOption() {
         const option = Option.create({})
@@ -70,6 +118,12 @@ export default class OptionMenuSection extends Mixins(NavigationMixin) {
     addOptionMenuPatch(patch: AutoEncoderPatchType<OptionMenu>) {
         const p = Product.patch({ id: this.product.id })
         p.optionMenus.addPatch(OptionMenu.patch(Object.assign({}, patch, { id: this.optionMenu.id })))
+        this.addPatch(p)
+    }
+
+    delete() {
+        const p = Product.patch({ id: this.product.id })
+        p.optionMenus.addDelete(this.optionMenu.id)
         this.addPatch(p)
     }
 

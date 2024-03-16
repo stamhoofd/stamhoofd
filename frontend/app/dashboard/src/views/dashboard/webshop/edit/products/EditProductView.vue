@@ -335,9 +335,9 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, SeatSelectionBox, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, SeatSelectionBox, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -398,6 +398,49 @@ export default class EditProductView extends Mixins(NavigationMixin) {
      */
     @Prop({ required: true })
         saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+
+    mounted() {
+        document.body.addEventListener("paste", this.onPaste);
+    }
+
+    beforeDestroy() {
+        document.body.removeEventListener("paste", this.onPaste);
+    }
+
+    async onPaste(event) {
+        console.log('Pasted data');
+
+        try {
+            // Iterate over all clipboard items.
+            const clipboardItems = await navigator.clipboard.read();
+            for (const clipboardItem of clipboardItems) {
+                for (const type of clipboardItem.types) {
+                    // Discard any types that are not web custom formats.
+                    if (type === 'web stamhoofd/webshop-option-menu') {
+                        const blob = await clipboardItem.getType(type);
+                        const str = await blob.text()
+
+                        const decoded = new VersionBoxDecoder(OptionMenu as Decoder<OptionMenu>).decode(new ObjectData(JSON.parse(str), {version: Version}))
+                        console.log('pasted option menu', decoded)
+
+                        // Create a new id
+                        decoded.data.id = OptionMenu.create({}).id;
+                        const p = Product.patch({ id: this.product.id })
+                        p.optionMenus.addPut(decoded.data)
+                        this.addPatch(p);
+
+                        new Toast(`Keuzemenu ${decoded.data.name || 'Naamloos'} werd geplakt vanaf je klembord`, 'copy').show()
+
+                        event.preventDefault();
+                    }
+                    
+                    // Sanitize the blob if you need to, then process it in your app.
+                }
+            }
+        } catch (err) {
+            console.error(err.name, err.message);
+        }
+    }
 
     get isTicket() {
         return this.type === ProductType.Ticket || this.type === ProductType.Voucher || this.webshop.meta.ticketType === WebshopTicketType.Tickets
