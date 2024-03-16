@@ -807,8 +807,6 @@ export class Organization extends Model {
             if (!this.meta.packages.useWebshops) {
                 const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.Webshops)
                 
-                console.log('OrganizationDripWebshopNotRenewed', deactivatedTime)
-
                 if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 60 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripWebshopNotRenewed,
