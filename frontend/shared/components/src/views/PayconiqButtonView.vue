@@ -6,11 +6,8 @@
 
         <main>
             <h1>Betaal met Payconiq by Bancontact</h1>
-            <p>Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile of ING Banking.</p>
-
-            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
-            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
-            <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
+            <p class="style-description">Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.</p>
+            <p class="style-description">Klik op de volgende pagina op 'Kies een andere app' als je met een andere app dan Payconiq by Bancontact wilt betalen.</p>
         </main>
 
         <STToolbar>
@@ -108,7 +105,7 @@ export default class PayconiqButtonView extends PayconiqBannerView {
     --color-primary: #FF4785;
 
     .payment-app-logo {
-        height: 40px;
+        height: 28px;
     }
 
     .open-app {

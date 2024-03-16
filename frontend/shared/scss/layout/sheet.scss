@@ -16,7 +16,7 @@
         will-change: transform, opacity;
         max-height: var(--popup-height);
 
-        .st-view {
+        .st-view, .payconiq-banner-view {
             contain: content;
             // We set explicit widths on all views inside a sheet, so we can animate width changes
             width: min(100vw, var(--st-sheet-width, 400px));

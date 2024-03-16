@@ -265,11 +265,7 @@ export default class EditPaymentMethodsBox extends Vue {
             for (const p of this.sortedPaymentMethods) {
                 if (!ignore.includes(p) && this.canEnablePaymentMethod(p)) {
                     this.setPaymentMethod(p, true)
-
-                    // Payconiq on its own is not enough (we'll still enable transfers), but will be enabled by default
-                    if (p !== PaymentMethod.Payconiq) {
-                        found = true
-                    }
+                    found = true
                 }
             }
 
@@ -326,12 +322,12 @@ export default class EditPaymentMethodsBox extends Vue {
         }
 
         // Force a given ordering
-        r.push(PaymentMethod.Bancontact)
-
-        // Force a given ordering
         if (this.country == Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
             r.push(PaymentMethod.Payconiq)
         }
+
+        // Force a given ordering
+        r.push(PaymentMethod.Bancontact)
 
         // Force a given ordering
         if (this.country != Country.Netherlands) {

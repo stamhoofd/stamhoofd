@@ -15,8 +15,7 @@
             </p>
         </LoadingButton>
 
-        <p>Of scan met de app van</p>
-        <p><a class="button simple" href="https://www.kbc.be/particulieren/nl/product/betalen/zelf-bankieren/payconiq.html" target="_blank">KBC<span class="icon help" /></a> <a class="button simple" href="https://www.ing.be/nl/retail/daily-banking/e-banking/payconiq" target="_blank">ING<span class="icon help" /></a></p>
+        <p>Of scan met een ondersteunende bank app</p>
     </div>
 </template>
 
@@ -68,7 +67,6 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
     close() {
         // Try to cancel the payment in the background
-        this.cancel();
         this.dismiss();
     }
 
@@ -91,6 +89,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
     async shouldNavigateAway() {
         if (await CenteredMessage.confirm("Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.", "Ik heb nog niet betaald")) {
+            this.cancel();
             return true;
         }
         return false;
@@ -153,17 +152,20 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 </script>
 
 <style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+
     .payconiq-banner-view {
         padding: 40px 30px;
-        background: #FF4785;
+        background: $color-payconiq;
         text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
+        --st-sheet-width: 380px;
 
         .payconiq-close {
-            color: #692038;
+            color: $color-payconiq-dark-original;
             position: absolute;
             top: 15px;
             right: 15px;
@@ -173,6 +175,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             font-size: 25px;
             font-weight: bold;
             color: white;
+            line-height: 1.5;
         }
 
         .payconiq-logo {
@@ -207,7 +210,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
         }
 
         p {
-            color: #692038;
+            color: $color-payconiq-dark-original;
             font-size: 16px;
             font-weight: 500;
         }

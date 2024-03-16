@@ -1,30 +1,37 @@
 <template>
-    <STList class="payment-selection-list">
-        <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
-            <Radio slot="left" v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
-            <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
-                {{ getName(paymentMethod) }}
-            </h2>
-            <p v-if="getDescription(paymentMethod)" class="style-description-small">
-                {{ getDescription(paymentMethod) }}
-            </p>
+    <div>
+        <STList class="payment-selection-list">
+            <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
+                <Radio slot="left" v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
+                <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
+                    {{ getName(paymentMethod) }}
 
-            <div v-if="paymentMethod == 'Payconiq' && !hasNonPayconiq" class="payment-app-banner">
-                <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
-                <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
-                <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
-            </div>
+                    <span v-if="paymentMethod == 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">Meest gebruikt</span>
+                </h2>
+                <p v-if="getDescription(paymentMethod)" class="style-description-small">
+                    {{ getDescription(paymentMethod) }}
+                </p>
 
-            <img v-if="getLogo(paymentMethod)" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
-        </STListItem>
-    </STList>
+                <div v-if="paymentMethod == 'Payconiq'" class="payment-app-banner">
+                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
+                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
+                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
+                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
+                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
+                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/hello-bank/app.png">
+                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
+                </div>
+
+                <img v-if="getLogo(paymentMethod) && (!$isMobile || paymentMethod !== 'Payconiq')" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
+            </STListItem>
+        </STList>
+    </div>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg";
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg";
-import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg";
 import { LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Country, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -82,13 +89,13 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Bancontact)) {
-            r.push(PaymentMethod.Bancontact)
+        if (methods.includes(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq)
+        if (methods.includes(PaymentMethod.Bancontact)) {
+            r.push(PaymentMethod.Bancontact)
         }
 
         // Force a given ordering
@@ -115,12 +122,12 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
     get hasNonPayconiq() {
         const hasTransfer = this.paymentMethods.includes(PaymentMethod.Transfer) ? 1 : 0
         const hasPOS = this.paymentMethods.includes(PaymentMethod.PointOfSale) ? 1 : 0
-        return this.paymentMethods.length > 1 + hasTransfer + hasPOS
+        return this.paymentMethods.length > 1 || !!hasTransfer || !!hasPOS
     }
 
     getName(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return this.hasNonPayconiq ? 'Payconiq' : "Payconiq, KBC mobile of ING-app (snelst)"
+            case PaymentMethod.Payconiq: return 'Payconiq by Bancontact'
             case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.DirectDebit: return "Opgeslagen betaalkaart"
         }
@@ -129,9 +136,9 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getDescription(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return this.hasNonPayconiq ? "" : "Betaal mobiel met de Payconiq by Bancontact app, de KBC-app of de ING-app."
+            case PaymentMethod.Payconiq: return "Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app"
             case PaymentMethod.Transfer: return ""
-            case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? "Meest gebruikte betaalmethode." : ""
+            case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? "" : ""
             case PaymentMethod.iDEAL: return this.organization.address.country === Country.Netherlands ? "Meest gebruikte betaalmethode." : ""
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return "Indien beschikbaar (kan 3 werkdagen duren)"
@@ -142,7 +149,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getLogo(paymentMethod: PaymentMethod): string | null {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return payconiqLogo
+            case PaymentMethod.Payconiq: return null;
             case PaymentMethod.Transfer: return null
             case PaymentMethod.Bancontact: return bancontactLogo
             case PaymentMethod.iDEAL: return idealLogo
@@ -167,7 +174,8 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
     }
 
     .payment-app-logo {
-        height: 35px;
+        height: 28px;
+        width: 28px;
     }
 
     .payment-app-banner {

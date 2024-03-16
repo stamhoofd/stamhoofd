@@ -246,6 +246,25 @@ $color-tertiary-dark: var(--color-tertiary-dark, $color-tertiary-dark-original);
 $color-tertiary-border: var(--color-tertiary-border, $color-tertiary-border-original);
 $color-tertiary-border-focus: $color-tertiary;
 
+// -----------------------------------------------------------------------------
+// -------- Payconiq (pink) -------------------------------------------------
+// -----------------------------------------------------------------------------
+
+$color-payconiq-original: #FF4785;
+$color-payconiq-background-original: #FFD6E4;
+$color-payconiq-dark-original: #692038;
+$color-payconiq-border-original: #DBAEBD;
+
+$dark-theme-color-payconiq-background: invertColor($color-payconiq-background-original);
+$dark-theme-color-payconiq-dark: invertColor($color-payconiq-dark-original);
+$dark-theme-color-payconiq-border: invertColor($color-payconiq-border-original);
+
+$color-payconiq: var(--color-payconiq, $color-payconiq-original);
+$color-payconiq-background: var(--color-payconiq-background, $color-payconiq-background-original);
+$color-payconiq-dark: var(--color-payconiq-dark, $color-payconiq-dark-original);
+$color-payconiq-border: var(--color-payconiq-border, $color-payconiq-border-original);
+$color-payconiq-border-focus: $color-payconiq;
+
 // Aliasses
 
 $color-border-lighter-original: $color-gray-3; 
@@ -308,6 +327,10 @@ $color-current-background: var(--color-current-background, #{$color-background})
   --color-tertiary-dark: #{$dark-theme-color-tertiary-dark};
   --color-tertiary-background: #{$dark-theme-color-tertiary-background};
   --color-tertiary-border: #{$dark-theme-color-tertiary-border};
+
+  --color-payconiq-dark: #{$dark-theme-color-payconiq-dark};
+  --color-payconiq-background: #{$dark-theme-color-payconiq-background};
+  --color-payconiq-border: #{$dark-theme-color-payconiq-border};
 
   --color-primary-lighter: #{$dark-theme-color-primary-lighter};
   --color-primary-light: #{$dark-theme-color-primary-light};

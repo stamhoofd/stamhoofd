@@ -238,6 +238,11 @@
         background: $color-background-shade;
     }
 
+    &.payconiq {
+        color: $color-payconiq-dark;
+        background: $color-payconiq-background;
+    }
+
     &.inline {
         // need to evaluate the usage of this class
         display: inline-block;

@@ -48,7 +48,7 @@ export class PaymentMethodHelper {
             case PaymentMethod.Bancontact: return "Bancontact";
             case PaymentMethod.iDEAL: return "iDEAL";
             case PaymentMethod.CreditCard: return "kredietkaart";
-            case PaymentMethod.Payconiq: return "Payconiq";
+            case PaymentMethod.Payconiq: return "Payconiq by Bancontact";
         }
     }
 
@@ -71,7 +71,7 @@ export class PaymentMethodHelper {
             case PaymentMethod.Bancontact: return "Bancontact";
             case PaymentMethod.iDEAL: return "iDEAL";
             case PaymentMethod.CreditCard: return "Kredietkaart";
-            case PaymentMethod.Payconiq: return "Payconiq";
+            case PaymentMethod.Payconiq: return "Payconiq by Bancontact";
         }
     }
 }
