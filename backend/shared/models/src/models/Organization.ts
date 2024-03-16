@@ -807,7 +807,7 @@ export class Organization extends Model {
             if (!this.meta.packages.useWebshops) {
                 const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.Webshops)
                 
-                if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 60 * 24 * 60 * 60 * 1000) {
+                if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 30*3 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripWebshopNotRenewed,
                         personal: true,
@@ -826,7 +826,7 @@ export class Organization extends Model {
             if (!this.meta.packages.useMembers) {
                 const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.Members)
                 
-                if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 60 * 24 * 60 * 60 * 1000) {
+                if (deactivatedTime !== null && deactivatedTime > 30 * 24 * 60 * 60 * 1000 && deactivatedTime < 30*3 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripMembersNotRenewed,
                         personal: true,
