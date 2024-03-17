@@ -21,17 +21,17 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     withCredentials: boolean;
 
     // Helpers (need both on static and non static)
-    UNSENT            = 0;
-    OPENED            = 1;
-    HEADERS_RECEIVED  = 2;
-    LOADING           = 3;
-    DONE              = 4;
+    UNSENT            = 0 as const;
+    OPENED            = 1 as const;
+    HEADERS_RECEIVED  = 2 as const;
+    LOADING           = 3 as const;
+    DONE              = 4 as const;
 
-    static UNSENT            = 0;
-    static OPENED            = 1;
-    static HEADERS_RECEIVED  = 2;
-    static LOADING           = 3;
-    static DONE              = 4;
+    static UNSENT            = 0 as const;
+    static OPENED            = 1 as const;
+    static HEADERS_RECEIVED  = 2 as const;
+    static LOADING           = 3 as const;
+    static DONE              = 4 as const;
 
     // Private implementation
     method: "GET" | "POST" | "PATCH" | "PUT" = "GET"
