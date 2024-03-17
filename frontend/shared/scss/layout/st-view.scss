@@ -228,13 +228,6 @@ body.modern.web-iOS {
         }
     }
 
-    .box {
-        height: auto;
-        min-height: 0;
-        max-height: calc(var(--vh, 1vh) * 100);
-        contain: content;
-    }
-
     .box & {
 
         @media (max-width: 800px),
