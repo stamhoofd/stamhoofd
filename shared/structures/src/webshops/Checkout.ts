@@ -17,6 +17,7 @@ import { Customer } from './Customer';
 import { Webshop, WebshopPreview } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
+import { Discount } from './Discount';
 
 export class Checkout extends AutoEncoder {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -48,6 +49,23 @@ export class Checkout extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, version: 207 })
     administrationFee = 0;
+
+    @field({ decoder: new ArrayDecoder(Discount), version: 235 })
+    discounts: Discount[] = []
+
+    /**
+     * Applied fixed discount (not applicable to a specific cart item)
+     */
+    @field({ decoder: IntegerDecoder, version: 235 })
+    fixedDiscount = 0
+
+    /**
+     * Applied percentage discount (not applicable to a specific cart item)
+     * in pertenthousand
+     */
+    @field({ decoder: IntegerDecoder, version: 235 })
+    percentageDiscount = 0
+    
 
     /**
      * Number of persons we did reserve in webshop time slots (and maybe future other maximums)
@@ -88,8 +106,51 @@ export class Checkout extends AutoEncoder {
         return this.checkoutMethod.price.price
     }
 
+    get appliedPercentageDiscount() {
+        return Math.round(this.cart.price * this.percentageDiscount / 10000)
+    }
+
     get totalPrice() {
-        return this.cart.price + this.deliveryPrice + this.administrationFee
+        // Percentage discount
+        
+        // + this.administrationFee;
+        return Math.max(0, this.cart.price + this.deliveryPrice - this.appliedPercentageDiscount - this.fixedDiscount) + this.administrationFee
+    }
+
+    get priceBreakown() {
+        const all = [
+            {
+                name: Formatter.percentage(this.percentageDiscount) + ' korting',
+                price: -this.appliedPercentageDiscount
+            },
+            {
+                name: 'Leveringskost',
+                price: this.deliveryPrice
+            },
+            {
+                name: 'Korting',
+                price: -this.fixedDiscount
+            },
+            {
+                name: 'Administratiekost',
+                price: this.administrationFee
+            },
+        ].filter(a => a.price !== 0)
+
+        if (all.length > 0) {
+            all.unshift({
+                name: 'Subtotaal',
+                price: this.cart.price
+            })
+        }
+
+        return [
+            ...all,
+            {
+                name: 'Totaal',
+                price: this.totalPrice
+            }
+        ];
     }
 
     get totalPriceWithoutAdministrationFee() {
@@ -138,8 +199,15 @@ export class Checkout extends AutoEncoder {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace("cart")
             }
+
+            // also update discounts on errors
+            this.updateDiscounts(webshop);
+            this.applyDiscounts();
             throw e
         }
+
+        this.updateDiscounts(webshop);
+        this.applyDiscounts();
 
         if (!asAdmin && webshop.meta.availableUntil && webshop.meta.availableUntil < new Date()) {
             throw new SimpleError({
@@ -383,11 +451,29 @@ export class Checkout extends AutoEncoder {
         this.recordAnswers = answers
     }
 
-    updateAdministrationFee(webshop: Webshop) {
+    private updateAdministrationFee(webshop: Webshop) {
         this.administrationFee = webshop.meta.paymentConfiguration.administrationFee.calculate(this.totalPriceWithoutAdministrationFee)
     }
 
+    private updateDiscounts(webshop: Webshop) {
+        this.discounts = webshop.meta.defaultDiscounts.slice()
+    }
+
+    private applyDiscounts() {
+        this.fixedDiscount = 0;
+        this.percentageDiscount = 0;
+        for (const item of this.cart.items) {
+            item.discounts = [];
+        }
+
+        for (const discount of this.discounts) {
+            discount.applyToCheckout(this);
+        }
+    }
+
     update(webshop: Webshop) {
+        this.updateDiscounts(webshop)
+        this.applyDiscounts();
         this.updateAdministrationFee(webshop)
     }
 

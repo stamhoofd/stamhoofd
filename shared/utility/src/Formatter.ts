@@ -211,6 +211,14 @@ export class Formatter {
         return v;
     }
 
+    static percentage(value: number): string {
+        const formatted = new Intl.NumberFormat("nl-BE").format(Math.abs(value/100));
+
+        const v = (value < 0 ? "- " : "")+formatted;
+
+        return v + "%";
+    }
+
     static price(value: number, removeZeroDecimals = true): string {
         const formatted = new Intl.NumberFormat("nl-BE", {
             style: "currency",

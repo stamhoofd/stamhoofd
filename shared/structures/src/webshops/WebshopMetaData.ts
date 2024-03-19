@@ -12,12 +12,13 @@ import { Replacement } from '../endpoints/EmailRequest';
 import { Image } from '../files/Image';
 import { RecordCategory } from '../members/records/RecordCategory';
 import { PaymentConfiguration, PrivatePaymentConfiguration } from '../PaymentConfiguration';
-import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
+import { PaymentMethod } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
 import { RichText } from '../RichText';
 import { SeatingPlan } from '../SeatingPlan';
 import { SponsorConfig } from '../SponsorConfig';
+import { Discount } from './Discount';
 import { TransferSettings } from './TransferSettings';
 import { WebshopField } from './WebshopField';
 
@@ -397,6 +398,9 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 233, optional: true })
     reduceBranding = false
+
+    @field({ decoder: new ArrayDecoder(Discount), version: 235 })
+    defaultDiscounts: Discount[] = []
 
     /**
      * @deprecated

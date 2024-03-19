@@ -8,6 +8,7 @@ import { CartStockHelper, StockDefinition } from './CartStockHelper';
 import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product';
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
+import { ProductDiscount } from './Discount';
 
 export class CartItemOption extends AutoEncoder {
     @field({ decoder: Option })
@@ -42,6 +43,9 @@ export class CartItem extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     amount = 1;
+
+    @field({ decoder: new ArrayDecoder(ProductDiscount), version: 235 })
+    discounts: ProductDiscount[] = []
 
     /**
      * When an order is correctly placed, we store the reserved amount in the stock here.
@@ -80,6 +84,9 @@ export class CartItem extends AutoEncoder {
      */
     cartError: SimpleError|SimpleErrors | null = null;
 
+    /**
+     * @deprecated
+     */
     get price() {
         return this.unitPrice ? (this.unitPrice * this.amount) : null
     }
@@ -224,42 +231,90 @@ export class CartItem extends AutoEncoder {
         return this.calculateUnitPrice(cart)
     }
 
-    getSeatPrice() {
-        return this.seats.reduce((c, seat) => c + seat.price, 0)
+    getPriceWithDiscounts(cart: Cart): {discounts: ProductDiscount[], totalPrice: number} {
+        const stackableDiscounts = ProductDiscount.stackDiscounts(this.discounts);
+        let cheapestPrice = this.getPriceWithoutDiscounts(cart)
+        let chosenDiscounts: ProductDiscount[] = []
+
+        for (const group of stackableDiscounts) {
+            const totalPrice = this.calculatePrice(cart, group);
+            if (totalPrice < cheapestPrice) {
+                chosenDiscounts = group;
+                cheapestPrice = totalPrice;
+            }
+        }
+
+        return {discounts: chosenDiscounts, totalPrice: cheapestPrice};
+    }
+
+    getPriceWithoutDiscounts(cart: Cart) {
+        return this.calculatePrice(cart, [])
+    }
+
+    calculatePrice(cart: Cart, discounts: ProductDiscount[] = []) {
+        const prices = this.getIndividualUnitPrices(cart, discounts);
+        return prices.reduce((a, b) => a + b, 0)
+    }
+
+    getIndividualUnitPrices(cart: Cart, discounts: ProductDiscount[] = []): number[] {
+        const combinations = this.getUnitPriceCombinationsWithoutDiscount(cart);
+
+        // For reliable calculation, we'll need individual prices
+        const prices: number[] = [];
+
+        for (const [price, amount] of combinations) {
+            for (let index = 0; index < amount; index++) {
+                prices.push(price);
+            }
+        }
+
+        // Apply one by one and sort again
+        for (const discount of discounts) {
+            // Sort DESC (highest ones should have the discounts applied on first)
+            prices.sort((a, b) => b - a)
+
+            for (let index = 0; index < (discount.amount ?? prices.length); index++) {
+                prices[index] =  Math.min(prices[index], Math.max(0, Math.round(prices[index] * (10000 - discount.percentageDiscount) / 10000))) // Min is required to support negative prices: prices should never increase after applyign discounts
+                prices[index] = Math.min(prices[index], Math.max(0, prices[index] - discount.discountPerPiece)) // Min is required to support negative prices: prices should never increase after applyign discounts
+            }
+        }
+
+        return prices;
     }
 
     /**
-     * Prices that are not unit based
+     * Use this method if you need temporary prices in case it is not yet calculated
      */
-    getAdditionalPrice() {
-        return 0
+    getUnitPriceWithDiscount(cart: Cart): number {
+        // Get all discounts that are applied on all items without a limit
+        return this.getUnitPrice(cart)
     }
 
     /**
+     * @deprecated: use other systems
      * Prices that are only applicable to some amount, but not all (e.g. seat extra prices)
      */
-    getPartialExtraPrice() {
-        return this.seats.reduce((c, seat) => c + seat.price, 0)
+    getPartialExtraPrice(cart: Cart) {
+        const combinations = this.getUnitPriceCombinationsWithoutDiscount(cart)
+        const unitPrice = this.getUnitPrice(cart);
+
+        let extra = 0;
+        for (const [price, amount] of combinations) {
+            extra += Math.max(0, amount * (price - unitPrice))
+        }
+
+        return extra;
     }
 
+    /**
+     * @deprecated use getPriceWithDiscounts instead for clarity
+     */
     getPrice(cart: Cart): number {
-        const price = this.getUnitPrice(cart) * this.amount + this.getAdditionalPrice() + this.getPartialExtraPrice();
-        if (this.productPrice.price < 0) {
-            // Allow virtal negative price to other items
-            return price
-        }
-        return Math.max(0, price)
+        const price = this.getPriceWithDiscounts(cart)
+        return price.totalPrice
     }
 
-    getFormattedPriceAmount(cart: Cart) {
-        if (this.getPrice(cart) === 0) {
-            if (!this.product.allowMultiple && this.amount <= 1) {
-                return ""
-            }
-            return this.amount + " x ";
-        }
-
-        // Group by seats
+    getUnitPriceCombinationsWithoutDiscount(cart: Cart) {
         const priceCombinations = new Map<number, number>()
         const unitPrice = this.getUnitPrice(cart)
         for (const seat of this.seats) {
@@ -272,7 +327,47 @@ export class CartItem extends AutoEncoder {
         if (remaining > 0) {
             priceCombinations.set(unitPrice, (priceCombinations.get(unitPrice) || 0) + remaining)
         }
+        return priceCombinations;
+    }
 
+    /**
+     * Without discounts
+     */
+    getFormattedPriceAmount(cart: Cart) {
+        if (cart.price === 0) {
+            if (!this.product.allowMultiple && this.amount <= 1) {
+                return ""
+            }
+            return this.amount + " x ";
+        }
+
+        if (this.getPriceWithDiscounts(cart).totalPrice === 0) {
+            if (!this.product.allowMultiple && this.amount <= 1) {
+                return "Gratis"
+            }
+            return this.amount + " x Gratis";
+        }
+
+        // Group by seats
+        const priceCombinations = this.getUnitPriceCombinationsWithoutDiscount(cart);
+        return this.priceCombinationToString(priceCombinations)
+    }
+
+    getFormattedDiscountPriceAmount(cart: Cart): string|null {
+        const {discounts} = this.getPriceWithDiscounts(cart);
+        if (discounts.length === 0) {
+            return null;
+        }
+
+        const prices = this.getIndividualUnitPrices(cart, discounts)
+        const priceCombinations: Map<number, number> = new Map()
+        for (const price of prices) {
+            priceCombinations.set(price, (priceCombinations.get(price) ?? 0) + 1)
+        }
+        return this.priceCombinationToString(priceCombinations)
+    }
+
+    priceCombinationToString(priceCombinations:  Map<number, number>) {
         // Sort map by amount, keeping the price amount combination
         const sorted = [...priceCombinations.entries()].map(([price, amount]) => ({ price, amount })).sort((a, b) => b.amount - a.amount)
 
@@ -293,18 +388,6 @@ export class CartItem extends AutoEncoder {
             }
 
             parts.push(amount + " x " + Formatter.price(Math.abs(price)))
-        }
-
-        // Additional price (= without amount)
-        const additionalPrice = this.getAdditionalPrice()
-        if (additionalPrice !== 0) {
-            if (additionalPrice >= 0) {
-                parts.push("+")
-            } else {
-                parts.push("-")
-            }
-
-            parts.push(Formatter.price(Math.abs(additionalPrice)))
         }
 
         return parts.join(" ")
@@ -711,22 +794,6 @@ export class Cart extends AutoEncoder {
         for (const item of this.items) {
             try {
                 item.refresh(webshop)
-            } catch (e) {
-                errors.addError(e)
-            }
-        }
-
-        errors.throwIfNotEmpty()
-    }
-
-    /**
-     * Refresh all items with the newest data, throw if something failed (at the end)
-     */
-    updatePrices() {
-        const errors = new SimpleErrors()
-        for (const item of this.items) {
-            try {
-                item.calculateUnitPrice(this)
             } catch (e) {
                 errors.addError(e)
             }

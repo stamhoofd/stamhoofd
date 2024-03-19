@@ -51,30 +51,14 @@
                     <span>Nog iets toevoegen</span>
                 </button>
             </p>
-            <div v-if="cart.items.length > 0 && (checkout.administrationFee || !webshop.isAllFree)" class="pricing-box">
+            <div class="pricing-box">
                 <STList>
-                    <STListItem v-if="checkout.administrationFee">
-                        Subtotaal
+                    <STListItem v-for="(item, index) of checkout.priceBreakown" :key="index">
+                        {{item.name}}
 
                         <template slot="right">
-                            {{ cart.price | price }}
+                            {{ item.price | price }}
                         </template>
-                    </STListItem>
-
-                    <STListItem v-if="checkout.administrationFee">
-                        Administratiekosten
-
-                        <template slot="right">
-                            {{ checkout.administrationFee | price }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem>
-                        Totaal
-
-                        <template slot="right">
-                            {{ (cart.price + checkout.administrationFee) | price }}
-                        </template> 
                     </STListItem>
                 </STList>
             </div>

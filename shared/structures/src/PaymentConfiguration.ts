@@ -43,7 +43,9 @@ export class PrivatePaymentConfiguration extends AutoEncoder {
 
 export class AdministrationFeeSettings extends AutoEncoder {
     /**
-     * In permyriad (‱) 0 - 10000 (= 100)
+     * In pertenthousand ‱
+     * 10 = 0,1% discount
+     * 1 = 0,01% discount
      */
     @field({ decoder: IntegerDecoder })
     percentage = 0

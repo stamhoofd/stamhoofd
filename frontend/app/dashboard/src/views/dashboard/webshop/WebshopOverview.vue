@@ -130,6 +130,17 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
+                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg">
+                        <h2 class="style-title-list">
+                            Kortingen
+                        </h2>
+                        <p class="style-description">
+                            Voeg kortingen toe aan je webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
                     <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
@@ -321,6 +332,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
+import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
 import EditWebshopEmailsView from './edit/EditWebshopEmailsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
 import EditWebshopInputFieldsView from './edit/EditWebshopInputFieldsView.vue';
@@ -494,6 +506,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     editProducts(animated = true) {
         this.displayEditComponent(EditWebshopProductsView, animated)
+    }
+
+    editDiscounts(animated = true) {
+        this.displayEditComponent(EditWebshopDiscountsView, animated)
     }
 
     editPaymentMethods(animated = true) {

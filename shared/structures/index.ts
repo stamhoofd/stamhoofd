@@ -118,6 +118,7 @@ export * from "./src/webshops/TransferSettings"
 export * from "./src/webshops/Webshop"
 export * from "./src/webshops/WebshopField"
 export * from "./src/webshops/WebshopMetaData"
+export * from "./src/webshops/Discount"
 
 // billing
 export * from "./src/billing/STBillingStatus"

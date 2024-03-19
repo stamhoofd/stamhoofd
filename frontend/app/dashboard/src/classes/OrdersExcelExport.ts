@@ -219,7 +219,7 @@ export class OrdersExcelExport {
                         format: '€0.00'
                     },
                     {
-                        value: ((item.getAdditionalPrice() ?? 0) + (item.getPartialExtraPrice() ?? 0)) / 100,
+                        value: ((item.getPartialExtraPrice(order.data.cart) ?? 0)) / 100,
                         format: '€0.00'
                     },
                     {
