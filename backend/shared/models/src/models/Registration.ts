@@ -295,6 +295,7 @@ export class Registration extends Model {
             subject: template.subject,
             html: template.html,
             from,
+            type: "transactional",
             replyTo
         })
 
