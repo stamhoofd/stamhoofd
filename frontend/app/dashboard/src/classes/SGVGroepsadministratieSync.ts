@@ -337,7 +337,7 @@ export function getFunctie(details: MemberDetails, memberGroups: Group[], groepF
         "JGJV": ["jonggidsen", "jongverkenners", "jonggivers", "jong-verkenners", "jong-givers", "jong-gidsen"],
         "GVE": ["gidsen", "verkenners", "givers"],
         "AKAB": ["akabe"],
-        "JIN": ["jin"]
+        "JIN": ["jin", "jins"]
     }
     
     const matches = new Set<string>()
