@@ -130,7 +130,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)">
+                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)" v-if="getFeatureFlag('webshop-discounts')">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                         <h2 class="style-title-list">
                             Kortingen
@@ -378,6 +378,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
         })
+    }
+
+    getFeatureFlag(flag: string) {
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
     }
 
     get webshop() {

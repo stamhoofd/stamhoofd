@@ -34,14 +34,14 @@
         <STInputBox :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errorBox" class="max" v-for="optionMenu of product.optionMenus" :key="optionMenu.id">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
-                     <Checkbox slot="left" :checked="isOptionSelected(option)" @change="setOptionSelected(option, $event)" />
+                     <Checkbox slot="left" :checked="isOptionSelected(optionMenu, option)" @change="setOptionSelected(optionMenu, option, $event)" />
 
                     <h2 class="style-title-list">
                         {{ option.name || 'Naamloos' }}
                     </h2>
 
-                     <button class="button text" type="button" slot="right" v-if="optionMenu.multipleChoice && isOptionSelected(option)">
-                        <span>Optioneel</span>
+                     <button class="button text" type="button" slot="right" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)" v-if="optionMenu.multipleChoice">
+                        <span>{{getRequirementName(getOptionRequirement(optionMenu, option))}}</span>
                         <span class="icon arrow-down-small" />
                     </button>
                 </STListItem>
@@ -54,8 +54,9 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ErrorBox, ImageComponent, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { Option } from "@stamhoofd/structures";
+import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { Option, OptionMenu, OptionSelectionRequirementHelper } from "@stamhoofd/structures";
+import { OptionSelectionRequirement } from "@stamhoofd/structures";
 import { PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import ChooseProductView from "./ChooseProductView.vue";
@@ -109,8 +110,7 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
                     saveHandler: (product: Product) => {
                         this.addPatch(ProductSelector.patch({
                             productId: product.id,
-                            excludeOptionIds: [] as any,
-                            productPriceIds: [] as any
+                            optionIds: new Map()
                         }))
                     }
                 })
@@ -127,20 +127,6 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
                 "field": "productId"
             }))
             return false
-        }
-
-        for (const menu of this.product.optionMenus) {
-            if (!menu.multipleChoice) {
-                const ids = menu.options.filter(o => this.productSelector.excludeOptionIds.includes(o.id))
-                if (ids.length === menu.options.length) {
-                    this.errorBox = new ErrorBox(new SimpleError({
-                        "code": "invalid_field",
-                        "message": 'Kies minstens één optie voor ' + menu.name,
-                        "field": "optionMenu."+menu.id
-                    }))
-                    return false;
-                }
-            }
         }
 
         return true;
@@ -173,18 +159,74 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
         }))
     }
 
-    isOptionSelected(option: Option) {
-        return !this.productSelector.excludeOptionIds.includes(option.id)
+    getOptionRequirement(menu: OptionMenu, option: Option): OptionSelectionRequirement {
+        return this.productSelector.getOptionRequirement(menu, option)
     }
 
-    setOptionSelected(option: Option, selected: boolean) {
-        const excludeOptionIds = this.productSelector.excludeOptionIds.filter(i => i !== option.id)
-        if (!selected) {
-            excludeOptionIds.push(option.id)
-        }
+    setOptionRequirement(menu: OptionMenu, option: Option, requirement: OptionSelectionRequirement) {
+        const map = new Map(this.productSelector.optionIds);
+
+        map.set(option.id, requirement)
+
         this.addPatch(ProductSelector.patch({
-            excludeOptionIds: excludeOptionIds as any
+            optionIds: map
         }))
+    }
+
+    isOptionSelected(menu: OptionMenu, option: Option): boolean {
+        return this.productSelector.getOptionRequirement(menu, option) !== OptionSelectionRequirement.Excluded
+    }
+
+    setOptionSelected(menu: OptionMenu, option: Option, selected: boolean) {
+        const currentSelected = this.isOptionSelected(menu, option);
+
+        if (currentSelected === selected) {
+            return;
+        }
+
+        const map = new Map(this.productSelector.optionIds);
+
+        if (selected) {
+            map.set(option.id, OptionSelectionRequirement.Optional)
+        } else {
+            map.set(option.id, OptionSelectionRequirement.Excluded)
+        }
+
+        this.addPatch(ProductSelector.patch({
+            optionIds: map
+        }))
+    }
+
+    getRequirementName(requirement: OptionSelectionRequirement) {
+        return OptionSelectionRequirementHelper.getName(requirement)
+    }
+
+    showRequirementMenu(menu: OptionMenu, option: Option, event) {
+        const value = this.getOptionRequirement(menu, option);
+        let values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded]
+
+        if (!menu.multipleChoice) {
+            values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Excluded]
+        }
+
+        const c = new ContextMenu([
+            values.map(v => {
+                return new ContextMenuItem({
+                    name: OptionSelectionRequirementHelper.getName(v),
+                    selected: v === value,
+                    action: () => {
+                        this.setOptionRequirement(menu, option, v)
+                        return true;
+                    }
+                })
+            })
+        ])
+
+        c.show({
+            button: event.currentTarget,
+            xPlacement: "left",
+            yPlacement: "bottom",
+        }).catch(console.error)
     }
 }
 </script>

@@ -463,11 +463,15 @@ export class Checkout extends AutoEncoder {
         this.fixedDiscount = 0;
         this.percentageDiscount = 0;
         for (const item of this.cart.items) {
-            item.discounts = [];
+            item.applicableDiscounts = [];
         }
 
         for (const discount of this.discounts) {
             discount.applyToCheckout(this);
+        }
+
+        for (const item of this.cart.items) {
+            item.calculateAppliedDiscounts(this.cart)
         }
     }
 

@@ -20,8 +20,12 @@
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
                     <footer>
-                        <p class="price">
+                        <p class="price" v-if="!cartItem.getFormattedDiscountPriceAmount(cart)">
                             {{ cartItem.getFormattedPriceAmount(cart) }}
+                        </p>
+                        <p class="price" v-else>
+                            <span class="style-discount-old-price">{{ cartItem.getFormattedPriceAmount(cart) }}</span>
+                            <span class="style-discount-price">{{cartItem.getFormattedDiscountPriceAmount(cart)}}</span>
                         </p>
                         <div @click.stop>
                             <button class="button icon trash" type="button" @click="deleteItem(cartItem)" />
@@ -276,6 +280,16 @@ export default class CartView extends Mixins(NavigationMixin){
             line-height: 1.4;
             font-weight: 600;
             color: $color-primary;
+        }
+
+        .style-discount-old-price {
+            text-decoration: line-through;
+            color: $color-gray-4;
+        }
+
+        .style-discount-price {
+            color: $color-tertiary;
+            margin-left: 5px;
         }
 
         footer {

@@ -73,6 +73,31 @@
             Korting op specifieke artikels
         </h2>
         <p>Je kan een procentuele korting geven op bepaalde artikels, je kan één artikel gratis maken, je kan een korting per stuk geven op de eerste x aantal stuks (of alle stuks) van een artikel...</p>
+
+        <STList v-if="patchedDiscount.productDiscounts.length">
+            <STListItem v-for="productDiscount of patchedDiscount.productDiscounts" :key="productDiscount.id" class="right-description right-stack" :selectable="true" @click="editProductDiscount(productDiscount)">
+                <h3 class="style-title-list">
+                    {{productDiscount.getTitle(webshop, true).title}}
+                </h3>
+                <p class="style-description-small">
+                     {{productDiscount.getTitle(webshop, true).description}}
+                </p>
+                <p class="style-description-small">
+                     {{productDiscount.getTitle(webshop, true).footnote}}
+                </p>
+
+                <template slot="right">
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </STList>
+
+        <p>
+            <button class="button text" type="button" @click="addProductDiscount">
+                <span class="icon add" />
+                <span>Artikel toevoegen</span>
+            </button>
+        </p>
       
         <div v-if="!isNew" class="container">
             <hr>
@@ -92,11 +117,12 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator, PermyriadInput, PriceInput, Checkbox } from "@stamhoofd/components";
-import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductSelector, Version } from '@stamhoofd/structures';
+import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscount, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
+import EditProductDiscountView from './EditProductDiscountView.vue';
 
 @Component({
     components: {
@@ -190,6 +216,13 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
         this.addPatch(meta)
     }
 
+    addProductDiscountPatch(d: PatchableArrayAutoEncoder<ProductDiscountSettings>) {
+        const meta = Discount.patch({
+            productDiscounts: d,
+        })
+        this.addPatch(meta)
+    }
+
     addRequirement() {
         const requirement = DiscountRequirement.create({
             product: ProductSelector.create({
@@ -224,6 +257,50 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<DiscountRequirement>) => {
                         this.addRequirementsPatch(patch)
+                    }
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
+    }
+
+    addProductDiscount() {
+        const productDiscount = ProductDiscountSettings.create({
+            product: ProductSelector.create({
+                productId: this.webshop.products[0].id
+            }),
+            discount: ProductDiscount.create({
+
+            })
+        })
+        const arr: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
+        arr.addPut(productDiscount);
+
+        this.present({
+            components: [
+                new ComponentWithProperties(EditProductDiscountView, {
+                    isNew: true,
+                    productDiscount,
+                    webshop: this.webshop,
+                    saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
+                        arr.merge(patch);
+                        this.addProductDiscountPatch(arr)
+                    }
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
+    }
+
+    editProductDiscount(productDiscount: ProductDiscountSettings) {
+        this.present({
+            components: [
+                new ComponentWithProperties(EditProductDiscountView, {
+                    isNew: false,
+                    productDiscount,
+                    webshop: this.webshop,
+                    saveHandler: (patch: PatchableArrayAutoEncoder<ProductDiscountSettings>) => {
+                        this.addProductDiscountPatch(patch)
                     }
                 })
             ],

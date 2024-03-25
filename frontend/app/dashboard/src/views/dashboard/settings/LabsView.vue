@@ -86,6 +86,10 @@
                 Webshop auth
             </Checkbox>
 
+            <Checkbox :checked="getFeatureFlag('webshop-discounts')" @change="setFeatureFlag('webshop-discounts', !!$event)">
+                Webshop discounts
+            </Checkbox>
+
             <hr>
 
             <button class="button text" type="button" @click="applyDiscountCode">

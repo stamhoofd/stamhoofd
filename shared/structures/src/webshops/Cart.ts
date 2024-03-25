@@ -8,7 +8,7 @@ import { CartStockHelper, StockDefinition } from './CartStockHelper';
 import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product';
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
-import { ProductDiscount } from './Discount';
+import { ProductDiscount, ProductDiscountTracker } from './Discount';
 
 export class CartItemOption extends AutoEncoder {
     @field({ decoder: Option })
@@ -44,8 +44,16 @@ export class CartItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amount = 1;
 
+    /**
+     * Discounts that are actually applied
+     */
     @field({ decoder: new ArrayDecoder(ProductDiscount), version: 235 })
     discounts: ProductDiscount[] = []
+
+    /**
+     * Only used during calculation of discounts
+     */
+    applicableDiscounts: ProductDiscountTracker[] = []
 
     /**
      * When an order is correctly placed, we store the reserved amount in the stock here.
@@ -231,20 +239,8 @@ export class CartItem extends AutoEncoder {
         return this.calculateUnitPrice(cart)
     }
 
-    getPriceWithDiscounts(cart: Cart): {discounts: ProductDiscount[], totalPrice: number} {
-        const stackableDiscounts = ProductDiscount.stackDiscounts(this.discounts);
-        let cheapestPrice = this.getPriceWithoutDiscounts(cart)
-        let chosenDiscounts: ProductDiscount[] = []
-
-        for (const group of stackableDiscounts) {
-            const totalPrice = this.calculatePrice(cart, group);
-            if (totalPrice < cheapestPrice) {
-                chosenDiscounts = group;
-                cheapestPrice = totalPrice;
-            }
-        }
-
-        return {discounts: chosenDiscounts, totalPrice: cheapestPrice};
+    getPriceWithDiscounts(cart: Cart): number {
+        return this.calculatePrice(cart, this.discounts)
     }
 
     getPriceWithoutDiscounts(cart: Cart) {
@@ -268,14 +264,65 @@ export class CartItem extends AutoEncoder {
             }
         }
 
-        // Apply one by one and sort again
-        for (const discount of discounts) {
-            // Sort DESC (highest ones should have the discounts applied on first)
-            prices.sort((a, b) => b - a)
+        let discountsQueue = discounts.slice();
 
-            for (let index = 0; index < (discount.amount ?? prices.length); index++) {
-                prices[index] =  Math.min(prices[index], Math.max(0, Math.round(prices[index] * (10000 - discount.percentageDiscount) / 10000))) // Min is required to support negative prices: prices should never increase after applyign discounts
-                prices[index] = Math.min(prices[index], Math.max(0, prices[index] - discount.discountPerPiece)) // Min is required to support negative prices: prices should never increase after applyign discounts
+        for (let index = 0; index < prices.length; index++) {
+            const discount = discountsQueue.shift();
+            if (discount) {
+                prices[index] = discount.calculate(prices[index])
+            }
+        }
+
+        return prices;
+    }
+
+    /**
+     * This should get called after the Checkout object
+     * added all the applicable discounts to all cart items.
+     * After that, it calls this method for each cart item (starting with the most expensive cart items).
+     * Every cart item can claim a discount if it is the best discount it can get.
+     */
+    calculateAppliedDiscounts(cart: Cart): number[] {
+        const combinations = this.getUnitPriceCombinationsWithoutDiscount(cart);
+
+        // For reliable calculation, we'll need individual prices
+        const prices: number[] = [];
+
+        for (const [price, amount] of combinations) {
+            for (let index = 0; index < amount; index++) {
+                prices.push(price);
+            }
+        }
+
+        // Discounts should get applied to the most expensive prices first
+        prices.sort((a, b) => b - a);
+
+        // Reset applied discounts
+        this.discounts = [];
+
+        // Loop prices and look for the best discount
+        for (let index = 0; index < prices.length; index++) {
+            const price = prices[index];
+            let bestPrice = price;
+            let bestDiscount: ProductDiscountTracker|null = null;
+            let bestDiscountUsed: ProductDiscount|null = null;
+
+            for (const discount of this.applicableDiscounts) {
+                const d = discount.getNextDiscount();
+                if (d) {
+                    const c = d.calculate(price);
+                    if (c < bestPrice || bestDiscount === null) { // Price can also be equal, if discount = 0% (we need to count it because otherwise X + y discounts don't work)
+                        bestPrice = c;
+                        bestDiscount = discount;
+                        bestDiscountUsed = d;
+                    }
+                }
+            }
+
+            if (bestDiscount && bestDiscountUsed) {
+                this.discounts.push(bestDiscountUsed);
+                bestDiscount.markUsed();
+                prices[index] = bestPrice;
             }
         }
 
@@ -310,8 +357,7 @@ export class CartItem extends AutoEncoder {
      * @deprecated use getPriceWithDiscounts instead for clarity
      */
     getPrice(cart: Cart): number {
-        const price = this.getPriceWithDiscounts(cart)
-        return price.totalPrice
+        return this.getPriceWithDiscounts(cart)
     }
 
     getUnitPriceCombinationsWithoutDiscount(cart: Cart) {
@@ -341,7 +387,7 @@ export class CartItem extends AutoEncoder {
             return this.amount + " x ";
         }
 
-        if (this.getPriceWithDiscounts(cart).totalPrice === 0) {
+        if (this.getPriceWithoutDiscounts(cart) === 0) {
             if (!this.product.allowMultiple && this.amount <= 1) {
                 return "Gratis"
             }
@@ -354,12 +400,12 @@ export class CartItem extends AutoEncoder {
     }
 
     getFormattedDiscountPriceAmount(cart: Cart): string|null {
-        const {discounts} = this.getPriceWithDiscounts(cart);
-        if (discounts.length === 0) {
+        const price = this.getPriceWithDiscounts(cart);
+        if (price === this.getPriceWithoutDiscounts(cart)) {
             return null;
         }
 
-        const prices = this.getIndividualUnitPrices(cart, discounts)
+        const prices = this.getIndividualUnitPrices(cart, this.discounts)
         const priceCombinations: Map<number, number> = new Map()
         for (const price of prices) {
             priceCombinations.set(price, (priceCombinations.get(price) ?? 0) + 1)
@@ -387,7 +433,11 @@ export class CartItem extends AutoEncoder {
                 continue
             }
 
-            parts.push(amount + " x " + Formatter.price(Math.abs(price)))
+            if (parts.length > 0 && price === 0) {
+                parts.push(amount + " gratis")
+            } else {
+                parts.push(amount + " x " + Formatter.price(Math.abs(price)))
+            }
         }
 
         return parts.join(" ")
