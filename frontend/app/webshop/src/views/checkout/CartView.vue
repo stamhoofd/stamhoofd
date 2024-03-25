@@ -208,14 +208,31 @@ export default class CartView extends Mixins(NavigationMixin){
 
     mounted() {
         UrlHelper.setUrl("/cart")
-        
+
+        this.check().catch(console.error)
+    }
+
+    async check() {
         try {
+            await WebshopManager.reload()
+        } catch (e) {
+            // Possible: but don't skip validation
+            console.error(e);
+        }
+
+         try {
             this.cart.validate(WebshopManager.webshop)
+            this.errorBox = null
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
         }
         CheckoutManager.saveCart()
+    }
+
+    activated() {     
+        this.errorBox = null   
+        this.check().catch(console.error)
     }
 
     countFor(cartItem: CartItem) {

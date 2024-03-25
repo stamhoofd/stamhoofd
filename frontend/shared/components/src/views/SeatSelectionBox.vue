@@ -306,10 +306,6 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         if (seat.isSpace) {
             return
         }
-        if (this.isOccupied(row, seat)) {
-            new Toast('Deze plaats is al bezet', 'error red').show()
-            return
-        }
 
         if (this.lastPriceToast) {
             this.lastPriceToast.hide()
@@ -324,6 +320,11 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
                 this.seats.filter(s => s.section !== this.seatingPlanSection.id || s.row !== row.label || s.seat !== seat.label)
             )
         } else {
+            if (this.isOccupied(row, seat)) {
+                new Toast('Deze plaats is al bezet', 'error red').show()
+                return
+            }
+
             // select
             const addedSeat = ReservedSeat.create({
                 section: this.seatingPlanSection.id,
