@@ -127,13 +127,24 @@
                 </button>
             </p>
         </template>
+
+        <hr>
+        <h2>Stamhoofd</h2>
+        <p>
+            Stamhoofd toont op enkele plaatsen het logo van Stamhoofd op jullie webshop. Op die manier kunnen we andere verenigingen Stamhoofd leren kennen waardoor we Stamhoofd aan een vrij betaalbare prijs kunnen blijven aanbieden. Je kan dit een beetje verminderen als je dit liever niet hebt.
+        </p>
+
+        <Checkbox v-model="reduceBranding">
+            Verminder de zichtbaarheid van Stamhoofd
+        </Checkbox>
+
     </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
+import { ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput, Checkbox } from "@stamhoofd/components";
 import { Cart, CartReservedSeat, TicketPublic } from "@stamhoofd/structures";
 import { CartItem } from "@stamhoofd/structures";
 import { DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
@@ -158,7 +169,8 @@ import EditWebshopMixin from "./EditWebshopMixin";
         WYSIWYGTextInput,
         LogoEditor,
         ColorInput,
-        EditSponsorsBox
+        EditSponsorsBox,
+        Checkbox
     }
 })
 export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
@@ -216,6 +228,15 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
 
     set description(description: RichText) {
         const patch = WebshopMetaData.patch({ description })
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+    }
+
+    get reduceBranding() {
+        return this.webshop.meta.reduceBranding
+    }
+
+    set reduceBranding(reduceBranding: boolean) {
+        const patch = WebshopMetaData.patch({ reduceBranding })
         this.addPatch(PrivateWebshop.patch({ meta: patch}) )
     }
 

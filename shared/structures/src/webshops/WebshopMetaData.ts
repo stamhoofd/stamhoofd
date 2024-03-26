@@ -395,6 +395,9 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(SeatingPlan), version: 211 })
     seatingPlans: SeatingPlan[] = []
 
+    @field({ decoder: BooleanDecoder, version: 233 })
+    reduceBranding = false
+
     /**
      * @deprecated
      * Use paymentConfiguration.paymentMethods instead

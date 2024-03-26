@@ -9,7 +9,7 @@
         </STNavigationBar>
 
         <main>
-            <p class="stamhoofd-header">
+            <p class="stamhoofd-header" v-if="!webshop.meta.reduceBranding">
                 <a :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw je betaalbare webshop via</span>  <Logo /></a>
             </p>
             <div class="box">
