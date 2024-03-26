@@ -131,7 +131,7 @@
         <hr>
         <h2>Stamhoofd</h2>
         <p>
-            Stamhoofd toont op enkele plaatsen het logo van Stamhoofd op jullie webshop. Op die manier kunnen we andere verenigingen Stamhoofd leren kennen waardoor we Stamhoofd aan een vrij betaalbare prijs kunnen blijven aanbieden. Je kan dit een beetje verminderen als je dit liever niet hebt.
+            Stamhoofd toont op enkele plaatsen het logo van Stamhoofd op jullie webshop. Op die manier kunnen we Stamhoofd bekender maken bij andere verenigingen, waardoor we Stamhoofd ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.
         </p>
 
         <Checkbox v-model="reduceBranding">
