@@ -690,7 +690,7 @@ export class Organization extends Model {
         const days7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
         // Welcome drip
-        // Created 7 days ago
+        // Created maximum 7 days ago
         if (this.createdAt > days7 && !this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWelcome)) {
             await this.sendEmailTemplate({
                 type: EmailTemplateType.OrganizationDripWelcome,
@@ -707,7 +707,7 @@ export class Organization extends Model {
         if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWebshopTrialCheckin)) {
             if (this.meta.packages.isWebshopsTrial) {
                 const activeTime = this.meta.packages.getActiveTime(STPackageType.TrialWebshops)
-                if (activeTime !== null && activeTime > 7 * 24 * 60 * 60 * 1000) {
+                if (activeTime !== null && activeTime > 4 * 24 * 60 * 60 * 1000) {
                     // 7 days checkin
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripWebshopTrialCheckin,
@@ -727,7 +727,7 @@ export class Organization extends Model {
         if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripMembersTrialCheckin)) {
             if (this.meta.packages.isMembersTrial) {
                 const activeTime = this.meta.packages.getActiveTime(STPackageType.TrialMembers)
-                if (activeTime !== null && activeTime > 7 * 24 * 60 * 60 * 1000) {
+                if (activeTime !== null && activeTime > 4 * 24 * 60 * 60 * 1000) {
                     // 7 days checkin
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripMembersTrialCheckin,
@@ -743,11 +743,11 @@ export class Organization extends Model {
             }
         }
 
-        // Webshop trial expired
+        // Webshop trial expired after 1 week
         if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWebshopTrialExpired)) {
             if (!this.meta.packages.useWebshops) {
                 const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.TrialWebshops)
-                if (deactivatedTime !== null && deactivatedTime < 14 * 24 * 60 * 60 * 1000) {
+                if (deactivatedTime !== null && deactivatedTime < 14 * 24 * 60 * 60 * 1000 && deactivatedTime > 7 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripWebshopTrialExpired,
                         personal: true
@@ -765,7 +765,7 @@ export class Organization extends Model {
         if (!this.serverMeta.hasEmail(EmailTemplateType.OrganizationDripMembersTrialExpired)) {
             if (!this.meta.packages.useMembers) {
                 const deactivatedTime = this.meta.packages.getDeactivatedTime(STPackageType.TrialMembers)
-                if (deactivatedTime !== null && deactivatedTime < 14 * 24 * 60 * 60 * 1000) {
+                if (deactivatedTime !== null && deactivatedTime < 14 * 24 * 60 * 60 * 1000 && deactivatedTime > 7 * 24 * 60 * 60 * 1000) {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDripMembersTrialExpired,
                         personal: true
