@@ -496,19 +496,15 @@ export class TicketBuilder {
         this.document.font('Metropolis-Medium');
         this.document.fillColor(COLOR_GRAY);
 
-        const shareText = "Sla dit ticket op door de QR-code te scannen.\nTicketverkoop via Stamhoofd. Verkoop zelf ook tickets zonder commissies."
+        const shareText = "Ticketverkoop via Stamhoofd"
         const expectedHeight = this.document.heightOfString(shareText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 }) - 2
         height = Math.max(height, qrHeight - expectedHeight)
 
         if (!dryRun) {
-            this.document.text("Sla dit ticket op door de QR-code te scannen.\nTicketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 , lineGap: 2, paragraphGap: 2, continued: true })
+            this.document.text("Ticketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 , lineGap: 2, paragraphGap: 2, continued: true })
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
             this.document.text("Stamhoofd", { continued: true, link: 'https://'+I18nController.i18n.t("shared.domains.marketing"), })
-            
-            this.document.font('Metropolis-Medium');
-            this.document.fillColor(COLOR_GRAY);
-            this.document.text(". Verkoop zelf ook tickets zonder commissies.")
         }
 
         height += expectedHeight + 2
@@ -519,8 +515,5 @@ export class TicketBuilder {
         height += 5*MM
 
         return height
-    }
-    
-
-    
+    }  
 }
