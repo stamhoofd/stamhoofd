@@ -135,6 +135,10 @@ export class DocumentTemplate extends Model {
                 settings: RecordSettings.create({}), // settings will be overwritten
                 address: registration.member.details.address ?? null
             }),
+            "member.email": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.email ?? null
+            }),
             "member.birthDay": RecordDateAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 dateValue: registration.member.details.birthDay
@@ -151,6 +155,10 @@ export class DocumentTemplate extends Model {
                 settings: RecordSettings.create({}), // settings will be overwritten
                 address: registration.member.details.parents[0]?.address ?? null
             }),
+            "parents[0].email": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[0]?.email ?? null
+            }),
             "parents[1].firstName": RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[1]?.firstName
@@ -163,6 +171,10 @@ export class DocumentTemplate extends Model {
                 settings: RecordSettings.create({}), // settings will be overwritten
                 address: registration.member.details.parents[1]?.address ?? null
             }),
+            "parents[1].email": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[1]?.email ?? null
+            })
         }
 
         // Add data that is different for each member

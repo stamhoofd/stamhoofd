@@ -103,7 +103,7 @@ export const participation = DocumentTemplateDefinition.create({
     documentFieldCategories: [
         RecordCategory.create({
             name: "Gegevens lid",
-            description: "Deze gegevens zijn allemaal standaard beschikbaar in Stamhoofd.",
+            description: "Deze gegevens zijn allemaal standaard beschikbaar in Stamhoofd. Je kiest zelf wat je wilt tonen op het document, en kan iets weglaten door het niet te koppelen.",
             records: [
                 RecordSettings.create({
                     id: "member.firstName",
@@ -128,6 +128,18 @@ export const participation = DocumentTemplateDefinition.create({
                     name: "Adres",
                     required: false,
                     type: RecordType.Address
+                }),
+                RecordSettings.create({
+                    id: "member.nationalRegistryNumber",
+                    name: "Rijksregisternummer",
+                    required: false,
+                    type: RecordType.Text
+                }),
+                RecordSettings.create({
+                    id: "member.email",
+                    name: "E-mailadres",
+                    required: false,
+                    type: RecordType.Email
                 })
             ]
         }),

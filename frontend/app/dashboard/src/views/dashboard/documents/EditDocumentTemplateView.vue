@@ -306,6 +306,14 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             })
         }
 
+        if (field.type === RecordType.Email) {
+            choices.push({
+                value: 'member.email',
+                label: 'E-mailadres',
+                categories: ['Lid']
+            })
+        }
+
         // Parents
         if (field.type === RecordType.Text) {
             choices.push({
@@ -323,6 +331,13 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             choices.push({
                 value: 'parents[0].address',
                 label: 'Adres',
+                categories: ['Ouder 1']
+            })
+        }
+        if (field.type === RecordType.Email) {
+            choices.push({
+                value: 'parents[0].email',
+                label: 'E-mailadres',
                 categories: ['Ouder 1']
             })
         }
@@ -344,6 +359,14 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             choices.push({
                 value: 'parents[1].address',
                 label: 'Adres',
+                categories: ['Ouder 2']
+            })
+        }
+
+        if (field.type === RecordType.Email) {
+            choices.push({
+                value: 'parents[1].email',
+                label: 'E-mailadres',
                 categories: ['Ouder 2']
             })
         }
@@ -381,6 +404,11 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 "member.address",
                 "parents[0].address",
                 "parents[1].address"
+            ],
+            "member.email": [
+                "member.email",
+                "parents[0].email",
+                "parents[1].email"
             ],
             "debtor.firstName": [
                 "parents[0].firstName",

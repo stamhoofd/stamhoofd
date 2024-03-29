@@ -8,9 +8,9 @@
             body, html {
                 padding: 0;
                 margin: 0;
-                font-family: "Helvetica Neue", Arial, sans-serif;
+                font-family: Arial, "Helvetica Neue", sans-serif;
                 line-height: normal;
-                font-size: 14px;
+                font-size: 13px;
                 overflow-wrap: break-word;
                 font-weight: 400;
                 font-style: normal;
@@ -33,8 +33,8 @@
 
             hr {
                 border: 0;
-                border-top: 0.5px solid rgb(186, 186, 186);
-                margin: 20px 0;
+                border-top: 0.2px solid gray;
+                margin: 30px 0;
             }
 
             .form-box p.flex {
@@ -42,13 +42,9 @@
                 gap: 30px;
             }
 
-            .page-box > p, .page-box > h1, .page-box > h2, .page-box > h3, .page-box > h4 {
-                padding: 0 4.5px;
-            }
-
             h1 {
-                font-size: 26px;
-                font-weight: 500;
+                font-size: 24px;
+                font-weight: bold;
             }
 
             h1 + p {
@@ -61,7 +57,8 @@
 
             h2 {
                 font-size: 18px;
-                font-weight: 500;
+                font-weight: bold;
+                margin-bottom: 15px;
             }
 
             h2 span {
@@ -71,6 +68,7 @@
 
             .plaintext {
                 white-space: pre-wrap;
+                margin-bottom: 40px;
             }
 
             .space {
@@ -100,15 +98,15 @@
 
             table td, table th {
                 border: 0;
-                padding: 2px 7px;
+                padding: 4px 7px;
                 text-align: left;
                 vertical-align: top;
                 min-height: 36px;
             }
             table th, table td:first-child {
-                font-weight: 500;
+                font-weight: bold;
                 padding-left: 0;
-                width: 30%;
+                width: 25%;
             }
 
             .avoid {
@@ -147,16 +145,50 @@
     </head>
     <body>
         <main>
-            <div>
+            <div class="page-box">
                 <h1>{{name}}</h1>
 
                 {{#if comments}}
                 <p class="plaintext">{{comments}}</p>
                 {{/if}}
 
+                <hr>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Naam</td>
+                            <td>{{member.firstName}} {{member.lastName}}</td>
+                        </tr>
+                        {{#if member.birthDay}}
+                        <tr>
+                            <td>Geboortedatum</td>
+                            <td>{{ formatDate member.birthDay}}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if member.nationalRegistryNumber}}
+                        <tr>
+                            <td>Rijksregisternummer</td>
+                            <td>{{member.nationalRegistryNumber}}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if member.address}}
+                        <tr>
+                            <td>Adres</td>
+                            <td>{{member.address.street}} {{member.address.number}}, {{member.address.postalCode}}
+                                {{member.address.city}}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if member.email}}
+                        <tr>
+                            <td>E-mailadres</td>
+                            <td>{{member.email}}</td>
+                        </tr>
+                        {{/if}}
+                    </tbody>
+                </table>
+
                 {{#if (or registration.showGroup registration.showDate registration.price) }}
                 <hr>
-                <h2>Details</h2>
                 <table>
                     <tbody>
                         {{#if registration.showGroup}}
@@ -192,31 +224,7 @@
                 {{/if}}
 
                 <hr>
-                <h2>Deelnemer</h2>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>Naam</td>
-                            <td>{{member.firstName}} {{member.lastName}}</td>
-                        </tr>
-                        {{#if member.birthDay}}
-                        <tr>
-                            <td>Geboortedatum</td>
-                            <td>{{ formatDate member.birthDay}}</td>
-                        </tr>
-                        {{/if}}
-                        {{#if member.address}}
-                        <tr>
-                            <td>Adres</td>
-                            <td>{{member.address.street}} {{member.address.number}}, {{member.address.postalCode}}
-                                {{member.address.city}}</td>
-                        </tr>
-                        {{/if}}
-                    </tbody>
-                </table>
-
-                <hr>
-                <h2>Organisatie</h2>
+                <h2>Uitgereikt door</h2>
                 <table>
                     <tbody>
                         <tr>

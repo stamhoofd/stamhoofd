@@ -164,6 +164,16 @@ function verifyBelgianNationalNumber(text: string) {
     return checksum === realChecksum || checksum === realChecksum2
 }
 
+function formatBelgianNationalNumber(text: string) {
+    const trimmed = text.replace(/[^A-Za-z0-9]+/g, "") // keep A-Z for validation
+    if (trimmed.length != 11) {
+        return text;
+    }
+    
+    // JJ.MM.DD-XXX.XX
+    return trimmed.substring(0, 2) + '.' + trimmed.substring(2, 4) + '.' + trimmed.substring(4, 6) + '-' + trimmed.substring(6, 9) + '.' + trimmed.substring(9, 11)
+}
+
 export class RecordTextAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder, nullable: true })
     value: string | null = null
@@ -204,6 +214,9 @@ export class RecordTextAnswer extends RecordAnswer {
                     field: "input"
                 })
             }
+
+            // Auto format the number
+            this.value = formatBelgianNationalNumber(this.value)
         }
     }
 
