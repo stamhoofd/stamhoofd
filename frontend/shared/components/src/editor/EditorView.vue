@@ -16,7 +16,7 @@
             </LoadingButton>
             <button v-else-if="$parent.canDismiss" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
         </STNavigationBar>
-        <main ref="main">
+        <main ref="main" class="flex">
             <slot />
 
             <STList>

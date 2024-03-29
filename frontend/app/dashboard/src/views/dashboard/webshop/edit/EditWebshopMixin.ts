@@ -16,6 +16,9 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
     @Prop({ required: false })
         initialWebshop?: PrivateWebshop
 
+    @Prop({ required: false })
+        savedHandler?: (webshop: PrivateWebshop) => Promise<void>
+
     originalWebshop: PrivateWebshop = this.webshopManager?.webshop ?? this.initialWebshop ?? PrivateWebshop.create({})
 
     get isNew() {
@@ -79,6 +82,10 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                     shouldRetry: false
                 })
 
+                if (this.savedHandler) {
+                    await this.savedHandler(response.data)
+                }
+
                 const preview = WebshopPreview.create(response.data)
                 OrganizationManager.organization.webshops.push(preview)
 
@@ -99,6 +106,11 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                     , "success green").show()
             } else {
                 await this.webshopManager!.patchWebshop(this.webshopPatch)
+
+                if (this.savedHandler && this.webshopManager!.webshop) {
+                    await this.savedHandler(this.webshopManager!.webshop)
+                }
+
                 new Toast("Jouw wijzigingen zijn opgeslagen", "success green").show()
 
                 // Clear the patch

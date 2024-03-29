@@ -1605,7 +1605,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             if (!text || text.length < 20) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: "",
-                    message: "Vul een voldoende groot bericht in, anders is de kans groot dat jouw e-mail als spam wordt gezien",
+                    message: "Schrijf een voldoende groot bericht, anders is de kans groot dat jouw e-mail als spam wordt gezien",
                     field: "message"
                 }))
                 return;

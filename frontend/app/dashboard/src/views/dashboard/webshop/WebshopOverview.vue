@@ -309,11 +309,12 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -612,8 +613,51 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                         // Set usedStock to 0
                         duplicate.clearStock();
 
+                        const response = await SessionManager.currentSession!.authenticatedServer.request({
+                            method: "GET",
+                            path: "/email-templates",
+                            query: { webshopId: webshop.id },
+                            shouldRetry: false,
+                            owner: this,
+                            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>)
+                        })
+                        const templates = response.data;
+
                         return new ComponentWithProperties(EditWebshopGeneralView, {
-                            initialWebshop: duplicate
+                            initialWebshop: duplicate,
+                            savedHandler: async (duplicateWebshop: PrivateWebshop) => {
+                                // Copy over the templates
+                                try {
+                                    const patchedArray: PatchableArrayAutoEncoder<EmailTemplate> = new PatchableArray()
+                                    for (const t of templates) {
+                                        if (t.webshopId !== webshop.id) {
+                                            // Skip default templates
+                                            continue;
+                                        }
+
+                                        // Create a new duplicate
+                                        const template = EmailTemplate.create({
+                                            ...t,
+                                            webshopId: duplicateWebshop.id,
+                                            id: undefined
+                                        })
+                                        patchedArray.addPut(template)
+                                    }
+
+                                    if (patchedArray.getPuts().length > 0) {
+                                        await SessionManager.currentSession!.authenticatedServer.request({
+                                            method: "PATCH",
+                                            path: "/email-templates",
+                                            body: patchedArray,
+                                            shouldRetry: false,
+                                            owner: this
+                                        })
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    new Toast('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop', 'warning').show()
+                                }
+                            }
                         })
                     } catch (e) {
                         Toast.fromError(e).show()
