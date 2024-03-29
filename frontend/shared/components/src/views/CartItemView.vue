@@ -210,11 +210,40 @@ export default class CartItemView extends Mixins(NavigationMixin){
         return Formatter.pluralText(num, singular, plural)
     }
 
+    validate() {
+        try {
+            const clonedCart = this.cart.clone()
+
+            if (!this.cartEnabled) {
+                clonedCart.clear()
+            } else if (this.oldItem) {
+                clonedCart.removeItem(this.oldItem)
+            }
+
+            this.cartItem.validate(this.webshop, clonedCart, {
+                refresh: true,
+                admin: this.admin,
+                validateSeats: false
+            })
+        } catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e)
+            return false
+        }
+        this.errorBox = null
+        return true;
+    }
+
     addToCart() {
+        if (!this.validate()) {
+            return;
+        }
+
         if (this.willNeedSeats) {
             this.chooseSeats();
             return;
         }
+
         try {
             this.saveHandler(this.cartItem, this.oldItem, this)
         } catch (e) {
@@ -222,8 +251,6 @@ export default class CartItemView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
             return
         }
-        this.errorBox = null // required if dismiss is disabled
-        //this.dismiss({ force: true })
     }
 
     chooseSeats() {

@@ -619,7 +619,6 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                 cart: clone,
                 webshop: webshop,
                 saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                    cartItem.validate(webshop, clone, false, true)
                     component.dismiss({force: true})
 
                     if (oldItem) {
@@ -662,7 +661,6 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                         cart: clone,
                         webshop: webshop,
                         saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                            cartItem.validate(webshop, clone, false, true)
                             component.dismiss({force: true})
                             
                             if (oldItem) {

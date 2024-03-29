@@ -191,7 +191,6 @@ export default class CartView extends Mixins(NavigationMixin){
                         cart: CheckoutManager.cart,
                         webshop: WebshopManager.webshop,
                         saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
-                            cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
                             component?.dismiss({force: true})
                             if (oldItem) {
                                 CheckoutManager.cart.removeItem(oldItem)

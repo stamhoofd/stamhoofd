@@ -302,12 +302,6 @@ export default class WebshopView extends Mixins(NavigationMixin){
     
     onAddItem(cartItem: CartItem, oldItem: CartItem | null, component) {
         if (this.cartEnabled) {
-            const clonedCart = CheckoutManager.cart.clone()
-            if (oldItem) {
-                clonedCart.removeItem(oldItem)
-            }
-
-            cartItem.validate(this.webshop, clonedCart)
             if (component) {
                 component.dismiss({force: true})
             }
@@ -326,11 +320,9 @@ export default class WebshopView extends Mixins(NavigationMixin){
             // }
         } else {
             CheckoutManager.cart.clear();
-            cartItem.validate(this.webshop, CheckoutManager.cart)
             if (component) {
                 component.dismiss({force: true})
             }
-
             CheckoutManager.cart.addItem(cartItem)
             CheckoutManager.saveCart()
             this.openCheckout(true).catch(console.error)

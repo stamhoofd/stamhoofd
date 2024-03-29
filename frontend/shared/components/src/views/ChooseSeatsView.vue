@@ -172,6 +172,30 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin){
         return this.webshop.meta.seatingPlans.find(p => p.id === this.cartItem.product.seatingPlanId)
     }
 
+    validate() {
+        try {
+            const clonedCart = this.cart.clone()
+            
+            if (!this.cartEnabled) {
+                clonedCart.clear()
+            } else if (this.oldItem) {
+                clonedCart.removeItem(this.oldItem)
+            }
+
+            this.cartItem.validate(this.webshop, clonedCart, {
+                refresh: true,
+                admin: this.admin,
+                validateSeats: true
+            })
+        } catch (e) {
+            console.error(e);
+            this.errorBox = new ErrorBox(e)
+            return false
+        }
+        this.errorBox = null
+        return true;
+    }
+
     save() {
         // Check seats are optimal
         if (this.seatingPlan && this.seatingPlan.requireOptimalReservation && !this.admin) {
@@ -186,6 +210,10 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin){
                 }))
                 return;
             }
+        }
+
+        if (!this.validate()) {
+            return;
         }
 
         try {

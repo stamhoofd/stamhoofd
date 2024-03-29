@@ -495,8 +495,19 @@ export class CartItem extends AutoEncoder {
     /**
      * Update self to the newest available data and throw if it was not able to recover
      */
-    validate(webshop: Webshop, cart: Cart, refresh = true, asAdmin = false) {
+    validate(webshop: Webshop, cart: Cart, {refresh, admin, validateSeats}: {refresh?: boolean, admin?: boolean, validateSeats?: boolean} = {refresh: true, admin: false, validateSeats: true}) {
         this.cartError = null;
+
+        if (admin === undefined) {
+            admin = false
+        }
+        if (refresh === undefined) {
+            refresh = true;
+        }
+        if (validateSeats === undefined) {
+            validateSeats = true;
+        }
+
         if (refresh) {
             this.refresh(webshop)
         }
@@ -507,7 +518,7 @@ export class CartItem extends AutoEncoder {
         }
 
         // Check stock
-        if (!asAdmin) {
+        if (!admin) {
             if (!product.isEnabled && this.amount > this.reservedAmount) {
                 throw new SimpleError({
                     code: "product_unavailable",
@@ -532,7 +543,7 @@ export class CartItem extends AutoEncoder {
                 })
             }
 
-            const remaining = this.getAvailableStock(this, cart, webshop, asAdmin)
+            const remaining = this.getAvailableStock(this, cart, webshop, admin)
             const minimumRemaining = CartStockHelper.getRemaining(remaining)
             if (minimumRemaining !== null && minimumRemaining < this.amount) {
                 // Search for appropriate message in stock definitions
@@ -544,51 +555,9 @@ export class CartItem extends AutoEncoder {
                     meta: {recoverable: minimumRemaining > 0}
                 })
             }
-
-            // Count the increase in stock for the whole cart and this product
-            /*const pending = cart.items.reduce((prev, item) => {
-                if (item.product.id != this.product.id) {
-                    return prev
-                }
-                if (item.id >= this.id) { // greater than or equal, so we only compare with items before this item in the cart (we'll check the opposite direction anyway later)
-                    return prev
-                }
-                return prev + item.amount - item.reservedAmount
-            }, 0) + this.amount - this.reservedAmount
-
-            if (product.remainingStock !== null && product.remainingStock < pending) {
-                throw new SimpleError({
-                    code: "product_unavailable",
-                    message: "No remaining stock",
-                    human: product.remainingStock === 1 ? ("Er is nog maar één stuk beschikbaar van " +this.product.name) : ("Er zijn nog maar "+product.remainingStock+" stuks beschikbaar van "+this.product.name),
-                    meta: {recoverable: product.remainingStock > 0}
-                })
-            }
-
-            // Count the total items
-            if (!asAdmin && product.maxPerOrder !== null) {
-                const total = cart.items.reduce((prev, item) => {
-                    if (item.product.id != this.product.id) {
-                        return prev
-                    }
-                    if (item.id >= this.id) { // greater than or equal, so we only compare with items before this item in the cart (we'll check the opposite direction anyway later)
-                        return prev
-                    }
-                    return prev + item.amount
-                }, 0) + this.amount
-
-                if (total > product.maxPerOrder) {
-                    throw new SimpleError({
-                        code: "product_unavailable",
-                        message: "Maximum amount reached",
-                        human: "Je kan niet meer dan "+product.maxPerOrder+" stuks van "+this.product.name+" bestellen",
-                        meta: {recoverable: true}
-                    })
-                }
-            }*/
         }
 
-        if (this.product.seatingPlanId) {
+        if (this.product.seatingPlanId && validateSeats) {
             const seatingPlan = webshop.meta.seatingPlans.find(s => s.id === this.product.seatingPlanId)
             if (!seatingPlan) {
                 throw new SimpleError({
@@ -608,7 +577,7 @@ export class CartItem extends AutoEncoder {
                 if (valid) {
                     return false
                 } else {
-                    if (!asAdmin && seatingPlan.isAdminSeat(s)) {
+                    if (!admin && seatingPlan.isAdminSeat(s)) {
                         return false
                     }
                     return true
@@ -638,7 +607,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: "invalid_seats",
                     message: "Invalid seats",
-                    human: `Kies nog ${Formatter.pluralText(this.amount - this.seats.length, 'plaats', 'plaatsen')} (${this.amount})`,
+                    human: `Kies nog ${Formatter.pluralText(this.amount - this.seats.length, 'plaats', 'plaatsen')}`,
                     meta: {recoverable: true}
                 })
             }
@@ -658,7 +627,7 @@ export class CartItem extends AutoEncoder {
             }
 
             // Adjust seats automatically if enabled
-            if (seatingPlan.requireOptimalReservation && !asAdmin) {
+            if (seatingPlan.requireOptimalReservation && !admin) {
                 const otherSeats = cart.items.filter(i => i.product.id === this.product.id && i.id !== this.id).flatMap(i => i.seats)
                 const adjusted = seatingPlan.adjustSeatsForBetterFit(this.seats, [...reservedSeats, ...otherSeats], this.reservedSeats)
                 if (adjusted) {
@@ -687,9 +656,6 @@ export class CartItem extends AutoEncoder {
         // Update prices
         this.calculateUnitPrice(cart)
     }
-
-
-
 }
 
 export class Cart extends AutoEncoder {
@@ -774,7 +740,10 @@ export class Cart extends AutoEncoder {
         const errors = new SimpleErrors()
         for (const item of this.items) {
             try {
-                item.validate(webshop, this, true, asAdmin)
+                item.validate(webshop, this, {
+                    refresh: true,
+                    admin: asAdmin
+                })
                 newItems.push(item)
 
                 if (!webshop.meta.cartEnabled) {

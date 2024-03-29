@@ -59,7 +59,10 @@ export default class FullPageProduct extends Mixins(NavigationMixin){
             const item = this.cart.items.find(i => i.product.id == this.product.id)
             if (item) {
                 try {
-                    item.validate(this.webshop, this.cart, true, false)
+                    item.validate(this.webshop, this.cart, {
+                        refresh: true,
+                        admin: this.admin
+                    })
 
                     return item
                 } catch (e) {
