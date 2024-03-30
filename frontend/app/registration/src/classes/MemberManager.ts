@@ -2,7 +2,7 @@
 
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking';
+import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
 import { Address, Document, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
 import { Vue } from "vue-property-decorator";
 
@@ -21,8 +21,6 @@ export class MemberManagerStatic extends MemberManagerBase {
      */
     setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
         // Save keychain items
-        Keychain.addItems(data.keychainItems)
-
         const s: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
 

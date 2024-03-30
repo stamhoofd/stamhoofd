@@ -15,8 +15,8 @@ import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
-import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
-import { ExchangePaymentEndpoint } from './endpoints/payments/ExchangePaymentEndpoint';
+import { ExchangeSTPaymentEndpoint } from './endpoints/global/payments/ExchangeSTPaymentEndpoint';
+import { ExchangePaymentEndpoint } from './endpoints/organization/shared/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
 

@@ -42,8 +42,12 @@ const start = async () => {
     loadLogger();
     await I18n.load()
     const router = new Router();
-    await router.loadAllEndpoints(__dirname + "/src/endpoints/*");
-    await router.loadAllEndpoints(__dirname + "/src/endpoints/*/manage");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/global/*");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/dashboard/*");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/registration");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/shared");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/shared/*");
+
     router.endpoints.push(new CORSPreflightEndpoint())
 
     const routerServer = new RouterServer(router);

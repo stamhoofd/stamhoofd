@@ -163,20 +163,6 @@ export class LoginHelper {
         })
        
         return response.data.token
-
-        // Auomatically assign all prmissions (frontend side)
-        /*user.permissions = Permissions.create({
-            level: PermissionLevel.Full
-        })
-
-        const session = new Session(organization.id)
-        session.setToken(response.data)
-        Keychain.addItem(item)
-
-        // We don't preload anything because the server will make some additional changes to all the data, and we need to refetch everything
-        await session.setEncryptionKey(keys.authEncryptionSecretKey)
-        await SessionManager.setCurrentSession(session)
-        */
     }
 
     static async loadAdmins(shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {

@@ -1,4 +1,4 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column, Database, Model } from '@simonbackx/simple-database';
 import { BalanceItemStatus, MemberBalanceItem, MemberBalanceItemPayment, OrderStatus, Payment as PaymentStruct, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
@@ -331,5 +331,48 @@ export class BalanceItem extends Model {
                 })
             })
         })
+    }
+
+    static async balanceItemsForUsersAndMembers(userIds: string[], memberIds: string[]): Promise<BalanceItem[]> {
+        if (memberIds.length == 0 && userIds.length == 0) {
+            return []
+        }
+        
+        const params: any[] = [];
+        const where: string[] = [];
+
+        if (memberIds.length) {
+            if (memberIds.length == 1) {
+                where.push(`memberId = ?`)
+                params.push(memberIds[0]);
+            } else {
+                where.push(`memberId IN (?)`)
+                params.push(memberIds);
+            }
+        }
+
+        // Note here, we don't search for memberId IS NULL restriction in MySQL because it slows down the query too much (500ms)
+        // Better if we do it in code here
+        if (userIds.length) {
+            if (userIds.length == 1) {
+                where.push('userId = ?')
+                params.push(userIds[0]);
+            } else {
+                where.push('userId IN (?)')
+                params.push(userIds);
+            }
+        }
+        
+        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE (${where.join(" OR ")}) AND ${BalanceItem.table}.status != ?`;
+        params.push(BalanceItemStatus.Hidden);
+        
+        const [rows] = await Database.select(query, params);
+        const balanceItems = BalanceItem.fromRows(rows, BalanceItem.table);
+
+        // Filter out items of other members
+        if (memberIds.length) {
+            return balanceItems.filter(b => !b.memberId || memberIds.includes(b.memberId))
+        }
+        return balanceItems;
     }
 }

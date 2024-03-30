@@ -4,7 +4,6 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { Request } from '@simonbackx/simple-networking';
 import { Organization, Version } from '@stamhoofd/structures';
 
-import { Keychain } from './Keychain';
 import { Session } from './Session';
 import { Storage } from './Storage';
 
@@ -25,6 +24,7 @@ type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organi
  */
 export class SessionManagerStatic {
     currentSession: Session | null = null
+    currentOrganization: Organization | null = null
 
     protected cachedStorage?: SessionStorage
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
@@ -32,7 +32,6 @@ export class SessionManagerStatic {
     async restoreLastSession() {
         // Restore keychain before setting the current session
         // to prevent fetching the organization to refetch the missing keychain items
-        await Keychain.load()
 
         const id = (await this.getSessionStorage(false)).lastOrganizationId
         if (id) {

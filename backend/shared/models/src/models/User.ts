@@ -1,18 +1,13 @@
-import { Worker } from 'node:worker_threads';
 
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { EmailInterfaceRecipient } from "@stamhoofd/email";
-import { QueueHandler } from "@stamhoofd/queues";
-import { ApiUser,KeyConstants, LoginProviderType, NewUser, Organization as OrganizationStruct, Permissions, User as UserStruct, UserMeta, Version } from "@stamhoofd/structures";
+import { ApiUser, LoginProviderType, NewUser, Organization as OrganizationStruct, Permissions, UserMeta, User as UserStruct } from "@stamhoofd/structures";
 import argon2 from "argon2";
-import path from "path";
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization, Token } from "./";
 
 export type UserWithOrganization = User & { organization: Organization };
-export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };
-export type UserFull = User & { publicKey: string; publicAuthSignKey: string; authEncryptionKeyConstants: KeyConstants; authSignKeyConstants: KeyConstants; encryptedPrivateKey: string };
 
 export class User extends Model {
     static table = "users";
@@ -54,42 +49,6 @@ export class User extends Model {
      */
     @column({ type: "json", decoder: UserMeta, nullable: true })
     meta: UserMeta | null = null
-
-    /**
-     * @deprecated
-     * Public key used for encryption
-     */
-    @column({ type: "string", nullable: true })
-    publicKey: string | null = null;
-
-    /**
-     * @deprecated
-     * public key that is used to verify during login (using a challenge) and for getting a token
-     * SHOULD NEVER BE PUBLIC!
-     */
-    @column({ type: "string", nullable: true })
-    protected publicAuthSignKey?: string | null = null // if not selected will be undefined
-
-    /**
-     * @deprecated
-     * Encrypted private key, used for authenticated encrytion and decryption
-     */
-    @column({ type: "string", nullable: true })
-    protected encryptedPrivateKey: string | null = null // if not selected will be undefined
-
-    /**
-     * @deprecated
-     * Constants that are used to get the authSignKeyPair from the user password. Using
-     */
-    @column({ type: "json", decoder: KeyConstants, nullable: true })
-    protected authSignKeyConstants?: KeyConstants | null = null // if not selected will be undefined
-
-    /**
-     * @deprecated
-     * Constants that are used to get the authEncryptionKey from the user password. Only accessible for the user using his token (= after login)
-     */
-    @column({ type: "json", decoder: KeyConstants, nullable: true })
-    protected authEncryptionKeyConstants: KeyConstants | null = null // if not selected will be undefined
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -189,59 +148,7 @@ export class User extends Model {
         return this.permissions?.hasFullAccess(this.organization.privateMeta.roles) ?? false
     }
 
-    static async checkOldPassword(email: string, password: string, keyConstants: KeyConstants, publicAuthSignKey: string): Promise<boolean> {
-        return await QueueHandler.schedule('check-old-password', async () => {
-            return new Promise((resolve) => {
-                console.log('[WORKER] Logging in via the old E2E way...', email)
-
-                let resolved = false;
-                const worker = new Worker(path.join(__dirname, '../helpers/checkPasswordWorker.js'), { workerData: {email, password, publicAuthSignKey, keyConstants: keyConstants.encode({version: Version})} });
-                const timer = setTimeout(() => {
-                    console.log('[WORKER] Worker timed out after 20s for email', email)
-
-                    if (resolved) {
-                        return;
-                    }
-                    resolve(false);
-                    resolved = true;
-                    
-                    worker.terminate().catch(console.error);
-                }, 20 * 1000);
-                
-                worker.on('message', (m) => {
-                    if (resolved) {
-                        return;
-                    }
-                    clearTimeout(timer);
-                    resolve(!!m);
-                    resolved = true;
-                });
-                worker.on('error', (e) => {
-                    console.error('[WORKER] Catched worker error', e)
-
-                    if (resolved) {
-                        return;
-                    }
-                    clearTimeout(timer);
-                    resolve(false);
-                    resolved = true;
-                });
-                worker.on('exit', (code) => {
-                    if (code !== 0) {
-                        console.error('[WORKER] Worker stopped with exit code', code);
-                    }
-                    if (resolved) {
-                        return;
-                    }
-                    clearTimeout(timer);
-                    resolve(false);
-                    resolved = true;
-                });
-            })
-        }, 3);
-    }
-
-    static async login(organizationId: string, email: string, password: string): Promise<UserForAuthentication | undefined> {
+    static async login(organizationId: string, email: string, password: string): Promise<User | undefined> {
         const user = await User.getForAuthentication(organizationId, email)
         if (!user || !user.hasKeys() || user.isApiUser) {
             return undefined
@@ -254,34 +161,7 @@ export class User extends Model {
         }
 
         if (!user.password) {
-            if (!user.authSignKeyConstants) {
-                console.error('Tried to login to a user with no password or authSignKeyConstants');
-                return undefined;
-            }
-            if (!user.publicAuthSignKey) {
-                console.error('Tried to login to a user with no password or publicAuthSignKey');
-                return undefined;
-            }
-
-            console.log('Preparing to log in via the old E2E way...', email)
-
-            // Old e2e login system: we need to generate the keys locally to check if they match
-            try {
-                if (await this.checkOldPassword(email, password, user.authSignKeyConstants, user.publicAuthSignKey)) {
-                    console.log('Login succeeded for', email, '. Updating password...')
-
-                    await user.changePassword(password)
-                    await user.save();
-                    console.log('Successfully stored hashed password for', email)
-
-                    return user
-                }
-                
-                console.log('Login failed for', email)
-
-            } catch (e) {
-                console.error(e)
-            }
+            console.log('Tried to login to a user without password', email)
             return
         }
 
@@ -301,15 +181,7 @@ export class User extends Model {
         return rows
     }
 
-    /**
-     * @param namespace
-     * @override
-     */
-    static getDefaultSelect(namespace?: string): string {
-        return this.selectColumnsWithout(namespace, "encryptedPrivateKey", "publicAuthSignKey", "authSignKeyConstants", "authEncryptionKeyConstants");
-    }
-
-    static async getFull(id: string): Promise<UserFull | undefined> {
+    static async getFull(id: string): Promise<User | undefined> {
         const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`id\` = ? LIMIT 1`, [id]);
 
         if (rows.length == 0) {
@@ -323,7 +195,7 @@ export class User extends Model {
             return undefined
         }
         
-        return user as UserFull;
+        return user as User;
     }
 
     hasPasswordBasedAccount() {
@@ -331,11 +203,7 @@ export class User extends Model {
             return true;
         }
         
-        if (this.publicKey === null) {
-            // This is a placeholder user
-            return false
-        }
-        return true
+        return false
     }
 
     get isApiUser() {
@@ -379,36 +247,7 @@ export class User extends Model {
             return true;
         }
 
-        if (this.publicKey === null) {
-            // This is a placeholder user
-
-            return false
-        }
-
-        if (this.authSignKeyConstants === null) {
-            console.error(this.id+": authSignKeyConstants is null")
-            // This is a placeholder user
-            return false
-        }
-        
-        if (this.publicAuthSignKey === null) {
-            console.error(this.id+": publicAuthSignKey is null")
-            // This is a placeholder user
-            return false
-        }
-
-        if (this.authEncryptionKeyConstants === null) {
-            console.error(this.id+": authEncryptionKeyConstants is null")
-            // This is a placeholder user
-            return false
-        }
-
-        if (this.encryptedPrivateKey === null) {
-            console.error(this.id+": encryptedPrivateKey is null")
-            // This is a placeholder user
-            return false
-        }
-        return true
+        return false;
     }
 
     static async getForRegister(organization: Organization, email: string): Promise<UserWithOrganization | undefined> {
@@ -437,7 +276,7 @@ export class User extends Model {
         return user;
     }
 
-    static async getForAuthentication(organizationId: string, email: string): Promise<UserForAuthentication | undefined> {
+    static async getForAuthentication(organizationId: string, email: string): Promise<User | undefined> {
         const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organizationId]);
 
         if (rows.length == 0) {
@@ -450,7 +289,7 @@ export class User extends Model {
         }
 
         // Read member + address from first row
-        return user as UserForAuthentication;
+        return user;
     }
 
     static async hash(password: string) {
@@ -537,13 +376,6 @@ export class User extends Model {
 
     async changePassword(password: string) {
         this.password = await User.hash(password)
-
-        // Clear old fields
-        this.publicKey = null;
-        this.publicAuthSignKey = null;
-        this.encryptedPrivateKey = null;
-        this.authSignKeyConstants = null;
-        this.authEncryptionKeyConstants = null;
     }
 
     async getOrganizationStructure(this: UserWithOrganization): Promise<OrganizationStruct> {

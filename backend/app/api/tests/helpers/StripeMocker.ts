@@ -4,7 +4,7 @@ import nock from "nock";
 import qs from 'qs';
 import { v4 as uuidv4 } from "uuid";
 
-import { StripeWebookEndpoint } from "../../src/endpoints/stripe/StripeWebhookEndpoint";
+import { StripeWebookEndpoint } from "../../src/endpoints/global/payments/StripeWebhookEndpoint";
 import { StripeHelper } from "../../src/helpers/StripeHelper";
 
 export class StripeMocker {

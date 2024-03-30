@@ -1,6 +1,5 @@
-import { ArrayDecoder,AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { KeychainItem } from '../KeychainItem';
 import { Organization } from '../Organization';
 import { NewUser } from '../User';
 

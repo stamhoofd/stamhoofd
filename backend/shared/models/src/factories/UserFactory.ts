@@ -1,7 +1,6 @@
 import { Factory } from "@simonbackx/simple-database";
 import { NewUser,Permissions } from '@stamhoofd/structures';
 
-import { KeychainItem } from '../models/KeychainItem';
 import { Organization } from "../models/Organization";
 import { User, UserWithOrganization } from "../models/User";
 import { OrganizationFactory } from './OrganizationFactory';

@@ -1,6 +1,5 @@
 
 export * from "./src/AppManager"
-export * from "./src/Keychain"
 export * from "./src/LoginHelper"
 export * from "./src/ManagedToken"
 export * from "./src/MemberManagerBase"

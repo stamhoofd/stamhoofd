@@ -13,6 +13,6 @@ export class KeychainedMembers extends AutoEncoder {
     /**
      * Create or update the keychain items for these public keys (needs to be also present in addMembers or updateMembers)
      */
-    @field({ decoder: new ArrayDecoder(KeychainItem)})
-    keychainItems: KeychainItem[]
+    @field({ decoder: new ArrayDecoder(KeychainItem), optional: true })
+    keychainItems: KeychainItem[] = []
 }

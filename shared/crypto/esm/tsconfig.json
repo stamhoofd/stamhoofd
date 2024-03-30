@@ -1,7 +1,0 @@
-{
-    "extends": "../tsconfig.json",
-    "compilerOptions": {
-        "module": "esnext", // esnext is needed to make lazy loading work in webpack
-        "outDir": "dist"
-    }
-}

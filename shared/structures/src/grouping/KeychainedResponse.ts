@@ -7,23 +7,27 @@ import { KeychainItem } from '../KeychainItem';
  */
 export class KeychainedResponse<T extends Encodeable | (Encodeable[])> implements Encodeable {
     data: T;
+
+    /**
+     * @deprecated
+     */
     keychainItems: KeychainItem[];
 
-    constructor(data: { data: T; keychainItems: KeychainItem[] }) {
+    constructor(data: { data: T; keychainItems?: KeychainItem[] }) {
         this.data = data.data
-        this.keychainItems = data.keychainItems
+        this.keychainItems = []
     }
 
     encode(context: EncodeContext) {
         if (Array.isArray(this.data)) {
             return {
                 data: this.data.map(r => r.encode(context)),
-                keychainItems: this.keychainItems.map(r => r.encode(context)),
+                keychainItems: [],
             };
         }
         return {
             data: (this.data as Encodeable).encode(context),
-            keychainItems: this.keychainItems.map(r => r.encode(context)),
+            keychainItems: [],
         };
     }
 }
@@ -38,7 +42,7 @@ export class KeychainedResponseDecoder<T extends Encodeable | Encodeable[]> impl
     decode(data: Data) {
         return new KeychainedResponse<T>({
             data: data.field('data').decode(this.dataDecoder),
-            keychainItems: data.field('keychainItems').array(KeychainItem as Decoder<KeychainItem>),
+            keychainItems: [],
         })
     }
 }

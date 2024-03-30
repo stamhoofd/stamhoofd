@@ -1,9 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Member } from '@stamhoofd/models';
-import { Address } from '@stamhoofd/structures';
-import { StringCompare } from '@stamhoofd/utility';
 
-import { AddressValidator } from '../helpers/AddressValidator';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == "test") {

@@ -6,7 +6,6 @@ import { KeychainedResponseDecoder, LoginProviderType, MyUser, Organization, Tok
 import { Vue } from "vue-property-decorator"
 
 import { AppManager, UrlHelper } from '..'
-import { Keychain } from './Keychain'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
@@ -424,7 +423,6 @@ export class Session implements RequestMiddleware {
         })
 
         this.updateOrganization(response.data.data)
-        Keychain.addItems(response.data.keychainItems)
        
         this.callListeners("organization")
         return this.organization!
@@ -450,7 +448,7 @@ export class Session implements RequestMiddleware {
             }
 
             let fetchedOrganization = false
-            if (force || !this.organization || (fetchedUser && this.user?.permissions) || (this.user?.permissions && !this.organization.privateMeta)) { //  || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))
+            if (force || !this.organization || (fetchedUser && this.user?.permissions) || (this.user?.permissions && !this.organization.privateMeta)) { 
                 fetchedOrganization = true
                 await this.fetchOrganization(shouldRetry)
             }
