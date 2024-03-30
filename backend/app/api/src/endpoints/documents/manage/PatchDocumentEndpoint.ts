@@ -9,11 +9,7 @@ type Query = undefined;
 type Body = PatchableArrayAutoEncoder<DocumentStruct>
 type ResponseBody = DocumentStruct[]
 
-/**
- * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
- */
-
-export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = new PatchableArrayDecoder(DocumentStruct as Decoder<DocumentStruct>, DocumentStruct.patchType() as Decoder<AutoEncoderPatchType<DocumentStruct>>, StringDecoder)
 
     protected doesMatch(request: Request): [true, Params] | [false] {

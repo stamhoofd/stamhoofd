@@ -8,11 +8,7 @@ type Query = undefined;
 type Body = undefined
 type ResponseBody = DocumentTemplatePrivate[]
 
-/**
- * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
- */
-
-export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
             return [false];
