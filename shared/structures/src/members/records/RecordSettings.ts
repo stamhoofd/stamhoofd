@@ -213,4 +213,16 @@ export class RecordSettings extends AutoEncoder {
 
         return answer;
     }
+
+    get excelColumns() {
+        if (this.type === RecordType.Address) {
+            return [
+                this.name + ' - Straat en nummer',
+                this.name + ' - Postcode',
+                this.name + ' - Gemeente',
+                this.name + ' - Land'
+            ]
+        }
+        return [this.name]
+    }
 }

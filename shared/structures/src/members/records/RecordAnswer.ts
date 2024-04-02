@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../addresses/Address";
 import { Image } from "../../files/Image";
 import { RecordChoice, RecordSettings,RecordType, RecordWarning, RecordWarningType } from "./RecordSettings"
+import { CountryHelper } from "../../addresses/CountryDecoder";
 
 
 export class RecordAnswer extends AutoEncoder {
@@ -60,11 +61,15 @@ export class RecordAnswer extends AutoEncoder {
         return this.settings.name+": "+this.stringValue
     }
 
-    get excelValue() {
-        return {
+    get excelColumns() {
+        return this.settings.excelColumns
+    }
+
+    get excelValues() {
+        return [{
             value: this.stringValue,
             format: null
-        }
+        }]
     }
 
     getWarnings(): RecordWarning[] {
@@ -251,11 +256,11 @@ export class RecordCheckboxAnswer extends RecordAnswer {
         return this.selected;
     }
 
-    get excelValue() {
-        return {
+    get excelValues() {
+        return [{
             value: this.selected ? (this.comments ? this.comments : "Ja") : "Nee",
             format: null
-        }
+        }]
     }
 
     override validate() {
@@ -396,6 +401,27 @@ export class RecordAddressAnswer extends RecordAnswer {
                 field: "input"
             })
         }
+    }
+
+    get excelValues() {
+        return [
+            {
+                value: this.address ? `${this.address.street} ${this.address.number}` : '/',
+                format: null
+            },
+            {
+                value: this.address?.postalCode ?? '/',
+                format: null
+            },
+            {
+                value: this.address?.city ?? '/',
+                format: null
+            },
+            {
+                value: this.address ? CountryHelper.getName(this.address.country) : '/',
+                format: null
+            }
+        ]
     }
 
     get isEmpty() {

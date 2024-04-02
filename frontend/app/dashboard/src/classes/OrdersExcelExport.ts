@@ -37,7 +37,7 @@ export class OrdersExcelExport {
         for (const order of orders) {
             for (const a of order.data.fieldAnswers) {
                 if (!answerColumns.has(a.field.id)) {
-                    answerColumns.set(a.field.id, answerColumns.size)
+                    answerColumns.set(a.field.id, answerNames.length)
                     answerNames.push(a.field.name)
                 }
             }
@@ -47,8 +47,11 @@ export class OrdersExcelExport {
         for (const order of orders) {
             for (const a of order.data.recordAnswers) {
                 if (!answerColumns.has(a.settings.id)) {
-                    answerColumns.set(a.settings.id, answerColumns.size)
-                    answerNames.push(a.settings.name)
+                    answerColumns.set(a.settings.id, answerNames.length)
+                    const columns = a.excelColumns
+                    for (const c of columns) {
+                        answerNames.push(c)
+                    }
                 }
             }
 
@@ -153,7 +156,10 @@ export class OrdersExcelExport {
                 for (const a of order.data.recordAnswers) {
                     const index = answerColumns.get(a.settings.id)
                     if (index !== undefined) {
-                        answers[index] = a.excelValue
+                        const values = a.excelValues
+                        for (const [i, v] of values.entries()) {
+                            answers[index + i] = v
+                        }
                     }
                 }
 
@@ -223,7 +229,7 @@ export class OrdersExcelExport {
                         format: '€0.00'
                     },
                     {
-                        value: (item.getPrice(order.data.cart) ?? 0) / 100,
+                        value: (item.getPriceWithDiscounts() ?? 0) / 100,
                         format: '€0.00'
                     },
                     item.product.name,
@@ -255,7 +261,7 @@ export class OrdersExcelExport {
         for (const order of orders) {
             for (const a of order.data.fieldAnswers) {
                 if (!answerColumns.has(a.field.id)) {
-                    answerColumns.set(a.field.id, answerColumns.size)
+                    answerColumns.set(a.field.id, answerNames.length)
                     answerNames.push(a.field.name)
                 }
             }
@@ -265,8 +271,11 @@ export class OrdersExcelExport {
         for (const order of orders) {
             for (const a of order.data.recordAnswers) {
                 if (!answerColumns.has(a.settings.id)) {
-                    answerColumns.set(a.settings.id, answerColumns.size)
-                    answerNames.push(a.settings.name)
+                    answerColumns.set(a.settings.id, answerNames.length)
+                    const columns = a.excelColumns
+                    for (const c of columns) {
+                        answerNames.push(c)
+                    }
                 }
             }
         }
@@ -337,7 +346,10 @@ export class OrdersExcelExport {
             for (const a of order.data.recordAnswers) {
                 const index = answerColumns.get(a.settings.id)
                 if (index !== undefined) {
-                    answers[index] = a.excelValue
+                    const values = a.excelValues
+                    for (const [i, v] of values.entries()) {
+                        answers[index + i] = v
+                    }
                 }
             }
 

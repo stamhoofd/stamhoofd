@@ -106,24 +106,29 @@ class ExcelMemberProperty {
 
     name = ""
     width = 10
-    getValue: (member: MemberWithRegistrations) => RowValue
+
+    getValues: (member: MemberWithRegistrations) => RowValue[]
+    columns: string[]
+
     format?: string
     description?: string
 
     constructor(settings: {
         name: string, 
         selected?: boolean,
-        getValue: (member: MemberWithRegistrations) => RowValue,
+        getValues: (member: MemberWithRegistrations) => RowValue[],
         format?: string,
         width?: number,
-        description?: string
+        description?: string,
+        columns?: string[]
     }) {
         this.name = settings.name
         this.selected = settings.selected ?? false
-        this.getValue = settings.getValue
+        this.getValues = settings.getValues
         this.format = settings.format
         this.width = settings.width ?? 10
         this.description = settings.description
+        this.columns = settings.columns ?? [this.name]
     }
 }
 
@@ -164,35 +169,35 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
         new ExcelMemberPropertyGroup("Persoonsgegevens", undefined, [
             new ExcelMemberProperty({
                 name: "Voornaam",
-                getValue: (member: MemberWithRegistrations) => member.details.firstName,
+                getValues: (member: MemberWithRegistrations) => [member.details.firstName],
                 width: 15,
                 selected: true
             }),
             new ExcelMemberProperty({
                 name: "Achternaam",
-                getValue: (member: MemberWithRegistrations) => member.details.lastName,
+                getValues: (member: MemberWithRegistrations) => [member.details.lastName],
                 width: 15,
                 selected: true
             }),
             new ExcelMemberProperty({
                 name: "Geboortedatum",
-                getValue: (member: MemberWithRegistrations) => member.details.birthDay ?? "",
+                getValues: (member: MemberWithRegistrations) => [member.details.birthDay ?? ""],
                 width: 15
             }),
             new ExcelMemberProperty({
                 name: "Geslacht",
-                getValue: (member: MemberWithRegistrations) => member.details.gender === Gender.Male ? "Man" : (member.details.gender === Gender.Female ? "Vrouw" : ""),
+                getValues: (member: MemberWithRegistrations) => [member.details.gender === Gender.Male ? "Man" : (member.details.gender === Gender.Female ? "Vrouw" : "")],
                 width: 10
             }),
             new ExcelMemberProperty({
                 name: this.$i18n.t("shared.inputs.mobile.label").toString(),
-                getValue: (member: MemberWithRegistrations) => member.details.phone ?? "",
+                getValues: (member: MemberWithRegistrations) => [member.details.phone ?? ""],
                 width: 20,
                 description: OrganizationManager.organization.meta.recordsConfiguration.parents === null ? undefined : "Nummer van lid zelf, niet van een ouder"
             }),
             new ExcelMemberProperty({
                 name: "E-mailadres",
-                getValue: (member: MemberWithRegistrations) => member.details.email ?? "",
+                getValues: (member: MemberWithRegistrations) => [member.details.email ?? ""],
                 width: 30,
                 description: OrganizationManager.organization.meta.recordsConfiguration.parents === null ? undefined : "E-mailadres van lid zelf, niet van een ouder"
             }),
@@ -201,16 +206,16 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
             new ExcelMemberProperty({
                 name: "Openstaand bedrag",
                 description: 'Totaal van aangerekende bedragen die nog niet betaald werden.',
-                getValue: (member: MemberWithRegistrations) => member.outstandingBalance/100,
+                getValues: (member: MemberWithRegistrations) => [member.outstandingBalance/100],
                 format: "€0.00",
                 width: 20
             }),
             new ExcelMemberProperty({
                 name: "Prijs",
                 description: "Prijs van alle inschrijvingen bij " + Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' en '),
-                getValue: (member: MemberWithRegistrations) => {
+                getValues: (member: MemberWithRegistrations) => {
                     const registrations = member.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
-                    return registrations.reduce((a, b) => a + b.price, 0)/100
+                    return [registrations.reduce((a, b) => a + b.price, 0)/100]
                 },
                 format: "€0.00",
                 width: 12
@@ -218,9 +223,9 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
             new ExcelMemberProperty({
                 name: "Prijs betaald",
                 description: "Totaal bedrag betaald van 'Prijs'",
-                getValue: (member: MemberWithRegistrations) => {
+                getValues: (member: MemberWithRegistrations) => {
                     const registrations = member.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
-                    return registrations.reduce((a, b) => a + b.pricePaid, 0)/100
+                    return [registrations.reduce((a, b) => a + b.pricePaid, 0)/100]
                 },
                 format: "€0.00",
                 width: 15
@@ -230,12 +235,12 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
             new ExcelMemberProperty({
                 name: "Alle inschrijvingen",
                 description: 'Opsomming van alle huidige inschrijvingen van dit lid',
-                getValue: (member: MemberWithRegistrations) => {
+                getValues: (member: MemberWithRegistrations) => {
                     const registrations = member.filterRegistrations({waitingList: false, cycleOffset: this.cycleOffset})
                     const groups = registrations.map(r =>{
                         return  OrganizationManager.organization.groups.find(g => g.id === r.groupId)
                     }).filter(g => g !== undefined) as Group[]
-                    return Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')
+                    return [Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')]
                 },
                 width: 50
             }), 
@@ -243,12 +248,12 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 new ExcelMemberProperty({
                     name: "Wachtlijsten",
                     description: 'Opsomming van alle wachtlijsten waarop dit lid staat',
-                    getValue: (member: MemberWithRegistrations) => {
+                    getValues: (member: MemberWithRegistrations) => {
                         const registrations = member.filterRegistrations({waitingList: true, cycleOffset: this.cycleOffset})
                         const groups = registrations.map(r =>{
                             return  OrganizationManager.organization.groups.find(g => g.id === r.groupId)
                         }).filter(g => g !== undefined) as Group[]
-                        return Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')
+                        return [Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')]
                     },
                     width: 50
                 })
@@ -257,12 +262,12 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 return new ExcelMemberProperty({
                     name: category.settings.name,
                     description: `Opsomming van alle inschrijvingen in de categorie ${category.settings.name}`,
-                    getValue: (member: MemberWithRegistrations) => {
+                    getValues: (member: MemberWithRegistrations) => {
                         const registrations = member.filterRegistrations({groups: category.getAllGroups(), cycleOffset: this.cycleOffset})
                         const groups = registrations.map(r =>{
                             return  OrganizationManager.organization.groups.find(g => g.id === r.groupId)
                         }).filter(g => g !== undefined) as Group[]
-                        return Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')
+                        return [Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')]
                     },
                     width: 50
                 })
@@ -270,13 +275,13 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
             ...(this.groups.length === 1 ? [
                 new ExcelMemberProperty({
                     name: "Inschrijvingsdatum ("+Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' of ')+")",
-                    getValue: (member: MemberWithRegistrations) => {
+                    getValues: (member: MemberWithRegistrations) => {
                         const registrations = member.filterRegistrations({groups: this.groups, waitingList: false, cycleOffset: this.cycleOffset})
 
                         if (registrations.length === 0) {
-                            return "/"
+                            return ["/"]
                         }
-                        return registrations[0].registeredAt ?? registrations[0].createdAt
+                        return [registrations[0].registeredAt ?? registrations[0].createdAt]
                     },
                     width: 50,
                     format: "dd/mm/yyyy"
@@ -286,27 +291,27 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
         new ExcelMemberPropertyGroup("Adres 1", OrganizationManager.organization.meta.recordsConfiguration.parents === null ? "Adres van het lid zelf" : "Adres van het lid zelf, of van de eerste ouder", [
             new ExcelMemberProperty({
                 name: "Straat",
-                getValue: (member: MemberWithRegistrations) => this.firstAddress(member)?.street ?? "",
+                getValues: (member: MemberWithRegistrations) => [this.firstAddress(member)?.street ?? ""],
                 width: 30,
             }),
             new ExcelMemberProperty({
                 name: "Huisnummer",
-                getValue: (member: MemberWithRegistrations) => this.firstAddress(member)?.number ?? "",
+                getValues: (member: MemberWithRegistrations) => [this.firstAddress(member)?.number ?? ""],
                 width: 10,
             }),
             new ExcelMemberProperty({
                 name: "Postcode",
-                getValue: (member: MemberWithRegistrations) => this.firstAddress(member)?.postalCode ?? "",
+                getValues: (member: MemberWithRegistrations) => [this.firstAddress(member)?.postalCode ?? ""],
                 width: 10,
             }),
             new ExcelMemberProperty({
                 name: "Gemeente",
-                getValue: (member: MemberWithRegistrations) => this.firstAddress(member)?.city ?? "",
+                getValues: (member: MemberWithRegistrations) => [this.firstAddress(member)?.city ?? ""],
                 width: 20,
             }),
             new ExcelMemberProperty({
                 name: "Land",
-                getValue: (member: MemberWithRegistrations) => this.firstAddress(member)?.country ?? "",
+                getValues: (member: MemberWithRegistrations) => [this.firstAddress(member)?.country ?? ""],
                 width: 10,
             }),
         ]),
@@ -315,120 +320,120 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 new ExcelMemberProperty({
                     name: "Benaming ouder 1",
                     description: "Mama, papa, pluspapa...",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[0] ? ParentTypeHelper.getName(member.details.parents[0].type) : "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[0] ? ParentTypeHelper.getName(member.details.parents[0].type) : ""],
                     width: 10
                 }),
                 new ExcelMemberProperty({
                     name: "Naam ouder 1",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[0]?.name ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[0]?.name ?? ""],
                     width: 20
                 }),
                 new ExcelMemberProperty({
                     name: "GSM-nummer ouder 1",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[0]?.phone ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[0]?.phone ?? ""],
                     width: 20
                 }),
                 new ExcelMemberProperty({
                     name: "E-mailadres ouder 1",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[0]?.email ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[0]?.email ?? ""],
                     width: 30
                 }),
 
                 new ExcelMemberProperty({
                     name: "Benaming ouder 2",
                     description: "Mama, papa, pluspapa...",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[1] ? ParentTypeHelper.getName(member.details.parents[1].type) : "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[1] ? ParentTypeHelper.getName(member.details.parents[1].type) : ""],
                     width: 10
                 }),
                 new ExcelMemberProperty({
                     name: "Naam ouder 2",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[1]?.name ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[1]?.name ?? ""],
                     width: 20
                 }),
                 new ExcelMemberProperty({
                     name: "GSM-nummer ouder 2",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[1]?.phone ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[1]?.phone ?? ""],
                     width: 20
                 }),
                 new ExcelMemberProperty({
                     name: "E-mailadres ouder 2",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[1]?.email ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[1]?.email ?? ""],
                     width: 30
                 }),
 
                 new ExcelMemberProperty({
                     name: "Benaming ouder 3",
                     description: "Mama, papa, pluspapa...",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[2] ? ParentTypeHelper.getName(member.details.parents[2].type) : "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[2] ? ParentTypeHelper.getName(member.details.parents[2].type) : ""],
                     width: 10
                 }),
                 new ExcelMemberProperty({
                     name: "Naam ouder 3",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[2]?.name ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[2]?.name ?? ""],
                     width: 20
                 }),
                 new ExcelMemberProperty({
                     name: "GSM-nummer ouder 3",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[2]?.phone ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[2]?.phone ?? ""],
                     width: 20
                 }),
                 new ExcelMemberProperty({
                     name: "E-mailadres ouder 3",
-                    getValue: (member: MemberWithRegistrations) => member.details.parents[2]?.email ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.parents[2]?.email ?? ""],
                     width: 30
                 }),
             ]),
             new ExcelMemberPropertyGroup("Adres 2",  "Adres van een tweede ouder indien verschillend of eerste ouder indien lid op ander adres woont", [
                 new ExcelMemberProperty({
                     name: "Straat 2",
-                    getValue: (member: MemberWithRegistrations) => this.secondAddress(member)?.street ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.secondAddress(member)?.street ?? ""],
                     width: 30,
                 }),
                 new ExcelMemberProperty({
                     name: "Huisnummer 2",
-                    getValue: (member: MemberWithRegistrations) => this.secondAddress(member)?.number ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.secondAddress(member)?.number ?? ""],
                     width: 10,
                 }),
                 new ExcelMemberProperty({
                     name: "Postcode 2",
-                    getValue: (member: MemberWithRegistrations) => this.secondAddress(member)?.postalCode ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.secondAddress(member)?.postalCode ?? ""],
                     width: 10,
                 }),
                 new ExcelMemberProperty({
                     name: "Gemeente 2",
-                    getValue: (member: MemberWithRegistrations) => this.secondAddress(member)?.city ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.secondAddress(member)?.city ?? ""],
                     width: 20,
                 }),
                 new ExcelMemberProperty({
                     name: "Land 2",
-                    getValue: (member: MemberWithRegistrations) => this.secondAddress(member)?.country ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.secondAddress(member)?.country ?? ""],
                     width: 10,
                 }),
             ]),
             new ExcelMemberPropertyGroup("Adres 3",  "Zelden het geval, maar als er een derde (stief)ouder is met een ander adres. Of het adres van de tweede ouder als de ouders en het lid op een ander adres wonen.", [
                 new ExcelMemberProperty({
                     name: "Straat 3",
-                    getValue: (member: MemberWithRegistrations) => this.thirdAddress(member)?.street ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.thirdAddress(member)?.street ?? ""],
                     width: 30,
                 }),
                 new ExcelMemberProperty({
                     name: "Huisnummer 3",
-                    getValue: (member: MemberWithRegistrations) => this.thirdAddress(member)?.number ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.thirdAddress(member)?.number ?? ""],
                     width: 10,
                 }),
                 new ExcelMemberProperty({
                     name: "Postcode 3",
-                    getValue: (member: MemberWithRegistrations) => this.thirdAddress(member)?.postalCode ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.thirdAddress(member)?.postalCode ?? ""],
                     width: 10,
                 }),
                 new ExcelMemberProperty({
                     name: "Gemeente 3",
-                    getValue: (member: MemberWithRegistrations) => this.thirdAddress(member)?.city ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.thirdAddress(member)?.city ?? ""],
                     width: 20,
                 }),
                 new ExcelMemberProperty({
                     name: "Land 3",
-                    getValue: (member: MemberWithRegistrations) => this.thirdAddress(member)?.country ?? "",
+                    getValues: (member: MemberWithRegistrations) => [this.thirdAddress(member)?.country ?? ""],
                     width: 10,
                 }),
             ]),
@@ -439,17 +444,17 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 new ExcelMemberProperty({
                     name: "Noodcontact titel",
                     description: "Bv. oma, buurvrouw, ...",
-                    getValue: (member: MemberWithRegistrations) => member.details.emergencyContacts[0]?.title ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.emergencyContacts[0]?.title ?? ""],
                     width: 10,
                 }),
                 new ExcelMemberProperty({
                     name: "Noodcontact naam",
-                    getValue: (member: MemberWithRegistrations) => member.details.emergencyContacts[0]?.name ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.emergencyContacts[0]?.name ?? ""],
                     width: 20,
                 }),
                 new ExcelMemberProperty({
                     name: "Noodcontact GSM-nummer",
-                    getValue: (member: MemberWithRegistrations) => member.details.emergencyContacts[0]?.phone ?? "",
+                    getValues: (member: MemberWithRegistrations) => [member.details.emergencyContacts[0]?.phone ?? ""],
                     width: 20,
                 }),
             ]),
@@ -460,12 +465,13 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 return new ExcelMemberProperty({
                     name: record.name,
                     description: record.description,
-                    getValue: (member: MemberWithRegistrations) => {
+                    columns: record.excelColumns,
+                    getValues: (member: MemberWithRegistrations) => {
                         const answer = member.details.recordAnswers.find(answer => answer.settings.id === record.id);
                         if (!answer) {
-                            return ""
+                            return record.excelColumns.map(_ => "/")
                         }
-                        return answer.excelValue;
+                        return answer.excelValues;
                     },
                     width: 30,
                 });
@@ -556,11 +562,11 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
 
         /* make worksheet */
         const wsData: RowValue[][] = [
-            columns.map(c => c.name),
+            columns.flatMap(c => c.columns),
         ];
 
         for (const member of members) {
-            wsData.push(columns.map(c => c.getValue(member)))
+            wsData.push(columns.flatMap(c => c.getValues(member)))
         }
 
         const ws = XLSX.utils.aoa_to_sheet(transformRowValues(wsData), { cellDates: true });
