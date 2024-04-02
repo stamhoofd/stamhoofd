@@ -1,8 +1,8 @@
 <template>
-    <div class="stepper-input">
-        <button class="icon min" type="button" @click="step(-1)" @pointerdown.prevent />
+    <div class="stepper-input" @pointerdown.stop>
+        <button class="icon min" type="button" @click="step(-1)" />
         <hr>
-        <button class="icon plus" type="button" @click="step(1)" @pointerdown.prevent /> 
+        <button class="icon plus" type="button" @click="step(1)" /> 
     </div>
 </template>
 
@@ -66,7 +66,7 @@ export default class StepperInput extends Vue {
     height: $input-height;
     vertical-align: middle;
     contain: strict;
-    width: 24px * 2 + 14px * 4 + $border-width;
+    width: 52px * 2 - $border-width; 
 
     hr {
         width: $border-width;
@@ -80,6 +80,7 @@ export default class StepperInput extends Vue {
         align-self: center;
         margin: 0;
         padding: 0;
+        display: block;
     }
 
     &:active {
@@ -98,6 +99,7 @@ export default class StepperInput extends Vue {
         user-select: none;
         cursor: pointer;
         outline: 0;
+        display: block;
 
         &:active {
             background: $color-gray-3;

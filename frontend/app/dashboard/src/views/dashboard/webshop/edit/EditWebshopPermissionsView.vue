@@ -17,7 +17,8 @@
 
 <script lang="ts">
 import { SaveView, STErrorsDefault, STList } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import WebshopPermissionRow from '../../admins/WebshopPermissionRow.vue';
@@ -32,6 +33,10 @@ import EditWebshopMixin from './EditWebshopMixin';
     }
 })
 export default class EditWebshopPermissionsView extends Mixins(EditWebshopMixin) {
+    mounted() {
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/permissions")
+    }
+
     get viewTitle() {
         return "Toegangsbeheer"
     }

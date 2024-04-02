@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { WebshopCounter } from '../helpers/WebshopCounter';
-import { BalanceItem, EmailTemplate, Organization, Payment, Ticket, Webshop } from './';
+import { BalanceItem, EmailTemplate, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
 
 export class Order extends Model {
     static table = "webshop_orders";
@@ -267,6 +267,7 @@ export class Order extends Model {
         const add = this.shouldIncludeStock()
 
         let changed = false
+        const discountCodeUsageMap:  Map<string, number> = new Map()
 
         if (previousData !== null) {
             // Remove stock from old items without modifying old data
@@ -317,6 +318,14 @@ export class Order extends Model {
                         }
                         item.reservedSeats = [];
                     }
+                }
+            }
+
+            for (const code of previousData.discountCodes) {
+                if (code.reserved) {
+                    // Remove usage
+                    code.reserved = false;
+                    discountCodeUsageMap.set(code.id, (discountCodeUsageMap.get(code.id) ?? 0) - 1)
                 }
             }
         }
@@ -425,6 +434,32 @@ export class Order extends Model {
                     }
                     changed = true
                     item.reservedSeats = add ? item.seats : []
+                }
+            }
+        }
+
+        // Discount codes
+        for (const code of this.data.discountCodes) {
+            if (previousData !== null) {
+                code.reserved = false;
+            }
+
+            if (code.reserved && !add) {
+                // Remove usage
+                code.reserved = false;
+                discountCodeUsageMap.set(code.id, (discountCodeUsageMap.get(code.id) ?? 0) - 1)
+            } else if (!code.reserved && add) {
+                code.reserved = true;
+                discountCodeUsageMap.set(code.id, (discountCodeUsageMap.get(code.id) ?? 0) + 1)
+            }
+        }
+
+        for (const [id, amount] of discountCodeUsageMap) {
+            if (amount !== 0) {
+                const code = await WebshopDiscountCode.getByID(id);
+                if (code) {
+                    code.usageCount += amount;
+                    await code.save()
                 }
             }
         }

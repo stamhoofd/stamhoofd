@@ -5,7 +5,7 @@
         </h2>
         <p v-if="category.description.length > 0" class="style-description-small" v-text="category.description" />
 
-        <ProductGrid :products="products" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :admin="admin" />
+        <ProductGrid :products="products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="admin" />
         <hr v-if="!isLast">
     </div>
 </template>
@@ -14,7 +14,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Cart, CartItem, Category, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, Category, Checkout, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -48,7 +48,7 @@ export default class CategoryBox extends Mixins(NavigationMixin){
         isLast: boolean
 
     @Prop({ required: true })
-        cart: Cart
+        checkout: Checkout
 
     @Prop({ required: true })
         saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void

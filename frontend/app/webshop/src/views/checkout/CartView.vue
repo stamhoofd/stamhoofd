@@ -9,43 +9,17 @@
             <p v-if="cart.items.length == 0" class="info-box">
                 Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.
             </p>
+
+            <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon gift">
+                <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+
+                <button class="button icon trash" @click="deleteCode(code)" />
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
            
             <STList>
-                <STListItem v-for="cartItem in cart.items" :key="cartItem.id" class="cart-item-row" :selectable="true" @click="editCartItem(cartItem)">
-                    <h3>
-                        <span>{{ cartItem.product.name }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </h3>
-                    <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
-
-                    <footer>
-                        <p class="price" v-if="!cartItem.getFormattedDiscountPriceAmount(cart)">
-                            {{ cartItem.getFormattedPriceAmount(cart) }}
-                        </p>
-                        <p class="price" v-else>
-                            <span class="style-discount-old-price">{{ cartItem.getFormattedPriceAmount(cart) }}</span>
-                            <span class="style-discount-price">{{cartItem.getFormattedDiscountPriceAmount(cart)}}</span>
-                        </p>
-                        <div @click.stop>
-                            <button class="button icon trash" type="button" @click="deleteItem(cartItem)" />
-                            <StepperInput v-if="!cartItem.cartError && cartItem.seats.length == 0 && (maximumRemainingFor(cartItem) === null || maximumRemainingFor(cartItem) > 1)" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
-                        </div>
-                    </footer>
-
-                    <p v-if="cartItem.cartError" class="error-box small">
-                        {{ cartItem.cartError.getHuman() }}
-
-                        <span class="button text">
-                            <span>Corrigeren</span>
-                            <span class="icon arrow-right-small" />
-                        </span>
-                    </p>
-
-                    <figure v-if="imageSrc(cartItem)" slot="right">
-                        <img :src="imageSrc(cartItem)" :width="imageResolution(cartItem).width" :height="imageResolution(cartItem).height">
-                    </figure>
-                </STListItem>
+                <CartItemRow v-for="cartItem of cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="cart" :webshop="webshop" :editable="true" :admin="false" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
 
@@ -55,17 +29,8 @@
                     <span>Nog iets toevoegen</span>
                 </button>
             </p>
-            <div class="pricing-box">
-                <STList>
-                    <STListItem v-for="(item, index) of checkout.priceBreakown" :key="index">
-                        {{item.name}}
 
-                        <template slot="right">
-                            {{ item.price | price }}
-                        </template>
-                    </STListItem>
-                </STList>
-            </div>
+            <CheckoutPriceBreakdown :checkout="checkout" />
         </main>
 
         <STToolbar v-if="cart.items.length > 0">
@@ -82,9 +47,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CartItemView, ErrorBox, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { CartItemView, ErrorBox, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, CheckoutPriceBreakdown, CartItemRow } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
-import { CartItem } from '@stamhoofd/structures';
+import { CartItem, DiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from 'vue-property-decorator';
 
@@ -101,7 +66,8 @@ import { CheckoutStepsManager } from './CheckoutStepsManager';
         STListItem,
         STErrorsDefault,
         LoadingButton,
-        StepperInput
+        CartItemRow,
+        CheckoutPriceBreakdown
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -143,29 +109,19 @@ export default class CartView extends Mixins(NavigationMixin){
         this.loading = false
     }
 
-    formatFreePrice(price: number) {
-        if (price === 0) {
-            return ''
-        }
-        return Formatter.price(price)
-    }
-
-    imageSrc(cartItem: CartItem) {
-        return this.imageResolution(cartItem)?.file?.getPublicPath()
-    }
-
-    imageResolution(cartItem: CartItem) {
-        return cartItem.product.images[0]?.getResolutionForSize(100, 100)
+    deleteCode(code: DiscountCode) {
+        CheckoutManager.removeCode(code)
     }
 
     deleteItem(cartItem: CartItem) {
         CheckoutManager.cart.removeItem(cartItem)
+        CheckoutManager.checkout.update(this.webshop);
         CheckoutManager.saveCart()
     }
 
     setCartItemAmount(cartItem: CartItem, amount: number) {
         cartItem.amount = amount
-        cartItem.calculateUnitPrice(this.cart)
+        CheckoutManager.checkout.update(this.webshop);
         CheckoutManager.saveCart()
     }
 
@@ -178,6 +134,7 @@ export default class CartView extends Mixins(NavigationMixin){
                         oldItem: cartItem,
                         cart: CheckoutManager.cart,
                         webshop: WebshopManager.webshop,
+                        checkout: CheckoutManager.checkout,
                         saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                             component?.dismiss({force: true})
                             if (oldItem) {
@@ -215,6 +172,12 @@ export default class CartView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
         }
         CheckoutManager.saveCart()
+
+        try {
+            await CheckoutManager.validateCodes()
+        }  catch (e) {
+            console.error(e);
+        }
     }
 
     activated() {     
@@ -254,64 +217,3 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.cart-view {
-    .cart-item-row {
-        h3 {
-            padding-top: 5px;
-            @extend .style-title-3;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .description {
-            @extend .style-description-small;
-            padding-top: 5px;
-            white-space: pre-wrap;
-        }
-
-        .price {
-            font-size: 14px;
-            line-height: 1.4;
-            font-weight: 600;
-            color: $color-primary;
-        }
-
-        .style-discount-old-price {
-            text-decoration: line-through;
-            color: $color-gray-4;
-        }
-
-        .style-discount-price {
-            color: $color-tertiary;
-            margin-left: 5px;
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        img {
-            max-width: 70px;
-            height: auto;
-            border-radius: $border-radius;
-
-            @media (min-width: 340px) {
-                max-width: 80px;
-            }
-
-            @media (min-width: 801px) {
-                max-width: 100px;
-            }
-        }
-    }
-}
-
-</style>

@@ -39,7 +39,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { Cart, CartItem, CartStockHelper, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, CartStockHelper, Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -68,13 +68,17 @@ export default class ProductBox extends Mixins(NavigationMixin){
         webshop: Webshop
 
     @Prop({ required: true })
-        cart: Cart
+        checkout: Checkout
 
     @Prop({ required: true })
         saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 
     get price() {
         return this.product.prices[0].price
+    }
+
+    get cart() {
+        return this.checkout.cart
     }
 
     get priceString() {
@@ -217,6 +221,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 oldItem,
                 cart: this.cart,
                 webshop: this.webshop,
+                checkout: this.checkout,
                 saveHandler: this.saveHandler,
             }))
         } else {
@@ -227,8 +232,8 @@ export default class ProductBox extends Mixins(NavigationMixin){
                             admin: this.admin,
                             cartItem,
                             oldItem,
-                            cart: this.cart,
                             webshop: this.webshop,
+                            checkout: this.checkout,
                             saveHandler: this.saveHandler,
                         })
                     })

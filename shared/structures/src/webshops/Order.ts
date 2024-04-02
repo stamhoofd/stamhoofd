@@ -220,7 +220,7 @@ export class Order extends AutoEncoder {
     }
 
     getHTMLTable(): string {
-        const allFree = this.data.cart.items.every(i => i.getPrice(this.data.cart) === 0)
+        const allFree = this.data.cart.items.every(i => i.getPriceWithoutDiscounts() === 0)
 
         if (allFree) {
             let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Aantal</th></tr></thead><tbody>`
@@ -234,7 +234,7 @@ export class Order extends AutoEncoder {
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Prijs</th></tr></thead><tbody>`
 
         for (const item of this.data.cart.items) {
-            str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(item.getFormattedPriceAmount(this.data.cart))}</td></tr>`
+            str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(item.getFormattedPriceWithDiscount(this.data.cart) || item.getFormattedPriceWithoutDiscount(this.data.cart))}</td></tr>`
         }
         return str+"</tbody></table>";
     }

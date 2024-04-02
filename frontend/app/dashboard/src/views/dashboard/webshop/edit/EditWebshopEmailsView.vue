@@ -37,8 +37,9 @@ import creditCardsIllustration from "@stamhoofd/assets/images/illustrations/cred
 import payPointOfSaleIllustration from "@stamhoofd/assets/images/illustrations/pay-point-of-sale.svg";
 import transferIllustration from "@stamhoofd/assets/images/illustrations/transfer.svg";
 import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferDescriptionType, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
@@ -87,6 +88,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshopManager.preview.meta.name) + "/settings/emails")
         this.loadTemplates().catch(console.error)
     }
 

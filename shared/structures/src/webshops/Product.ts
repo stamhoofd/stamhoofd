@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from '../addresses/Address';
 import { Image } from '../files/Image';
 import { ReservedSeat } from '../SeatingPlan';
-import { CartItem } from './Cart';
 import { Webshop } from './Webshop';
 import { WebshopField } from './WebshopField';
 

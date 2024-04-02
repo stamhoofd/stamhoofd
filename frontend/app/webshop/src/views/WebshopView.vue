@@ -46,10 +46,10 @@
                 </header>
 
                 <template v-if="!closed || showOpenAt">
-                    <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
+                    <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
                     <div v-else class="products">
-                        <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
-                        <ProductGrid v-if="categories.length == 0" :products="products" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
+                        <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
+                        <ProductGrid v-if="categories.length == 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
                     </div>
                 </template>
             </div>
@@ -191,6 +191,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get webshopLayout() {
         return this.webshop.meta.layout
+    }
+
+    get checkout() {
+        return CheckoutManager.checkout
     }
 
     get cart() {
@@ -337,7 +341,14 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
         UrlHelper.setUrl("/")
 
-        if (path.length == 2 && path[0] == 'order') {
+        if (path.length == 2 && path[0] == 'code') {
+            if (this.cartEnabled) {
+                this.openCart(false)
+            }
+            
+            const code = path[1];
+            CheckoutManager.applyCode(code).catch(console.error);
+        } else if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];
             this.present({
                 animated: false,

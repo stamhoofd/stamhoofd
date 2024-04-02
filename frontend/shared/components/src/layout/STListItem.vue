@@ -290,6 +290,18 @@ button.st-list-item {
                 }
             }
         }
+
+        &:active:has(button:active) {
+            transition: background-color 0.2s 0.1s;
+            background: none;
+
+             > .main {
+                > hr {
+                    opacity: 1;
+                    transition: opacity 0.2s 0.1s;
+                }
+            }
+        }
     }
 
     &.sortable-chosen {

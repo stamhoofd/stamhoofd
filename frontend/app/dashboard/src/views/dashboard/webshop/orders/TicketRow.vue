@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => openMenu(e)" class="right-stack" @contextmenu.prevent="openMenu">
+    <STListItem v-long-press="(e) => openMenu(e)" class="right-stack" @contextmenu.prevent="openMenu" @click="openTicket" :selectable="true">
         <h3 class="style-title-list">
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
@@ -25,7 +25,7 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, LongPressDirective, STList, STListItem } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Order, ProductDateRange, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from "@stamhoofd/structures";
@@ -33,6 +33,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import TicketAlreadyScannedView from "../tickets/status/TicketAlreadyScannedView.vue";
+import ValidTicketView from "../tickets/status/ValidTicketView.vue";
 import { WebshopManager } from "../WebshopManager";
 
 @Component({
@@ -95,9 +97,32 @@ export default class TicketRow extends Mixins(NavigationMixin){
         return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
+    openTicket() {
+         this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(!this.ticket.scannedAt ? ValidTicketView : TicketAlreadyScannedView, {
+                        order: this.order,
+                        ticket: this.ticket,
+                        webshopManager: this.webshopManager
+                    })
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
+    }
+
     openMenu(clickEvent) {
         const contextMenu = new ContextMenu([
             [
+                new ContextMenuItem({
+                    name: 'Open scanscherm',
+                    action: () => {
+                        this.openTicket()
+                        return true;
+                    },
+                    icon: 'qr-code'
+                }),
                 new ContextMenuItem({
                     name: 'Markeer als',
                     childMenu: this.getMarkAsMenu(),

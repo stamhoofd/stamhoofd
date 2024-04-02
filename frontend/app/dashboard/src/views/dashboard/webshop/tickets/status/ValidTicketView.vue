@@ -2,7 +2,7 @@
     <div class="st-view valid-ticket-view">
         <STNavigationBar title="Geldig ticket" :pop="canPop" />
 
-        <main v-if="!ticket.itemId">
+        <main v-if="!publicTicket.isSingle">
             <h1>
                 <span class="icon green success" />
                 <span>Bestelling #{{ order.number }}</span>
@@ -43,18 +43,7 @@
             </div>
 
             <STList>
-                <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
-                    <h3>
-                        {{ cartItem.product.name }}
-                    </h3>
-                    <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
-
-                    <footer>
-                        <p class="price">
-                            {{ cartItem.amount }} x
-                        </p>
-                    </footer>
-                </STListItem>
+                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 
             <hr>
@@ -399,9 +388,9 @@
 <script lang="ts">
 import { ArrayDecoder,AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ColorHelper, GlobalEventBus, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
+import { CartItemRow, ColorHelper, GlobalEventBus, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
+import { BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -415,13 +404,12 @@ import { WebshopManager } from "../../WebshopManager";
 @Component({
     components: {
         STNavigationBar,
-        BackButton,
         STList,
         STListItem,
         STToolbar,
         Spinner,
-        Checkbox,
-        RecordCategoryAnswersBox
+        RecordCategoryAnswersBox,
+        CartItemRow
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -440,7 +428,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         webshopManager!: WebshopManager
 
     @Prop({ required: true })
-        ticket!: TicketPrivate
+        ticket!: TicketPrivate|TicketPublicPrivate
 
     @Prop({ required: true })
         order!: PrivateOrder
@@ -488,7 +476,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
     }
 
     get item() {
-        return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
+        return this.publicTicket.isSingle ? this.publicTicket.items[0] : null
     }
 
     formatDateRange(dateRange: ProductDateRange) {

@@ -2,8 +2,8 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDe
 import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { CartReservedSeat, ReservedSeat } from "../SeatingPlan";
-import { CartItem } from "./Cart";
+import { CartReservedSeat } from "../SeatingPlan";
+import { CartItem } from "./CartItem";
 import { Order } from "./Order";
 import { Webshop, WebshopPreview } from "./Webshop";
 
@@ -213,6 +213,10 @@ export class TicketPublicPrivate extends TicketPublic {
 
     @field({ decoder: DateDecoder, nullable: true, version: 229 })
     deletedAt: Date|null = null
+
+    getPublic(): TicketPublicPrivate {
+        return this;
+    }
 }
 
 /**

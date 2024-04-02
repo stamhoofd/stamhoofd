@@ -56,7 +56,9 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import CategoryRow from './categories/CategoryRow.vue';
@@ -77,6 +79,10 @@ import ProductRow from './products/ProductRow.vue';
     }
 })
 export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
+    mounted() {
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/" + (this.isTickets ? "tickets" : "products"))
+    }
+    
     get viewTitle() {
         if (this.isTickets) {
             if (this.webshop.categories.length > 0) {

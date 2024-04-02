@@ -1,7 +1,8 @@
-import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { Checkout, Version } from '@stamhoofd/structures'
+import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
 import { WebshopManager } from './WebshopManager'
+import { Toast } from '@stamhoofd/components'
 
 /**
  * Convenient access to the organization of the current session
@@ -22,6 +23,58 @@ export class CheckoutManagerStatic {
 
     get cart() {
         return this.checkout.cart
+    }
+
+    async validateCodes() {
+        try {
+            // Validate code
+            const response = await WebshopManager.server.request({
+                method: "POST",
+                path: "/webshop/"+WebshopManager.webshop.id + '/discount-codes',
+                body: this.checkout.discountCodes.map(c => c.code),
+                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
+            })
+
+            this.checkout.discountCodes = response.data;
+            this.checkout.update(WebshopManager.webshop)
+            this.saveCheckout()
+
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    async applyCode(code: string) {
+        const toast = new Toast('Kortingscode toepassen', 'spinner').setHide(null).show();
+
+        try {
+            // Validate code
+            const response = await WebshopManager.server.request({
+                method: "POST",
+                path: "/webshop/"+WebshopManager.webshop.id + '/discount-codes',
+                body: [...this.checkout.discountCodes.map(c => c.code), code],
+                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
+            })
+
+            this.checkout.discountCodes = response.data;
+            this.checkout.update(WebshopManager.webshop)
+            this.saveCheckout()
+
+            if (this.checkout.discountCodes.find(c => c.code === code)) {
+                new Toast('Kortingscode toegepast', 'success primary').setHide(null).show();
+            } else {
+                new Toast('Ongeldige kortingscode '+code, 'red error').setHide(null).show();
+            }
+            
+        } finally {
+            toast.hide();
+        }
+    }
+
+    removeCode(discountCode: DiscountCode) {
+        this.checkout.discountCodes = this.checkout.discountCodes.filter(c => c.id !== discountCode.id)
+        this.checkout.update(WebshopManager.webshop)
+        this.saveCheckout()
     }
 
     loadCheckout() {
@@ -49,6 +102,12 @@ export class CheckoutManagerStatic {
             console.error("Failed to save cart")
             console.error(e)
         }
+    }
+
+    clear() {
+        this.cart.clear()
+        this.checkout.discountCodes = [];
+        this.saveCheckout()
     }
 }
 

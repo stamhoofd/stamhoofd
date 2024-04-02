@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
-import { CartItem } from "./Cart";
+import { CartItem, CartItemPrice } from "./CartItem";
 import { v4 as uuidv4 } from "uuid";
 import { Checkout } from "./Checkout";
 import { Webshop } from "./Webshop";
@@ -216,6 +216,20 @@ export class ProductDiscount extends AutoEncoder {
         price = Math.min(price, Math.max(0, price - this.discountPerPiece)) // Min is required to support negative prices: prices should never increase after applyign discounts
         return price;
     }
+
+    applyTo(item: CartItemPrice) {
+        // Percentage discounts are always applied to the original price without other discounts
+        item.percentageDiscount = Math.min(10000, item.percentageDiscount + this.percentageDiscount)
+        item.fixedDiscount = item.fixedDiscount + this.discountPerPiece
+    }
+
+    calculatePotential(item: CartItemPrice): number {
+        const current = item;
+        const potential = item.clone();
+        this.applyTo(potential);
+
+        return current.discountedPrice - potential.discountedPrice;
+    }
 }
 
 export enum ProductDiscountRepeatBehaviour {
@@ -236,6 +250,9 @@ export class ProductDiscountSettings extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(ProductDiscountRepeatBehaviour) })
     repeatBehaviour = ProductDiscountRepeatBehaviour.Once
+
+    @field({ decoder: StringDecoder, nullable: true, version: 238 })
+    cartLabel: string|null = null;
 
     getApplicableDiscounts(offset: number, amount: number): ProductDiscount[] {
         let d = this.discounts.slice()
@@ -265,51 +282,69 @@ export class ProductDiscountSettings extends AutoEncoder {
             footnotes.push(index + ' ' + n.footnote)
         }
 
-        // if (this.discount.percentageDiscount) {
-        //    if (this.discount.percentageDiscount >= 100 * 100) {
-        //        if (this.discount.amount === null) {
-        //            descriptions.push("Gratis")
-        //        } else {
-        //            if (this.discount.amount === 1) {
-        //                descriptions.push("Eén stuk gratis")
-        //            } else {
-        //                descriptions.push(this.discount.amount + " stuks gratis")
-        //            }
-        //        }
-        //    } else {
-        //        if (this.discount.amount === null) {
-        //            descriptions.push(Formatter.percentage(this.discount.percentageDiscount) + " korting")
-        //        } else {
-        //            if (this.discount.amount === 1) {
-        //                descriptions.push(
-        //                    "Eén keer " + Formatter.percentage(this.discount.percentageDiscount) + " korting"
-        //                )
-        //            } else {
-        //                descriptions.push(
-        //                    Formatter.percentage(this.discount.percentageDiscount) + " korting" + " korting op eerste " + this.discount.amount + ' stuks'
-        //                )
-        //            }
-        //        }
-        //    }
-        //    
-        // }
-        // if (this.discount.discountPerPiece) {
-        //     if (this.discount.amount === null) {
-        //         descriptions.push(Formatter.price(this.discount.discountPerPiece) + " korting per stuk")
-        //     } else {
-        //         if (this.discount.amount === 1) {
-        //             descriptions.push(
-        //                 "Eén keer " + Formatter.price(this.discount.discountPerPiece) + " korting"
-        //             )
-        //         } else {
-        //             descriptions.push(
-        //                 Formatter.price(this.discount.discountPerPiece) + " korting op eerste " + this.discount.amount + ' stuks'
-        //             )
-        //         }
-        //     }
-        // }
+        if (this.cartLabel) {
+            descriptions.push(this.cartLabel)
+        } else if (this.discounts.length === 1) {
+            const discount = this.discounts[0];
+            
+            if (discount.percentageDiscount) {
+                if (discount.percentageDiscount >= 100 * 100) {
+                    if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
+                        descriptions.push("Gratis")
+                    } else {
+                        descriptions.push("Eén stuk gratis")
+                    }
+                } else {
+                    if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
+                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + " korting")
+                    } else {
+                        descriptions.push(
+                            "Eén keer " + Formatter.percentage(discount.percentageDiscount) + " korting"
+                        )
+                    }
+                }
+            }
+            
+            if (discount.discountPerPiece) {
+                if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
+                    descriptions.push(Formatter.price(discount.discountPerPiece) + " korting per stuk")
+                } else {
+                    descriptions.push(
+                        "Eén keer " + Formatter.price(discount.discountPerPiece) + " korting"
+                    )
+                }
+            }
+        } else {
+            let index = 0;
+            for (const discount of this.discounts) {
+                index += 1;
+                let s = Formatter.ordinalNumber(index) + ' stuk';
 
-         if (descriptions.length === 0) {
+                if (index === this.discounts.length) {
+                    if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {
+                        s = 'overige stuks'
+                    }
+                }
+
+                if (discount.percentageDiscount) {
+                    if (discount.percentageDiscount >= 100 * 100) {
+                        descriptions.push(s + " gratis")
+                    } else {
+                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + " korting op " +s)
+                    }
+                }
+                
+                if (discount.discountPerPiece) {
+                    descriptions.push(Formatter.price(discount.discountPerPiece) + " korting op " + s)
+                }
+            }
+
+            if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
+                descriptions.push('herhalend')
+            }
+        }
+        
+        if (descriptions.length === 0) {
             descriptions.push('Geen korting')
         }
 
@@ -324,13 +359,14 @@ export class ProductDiscountSettings extends AutoEncoder {
 export class ProductDiscountTracker {
     discount: ProductDiscountSettings
     usageCount = 0
+    cartItemQueue: {price: CartItemPrice, item: CartItem}[] = []
 
     constructor(discount: ProductDiscountSettings) {
         this.discount = discount;
     }
 
-    getNextDiscount(): ProductDiscount|null {
-        const d = this.discount.getApplicableDiscounts(this.usageCount, 1);
+    getNextDiscount(offset = 0): ProductDiscount|null {
+        const d = this.discount.getApplicableDiscounts(this.usageCount + offset, 1);
         if (d.length === 1) {
             return d[0];
         }
@@ -339,6 +375,51 @@ export class ProductDiscountTracker {
 
     markUsed() {
         this.usageCount += 1;
+    }
+
+    sortQueue() {
+        // Sort queue from highest price to lowest price
+        this.cartItemQueue.sort((a, b) => b.price.discountedPrice - a.price.discountedPrice)
+    }
+
+    apply() {
+        // Make sure we use the next one in the discount applicable discounts
+        this.sortQueue()
+        const item = this.cartItemQueue.shift()
+        if (item) {
+            const discount = this.getNextDiscount();
+            if (discount) {
+                const potential = discount.calculatePotential(item.price)
+                this.usageCount += 1;
+                discount.applyTo(item.price)
+                if (potential > 0 && !item.item.discounts.find(d => d.id === this.discount.id)) {
+                    item.item.discounts.push(this.discount)
+                }
+            }
+        }
+    }
+
+    addItemToQueue(cartItem: CartItem) {
+        this.cartItemQueue.push(...cartItem.calculatedPrices.map(price => {
+            return {price, item: cartItem}
+        }))
+    }
+
+    getPotentialDiscount() {
+        let offset = 0;
+        let potential = 0;
+
+        this.sortQueue()
+        for (const item of this.cartItemQueue) {
+            const d = this.getNextDiscount(offset);
+            if (d) {
+                potential += d.calculatePotential(item.price)
+            } else {
+                break;
+            }
+            offset += 1;
+        }
+        return potential;
     }
 }
 
@@ -380,30 +461,42 @@ export class Discount extends AutoEncoder {
             )
         }
 
-        // for (const productDiscount of this.productDiscounts) {
-        //     if (productDiscount.discount.percentageDiscount) {
-        //         const n = productDiscount.product.getName(webshop, isAdmin)
-        //         titles.push(
-        //             Formatter.percentage(productDiscount.discount.percentageDiscount) + " korting op " + n.name
-        //         )
-        //         if (n.footnote) {
-        //             const index = '*'.repeat(footnotes.length + 1);
-        //             titles.push(index)
-        //             footnotes.push(index + ' ' + n.footnote)
-        //         }
-        //     }
-        //     if (productDiscount.discount.discountPerPiece) {
-        //         const n = productDiscount.product.getName(webshop, isAdmin)
-        //         titles.push(
-        //             Formatter.price(productDiscount.discount.discountPerPiece) + " korting per stuk op " + n.name
-        //         )
-        //         if (n.footnote) {
-        //             const index = '*'.repeat(footnotes.length + 1);
-        //             titles.push(index)
-        //             footnotes.push(index + ' ' + n.footnote)
-        //         }
-        //     }
-        // }
+        for (const productDiscount of this.productDiscounts) {
+            const t = productDiscount.getTitle(webshop, isAdmin)
+
+            titles.push(
+                t.description + " op " + t.title
+            )
+
+            if (t.footnote) {
+                const index = '*'.repeat(footnotes.length + 1);
+                titles.push(index)
+                footnotes.push(index + ' ' + t.footnote)
+            }
+
+            // if (productDiscount.discount.percentageDiscount) {
+            //     const n = productDiscount.product.getName(webshop, isAdmin)
+            //     titles.push(
+            //         Formatter.percentage(productDiscount.discount.percentageDiscount) + " korting op " + n.name
+            //     )
+            //     if (n.footnote) {
+            //         const index = '*'.repeat(footnotes.length + 1);
+            //         titles.push(index)
+            //         footnotes.push(index + ' ' + n.footnote)
+            //     }
+            // }
+            // if (productDiscount.discount.discountPerPiece) {
+            //     const n = productDiscount.product.getName(webshop, isAdmin)
+            //     titles.push(
+            //         Formatter.price(productDiscount.discount.discountPerPiece) + " korting per stuk op " + n.name
+            //     )
+            //     if (n.footnote) {
+            //         const index = '*'.repeat(footnotes.length + 1);
+            //         titles.push(index)
+            //         footnotes.push(index + ' ' + n.footnote)
+            //     }
+            // }
+        }
 
         if (titles.length === 0) {
             return {
@@ -447,7 +540,7 @@ export class Discount extends AutoEncoder {
         }
     }
 
-    applyToCheckout(checkout: Checkout) {
+    applyToCheckout(checkout: Checkout): ProductDiscountTracker[] {
         let matchCount: null|number = null;
         if (this.requirements.length > 0) {
             for (const requirement of this.requirements) {
@@ -455,11 +548,15 @@ export class Discount extends AutoEncoder {
 
                 if (amount === 0) {
                     // Not applicable
-                    return;
+                    return [];
                 }
 
                 matchCount = matchCount === null ? amount : Math.min(amount, matchCount)
             }
+        }
+
+        if (matchCount === null) {
+            matchCount = 1;
         }
 
         if (!this.applyMultipleTimes) {
@@ -471,22 +568,26 @@ export class Discount extends AutoEncoder {
         checkout.fixedDiscount += multipliedOrderDiscount.fixedDiscount
         checkout.percentageDiscount = Math.max(checkout.percentageDiscount , multipliedOrderDiscount.percentageDiscount)
 
+        const trackers: ProductDiscountTracker[] = [];
+
         // Per product
         for (const discount of this.productDiscounts) {
-            const tracker = new ProductDiscountTracker(discount);
+            for (let index = 0; index < matchCount; index++) {
+                const tracker = new ProductDiscountTracker(discount);
 
-            if (this.applyMultipleTimes) {
-                // Repeating is not allowed if multiple times is enable
-                tracker.discount = tracker.discount.clone()
-                tracker.discount.repeatBehaviour = ProductDiscountRepeatBehaviour.Once
-                tracker.discount.discounts = Array(matchCount).fill(0).flatMap(_ => tracker.discount.discounts)
-            }
-
-            for (const item of checkout.cart.items) {
-                if (discount.product.doesMatch(item)) {
-                    item.applicableDiscounts.push(tracker);
+                for (const item of checkout.cart.items) {
+                    if (discount.product.doesMatch(item)) {
+                        tracker.addItemToQueue(item);
+                        //item.applicableDiscounts.push(tracker);
+                    }
                 }
+
+                trackers.push(tracker);
             }
+            
         }
+
+        return trackers
     }
 }
+

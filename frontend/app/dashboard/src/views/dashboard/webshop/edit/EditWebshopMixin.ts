@@ -54,6 +54,10 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
         // override if needed
     }
 
+    afterSave(): Promise<void> | void {
+        // override if needed
+    }
+
     shouldDismiss(): Promise<boolean> | boolean {
         return true
     }
@@ -82,6 +86,8 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                     shouldRetry: false
                 })
 
+                await this.afterSave()
+
                 if (this.savedHandler) {
                     await this.savedHandler(response.data)
                 }
@@ -106,6 +112,8 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                     , "success green").show()
             } else {
                 await this.webshopManager!.patchWebshop(this.webshopPatch)
+
+                await this.afterSave()
 
                 if (this.savedHandler && this.webshopManager!.webshop) {
                     await this.savedHandler(this.webshopManager!.webshop)

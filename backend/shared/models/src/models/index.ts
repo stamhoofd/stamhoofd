@@ -38,3 +38,5 @@ export * from "./StripeCheckoutSession"
 
 export * from "./Document"
 export * from "./DocumentTemplate"
+
+export * from "./WebshopDiscountCode"

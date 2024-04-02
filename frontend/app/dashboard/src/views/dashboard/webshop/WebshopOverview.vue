@@ -599,6 +599,50 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'statistics') {
             this.openStatistics(false)
         }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'general') {
+            this.editGeneral(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && (parts[3] == 'products' || parts[3] == 'tickets')) {
+            this.editProducts(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'checkout-methods' && !this.isTicketsOnly) {
+            this.editCheckoutMethods(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'payments') {
+            this.editPaymentMethods(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'discounts') {
+            this.editDiscounts(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'records') {
+            this.editRecordSettings(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'permissions') {
+            this.editPermissions(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'notifications') {
+            this.editNotifications(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'page') {
+            this.editPage(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'link') {
+            this.editLink(false)
+        }
+
+        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'emails') {
+            this.editEmails(false)
+        }
     }
 
     created() {

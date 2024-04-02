@@ -133,31 +133,22 @@
                 <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
             </template>
 
+            <div class="container" v-if="patchedOrder.data.discountCodes.length">
+                <hr>
+                <h2>Kortingscodes</h2>
+
+                <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="info-box icon gift discount">
+                    Kortingscode {{code.code}}
+
+                    <button class="button icon trash" @click="deleteCode(code)" />
+                </p>
+            </div>
+            
             <hr>
             <h2>Winkelmandje</h2>
 
-            <STList>
-                <STListItem v-for="cartItem in patchedOrder.data.cart.items" :key="cartItem.id" class="cart-item-row" :selectable="true" @click="editCartItem(cartItem)">
-                    <h3>
-                        <span>{{ cartItem.product.name }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </h3>
-                    <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
-
-                    <footer>
-                        <p class="price">
-                            {{ cartItem.getFormattedPriceAmount(patchedOrder.data.cart) }}
-                        </p>
-
-                        <div @click.stop>
-                            <button type="button" class="button icon trash gray" @click="deleteItem(cartItem)" />
-                        </div>
-                    </footer>
-
-                    <figure v-if="imageSrc(cartItem)" slot="right">
-                        <img :src="imageSrc(cartItem)">
-                    </figure>
-                </STListItem>
+            <STList v-if="webshopFull">
+                <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
             <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
@@ -167,42 +158,10 @@
                 </button>
             </p>
 
-            <div class="pricing-box">
-                <STList>
-                    <STListItem v-if="patchedOrder.data.administrationFee">
-                        Subtotaal
-
-                        <template slot="right">
-                            {{ patchedOrder.data.cart.price | price }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="patchedOrder.data.deliveryPrice">
-                        Leveringskost
-
-                        <template slot="right">
-                            {{ patchedOrder.data.deliveryPrice | price }}
-                        </template>
-                    </STListItem>
+            <hr>
 
 
-                    <STListItem v-if="patchedOrder.data.administrationFee">
-                        Administratiekosten
-
-                        <template slot="right">
-                            {{ patchedOrder.data.administrationFee | price }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem>
-                        Totaal
-
-                        <template slot="right">
-                            {{ patchedOrder.data.totalPrice | price }}
-                        </template> 
-                    </STListItem>
-                </STList>
-            </div>
+            <CheckoutPriceBreakdown :checkout="patchedOrder.data" />
 
             <template v-if="isNew">
                 <hr>
@@ -216,10 +175,10 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
+import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, CartItemRow, STList, CheckoutPriceBreakdown, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager } from "@stamhoofd/networking";
-import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -242,7 +201,9 @@ import AddItemView from "./AddItemView.vue";
         AddressInput,
         FieldBox,
         PaymentSelectionList,
-        RecordAnswerInput
+        RecordAnswerInput,
+        CheckoutPriceBreakdown,
+        CartItemRow
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -291,6 +252,15 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             return ''
         }
         return Formatter.price(price)
+    }
+
+    deleteCode(code: DiscountCode) {
+        const patchedData = OrderData.patch({})
+        patchedData.discountCodes.addDelete(code.id)
+        
+        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+            data: patchedData
+        }))
     }
 
     get recordCategories(): RecordCategory[] {
@@ -639,7 +609,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     }
 
     async editCartItem(cartItem: CartItem ) {
-        let clone = this.patchedOrder.data.cart.clone()
+        let clone = this.patchedOrder.data.clone()
         const webshop = await this.webshopManager.loadWebshopIfNeeded()
 
         const newCartItem = cartItem.clone()
@@ -658,24 +628,22 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                         admin: true,
                         cartItem: newCartItem, 
                         oldItem: cartItem,
-                        cart: clone,
+                        checkout: clone,
                         webshop: webshop,
                         saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                             component.dismiss({force: true})
                             
                             if (oldItem) {
-                                clone.removeItem(oldItem)
+                                clone.cart.removeItem(oldItem)
                             }
-                            clone.addItem(cartItem)
+                            clone.cart.addItem(cartItem)
 
-                            if (clone.price != this.patchedOrder.data.cart.price) {
+                            if (clone.totalPrice != this.patchedOrder.data.totalPrice) {
                                 new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
                             }
 
                             this.patchOrder = this.patchOrder.patch({ 
-                                data: OrderData.patch({
-                                    cart: clone
-                                })
+                                data: clone
                             })
                         }
                     })
@@ -701,6 +669,18 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         })})
     }
 
+    setCartItemAmount(cartItem: CartItem, amount: number) {
+        let clone = this.patchedOrder.data.cart.clone()
+        const found = clone.items.find(i => i.id === cartItem.id)
+        if (found) {
+            found.amount = amount
+
+            this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
+                cart: clone
+            })})
+        }
+    }
+
     get isChanged() {
         return patchContainsChanges(this.finalPatch, this.order, { version: Version })
     }
@@ -713,43 +693,3 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.edit-order-view {
-    .cart-item-row {
-        h3 {
-            padding-top: 5px;
-            @extend .style-title-3;
-        }
-
-        .description {
-            @extend .style-description-small;
-            padding-top: 5px;
-            white-space: pre-wrap;
-        }
-
-        .price {
-            font-size: 14px;
-            line-height: 1.4;
-            font-weight: 600;
-            padding-top: 10px;
-            color: $color-primary;
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        img {
-            width: 100px;
-            height: 100px;
-            border-radius: $border-radius;
-        }
-    }
-}
-</style>

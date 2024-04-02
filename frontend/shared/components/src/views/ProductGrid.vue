@@ -1,6 +1,6 @@
 <template>
     <div class="product-grid" :class="{single: products.length === 1}">
-        <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :admin="admin" />
+        <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="admin" />
     </div>
 </template>
 
@@ -8,7 +8,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Cart, CartItem, Product, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -37,9 +37,9 @@ export default class ProductGrid extends Mixins(NavigationMixin){
 
     @Prop({ required: true })
         webshop: Webshop
-
+        
     @Prop({ required: true })
-        cart: Cart
+        checkout: Checkout
 
     @Prop({ required: true })
         saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void

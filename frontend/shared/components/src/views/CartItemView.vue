@@ -1,7 +1,10 @@
 <template>
     <form class="st-view cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name" :pop="canPop" :dismiss="canDismiss">
-            <span v-if="!webshop.isAllFree || cartItem.calculateUnitPrice(cart)" slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | priceFree }}</span>
+            <p v-if="!webshop.isAllFree || formattedPriceWithoutDiscount" slot="left">
+                <span class="style-tag discount" v-if="formattedPriceWithDiscount">{{ formattedPriceWithDiscount }}</span>
+                <span class="style-tag" v-else>{{ formattedPriceWithoutDiscount }}</span>
+            </p>
         </STNavigationBar>
         <main>
             <h1>{{ cartItem.product.name }}</h1>
@@ -148,9 +151,9 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Cart, CartItem, CartStockHelper, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from 'vue-property-decorator';
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator';
 
 import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
@@ -186,13 +189,13 @@ export default class CartItemView extends Mixins(NavigationMixin){
         admin: boolean
         
     @Prop({ required: true })
-        cartItem: CartItem
+        cartItem!: CartItem
 
     @Prop({ required: true })
         webshop: Webshop
 
     @Prop({ required: true })
-        cart: Cart
+        checkout!: Checkout
 
     @Prop({ required: true })
         saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
@@ -200,14 +203,49 @@ export default class CartItemView extends Mixins(NavigationMixin){
     @Prop({ default: null })
         oldItem: CartItem | null
 
+    pricedItem = this.cartItem
+    pricedCheckout = this.checkout
+
     errorBox: ErrorBox | null = null
 
     get willNeedSeats() {
         return this.withSeats
     }
 
+    get cart() {
+        return this.checkout.cart
+    }
+
     pluralText(num: number, singular: string, plural: string) {
         return Formatter.pluralText(num, singular, plural)
+    }
+
+    mounted() {
+        this.onChangeItem()
+    }
+
+    @Watch('cartItem', {deep: true})
+    onChangeItem() {
+        // Update the cart price on changes
+        const clonedCheckout = this.checkout.clone();
+        if (this.oldItem) {
+            clonedCheckout.cart.removeItem(this.oldItem)
+        }
+        const pricedItem = this.cartItem.clone()
+        clonedCheckout.cart.addItem(pricedItem, false) // No merging (otherwise prices are not updated)
+
+        // Calculate prices
+        clonedCheckout.update(this.webshop)
+        this.pricedCheckout = clonedCheckout
+        this.pricedItem = pricedItem
+    }
+
+    get formattedPriceWithDiscount() {
+        return this.pricedItem.getFormattedPriceWithDiscount(this.pricedCheckout.cart)
+    }
+
+    get formattedPriceWithoutDiscount() {
+        return this.pricedItem.getFormattedPriceWithoutDiscount(this.pricedCheckout.cart)
     }
 
     validate() {
@@ -409,11 +447,11 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get totalPrice() {
-        return this.cartItem.getPrice(this.cart)
+        return this.cartItem.getPriceWithDiscounts()
     }
 
     get administrationFee() {
-        return this.webshop.meta.paymentConfiguration.administrationFee.calculate(this.cartItem.getPrice(this.cart))
+        return this.webshop.meta.paymentConfiguration.administrationFee.calculate(this.cartItem.getPriceWithDiscounts())
     }
 }
 </script>

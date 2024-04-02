@@ -222,10 +222,14 @@
         background: $color-success-background;
     }
 
-
     &.secundary {
         color: $color-secundary-dark;
         background: $color-secundary-background;
+    }
+
+    &.discount {
+        color: $color-discount-dark;
+        background: $color-discount-background;
     }
 
     &.tertiary {
@@ -915,6 +919,12 @@
     padding: 2px;
     border-radius: $border-radius;
     margin: -2px 2px;
+    display: inline-block;
+}
+
+.style-discount-code {
+    font-family: monospace;
+    white-space: pre-wrap;
     display: inline-block;
 }
 

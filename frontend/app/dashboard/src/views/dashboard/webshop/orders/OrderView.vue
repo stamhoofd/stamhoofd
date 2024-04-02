@@ -293,60 +293,12 @@
             <hr>
 
             <STList>
-                <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
-                    <h3>
-                        <span>{{ cartItem.product.name }}</span>
-                    </h3>
-                    <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
-
-                    <footer>
-                        <p class="price">
-                            {{ cartItem.getFormattedPriceAmount(order.data.cart) }}
-                        </p>
-                    </footer>
-
-                    <figure v-if="imageSrc(cartItem)" slot="right">
-                        <img :src="imageSrc(cartItem)">
-                    </figure>
-                </STListItem>
+                <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 
-            <div class="pricing-box">
-                <STList>
-                    <STListItem v-if="order.data.administrationFee">
-                        Subtotaal
+            <hr>
 
-                        <template slot="right">
-                            {{ order.data.cart.price | price }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="order.data.deliveryPrice">
-                        Leveringskost
-
-                        <template slot="right">
-                            {{ order.data.deliveryPrice | price }}
-                        </template>
-                    </STListItem>
-
-
-                    <STListItem v-if="order.data.administrationFee">
-                        Administratiekosten
-
-                        <template slot="right">
-                            {{ order.data.administrationFee | price }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem>
-                        Totaal
-
-                        <template slot="right">
-                            {{ order.data.totalPrice | price }}
-                        </template> 
-                    </STListItem>
-                </STList>
-            </div>
+            <CheckoutPriceBreakdown :checkout="order.data" />
         </main>
     </div>
 </template>
@@ -355,7 +307,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
+import { CheckoutPriceBreakdown, CartItemRow, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -380,7 +332,9 @@ import TicketRow from "./TicketRow.vue";
         STErrorsDefault,
         LoadingView,
         TicketRow,
-        RecordCategoryAnswersBox
+        RecordCategoryAnswersBox,
+        CartItemRow,
+        CheckoutPriceBreakdown
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -815,43 +769,3 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.order-view {
-    .cart-item-row {
-        h3 {
-            padding-top: 5px;
-            @extend .style-title-3;
-        }
-
-        .description {
-            @extend .style-description-small;
-            padding-top: 5px;
-            white-space: pre-wrap;
-        }
-
-        .price {
-            font-size: 14px;
-            line-height: 1.4;
-            font-weight: 600;
-            padding-top: 10px;
-            color: $color-primary;
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        img {
-            width: 100px;
-            height: 100px;
-            border-radius: $border-radius;
-        }
-    }
-}
-</style>

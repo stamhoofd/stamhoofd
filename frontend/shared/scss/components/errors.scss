@@ -41,6 +41,16 @@
     }
 }
 
+.discount-box {
+    background: $color-discount-background;
+    color: $color-dark;
+
+    &::before,
+    .inline-link {
+        color: $color-discount;
+    }
+}
+
 .success-box {
     background: $color-success-background;
     color: $color-success-dark;
@@ -63,7 +73,7 @@
     }
 }
 
-.error-box, .success-box, .info-box, .warning-box, .loading-box {
+.error-box, .success-box, .info-box, .warning-box, .loading-box, .discount-box {
     border-radius: $border-radius;
     font-size: 14px;
     line-height: 1.5;
@@ -103,7 +113,7 @@
         margin-top: 5px;
     }
 
-    +.error-box, +.success-box, +.info-box, +.warning-box, +.loading-box  {
+    +.error-box, +.success-box, +.info-box, +.warning-box, +.loading-box, +.discount-box  {
         margin-top: -7px;
     }
 
@@ -134,7 +144,7 @@
     }
 }
 
-.error-box, .success-box, .info-box, .warning-box {
+.error-box, .success-box, .info-box, .warning-box, .discount-box {
     @extend .icon-base;
 
     &::before {

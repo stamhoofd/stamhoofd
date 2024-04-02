@@ -11,8 +11,11 @@
 
         <ProductSelectorBox :productSelector="productSelector" @patch="patchProductSelector" :webshop="webshop" :validator="validator" />
 
-        <div v-for="d in discounts" :key="d.id">
-            <STInputBox title="Korting op 1e stuk" :error-box="errorBox" class="max">
+        <hr>
+        <h2>Korting</h2>
+
+        <div v-for="(d, index) in discounts" :key="d.id">
+            <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errorBox" class="max">
                 <button slot="right" class="button icon trash gray" type="button" @click="removeDiscount(d)" v-if="discounts.length > 1" />
 
                 <div class="split-inputs">
@@ -33,7 +36,8 @@
         <p>
             <button class="button text" type="button" @click="addDiscount">
                 <span class="icon add" />
-                <span>Toevoegen</span>
+                <span v-if="discounts.length === 1">Andere korting op tweede stuk</span>
+                <span v-else>Toevoegen</span>
             </button>
         </p>
 
@@ -59,15 +63,18 @@
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <Radio slot="left" v-model="repeatBehaviour" value="RepeatLast" />
-                <h3 class="style-title-list">
+                <h3 class="style-title-list" v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'">
                     Laatste korting herhalen
+                </h3>
+                <h3 v-else>
+                    Herhalen
                 </h3>
                 <p class="style-description">
                     De laatste korting uit de lijst wordt toegepast als er nog meer stuks zijn.
                 </p>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label" class="left-center">
+            <STListItem :selectable="true" element-name="label" class="left-center" v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'">
                 <Radio slot="left" v-model="repeatBehaviour" value="RepeatPattern" />
                 <h3 class="style-title-list">
                     Patroon herhalen
@@ -77,6 +84,20 @@
                 </p>
             </STListItem>
         </STList>
+
+        <hr>
+        <h2>Zichtbaarheid (optioneel)</h2>
+        <p>Als deze korting wordt toegepast op een item in een winkelmandje kan je bij dat item een label tonen (bv. 'BLACK FRIDAY'). Hou dit label kort, bij voorkeur 1 woord.</p>
+
+        <STInputBox title="Label" error-fields="cartLabel" :error-box="errorBox">
+            <input
+                v-model="cartLabel"
+                class="input"
+                type="text"
+                placeholder="Optioneel"
+                autocomplete=""
+            >
+        </STInputBox>
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -173,6 +194,16 @@ export default class EditProductDiscountView extends Mixins(NavigationMixin) {
     set repeatBehaviour(repeatBehaviour: ProductDiscountRepeatBehaviour) {
         this.addPatch(ProductDiscountSettings.patch({
             repeatBehaviour
+        }))
+    }
+
+    get cartLabel() {
+        return this.patchedProductDiscount.cartLabel ?? ''
+    }
+
+    set cartLabel(cartLabel: string) {
+        this.addPatch(ProductDiscountSettings.patch({
+            cartLabel: cartLabel || null
         }))
     }
 

@@ -30,8 +30,9 @@
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { EmailInput, SaveView, STErrorsDefault, STInputBox, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
@@ -75,6 +76,7 @@ export default class EditWebshopNotificationsView extends Mixins(EditWebshopMixi
     }
 
     mounted() {
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/notifications")
         this.checkBounces().catch(console.error)
     }
 

@@ -1,4 +1,5 @@
-import { Cart, CartItem, CartItemOption } from './Cart';
+import { Cart } from './Cart';
+import { CartItem, CartItemOption } from './CartItem';
 import { Option, OptionMenu, Product } from "./Product";
 import { Webshop } from './Webshop';
 

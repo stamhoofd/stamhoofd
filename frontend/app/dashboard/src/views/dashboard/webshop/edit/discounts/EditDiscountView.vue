@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? 'Korting toevoegen' : 'Korting bewerken'" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? 'Korting toevoegen' : 'Korting bewerken'" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             Korting toevoegen
         </h1>
@@ -268,9 +268,6 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
         const productDiscount = ProductDiscountSettings.create({
             product: ProductSelector.create({
                 productId: this.webshop.products[0].id
-            }),
-            discount: ProductDiscount.create({
-
             })
         })
         const arr: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();
@@ -344,8 +341,3 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
     
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-</style>

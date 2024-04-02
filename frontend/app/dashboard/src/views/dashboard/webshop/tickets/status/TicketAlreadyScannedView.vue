@@ -50,7 +50,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,ColorHelper,Spinner,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { PrivateOrder, TicketPrivate } from "@stamhoofd/structures";
+import { PrivateOrder, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -73,14 +73,10 @@ export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
         webshopManager!: WebshopManager
 
     @Prop({ required: true })
-        ticket!: TicketPrivate
+        ticket!: TicketPrivate|TicketPublicPrivate
 
     @Prop({ required: true })
         order!: PrivateOrder
-
-    get item() {
-        return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
-    }
 
     formatDateTime(date: Date) {
         return Formatter.capitalizeFirstLetter(Formatter.dateTimeWithDay(date))

@@ -265,6 +265,25 @@ $color-payconiq-dark: var(--color-payconiq-dark, $color-payconiq-dark-original);
 $color-payconiq-border: var(--color-payconiq-border, $color-payconiq-border-original);
 $color-payconiq-border-focus: $color-payconiq;
 
+// -----------------------------------------------------------------------------
+// -------- Discount (red) -------------------------------------------------
+// -----------------------------------------------------------------------------
+
+$color-discount-original: #ff4747;
+$color-discount-background-original: #ffd6d6;
+$color-discount-dark-original: #692020;
+$color-discount-border-original: #dbaeae;
+
+$dark-theme-color-discount-background: invertColor($color-discount-background-original);
+$dark-theme-color-discount-dark: invertColor($color-discount-dark-original);
+$dark-theme-color-discount-border: invertColor($color-discount-border-original);
+
+$color-discount: var(--color-discount, $color-discount-original);
+$color-discount-background: var(--color-discount-background, $color-discount-background-original);
+$color-discount-dark: var(--color-discount-dark, $color-discount-dark-original);
+$color-discount-border: var(--color-discount-border, $color-discount-border-original);
+$color-discount-border-focus: $color-discount;
+
 // Aliasses
 
 $color-border-lighter-original: $color-gray-3; 

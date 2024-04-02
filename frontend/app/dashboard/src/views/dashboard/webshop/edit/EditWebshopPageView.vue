@@ -145,9 +145,11 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, WYSIWYGTextInput, Checkbox } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
 import { Cart, CartReservedSeat, TicketPublic } from "@stamhoofd/structures";
 import { CartItem } from "@stamhoofd/structures";
 import { DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
@@ -174,6 +176,10 @@ import EditWebshopMixin from "./EditWebshopMixin";
     }
 })
 export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
+    mounted() {
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/page")
+    }
+
     get organization() {
         return OrganizationManager.organization
     }

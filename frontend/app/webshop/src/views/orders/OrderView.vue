@@ -310,27 +310,20 @@
                     <template v-if="!hasTickets || hasSingleTicket || !isPaid">
                         <hr>
 
+                        <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
+                            <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+                        </p>
+
                         <STList>
-                            <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
-                                <h3>
-                                    {{ cartItem.product.name }}
-                                </h3>
-                                <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
-
-                                <footer>
-                                    <p class="price">
-                                        {{ cartItem.getFormattedPriceAmount(order.data.cart) }}
-                                    </p>
-                                </footer>
-
-                                <figure v-if="imageSrc(cartItem)" slot="right">
-                                    <img :src="imageSrc(cartItem)">
-                                </figure>
-                            </STListItem>
+                            <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="false" />
                         </STList>
+
+                        <hr>
+
+                        <CheckoutPriceBreakdown :checkout="order.data" />
                     </template>
                 </main>
-                <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || !isPaid)" :sticky="false">
+                <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || (!isPaid && isTransfer))" :sticky="false">
                     <template slot="right">
                         <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
                             <span class="icon share" />
@@ -350,7 +343,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
+import { CheckoutPriceBreakdown, CartItemRow, CenteredMessage, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Payment, RecordCategory } from '@stamhoofd/structures';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
@@ -371,12 +364,13 @@ import TicketListItem from '../products/TicketListItem.vue';
         LoadingButton,
         STErrorsDefault,
         LoadingView,
-        BackButton,
         OrganizationLogo,
         Spinner,
         TicketListItem,
         RecordCategoryAnswersBox,
-        Logo
+        Logo,
+        CartItemRow,
+        CheckoutPriceBreakdown
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -559,8 +553,7 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     mounted() {
         if (this.success) {
-            CheckoutManager.cart.items = []
-            CheckoutManager.saveCheckout()
+            CheckoutManager.clear()
 
             // Update stock in background
             WebshopManager.reload().catch(e => {
@@ -713,48 +706,6 @@ export default class OrderView extends Mixins(NavigationMixin){
          }
     }
 
-.cart-item-row {
-        h3 {
-            padding-top: 5px;
-            @extend .style-title-3;
-        }
-
-        .description {
-            @extend .style-description-small;
-            padding-top: 5px;
-            white-space: pre-wrap;
-        }
-
-        .price {
-            font-size: 14px;
-            line-height: 1.4;
-            font-weight: 600;
-            padding-top: 10px;
-            color: $color-primary;
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        img {
-            width: 70px;
-            height: 70px;
-            border-radius: $border-radius;
-
-            @media (min-width: 340px) {
-                width: 80px;
-                height: 80px;
-            }
-
-            @media (min-width: 801px) {
-                width: 100px;
-                height: 100px;
-            }
-        }
-    }
     .pre-wrap {
         @extend .style-description;
         white-space: pre-wrap;

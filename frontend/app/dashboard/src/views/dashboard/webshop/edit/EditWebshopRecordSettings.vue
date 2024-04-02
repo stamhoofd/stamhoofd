@@ -45,9 +45,11 @@
 import { PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
 import { Checkout } from "@stamhoofd/structures";
 import { RecordEditorSettings } from "@stamhoofd/structures";
 import { PrivateWebshop, RecordCategory, WebshopMetaData } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import EditRecordCategoryQuestionsView from "../../settings/modules/members/records/EditRecordCategoryQuestionsView.vue";
@@ -67,6 +69,10 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) {
+    mounted() {
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/records")
+    }
+
     get categories() {
         return this.webshop.meta.recordCategories;
     }

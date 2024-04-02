@@ -519,7 +519,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                         const current = productMap.get(code)
                         if (current) {
                             current.amount += item.amount
-                            current.price += item.getPrice(order.data.cart)
+                            current.price += item.getPriceWithDiscounts()
                         } else {
                             const productCategory = this.webshop?.categories.find(c => c.productIds.includes(item.product.id))
 
@@ -527,7 +527,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                                 amount: item.amount,
                                 name: item.product.name,
                                 description: item.descriptionWithoutFields,
-                                price: item.getPrice(order.data.cart),
+                                price: item.getPriceWithDiscounts(),
                                 category: productCategory ?? null
                             })
                         }

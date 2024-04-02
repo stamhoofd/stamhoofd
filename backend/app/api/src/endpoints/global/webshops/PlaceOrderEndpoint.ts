@@ -4,12 +4,13 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, RateLimiter, Token, Webshop } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, RateLimiter, Token, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct, WebshopAuthType } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { StripeHelper } from '../../../helpers/StripeHelper';
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string };
 type Query = undefined;
@@ -100,7 +101,34 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             const webshopStruct = WebshopStruct.create(webshop)
 
+            const usedCodes = request.body.discountCodes.map(c => c.code)
+            const uniqueCodes = Formatter.uniqueArray(usedCodes);
+            if (uniqueCodes.length !== usedCodes.length) {
+                // Duplicate code usage is not allowed
+                throw new SimpleError({
+                    code: "duplicate_codes",
+                    message: "Duplicate usage of discount codes",
+                    human: "Sommige kortingcodes werden dubbel toegepast op jouw bestelling. Kijk het even na, dit is niet toegestaan.",
+                    field: "cart.discountCodes"
+                })
+            }
+            if (uniqueCodes.length > 0) {
+                // Fetch new and update them
+                const codeModels = await WebshopDiscountCode.getActiveCodes(webshop.id, uniqueCodes)
+
+                if (codeModels.length !== uniqueCodes.length) {
+                    throw new SimpleError({
+                        code: "invalid_code",
+                        message: "Invalid discount code",
+                        human: "De kortingscode die je hebt toegevoegd is niet (meer) geldig",
+                        field: "cart.discountCodes"
+                    })
+                }
+                request.body.discountCodes = codeModels.map(c => c.getStructure())
+            }
+
             request.body.validate(webshopStruct, organization.meta, request.i18n, false, token?.user?.getStructure())
+            request.body.update(webshopStruct)
 
             const order = new Order().setRelation(Order.webshop, webshop)
             order.data = request.body // TODO: validate

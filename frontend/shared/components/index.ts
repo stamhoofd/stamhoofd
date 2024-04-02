@@ -109,6 +109,8 @@ export { default as VATNumberInput } from "./src/inputs/VATNumberInput.vue"
 export { default as WYSIWYGTextInput } from "./src/inputs/WYSIWYGTextInput.vue"
 
 // Shared views should be last
+export { default as CheckoutPriceBreakdown } from "./src/views/CheckoutPriceBreakdown.vue"
+export { default as CartItemRow } from "./src/views/CartItemRow.vue"
 export { default as CartItemView } from "./src/views/CartItemView.vue"
 export { default as CategoryBox } from "./src/views/CategoryBox.vue"
 export { default as ChangePasswordView } from "./src/views/ChangePasswordView.vue"

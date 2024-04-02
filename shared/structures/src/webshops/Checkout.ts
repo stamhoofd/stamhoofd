@@ -1,7 +1,6 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import { v4 as uuidv4 } from "uuid";
 
 import { ValidatedAddress } from '../addresses/Address';
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
@@ -14,10 +13,11 @@ import { PaymentMethod } from '../PaymentMethod';
 import { User } from '../User';
 import { Cart } from './Cart';
 import { Customer } from './Customer';
-import { Webshop, WebshopPreview } from './Webshop';
+import { Discount, ProductDiscountTracker } from './Discount';
+import { DiscountCode } from './DiscountCode';
+import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
-import { Discount } from './Discount';
 
 export class Checkout extends AutoEncoder {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -52,6 +52,9 @@ export class Checkout extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Discount), version: 235 })
     discounts: Discount[] = []
+
+    @field({ decoder: new ArrayDecoder(DiscountCode), version: 239 })
+    discountCodes: DiscountCode[] = []
 
     /**
      * Applied fixed discount (not applicable to a specific cart item)
@@ -114,7 +117,7 @@ export class Checkout extends AutoEncoder {
         // Percentage discount
         
         // + this.administrationFee;
-        return Math.max(0, this.cart.price + this.deliveryPrice - this.appliedPercentageDiscount - this.fixedDiscount) + this.administrationFee
+        return Math.max(0, this.cart.price - this.appliedPercentageDiscount - this.fixedDiscount) + this.deliveryPrice + this.administrationFee
     }
 
     get priceBreakown() {
@@ -124,12 +127,12 @@ export class Checkout extends AutoEncoder {
                 price: -this.appliedPercentageDiscount
             },
             {
-                name: 'Leveringskost',
-                price: this.deliveryPrice
-            },
-            {
                 name: 'Korting',
                 price: -this.fixedDiscount
+            },
+            {
+                name: 'Leveringskost',
+                price: this.deliveryPrice
             },
             {
                 name: 'Administratiekost',
@@ -202,12 +205,12 @@ export class Checkout extends AutoEncoder {
 
             // also update discounts on errors
             this.updateDiscounts(webshop);
-            this.applyDiscounts();
+            this.calculatePrices();
             throw e
         }
 
         this.updateDiscounts(webshop);
-        this.applyDiscounts();
+        this.calculatePrices();
 
         if (!asAdmin && webshop.meta.availableUntil && webshop.meta.availableUntil < new Date()) {
             throw new SimpleError({
@@ -457,27 +460,53 @@ export class Checkout extends AutoEncoder {
 
     private updateDiscounts(webshop: Webshop) {
         this.discounts = webshop.meta.defaultDiscounts.slice()
+        this.discounts.push(...this.discountCodes.flatMap(c => c.discounts))
     }
 
-    private applyDiscounts() {
-        this.fixedDiscount = 0;
-        this.percentageDiscount = 0;
-        for (const item of this.cart.items) {
-            item.applicableDiscounts = [];
-        }
+    private calculatePrices() {
+        // Group discounts by discounts that can get applied together with other discounts
+        // for now: everything can get combined
+        const discountOrders = [this.discounts]
 
-        for (const discount of this.discounts) {
-            discount.applyToCheckout(this);
-        }
+        for (const discounts of discountOrders) {
+            this.fixedDiscount = 0;
+            this.percentageDiscount = 0;
 
-        for (const item of this.cart.items) {
-            item.calculateAppliedDiscounts(this.cart)
+            for (const item of this.cart.items) {
+                item.discounts = [];
+                
+                // Reset all discounts on this item
+                item.calculatePrices(this.cart);
+            }
+
+            const trackers: ProductDiscountTracker[] = []
+
+            for (const discount of discounts) {
+                trackers.push(...discount.applyToCheckout(this));
+            }
+
+            // Loop trackers and apply the one with the current highest potential
+            while (true) {
+                let bestPotential: {tracker: ProductDiscountTracker, potential: number}|null = null;
+
+                for (const tracker of trackers) {
+                    const potential = tracker.getPotentialDiscount();
+                    if (potential !== 0 && (bestPotential === null || potential > bestPotential.potential)) {
+                        bestPotential = {tracker, potential}
+                    }
+                }
+                if (bestPotential) {
+                    bestPotential.tracker.apply()
+                } else {
+                    break;
+                }
+            }
         }
     }
 
     update(webshop: Webshop) {
         this.updateDiscounts(webshop)
-        this.applyDiscounts();
+        this.calculatePrices();
         this.updateAdministrationFee(webshop)
     }
 

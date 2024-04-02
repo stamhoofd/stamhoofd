@@ -106,6 +106,7 @@ export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 // Webshop
 export * from "./src/endpoints/WebshopOrdersQuery"
 export * from "./src/endpoints/WebshopTicketsQuery"
+export * from "./src/webshops/CartItem"
 export * from "./src/webshops/Cart"
 export * from "./src/webshops/CartStockHelper"
 export * from "./src/webshops/Category"
@@ -119,6 +120,7 @@ export * from "./src/webshops/Webshop"
 export * from "./src/webshops/WebshopField"
 export * from "./src/webshops/WebshopMetaData"
 export * from "./src/webshops/Discount"
+export * from "./src/webshops/DiscountCode"
 
 // billing
 export * from "./src/billing/STBillingStatus"
