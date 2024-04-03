@@ -13,12 +13,12 @@
         </p>
 
         <footer>
-            <p class="price" v-if="!cartItem.getFormattedPriceWithDiscount(cart)">
-                {{ cartItem.getFormattedPriceWithoutDiscount(cart) }}
+            <p class="price" v-if="!cartItem.getFormattedPriceWithDiscount()">
+                {{ cartItem.getFormattedPriceWithoutDiscount() }}
             </p>
             <p class="price" v-else>
-                <span class="style-discount-old-price">{{ cartItem.getFormattedPriceWithoutDiscount(cart) }}</span>
-                <span class="style-discount-price">{{cartItem.getFormattedPriceWithDiscount(cart)}}</span>
+                <span class="style-discount-old-price">{{ cartItem.getFormattedPriceWithoutDiscount() }}</span>
+                <span class="style-discount-price">{{cartItem.getFormattedPriceWithDiscount()}}</span>
             </p>
             <div @click.stop>
                 <span class="amount" v-if="cartItem.formattedAmount">{{cartItem.formattedAmount}}</span>

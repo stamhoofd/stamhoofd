@@ -146,7 +146,7 @@ a {
         }
     }
 
-    h4 + p {
+    h4 ~ p {
         padding-top: 3px;
         opacity: 0.8;
         font-size: 11pt;

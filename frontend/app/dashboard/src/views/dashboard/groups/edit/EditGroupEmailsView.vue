@@ -33,7 +33,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import editDataIllustration from "@stamhoofd/assets/images/illustrations/edit-data.svg";
 import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Group, Member, MemberDetails, Order, OrderData, Organization, OrganizationMetaData, OrganizationType, Payment, PaymentDetailed, PaymentMethod, Product, ProductPrice, RegistrationWithMember, STPackageType, STPackageTypeHelper, ValidatedAddress, WebshopMetaData, WebshopPreview, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EmailTemplate, EmailTemplateType, Group, Member, MemberDetails, Order, OrderData, Organization, OrganizationMetaData, OrganizationType, Payment, PaymentDetailed, PaymentMethod, Product, ProductPrice, RegistrationWithMember, STPackageType, STPackageTypeHelper, ValidatedAddress, WebshopMetaData, WebshopPreview, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -286,7 +286,12 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                             productPrice: ProductPrice.create({
                                 price: 550
                             }),
-                            amount: 2
+                            amount: 2,
+                            calculatedPrices: [CartItemPrice.create({
+                                price: 550
+                            }), CartItemPrice.create({
+                                price: 550
+                            })]
                         }),
                         CartItem.create({
                             product: Product.create({
@@ -295,7 +300,10 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                             productPrice: ProductPrice.create({
                                 price: 400
                             }),
-                            amount: 1
+                            amount: 1,
+                            calculatedPrices: [CartItemPrice.create({
+                                price: 400
+                            })]
                         })
                     ]
                 }),

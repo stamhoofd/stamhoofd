@@ -235,11 +235,11 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get formattedPriceWithDiscount() {
-        return this.pricedItem.getFormattedPriceWithDiscount(this.pricedCheckout.cart)
+        return this.pricedItem.getFormattedPriceWithDiscount()
     }
 
     get formattedPriceWithoutDiscount() {
-        return this.pricedItem.getFormattedPriceWithoutDiscount(this.pricedCheckout.cart)
+        return this.pricedItem.getFormattedPriceWithoutDiscount()
     }
 
     validate() {

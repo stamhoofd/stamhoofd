@@ -226,7 +226,7 @@ export class Order extends AutoEncoder {
             let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Aantal</th></tr></thead><tbody>`
 
             for (const item of this.data.cart.items) {
-                str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${item.amount}</td></tr>`
+                str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(item.formattedAmount ?? '1')}</td></tr>`
             }
             return str+"</tbody></table>";
         }
@@ -234,7 +234,7 @@ export class Order extends AutoEncoder {
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Aantal</th></tr></thead><tbody>`
 
         for (const item of this.data.cart.items) {
-            str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(item.formattedAmount ?? '1')}</td></tr>`
+            str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}${"<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.getFormattedPriceWithDiscount()||item.getFormattedPriceWithoutDiscount())+"</p>"}</td><td>${Formatter.escapeHtml(item.formattedAmount ?? '1')}</td></tr>`
         }
         return str+"</tbody></table>";
     }

@@ -38,7 +38,7 @@ import payPointOfSaleIllustration from "@stamhoofd/assets/images/illustrations/p
 import transferIllustration from "@stamhoofd/assets/images/illustrations/transfer.svg";
 import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferDescriptionType, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferDescriptionType, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -323,7 +323,12 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                             productPrice: ProductPrice.create({
                                 price: 550
                             }),
-                            amount: 2
+                            amount: 2,
+                            calculatedPrices: [CartItemPrice.create({
+                                price: 550
+                            }), CartItemPrice.create({
+                                price: 550
+                            })]
                         }),
                         CartItem.create({
                             product: Product.create({
@@ -332,7 +337,10 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                             productPrice: ProductPrice.create({
                                 price: 400
                             }),
-                            amount: 1
+                            amount: 1,
+                            calculatedPrices: [CartItemPrice.create({
+                                price: 400
+                            })]
                         })
                     ]
                 }),
