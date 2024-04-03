@@ -442,15 +442,18 @@ export class Order extends Model {
         for (const code of this.data.discountCodes) {
             if (previousData !== null) {
                 code.reserved = false;
+                changed = true
             }
 
             if (code.reserved && !add) {
                 // Remove usage
                 code.reserved = false;
                 discountCodeUsageMap.set(code.id, (discountCodeUsageMap.get(code.id) ?? 0) - 1)
+                changed = true
             } else if (!code.reserved && add) {
                 code.reserved = true;
                 discountCodeUsageMap.set(code.id, (discountCodeUsageMap.get(code.id) ?? 0) + 1)
+                changed = true
             }
         }
 
@@ -460,6 +463,7 @@ export class Order extends Model {
                 if (code) {
                     code.usageCount += amount;
                     await code.save()
+                    changed = true
                 }
             }
         }
