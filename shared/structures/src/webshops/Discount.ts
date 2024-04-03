@@ -181,14 +181,10 @@ export class GeneralDiscount extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     percentageDiscount = 0
 
-    @field({ decoder: BooleanDecoder })
-    stackable = false
-
     multiply(amount: number): GeneralDiscount {
         return GeneralDiscount.create({
             fixedDiscount: Math.round(this.fixedDiscount * amount),
-            percentageDiscount: this.percentageDiscount,
-            stackable: this.stackable
+            percentageDiscount: Math.round(this.percentageDiscount * amount),
         })
     }
 }
@@ -545,7 +541,7 @@ export class Discount extends AutoEncoder {
         // Fixed part to the whole order
         const multipliedOrderDiscount = this.orderDiscount.multiply(matchCount ?? 1)
         checkout.fixedDiscount += multipliedOrderDiscount.fixedDiscount
-        checkout.percentageDiscount = Math.min(10000,checkout.percentageDiscount + multipliedOrderDiscount.percentageDiscount)
+        checkout.percentageDiscount = Math.min(10000, checkout.percentageDiscount + multipliedOrderDiscount.percentageDiscount)
 
         const trackers: ProductDiscountTracker[] = [];
 
