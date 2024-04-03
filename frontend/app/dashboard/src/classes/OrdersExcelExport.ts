@@ -312,6 +312,8 @@ export class OrdersExcelExport {
                 "Leveringsadres / afhaallocatie",
                 "Datum",
                 "Tijdstip",
+                "Subtotaal",
+                "Korting",
                 "Leveringskost",
                 "Administratiekosten",
                 "Totaal",
@@ -382,6 +384,14 @@ export class OrdersExcelExport {
                 address,
                 order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : "/",
                 order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime)+" - "+Formatter.minutes(order.data.timeSlot.endTime) : "/",
+                {
+                    value: order.data.cart.priceWithDiscounts / 100,
+                    format: "€0.00"
+                },
+                {
+                    value: (order.data.appliedPercentageDiscount + order.data.fixedDiscount) / 100,
+                    format: "€0.00"
+                },
                 {
                     value: order.data.deliveryPrice / 100,
                     format: "€0.00"

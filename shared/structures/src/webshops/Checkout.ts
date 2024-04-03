@@ -143,7 +143,7 @@ export class Checkout extends AutoEncoder {
         if (all.length > 0) {
             all.unshift({
                 name: 'Subtotaal',
-                price: this.cart.price
+                price: this.cart.priceWithDiscounts
             })
         }
 
