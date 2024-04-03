@@ -723,39 +723,6 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         padding-top: 5px;
     }
 
-    .cart-item-row {
-        h3 {
-            padding-top: 5px;
-            @extend .style-title-3;
-        }
-
-        .description {
-            @extend .style-description-small;
-            padding-top: 5px;
-            white-space: pre-wrap;
-        }
-
-        .price {
-            font-size: 14px;
-            line-height: 1.4;
-            font-weight: 600;
-            padding-top: 10px;
-            color: $color-primary;
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        img {
-            width: 100px;
-            height: 100px;
-            border-radius: $border-radius;
-        }
-    }
-
     .pre-wrap {
         @extend .style-description;
         white-space: pre-wrap;
