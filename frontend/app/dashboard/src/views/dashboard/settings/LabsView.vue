@@ -60,6 +60,10 @@
             Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
         </p>
 
+        <Checkbox :checked="getFeatureFlag('webshop-discounts')" @change="setFeatureFlag('webshop-discounts', !!$event)">
+            Kortingen en kortingscodes in webshops
+        </Checkbox>
+
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>
             <h2>
@@ -84,10 +88,6 @@
 
             <Checkbox :checked="getFeatureFlag('webshop-auth')" @change="setFeatureFlag('webshop-auth', !!$event)">
                 Webshop auth
-            </Checkbox>
-
-            <Checkbox :checked="getFeatureFlag('webshop-discounts')" @change="setFeatureFlag('webshop-discounts', !!$event)">
-                Webshop discounts
             </Checkbox>
 
             <hr>
