@@ -116,6 +116,7 @@ export class OrdersExcelExport {
                 "Aantal",
                 "Stukprijs",
                 "Eenmalige extra kost",
+                "Korting",
                 "Prijs",
                 "Artikel",
                 ...optionNames,
@@ -226,6 +227,10 @@ export class OrdersExcelExport {
                     },
                     {
                         value: ((item.getPartialExtraPrice(order.data.cart) ?? 0)) / 100,
+                        format: '€0.00'
+                    },
+                    {
+                        value: ((item.getPriceWithDiscounts() - item.getPriceWithoutDiscounts())) / 100,
                         format: '€0.00'
                     },
                     {
