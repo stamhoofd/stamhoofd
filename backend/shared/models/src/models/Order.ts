@@ -122,7 +122,7 @@ export class Order extends Model {
             return false;
         }
 
-        if (this.data.paymentMethod === PaymentMethod.PointOfSale || this.data.totalPrice === 0) {
+        if (this.data.paymentMethod === PaymentMethod.PointOfSale || this.data.paymentMethod === PaymentMethod.Unknown || this.data.totalPrice === 0) {
             return true;
         }
 

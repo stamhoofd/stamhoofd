@@ -10,7 +10,7 @@
                 Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.
             </p>
 
-            <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon gift">
+            <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
                 <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
 
                 <button class="button icon trash" @click="deleteCode(code)" />
@@ -30,6 +30,7 @@
                 </button>
             </p>
 
+            <AddDiscountCodeBox :applyCode="applyCode" v-if="webshop.meta.allowDiscountCodeEntry" />
             <CheckoutPriceBreakdown :checkout="checkout" />
         </main>
 
@@ -47,7 +48,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CartItemView, ErrorBox, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, CheckoutPriceBreakdown, CartItemRow } from '@stamhoofd/components';
+import { AddDiscountCodeBox, CartItemRow, CartItemView, CheckoutPriceBreakdown, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, DiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -67,7 +68,8 @@ import { CheckoutStepsManager } from './CheckoutStepsManager';
         STErrorsDefault,
         LoadingButton,
         CartItemRow,
-        CheckoutPriceBreakdown
+        CheckoutPriceBreakdown,
+        AddDiscountCodeBox
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -125,6 +127,10 @@ export default class CartView extends Mixins(NavigationMixin){
         CheckoutManager.saveCart()
     }
 
+    async applyCode(code: string) {
+        return await CheckoutManager.applyCode(code)
+    }
+
     editCartItem(cartItem: CartItem ) {
         this.present({
             components: [
@@ -138,9 +144,10 @@ export default class CartView extends Mixins(NavigationMixin){
                         saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                             component?.dismiss({force: true})
                             if (oldItem) {
-                                CheckoutManager.cart.removeItem(oldItem)
+                                CheckoutManager.cart.replaceItem(oldItem, cartItem)
+                            } else {
+                                CheckoutManager.cart.addItem(cartItem)
                             }
-                            CheckoutManager.cart.addItem(cartItem)
                             CheckoutManager.saveCart()
                         }
                     })

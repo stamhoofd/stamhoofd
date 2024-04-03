@@ -8,53 +8,6 @@
         </h1>
         
         <STErrorsDefault :error-box="errorBox" />
-
-        <hr>
-        <h2>
-            Artikelvoorwaarden
-        </h2>
-        <p>De korting wordt enkel toegepast als deze artikels met een bepaalde hoeveelheid aanwezig zijn in het winkelmandje.</p>
-
-        <STList v-if="patchedDiscount.requirements.length">
-            <STListItem v-for="requirement of patchedDiscount.requirements" :key="requirement.id" class="right-description right-stack" :selectable="true" @click="editRequirement(requirement)">
-                <h3 class="style-title-list">
-                    {{requirement.amount}} x {{requirement.product.getName(webshop, true).name}}
-                </h3>
-                <p class="style-description-small">
-                    {{requirement.product.getName(webshop, true).footnote}}
-                </p>
-
-                <template slot="right">
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
-        </STList>
-
-        <p>
-            <button class="button text" type="button" @click="addRequirement">
-                <span class="icon add" />
-                <span>Artikelvoorwaarde toevoegen</span>
-            </button>
-        </p>
-
-        <STList v-if="patchedDiscount.requirements.length">
-            <STListItem :selectable="true" element-name="label">
-                <Checkbox slot="left" v-model="applyMultipleTimes" />
-
-                <h3 class="style-title-list">
-                    Meerdere keren toepassen
-                </h3>
-                <p class="style-description-small">
-                    Als de vereiste artikels meerdere keren aanwezig zijn, dan wordt de korting meerdere keren toegepast. Ideaal voor bijvoorbeeld een 2 + 1 gratis actie, of x euro korting per 2 bestelde stuks.
-                </p>
-            </STListItem>
-        </STList>
-
-        <hr>
-
-        <h2>
-            Korting op volledige bestelling
-        </h2>
         
         <div class="split-inputs">
             <STInputBox title="Vast bedrag" error-fields="administrationFee.fixed" :error-box="errorBox">
@@ -66,7 +19,7 @@
             </STInputBox>
         </div>
 
-        <p class="style-description-small">Indien er meerdere kortingen op bestelniveau van toepassing zijn wordt het vaste bedrag opgeteld, bij het percentage wordt het hoogste genomen (niet opgeteld).
+        <p class="style-description-small">Deze kortingen worden op de volledige bestelling toegepast.</p>
 
         <hr>
         <h2>
@@ -98,6 +51,47 @@
                 <span>Artikel toevoegen</span>
             </button>
         </p>
+
+        <hr>
+        <h2>
+            Artikelvoorwaarden
+        </h2>
+        <p>De korting wordt enkel toegepast als deze artikels met een bepaalde hoeveelheid aanwezig zijn in het winkelmandje. Hiermee kan je speciale kortingen bereiken waarbij je bijvoorbeeld korting geeft op een bepaald artikel als je eerst een ander artikel bestelt (bv. één drankkaart gratis als je 10 tickets bestelt).</p>
+
+        <STList v-if="patchedDiscount.requirements.length">
+            <STListItem v-for="requirement of patchedDiscount.requirements" :key="requirement.id" class="right-description right-stack" :selectable="true" @click="editRequirement(requirement)">
+                <h3 class="style-title-list">
+                    {{requirement.amount}} x {{requirement.product.getName(webshop, true).name}}
+                </h3>
+                <p class="style-description-small">
+                    {{requirement.product.getName(webshop, true).footnote}}
+                </p>
+
+                <template slot="right">
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </STList>
+
+        <p>
+            <button class="button text" type="button" @click="addRequirement">
+                <span class="icon add" />
+                <span>Artikelvoorwaarde toevoegen</span>
+            </button>
+        </p>
+
+        <STList v-if="patchedDiscount.requirements.length">
+            <STListItem :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="applyMultipleTimes" />
+
+                <h3 class="style-title-list">
+                    Meerdere keren toepassen
+                </h3>
+                <p class="style-description-small">
+                    Als de vereiste artikels meerdere keren aanwezig zijn, dan wordt de korting meerdere keren toegepast. Bijvoorbeeld als je korting op één artikel geeft op voorwaarde dat je eerst een ander artikel erbij bestelt.
+                </p>
+            </STListItem>
+        </STList>
       
         <div v-if="!isNew" class="container">
             <hr>

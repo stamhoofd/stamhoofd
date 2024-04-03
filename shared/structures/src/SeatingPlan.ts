@@ -311,6 +311,21 @@ export class SeatingPlan extends AutoEncoder {
         return null;
     }
 
+    getCategoryName(seat: ReservedSeat): string|null {
+        if (this.categories.length <= 1) {
+            return null;
+        }
+
+        const s = this.getSeat(seat)
+        if (s) {
+            const c = this.categories.find(c => c.id === s.category)
+            if (c && c.name) {
+                return c.name
+            }
+        }
+        return null
+    }
+
     getCategoryColor(categoryId) {
         const colorIndexes = ['', 'var(--color-secundary)', 'var(--color-tertiary)', 'var(--color-warning)']
         const category = this.categories.findIndex(c => c.id === categoryId)
@@ -486,6 +501,8 @@ export class ReservedSeat extends AutoEncoder {
         }
 
         const section = seatingPlan.sections.find(s => s.id === this.section)
+        const categoryName = seatingPlan.getCategoryName(this);
+        const suffix = categoryName ? [{title: 'Categorie', value: categoryName}] : []
 
         if (seatingPlan.sections.length === 1 || !section || section.name.length === 0) {
             // Don't mention the section
@@ -497,7 +514,8 @@ export class ReservedSeat extends AutoEncoder {
                 {
                     title: 'Zetel',
                     value: this.seat
-                }
+                },
+                ...suffix
             ]
         }
 
@@ -513,7 +531,8 @@ export class ReservedSeat extends AutoEncoder {
             {
                 title: 'Zetel',
                 value: this.seat
-            }
+            },
+            ...suffix
         ];
     }
 

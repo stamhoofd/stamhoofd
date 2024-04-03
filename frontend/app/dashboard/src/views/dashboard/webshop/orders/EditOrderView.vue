@@ -132,20 +132,15 @@
 
                 <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
             </template>
-
-            <div class="container" v-if="patchedOrder.data.discountCodes.length">
-                <hr>
-                <h2>Kortingscodes</h2>
-
-                <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="info-box icon gift discount">
-                    Kortingscode {{code.code}}
-
-                    <button class="button icon trash" @click="deleteCode(code)" />
-                </p>
-            </div>
             
             <hr>
             <h2>Winkelmandje</h2>
+
+            <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
+                <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+
+                <button class="button icon trash" @click="deleteCode(code)" />
+            </p>
 
             <STList v-if="webshopFull">
                 <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
@@ -581,28 +576,27 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     }
 
     async addProduct() {
-        let clone = this.patchedOrder.data.cart.clone()
+        let clone = this.patchedOrder.data.clone()
         const webshop = await this.webshopManager.loadWebshopIfNeeded()
 
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(AddItemView, { 
-                cart: clone,
+                checkout: clone,
                 webshop: webshop,
                 saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                     component.dismiss({force: true})
 
                     if (oldItem) {
-                        clone.removeItem(oldItem)
+                        clone.cart.replaceItem(oldItem, cartItem)
+                    } else {
+                        clone.cart.addItem(cartItem)
                     }
-                    clone.addItem(cartItem)
 
-                    if (!this.isNew && clone.price != this.patchedOrder.data.cart.price) {
+                    if (!this.isNew && clone.totalPrice != this.patchedOrder.data.totalPrice) {
                         new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
                     }
 
-                    this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-                        cart: clone
-                    })})
+                    this.patchOrder = this.patchOrder.patch({ data: clone})
                 }
             })
         }).setDisplayStyle("sheet"))
@@ -634,9 +628,10 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                             component.dismiss({force: true})
                             
                             if (oldItem) {
-                                clone.cart.removeItem(oldItem)
+                                clone.cart.replaceItem(oldItem, cartItem)
+                            } else {
+                                clone.cart.addItem(cartItem)
                             }
-                            clone.cart.addItem(cartItem)
 
                             if (clone.totalPrice != this.patchedOrder.data.totalPrice) {
                                 new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();

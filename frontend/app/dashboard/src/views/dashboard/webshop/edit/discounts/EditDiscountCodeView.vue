@@ -22,6 +22,16 @@
         <p class="style-description-small" v-if="!code">Kies zelf een code of <button type="button" class="inline-link" @click="generateCode()">genereer één willekeurig</button></p>
         <p class="style-description-small" v-else>De kortingscode kan gebruikt worden via <span class="style-copyable style-inline-code" v-copyable="'https://'+link">{{link}}</span></p>
 
+        <STInputBox title="Beschrijving" class="max" error-fields="description" :error-box="errorBox">
+            <textarea
+                v-model="description"
+                class="input"
+                placeholder="Optioneel"
+                autocomplete=""
+            ></textarea>
+        </STInputBox>
+        <p class="style-description-small">De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.</p>
+
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <Checkbox slot="left" v-model="useMaximumUsage" />
@@ -37,16 +47,6 @@
                 </div>
             </STListItem>
         </STList>
-
-        <STInputBox title="Beschrijving" class="max" error-fields="description" :error-box="errorBox">
-            <textarea
-                v-model="description"
-                class="input"
-                placeholder="Optioneel"
-                autocomplete=""
-            ></textarea>
-        </STInputBox>
-        <p class="style-description-small">De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.</p>
 
         <hr>
         <h2>

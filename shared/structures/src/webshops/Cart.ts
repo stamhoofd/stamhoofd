@@ -38,6 +38,34 @@ export class Cart extends AutoEncoder {
         }
     }
 
+    replaceItem(old: CartItem, item: CartItem) {
+        // First check if code is already used
+        const c = item.code
+        const oldCode = old.code
+        
+        for (const i of this.items) {
+            if (i.code === c && i.code !== oldCode) {
+                i.amount += item.amount
+                i.seats.push(...item.seats)
+                this.removeItem(old)
+                return
+            }
+        }
+        
+        for (const [index, i] of this.items.entries()) {
+            if (i.code === oldCode) {
+                this.items.splice(index, 1, item)
+                return
+            }
+        }
+
+        if (item.amount === 0) {
+            return
+        }
+        this.removeItem(old)
+        this.addItem(item)
+    }
+
     /**
      * @deprecated
      * Be careful when to use the price with and without discounts

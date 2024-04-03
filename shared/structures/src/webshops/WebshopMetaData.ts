@@ -381,6 +381,9 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     phoneEnabled = true
 
+    @field({ decoder: BooleanDecoder, version: 242 })
+    allowDiscountCodeEntry = false
+
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), optional: true })
     recordCategories: RecordCategory[] = []
 

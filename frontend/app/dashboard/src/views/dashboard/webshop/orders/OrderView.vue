@@ -292,6 +292,10 @@
 
             <hr>
 
+            <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
+                <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+            </p>
+
             <STList>
                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>

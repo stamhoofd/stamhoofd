@@ -191,7 +191,7 @@ export class Webshop extends AutoEncoder {
     }
 
     get canEnableCart() {
-        if (this.products.length === 1) {
+        if (this.products.length === 1 && !this.meta.allowDiscountCodeEntry) {
             const product = this.products[0]
             if (product.isUnique) {
                 return false

@@ -1,7 +1,7 @@
 <template>
     <form class="st-view cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name" :pop="canPop" :dismiss="canDismiss">
-            <p v-if="!webshop.isAllFree || formattedPriceWithoutDiscount" slot="left">
+            <p v-if="!webshop.isAllFree || pricedItem.getPriceWithDiscounts()" slot="left">
                 <span class="style-tag discount" v-if="formattedPriceWithDiscount">{{ formattedPriceWithDiscount }}</span>
                 <span class="style-tag" v-else>{{ formattedPriceWithoutDiscount }}</span>
             </p>
@@ -107,24 +107,9 @@
                 <p v-if="stockText" class="st-list-description" v-text="stockText" />
             </template>
 
-            <div v-if="!cartEnabled && (administrationFee || (canSelectAmount && !webshop.isAllFree))" class="pricing-box max">
-                <STList>
-                    <STListItem v-if="administrationFee">
-                        Administratiekosten
+            <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || (pricedCheckout.totalPrice > 0 && cartItem.amount > 1))" class="pricing-box max">
+                <CheckoutPriceBreakdown :checkout="pricedCheckout" />
 
-                        <template slot="right">
-                            {{ administrationFee | price }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem>
-                        Totaal
-
-                        <template slot="right">
-                            {{ (totalPrice + administrationFee) | price }}
-                        </template> 
-                    </STListItem>
-                </STList>
             </div>
         </main>
 
@@ -150,7 +135,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, CheckoutPriceBreakdown } from '@stamhoofd/components';
 import { Cart, CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator';
@@ -171,7 +156,8 @@ import OptionMenuBox from './OptionMenuBox.vue';
         StepperInput,
         FieldBox,
         STErrorsDefault,
-        BackButton
+        BackButton,
+        CheckoutPriceBreakdown
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -221,6 +207,14 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     mounted() {
+        this.onChangeItem()
+    }
+
+    /**
+     * External changes should trigger a price update
+     */
+    @Watch('checkout', {deep: true})
+    onChangeCheckout() {
         this.onChangeItem()
     }
 
@@ -447,11 +441,11 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get totalPrice() {
-        return this.cartItem.getPriceWithDiscounts()
+        return this.pricedItem.getPriceWithDiscounts()
     }
 
     get administrationFee() {
-        return this.webshop.meta.paymentConfiguration.administrationFee.calculate(this.cartItem.getPriceWithDiscounts())
+        return this.webshop.meta.paymentConfiguration.administrationFee.calculate(this.pricedItem.getPriceWithDiscounts())
     }
 }
 </script>

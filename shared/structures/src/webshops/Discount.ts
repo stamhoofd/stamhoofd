@@ -316,13 +316,17 @@ export class ProductDiscountSettings extends AutoEncoder {
             }
         } else {
             let index = 0;
-            for (const discount of this.discounts) {
+            for (const discount of this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern ? [...this.discounts, ...this.discounts, ...this.discounts] : this.discounts) {
                 index += 1;
                 let s = Formatter.ordinalNumber(index) + ' stuk';
 
                 if (index === this.discounts.length) {
                     if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {
-                        s = 'overige stuks'
+                        if (descriptions.length > 0) {
+                            s = 'overige stuks'
+                        } else {
+                            s = 'vanaf '+s
+                        }
                     }
                 }
 
@@ -340,7 +344,11 @@ export class ProductDiscountSettings extends AutoEncoder {
             }
 
             if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
-                descriptions.push('herhalend')
+                if (descriptions.length === 3 && this.discounts[this.discounts.length - 1].percentageDiscount === 100*100) {
+                    descriptions = [(this.discounts.length - 1) + ' + 1 gratis']
+                } else {
+                    descriptions.push('...')
+                }
             }
         }
         
@@ -350,7 +358,7 @@ export class ProductDiscountSettings extends AutoEncoder {
 
         return {
             title: titles.join(' '),
-            description: Formatter.joinLast(descriptions, ', ', ' en '),
+            description: Formatter.capitalizeFirstLetter(Formatter.joinLast(descriptions, ', ', ' en ')),
             footnote: footnotes.join('\n')
         }
     }
@@ -371,10 +379,6 @@ export class ProductDiscountTracker {
             return d[0];
         }
         return null;
-    }
-
-    markUsed() {
-        this.usageCount += 1;
     }
 
     sortQueue() {
@@ -469,33 +473,8 @@ export class Discount extends AutoEncoder {
             )
 
             if (t.footnote) {
-                const index = '*'.repeat(footnotes.length + 1);
-                titles.push(index)
-                footnotes.push(index + ' ' + t.footnote)
+                footnotes.push(t.footnote)
             }
-
-            // if (productDiscount.discount.percentageDiscount) {
-            //     const n = productDiscount.product.getName(webshop, isAdmin)
-            //     titles.push(
-            //         Formatter.percentage(productDiscount.discount.percentageDiscount) + " korting op " + n.name
-            //     )
-            //     if (n.footnote) {
-            //         const index = '*'.repeat(footnotes.length + 1);
-            //         titles.push(index)
-            //         footnotes.push(index + ' ' + n.footnote)
-            //     }
-            // }
-            // if (productDiscount.discount.discountPerPiece) {
-            //     const n = productDiscount.product.getName(webshop, isAdmin)
-            //     titles.push(
-            //         Formatter.price(productDiscount.discount.discountPerPiece) + " korting per stuk op " + n.name
-            //     )
-            //     if (n.footnote) {
-            //         const index = '*'.repeat(footnotes.length + 1);
-            //         titles.push(index)
-            //         footnotes.push(index + ' ' + n.footnote)
-            //     }
-            // }
         }
 
         if (titles.length === 0) {

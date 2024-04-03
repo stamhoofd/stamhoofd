@@ -129,6 +129,7 @@ export { default as ProductGrid } from "./src/views/ProductGrid.vue"
 export { default as RecordCategoryAnswersBox } from "./src/views/RecordCategoryAnswersBox.vue"
 export { default as SeatSelectionBox } from "./src/views/SeatSelectionBox.vue"
 export { default as ShowSeatsView } from "./src/views/ShowSeatsView.vue"
+export {default as AddDiscountCodeBox} from "./src/views/AddDiscountCodeBox.vue"
 
 // Payment
 export * from "./src/ColorHelper"

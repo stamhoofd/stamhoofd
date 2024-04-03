@@ -368,10 +368,6 @@ export class CartItem extends AutoEncoder {
      * Without discounts
      */
     getFormattedPriceWithoutDiscount(cart: Cart) {
-        if (cart.priceWithoutDiscounts === 0) {
-            return ""
-        }
-
         // Group by seats
         const priceCombinations = this.getUnitPriceCombinationsWithoutDiscount();
         return this.priceCombinationToString(priceCombinations)

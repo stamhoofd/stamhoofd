@@ -37,7 +37,18 @@
 
         <Spinner v-if="fetchingDiscountCodes" />
         <div v-else>
-            <STList v-if="patchedDiscountCodes.length">
+            <STList v-if="patchedDiscountCodes.length || allowDiscountCodeEntry">
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" v-model="allowDiscountCodeEntry" />
+
+                    <h3 class="style-title-list">
+                        Sta invullen van kortingscodes toe
+                    </h3>
+                    <p class="style-description-small">
+                        Als je dit uitschakelt kunnen bestellers enkel een kortingscode gebruiken via een link.
+                    </p>
+                </STListItem>
+
                 <STListItem v-for="discountCode of patchedDiscountCodes" :key="discountCode.id" class="right-description right-stack left-center" :selectable="true" @click="editDiscountCode(discountCode)">
                     <span class="icon label" slot="left" />
 
@@ -71,7 +82,7 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Spinner } from "@stamhoofd/components";
+import { Checkbox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Discount, DiscountCode, PrivateWebshop, Version, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -88,7 +99,8 @@ import EditWebshopMixin from './EditWebshopMixin';
         STInputBox,
         STErrorsDefault,
         SaveView,
-        Spinner
+        Spinner,
+        Checkbox,
     },
 })
 export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
@@ -150,6 +162,14 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
         this.addMetaPatch(meta)
     }
 
+    get allowDiscountCodeEntry() {
+        return this.webshop.meta.allowDiscountCodeEntry
+    }
+
+    set allowDiscountCodeEntry(value: boolean) {
+        this.addMetaPatch(WebshopMetaData.patch({allowDiscountCodeEntry: value}))
+    }
+
     addDiscount() {
         const discount = Discount.create({})
         const arr: PatchableArrayAutoEncoder<Discount> = new PatchableArray();
@@ -203,6 +223,12 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
                     saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
                         arr.merge(patch);
                         this.addDiscountCodesPatch(arr)
+
+                        this.$nextTick(() => {
+                            if (this.patchedDiscountCodes.length === 1) {
+                                this.allowDiscountCodeEntry = true
+                            }
+                        });
                     }
                 })
             ],
@@ -219,6 +245,12 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
                     webshop: this.webshop,
                     saveHandler: (patch: PatchableArrayAutoEncoder<DiscountCode>) => {
                         this.addDiscountCodesPatch(patch)
+
+                        this.$nextTick(() => {
+                            if (this.patchedDiscountCodes.length === 0) {
+                                this.allowDiscountCodeEntry = false
+                            }
+                        });
                     }
                 })
             ],

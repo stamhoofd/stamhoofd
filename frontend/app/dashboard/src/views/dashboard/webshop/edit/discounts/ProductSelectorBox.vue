@@ -1,16 +1,18 @@
 <template>
-    <div>
+    <div class="product-selector-box">
         <STInputBox title="Artikel" error-fields="productId" :error-box="errorBox" class="max">
-            <div class="style-input-box input-icon-container right icon arrow-down-small gray" @click="changeProduct">
+            <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
-                    <STListItem>
+                    <STListItem :selectable="true">
                         <div slot="left" v-if="product.images[0]" class="product-selector-image-preview">
-                            <ImageComponent :image="product.images[0]" />
+                            <ImageComponent :image="product.images[0]" :autoHeight="true" />
                         </div>
                         
                         <h2 class="style-title-list">
                             {{ product.name }}
                         </h2>
+
+                        <span class="icon arrow-down-small gray" slot="right" />
                     </STListItem>
                 </STList>
                 <div v-else>
@@ -235,6 +237,18 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
 <style lang="scss">
 .product-selector-image-preview .image-component {
     width: 50px;
-    height: 50px;
+
+    img {
+        border-radius: 5px;
+    }
+}
+
+.product-selector-box {
+    .style-input-box {
+        padding-left: 15px;
+        padding-right: 15px;
+        --st-horizontal-padding: 15px;
+        overflow: hidden;
+    }
 }
 </style>

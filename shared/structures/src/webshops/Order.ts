@@ -231,10 +231,10 @@ export class Order extends AutoEncoder {
             return str+"</tbody></table>";
         }
 
-        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Prijs</th></tr></thead><tbody>`
+        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Aantal</th></tr></thead><tbody>`
 
         for (const item of this.data.cart.items) {
-            str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(item.getFormattedPriceWithDiscount(this.data.cart) || item.getFormattedPriceWithoutDiscount(this.data.cart))}</td></tr>`
+            str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p style=\"white-space: pre-wrap;\">"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(item.formattedAmount ?? '1')}</td></tr>`
         }
         return str+"</tbody></table>";
     }
@@ -311,30 +311,12 @@ export class Order extends AutoEncoder {
                     }
                 ] : []
             ),
-             ...(
-                (this.data.deliveryPrice) ? [
-                    {
-                        title: 'Leveringskost',
-                        value: Formatter.price(this.data.deliveryPrice)
-                    }
-                ] : []
-            ),
-            ...(
-                (this.data.administrationFee) ? [
-                    {
-                        title: 'Administratiekosten',
-                        value: Formatter.price(this.data.administrationFee)
-                    }
-                ] : []
-            ),
-             ...(
-                (this.data.totalPrice) ? [
-                    {
-                        title: "Prijs",
-                        value: Formatter.price(this.data.totalPrice)
-                    }
-                ] : []
-            ),
+             ...this.data.priceBreakown.map(p => {
+                return {
+                    title: p.name,
+                    value: Formatter.price(p.price)
+                }
+            })
         ]
 
         for (const replacement of data) {

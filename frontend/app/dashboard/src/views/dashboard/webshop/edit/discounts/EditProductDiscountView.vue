@@ -13,6 +13,9 @@
 
         <hr>
         <h2>Korting</h2>
+        <p v-if="discounts.length > 1">
+            De kortingen worden toegepast van hoog naar lage prijs. Dus het eerste stuk is het artikel met de hoogste prijs (als er prijs verschillen zijn binnenin hetzelfde artikel door bijvoorbeeld keuzemenu's). Als de korting per stuk groter is dan de prijs van een stuk, is het stuk gratis en wordt de korting niet overgedragen.
+        </p>
 
         <div v-for="(d, index) in discounts" :key="d.id">
             <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errorBox" class="max">
@@ -20,14 +23,14 @@
 
                 <div class="split-inputs">
                     <div>
+                        <PriceInput v-if="getDiscountType(d) == 'discountPerPiece'" :value="getDiscountDiscountPerPiece(d)" @input="setDiscountDiscountPerPiece(d, $event)" :min="0" :required="true" />
+                        <PermyriadInput v-else :value="getDiscountPercentageDiscount(d)" @input="setDiscountPercentageDiscount(d, $event)" :required="true" />
+                    </div>
+                    <div>
                         <Dropdown :value="getDiscountType(d)" @change="setDiscountType(d, $event)">
                             <option value="percentageDiscount">Percentage</option>
                             <option value="discountPerPiece">Bedrag</option>
                         </Dropdown>
-                    </div>
-                    <div>
-                        <PriceInput v-if="getDiscountType(d) == 'discountPerPiece'" :value="getDiscountDiscountPerPiece(d)" @input="setDiscountDiscountPerPiece(d, $event)" :min="0" :required="true" />
-                        <PermyriadInput v-else :value="getDiscountPercentageDiscount(d)" @input="setDiscountPercentageDiscount(d, $event)" :required="true" />
                     </div>
                 </div>
             </STInputBox>
@@ -154,6 +157,7 @@ export default class EditProductDiscountView extends Mixins(NavigationMixin) {
 
     /// For now only used to update locations and times of other products that are shared
     patchProductDiscount: AutoEncoderPatchType<ProductDiscountSettings> = ProductDiscountSettings.patch({ id: this.productDiscount.id })
+    cachedDiscountType: Map<string, 'percentageDiscount' | 'discountPerPiece'> = new Map()
 
     /**
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
@@ -208,25 +212,31 @@ export default class EditProductDiscountView extends Mixins(NavigationMixin) {
     }
 
     getDiscountType(d: ProductDiscount) {
-        if (d.percentageDiscount > 0) {
-            return 'percentageDiscount'
+        if (this.cachedDiscountType.has(d.id)) {
+            return this.cachedDiscountType.get(d.id)
         }
-        return 'discountPerPiece'
+
+        if (d.discountPerPiece > 0) {
+            return 'discountPerPiece'
+        }
+        return 'percentageDiscount'
     }
 
     setDiscountType(d: ProductDiscount, type: 'percentageDiscount' | 'discountPerPiece') {
+        this.cachedDiscountType.set(d.id, type)
+
         const p = ProductDiscountSettings.patch({})
         if (type === 'percentageDiscount') {
             p.discounts.addPatch(ProductDiscount.patch({
                 id: d.id,
-                percentageDiscount: 10,
+                percentageDiscount: Math.min(100, this.getDiscountDiscountPerPiece(d)),
                 discountPerPiece: 0
             }))
         } else {
             p.discounts.addPatch(ProductDiscount.patch({
                 id: d.id,
                 percentageDiscount: 0,
-                discountPerPiece: 0
+                discountPerPiece: Math.max(1, this.getDiscountPercentageDiscount(d))
             }))
         }
         this.addPatch(p)

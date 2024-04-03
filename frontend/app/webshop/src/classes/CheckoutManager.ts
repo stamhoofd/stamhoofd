@@ -26,6 +26,9 @@ export class CheckoutManagerStatic {
     }
 
     async validateCodes() {
+        if (this.checkout.discountCodes.length === 0) {
+            return
+        }
         try {
             // Validate code
             const response = await WebshopManager.server.request({
@@ -61,9 +64,11 @@ export class CheckoutManagerStatic {
             this.saveCheckout()
 
             if (this.checkout.discountCodes.find(c => c.code === code)) {
-                new Toast('Kortingscode toegepast', 'success primary').setHide(null).show();
+                new Toast('Kortingscode toegepast', 'success primary').setHide(10 * 1000).show();
+                return true;
             } else {
-                new Toast('Ongeldige kortingscode '+code, 'red error').setHide(null).show();
+                new Toast('Ongeldige kortingscode '+code, 'red error').setHide(10 * 1000).show();
+                return false;
             }
             
         } finally {

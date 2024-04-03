@@ -504,7 +504,7 @@ export class TicketBuilder {
             this.document.text("Ticketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 , lineGap: 2, paragraphGap: 2, continued: true })
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
-            this.document.text("Stamhoofd", { continued: true, link: 'https://'+I18nController.i18n.t("shared.domains.marketing"), })
+            this.document.text("Stamhoofd", { continued: false, link: 'https://'+I18nController.i18n.t("shared.domains.marketing"), })
         }
 
         height += expectedHeight + 2

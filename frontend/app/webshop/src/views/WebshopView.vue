@@ -311,9 +311,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
 
             if (oldItem) {
-                CheckoutManager.cart.removeItem(oldItem)
+                CheckoutManager.cart.replaceItem(oldItem, cartItem)
+            } else {
+                CheckoutManager.cart.addItem(cartItem)
             }
-            CheckoutManager.cart.addItem(cartItem)
             CheckoutManager.saveCart()
 
             this.openCart(true)
@@ -333,6 +334,24 @@ export default class WebshopView extends Mixins(NavigationMixin){
         }
     }
 
+    /**
+     * Update cart
+     */
+    async check() {
+        try {
+            this.cart.validate(WebshopManager.webshop)
+        } catch (e) {
+            console.error(e)
+        }
+        CheckoutManager.saveCart()
+
+        try {
+            await CheckoutManager.validateCodes()
+        }  catch (e) {
+            console.error(e);
+        }
+    }
+
     mounted() {
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
         const path = UrlHelper.shared.getParts();
@@ -340,6 +359,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         UrlHelper.shared.clear()
 
         UrlHelper.setUrl("/")
+        this.check().catch(console.error)
 
         if (path.length == 2 && path[0] == 'code') {
             if (this.cartEnabled) {

@@ -131,7 +131,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)" v-if="getFeatureFlag('webshop-discounts')">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/discount.svg">
                         <h2 class="style-title-list">
                             Kortingen
                         </h2>

@@ -2,6 +2,23 @@
     display: flex;
     flex-direction: row;
 
+    .st-input-box > & {
+        gap: 10px;
+
+        & > div {
+            margin: 0;
+            flex-grow: 0;
+            flex-shrink: 0;
+            flex-basis: auto;
+            min-width: 0;
+            max-width: none;
+
+            &:first-child {
+                flex-grow: 1;
+            }
+        }
+    }
+
     & > div {
         flex-grow: 1;
         flex-shrink: 0;
