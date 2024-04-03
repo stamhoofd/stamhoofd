@@ -6,6 +6,7 @@
                 <span>Kortingscode inwisselen</span>
             </button>
         </p>
+        <hr v-if="isEnteringDiscountCode">
         <form v-if="isEnteringDiscountCode" @submit.prevent="addEnteredCode" data-submit-last-field>
             <STInputBox title="Kortingscode" error-fields="code" :error-box="errorBox" class="max">
                 <div class="split-inputs">
@@ -20,12 +21,11 @@
                         @blur="cleanCode"
                     >
                     <LoadingButton :loading="loading">
-                <button class="button primary" type="submit">
-                    Inwisselen
-                </button>
-            </LoadingButton>
+                        <button class="button primary" type="submit">
+                            Inwisselen
+                        </button>
+                    </LoadingButton>
                 </div>
-                
             </STInputBox>
         </form>
     </div>
@@ -70,6 +70,7 @@ export default class AddDiscountCodeBox extends Vue {
         }
         this.loading = true;
         try {
+            this.cleanCode()
             if (await this.applyCode(this.code)) {
                 this.isEnteringDiscountCode = false
                 this.code = ""
