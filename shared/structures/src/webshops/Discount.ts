@@ -545,7 +545,7 @@ export class Discount extends AutoEncoder {
         // Fixed part to the whole order
         const multipliedOrderDiscount = this.orderDiscount.multiply(matchCount ?? 1)
         checkout.fixedDiscount += multipliedOrderDiscount.fixedDiscount
-        checkout.percentageDiscount = Math.max(checkout.percentageDiscount , multipliedOrderDiscount.percentageDiscount)
+        checkout.percentageDiscount = Math.min(10000,checkout.percentageDiscount + multipliedOrderDiscount.percentageDiscount)
 
         const trackers: ProductDiscountTracker[] = [];
 
