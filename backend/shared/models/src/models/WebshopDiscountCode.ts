@@ -35,11 +35,6 @@ export class WebshopDiscountCode extends Model {
     @column({ type: "integer", nullable: true })
     maximumUsage: number|null = null
 
-    // Unique representation of this webshop from a string, that is used to provide the default domains
-    // in shop.stamhoofd.be/uri, and stamhoofd.be/shop/uri
-    @column({ type: "boolean" })
-    reserved = false;
-
     @column({
         type: "datetime", beforeSave(old?: any) {
             if (old !== undefined) {
