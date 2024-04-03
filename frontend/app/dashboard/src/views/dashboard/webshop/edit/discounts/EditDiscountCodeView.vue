@@ -14,7 +14,7 @@
                 v-model="code"
                 class="input"
                 type="text"
-                placeholder="Bv; 'BLACK-FRIDAY"
+                placeholder="Bv. BLACK-FRIDAY"
                 autocomplete=""
                 @blur="cleanCode"
             >
