@@ -228,16 +228,16 @@ export class TicketBuilder {
 
         if (!dryRun) {
             if (repeatWebshopName) {
-                this.document.text(this.webshop.meta.name.toLocaleUpperCase(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 })
+                this.document.text(this.webshop.meta.name.toLocaleUpperCase(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - QR_COLUMN_WIDTH, lineGap: 2, paragraphGap: 2 })
             }
 
             const indexText = ticket.getIndexText()
             if (indexText) {
-                this.document.text(indexText.toLocaleUpperCase(), PAGE_WIDTH - PAGE_MARGIN  - 40*MM, y, { align: "right", width: 40*MM })
+                this.document.text(indexText.toLocaleUpperCase(), PAGE_WIDTH - PAGE_MARGIN  - QR_COLUMN_WIDTH, y, { align: "right", width: QR_COLUMN_WIDTH })
             }
         }
         if (repeatWebshopName) {
-            height += this.document.heightOfString(this.webshop.meta.name.toLocaleUpperCase(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 40*MM, lineGap: 2, paragraphGap: 2 }) - 2
+            height += this.document.heightOfString(this.webshop.meta.name.toLocaleUpperCase(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - QR_COLUMN_WIDTH, lineGap: 2, paragraphGap: 2 }) - 2
             height += 3
         }
 
@@ -245,9 +245,9 @@ export class TicketBuilder {
         this.document.fillColor(COLOR_DARK);
         
         if (!dryRun) {
-            this.document.text(ticket.getTitle(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 })
+            this.document.text(ticket.getTitle(), PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - QR_COLUMN_WIDTH, lineGap: 2, paragraphGap: 2 })
         }
-        height += this.document.heightOfString(ticket.getTitle(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2, lineGap: 2, paragraphGap: 2 }) - 2
+        height += this.document.heightOfString(ticket.getTitle(), { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - QR_COLUMN_WIDTH, lineGap: 2, paragraphGap: 2 }) - 2
 
         // Margin
         height += 5*MM
