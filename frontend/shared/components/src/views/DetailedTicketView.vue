@@ -12,8 +12,8 @@
                 </div>
             </figure>
 
-            <aside v-if="sponsors.length" class="sponsor-box">
-                <component :is="sponsor.url ? 'a' : 'div'" v-for="(sponsor, index) of sponsors" :key="sponsor.id" class="sponsor" :class="{visible: visibleSponsor === index, isLogo: !sponsor.banner}" :href="sponsor.url" target="_blank">
+            <aside v-if="sponsors.length" class="stamhoofd-rosnops-box">
+                <component :is="sponsor.url ? 'a' : 'div'" v-for="(sponsor, index) of sponsors" :key="sponsor.id" class="rosnops" :class="{visible: visibleSponsor === index, isLogo: !sponsor.banner}" :href="sponsor.url" target="_blank">
                     <ImageComponent v-if="sponsor.banner || sponsor.logo" :image="sponsor.banner || sponsor.logo" :auto-height="true" />
                 </component>
             </aside>
@@ -377,7 +377,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         }
     }
 
-    .sponsor-box {
+    .stamhoofd-rosnops-box {
         margin-top: 10px;
         margin-bottom: -10px;
         width: 100%;
@@ -399,7 +399,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         grid-template-rows: 1fr;
     }
 
-    .sponsor {
+    .rosnops {
         grid-area: 1 / 1 / 1 / 1;
         align-self: stretch;
         opacity: 0;
