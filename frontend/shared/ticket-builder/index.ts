@@ -108,8 +108,8 @@ export class TicketBuilder {
             if (!ticket.isValid) {
                 continue
             }
-            const remainingHeight = PAGE_HEIGHT - this.document.y - PAGE_MARGIN + (isFirst ? 10*MM : 0)
-            const neededHeight = await this.drawItem(ticket, true)
+            const remainingHeight = PAGE_HEIGHT - this.document.y - PAGE_MARGIN
+            const neededHeight = (await this.drawItem(ticket, true)) + (!isFirst ? 15*MM : 0)
 
             if (neededHeight > remainingHeight) {
                 this.document.addPage()
