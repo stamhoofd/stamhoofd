@@ -48,7 +48,7 @@ export default class App extends Vue {
                 // Ignore this fixed prefix in our next lookup
                 UrlHelper.fixedPrefix = prefix
 
-                const ignorePath = ["checkout", "order", "cart", "payment", "tickets"];
+                const ignorePath = ["checkout", "order", "cart", "payment", "tickets", "code"];
                 const path = UrlHelper.shared.getParts()
                 const usedUri = path[0] && !ignorePath.includes(path[0]) ? path[0] : ''
                 const response = await NetworkManager.server.request({
