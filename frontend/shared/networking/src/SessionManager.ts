@@ -127,7 +127,6 @@ export class SessionManagerStatic {
         if (this.currentSession) {
             this.currentSession.removeListener(this)
         }
-        this.currentSession = session
 
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
@@ -154,7 +153,6 @@ export class SessionManagerStatic {
                     if (e.hasCode("invalid_organization")) {
                         // Clear from session storage
                         await this.removeOrganizationFromStorage(session.organizationId)
-                        this.logout()
                         throw new SimpleError({
                             code: "invalid_organization",
                             message: e.message,
@@ -165,7 +163,6 @@ export class SessionManagerStatic {
 
                 if (!shouldRetry && Request.isNetworkError(e)) {
                     // Undo setting the session
-                    this.clearCurrentSession()
                     throw new SimpleError({
                         code: "network_error",
                         message: e.message,
@@ -186,6 +183,7 @@ export class SessionManagerStatic {
                 })
             }
         }
+        this.currentSession = session
 
         const storage = await this.getSessionStorage(false)
         storage.lastOrganizationId = session.organizationId

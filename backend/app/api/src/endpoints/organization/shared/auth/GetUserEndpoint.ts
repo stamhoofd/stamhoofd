@@ -1,11 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Token, User } from '@stamhoofd/models';
-import { MyUser } from '@stamhoofd/structures';
+import { MyUser, User as UserStruct } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = MyUser;
+type ResponseBody = UserStruct|MyUser;
 
 export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
@@ -32,7 +32,21 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             throw new Error("Unexpected error")
         }
 
-        const st = MyUser.create({
+        if (request.request.getVersion() < 243) {
+            // Password
+            const st = MyUser.create({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                id: user.id,
+                email: user.email,
+                verified: user.verified,
+                permissions: user.permissions,
+                hasAccount: user.hasAccount()
+            })
+            return new Response(st);
+        }
+
+        const st = UserStruct.create({
             firstName: user.firstName,
             lastName: user.lastName,
             id: user.id,

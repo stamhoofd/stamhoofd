@@ -55,12 +55,10 @@ export class NewUser extends User {
     password = '';
 }
 
+/**
+ * @deprecated
+ */
 export class MyUser extends NewUser {
-    /**
-     * @deprecated
-     */
-    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true })
-    incomingInvites: never[] = []
 }
 
 export class ApiUser extends AutoEncoder {

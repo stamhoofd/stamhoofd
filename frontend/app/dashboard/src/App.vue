@@ -11,6 +11,7 @@ import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptio
 import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { Organization } from '@stamhoofd/structures';
 import { Country, EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -26,6 +27,14 @@ export default class App extends Vue {
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
             try {
+                // First check if the URL is an organization specific or not
+                // Specific -> Load organization and set session -> go to login view for this organization or (directly to the dashboard / no permissions view)
+                // const initialPath = UrlHelper.shared.getParts()
+
+                // const testOrganization = Organization.create({})
+                // const session = new Session(testOrganization.id)
+
+                // 
                 await SessionManager.restoreLastSession()
 
                 // Default language for dashboard is nl-BE, but if we are signed in, always force set the country to the organization country

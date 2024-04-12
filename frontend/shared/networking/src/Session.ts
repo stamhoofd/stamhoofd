@@ -2,7 +2,7 @@ import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { KeychainedResponseDecoder, LoginProviderType, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder, LoginProviderType, User, Organization, Token, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator"
 
 import { AppManager, UrlHelper } from '..'
@@ -26,9 +26,12 @@ function generateId (len) {
 }
 
 export class Session implements RequestMiddleware {
+    /**
+     * This will become optional in the future
+     */
     organizationId: string;
     organization: Organization | null = null
-    user: MyUser | null = null
+    user: User | null = null
 
     /** 
      * Manually mark the session as incomplete by setting this to true
@@ -80,7 +83,7 @@ export class Session implements RequestMiddleware {
                 if (json) {
                     try {
                         const parsed = JSON.parse(json)
-                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(MyUser as Decoder<MyUser>) as Decoder<VersionBox<MyUser>>).data
+                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(User as Decoder<User>) as Decoder<VersionBox<User>>).data
                     } catch (e) {
                         console.error(e)
                     }
@@ -344,12 +347,12 @@ export class Session implements RequestMiddleware {
         });
     }
 
-    async fetchUser(shouldRetry = true): Promise<MyUser> {
+    async fetchUser(shouldRetry = true): Promise<User> {
         console.log("Fetching session user...")
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
-            decoder: MyUser as Decoder<MyUser>,
+            decoder: User as Decoder<User>,
             shouldRetry
         })
         if (this.user) {
