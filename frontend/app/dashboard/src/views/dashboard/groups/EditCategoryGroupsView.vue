@@ -68,7 +68,7 @@
         <div v-if="!isRoot && enableActivities" class="container">
             <hr>
             <h2>Toegangsbeheer</h2>
-            <p>Je kan toegang tot leden instellen per groep (instellingen van groep zelf) of per categorie (hieronder). Kies ook welke beheerders zelf een nieuwe groep (bv. activiteit, cursus of workshop) kunnen toevoegen in deze categorie. Je kan functies bewerken bij je instellingen.</p>
+            <p>Je kan toegang tot leden instellen per inschrijvingsgroep (instellingen van groep zelf) of per categorie (hieronder). Je kan de beschikbare rollen bewerken bij de instellingen van je vereniging, daar kan je ook instellen welke rollen elke beheerder heeft.</p>
     
             <STList v-if="roles.length > 0">
                 <STListItem>
@@ -79,7 +79,7 @@
             </STList>
 
             <p v-else-if="fullAccess" class="info-box">
-                Je hebt nog geen functies aangemaakt. Maak functies aan via instellingen > beheerders
+                Je hebt nog geen rollen aangemaakt. Maak rollen aan via Instellingen → Beheerders
             </p>
         </div>
 

@@ -17,13 +17,13 @@
         </STList>
 
         <p v-if="roles.length == 0" class="info-box">
-            Je hebt nog geen functies aangemaakt. Maak een functie aan om beheerders op te delen.
+            Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.
         </p>
 
         <p class="style-button-bar">
             <button class="button text" type="button" @click="editRoles">
                 <span class="icon edit" />
-                <span>Functies bewerken</span>
+                <span>Rollen bewerken</span>
             </button>
         </p>
     </div>

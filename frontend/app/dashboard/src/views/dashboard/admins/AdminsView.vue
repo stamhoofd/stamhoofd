@@ -11,7 +11,7 @@
     
         <main>
             <h1>Beheerders</h1>
-            <p>Voeg hier beheerders toe en regel wat ze kunnen doen in Stamhoofd door functies toe te kennen. Maak zelf nieuwe functies aan en stel de toegang in per functie.</p>
+            <p>Voeg hier beheerders toe en regel wat ze kunnen doen in Stamhoofd door rollen toe te kennen. Maak zelf nieuwe rollen aan en stel de rechten in per rol.</p>
 
 
             <STList class="illustration-list">    
@@ -31,10 +31,10 @@
                 <STListItem :selectable="true" class="left-center" @click="editRoles(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin-role.svg">
                     <h2 class="style-title-list">
-                        Functies beheren
+                        Rollen beheren
                     </h2>
                     <p class="style-description">
-                        Maak functies die je aan beheerders kan toekennen.
+                        Maak rollen die je aan beheerders kan toekennen.
                     </p>
                     <template slot="right">
                         <span class="icon arrow-right-small gray" />
@@ -51,7 +51,7 @@
                             <span class="icon user-admin-layer-1" />
                             <span class="icon user-admin-layer-2 yellow" />
                         </span>
-                        <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen functies'" class="icon layered">
+                        <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
                             <span class="icon user-blocked-layer-1" />
                             <span class="icon user-blocked-layer-2 error" />
                         </span>

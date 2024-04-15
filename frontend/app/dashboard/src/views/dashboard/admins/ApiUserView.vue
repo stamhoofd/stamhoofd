@@ -11,8 +11,8 @@
 
         <div class="container">
             <hr>
-            <h2>Functies</h2>
-            <p>Je kan een API-key verschillende functies geven, net zoals een beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.</p>
+            <h2>Rollen</h2>
+            <p>Je kan een API-key verschillende rollen geven, net zoals een beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.</p>
 
             <EditUserPermissionsBox :user="patchedUser" @patch="addPatch($event)" />
         </div>

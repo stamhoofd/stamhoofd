@@ -11,7 +11,7 @@
                 v-model="name"
                 class="input"
                 type="text"
-                placeholder="Titel van deze functie"
+                placeholder="Naam van deze rol"
                 autocomplete=""
             >
         </STInputBox>
@@ -136,7 +136,7 @@
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
-                Verwijder deze functie
+                Verwijder deze rol
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
@@ -146,7 +146,7 @@
         </div>
 
         <hr>
-        <h2>Beheerders met deze functie</h2>
+        <h2>Beheerders met deze rol</h2>
 
         <STList>
             <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
@@ -251,7 +251,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.isNew ? "Nieuwe functie" : this.patchedRole.name
+        return this.isNew ? "Nieuwe rol" : this.patchedRole.name
     }
 
     get name() {
@@ -557,7 +557,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
             return
         }
         
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze functie wilt verwijderen?", "Verwijderen")) {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze rol wilt verwijderen?", "Verwijderen")) {
             return
         }
         const privateMeta = OrganizationPrivateMetaData.patch({})

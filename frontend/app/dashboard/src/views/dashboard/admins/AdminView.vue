@@ -31,8 +31,8 @@
 
         <div class="container">
             <hr>
-            <h2>Functies</h2>
-            <p>Je kan beheerders verschillende functies toekennen. Zonder een functie heeft deze beheerder nergens toegang tot (tenzij voor hoofdbeheerders).</p>
+            <h2>Rollen</h2>
+            <p>Je kan beheerders verschillende rollen toekennen. Een beheerder zonder rollen heeft geen enkele toegang.</p>
 
             <EditUserPermissionsBox :user="patchedUser" @patch="addPatch($event)" />
         </div>

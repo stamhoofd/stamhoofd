@@ -1,22 +1,26 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Kies welke functies toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
+        <p>Kies welke beheerdersrollen toegang hebben tot deze webshop (hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders)</p>
 
-        <p v-if="roles.length == 0" class="error-box">
-            Je hebt nog geen functies aangemaakt. Maak eerst beheerders aan en deel ze op in functies via de instellingen (enkel voor hoofdbeheerders). Daarna kan je de toegang hier verdelen.
+        <p v-if="roles.length == 0" class="info-box">
+            Je hebt nog geen beheerdersrollen aangemaakt. Maak eerst beheerders aan en deel ze op in beheerdersrollen via de instellingen (enkel voor hoofdbeheerders). Daarna kan je de toegang hier verdelen.
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
 
         <STList>
+            <STListItem>
+                <Checkbox slot="left" :checked="true" :disabled="true" />
+                Hoofdbeheerders
+            </STListItem>
             <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
         </STList>
     </SaveView>
 </template>
 
 <script lang="ts">
-import { SaveView, STErrorsDefault, STList } from "@stamhoofd/components";
+import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -29,7 +33,9 @@ import EditWebshopMixin from './EditWebshopMixin';
         STList,
         STErrorsDefault,
         WebshopPermissionRow,
-        SaveView
+        SaveView,
+        STListItem,
+        Checkbox
     }
 })
 export default class EditWebshopPermissionsView extends Mixins(EditWebshopMixin) {

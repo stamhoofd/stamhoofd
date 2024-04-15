@@ -74,10 +74,15 @@
         <template v-if="isNew && roles.length">
             <hr>
             <h2>Toegangsbeheer</h2>
-            <p>Kies welke functies toegang hebben tot deze inschrijvingsgroep. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle groepen. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de inschrijvingsgroep.</p>
+            <p>Kies welke beheerdersrollen toegang hebben tot deze inschrijvingsgroep (hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders)</p>
             <STErrorsDefault :error-box="errorBox" />
 
             <STList>
+                <STListItem>
+                    <Checkbox slot="left" :checked="true" :disabled="true" />
+                    Hoofdbeheerders
+                </STListItem>
+
                 <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :show-role="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
             </STList>
         </template>

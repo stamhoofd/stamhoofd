@@ -134,9 +134,14 @@
         <template v-if="isNew && roles.length > 0">
             <hr>
             <h2>Toegangsbeheer</h2>
-            <p>Kies welke functies toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
+            <p>Kies welke beheerdersrollen toegang hebben tot deze webshop (hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders)</p>
 
             <STList>
+                <STListItem>
+                    <Checkbox slot="left" :checked="true" :disabled="true" />
+                    Hoofdbeheerders
+                </STListItem>
+
                 <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
             </STList>
         </template>

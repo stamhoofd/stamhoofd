@@ -1,10 +1,10 @@
 <template>
     <LoadingView v-if="loading" />
-    <SaveView v-else class="st-view background" title="Functies" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView v-else class="st-view background" title="Rollen" :loading="saving" :disabled="!hasChanges" @save="save">
         <button slot="buttons" class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
     
-        <h1>Beheerder functies</h1>
-        <p>Maak functies aan om toegang te regelen tot bepaalde onderdelen. Daarna kan je één of meerdere functies toekennen aan een beheerder. In Stamhoofd kan je zo bijvoorbeeld alle beheerders met een bepaalde functie toegang geven tot een webshop, in plaats van individueel per beheerder. Als beheerders later van functie veranderen of de vereniging verlaten, hoef je enkel maar de functies van een beheerder te wijzigen.</p>
+        <h1>Beheerdersrollen</h1>
+        <p>Maak rollen aan om toegang te regelen tot bepaalde onderdelen. Daarna kan je één of meerdere rollen toekennen aan een beheerder. In Stamhoofd kan je zo bijvoorbeeld alle beheerders met een bepaalde rol toegang geven tot een webshop, in plaats van individueel per beheerder. Als beheerders later van rol veranderen of de vereniging verlaten, hoef je enkel maar de rollen van een beheerder te wijzigen.</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -21,7 +21,7 @@
                     Hoofdbeheerder
                 </h2>
                 <p class="style-description-small">
-                    Toegang tot alles
+                    Volledige toegang
                 </p>
 
                 <template slot="right">
@@ -104,7 +104,7 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
         })
 
         UrlHelper.setUrl("/settings/admins/roles")
-        document.title = "Stamhoofd - Beheerderfuncties"
+        document.title = "Stamhoofd - Beheerdersrollen"
         
         const parts = UrlHelper.shared.getParts()
         if (parts.length === 4 && parts[0] == 'settings' && parts[1] == 'admins' && parts[2] == 'roles') {
