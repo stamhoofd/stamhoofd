@@ -44,7 +44,7 @@ export class PermissionRole extends AutoEncoder {
 
 export class PermissionRoleDetailed extends PermissionRole {
     /**
-     * Allow to read members and member details
+     * Generic access to all resources
      */
     @field({ decoder: new EnumDecoder(PermissionLevel), version: 201 })
     level: PermissionLevel = PermissionLevel.None
