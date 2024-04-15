@@ -84,6 +84,29 @@ export class User extends Model {
         return null;
     }
 
+    static async getAdmins(organizationIds: string[], options?: {verified?: boolean}) {
+        if (organizationIds.length == 0) {
+            return []
+        }
+
+        const query: any = {
+            permissions: { sign: "!=", value: null }, 
+            organizationId: {sign: 'IN', value: organizationIds},
+        };
+
+        if (options?.verified !== undefined) {
+            query.verified = options.verified
+        }
+
+        return (
+            await User.where(query)
+        ).filter(a => !a.isApiUser)
+    }
+
+    static async getApiUsers(organizationIds: string[]) {
+        return organizationIds.length > 0 ? (await User.where({ permissions: { sign: "!=", value: null }, organizationId: {sign: 'IN', value: organizationIds}})).filter(a => a.isApiUser) : []
+    }
+
     async merge(other: User) {
         if (other.hasAccount()) {
             // We are going to merge accounts!

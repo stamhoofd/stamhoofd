@@ -33,10 +33,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         }
 
         // Get all admins
-        let admins = await User.where({ organizationId: user.organizationId, permissions: { sign: "!=", value: null }})
-
-        // Only show API users
-        admins = admins.filter(a => a.isApiUser)
+        const admins = await User.getApiUsers([user.organizationId])
 
         const mapped: ApiUser[] = []
         for (const admin of admins) {

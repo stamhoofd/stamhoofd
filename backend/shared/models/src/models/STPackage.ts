@@ -273,7 +273,7 @@ export class STPackage extends Model {
         }
 
         const template = templates[0]
-        const admins = await organization.getAdmins()
+        const admins = await organization.getFullAdmins()
 
         const recipients = admins.map(admin => 
             Recipient.create({

@@ -856,24 +856,20 @@ export class Organization extends Model {
     /**
      * These email addresess are private
      */
-    async getAdmins() {
+    async getFullAdmins() {
         // Circular reference fix
         const User = (await import('./User')).User;
-        const admins = await User.where({ organizationId: this.id, verified: 1, permissions: { sign: "!=", value: null }})
+        const admins = await User.getAdmins([this.id], {verified: true})
 
-        let filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
-
-        // Hide api accounts
-        filtered = filtered.filter(a => !a.isApiUser)
-
-        return filtered
+        // Only full access
+        return admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
     }
 
     /**
      * These email addresess are private
      */
     async getAdminToEmails(): Promise<EmailInterfaceRecipient[]> {
-        const filtered = await this.getAdmins()
+        const filtered = await this.getFullAdmins()
 
         if (STAMHOOFD.environment === "production") {
             if (filtered.length > 1) {
@@ -892,7 +888,7 @@ export class Organization extends Model {
      * These email addresess are private
      */
     async getAdminRecipients(): Promise<Recipient[]> {
-        let filtered = await this.getAdmins()
+        let filtered = await this.getFullAdmins()
 
         if (STAMHOOFD.environment === "production") {
             if (filtered.length > 1) {
