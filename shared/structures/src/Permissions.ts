@@ -250,7 +250,7 @@ export class Permissions extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: new ArrayDecoder(GroupPermissions) })
+    @field({ decoder: new ArrayDecoder(GroupPermissions), optional: true })
     groups: GroupPermissions[] = []
 
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
