@@ -38,15 +38,9 @@ export class User extends Model {
     @column({ type: "boolean" })
     verified = false
 
-    /**
-     * Public key used for encryption
-     */
     @column({ type: "json", decoder: Permissions, nullable: true })
     permissions: Permissions | null = null
 
-    /**
-     * Public key used for encryption
-     */
     @column({ type: "json", decoder: UserMeta, nullable: true })
     meta: UserMeta | null = null
 
