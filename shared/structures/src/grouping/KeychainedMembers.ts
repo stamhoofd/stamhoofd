@@ -1,6 +1,5 @@
-import { ArrayDecoder,AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
 
-import { KeychainItem } from '../KeychainItem';
 import { Member } from '../members/Member';
 
 /**
@@ -11,8 +10,9 @@ export class KeychainedMembers extends AutoEncoder {
     members: Member[]
 
     /**
-     * Create or update the keychain items for these public keys (needs to be also present in addMembers or updateMembers)
+     * @deprecated
+     * Can get dropped after a few months
      */
-    @field({ decoder: new ArrayDecoder(KeychainItem), optional: true })
-    keychainItems: KeychainItem[] = []
+    @field({ decoder: new ArrayDecoder(BooleanDecoder), optional: true })
+    keychainItems: never[] = []
 }

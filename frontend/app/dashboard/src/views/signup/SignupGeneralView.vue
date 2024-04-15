@@ -369,8 +369,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 privateMeta: OrganizationPrivateMetaData.create({
                     acquisitionTypes: this.acquisitionTypes
                 }),
-                address: this.address,
-                publicKey: "" // placeholder
+                address: this.address
             })
 
             this.loading = false;

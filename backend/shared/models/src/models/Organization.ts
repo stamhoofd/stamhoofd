@@ -63,12 +63,6 @@ export class Organization extends Model {
     @column({ type: "json", decoder: Address })
     address: Address;
 
-    /**
-     * @deprecated
-     */
-    @column({ type: "string" })
-    publicKey = '';
-
     @column({
         type: "string", beforeSave: function (this: Organization) {
             return this.name+"\n"+this.address.toString()
@@ -255,7 +249,6 @@ export class Organization extends Model {
             name: this.name,
             meta: this.meta,
             address: this.address,
-            publicKey: this.publicKey,
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
@@ -287,7 +280,6 @@ export class Organization extends Model {
             name: this.name,
             meta: this.meta,
             address: this.address,
-            publicKey: this.publicKey,
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,

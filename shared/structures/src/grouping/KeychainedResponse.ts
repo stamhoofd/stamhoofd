@@ -1,7 +1,5 @@
 import { Data, Decoder, Encodeable, EncodeContext } from "@simonbackx/simple-encoding";
 
-import { KeychainItem } from '../KeychainItem';
-
 /**
  * Returns the response data, along with related keychain items that might be needed to decrypt the data
  */
@@ -11,9 +9,9 @@ export class KeychainedResponse<T extends Encodeable | (Encodeable[])> implement
     /**
      * @deprecated
      */
-    keychainItems: KeychainItem[];
+    keychainItems: never[];
 
-    constructor(data: { data: T; keychainItems?: KeychainItem[] }) {
+    constructor(data: { data: T; keychainItems?: never[] }) {
         this.data = data.data
         this.keychainItems = []
     }

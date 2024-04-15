@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './addresses/Address';
@@ -8,24 +8,7 @@ import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
 import { Permissions } from './Permissions';
 import { User } from './User';
-import { TransferSettings } from './webshops/TransferSettings';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
-
-export class OrganizationKey extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    publicKey: string;
-
-    @field({ decoder: DateDecoder })
-    start: Date;
-
-    @field({ decoder: DateDecoder, nullable: true })
-    end: Date | null = null;
-}
-
-export class OrganizationKeyUser extends OrganizationKey {
-    @field({ decoder: BooleanDecoder })
-    hasAccess = false;
-}
 
 export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -51,12 +34,6 @@ export class Organization extends AutoEncoder {
 
     @field({ decoder: Address })
     address: Address;
-
-    /**
-     * @deprecated
-     */
-    @field({ decoder: StringDecoder, optional: true })
-    publicKey = '';
 
     /**
      * All the available groups are listed here. They are only 'active' and visible when inside a category. Please remove them here if they are inactive.

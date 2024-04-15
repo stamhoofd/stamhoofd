@@ -5,7 +5,6 @@ import { Formatter } from "@stamhoofd/utility";
 import { Organization } from "../models/Organization";
 
 class Options {
-    publicKey?: string;
     uri?: string;
     domain?: string;
     meta?: OrganizationMetaData;

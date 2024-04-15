@@ -482,7 +482,6 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                 defaultEndDate: new Date(),
             }),
             address: Address.createDefault(Country.Belgium),
-            publicKey: "",
         }), WebshopPreview.create({
             meta: WebshopMetaData.create({
                 name: "Demowinkel"
