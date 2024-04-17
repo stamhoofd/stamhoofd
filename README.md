@@ -32,19 +32,48 @@ This is what you need to know:
 
 ## Development
 
+### Installation
+
+#### Git (optional, recommended)
+
+- We recommend to use rebases locally by default: `git config --global pull.rebase true` (changes it globally, you can also configure it only for this repo)
+- Git autostash on rebase:  `git config --global rebase.autoStash true` (this allows you to pull in changes or rebase when you have local changes pending)
+- Git prune on fetch by default: `git config --global fetch.prune true`
+
+#### Yarn, node and nvm
+
+- Install nvm locally. This allows you to have multiple Node versions locally on your computer between your projects: https://github.com/nvm-sh/nvm
+- Clone the repository and cd to the repository location and run `nvm install`. This installs the Node version we use at the moment for Stamhoofd and makes sure this version is used when working on Stamhoofd.
+- Afterwards install yarn 2: `npm install --global yarn` - this will globally install yarn when using that exact same node version. So every time node is updated you'll need to reinstlal yarn (which isn't a huge issue as it will keep the installation directory clean).
+- Set the yarn version used to the one used by the project by running `yarn policies set-version 1.22.19`, you can find the exact version in package.json → engines.yarn. We currently use version version 1.22.19 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
+- Run `yarn install`
+
+#### Dependencies
+
+- Install MySQL8
+- Install Caddy
+- Install CoreDNS (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
+- Update your computer's DNS-server to 127.0.0.1 (in case coredns is not running). On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
+
+#### Environments
+
+- Make sure you create all `/backend/app/*/.env.json` based on `/backend/app/*/.env.template.json` (make sure you create the required MySQL8 database and start MySQL)
+- Make sure you create `/frontend/.env.json` based on `/frontend/.env.template.json`
+
+#### VSCode (optional)
+
+- Install all needed vscode extensions: vetur & eslint. Please use VSCode because that makes sure all the developer tools are the same (e.g. eslint).
+
+### Building locally
+
 To run everything locally, we run everything on a fake TLD domain and host the dashboard on dashboard.stamhoofd. We use Caddy and Coredns to wire everything together. You can follow the following steps to run everything:
 
-1. We use `yarn`. Do not use `npm`. That will break things. Use `yarn policies set-version 1.22.19` to set the version of yarn to the one used in the project (and the server). Replace 1.22.19 with the version in package.json > engines > yarn. We use version version 1.22.19 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
-2. When switching branches, cloning the repo or when pulling changes, run `yarn install && yarn build` first in the project root. We use yarn workspaces to glue all packages together in the monorepo. We don't publish individual packages (not anymore, we used to do that).
+2. When switching branches, cloning the repo or when pulling changes, run `yarn install && yarn build` first in the project root
 3. Use `yarn build:shared` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
-4. Install all needed vscode extensions: vetur & eslint. Please use VSCode because that makes sure all the developer tools are the same (e.g. eslint).
-5. Make sure you create all `/backend/app/*/.env.json` based on `/backend/app/*/.env.template.json` (make sure you create the required MySQL8 database and start MySQL)
-6. Make sure you create `/frontend/.env.json` based on `/frontend/.env.template.json`
 7. Run migrations by running `yarn migrations` in the `backend/app/api` folder
 8. Run `yarn dev`. This will start all servers. If something fails, try to run it again and/or fix the error.
-9. Install and run caddy via `yarn caddy` (this serves the app on the default development domains)
-10. Install (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
-11. Update your computer's DNS-server to 127.0.0.1 (in case coredns is not running). On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
+9. Run caddy via `yarn caddy` (this serves the app on the default development domains)
+10. Start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
 12. Next time you can run `yarn dev`, `yarn caddy` and `yarn dns` in one go by running `yarn dev:server`
 
 Everything should run fine now and you should be able to visit `https://dashboard.stamhoofd` (make sure to enter http(s):// manually because the browser won't recognize the TLD by default and will default to search otherwise) to create your first organization.
