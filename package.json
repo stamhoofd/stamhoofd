@@ -62,7 +62,7 @@
         "vue-meta": "^2.4.0",
         "vue-property-decorator": "^9.1.2",
         "vuedraggable": "^2.24.3",
-        "xlsx": "^0.17.0"
+        "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     },
     "devDependencies": {
         "@babel/cli": "^7.16.0",
