@@ -44,7 +44,7 @@ This is what you need to know:
 
 - Install nvm locally. This allows you to have multiple Node versions locally on your computer between your projects: https://github.com/nvm-sh/nvm
 - Clone the repository and cd to the repository location and run `nvm install`. This installs the Node version we use at the moment for Stamhoofd and makes sure this version is used when working on Stamhoofd.
-- Afterwards install yarn 2: `npm install --global yarn` - this will globally install yarn when using that exact same node version. So every time node is updated you'll need to reinstlal yarn (which isn't a huge issue as it will keep the installation directory clean).
+- Afterwards install yarn 2: `npm install --global yarn` - this will globally install yarn. Every time node is updated you'll need to reinstall yarn (which isn't a huge issue as it will keep the installation directory clean).
 - Set the yarn version used to the one used by the project by running `yarn policies set-version 1.22.19`, you can find the exact version in package.json → engines.yarn. We currently use version version 1.22.19 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
 - Run `yarn install`
 
