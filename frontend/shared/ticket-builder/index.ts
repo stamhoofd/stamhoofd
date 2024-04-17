@@ -5,7 +5,7 @@ import { I18nController } from "@stamhoofd/frontend-i18n";
 import { AppManager } from '@stamhoofd/networking';
 import { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import PDFDocument from 'pdfkit';
+import PDFDocument from 'pdfkit/js/pdfkit.standalone';
 // PDFKit is used! Wrong warning below!
 //import PDFKit from "pdfkit"
 import QRCode from "qrcode"
