@@ -52,7 +52,7 @@
         "luxon": "^2.3.2",
         "path-browserify": "^1.0.1",
         "qrcode": "^1.4.4",
-        "sharp": "0.32.1",
+        "sharp": "0.32.6",
         "stream-browserify": "^3.0.0",
         "tslib": "^2.3.1",
         "uuid": "^9.0.0",
