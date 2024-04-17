@@ -18,9 +18,9 @@
         "@simonbackx/simple-errors": "^1.4"
     },
     "devDependencies": {
-        "@types/nodemailer": "^6.4.4"
+        "@types/nodemailer": "6.4.14"
     },
     "dependencies": {
-        "nodemailer": "^6.7.2"
+        "nodemailer": "6.9.11"
     }
 }
