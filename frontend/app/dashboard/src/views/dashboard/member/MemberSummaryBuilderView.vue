@@ -528,7 +528,7 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
     }
 
     async newCreatePDF() {
-        const PDFDocument = (await import("../../../pdfkit.standalone")).default as PDFKit.PDFDocument
+        const PDFDocument = (await import("pdfkit")).default as PDFKit.PDFDocument
         let title = "Samenvatting"
 
         if (this.group) {

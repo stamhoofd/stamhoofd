@@ -21,11 +21,11 @@
         "@simonbackx/simple-database": "*"
     },
     "dependencies": {
-        "pdfkit": "^0.13.0",
+        "pdfkit": "0.15.0",
         "argon2": "^0.28.3"
     },
     "devDependencies": {
-        "@types/pdfkit": "^0.12.3",
+        "@types/pdfkit": "0.13.4",
         "@simonbackx/simple-database": "1.24.0"
     }
 }

@@ -5,11 +5,10 @@ import { I18nController } from "@stamhoofd/frontend-i18n";
 import { AppManager } from '@stamhoofd/networking';
 import { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
+import PDFDocument from 'pdfkit';
 // PDFKit is used! Wrong warning below!
 //import PDFKit from "pdfkit"
 import QRCode from "qrcode"
-
-import PDFDocument from './pdfkit.standalone';
 
 // 1 mm
 const MM = 2.834666666666667
