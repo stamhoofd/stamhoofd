@@ -1,8 +1,10 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Token, User } from '@stamhoofd/models';
-import { ApiUser } from "@stamhoofd/structures";
+import { User } from '@stamhoofd/models';
+import { ApiUser, PermissionLevel } from "@stamhoofd/structures";
+
+import { Context } from '../../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
@@ -26,29 +28,28 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request, {allowWithoutAccount: true});
-        const user = token.user
+        await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
-        if (((!user.permissions || !user.hasFullAccess()) && user.id != request.body.id) || request.params.id != request.body.id) {
+        if (request.body.id !== request.params.id) {
             throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang om deze API-user te wijzigen"
+                code: "invalid_request",
+                message: "Invalid request: id mismatch",
+                statusCode: 400
             })
         }
 
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id)
-        if (editUser?.organizationId !== user.organizationId || !editUser.isApiUser) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang om deze API-user te wijzigen"
-            })
+        
+        if (!editUser || !Context.auth.canAccessUser(editUser, PermissionLevel.Write) || !editUser.isApiUser) {
+            throw Context.auth.error("Je hebt geen toegang om deze API-user te wijzigen")
         }
 
         editUser.firstName = request.body.name ?? editUser.name
         editUser.lastName = null
 
         if (request.body.permissions !== undefined && editUser.permissions) {
-            if (!user.hasFullAccess()) {
+            if (!Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je hebt geen rechten om de rechten van deze API-user te wijzigen"
@@ -61,7 +62,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 editUser.permissions = null
             }
 
-            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess(user.organization.privateMeta.roles))) {
+            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess(Context.auth.getAllRoles()))) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je kan jezelf niet verwijderen als hoofdbeheerder"

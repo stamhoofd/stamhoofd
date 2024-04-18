@@ -3,8 +3,10 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
-import { getEmailBuilder, RateLimiter,Token } from '@stamhoofd/models';
+import { getEmailBuilder,RateLimiter } from '@stamhoofd/models';
 import { EmailRequest, Recipient } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -62,16 +64,12 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
+        if (!Context.auth.canSendEmails()) {
+            throw Context.auth.error()
+        }  
 
         if (request.body.recipients.length > 5000) {
             throw new SimpleError({
@@ -83,7 +81,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         }
 
         // For non paid organizations, the limit is 10
-        if (request.body.recipients.length > 10 && !user.organization.meta.packages.isPaid) {
+        if (request.body.recipients.length > 10 && !organization.meta.packages.isPaid) {
             throw new SimpleError({
                 code: "too_many_emails",
                 message: "Too many e-mails",
@@ -92,15 +90,15 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             })
         }
 
-        const limiter = user.organization.meta.packages.isPaid ? paidEmailRateLimiter : freeEmailRateLimiter
+        const limiter = organization.meta.packages.isPaid ? paidEmailRateLimiter : freeEmailRateLimiter
 
         try {
-            limiter.track(user.organization.id, request.body.recipients.length);
+            limiter.track(organization.id, request.body.recipients.length);
         } catch (e) {
             Email.sendInternal({
                 to: "hallo@stamhoofd.be",
                 subject: "[Limiet] Limiet bereikt voor aantal e-mails",
-                text: "Beste, \nDe limiet werd bereikt voor het aantal e-mails per dag. \nVereniging: "+user.organization.id+" ("+user.organization.name+")" + "\n\n" + e.message + "\n\nStamhoofd"
+                text: "Beste, \nDe limiet werd bereikt voor het aantal e-mails per dag. \nVereniging: "+organization.id+" ("+organization.name+")" + "\n\n" + e.message + "\n\nStamhoofd"
             }, new I18n("nl", "BE"))
 
             throw new SimpleError({
@@ -113,7 +111,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
        
 
         // Validate email
-        const sender = user.organization.privateMeta.emails.find(e => e.id == request.body.emailId)
+        const sender = organization.privateMeta.emails.find(e => e.id == request.body.emailId)
         if (!sender) {
             throw new SimpleError({
                 code: "invalid_field",
@@ -180,11 +178,11 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             }
         })
 
-        let from = user.organization.uri+"@stamhoofd.email";
+        let from = organization.uri+"@stamhoofd.email";
         let replyTo: string | undefined = sender.email;
 
         // Can we send from this e-mail or reply-to?
-        if (user.organization.privateMeta.mailDomain && user.organization.privateMeta.mailDomainActive && sender.email.endsWith("@"+user.organization.privateMeta.mailDomain)) {
+        if (organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && sender.email.endsWith("@"+organization.privateMeta.mailDomain)) {
             from = sender.email
             replyTo = undefined;
         }
@@ -193,13 +191,13 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         if (sender.name) {
             from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
         } else {
-            from = '"'+user.organization.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            from = '"'+organization.name.replace("\"", "\\\"")+"\" <"+from+">" 
         }
 
         const email = request.body
 
         // Create e-mail builder
-        const builder = await getEmailBuilder(user.organization, {
+        const builder = await getEmailBuilder(organization, {
             ...email,
             from,
             replyTo,
@@ -217,7 +215,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         recipient.userId = null
         
         const prefix = "<p><i>Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"</i><br /><br /></p>"
-        const builder2 = await getEmailBuilder(user.organization, {
+        const builder2 = await getEmailBuilder(organization, {
             ...email,
             subject: "[KOPIE] "+email.subject,
             html: email.html?.replace("<body>", "<body>"+prefix) ?? null,

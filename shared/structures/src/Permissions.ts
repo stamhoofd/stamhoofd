@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -48,6 +48,11 @@ export class PermissionRoleDetailed extends PermissionRole {
      */
     @field({ decoder: new EnumDecoder(PermissionLevel), version: 201 })
     level: PermissionLevel = PermissionLevel.None
+
+
+    // Todo: all these flag based permissions should move to a flag list
+    // so it is easier to add more permission levels in the future.
+    // also, permission flags should be prefixed with either organization or platform (e.g. managing invoices of the platform vs managing finances of all organizations)
 
     /**
      * Access to open transfers
@@ -199,6 +204,10 @@ export class PermissionsByRole extends AutoEncoder {
         return PermissionLevel.None
     }
 
+    /**
+     * @deprecated
+     * Switch to AdminPermissionChecker
+     */
     userHasAccess(user: {permissions?: Permissions|null, organization: {privateMeta: {roles: PermissionRoleDetailed[]}}}, level: PermissionLevel): boolean {
         return this.hasAccess(user.permissions, user.organization.privateMeta.roles, level)
     }
@@ -227,18 +236,6 @@ export class PermissionsByRole extends AutoEncoder {
     }
 }
 
-
-export class GroupPermissions extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    groupId: string
-
-    /**
-     * Allow to read members and member details
-     */
-    @field({ decoder: new EnumDecoder(PermissionLevel) })
-    level: PermissionLevel
-}
-
 export class Permissions extends AutoEncoder {
     /**
      * Automatically have all permissions (e.g. when someone created a new group)
@@ -250,76 +247,42 @@ export class Permissions extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: new ArrayDecoder(GroupPermissions), optional: true })
-    groups: GroupPermissions[] = []
+    @field({ decoder: new ArrayDecoder(BooleanDecoder), optional: true })
+    groups: never[] = []
 
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
     roles: PermissionRole[] = []
 
-    hasAccess(level: PermissionLevel): boolean {
+    hasAccess(allRoles: PermissionRoleDetailed[], level: PermissionLevel): boolean {
         if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
             // Someone with read / write access for the whole organization, also the same access for each group
             return true;
+        }
+
+        for (const r of this.roles) {
+            const f = allRoles.find(rr => r.id === rr.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(level)) {
+                return true
+            }
         }
 
         return false
     }
 
     hasReadAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        if (this.hasAccess(PermissionLevel.Read)) {
-            return true;
-        }
-
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(PermissionLevel.Read)) {
-                return true
-            }
-        }
-
-        return false;
+        return this.hasAccess(allRoles, PermissionLevel.Read)
     }
 
     hasWriteAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        if (this.hasAccess(PermissionLevel.Write)) {
-            return true;
-        }
-
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(PermissionLevel.Write)) {
-                return true
-            }
-        }
-
-        return false;
+        return this.hasAccess(allRoles, PermissionLevel.Write)
     }
 
     hasFullAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        if (this.hasAccess(PermissionLevel.Full)) {
-            return true;
-        }
-
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(PermissionLevel.Full)) {
-                return true
-            }
-        }
-
-        return false;
+        return this.hasAccess(allRoles, PermissionLevel.Full);
     }
 
     /**
@@ -398,4 +361,24 @@ export class Permissions extends AutoEncoder {
             }
         }
     }
+}
+
+export class UserPermissions extends AutoEncoder {
+    @field({ decoder: Permissions })
+    globalPermissions = Permissions.create({})
+
+    @field({ decoder: new MapDecoder(StringDecoder, Permissions) })
+    organizationPermissions: Map<string, Permissions> = new Map()
+}
+
+/**
+ * Convenience class to combine both roles of an organization, platform and the permissions of a user.
+ * This helps with checking permissions.
+ */
+export class FilledUserPermissions {
+    constructor(userPermissions: UserPermissions, allRoles: PermissionRoleDetailed[]) {
+        // todo
+    }
+
+
 }

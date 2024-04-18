@@ -1,7 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Payment, Token, UserWithOrganization } from "@stamhoofd/models";
-import { PaymentGeneral, PermissionLevel } from "@stamhoofd/structures";
+import { Payment } from "@stamhoofd/models";
+import { PaymentGeneral } from "@stamhoofd/structures";
+
+import { AuthenticatedStructures } from "../../../helpers/AuthenticatedStructures";
+import { Context } from "../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined
@@ -23,24 +26,20 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope()
+        await Context.authenticate()
 
-        return new Response(
-            (await this.getPayment(request.params.id, user, PermissionLevel.Read))
-        );
-    }
-
-    async getPayment(id: string, user: UserWithOrganization, permissionLevel: PermissionLevel) {
-        const payment = await Payment.getByID(id);
-        if (!payment || payment.organizationId !== user.organizationId) {
+        const payment = await Payment.getByID(request.params.id);
+        if (!payment) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Payment not found",
-                human: "Deze betaling werd niet gevonden."
+                human: "Je hebt geen toegang tot deze betaling"
             })
         }
 
-        return await payment.getGeneralStructure({user, permissionLevel})
+        return new Response(
+            await AuthenticatedStructures.paymentGeneral(payment, true)
+        );
     }
 }

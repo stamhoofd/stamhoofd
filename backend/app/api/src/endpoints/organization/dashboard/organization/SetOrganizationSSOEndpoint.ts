@@ -1,9 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Token } from '@stamhoofd/models';
-import { OpenIDClientConfiguration, Organization as OrganizationStruct, OrganizationDomains } from "@stamhoofd/structures";
+import { OpenIDClientConfiguration } from "@stamhoofd/structures";
 
+import { Context } from '../../../../helpers/Context';
 import { OpenIDConnectHelper } from '../../../../helpers/OpenIDConnectHelper';
 
 type Params = Record<string, never>;
@@ -32,18 +31,12 @@ export class SetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        if (!Context.auth.canManageSSOSettings()) {
+            throw Context.auth.error()
         }
-
-        const organization = user.organization
 
         // Validate configuration
         const helper = new OpenIDConnectHelper(organization, request.body)
@@ -54,6 +47,4 @@ export class SetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
 
         return new Response(request.body);
     }
-
-    
 }

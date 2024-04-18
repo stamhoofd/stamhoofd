@@ -8,6 +8,7 @@ import { Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentPr
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
+import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 
 function calculateFee(totalPrice: number, fixed: number, percentageTimes100: number) {
@@ -49,7 +50,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Context.setOrganizationScope()
         
         // Not method on payment because circular references (not supprted in ts)
         const payment = await ExchangePaymentEndpoint.pollStatus(request.params.id, organization, request.query.cancel)

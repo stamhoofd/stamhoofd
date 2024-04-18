@@ -4,6 +4,8 @@ import { Group } from "@stamhoofd/models";
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
+
+import { Context } from "../../../../helpers/Context";
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
@@ -28,37 +30,35 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot deze groep"
-            })
-        }
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        }  
 
-        const groups = await Group.getAll(user.organizationId)
+        const groups = await Group.getAll(organization.id)
         const members = (await Member.getFamilyWithRegistrations(request.params.id))
 
-        // You can access a family when you have access to one of the members
-        let canAccess = true
+        let foundMember = false
 
         for (const member of members) {
-            if (member.organizationId != user.organizationId ) {
-                canAccess = false;
+            if (member.id === request.params.id) {
+                foundMember = true;
+
+                // Check access to this member (this will automatically give access to the family)
+                if (!Context.auth.canAccessMember(member, groups)) {
+                    throw Context.auth.error("Je hebt geen toegang tot dit lid")
+                }
                 break;
             }
         }
 
-        if (!canAccess) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "No members found",
-                human: "Geen leden gevonden, of je hebt geen toegang tot deze leden"
-            })
+        if (!foundMember) {
+            throw Context.auth.error("Je hebt geen toegang tot dit lid")
         }
 
-        return new Response(members.filter(member => member.hasReadAccess(user, groups)).map(m => m.getStructureWithRegistrations(true)));
+        return new Response(members.filter(member => Context.auth.canAccessMember(member, groups)).map(m => m.getStructureWithRegistrations(true)));
     }
 }

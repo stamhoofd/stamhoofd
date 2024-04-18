@@ -2,6 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Token, User } from '@stamhoofd/models';
 import { ApiUser } from "@stamhoofd/structures";
+
+import { Context } from "../../../../helpers/Context";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -21,19 +23,17 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot dit onderdeel"
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManageAdmins()) {
+            throw Context.auth.error()
         }
 
         // Get all admins
-        const admins = await User.getApiUsers([user.organizationId])
+        const admins = await User.getApiUsers([organization.id])
 
         const mapped: ApiUser[] = []
         for (const admin of admins) {

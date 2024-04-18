@@ -98,7 +98,7 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
         if (request.method !== "OPTIONS") {
             logger.log(
                 ...requestPrefix(request, 'time'),
-                "Finished in "+timeInMs+"ms"
+                response.status + " - Finished in "+timeInMs+"ms"
             )
         }
 

@@ -9,6 +9,7 @@ import { Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 
 import { areCronsRunning, crons, stopCronScheduling } from './src/crons';
+import { ContextMiddleware } from "./src/middleware/ContextMiddleware";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -45,6 +46,7 @@ const start = async () => {
     await router.loadAllEndpoints(__dirname + "/src/endpoints/global/*");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/dashboard/*");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/registration");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/webshops");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/shared");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/shared/*");
 
@@ -56,6 +58,9 @@ const start = async () => {
     // Log requests and errors
     routerServer.addRequestMiddleware(LogMiddleware)
     routerServer.addResponseMiddleware(LogMiddleware)
+
+    // Contexts
+    routerServer.addRequestMiddleware(ContextMiddleware)
 
     // Add version headers and minimum version
     const versionMiddleware = new VersionMiddleware({

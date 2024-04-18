@@ -1,7 +1,7 @@
 
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { EmailInterfaceRecipient } from "@stamhoofd/email";
-import { ApiUser, LoginProviderType, NewUser, Organization as OrganizationStruct, Permissions, UserMeta, User as UserStruct } from "@stamhoofd/structures";
+import { ApiUser, LoginProviderType, NewUser, Organization as OrganizationStruct, Permissions, User as UserStruct,UserMeta } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { v4 as uuidv4 } from "uuid";
 
@@ -38,8 +38,19 @@ export class User extends Model {
     @column({ type: "boolean" })
     verified = false
 
+    /**
+     * This field is cached and recalculated when permissions are changed. This avoids database joins on every request.
+     * It is a combination of all user_permissions rows for this user and globalPermissions
+     */
     @column({ type: "json", decoder: Permissions, nullable: true })
     permissions: Permissions | null = null
+
+    /**
+     * Global permissions that are not related to an organization. This is used for platform admins.
+     * Note that this field is only valid for the specific organization if user.organizationId is set.
+     */
+    @column({ type: "json", decoder: Permissions, nullable: true })
+    globalPermissions: Permissions | null = null
 
     @column({ type: "json", decoder: UserMeta, nullable: true })
     meta: UserMeta | null = null
@@ -196,23 +207,6 @@ export class User extends Model {
     static async deleteForDeletedMember(memberId: string) {
         const [rows] = await Database.delete(`DELETE ${this.table} FROM ${this.table} JOIN _members_users a ON a.usersId = ${this.table}.id LEFT JOIN _members_users b ON b.usersId = ${this.table}.id AND b.membersId != a.membersId WHERE a.membersId = ? and b.membersId is null and users.permissions is null`, [memberId]);
         return rows
-    }
-
-    static async getFull(id: string): Promise<User | undefined> {
-        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`id\` = ? LIMIT 1`, [id]);
-
-        if (rows.length == 0) {
-            return undefined;
-        }
-
-        // Read member + address from first row
-        const user = this.fromRow(rows[0][this.table]) 
-
-        if (!user) {
-            return undefined
-        }
-        
-        return user as User;
     }
 
     hasPasswordBasedAccount() {
@@ -393,14 +387,6 @@ export class User extends Model {
 
     async changePassword(password: string) {
         this.password = await User.hash(password)
-    }
-
-    async getOrganizationStructure(this: UserWithOrganization): Promise<OrganizationStruct> {
-        const organization = this.organization
-        if (organization.id != this.organizationId) {
-            throw new Error("Unexpected permission failure")
-        }
-        return this.permissions ? await organization.getPrivateStructure(this) : await organization.getStructure()
     }
 
     getStructure() {

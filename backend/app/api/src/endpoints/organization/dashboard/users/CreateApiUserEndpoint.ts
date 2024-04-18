@@ -1,10 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Email } from '@stamhoofd/email';
-import { PasswordToken, Token, User } from '@stamhoofd/models';
-import { ApiUser, ApiUserWithToken, User as UserStruct } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
+import { Token, User } from '@stamhoofd/models';
+import { ApiUser, ApiUserWithToken } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = ApiUser
@@ -27,19 +27,16 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess() || user.isApiUser) {
-            throw new SimpleError({
-                code: "permission_denied",
-                human: "Je hebt geen toegang om API-keys aan te maken",
-                message: "You don't have permissions to create API-keys"
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManageAdmins()) {
+            throw Context.auth.error()
         }
 
         const admin = new User();
-        admin.organizationId = user.organization.id;
+        admin.organizationId = organization.id;
         admin.firstName = request.body.name;
         admin.lastName = null
         admin.email = 'creating.api'

@@ -2,8 +2,10 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { StripeAccount, Token } from '@stamhoofd/models';
+import { StripeAccount } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/structures';
 
+import { Context } from '../../../../helpers/Context';
 import { StripeHelper } from '../../../../helpers/StripeHelper';
 
 type Params = Record<string, never>;
@@ -45,19 +47,17 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je moet hoofdbeheerder zijn om Stripe te kunnen connecteren"
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Full)) {
+            throw Context.auth.error()
         }
 
         // Search account in database
         const model = await StripeAccount.getByID(request.body.accountId)
-        if (!model || model.organizationId != user.organizationId || model.status !== 'active') {
+        if (!model || model.organizationId != organization.id || model.status !== 'active') {
             throw new SimpleError({
                 code: "not_found",
                 message: "Account niet gevonden",

@@ -2,7 +2,7 @@ import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { KeychainedResponseDecoder, LoginProviderType, User, Organization, Token, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder, LoginProviderType, Organization, Token, User, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator"
 
 import { AppManager, UrlHelper } from '..'
@@ -289,6 +289,7 @@ export class Session implements RequestMiddleware {
     }
 
     canGetCompleted(): boolean {
+        console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
         return !!this.token
     }
 
@@ -425,8 +426,15 @@ export class Session implements RequestMiddleware {
             shouldRetry
         })
 
+        if (this.hasToken() && this.user?.permissions && !response.data.data.privateMeta) {
+            console.error('Missing privateMeta in authenticated organization response');
+
+            // Critical issue: log out
+            this.temporaryLogout()
+            throw new Error("Missing privateMeta in authenticated organization response")
+        }
+
         this.updateOrganization(response.data.data)
-       
         this.callListeners("organization")
         return this.organization!
     }

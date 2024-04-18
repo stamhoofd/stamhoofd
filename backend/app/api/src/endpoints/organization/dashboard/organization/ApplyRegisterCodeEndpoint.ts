@@ -1,8 +1,9 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { RegisterCode, Token, UsedRegisterCode } from '@stamhoofd/models';
+import { RegisterCode, UsedRegisterCode } from '@stamhoofd/models';
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -34,15 +35,11 @@ export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);    
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.isPlatformAdmin()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        if (!Context.auth.hasPlatformFullAccess()) {
+            throw Context.auth.error()
         }
 
         let code = request.body.registerCode;
@@ -60,19 +57,19 @@ export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
             }
         }
 
-        const {models, emails} = await RegisterCode.applyRegisterCode(user.organization, code)
+        const {models, emails} = await RegisterCode.applyRegisterCode(organization, code)
 
         for (const model of models) {
             await model.save();
         }
 
         for (const email of emails) {
-            Email.sendInternal(email, user.organization.i18n)
+            Email.sendInternal(email, organization.i18n)
         }
 
-        if (user.organization.meta.packages.isPaid) {
+        if (organization.meta.packages.isPaid) {
             // Already bought something: apply credit to other organization immediately
-            const code = await UsedRegisterCode.getFor(user.organization.id)
+            const code = await UsedRegisterCode.getFor(organization.id)
             if (code && !code.creditId) {
                 console.log("Rewarding code "+code.id+" for payment")
 

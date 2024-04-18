@@ -1,7 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Order, Token, Webshop } from '@stamhoofd/models';
+import { BalanceItem, Order, Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from "@stamhoofd/structures";
+
+import { Context } from "../../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined;
@@ -28,32 +30,17 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions ) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
         }
 
         const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop || webshop.organizationId != user.organizationId) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Webshop not found",
-                human: "De webshop die je wilt aanpassen bestaat niet (meer)"
-            })
-        }
-
-        if (!webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            throw Context.auth.error()
         }
 
         const orders = await Order.where({ webshopId: webshop.id });

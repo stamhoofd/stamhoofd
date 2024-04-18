@@ -357,7 +357,7 @@ export class Member extends Model {
         })
     }
 
-    hasReadAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false) {
+    _hasReadAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false) {
         if (!user.permissions) {
             return false
         }
@@ -366,7 +366,7 @@ export class Member extends Model {
         }
 
         for (const registration of this.registrations) {
-            if (registration.hasReadAccess(user, groups)) {
+            if (registration._hasReadAccess(user, groups)) {
                 if (!needAll) {
                     return true;
                 }
@@ -383,7 +383,7 @@ export class Member extends Model {
         return false;
     }
 
-    async hasWriteAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false, checkFamily = false) {
+    async _hasWriteAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false, checkFamily = false) {
         if (!user.permissions) {
             return false
         }
@@ -393,7 +393,7 @@ export class Member extends Model {
         }
 
         for (const registration of this.registrations) {
-            if (registration.hasWriteAccess(user, groups)) {
+            if (registration._hasWriteAccess(user, groups)) {
                 if (!needAll) {
                     return true;
                 }
@@ -412,7 +412,7 @@ export class Member extends Model {
         if (checkFamily) {
             const members = (await Member.getFamilyWithRegistrations(this.id))
             for (const member of members) {
-                if (await member.hasWriteAccess(user, groups, false, false)) {
+                if (await member._hasWriteAccess(user, groups, false, false)) {
                     return true
                 }
             }

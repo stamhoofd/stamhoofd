@@ -6,6 +6,8 @@ import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory
 import { BalanceItemStatus, EncryptedMemberWithRegistrations, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
@@ -32,20 +34,16 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions to access this endpoint",
-                human: "Je hebt geen toegang tot deze functie"
-            })
-        }
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        } 
 
         const members: MemberWithRegistrations[] = []
-        const groups = await Group.getAll(user.organizationId)
+        const groups = await Group.getAll(organization.id)
         const updateGroups = new Map<string, Group>()
 
         const balanceItemMemberIds: string[] = []
@@ -56,7 +54,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const struct = put.put
             let member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
             member.id = struct.id
-            member.organizationId = user.organizationId
+            member.organizationId = organization.id
 
             struct.details.cleanData()
             member.details = struct.details
@@ -81,22 +79,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             for (const registrationStruct of struct.registrations) {
                 const group = groups.find(g => g.id === registrationStruct.groupId)
-                if (!group) {
-                    throw new SimpleError({
-                        code: "invalid_group",
-                        message: "Invalid group",
-                        human: "De groep waar je dit lid wilt toevoegen bestaat niet (meer)",
-                        statusCode: 404
-                    })
-                }
-
-                if (!group.hasAccess(user, PermissionLevel.Write)) {
-                    throw new SimpleError({
-                        code: "permission_denied",
-                        message: "No permissions to create member in this group",
-                        human: "Je hebt niet voldoende rechten om leden toe te voegen in deze groep",
-                        statusCode: 403
-                    })
+                if (!group || !Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om leden toe te voegen in deze groep")
                 }
 
                 // Update occupancy at the end of the call
@@ -119,7 +103,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         }
                     }
 
-                    await this.createDummyMembers(user.organization, group, count)
+                    await this.createDummyMembers(organization, group, count)
 
                     // Skip creating this member
                     continue;
@@ -153,7 +137,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                const reg = await this.addRegistration(user, member, registrationStruct, groups)
+                const reg = await this.addRegistration(member, registrationStruct, groups)
                 balanceItemRegistrationIds.push(reg.id)
             }
 
@@ -166,21 +150,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const patch of request.body.getPatches()) {
             const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id)
-            if (!member || member.organizationId != user.organizationId) {
-                 throw new SimpleError({
-                    code: "permission_denied",
-                    message: "You don't have permissions to access this endpoint",
-                    human: "Je hebt geen toegang om dit lid te wijzigen"
-                })
-            }
-
-            if (!await member.hasWriteAccess(user, groups, false, true)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "No permissions to edit members in this group",
-                    human: "Je hebt niet voldoende rechten om dit lid te wijzigen",
-                    statusCode: 403
-                })
+            if (!member || !Context.auth.canAccessMember(member, groups, PermissionLevel.Write)) {
+                throw Context.auth.error("Je hebt geen toegang tot dit lid of het bestaat niet")
             }
             
             if (patch.details) {
@@ -227,6 +198,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         human: "De groep naarwaar je dit lid wilt verplaatsen bestaat niet",
                         field: "groupId"
                     })
+                }
+
+                if (!Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om leden te verplaatsen naar deze groep")
                 }
 
                 if (patchRegistration.cycle && patchRegistration.cycle > group.cycle) {
@@ -279,7 +254,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         // Create an Unknown payment and attach it to the balance item
                         const payment = new Payment();
                         payment.userId = member.users[0]?.id ?? null
-                        payment.organizationId = user.organizationId
+                        payment.organizationId = member.organizationId
                         payment.method = PaymentMethod.Unknown
                         payment.status = PaymentStatus.Succeeded
                         payment.price = balanceItem.pricePaid;
@@ -290,7 +265,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         const balanceItemPayment = new BalanceItemPayment()
                         balanceItemPayment.balanceItemId = balanceItem.id;
                         balanceItemPayment.paymentId = payment.id;
-                        balanceItemPayment.organizationId = user.organizationId;
+                        balanceItemPayment.organizationId = member.organizationId
                         balanceItemPayment.price = payment.price;
                         await balanceItemPayment.save();
                     }
@@ -308,6 +283,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         human: "Je hebt geen toegang om deze registratie te wijzigen"
                     })
                 }
+
+                if (!Context.auth.canAccessRegistration(registration, groups, PermissionLevel.Write)) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om deze inschrijving te verwijderen")
+                }
+
                 balanceItemMemberIds.push(member.id)                
                 await BalanceItem.deleteForDeletedRegistration(registration.id)
                 await registration.delete()
@@ -324,24 +304,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             for (const registrationStruct of patch.registrations.getPuts()) {
                 const struct = registrationStruct.put
                 const group = groups.find(g => g.id === struct.groupId)
-                if (!group) {
-                    throw new SimpleError({
-                        code: "invalid_group",
-                        message: "Invalid group",
-                        human: "De groep waar je dit lid wilt toevoegen bestaat niet (meer)",
-                        statusCode: 404
-                    })
-                }
-                if (!group.hasAccess(user, PermissionLevel.Write)) {
-                    throw new SimpleError({
-                        code: "permission_denied",
-                        message: "No permissions to create member in this group",
-                        human: "Je hebt niet voldoende rechten om leden toe te voegen in deze groep",
-                        statusCode: 403
-                    })
+
+                if (!group || !Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om inschrijvingen in deze groep te maken")
                 }
 
-                const reg = await this.addRegistration(user, member, struct, groups)
+                const reg = await this.addRegistration(member, struct, groups)
                 balanceItemMemberIds.push(member.id)
                 balanceItemRegistrationIds.push(reg.id)
 
@@ -367,22 +335,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const id of request.body.getDeletes()) {
             const member = await Member.getWithRegistrations(id)
-            if (!member || member.organizationId != user.organizationId) {
-                 throw new SimpleError({
-                    code: "permission_denied",
-                    message: "You don't have permissions to delete this member",
-                    human: "Je hebt geen toegang om dit lid te verwijderen"
-                })
+            if (!member || !Context.auth.canDeleteMember(member)) {
+                throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
             }
-
-            if (!await member.hasWriteAccess(user, groups, true, false)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "No permissions to edit members in this group",
-                    human: "Je hebt niet voldoende rechten om dit lid te verwijderen",
-                    statusCode: 403
-                })
-            }     
 
             await User.deleteForDeletedMember(member.id)
             await BalanceItem.deleteForDeletedMember(member.id)
@@ -400,7 +355,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
-        await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds), user.organizationId)
+        await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds), organization.id)
         
         // Loop all groups and update occupancy if needed
         for (const group of updateGroups.values()) {
@@ -440,7 +395,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    async addRegistration(user: User, member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, groups: Group[]) {
+    async addRegistration(member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, groups: Group[]) {
         // Check if this member has this registration already.
         // Note: we cannot use the relation here, because invalid ones or reserved ones are not loaded in there
         const existings = await Registration.where({ 
@@ -502,7 +457,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 // Create an Unknown payment and attach it to the balance item
                 const payment = new Payment();
                 payment.userId = member.users[0]?.id ?? null
-                payment.organizationId = user.organizationId
+                payment.organizationId = member.organizationId
                 payment.method = PaymentMethod.Unknown
                 payment.status = PaymentStatus.Succeeded
                 payment.price = balanceItem.pricePaid;
@@ -513,7 +468,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const balanceItemPayment = new BalanceItemPayment()
                 balanceItemPayment.balanceItemId = balanceItem.id;
                 balanceItemPayment.paymentId = payment.id;
-                balanceItemPayment.organizationId = user.organizationId;
+                balanceItemPayment.organizationId = member.organizationId
                 balanceItemPayment.price = payment.price;
                 await balanceItemPayment.save();
             }

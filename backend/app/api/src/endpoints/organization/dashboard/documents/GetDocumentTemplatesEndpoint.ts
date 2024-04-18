@@ -3,6 +3,8 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { DocumentTemplate, Token } from "@stamhoofd/models";
 import { DocumentTemplatePrivate } from "@stamhoofd/structures";
 
+import { Context } from "../../../../helpers/Context";
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -22,20 +24,17 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot documenten"
-            })
+        if (!Context.auth.canManageDocuments()) {
+            throw Context.auth.error()
         }
 
         const templates = await DocumentTemplate.where(
             { 
-                organizationId: user.organizationId 
+                organizationId: organization.id 
             }, 
             { 
                 sort: [{

@@ -5,6 +5,8 @@ import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from 
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment,Webshop as WebshopStruct } from "@stamhoofd/structures";
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<PrivateOrder>[] | PatchableArrayAutoEncoder<PrivateOrder>
@@ -56,7 +58,13 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
+
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        }
 
         let body: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
 
@@ -75,25 +83,11 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
         // Need to happen in the queue because we are updating the webshop stock
         const orders = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
-
             const webshop = await Webshop.getByID(request.params.id)
-            if (!webshop || token.user.organizationId != webshop.organizationId) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Webshop not found",
-                    human: "Deze webshop bestaat niet (meer)"
-                })
+            if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Write)) {
+                throw Context.auth.error()
             }
 
-            if (!webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Write)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "No permissions for this webshop",
-                    human: "Je hebt geen toegang om bestellingen te bewerken van deze webshop",
-                    statusCode: 403
-                })
-            }
-            
             const orders = body.getPatches().length > 0 ? await Order.where({
                 webshopId: webshop.id,
                 id: {
@@ -102,7 +96,6 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 }
             }) : []
 
-            const organization = token.user.organization
             // We use a getter because we need to have an up to date webshop struct
             // otherwise we won't validate orders on the latest webshop with the latest stock information
             const webshopGetter = {
@@ -129,7 +122,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     model.data.removePersonalData()
                 }
 
-                const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, token.user.organization))
+                const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, organization))
 
                 // TODO: validate before updating stock
                 order.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);

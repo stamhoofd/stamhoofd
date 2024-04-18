@@ -7,7 +7,7 @@ import { Organization, OrganizationFactory, StripeAccount, Ticket, Token, UserFa
 import { Cart, CartItem, CartReservedSeat, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from "@stamhoofd/structures";
 
 import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint";
-import { PlaceOrderEndpoint } from '../../src/endpoints/global/webshops/PlaceOrderEndpoint';
+import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint';
 import { StripeMocker } from "../helpers/StripeMocker";
 
 const customer = Customer.create({

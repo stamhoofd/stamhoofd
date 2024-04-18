@@ -90,19 +90,19 @@ export class Token extends Model {
 
     static user = new ManyToOneRelation(User, "user");
 
-    static async optionalAuthenticate(request: DecodedRequest<any, any, any>, options?: {allowWithoutAccount: boolean}): Promise<TokenWithOrganizationAndUser | undefined> {
+    static async _optionalAuthenticate(request: DecodedRequest<any, any, any>, options?: {allowWithoutAccount: boolean}): Promise<TokenWithOrganizationAndUser | undefined> {
         const header = request.headers.authorization
         if (!header) {
             return
         }
-        return this.authenticate(request, options)
+        return this._authenticate(request, options)
     }
 
     /**
      * Throws instead of returning undefined
      * allowWithoutAccount: allow users who don't have a password yet to authenticate (required for users who want to set a password)
      */
-    static async authenticate(request: DecodedRequest<any, any, any>, {allowWithoutAccount} = {allowWithoutAccount: false}): Promise<TokenWithOrganizationAndUser> {
+    static async _authenticate(request: DecodedRequest<any, any, any>, {allowWithoutAccount} = {allowWithoutAccount: false}): Promise<TokenWithOrganizationAndUser> {
         const organization = await Organization.getFromRequest(request);
         const header = request.headers.authorization
         if (!header) {

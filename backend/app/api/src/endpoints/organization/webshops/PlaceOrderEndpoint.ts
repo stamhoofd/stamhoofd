@@ -7,10 +7,11 @@ import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, RateLimiter, Token, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct, WebshopAuthType } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
+import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
-import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string };
 type Query = undefined;
@@ -52,12 +53,13 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.optionalAuthenticate(request);
+        const organization = await Context.setOrganizationScope();
+        await Context.optionalAuthenticate()
 
         // Read + validate + update stock in one go, to prevent race conditions
-        const { webshop, order, organization } = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
+        const { webshop, order } = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshopWithoutOrganization = await Webshop.getByID(request.params.id)
-            if (!webshopWithoutOrganization) {
+            if (!webshopWithoutOrganization || webshopWithoutOrganization.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Webshop not found",
@@ -65,10 +67,10 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 })
             }
 
-            const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
+            //const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
             const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization)
 
-            if (webshop.meta.authType === WebshopAuthType.Required && !token) {
+            if (webshop.meta.authType === WebshopAuthType.Required && !Context.user) {
                 throw new SimpleError({
                     code: "not_authenticated",
                     message: "Not authenticated",
@@ -127,7 +129,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 request.body.discountCodes = codeModels.map(c => c.getStructure())
             }
 
-            request.body.validate(webshopStruct, organization.meta, request.i18n, false, token?.user?.getStructure())
+            request.body.validate(webshopStruct, organization.meta, request.i18n, false, Context.user?.getStructure())
             request.body.update(webshopStruct)
 
             const order = new Order().setRelation(Order.webshop, webshop)
@@ -135,7 +137,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.organizationId = organization.id
             order.createdAt = new Date()
             order.createdAt.setMilliseconds(0)
-            order.userId = token?.user?.id ?? null
+            order.userId = Context.user?.id ?? null
 
             // Always reserve the stock
             await order.updateStock()

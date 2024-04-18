@@ -1,9 +1,10 @@
 
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { SimpleError } from '@simonbackx/simple-errors'
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { MollieToken } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
+import { Organization as OrganizationStruct, PermissionLevel } from "@stamhoofd/structures";
+
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Body = undefined
@@ -25,26 +26,24 @@ export class DisonnectMollieEndpoint extends Endpoint<Params, Query, Body, Respo
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je moet hoofdbeheerder zijn om mollie te kunnen ontkoppelen"
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Full)) {
+            throw Context.auth.error()
         }
 
-        const mollieToken = await MollieToken.getTokenFor(user.organization.id)
+        const mollieToken = await MollieToken.getTokenFor(organization.id)
         await mollieToken?.revoke();
-        user.organization.privateMeta.mollieOnboarding = null;
-        user.organization.privateMeta.mollieProfile = null;
+        organization.privateMeta.mollieOnboarding = null;
+        organization.privateMeta.mollieProfile = null;
 
-        await user.organization.save()
+        await organization.save()
 
         // TODO: disable all payment methods that use this method
         
-        return new Response(await user.getOrganizationStructure());
+        return new Response(await AuthenticatedStructures.organization(organization));
     }
 }

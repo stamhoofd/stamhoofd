@@ -1,7 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, Group, Member, Token } from "@stamhoofd/models";
+import { BalanceItem, Group, Member } from "@stamhoofd/models";
 import { MemberBalanceItem } from "@stamhoofd/structures";
+
+import { Context } from "../../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined
@@ -23,20 +25,17 @@ export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot deze groep"
-            })
-        }
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        } 
 
         const member = (await Member.getWithRegistrations(request.params.id))
-        const groups = await Group.where({ organizationId: user.organizationId })
+        const groups = await Group.where({ organizationId: organization.id })
 
-        if (! member || member.organizationId != user.organizationId || !member.hasReadAccess(user, groups)) {
+        if (!member || !Context.auth.canAccessMember(member, groups)) {
             throw new SimpleError({
                 code: "not_found",
                 message: "No members found",

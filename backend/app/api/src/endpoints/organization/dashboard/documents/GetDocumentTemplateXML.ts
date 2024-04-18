@@ -1,6 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { DocumentTemplate, Token } from '@stamhoofd/models';
+import { DocumentTemplate } from '@stamhoofd/models';
+
+import { Context } from "../../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined;
@@ -26,20 +28,15 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions to access documents",
-                human: "Je hebt geen toegang tot documenten"
-            })
+        if (!Context.auth.canManageDocuments()) {
+            throw Context.auth.error()
         }
 
         const template = await DocumentTemplate.getByID(request.params.id)
-        if (!template || template.organizationId != user.organizationId) {
+        if (!template || !Context.auth.canAccessDocumentTemplate(template)) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Document not found",
@@ -48,7 +45,7 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
         }
 
         // Update documents
-        const xml = await template.getRenderedXml(user.organization);
+        const xml = await template.getRenderedXml(organization);
         if (!xml) {
             throw new SimpleError({
                 code: "failed_generating",

@@ -10,6 +10,7 @@ import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, MemberBalanceIte
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
+import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../shared/ExchangePaymentEndpoint';
 type Params = Record<string, never>;
@@ -61,17 +62,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        if (request.request.getVersion() < 71) {
-            throw new SimpleError({
-                code: "not_supported",
-                message: "This version is no longer supported",
-                human: "Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser."
-            })
-        }
-        const token = await Token.authenticate(request);
-        const user = token.user
-
-        const organization = user.organization
+        const organization = await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
         // For non paid organizations, limit amount of tests
         if (!organization.meta.packages.isPaid) {
@@ -253,7 +245,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const payment = new Payment()
         payment.userId = user.id
-        payment.organizationId = user.organizationId
+        payment.organizationId = organization.id
         payment.method = request.body.paymentMethod
         payment.status = PaymentStatus.Created
         payment.price = totalPrice
@@ -261,7 +253,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         if (payment.method == PaymentMethod.Transfer) {
             // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
-            payment.transferSettings = user.organization.mappedTransferSettings
+            payment.transferSettings = organization.mappedTransferSettings
 
             if (!payment.transferSettings.iban) {
                 throw new SimpleError({
@@ -273,7 +265,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             const m = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)]
             payment.generateDescription(
-                user.organization, 
+                organization, 
                 Formatter.groupNamesByFamily(m as any),
                 {
                     name: Formatter.groupNamesByFamily(m as any),
@@ -438,15 +430,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update balance items
         if (payment.method == PaymentMethod.Transfer) {
             // Send a small reminder email
-            await Registration.sendTransferEmail(user, payment)
+            await Registration.sendTransferEmail(user, organization, payment)
         }
 
         let paymentUrl: string | null = null
-        const description = 'Inschrijving '+user.organization.name
+        const description = 'Inschrijving '+organization.name
         if (payment.status != PaymentStatus.Succeeded) {
-            const redirectUrl = "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id)
-            const cancelUrl = "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id) + '&cancel=true'
-            const webhookUrl = 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
+            const redirectUrl = "https://"+organization.getHost()+'/payment?id='+encodeURIComponent(payment.id)
+            const cancelUrl = "https://"+organization.getHost()+'/payment?id='+encodeURIComponent(payment.id) + '&cancel=true'
+            const webhookUrl = 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
 
             if (payment.provider === PaymentProvider.Stripe) {
                 const stripeResult = await StripeHelper.createPayment({
@@ -454,7 +446,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     stripeAccount,
                     redirectUrl,
                     cancelUrl,
-                    statementDescriptor: user.organization.name,
+                    statementDescriptor: organization.name,
                     metadata: {
                         organization: organization.id,
                         user: user.id,
@@ -510,7 +502,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 dbPayment.mollieId = molliePayment.id
                 await dbPayment.save();
             } else if (payment.provider === PaymentProvider.Payconiq) {
-                paymentUrl = await PayconiqPayment.createPayment(payment, user.organization, description, redirectUrl, webhookUrl)
+                paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl)
             } else if (payment.provider == PaymentProvider.Buckaroo) {
                 // Increase request timeout because buckaroo is super slow (in development)
                 request.request.request?.setTimeout(60 * 1000)

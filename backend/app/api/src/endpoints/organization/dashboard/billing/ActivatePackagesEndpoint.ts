@@ -7,6 +7,8 @@ import { MolliePayment, Payment, Registration, STCredit, STInvoice, STPackage, S
 import { QueueHandler } from '@stamhoofd/queues';
 import { Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceResponse, STPackage as STPackageStruct, STPackageBundle, STPackageBundleHelper, STPricingType, TransferSettings, User as UserStruct, Version } from "@stamhoofd/structures";
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
@@ -51,16 +53,12 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (user.permissions === null || !user.permissions.hasFinanceAccess(user.organization.privateMeta.roles)) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions for this endpoint",
-                statusCode: 403
-            })
+        if (!Context.auth.canActivatePackages()) {
+            throw Context.auth.error()
         }        
 
         // Apply patches if needed
@@ -75,26 +73,26 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
         // Apply patches if needed
         if (user.firstName && user.lastName) {
-            user.organization.privateMeta.billingContact = user.firstName + " " + user.lastName
+            organization.privateMeta.billingContact = user.firstName + " " + user.lastName
         }
 
         if (request.body.organizationPatch) {
             console.log("Received patch in activatePackagesEndpoint", request.body.organizationPatch)
             if (request.body.organizationPatch.address) {
-                user.organization.address.patchOrPut(request.body.organizationPatch.address)
+                organization.address.patchOrPut(request.body.organizationPatch.address)
             }
 
             if (request.body.organizationPatch.meta) {
-                user.organization.meta.patchOrPut(request.body.organizationPatch.meta)
+                organization.meta.patchOrPut(request.body.organizationPatch.meta)
             }
         }
 
         if (!request.body.proForma) {
-            await user.organization.save();
+            await organization.save();
         }
 
-        return await QueueHandler.schedule("billing/invoices-"+user.organizationId, async () => {
-            const currentPackages = await STPackage.getForOrganization(user.organization.id)
+        return await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
+            const currentPackages = await STPackage.getForOrganization(organization.id)
 
             // Create packages
             const packages: STPackageStruct[] = [];
@@ -132,7 +130,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 packages.push(STPackageBundleHelper.getCurrentPackage(bundle, date))
             }
             
-            const invoice = STInvoice.createFor(user.organization)
+            const invoice = STInvoice.createFor(organization)
             const date = new Date()
 
             invoice.meta.ipAddress = request.request.getIP()
@@ -220,7 +218,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 
                 // Since we are about the pay something:
                 // also add the items that are in the pending queue
-                const pendingInvoice = await STPendingInvoice.addAutomaticItems(user.organization)
+                const pendingInvoice = await STPendingInvoice.addAutomaticItems(organization)
                 if (pendingInvoice && pendingInvoice.invoiceId === null && pendingInvoice.meta.items.length) {
                     if (!request.body.proForma) {
                         // Already generate an ID for the invoice
@@ -237,7 +235,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             // Apply credits
-            await STCredit.applyCredits(user.organization.id, invoice, request.body.proForma)
+            await STCredit.applyCredits(organization.id, invoice, request.body.proForma)
             
             const price = invoice.meta.priceWithVAT
 
@@ -267,7 +265,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     _molliePaymentMethod = molliePaymentMethod.banktransfer
                     sequenceType = SequenceType.oneoff
                 } else if (payment.method == PaymentMethod.DirectDebit) {
-                    const pendingInvoice = await STPendingInvoice.getForOrganization(user.organization.id)
+                    const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
 
                     if (pendingInvoice && pendingInvoice.invoiceId !== null && pendingInvoice.invoiceId !== invoice.id) {
                         throw new SimpleError({
@@ -281,7 +279,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     _molliePaymentMethod = undefined
                     sequenceType = SequenceType.recurring
 
-                    if (!user.organization.serverMeta.mollieCustomerId) {
+                    if (!organization.serverMeta.mollieCustomerId) {
                         throw new SimpleError({
                             code: "no_mollie_customer",
                             message: "Er is geen opgeslagen betaalmethode gevonden. Probeer te betalen via een andere betaalmethode."
@@ -316,9 +314,9 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         })
                     }
                     const mollieClient = createMollieClient({ apiKey });
-                    let customerId = user.organization.serverMeta.mollieCustomerId
+                    let customerId = organization.serverMeta.mollieCustomerId
 
-                    if (!user.organization.serverMeta.mollieCustomerId) {
+                    if (!organization.serverMeta.mollieCustomerId) {
                         if (payment.method === PaymentMethod.DirectDebit) {
                             throw new SimpleError({
                                 code: "no_mollie_customer",
@@ -326,18 +324,18 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                             })
                         }
                         const mollieCustomer = await mollieClient.customers.create({
-                            name: user.organization.name,
+                            name: organization.name,
                             email: user.email,
                             metadata: {
-                                organizationId: user.organization.id,
+                                organizationId: organization.id,
                                 userId: user.id,
                             }
                         })
 
                         customerId = mollieCustomer.id
-                        user.organization.serverMeta.mollieCustomerId = mollieCustomer.id
-                        console.log("Saving new mollie customer", mollieCustomer, "for organization", user.organization.id)
-                        await user.organization.save()
+                        organization.serverMeta.mollieCustomerId = mollieCustomer.id
+                        console.log("Saving new mollie customer", mollieCustomer, "for organization", organization.id)
+                        await organization.save()
                     }
 
                     const molliePayment = await mollieClient.payments.create({
@@ -388,7 +386,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         await invoice.activatePackages(false)
                         await STPackage.updateOrganizationPackages(user.organizationId)
 
-                        const pendingInvoice = await STPendingInvoice.getForOrganization(user.organization.id)
+                        const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
                         if (pendingInvoice) {
                             pendingInvoice.invoiceId = invoice.id
                             await pendingInvoice.save()

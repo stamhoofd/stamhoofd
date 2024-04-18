@@ -8,7 +8,7 @@ import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Country, Cus
 import { v4 as uuidv4 } from "uuid";
 
 import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint";
-import { PlaceOrderEndpoint } from '../../src/endpoints/global/webshops/PlaceOrderEndpoint';
+import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint';
 import { StripeMocker } from "../helpers/StripeMocker";
 
 const address = Address.create({

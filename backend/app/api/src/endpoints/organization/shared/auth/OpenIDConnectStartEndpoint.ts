@@ -1,9 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, Webshop } from '@stamhoofd/models';
+import { Webshop } from '@stamhoofd/models';
 import { StartOpenIDFlowStruct } from "@stamhoofd/structures";
 
+import { Context } from '../../../../helpers/Context';
 import { OpenIDConnectHelper } from '../../../../helpers/OpenIDConnectHelper';
 
 type Params = Record<string, never>;
@@ -29,7 +30,7 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Check webshop and/or organization
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Context.setOrganizationScope()
         const webshopId = request.body.webshopId;
         let redirectUri = 'https://' + organization.getHost()
         

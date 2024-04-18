@@ -5,6 +5,8 @@ import { BalanceItem, BalanceItemPayment, Payment, Token } from '@stamhoofd/mode
 import { QueueHandler } from '@stamhoofd/queues';
 import { Payment as PaymentStruct, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../../helpers/Context';
 import { ExchangePaymentEndpoint } from '../../shared/ExchangePaymentEndpoint';
 
 type Params = Record<string, never>;
@@ -33,19 +35,14 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions to access payments",
-                human: "Je hebt geen toegang tot betalingen"
-            })
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
         }
 
-        const changedPayments: PaymentGeneral[] = []
+        const changedPayments: Payment[] = []
 
         // Modify payments
         for (const {put} of request.body.getPuts()) {
@@ -69,7 +66,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             const payment = new Payment()
-            payment.organizationId = user.organizationId
+            payment.organizationId = organization.id
             payment.status = PaymentStatus.Created
             payment.method = put.method
 
@@ -102,7 +99,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             for (const item of put.balanceItemPayments) {
                 const balanceItem = await BalanceItem.getByID(item.balanceItem.id)
-                if (!balanceItem || balanceItem.organizationId !== user.organizationId) {
+                if (!balanceItem || balanceItem.organizationId !== organization.id) {
                     throw new SimpleError({
                         code: "not_found",
                         message: "Balance item not found",
@@ -112,18 +109,18 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
                 balanceItems.push(balanceItem)
 
-                // Check permissions
-
                 // Create payment
                 const balanceItemPayment = new BalanceItemPayment()
-                balanceItemPayment.organizationId = user.organizationId
+                balanceItemPayment.organizationId = organization.id
                 balanceItemPayment.balanceItemId = balanceItem.id
                 balanceItemPayment.price = item.price
                 balanceItemPayments.push(balanceItemPayment)
             }
 
             // Check permissions
-            await Payment.checkBalanceItemPermissions({user, permissionLevel: PermissionLevel.Write}, balanceItems)
+            if (!(await Context.auth.canAccessBalanceItems(balanceItems, PermissionLevel.Write))) {
+                throw Context.auth.error('Je hebt geen toegangsrechten tot één van de gekozen afrekeningen voor de betaling die je wilt aanmaken')
+            }
 
             // Check total price
             const totalPrice = balanceItemPayments.reduce((total, item) => total + item.price, 0)
@@ -135,7 +132,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     human: "De totale prijs komt niet overeen met de som van de afrekeningen",
                     field: "price"
                 })
-            }            
+            }
 
             payment.price = totalPrice
 
@@ -150,7 +147,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Mark paid or failed
             if (put.status !== PaymentStatus.Created && put.status !== PaymentStatus.Pending) {
-                await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, user.organization, put.status)
+                await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, organization, put.status)
 
                 if (put.status === PaymentStatus.Succeeded) {
                     payment.paidAt = put.paidAt
@@ -158,31 +155,23 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
             } else {
                 for (const balanceItem of balanceItems) {
-                    await balanceItem.markUpdated(payment, user.organization)
+                    await balanceItem.markUpdated(payment, organization)
                 }
             }
 
-            const paymentGeneral = await payment.getGeneralStructure();
-            changedPayments.push(paymentGeneral)
+            changedPayments.push(payment)
         }
 
         // Modify payments
         for (const patch of request.body.getPatches()) {
             await QueueHandler.schedule("payments/"+patch.id, async () => {
                 const payment = await Payment.getByID(patch.id);
-                if (!payment || payment.organizationId !== user.organizationId) {
+                if (!payment || !(await Context.auth.canAccessPayment(payment, PermissionLevel.Write))) {
                     throw new SimpleError({
                         code: "not_found",
                         message: "Payment not found",
                         human: "Deze betaling werd niet gevonden."
                     })
-                }
-
-                // Check permissions
-                const paymentGeneral = await payment.getGeneralStructure({user, permissionLevel: PermissionLevel.Write});
-
-                if (patch.status) {
-                    await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, user.organization, patch.status)
                 }
 
                 if (patch.method || patch.paidAt !== undefined) {
@@ -215,9 +204,9 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     payment.method = patch.method
 
                     if (payment.method === PaymentMethod.Transfer && patch.transferDescription === undefined && !payment.transferDescription) {
-                        payment.transferSettings = payment.transferSettings ?? user.organization.meta.transferSettings
+                        payment.transferSettings = payment.transferSettings ?? organization.meta.transferSettings
                         // TODO: fill in description!
-                        payment.generateDescription(user.organization, "")
+                        payment.generateDescription(organization, "")
                     }
                 }
 
@@ -232,15 +221,18 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 await payment.save()
 
-                // Copy changes to struct without refetching everything again
-                paymentGeneral.set(payment)
+                if (patch.status) {
+                    await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, organization, patch.status)
+                }
 
-                changedPayments.push(paymentGeneral)
+                changedPayments.push(
+                    payment
+                )
             });
         }
 
         return new Response(
-            changedPayments
+            await AuthenticatedStructures.paymentsGeneral(changedPayments, true)
         );
     }
 }

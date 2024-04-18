@@ -89,7 +89,7 @@ export class Registration extends Model {
         })
     }
 
-    hasAccess(user: UserWithOrganization, groups: import('./').Group[], permissionLevel: PermissionLevel) {
+    _hasAccess(user: UserWithOrganization, groups: import('./').Group[], permissionLevel: PermissionLevel) {
         if (!user.permissions) {
             return false
         }
@@ -106,12 +106,12 @@ export class Registration extends Model {
         return false;
     }
 
-    hasReadAccess(user: UserWithOrganization, groups: import('./').Group[]) {
-        return this.hasAccess(user, groups, PermissionLevel.Read)
+    _hasReadAccess(user: UserWithOrganization, groups: import('./').Group[]) {
+        return this._hasAccess(user, groups, PermissionLevel.Read)
     }
 
-    hasWriteAccess(user: UserWithOrganization, groups: import('./').Group[]) {
-        return this.hasAccess(user, groups, PermissionLevel.Write)
+    _hasWriteAccess(user: UserWithOrganization, groups: import('./').Group[]) {
+        return this._hasAccess(user, groups, PermissionLevel.Write)
     }
 
     /**
@@ -302,7 +302,7 @@ export class Registration extends Model {
         Email.schedule(builder)
     }
 
-    static async sendTransferEmail(user: UserWithOrganization, payment: import('./').Payment) {
+    static async sendTransferEmail(user: User, organization: Organization, payment: import('./').Payment) {
         const data = {
             type: EmailTemplateType.RegistrationTransferDetails
         };
@@ -320,8 +320,6 @@ export class Registration extends Model {
         }
 
         const template = templates[0]
-
-        const organization = user.organization;
 
         const paymentGeneral = await payment.getGeneralStructure();
         const registrations = paymentGeneral.registrations

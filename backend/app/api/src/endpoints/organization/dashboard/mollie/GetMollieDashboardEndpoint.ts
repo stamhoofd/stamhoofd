@@ -1,7 +1,10 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { MollieToken, Token } from '@stamhoofd/models';
+import { isSimpleError, isSimpleErrors,SimpleError } from '@simonbackx/simple-errors';
+import { MollieToken } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/structures';
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Body = undefined
@@ -23,19 +26,16 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je moet hoofdbeheerder zijn om mollie te kunnen connecteren"
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Full)) {
+            throw Context.auth.error()
         }
-
         
-        const mollie = await MollieToken.getTokenFor(user.organizationId)
+        const mollie = await MollieToken.getTokenFor(organization.id)
         if (!mollie) {
             throw new SimpleError({
                 code: "not_yet_linked",

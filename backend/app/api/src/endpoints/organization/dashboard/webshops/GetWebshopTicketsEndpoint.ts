@@ -1,10 +1,9 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Ticket } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
-import { PaginatedResponse, PermissionLevel,TicketPrivate, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { Ticket, Webshop } from '@stamhoofd/models';
+import { PaginatedResponse, PermissionLevel, TicketPrivate, WebshopTicketsQuery } from "@stamhoofd/structures";
+
+import { Context } from "../../../../helpers/Context";
 
 type Params = { id: string };
 type Query = WebshopTicketsQuery
@@ -28,31 +27,19 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const errors = new SimpleErrors()
+        await Context.setOrganizationScope();
+        await Context.authenticate()
+
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        }
 
         const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop || token.user.organizationId != webshop.organizationId) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Webshop not found",
-                human: "Deze webshop bestaat niet (meer)"
-            })
-        }
-
-        if (!webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Read)) {
-            if (!webshop.privateMeta.scanPermissions.userHasAccess(token.user, PermissionLevel.Read)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "No permissions for this webshop",
-                    human: "Je hebt geen toegang tot de tickets van deze webshop",
-                    statusCode: 403
-                })
-            }
+        if (!webshop || !Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Read)) {
+            throw Context.auth.error("Je hebt geen toegang tot de tickets van deze webshop")
         }
         
-        errors.throwIfNotEmpty()
-
         let tickets: Ticket[] | undefined = undefined
         const limit = 150
 

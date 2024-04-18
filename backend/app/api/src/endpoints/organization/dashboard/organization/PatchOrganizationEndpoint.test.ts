@@ -1,10 +1,7 @@
-import { AutoEncoderPatchType,PatchableArray, PatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from "@simonbackx/simple-endpoints";
-import { GroupFactory } from '@stamhoofd/models';
-import { OrganizationFactory } from '@stamhoofd/models';
-import { UserFactory } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupPrivateSettings,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,PermissionRole,PermissionRoleDetailed,Permissions } from '@stamhoofd/structures';
+import { GroupFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { Group, GroupGenderType, GroupPatch, GroupPrivateSettings, GroupSettings, GroupSettingsPatch, Organization, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions } from '@stamhoofd/structures';
 
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
 

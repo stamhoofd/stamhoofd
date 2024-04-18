@@ -1,6 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { BalanceItem, Member, Token } from "@stamhoofd/models";
+import { BalanceItem, Member } from "@stamhoofd/models";
 import { MemberBalanceItem } from "@stamhoofd/structures";
+
+import { Context } from "../../../helpers/Context";
 
 type Params = Record<string, never>;
 type Query = undefined
@@ -21,9 +23,9 @@ export class GetUserBalanceEndpoint extends Endpoint<Params, Query, Body, Respon
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
         const members = await Member.getMembersWithRegistrationForUser(user)
 

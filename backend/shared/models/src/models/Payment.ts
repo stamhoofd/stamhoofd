@@ -105,13 +105,67 @@ export class Payment extends Model {
         this.transferDescription = settings.generateDescription(reference, organization.address.country, replacements)
     }
 
+    static async getGeneralStructure(payments: Payment[], includeSettlements = false): Promise<PaymentGeneral[]> {
+        if (payments.length === 0) {
+            return []
+        }
+
+        const {balanceItemPayments, balanceItems} = await Payment.loadBalanceItems(payments)
+        const {registrations, orders, members} = await Payment.loadBalanceItemRelations(balanceItems);
+        
+        return this.getGeneralStructureFromRelations({
+            payments,
+            registrations,
+            orders,
+            members,
+            balanceItemPayments,
+            balanceItems
+        }, includeSettlements)
+    }
+
+    static getGeneralStructureFromRelations({payments, registrations, orders, members, balanceItemPayments, balanceItems}: {
+        payments: Payment[];
+        registrations: import("./Registration").Registration[];
+        orders: import("./Order").Order[];
+        members: import("./Member").Member[];
+        balanceItemPayments: import("./BalanceItemPayment").BalanceItemPayment[];
+        balanceItems: import("./BalanceItem").BalanceItem[];
+    }, includeSettlements = false): PaymentGeneral[] {
+        if (payments.length === 0) {
+            return []
+        }
+        
+        return payments.map(payment => {
+            return PaymentGeneral.create({
+                ...payment,
+                balanceItemPayments: balanceItemPayments.filter(item => item.paymentId === payment.id).map((item) => {
+                    const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)
+                    const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
+                    const member = balanceItem?.memberId ? members.find(r => r.id === balanceItem.memberId) : undefined
+                    const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
+
+                    return BalanceItemPaymentDetailed.create({
+                        ...item,
+                        balanceItem: BalanceItemDetailed.create({
+                            ...balanceItem,
+                            registration: registration ? registration.getStructure() : null,
+                            member: member ? MemberStruct.create(member) : null,
+                            order: order ? OrderStruct.create({...order, payment: null}) : null
+                        })
+                    })
+                }),
+                ...(!includeSettlements) ? {settlement: null, transferFee: 0, stripeAccountId: null} : {}
+            })
+        })
+    }
+
     /**
      * 
      * @param checkPermissions Only set to undefined when not returned in the API + not for public use
      * @returns 
      */
-    async getGeneralStructure(checkPermissions?: {user: UserWithOrganization, permissionLevel: PermissionLevel}): Promise<PaymentGeneral> {
-        return (await Payment.getGeneralStructure([this], checkPermissions))[0]
+    async getGeneralStructure(): Promise<PaymentGeneral> {
+        return await Payment.getGeneralStructure([this], false)[0]
     }
 
     static async loadBalanceItems(payments: Payment[]) {
@@ -149,118 +203,5 @@ export class Payment extends Model {
         const members = await Member.getByIDs(...memberIds)
 
         return {registrations, orders, members}
-    }
-
-    static async checkBalanceItemPermissions(
-        checkPermissions: {user: UserWithOrganization, permissionLevel: PermissionLevel}, 
-        balanceItems: import("./BalanceItem").BalanceItem[],
-        data?: {
-            registrations: import("./Registration").Registration[],
-            orders: import("./Order").Order[],
-            members: import("./Member").Member[]
-        }
-    ) {
-        const {user, permissionLevel} = checkPermissions;
-        const {Member} = await import("./Member");
-        
-        // First try without queries
-        if (permissionLevel === PermissionLevel.Read) {
-            for (const balanceItem of balanceItems) {
-                if (balanceItem.userId === user.id) {
-                    return;
-                }
-            }
-        }
-
-        if (user.permissions && (user.permissions.hasFullAccess(user.organization.privateMeta.roles) || user.permissions.canManagePayments(user.organization.privateMeta.roles))) {
-            return
-        }
-
-        // Slight optimization possible here
-        const {registrations, orders, members} = data ?? await this.loadBalanceItemRelations(balanceItems)
-
-        if (user.permissions) {
-            const {Group} = await import("./Group");
-            const {Webshop} = await import("./Webshop");
-            const groupIds = Formatter.uniqueArray(registrations.flatMap(b => b.groupId ? [b.groupId] : []))
-            const groups = await Group.getByIDs(...groupIds)
-
-            // We grant permission for a whole payment when the user has at least permission for a part of that payment.
-            for (const registration of registrations) {
-                if (registration.hasAccess(user, groups, permissionLevel)) {
-                    return
-                }
-            }
-
-            const webshopCache: Map<string, import("./Webshop").Webshop> = new Map()
-
-            for (const order of orders) {
-                const webshop = webshopCache.get(order.webshopId) ?? await Webshop.getByID(order.webshopId)
-                if (webshop) {
-                    webshopCache.set(order.webshopId, webshop)
-                    if (webshop.privateMeta.permissions.userHasAccess(user, permissionLevel)) {
-                        return
-                    }
-                }
-            }
-        }
-
-        if (permissionLevel === PermissionLevel.Read) {
-            // Check members
-            const userMembers = await Member.getMembersWithRegistrationForUser(user)
-            for (const member of userMembers) {
-                if (members.find(m => m.id === member.id)) {
-                    return
-                }
-            }
-        }
-
-        throw new SimpleError({
-            code: "not_found",
-            message: "Payment not found",
-            human: "Je hebt geen toegang tot deze betaling"
-        })
-    }
-
-    /**
-     * 
-     * @param payments 
-     * @param checkPermissions Only set to undefined when not returned in the API + not for public use
-     * @returns 
-     */
-    static async getGeneralStructure(payments: Payment[], checkPermissions?: {user: UserWithOrganization, permissionLevel: PermissionLevel}): Promise<PaymentGeneral[]> {
-        if (payments.length === 0) {
-            return []
-        }
-
-        const {balanceItemPayments, balanceItems} = await this.loadBalanceItems(payments)
-        const {registrations, orders, members} = await this.loadBalanceItemRelations(balanceItems);
-
-        if (checkPermissions) {
-            await this.checkBalanceItemPermissions(checkPermissions, balanceItems, {registrations, orders, members})
-        }
-        
-        return payments.map(payment => {
-            return PaymentGeneral.create({
-                ...payment,
-                balanceItemPayments: balanceItemPayments.filter(item => item.paymentId === payment.id).map((item) => {
-                    const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)
-                    const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
-                    const member = balanceItem?.memberId ? members.find(r => r.id === balanceItem.memberId) : undefined
-                    const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
-
-                    return BalanceItemPaymentDetailed.create({
-                        ...item,
-                        balanceItem: BalanceItemDetailed.create({
-                            ...balanceItem,
-                            registration: registration ? registration.getStructure() : null,
-                            member: member ? MemberStruct.create(member) : null,
-                            order: order ? OrderStruct.create({...order, payment: null}) : null
-                        })
-                    })
-                }),
-                ...(!checkPermissions || !checkPermissions.user || !checkPermissions.user.permissions) ? {settlement: null, transferFee: 0, stripeAccountId: null} : {}
-            })
-        })
     }
 }

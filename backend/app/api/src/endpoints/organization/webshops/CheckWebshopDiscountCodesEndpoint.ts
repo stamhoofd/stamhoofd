@@ -1,8 +1,10 @@
-import { ArrayDecoder, Decoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
-import { Discount, DiscountCode, GeneralDiscount } from "@stamhoofd/structures";
+import { DiscountCode } from "@stamhoofd/structures";
+
+import { Context } from "../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined;
@@ -26,8 +28,9 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope()
         const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop) {
+        if (!webshop || webshop.organizationId != organization.id) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Webshop not found",

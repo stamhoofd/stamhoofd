@@ -191,7 +191,7 @@ export class Group extends Model {
         return GroupStruct.create(Object.assign({}, this, { privateSettings: null }))
     }
 
-    getPrivateStructure(user?: UserWithOrganization) {
+    _getPrivateStructure(user?: UserWithOrganization) {
         const struct = GroupStruct.create(this)
         if (user && !this.hasAccess(user)) {
             struct.privateSettings = null

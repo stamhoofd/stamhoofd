@@ -1,7 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Document, DocumentTemplate, Token } from "@stamhoofd/models";
+import { Document, DocumentTemplate } from "@stamhoofd/models";
 import { Document as DocumentStruct } from "@stamhoofd/structures";
+
+import { Context } from "../../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined;
@@ -27,18 +29,15 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot documenten"
-            })
-        }
+        if (!Context.auth.canManageDocuments()) {
+            throw Context.auth.error()
+        }  
 
         const template = await DocumentTemplate.getByID(request.params.id)
-        if (!template || template.organizationId != user.organizationId) {
+        if (!template || !Context.auth.canAccessDocumentTemplate(template)) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Onbekend document"

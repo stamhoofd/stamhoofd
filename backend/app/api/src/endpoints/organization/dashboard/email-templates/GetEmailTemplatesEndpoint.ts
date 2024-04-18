@@ -4,6 +4,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailTemplate, Token } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = Record<string, never>;
 type Body = undefined;
 
@@ -34,16 +36,12 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
+        if (!Context.auth.canReadEmailTemplates()) {
+            throw Context.auth.error()
+        }  
 
         const types = [
             EmailTemplateType.OrderConfirmationOnline, 

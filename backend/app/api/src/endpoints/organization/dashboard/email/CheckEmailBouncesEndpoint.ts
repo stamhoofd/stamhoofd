@@ -2,8 +2,9 @@ import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailAddress } from '@stamhoofd/email';
-import { Token } from '@stamhoofd/models';
 import { EmailInformation } from '@stamhoofd/structures';
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -27,16 +28,12 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
+        if (!Context.auth.canAccessEmailBounces()) {
+            throw Context.auth.error()
+        }  
 
         if (request.body.length > 10000) {
             throw new SimpleError({
@@ -47,7 +44,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        const emails = await EmailAddress.getByEmails(request.body, user.organizationId)
+        const emails = await EmailAddress.getByEmails(request.body, organization.id)
         return new Response(emails.map(e => EmailInformation.create(e)));
     }
 }

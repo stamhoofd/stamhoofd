@@ -5,7 +5,9 @@ import { Group, Organization,PayconiqPayment, StripeAccount, Token, User, Websho
 import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -33,10 +35,15 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
+        const organization = await Context.setOrganizationScope();
+       const {user} = await Context.authenticate()
 
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        }
+        
         // check if organization ID matches
-        if (request.body.id !== token.user.organization.id) {
+        if (request.body.id !== organization.id) {
             throw new SimpleError({
                 code: "invalid_id",
                 message: "You cannot modify an organization with a different ID than the organization you are signed in for",
@@ -44,22 +51,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        const user = token.user
         let deleteUnreachable = false
-
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
 
         const errors = new SimpleErrors()
         const allowedIds: string[] = []
 
-        const organization = token.user.organization
-        if (user.hasFullAccess()) {
+        if (Context.auth.hasFullAccess()) {
             organization.name = request.body.name ?? organization.name
             if (request.body.website !== undefined) {
                 organization.website = request.body.website;
@@ -190,7 +187,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 for (const patch of request.body.admins.getPatches()) {
                     if (patch.permissions) {
                         const admin = await User.getByID(patch.id)
-                        if (!admin || admin.organizationId !== user.organizationId) {
+                        if (!admin || !Context.auth.canAccessUser(admin, PermissionLevel.Full)) {
                             throw new SimpleError({
                                 code: "invalid_field",
                                 message: "De beheerder die je wilt wijzigen bestaat niet (meer)",
@@ -204,7 +201,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             admin.permissions = patch.permissions
                         }
 
-                        if (admin.id === user.id && !admin.permissions.hasFullAccess(user.organization.privateMeta.roles)) {
+                        if (admin.id === user.id && !admin.permissions.hasFullAccess(Context.auth.getAllRoles())) {
                             throw new SimpleError({
                                 code: "permission_denied",
                                 message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
@@ -279,10 +276,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             continue
                         }
 
-                        if (category.settings.permissions.getPermissionLevel(user.permissions, user.organization.privateMeta.roles) !== "Create") {
-                            throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to add new groups", statusCode: 403 })
+                        if (!Context.auth.canCreateGroupInCategory(category)) {
+                            throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie')
                         }
-
+                            
                         // Only process puts
                         const ids = patch.groupIds.getPuts().map(p => p.put)
                         allowedIds.push(...ids)
@@ -310,17 +307,13 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         if (deleteGroups.length > 0) {
             for (const id of deleteGroups) {
                 const model = await Group.getByID(id)
-                if (!model || model.organizationId !== organization.id) {
-                    // Silently ignore
-                    continue;
-                }
-
-                if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
+                if (!model || !Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                     errors.addError(
-                        new SimpleError({ code: "permission_denied", message: "You do not have permissions to delete this group", statusCode: 403 })
+                        Context.auth.error('Je hebt geen toegangsrechten om deze groep te verwijderen')
                     )
                     continue;
                 }
+
                 model.deletedAt = new Date()
                 await model.save()
                 deleteUnreachable = true
@@ -328,8 +321,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         for (const groupPut of request.body.groups.getPuts()) {
-            if (!user.hasFullAccess() && !allowedIds.includes(groupPut.put.id)) {
-                throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to create groups", statusCode: 403 })
+            if (!Context.auth.hasFullAccess() && !allowedIds.includes(groupPut.put.id)) {
+                errors.addError(
+                    Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen')
+                )
+                continue;
             }
 
             const struct = groupPut.put
@@ -341,7 +337,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             model.status = struct.status
 
             // Check if current user has permissions to this new group -> else fail with error
-            if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
+            if (!Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                 errors.addError(
                     new SimpleError({
                         code: "missing_permissions",
@@ -358,17 +354,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         for (const struct of request.body.groups.getPatches()) {
             const model = await Group.getByID(struct.id)
-            if (!model || model.organizationId != organization.id) {
-                errors.addError(new SimpleError({
-                    code: "invalid_id",
-                    message: "No group found with id " + struct.id
-                }))
-                continue;
-            }
 
-            if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
+            if (!model || !Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                 errors.addError(
-                    new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this group", statusCode: 403 })
+                    Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen')
                 )
                 continue;
             }
@@ -384,12 +373,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (struct.privateSettings) {
                 model.privateSettings.patchOrPut(struct.privateSettings)
 
-                if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
+                if (!Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                     errors.addError(
                         new SimpleError({
                             code: "missing_permissions",
                             message: "You cannot restrict your own permissions",
-                            human: "Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen (stel dit in via het tabblad toegang). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
+                            human: "Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen. Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
                         })
                     )
                     continue;
@@ -411,18 +400,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         // Only needed for permissions atm, so no put or delete here
         for (const struct of request.body.webshops.getPatches()) {
             const model = await Webshop.getByID(struct.id)
-            if (!model || model.organizationId != organization.id) {
-                errors.addError(new SimpleError({
-                    code: "invalid_id",
-                    message: "No webshop found with id " + struct.id
-                }))
-                continue;
-            }
 
-
-            if (!model.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
+            if (!model || !Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
                 errors.addError(
-                    new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this webshop", statusCode: 403 })
+                    Context.auth.error('Je hebt geen toegangsrechten om deze webshop te wijzigen')
                 )
                 continue;
             }
@@ -446,7 +427,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         errors.throwIfNotEmpty()
-        return new Response(await user.getOrganizationStructure());
+        return new Response(await AuthenticatedStructures.organization(organization));
     }
 }
 

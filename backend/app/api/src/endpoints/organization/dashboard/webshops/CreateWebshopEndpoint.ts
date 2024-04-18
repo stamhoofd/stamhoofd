@@ -6,6 +6,8 @@ import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = { };
 type Query = undefined;
 type Body = PrivateWebshop;
@@ -32,16 +34,12 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
-        if (!user.permissions || !user.permissions.canCreateWebshops(token.user.organization.privateMeta.roles)) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                human: "Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.",
-                statusCode: 403
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canCreateWebshops()) {
+            throw Context.auth.error("Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.")
         }
 
         const errors = new SimpleErrors()
@@ -54,7 +52,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.privateMeta = request.body.privateMeta
         webshop.products = request.body.products
         webshop.categories = request.body.categories
-        webshop.organizationId = user.organizationId
+        webshop.organizationId = organization.id
         webshop.privateMeta.authorId = user.id;
         webshop.privateMeta.dnsRecords = [];
         let updateDNS = false
@@ -111,7 +109,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         // Check if this uri is inique
         let original = webshop.uri
-        const possibleSuffixes = [new Date().getFullYear().toString(), Formatter.slug(user.organization.uri)]
+        const possibleSuffixes = [new Date().getFullYear().toString(), Formatter.slug(organization.uri)]
 
         // Remove possible suffices from original
         for (const suffix of possibleSuffixes) {
@@ -150,7 +148,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         // Verify if we have full access
-        if (!webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
+        if (!Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
             throw new SimpleError({
                 code: "missing_permissions",
                 message: "You cannot create a webshop without having full permissions on the created webshop",

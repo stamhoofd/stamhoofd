@@ -2,7 +2,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount, Token } from '@stamhoofd/models';
-import { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -25,17 +27,15 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Deze actie is enkel beschikbaar voor beheerders",
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Read)) {
+            throw Context.auth.error()
         }
 
-        const models = await StripeAccount.where({ organizationId: user.organizationId, status: 'active' })
+        const models = await StripeAccount.where({ organizationId: organization.id, status: 'active' })
         return new Response(models.map(m => StripeAccountStruct.create(m)));
     }
 }

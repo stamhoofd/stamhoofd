@@ -4,6 +4,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailTemplate, Token, UserWithOrganization, Webshop } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = Record<string, never>;
 type Body = PatchableArrayAutoEncoder<EmailTemplateStruct>;
 type Query = undefined;
@@ -27,16 +29,13 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canReadEmailTemplates()) {
+            throw Context.auth.error()
+        }  
 
         const templates: EmailTemplate[] = []
 
@@ -49,7 +48,10 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
                     message: "Template with id "+patch.id+" not found",
                 })
             }
-            await this.checkTemplateWritePermission(template, user)
+
+            if (!(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
+                throw Context.auth.error("Je hebt geen toegang om deze emailtemplate te bewerken")
+            } 
             
             template.html = patch.html ?? template.html
             template.subject = patch.subject ?? template.subject
@@ -77,7 +79,10 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             template.type = struct.type
 
             // Check if valid + write permissions
-            await this.checkTemplateWritePermission(template, user)
+            if (!(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
+                throw Context.auth.error("Je hebt geen toegang om deze emailtemplate te maken")
+            } 
+
             await template.save()
 
             templates.push(template)
@@ -85,20 +90,4 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         
         return new Response(templates.map(template => EmailTemplateStruct.create(template)))
     }
-
-    async checkTemplateWritePermission(template: EmailTemplate, user: UserWithOrganization) {
-        if (template.webshopId) {
-            const webshop = await Webshop.getByID(template.webshopId)
-            if (!webshop || webshop.organizationId !== user.organizationId || !webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Write)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "No permissions for this webshop",
-                    human: "Je hebt geen toegang om bestellingen te bewerken van deze webshop",
-                    statusCode: 403
-                })
-            }
-        }
-    }
-
-    
 }

@@ -1,8 +1,10 @@
 import { AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Token } from "@stamhoofd/models";
-import { EncryptedMemberWithRegistrations, KeychainedResponse, PermissionLevel } from "@stamhoofd/structures";
+import { Group } from "@stamhoofd/models";
+import { EncryptedMemberWithRegistrations, KeychainedResponse } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
 class Query extends AutoEncoder {
@@ -36,29 +38,19 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot deze groep"
-            })
-        }
-
-        const groups = await Group.where({ id: request.params.id, organizationId: user.organizationId}, { limit: 1})
-        if (groups.length != 1) {
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        }  
+        
+        const group = await Group.getByID(request.params.id)
+        if (!group || !Context.auth.canAccessGroup(group)) {
             throw new SimpleError({
                 code: "group_not_found",
                 message: "De groep die je opvraagt bestaat niet (meer)"
-            })
-        }
-        const [group] = groups
-
-        if (group.deletedAt || !group.hasAccess(user)) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot deze groep"
             })
         }
 

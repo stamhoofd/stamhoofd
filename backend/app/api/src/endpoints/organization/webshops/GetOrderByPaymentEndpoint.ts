@@ -4,6 +4,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Order as OrderStruct } from "@stamhoofd/structures";
+
+import { Context } from "../../../helpers/Context";
 type Params = { id: string; paymentId: string };
 type Query = undefined;
 type Body = undefined
@@ -24,9 +26,10 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope()
         const payment = await Payment.getByID(request.params.paymentId)
 
-        if (!payment) {
+        if (!payment || payment.organizationId != organization.id) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Order not found",
@@ -34,7 +37,7 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
         const [order] = await Order.where({ paymentId: payment.id }, { limit: 1})
-        if (!order || order.webshopId != request.params.id) {
+        if (!order || order.webshopId != request.params.id || order.organizationId != organization.id) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Order not found",
