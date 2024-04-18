@@ -336,7 +336,33 @@ export class SGVFunctie extends AutoEncoder {
         code?: string;
 }
 
+export class SGVMyFunctie extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+        groep: string;
+
+    // @field({ decoder: StringDecoder })
+    //     functie: string;
+
+    @field({ decoder: StringDecoder })
+        begin: string;
+
+    @field({ decoder: StringDecoder, optional: true})
+        einde?: string;
+
+    @field({ decoder: StringDecoder, optional: true })
+        code?: string;
+
+    get isActive() {
+        return !this.einde;
+    }
+}
+
 export class SGVGFunctieResponse extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(SGVFunctie) })
         functies: SGVFunctie[];
+}
+
+export class SGVProfielResponse extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(SGVMyFunctie) })
+        functies: SGVMyFunctie[];
 }

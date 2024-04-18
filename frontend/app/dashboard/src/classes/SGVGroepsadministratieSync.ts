@@ -295,6 +295,20 @@ export function getManagedFuncties(groepFuncties: GroepFunctie[]): GroepFunctie[
 }
 
 /**
+ * Fix because API isn't returning all functies (probably a temporary bug in the API)
+ */
+export function getDefaultGroepFuncties(): GroepFunctie[] {
+    return [
+        {id: "d5f75b320b812440010b812555de03a2", beschrijving: "Kapoen", code: "KAP"},
+        {id: "d5f75b320b812440010b8125567703cb", beschrijving: "Kabouter/Welp", code: "KW"},
+        {id: "d5f75b320b812440010b812555d603a0", beschrijving: "Jonggids/Jongverkenner", code: "JGJV"},
+        {id: "d5f75b320b812440010b8125565203c1", beschrijving: "Gids/Verkenner", code: "GVE"},
+        {id: "d5f75b320b812440010b812554790354", beschrijving: "Akabelid", code: "AKAB"},
+        {id: "d5f75b320b812440010b812555c1039b", beschrijving: "Jin", code: "JIN"},
+    ]
+}
+
+/**
  * Mapt alle fucntie codes op een functie id van SGV
  */
 export function getGroepCodeMapping(groepFuncties: GroepFunctie[]): Map<string, GroepFunctie> {

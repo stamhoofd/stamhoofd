@@ -12,8 +12,8 @@ import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import { MemberManager } from './MemberManager';
 import { OrganizationManager } from './OrganizationManager';
-import { getPatch, isManaged, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
-import { SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
+import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
+import { SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
 
 class SGVGroepsadministratieStatic implements RequestMiddleware {
     token: {accessToken: string; refreshToken: string; validUntil: Date} | null = null // null to keep reactive
@@ -27,7 +27,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     leden: SGVLid[] = []
     groupNumber: string | null = null
     group: SGVGroep | null = null
-    functies: SGVFunctie[] = []
+    functies: GroepFunctie[] = []
 
     get hasToken() {
         return !!this.token //|| this.dryRun
@@ -160,22 +160,36 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async getFuncties() {
+        // Temporary replaced because of issue in API that misses normal member functies
+        this.functies = getDefaultGroepFuncties()
+
+        return Promise.resolve()
+        // const response = await this.authenticatedServer.request({
+        //     method: "GET",
+        //     path: "/functie",
+        //     query: {
+        //         groep: this.groupNumber
+        //     },
+        //     decoder: SGVGFunctieResponse as Decoder<SGVGFunctieResponse>
+        // })
+        // this.functies = response.data.functies
+    }
+
+    async getProfiel() {
         const response = await this.authenticatedServer.request({
             method: "GET",
-            path: "/functie",
-            query: {
-                groep: this.groupNumber
-            },
-            decoder: SGVGFunctieResponse as Decoder<SGVGFunctieResponse>
+            path: "/lid/profiel",
+            decoder: SGVProfielResponse as Decoder<SGVProfielResponse>
         })
-        this.functies = response.data.functies
+        return response.data
     }
 
     async checkFuncties() {
         await this.getFuncties()
+        const profiel = await this.getProfiel()
 
         // Check if this user has access to all the needed groups...
-        if (!this.functies.find(f => f.code == 'VGA' || f.code == 'GRL')) {
+        if (!profiel.functies.find(f => (f.code == 'VGA' || f.code == 'GRL') && f.isActive && f.groep === this.groupNumber)) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Synchroniseren met de groepsadministratie is voorlopig enkel beschikbaar voor groepsleiding of voor de verantwoordelijke van de groepsadministratie (VGA)"
@@ -189,7 +203,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             path: "/ledenlijst/filter/huidige",
             body: {
                 "criteria":{
-                    "functies": this.functies.map(f => f.id),
+                    //"functies": this.functies.map(f => f.id),
+                    "functies": [],
                     "groepen": [this.groupNumber ],
                     "oudleden": false,
                 },

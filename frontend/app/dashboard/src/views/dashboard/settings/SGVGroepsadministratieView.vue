@@ -5,6 +5,10 @@
         <main>
             <h1>Groepsadministratie synchroniseren</h1>
 
+            <p class="error-box">
+                Door een aanpassing in de groepsadministratie (waarschijnlijk een klein foutje), is het tijdelijk niet mogelijk om te synchroniseren (lidfuncties zijn onzichtbaar waardoor je ook manueel geen lid meer kan inschrijven).
+            </p>
+
             <p class="info-box">
                 Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via {{ $t('shared.emails.general') }}
             </p>
@@ -41,10 +45,10 @@
                     Naar groepsadministratie
                 </a>
                 <LoadingButton :loading="loading">
-                    <button v-if="isLoggedIn" key="syncButton" class="button primary" type="button" @click="sync">
+                    <button v-if="isLoggedIn" key="syncButton" class="button primary" type="button" :disabled="!isStamhoofd" @click="sync">
                         Synchroniseren
                     </button>
-                    <button v-else key="loginButton" class="button primary" type="button" @click="login">
+                    <button v-else key="loginButton" class="button primary" type="button" :disabled="!isStamhoofd" @click="login">
                         Inloggen
                     </button>
                 </LoadingButton>
@@ -60,6 +64,7 @@ import { UrlHelper } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie";
 
 @Component({
@@ -94,6 +99,10 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
     get isLoggedIn() {
         return SGVGroepsadministratie.hasToken
+    }
+
+    get isStamhoofd() {
+        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
     async sync() {
