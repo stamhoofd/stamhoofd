@@ -28,6 +28,10 @@ export class WebshopManagerStatic {
         return server
     }
 
+    get unscopedServer() {
+        return NetworkManager.server
+    }
+
     async reload() {
         const response = await this.server.request({
             method: "GET",

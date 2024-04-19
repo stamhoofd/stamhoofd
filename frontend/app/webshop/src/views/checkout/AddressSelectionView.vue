@@ -20,7 +20,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
+        <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="unscopedServer" />
     </SaveView>
 </template>
 
@@ -85,8 +85,8 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
         }
     } 
 
-    get server() {
-        return WebshopManager.server
+    get unscopedServer() {
+        return WebshopManager.unscopedServer
     }
 
     async goNext() {
