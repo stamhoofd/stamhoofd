@@ -30,11 +30,9 @@ export class Group extends Model {
     settings: GroupSettings;
 
     @column({ 
-        type: "json", decoder: GroupPrivateSettings, beforeSave(value) {
-            return value ?? GroupPrivateSettings.create({})
-        } 
+        type: "json", decoder: GroupPrivateSettings
     })
-    privateSettings: GroupPrivateSettings;
+    privateSettings = GroupPrivateSettings.create({})
 
     @column({ type: "string" })
     organizationId: string;

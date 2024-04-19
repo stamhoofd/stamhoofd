@@ -1,6 +1,5 @@
 import { AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
 import { Group } from "@stamhoofd/models";
 import { EncryptedMemberWithRegistrations, KeychainedResponse } from "@stamhoofd/structures";
 

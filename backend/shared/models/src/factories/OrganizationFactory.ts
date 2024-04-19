@@ -1,5 +1,5 @@
 import { Factory } from "@simonbackx/simple-database";
-import { Address,Country,OrganizationMetaData, OrganizationType } from "@stamhoofd/structures";
+import { Address,Country,OrganizationMetaData, OrganizationType, PermissionRoleDetailed } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility"; 
 
 import { Organization } from "../models/Organization";
@@ -9,7 +9,8 @@ class Options {
     domain?: string;
     meta?: OrganizationMetaData;
     name?: string;
-    city?: string
+    city?: string;
+    roles?: PermissionRoleDetailed[];
 }
 
 export class OrganizationFactory extends Factory<Options, Organization> {
@@ -33,6 +34,10 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             postalCode: "9000",
             country: Country.Belgium
         })
+
+        if (this.options.roles) {
+            organization.privateMeta.roles = this.options.roles;
+        }
 
         await organization.save();
         return organization;

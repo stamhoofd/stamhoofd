@@ -65,4 +65,22 @@ describe("Endpoint.GetOrganization", () => {
         expect(response.body.data.privateMeta).not.toEqual(null)
     });
 
+     test("Get organization as admin of a different organization", async () => {
+        const organization = await new OrganizationFactory({}).create()
+        const organization2 = await new OrganizationFactory({}).create()
+        const user = await new UserFactory({
+            organization: organization2,
+            permissions: Permissions.create({
+                level: PermissionLevel.Read
+            })
+        }).create()
+
+        const token = await Token.createToken(user)
+
+        const r = Request.buildJson("GET", "/v3/organization", organization.getApiHost());
+        r.headers.authorization = "Bearer " + token.accessToken
+
+        await expect(testServer.test(endpoint, r)).rejects.toThrow('The access token is invalid');
+    });
+
 });

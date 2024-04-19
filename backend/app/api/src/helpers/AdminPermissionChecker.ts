@@ -37,7 +37,7 @@ export class AdminPermissionChecker {
     notFoundOrNoAccess(message?: string): SimpleError {
         return new SimpleError({
             code: "not_found",
-            message: "Resourcen not found or no access",
+            message: "Resource not found or no access",
             human: message ?? 'Niet gevonden of geen toegang tot dit object',
             statusCode: 404
         })
