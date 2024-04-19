@@ -49,20 +49,35 @@ export class AdminPermissionChecker {
     }
 
     canAccessPrivateOrganizationData(organization: Organization) {
-        if (this.organization && this.organization.id === organization.id && this.hasSomeAccess()) {
-            return true;
+        if (!this.checkScope(organization.id)) {
+            return false;
         }
-        return false;
+
+        if (!this.hasSomeAccess()) {
+            return false;
+        }
+        return true;
     }
 
     checkScope(organizationId: string|null) {
         if (organizationId) {
+            // If request is scoped to a different organization
             if (this.organization && organizationId !== this.organization.id) {
+                return false
+            }
+
+            // If user is limited to scope
+            if (this.user.organizationId && organizationId !== this.user.organizationId) {
                 return false
             }
         } else {
             // Global objects are only accessible in the platform context
             if (this.organization) {
+                return false
+            }
+
+            // User is limited to a scope
+            if (this.user.organizationId) {
                 return false
             }
         }
@@ -231,12 +246,10 @@ export class AdminPermissionChecker {
             members: Member[]
         }
     ): Promise<boolean> {
-        if (this.organization) {
-            for (const balanceItem of balanceItems) {
-                if (!this.checkScope(balanceItem.organizationId)) {
-                    // Invalid scope
-                    return false;
-                }
+        for (const balanceItem of balanceItems) {
+            if (!this.checkScope(balanceItem.organizationId)) {
+                // Invalid scope
+                return false;
             }
         }
 

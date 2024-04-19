@@ -11,7 +11,7 @@ type Query = undefined;
 type Body = string[]
 type ResponseBody = DiscountCode[]
 
-export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class CheckWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = new ArrayDecoder(StringDecoder)
 
     protected doesMatch(request: Request): [true, Params] | [false] {
