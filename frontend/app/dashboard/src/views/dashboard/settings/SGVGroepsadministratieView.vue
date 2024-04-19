@@ -5,7 +5,7 @@
         <main>
             <h1>Groepsadministratie synchroniseren</h1>
 
-            <p class="error-box">
+            <p v-if="isTemporaryDisabled" class="error-box">
                 Door een aanpassing in de groepsadministratie (waarschijnlijk een klein foutje), is het tijdelijk niet mogelijk om te synchroniseren (lidfuncties zijn onzichtbaar waardoor je ook manueel geen lid meer kan inschrijven).
             </p>
 
@@ -45,10 +45,10 @@
                     Naar groepsadministratie
                 </a>
                 <LoadingButton :loading="loading">
-                    <button v-if="isLoggedIn" key="syncButton" class="button primary" type="button" :disabled="!isStamhoofd" @click="sync">
+                    <button v-if="isLoggedIn" key="syncButton" class="button primary" type="button" :disabled="!isStamhoofd && isTemporaryDisabled" @click="sync">
                         Synchroniseren
                     </button>
-                    <button v-else key="loginButton" class="button primary" type="button" :disabled="!isStamhoofd" @click="login">
+                    <button v-else key="loginButton" class="button primary" type="button" :disabled="!isStamhoofd && isTemporaryDisabled" @click="login">
                         Inloggen
                     </button>
                 </LoadingButton>
@@ -95,6 +95,10 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
         SGVGroepsadministratie.checkUrl();
 
         UrlHelper.setUrl("/scouts-en-gidsen-vlaanderen")
+    }
+
+    get isTemporaryDisabled() {
+        return false
     }
 
     get isLoggedIn() {
