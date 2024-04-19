@@ -479,7 +479,7 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        return this.hasFullAccess()
+        return this.hasSomeAccess()
     }
 
     canSendEmails() {
