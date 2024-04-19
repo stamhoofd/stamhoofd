@@ -430,7 +430,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Update balance items
         if (payment.method == PaymentMethod.Transfer) {
             // Send a small reminder email
-            await Registration.sendTransferEmail(user, organization, payment)
+            try {
+                await Registration.sendTransferEmail(user, organization, payment)
+            } catch (e) {
+                console.error("Failed to send transfer email")
+                console.error(e)
+            }
         }
 
         let paymentUrl: string | null = null

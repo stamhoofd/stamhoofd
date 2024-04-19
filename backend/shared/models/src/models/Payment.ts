@@ -164,7 +164,7 @@ export class Payment extends Model {
      * @returns 
      */
     async getGeneralStructure(): Promise<PaymentGeneral> {
-        return await Payment.getGeneralStructure([this], false)[0]
+        return (await Payment.getGeneralStructure([this], false))[0]
     }
 
     static async loadBalanceItems(payments: Payment[]) {
