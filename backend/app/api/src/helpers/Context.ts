@@ -68,6 +68,10 @@ export class ContextInstance {
         });
     }
 
+    get version() {
+        return this.request.getVersion()
+    }
+
     get i18n() {
         if (!this.#i18n) {
             this.#i18n = I18n.fromRequest(this.request)

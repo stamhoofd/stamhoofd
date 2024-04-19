@@ -26,7 +26,12 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        if (Context.version < 244) {
+            await Context.setOptionalOrganizationScope();
+        } else {
+            await Context.setOrganizationScope();
+        }
+        
         await Context.optionalAuthenticate()
 
         const webshop = await Webshop.getByID(request.params.id)
