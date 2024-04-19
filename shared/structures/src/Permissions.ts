@@ -1,9 +1,8 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from './Group';
-import { Organization } from './Organization';
 import { WebshopPreview } from './webshops/Webshop';
 
 
@@ -239,7 +238,7 @@ export class Permissions extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: new ArrayDecoder(BooleanDecoder), optional: true })
+    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true })
     groups: never[] = []
 
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })

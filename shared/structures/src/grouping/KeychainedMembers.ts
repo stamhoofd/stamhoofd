@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 
 import { Member } from '../members/Member';
 
@@ -13,6 +13,6 @@ export class KeychainedMembers extends AutoEncoder {
      * @deprecated
      * Can get dropped after a few months
      */
-    @field({ decoder: new ArrayDecoder(BooleanDecoder), optional: true })
+    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true })
     keychainItems: never[] = []
 }
