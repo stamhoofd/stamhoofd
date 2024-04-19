@@ -351,6 +351,10 @@ $color-current-background: var(--color-current-background, #{$color-background})
   --color-payconiq-background: #{$dark-theme-color-payconiq-background};
   --color-payconiq-border: #{$dark-theme-color-payconiq-border};
 
+  --color-discount-dark: #{$dark-theme-color-discount-dark};
+  --color-discount-background: #{$dark-theme-color-discount-background};
+  --color-discount-border: #{$dark-theme-color-discount-border};
+
   --color-primary-lighter: #{$dark-theme-color-primary-lighter};
   --color-primary-light: #{$dark-theme-color-primary-light};
   --color-primary-background: #{$dark-theme-color-primary-background};
