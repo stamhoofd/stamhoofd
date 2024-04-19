@@ -80,7 +80,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             for (const registrationStruct of struct.registrations) {
                 const group = groups.find(g => g.id === registrationStruct.groupId)
                 if (!group || !Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
-                    throw Context.auth.error("Je hebt niet voldoende rechten om leden toe te voegen in deze groep")
+                    throw Context.auth.notFoundOrNoAccess("Je hebt niet voldoende rechten om leden toe te voegen in deze groep")
                 }
 
                 // Update occupancy at the end of the call
@@ -151,7 +151,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         for (const patch of request.body.getPatches()) {
             const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id)
             if (!member || !Context.auth.canAccessMember(member, groups, PermissionLevel.Write)) {
-                throw Context.auth.error("Je hebt geen toegang tot dit lid of het bestaat niet")
+                throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot dit lid of het bestaat niet")
             }
             
             if (patch.details) {

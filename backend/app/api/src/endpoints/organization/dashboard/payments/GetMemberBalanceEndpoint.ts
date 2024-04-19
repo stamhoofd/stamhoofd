@@ -36,11 +36,7 @@ export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, Resp
         const groups = await Group.where({ organizationId: organization.id })
 
         if (!member || !Context.auth.canAccessMember(member, groups)) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "No members found",
-                human: "Geen leden gevonden, of je hebt geen toegang tot deze leden"
-            })
+            throw Context.auth.notFoundOrNoAccess("Geen leden gevonden, of je hebt geen toegang tot deze leden")
         }
 
         // Get all balance items for this member or users

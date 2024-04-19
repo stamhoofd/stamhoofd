@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint";
 import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint';
 import { StripeMocker } from "../helpers/StripeMocker";
+import { testServer } from "../helpers/TestServer";
 
 const address = Address.create({
     street: 'Demostraat',
@@ -500,7 +501,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body.order;
 
@@ -548,7 +549,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            await expect(endpoint.test(r)).toReject();
+            await expect(testServer.test(endpoint, r)).toReject();
             await checkStocks([], []);
         });
 
@@ -581,7 +582,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body.order;
 
@@ -621,7 +622,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body.order;
 
@@ -664,7 +665,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            await expect(endpoint.test(r)).rejects.toThrow('Missing IBAN');
+            await expect(testServer.test(endpoint, r)).rejects.toThrow('Missing IBAN');
             await checkStocks([], []);
         });
 
@@ -697,7 +698,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body.order;
 
@@ -744,7 +745,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            const response = await patchWebshopOrdersEndpoint.test(r);
+            const response = await testServer.test(patchWebshopOrdersEndpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body[0];
             await checkStock(order.id, order.data.cart.items);
@@ -794,7 +795,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await expect(patchWebshopOrdersEndpoint.test(r)).rejects.toThrow('Missing IBAN');
+            await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow('Missing IBAN');
             await checkStocks([], []);
         });
 
@@ -829,7 +830,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body.order;
 
@@ -877,7 +878,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            const response = await patchWebshopOrdersEndpoint.test(r);
+            const response = await testServer.test(patchWebshopOrdersEndpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body[0];
             await checkStock(order.id, order.data.cart.items);
@@ -908,7 +909,7 @@ describe("E2E.Stock", () => {
             })
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
-            await expect(endpoint.test(r)).rejects.toThrow('Invalid seats');
+            await expect(testServer.test(endpoint, r)).rejects.toThrow('Invalid seats');
         });
 
         test.todo("Amount of persons and orders for a takeout method is calculated correctly");
@@ -951,7 +952,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            await expect(endpoint.test(r)).rejects.toThrow('Product unavailable');
+            await expect(testServer.test(endpoint, r)).rejects.toThrow('Product unavailable');
         });
 
         test("Cannot place an order when product price stock is full", async () => {
@@ -987,7 +988,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            await expect(endpoint.test(r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van productPrice1 beschikbaar');
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van productPrice1 beschikbaar');
         });
 
         test("Cannot place an order when option stock is full", async () => {
@@ -1023,7 +1024,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            await expect(endpoint.test(r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van radioOption1 beschikbaar');
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van radioOption1 beschikbaar');
         });
 
         test("Cannot place an order when multiple choice option stock is full", async () => {
@@ -1059,7 +1060,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            await expect(endpoint.test(r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van checkboxOption2 beschikbaar');
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human','Er zijn nog maar 2 stuks van checkboxOption2 beschikbaar');
         });
 
         test.todo("Cannot place an order when takeout persons stock is full");
@@ -1106,7 +1107,7 @@ describe("E2E.Stock", () => {
             })
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
-            await expect(endpoint.test(r)).rejects.toThrow('Seats unavailable');
+            await expect(testServer.test(endpoint, r)).rejects.toThrow('Seats unavailable');
         });
 
         test("Admin cannot place an order for a reserved seat", async () => {
@@ -1159,7 +1160,7 @@ describe("E2E.Stock", () => {
             // Send a patch
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
-            await expect(patchWebshopOrdersEndpoint.test(r)).rejects.toThrow('Seats unavailable');
+            await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow('Seats unavailable');
         });
 
         test.todo("Admin cannot edit an an order to a reserved seat");
@@ -1199,7 +1200,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
             const order = response.body.order;
 
@@ -1258,7 +1259,7 @@ describe("E2E.Stock", () => {
                 
                 const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-                const response = await endpoint.test(r);
+                const response = await testServer.test(endpoint, r);
                 expect(response.body).toBeDefined();
                 const orderStruct = response.body.order;
 
@@ -1318,7 +1319,7 @@ describe("E2E.Stock", () => {
                 
                 const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-                const response = await endpoint.test(r);
+                const response = await testServer.test(endpoint, r);
                 expect(response.body).toBeDefined();
                 const orderStruct = response.body.order;
 
@@ -1342,7 +1343,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [personCartItem!]);
             }
@@ -1375,7 +1376,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [newItem]);
             }
@@ -1412,7 +1413,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             order = await checkStock(order.id, [personCartItem!, newItem]);
         });
@@ -1436,7 +1437,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
@@ -1456,7 +1457,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
@@ -1477,7 +1478,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
@@ -1503,7 +1504,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
@@ -1533,7 +1534,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
@@ -1567,7 +1568,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
@@ -1594,7 +1595,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
             await checkStock(order.id, [personCartItem!, productCartItem!]);
         });
 
@@ -1612,7 +1613,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [], [personCartItem!, productCartItem!]);
             }
@@ -1631,7 +1632,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [personCartItem!, productCartItem!]);
             }
@@ -1651,7 +1652,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [], [personCartItem!, productCartItem!]);
             }
@@ -1670,7 +1671,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [personCartItem!, productCartItem!]);
             }
@@ -1714,7 +1715,7 @@ describe("E2E.Stock", () => {
             
             const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
             const orderStruct = response.body.order;
 
@@ -1752,7 +1753,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [newItem]);
             
@@ -1792,7 +1793,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [seatCartItem!]);
         });        
@@ -1823,7 +1824,7 @@ describe("E2E.Stock", () => {
             const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r);
+            await testServer.test(patchWebshopOrdersEndpoint, r);
 
             await checkStock(order.id, [seatCartItem!]);
         });
@@ -1842,7 +1843,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [], [seatCartItem!]);
             }
@@ -1861,7 +1862,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [seatCartItem!]);
             }
@@ -1881,7 +1882,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [], [seatCartItem!]);
             }
@@ -1900,7 +1901,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [seatCartItem!]);
             }
@@ -1920,7 +1921,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [], [seatCartItem!]);
             }
@@ -1960,7 +1961,7 @@ describe("E2E.Stock", () => {
             {
                 const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-                const response = await endpoint.test(r);
+                const response = await testServer.test(endpoint, r);
                 expect(response.body).toBeDefined();
                 const orderStruct = response.body.order;
 
@@ -1982,7 +1983,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 orders = await checkStocks(orders.map(o => o.id), [newItem, seatCartItem!]);
             }
@@ -2043,7 +2044,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStocks(orders.map(o => o.id), [newItem, seatCartItem!]);
             }
@@ -2095,7 +2096,7 @@ describe("E2E.Stock", () => {
                 const r = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
                 r.headers.authorization = "Bearer " + token.accessToken
 
-                await patchWebshopOrdersEndpoint.test(r);
+                await testServer.test(patchWebshopOrdersEndpoint, r);
 
                 await checkStock(order.id, [seatCartItem!]);
             }

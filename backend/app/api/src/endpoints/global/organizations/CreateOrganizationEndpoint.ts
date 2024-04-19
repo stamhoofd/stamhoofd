@@ -3,7 +3,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, EmailInterfaceBase } from '@stamhoofd/email';
-import { EmailVerificationCode, Organization, RegisterCode, STCredit, UsedRegisterCode, User } from '@stamhoofd/models';
+import { EmailVerificationCode, Organization, RegisterCode, User } from '@stamhoofd/models';
 import { CreateOrganization, PermissionLevel, Permissions, SignupResponse } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
@@ -123,7 +123,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         const code = await EmailVerificationCode.createFor(user, user.email)
-        code.send(user, request.i18n)
+        code.send(user, organization, request.i18n)
 
         for (const email of delayEmails) {
             Email.sendInternal(email, organization.i18n)

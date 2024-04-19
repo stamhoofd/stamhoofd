@@ -73,7 +73,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         validUntil.setTime(validUntil.getTime() + 7 * 24 * 3600 * 1000);
 
         const dateTime = Formatter.dateTime(validUntil)
-        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(admin.setRelation(User.organization, organization), request.i18n, validUntil)
+        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(admin, organization, request.i18n, validUntil)
 
         if (admin.hasAccount()) {
             const url = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+request.i18n.locale;

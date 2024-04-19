@@ -14,7 +14,7 @@
         "build:full": "rm -rf ./dist && yarn build"
     },
     "dependencies": {
-        "@simonbackx/simple-endpoints": "^1.12.1",
+        "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "@simonbackx/simple-errors": "^1.4"
     }

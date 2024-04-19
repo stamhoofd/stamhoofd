@@ -3,7 +3,7 @@ import { EncryptedMemberWithRegistrations, Member as MemberStruct, MemberDetails
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Payment, Registration, User, UserWithOrganization } from './';
+import { Payment, Registration, User } from './';
 export type MemberWithUsers = Member & { users: User[] }
 export type MemberWithRegistrations = MemberWithUsers & { registrations: Registration[] }
 
@@ -355,69 +355,5 @@ export class Member extends Model {
             cycle: registration.cycle,
             member: MemberStruct.create(registration.member),
         })
-    }
-
-    _hasReadAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false) {
-        if (!user.permissions) {
-            return false
-        }
-        if (user.permissions.hasReadAccess(user.organization.privateMeta.roles)) {
-            return true;
-        }
-
-        for (const registration of this.registrations) {
-            if (registration._hasReadAccess(user, groups)) {
-                if (!needAll) {
-                    return true;
-                }
-            } else {
-                if (needAll) {
-                    return false
-                }
-            }
-        }
-
-        if (needAll) {
-            return this.registrations.length > 0;
-        }
-        return false;
-    }
-
-    async _hasWriteAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false, checkFamily = false) {
-        if (!user.permissions) {
-            return false
-        }
-
-        if (user.permissions.hasWriteAccess(user.organization.privateMeta.roles)) {
-            return true;
-        }
-
-        for (const registration of this.registrations) {
-            if (registration._hasWriteAccess(user, groups)) {
-                if (!needAll) {
-                    return true;
-                }
-            } else {
-                if (needAll) {
-                    return false
-                }
-            }
-        }
-
-        if (needAll) {
-            return true;
-        }         
-        
-        // Check family acccess
-        if (checkFamily) {
-            const members = (await Member.getFamilyWithRegistrations(this.id))
-            for (const member of members) {
-                if (await member._hasWriteAccess(user, groups, false, false)) {
-                    return true
-                }
-            }
-        }
-        
-        return false
     }
 }

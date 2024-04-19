@@ -38,11 +38,7 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
        // Search account in database
         const model = await StripeAccount.getByID(request.params.id)
         if (!model || model.organizationId != organization.id || model.status !== "active") {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Account niet gevonden",
-                statusCode: 400
-            })
+            throw Context.auth.notFoundOrNoAccess("Account niet gevonden")
         }
 
         // For now we don't delete them in Stripe because this causes issues with data access

@@ -85,7 +85,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         const orders = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id)
             if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Write)) {
-                throw Context.auth.error()
+                throw Context.auth.notFoundOrNoAccess()
             }
 
             const orders = body.getPatches().length > 0 ? await Order.where({

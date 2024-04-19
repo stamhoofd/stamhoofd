@@ -35,7 +35,7 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
 
         const webshop = await Webshop.getByID(request.params.id)
         if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
-            throw Context.auth.error()
+            throw Context.auth.notFoundOrNoAccess()
         }
         
         const discountCodes = await WebshopDiscountCode.where({webshopId: request.params.id})

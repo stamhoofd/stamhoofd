@@ -1,8 +1,8 @@
 import { Factory } from "@simonbackx/simple-database";
-import { NewUser,Permissions } from '@stamhoofd/structures';
+import { NewUser, Permissions } from '@stamhoofd/structures';
 
 import { Organization } from "../models/Organization";
-import { User, UserWithOrganization } from "../models/User";
+import { User } from "../models/User";
 import { OrganizationFactory } from './OrganizationFactory';
 
 class Options {
@@ -16,8 +16,8 @@ class Options {
     permissions?: Permissions | null
 }
 
-export class UserFactory extends Factory<Options, UserWithOrganization> {
-    async create(): Promise<UserWithOrganization> {
+export class UserFactory extends Factory<Options, User> {
+    async create(): Promise<User> {
         let organization: Organization
 
         if (!this.options.organization) {

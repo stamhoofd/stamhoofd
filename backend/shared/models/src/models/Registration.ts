@@ -1,11 +1,11 @@
 import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { Email } from '@stamhoofd/email';
-import { EmailTemplateType, getPermissionLevelNumber, PaymentMethod, PaymentMethodHelper, PermissionLevel, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, PaymentMethod, PaymentMethodHelper, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { getEmailBuilder } from '../helpers/EmailBuilder';
-import { Document, EmailTemplate, Organization, User, UserWithOrganization } from './';
+import { Document, EmailTemplate, Organization, User } from './';
 
 export class Registration extends Model {
     static table = "registrations"
@@ -87,31 +87,6 @@ export class Registration extends Model {
             ...this,
             price: this.price ?? 0
         })
-    }
-
-    _hasAccess(user: UserWithOrganization, groups: import('./').Group[], permissionLevel: PermissionLevel) {
-        if (!user.permissions) {
-            return false
-        }
-
-        const group = groups.find(g => g.id === this.groupId)
-        if (!group) {
-            return false;
-        }
-
-        if (group.hasAccess(user, permissionLevel)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    _hasReadAccess(user: UserWithOrganization, groups: import('./').Group[]) {
-        return this._hasAccess(user, groups, PermissionLevel.Read)
-    }
-
-    _hasWriteAccess(user: UserWithOrganization, groups: import('./').Group[]) {
-        return this._hasAccess(user, groups, PermissionLevel.Write)
     }
 
     /**
@@ -308,7 +283,7 @@ export class Registration extends Model {
         };
 
         // First fetch template
-        let templates = (await EmailTemplate.where({ type: data.type, organizationId: user.organizationId, groupId: null }))
+        let templates = (await EmailTemplate.where({ type: data.type, organizationId: organization.id, groupId: null }))
 
         if (templates.length == 0) {
             templates = (await EmailTemplate.where({ type: data.type, organizationId: null, groupId: null }))

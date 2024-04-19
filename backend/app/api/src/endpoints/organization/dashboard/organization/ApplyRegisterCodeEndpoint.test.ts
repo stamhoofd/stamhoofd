@@ -3,6 +3,7 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { OrganizationFactory, RegisterCodeFactory, STCredit, Token, UserFactory } from "@stamhoofd/models";
 import { PermissionLevel, Permissions } from "@stamhoofd/structures";
 
+import { testServer } from "../../../../../tests/helpers/TestServer";
 import { ApplyRegisterCodeEndpoint } from "./ApplyRegisterCodeEndpoint";
 
 describe("Endpoint.ApplyRegisterCodeEndpoint", () => {
@@ -27,7 +28,7 @@ describe("Endpoint.ApplyRegisterCodeEndpoint", () => {
         );
         r.headers.authorization = "Bearer "+token.accessToken
 
-        await expect(endpoint.test(r)).rejects.toThrow("You do not have permissions for this endpoint");
+        await expect(testServer.test(endpoint, r)).rejects.toThrow("You do not have permissions for this action");
     });
 
     test("Can apply a register code and apply the discount", async () => {
@@ -52,7 +53,7 @@ describe("Endpoint.ApplyRegisterCodeEndpoint", () => {
         );
         r.headers.authorization = "Bearer "+token.accessToken
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeUndefined();
 
         // Check if this organization has an open register code

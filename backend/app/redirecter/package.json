@@ -14,7 +14,7 @@
         "@types/node": "^18.11.17"
     },
     "dependencies": {
-        "@simonbackx/simple-endpoints": "^1.12.1",
+        "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1"
     }
 }

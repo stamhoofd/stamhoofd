@@ -42,7 +42,7 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
         return await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id)
             if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
-                throw Context.auth.error()
+                throw Context.auth.notFoundOrNoAccess()
             }
         
             if (webshop.domain !== null) {

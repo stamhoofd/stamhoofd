@@ -1,9 +1,8 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import {  NewUser } from '@stamhoofd/structures';
+import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { NewUser } from '@stamhoofd/structures';
 
-import { OrganizationFactory } from '@stamhoofd/models';
-import { UserFactory } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
+import { testServer } from "../../../../../tests/helpers/TestServer";
 import { GetUserEndpoint } from './GetUserEndpoint';
 
 
@@ -19,7 +18,7 @@ describe("Endpoint.GetUser", () => {
         const r = Request.buildJson("GET", "/v1/user", organization.getApiHost());
         r.headers.authorization = "Bearer "+token.accessToken
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
         if (!(response.body instanceof NewUser)) {
@@ -36,7 +35,7 @@ describe("Endpoint.GetUser", () => {
 
         const r = Request.buildJson("GET", "/v1/user", organization.getApiHost());
 
-        await expect(endpoint.test(r)).rejects.toThrow(/missing/i)
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(/missing/i)
     });
 
     test("Request user details with invalid token is not working", async () => {
@@ -47,7 +46,7 @@ describe("Endpoint.GetUser", () => {
         const r = Request.buildJson("GET", "/v1/user", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken+"d"
 
-        await expect(endpoint.test(r)).rejects.toThrow(/invalid/i)
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(/invalid/i)
     });
 
     test("Request user details with expired token is not working", async () => {
@@ -58,7 +57,7 @@ describe("Endpoint.GetUser", () => {
         const r = Request.buildJson("GET", "/v1/user", organization.getApiHost());
         r.headers.authorization = "Bearer " + token.accessToken
 
-        await expect(endpoint.test(r)).rejects.toThrow(/expired/i)
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(/expired/i)
     });
 
     

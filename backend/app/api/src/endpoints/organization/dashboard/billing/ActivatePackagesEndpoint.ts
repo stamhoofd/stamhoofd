@@ -149,13 +149,13 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 // Not yet valid / active (ignored until valid)
                 model.validAt = null
-                model.organizationId = user.organizationId
+                model.organizationId = organization.id
 
                 // If type is 
                 let amount = 1
 
                 if (membersCount === null && pack.meta.pricingType === STPricingType.PerMember) {
-                    membersCount = await Registration.getActiveMembers(user.organizationId)
+                    membersCount = await Registration.getActiveMembers(organization.id)
                 }
 
                 if (pack.meta.pricingType === STPricingType.PerMember) {
@@ -175,7 +175,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             // Add renewals
             if (request.body.renewPackageIds.length > 0) {
-                const currentPackages = await STPackage.getForOrganization(user.organizationId)
+                const currentPackages = await STPackage.getForOrganization(organization.id)
 
                 for (const id of request.body.renewPackageIds) {
                     const pack = currentPackages.find(c => c.id === id)
@@ -194,7 +194,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     let amount = 1
 
                     if (membersCount === null && pack.meta.pricingType === STPricingType.PerMember) {
-                        membersCount = await Registration.getActiveMembers(user.organizationId)
+                        membersCount = await Registration.getActiveMembers(organization.id)
                     }
 
                     if (pack.meta.pricingType === STPricingType.PerMember) {
@@ -384,7 +384,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     if (sequenceType === SequenceType.recurring) {
                         // Activate package
                         await invoice.activatePackages(false)
-                        await STPackage.updateOrganizationPackages(user.organizationId)
+                        await STPackage.updateOrganizationPackages(organization.id)
 
                         const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
                         if (pendingInvoice) {

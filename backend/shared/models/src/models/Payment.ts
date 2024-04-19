@@ -1,10 +1,9 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, Country, getPermissionLevelNumber, Member as MemberStruct, Order as OrderStruct, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, Settlement, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, Member as MemberStruct, Order as OrderStruct, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization, UserWithOrganization } from './';
+import { Organization } from './';
 
 export class Payment extends Model {
     static table = "payments"

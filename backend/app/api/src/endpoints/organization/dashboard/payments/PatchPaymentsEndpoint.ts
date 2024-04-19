@@ -100,12 +100,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             for (const item of put.balanceItemPayments) {
                 const balanceItem = await BalanceItem.getByID(item.balanceItem.id)
                 if (!balanceItem || balanceItem.organizationId !== organization.id) {
-                    throw new SimpleError({
-                        code: "not_found",
-                        message: "Balance item not found",
-                        human: "Eén van de afrekeningen die je wilde markeren als betaald bestaat niet (meer).",
-                        field: "balanceItem"
-                    })
+                    throw Context.auth.notFoundOrNoAccess("Eén van de afrekeningen die je wilde markeren als betaald bestaat niet (meer).")
                 }
                 balanceItems.push(balanceItem)
 

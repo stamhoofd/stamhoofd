@@ -3,6 +3,7 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { GroupFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Group, GroupGenderType, GroupPatch, GroupPrivateSettings, GroupSettings, GroupSettingsPatch, Organization, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions } from '@stamhoofd/structures';
 
+import { testServer } from '../../../../../tests/helpers/TestServer';
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
 
 describe("Endpoint.PatchOrganization", () => {
@@ -21,7 +22,7 @@ describe("Endpoint.PatchOrganization", () => {
         });
         r.headers.authorization = "Bearer "+token.accessToken
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
         if (!(response.body instanceof Organization)) {
@@ -43,7 +44,7 @@ describe("Endpoint.PatchOrganization", () => {
         });
         r.headers.authorization = "Bearer " + token.accessToken
 
-        await expect(endpoint.test(r)).rejects.toThrow(/permissions/i);
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(/permissions/i);
     });
 
     test("Can't change organization as a user with read access", async () => {
@@ -57,7 +58,7 @@ describe("Endpoint.PatchOrganization", () => {
         });
         r.headers.authorization = "Bearer " + token.accessToken
 
-        await expect(endpoint.test(r)).rejects.toThrow(/permissions/i);
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(/permissions/i);
     });
 
     test("Change the name of a group with access", async () => {
@@ -104,7 +105,7 @@ describe("Endpoint.PatchOrganization", () => {
             });
             r.headers.authorization = "Bearer " + token.accessToken
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
 
             if (!(response.body instanceof Organization)) {
@@ -178,7 +179,7 @@ describe("Endpoint.PatchOrganization", () => {
                     groups: changes.encode({ version: 2 }),
                 });
                 r.headers.authorization = "Bearer " + token.accessToken
-                await expect(endpoint.test(r)).rejects.toThrow(/permissions/i);
+                await expect(testServer.test(endpoint, r)).rejects.toThrow(/permissions/i);
         }
         
         
@@ -229,7 +230,7 @@ describe("Endpoint.PatchOrganization", () => {
             });
             r.headers.authorization = "Bearer " + token.accessToken
 
-            const response = await endpoint.test(r);
+            const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
 
             if (!(response.body instanceof Organization)) {
@@ -266,7 +267,7 @@ describe("Endpoint.PatchOrganization", () => {
                 groups: changes.encode({ version: 2 }),
             });
             r.headers.authorization = "Bearer " + token.accessToken
-            await expect(endpoint.test(r)).rejects.toThrow(/permissions/i);
+            await expect(testServer.test(endpoint, r)).rejects.toThrow(/permissions/i);
         }
     });
 

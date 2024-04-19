@@ -1,14 +1,13 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
 
-type Params = { };
+type Params = Record<string, never>;
 type Query = undefined;
 type Body = PrivateWebshop;
 type ResponseBody = PrivateWebshop;
@@ -60,7 +59,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         // Check if we can decide the domain
         if (!request.body.domain && !request.body.domainUri) {
             const webshops = await Webshop.where({ 
-                organizationId: user.organizationId, 
+                organizationId: organization.id, 
                 domain: { 
                     value: null,
                     sign: "!="

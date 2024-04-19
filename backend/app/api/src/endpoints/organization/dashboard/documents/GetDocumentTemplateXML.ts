@@ -37,11 +37,7 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
 
         const template = await DocumentTemplate.getByID(request.params.id)
         if (!template || !Context.auth.canAccessDocumentTemplate(template)) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Document not found",
-                human: "Document niet gevonden"
-            })
+            throw Context.auth.notFoundOrNoAccess("Onbekend document")
         }
 
         // Update documents

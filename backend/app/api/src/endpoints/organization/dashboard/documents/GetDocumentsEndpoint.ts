@@ -38,10 +38,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
 
         const template = await DocumentTemplate.getByID(request.params.id)
         if (!template || !Context.auth.canAccessDocumentTemplate(template)) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Onbekend document"
-            })
+            throw Context.auth.notFoundOrNoAccess("Onbekend document")
         }
 
         const documents = await Document.where({ templateId: template.id });

@@ -88,7 +88,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        const groups = await Group.getAll(user.organizationId)
+        const groups = await Group.getAll(organization.id)
         
         const registrations: RegistrationWithMemberAndGroup[] = []
         const payRegistrations: {registration: RegistrationWithMemberAndGroup, item: IDRegisterItem}[] = []
@@ -464,7 +464,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             } else if (payment.provider === PaymentProvider.Mollie) {
                 
                 // Mollie payment
-                const token = await MollieToken.getTokenFor(user.organizationId)
+                const token = await MollieToken.getTokenFor(organization.id)
                 if (!token) {
                     throw new SimpleError({
                         code: "",

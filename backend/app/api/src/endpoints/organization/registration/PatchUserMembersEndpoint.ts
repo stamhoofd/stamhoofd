@@ -31,7 +31,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         const {user} = await Context.authenticate()
 
         // Process changes
@@ -41,7 +41,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             const member = new Member()
             member.id = struct.id
-            member.organizationId = user.organizationId
+            member.organizationId = organization.id
 
             struct.details.cleanData()
             member.details = struct.details

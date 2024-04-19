@@ -37,7 +37,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
 
         const webshop = await Webshop.getByID(request.params.id)
         if (!webshop || !Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Read)) {
-            throw Context.auth.error("Je hebt geen toegang tot de tickets van deze webshop")
+            throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot de tickets van deze webshop")
         }
         
         let tickets: Ticket[] | undefined = undefined

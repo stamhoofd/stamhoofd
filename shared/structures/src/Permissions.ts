@@ -204,14 +204,6 @@ export class PermissionsByRole extends AutoEncoder {
         return PermissionLevel.None
     }
 
-    /**
-     * @deprecated
-     * Switch to AdminPermissionChecker
-     */
-    userHasAccess(user: {permissions?: Permissions|null, organization: {privateMeta: {roles: PermissionRoleDetailed[]}}}, level: PermissionLevel): boolean {
-        return this.hasAccess(user.permissions, user.organization.privateMeta.roles, level)
-    }
-
     hasAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[], level: PermissionLevel): boolean {
         if (!permissions) {
             return false

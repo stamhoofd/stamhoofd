@@ -136,8 +136,8 @@ export class ContextInstance {
         const accessToken = header.substring("Bearer ".length);
 
         const token = await Token.getByAccessToken(accessToken, true)
+        
         if (!token || (this.organization && token.user.organizationId != this.organization.id) || (!this.organization && token.user.organizationId)) {
-            console.log(token?.user, this.organization, this)
             throw new SimpleError({
                 code: "invalid_access_token",
                 message: "The access token is invalid",

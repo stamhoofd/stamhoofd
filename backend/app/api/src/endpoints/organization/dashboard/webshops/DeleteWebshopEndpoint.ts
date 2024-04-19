@@ -40,7 +40,7 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         const webshop = await Webshop.getByID(request.params.id)
         if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
-            throw Context.auth.error()
+            throw Context.auth.notFoundOrNoAccess()
         }
 
         const orders = await Order.where({ webshopId: webshop.id });

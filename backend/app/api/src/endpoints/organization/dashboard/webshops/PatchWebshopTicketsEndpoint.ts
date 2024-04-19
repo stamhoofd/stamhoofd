@@ -42,7 +42,7 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
 
         const webshop = await Webshop.getByID(request.params.id)
         if (!webshop || !Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Write)) {
-            throw Context.auth.error("Je hebt geen toegang om tickets te wijzigen van deze webshop")
+            throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang om tickets te wijzigen van deze webshop")
         }
 
         const tickets: Ticket[] = []

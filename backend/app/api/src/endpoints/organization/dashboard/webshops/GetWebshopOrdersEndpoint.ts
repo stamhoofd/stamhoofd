@@ -37,7 +37,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
 
         const webshop = await Webshop.getByID(request.params.id)
         if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
-            throw Context.auth.error("Je hebt geen toegang tot de bestellingen van deze webshop")
+            throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot de bestellingen van deze webshop")
         }
 
         let orders: Order[] | undefined = undefined

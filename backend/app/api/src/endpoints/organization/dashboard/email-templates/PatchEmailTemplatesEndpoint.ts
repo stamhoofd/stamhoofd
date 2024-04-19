@@ -1,7 +1,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailTemplate, Token, UserWithOrganization, Webshop } from '@stamhoofd/models';
+import { EmailTemplate } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
@@ -29,8 +28,8 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
-        const {user} = await Context.authenticate()
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
         if (!Context.auth.canReadEmailTemplates()) {
@@ -42,15 +41,8 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         // Get all patches
         for (const patch of request.body.getPatches()) {
             const template = await EmailTemplate.getByID(patch.id)
-            if (!template || template.organizationId !== user.organizationId) {
-                throw new SimpleError({
-                    code: "invalid_template",
-                    message: "Template with id "+patch.id+" not found",
-                })
-            }
-
-            if (!(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
-                throw Context.auth.error("Je hebt geen toegang om deze emailtemplate te bewerken")
+            if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
+                throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang om deze emailtemplate te bewerken")
             } 
             
             template.html = patch.html ?? template.html
@@ -67,7 +59,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             const struct = put.put
             const template = new EmailTemplate()
             template.id = struct.id
-            template.organizationId = user.organizationId
+            template.organizationId = organization.id
             template.webshopId = struct.webshopId
             template.groupId = struct.groupId
 

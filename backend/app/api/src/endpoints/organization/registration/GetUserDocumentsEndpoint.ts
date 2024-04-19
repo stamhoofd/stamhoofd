@@ -28,11 +28,11 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         const {user} = await Context.authenticate()
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        const templates = await DocumentTemplate.where({ status: 'Published', organizationId: user.organizationId })
+        const templates = await DocumentTemplate.where({ status: 'Published', organizationId: organization.id })
         const memberIds = members.map(m => m.id)
         const templateIds = templates.map(t => t.id)
 

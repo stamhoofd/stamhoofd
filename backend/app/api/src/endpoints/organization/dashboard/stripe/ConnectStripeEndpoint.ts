@@ -51,25 +51,6 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         let expressData: Stripe.AccountCreateParams = {
             country: organization.address.country,
             // Problem: we cannot set company or business_type, because then it defaults the structure of the company to one that requires a company number
-            /*
-            business_type: 'non_profit',
-            company: {
-                name: user.organization.meta.companyName ?? undefined,
-                tax_id: user.organization.meta.companyNumber ?? undefined,
-                vat_id: user.organization.meta.VATNumber ?? undefined,
-                structure: 'unincorporated_non_profit',
-                address: {
-                    line1: user.organization.address.street + " " + user.organization.address.number,
-                    city: user.organization.address.city,
-                    postal_code: user.organization.address.postalCode,
-                    country: user.organization.address.country
-                },
-            },*/
-            // business_profile: {
-            //     mcc: '8398', // charitable_and_social_service_organizations_fundraising <-> 8641 civic_social_fraternal_associations
-            //     //name: user.organization.name,
-            //     //url: user.organization.website ?? undefined,
-            // },
             capabilities: {
                 card_payments: { requested: true },
                 transfers: { requested: true },

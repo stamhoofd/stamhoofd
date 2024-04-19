@@ -40,11 +40,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const patch of request.body.getPatches()) {
             const document = await Document.getByID(patch.id)
             if (!document || !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Document not found",
-                    human: "Document niet gevonden"
-                })
+                throw Context.auth.notFoundOrNoAccess("Onbekend document")
             }
            
             if (patch.data) {

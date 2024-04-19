@@ -34,6 +34,15 @@ export class AdminPermissionChecker {
         })
     }
 
+    notFoundOrNoAccess(message?: string): SimpleError {
+        return new SimpleError({
+            code: "not_found",
+            message: "Resourcen not found or no access",
+            human: message ?? 'Niet gevonden of geen toegang tot dit object',
+            statusCode: 404
+        })
+    }
+
     getAllRoles() {
         // todo: add platform roles if user has global roles
         return [...(this.organization?.privateMeta.roles ?? [])]
@@ -330,9 +339,10 @@ export class AdminPermissionChecker {
         if (level === PermissionLevel.Read) {
             return this.canReadEmailTemplates();
         }
-
-        if (!this.organization) {
-            // For now restricted: only platform admins in the future
+        
+        // Note: if the template has an organizationId of null, everyone can access it, but only for reading
+        // that is why we only check the scope afterwards
+        if (!this.checkScope(template.organizationId)) {
             return false;
         }
 

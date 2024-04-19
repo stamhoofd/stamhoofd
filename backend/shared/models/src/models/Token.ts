@@ -1,13 +1,11 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { DecodedRequest } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { ApiUser } from "@stamhoofd/structures";
 import crypto from "crypto";
 
 import { RateLimiter } from "../helpers/RateLimiter";
-import { Organization, User, UserWithOrganization } from './';
+import { User } from './';
 
 export type TokenWithUser = Token & { user: User };
-export type TokenWithOrganizationAndUser = Token & { user: UserWithOrganization };
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -90,81 +88,26 @@ export class Token extends Model {
 
     static user = new ManyToOneRelation(User, "user");
 
-    static async _optionalAuthenticate(request: DecodedRequest<any, any, any>, options?: {allowWithoutAccount: boolean}): Promise<TokenWithOrganizationAndUser | undefined> {
-        const header = request.headers.authorization
-        if (!header) {
-            return
-        }
-        return this._authenticate(request, options)
-    }
-
-    /**
-     * Throws instead of returning undefined
-     * allowWithoutAccount: allow users who don't have a password yet to authenticate (required for users who want to set a password)
-     */
-    static async _authenticate(request: DecodedRequest<any, any, any>, {allowWithoutAccount} = {allowWithoutAccount: false}): Promise<TokenWithOrganizationAndUser> {
-        const organization = await Organization.getFromRequest(request);
-        const header = request.headers.authorization
-        if (!header) {
-            throw new SimpleError({
-                code: "not_authenticated",
-                message: "Missing required authorization header",
-                statusCode: 401
-            })
-        }
-
-        if (!header.startsWith("Bearer ")) {
-            throw new SimpleError({
-                code: "not_supported_authentication",
-                message: "Authentication method not supported. Please authenticate with OAuth2",
-                statusCode: 401
-            })
-        }
-
-        const accessToken = header.substring("Bearer ".length);
-
-        const token = await this.getByAccessToken(accessToken, true)
-        if (!token || token.user.organizationId != organization.id) {
-            throw new SimpleError({
-                code: "invalid_access_token",
-                message: "The access token is invalid",
-                human: "Je bent automatisch uitgelogd, log opnieuw in om verder te gaan",
-                statusCode: 401
-            })
-        }
-        
-        if (token.isAccessTokenExpired()) {
-            throw new SimpleError({
-                code: "expired_access_token",
-                message: "The access token is expired",
-                human: "Je bent automatisch uitgelogd, log opnieuw in om verder te gaan",
-                statusCode: 401
-            })
-        }
-
-        if (!token.user.setRelation(User.organization, organization)) {
-            throw new Error("Unexpected error when setting a relationship")
-        }
-
-        if (!token.user.hasAccount() && !allowWithoutAccount) {
-            throw new SimpleError({
-                code: "not_activated",
-                message: "This user is not yet activated",
-                human: "Maak een account aan op dit e-mailadres om een wachtwoord in te stellen voor je inlogt.",
-                statusCode: 401
-            })
-        }
-
-        // Rate limits for api users
-        if (token.user.isApiUser) {
-            apiUserRateLimiter.track(organization.id)
-        }
-
-        return token as TokenWithOrganizationAndUser
-    }
-
     isAccessTokenExpired(): boolean {
         return this.accessTokenValidUntil < new Date() || this.refreshTokenValidUntil < new Date()
+    }
+
+    static async getAPIUserWithToken(user: User) {
+        if (!user.isApiUser) {
+            throw new Error('Unexpected user type')
+        }
+
+        const [lastToken] = await this.where({
+            userId: user.id
+        }, {limit: 1})
+
+        return ApiUser.create({
+            id: user.id,
+            name: user.name,
+            permissions: user.permissions,
+            expiresAt: lastToken?.accessTokenValidUntil ?? null,
+            createdAt: user.createdAt,
+        })
     }
 
     /**

@@ -4,11 +4,11 @@ import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { UserFactory } from '../factories/UserFactory';
 import { Organization } from './Organization';
 import { Token } from "./Token";
-import { User, UserWithOrganization } from "./User";
+import { User } from "./User";
 
 describe("Model.Token", () => {
     const existingToken = "ABCDEFG";
-    let user: UserWithOrganization;
+    let user: User;
     let organization: Organization;
 
     beforeAll(async () => {

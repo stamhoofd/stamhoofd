@@ -50,11 +50,10 @@ export class AuthenticatedStructures {
     }
 
     static group(group: Group) {
-        const struct = GroupStruct.create(group)
         if (!Context.optionalAuth?.canAccessGroup(group)) {
-            struct.privateSettings = null
+            return group.getStructure()
         }
-        return struct
+        return group.getPrivateStructure()
     }
 
     static webshop(webshop: Webshop) {

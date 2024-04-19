@@ -37,7 +37,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
 
         const mapped: ApiUser[] = []
         for (const admin of admins) {
-            mapped.push(await admin.toApiUserStruct())
+            mapped.push(await Token.getAPIUserWithToken(admin))
         }
 
         return new Response(

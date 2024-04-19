@@ -1,7 +1,6 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { StripeAccount, Token } from '@stamhoofd/models';
+import { StripeAccount } from '@stamhoofd/models';
 import { PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
@@ -26,7 +25,7 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
+    async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 

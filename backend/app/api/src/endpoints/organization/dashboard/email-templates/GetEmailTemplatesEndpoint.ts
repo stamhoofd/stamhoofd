@@ -36,8 +36,8 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
-        const {user} = await Context.authenticate()
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
         if (!Context.auth.canReadEmailTemplates()) {
             throw Context.auth.error()
@@ -55,7 +55,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             EmailTemplateType.RegistrationConfirmation
         ]
         
-        const templates = await EmailTemplate.where({ organizationId: user.organizationId, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}});
+        const templates = await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}});
         const defaultTemplates = await EmailTemplate.where({ organizationId: null, type: {sign: 'IN', value: types} });
         return new Response([...templates, ...defaultTemplates].map(template => EmailTemplateStruct.create(template)))
     }

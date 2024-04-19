@@ -62,11 +62,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
         for (const patch of request.body.getPatches()) {
             const template = await DocumentTemplate.getByID(patch.id)
             if (!template || !Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Template not found",
-                    human: "Template niet gevonden"
-                })
+                throw Context.auth.notFoundOrNoAccess("Onbekende template")
             }
 
             if (patch.privateSettings) {

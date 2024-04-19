@@ -1,6 +1,5 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount } from '@stamhoofd/models';
 import { PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 
@@ -39,11 +38,7 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
        // Search account in database
         const model = await StripeAccount.getByID(request.params.id)
         if (!model || model.organizationId != organization.id) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Account niet gevonden",
-                statusCode: 400
-            })
+            throw Context.auth.notFoundOrNoAccess("Account niet gevonden")
         }
 
         // Get account

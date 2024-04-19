@@ -2,6 +2,7 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { OrganizationFactory, Token, UserFactory } from "@stamhoofd/models";
 import { Token as TokenStruct } from "@stamhoofd/structures";
 
+import { testServer } from "../../../../../tests/helpers/TestServer";
 import { CreateTokenEndpoint } from './CreateTokenEndpoint';
 
 describe("Endpoint.CreateToken", () => {
@@ -20,7 +21,7 @@ describe("Endpoint.CreateToken", () => {
             password: password
         });
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
         if (!(response.body instanceof TokenStruct)) {
@@ -47,7 +48,7 @@ describe("Endpoint.CreateToken", () => {
             refresh_token: token.refreshToken
         });
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
         if (!(response.body instanceof TokenStruct)) {

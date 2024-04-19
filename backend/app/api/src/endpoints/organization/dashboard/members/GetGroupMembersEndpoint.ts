@@ -48,10 +48,7 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         
         const group = await Group.getByID(request.params.id)
         if (!group || !Context.auth.canAccessGroup(group)) {
-            throw new SimpleError({
-                code: "group_not_found",
-                message: "De groep die je opvraagt bestaat niet (meer)"
-            })
+            throw Context.auth.notFoundOrNoAccess("De groep die je opvraagt bestaat niet (meer)")
         }
 
         const members = await group.getMembersWithRegistration(request.query.waitingList, request.query.cycleOffset)

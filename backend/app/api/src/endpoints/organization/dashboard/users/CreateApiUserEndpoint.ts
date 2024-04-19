@@ -65,7 +65,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const createdToken = await Token.createApiToken(admin);
 
         return new Response(ApiUserWithToken.create({
-            ...(await admin.toApiUserStruct()),
+            ...(await Token.getAPIUserWithToken(admin)),
             token: createdToken.accessToken,
             expiresAt: createdToken.accessTokenValidUntil
         }));
