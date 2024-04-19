@@ -6,6 +6,8 @@ import { PasswordToken } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
+import { Context } from '../../../../helpers/Context';
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Params = Record<string, never>;
 type Query = undefined;
@@ -30,7 +32,8 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // for now we care more about UX, so we show a mesage if the user doesn't exist
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Context.setOrganizationScope()
+        
         const users = await User.where({ email: request.body.email, organizationId: organization.id }, { limit: 1 })
         const { from, replyTo } = {
             from: organization.getStrongEmail(request.i18n),
@@ -50,8 +53,8 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
 
             return new Response(undefined)
         }
-        const user = users[0].setRelation(User.organization, organization);
-        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, request.i18n)
+        const user = users[0]
+        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n)
         
         // Send email
         Email.send({

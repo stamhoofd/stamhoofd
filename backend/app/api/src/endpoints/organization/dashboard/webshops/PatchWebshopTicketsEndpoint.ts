@@ -4,6 +4,8 @@ import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Ticket, Token, Webshop } from '@stamhoofd/models';
 import { PermissionLevel, TicketPrivate } from "@stamhoofd/structures";
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<TicketPrivate>[]
@@ -26,30 +28,21 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
+        await Context.setOrganizationScope();
+        await Context.authenticate()
+
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
+        }
 
         if (request.body.length == 0) {
             return new Response([]);
         }
 
         const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop || token.user.organizationId != webshop.organizationId) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Webshop not found",
-                human: "Deze webshop bestaat niet (meer)"
-            })
-        }
-
-        if (!webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Write)) {
-            if (!webshop.privateMeta.scanPermissions.userHasAccess(token.user, PermissionLevel.Write)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "No permissions for this webshop",
-                    human: "Je hebt geen toegang om tickets te scannen in deze webshop",
-                    statusCode: 403
-                })
-            }
+        if (!webshop || !Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Write)) {
+            throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang om tickets te wijzigen van deze webshop")
         }
 
         const tickets: Ticket[] = []

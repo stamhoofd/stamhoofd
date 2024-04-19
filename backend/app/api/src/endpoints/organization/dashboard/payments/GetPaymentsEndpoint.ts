@@ -1,8 +1,10 @@
 import { AutoEncoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Payment, Token, UserWithOrganization } from "@stamhoofd/models";
-import { PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
+import { Organization, Payment } from "@stamhoofd/models";
+import { PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus } from "@stamhoofd/structures";
+
+import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
+import { Context } from "../../../../helpers/Context";
 
 type Params = Record<string, never>;
 type Body = undefined
@@ -92,22 +94,19 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
+
+        if (!Context.auth.canManagePayments()) {
+            throw Context.auth.error()
+        } 
 
         return new Response(
-            (await this.getPayments(user, request.query, PermissionLevel.Read))
+            (await this.getPayments(organization, request.query))
         );
     }
 
-    async getPayments(user: UserWithOrganization, query: Query, permissionLevel: PermissionLevel) {
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot deze groep"
-            })
-        }
-
+    async getPayments(organization: Organization, query: Query) {
         const paidSince = query.paidSince ?? new Date(Date.now() - (24 * 60 * 60 * 1000 * 7 ))
         paidSince.setMilliseconds(0)
         const payments: Payment[] = []
@@ -115,7 +114,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (query.afterId) {
             // First return all payments with id > afterId and paidAt == paidSince
             payments.push(...await Payment.where({
-                organizationId: user.organizationId, 
+                organizationId: organization.id, 
                 paidAt: {
                     sign: '=', 
                     value: paidSince
@@ -142,7 +141,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         payments.push(...await Payment.where({
-            organizationId: user.organizationId, 
+            organizationId: organization.id, 
             paidAt: query.paidBefore ? [{
                 sign: query.afterId  ? '>' : '>=', 
                 value: paidSince
@@ -179,7 +178,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             payments.push(...
                 await Payment.where({
-                    organizationId: user.organizationId, 
+                    organizationId: organization.id, 
                     paidAt: null,
                     method: PaymentMethod.Transfer,
                     status: {
@@ -191,7 +190,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             payments.push(...
                 await Payment.where({
-                    organizationId: user.organizationId, 
+                    organizationId: organization.id, 
                     paidAt: null,
                     updatedAt: {
                         sign: '>', 
@@ -203,6 +202,6 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             );
         }
 
-        return await Payment.getGeneralStructure(payments, {user, permissionLevel})
+        return await AuthenticatedStructures.paymentsGeneral(payments, true)
     }
 }

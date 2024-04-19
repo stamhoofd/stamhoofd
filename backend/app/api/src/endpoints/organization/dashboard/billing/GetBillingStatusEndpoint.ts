@@ -4,6 +4,8 @@ import { STInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
 import { STBillingStatus  } from "@stamhoofd/structures";
 
+import { Context } from "../../../../helpers/Context";
+
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STBillingStatus;
@@ -23,19 +25,15 @@ export class GetBillingStatusEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (user.permissions === null || !user.permissions.hasFinanceAccess(user.organization.privateMeta.roles)) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
+        if (!Context.auth.canManageFinances()) {
+            throw Context.auth.error()
+        }  
 
-        return new Response(await STInvoice.getBillingStatus(user.organization));
+        return new Response(await STInvoice.getBillingStatus(organization));
     }
 }

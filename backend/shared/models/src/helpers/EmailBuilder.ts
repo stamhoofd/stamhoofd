@@ -61,7 +61,7 @@ export async function getEmailBuilder(organization: Organization, email: {
             const recipientUser = await User.getByID(recipient.userId)
             if (recipientUser && recipientUser.organizationId === organization.id && recipientUser.email === recipient.email) {
                 // We can create a special token
-                signInUrl = await PasswordToken.getMagicSignInUrl(recipientUser.setRelation(User.organization, organization))
+                signInUrl = await PasswordToken.getMagicSignInUrl(recipientUser, organization)
             }
         }
 

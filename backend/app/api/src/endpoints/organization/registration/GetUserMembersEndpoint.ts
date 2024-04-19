@@ -1,6 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Member, Token } from '@stamhoofd/models';
+import { Member } from '@stamhoofd/models';
 import { EncryptedMemberWithRegistrations, KeychainedResponse } from "@stamhoofd/structures";
+
+import { Context } from "../../../helpers/Context";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -24,9 +26,9 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
         const members = await Member.getMembersWithRegistrationForUser(user)
         

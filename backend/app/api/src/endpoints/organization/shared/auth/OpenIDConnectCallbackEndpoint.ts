@@ -1,8 +1,8 @@
 import { AnyDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, Webshop } from '@stamhoofd/models';
 
+import { Context } from '../../../../helpers/Context';
 import { OpenIDConnectHelper } from '../../../../helpers/OpenIDConnectHelper';
 
 type Params = Record<string, never>;
@@ -27,7 +27,7 @@ export class OpenIDConnectCallbackEndpoint extends Endpoint<Params, Query, Body,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Context.setOrganizationScope()
         const configuration = organization.serverMeta.ssoConfiguration
 
         if (!configuration) {

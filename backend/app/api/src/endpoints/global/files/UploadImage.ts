@@ -2,10 +2,12 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Image, Token } from '@stamhoofd/models';
+import { Image } from '@stamhoofd/models';
 import { Image as ImageStruct, ResolutionRequest } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from "fs";
+
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = {};
@@ -45,17 +47,12 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOptionalOrganizationScope()
+        await Context.authenticate();
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        if (!Context.auth.canUpload()) {
+            throw Context.auth.error()
         }
-
 
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({

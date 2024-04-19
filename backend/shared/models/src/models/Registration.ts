@@ -1,11 +1,11 @@
 import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { Email } from '@stamhoofd/email';
-import { EmailTemplateType, getPermissionLevelNumber, PaymentMethod, PaymentMethodHelper, PermissionLevel, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, PaymentMethod, PaymentMethodHelper, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { getEmailBuilder } from '../helpers/EmailBuilder';
-import { Document, EmailTemplate, Organization, User, UserWithOrganization } from './';
+import { Document, EmailTemplate, Organization, User } from './';
 
 export class Registration extends Model {
     static table = "registrations"
@@ -87,31 +87,6 @@ export class Registration extends Model {
             ...this,
             price: this.price ?? 0
         })
-    }
-
-    hasAccess(user: UserWithOrganization, groups: import('./').Group[], permissionLevel: PermissionLevel) {
-        if (!user.permissions) {
-            return false
-        }
-
-        const group = groups.find(g => g.id === this.groupId)
-        if (!group) {
-            return false;
-        }
-
-        if (group.hasAccess(user, permissionLevel)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    hasReadAccess(user: UserWithOrganization, groups: import('./').Group[]) {
-        return this.hasAccess(user, groups, PermissionLevel.Read)
-    }
-
-    hasWriteAccess(user: UserWithOrganization, groups: import('./').Group[]) {
-        return this.hasAccess(user, groups, PermissionLevel.Write)
     }
 
     /**
@@ -302,13 +277,13 @@ export class Registration extends Model {
         Email.schedule(builder)
     }
 
-    static async sendTransferEmail(user: UserWithOrganization, payment: import('./').Payment) {
+    static async sendTransferEmail(user: User, organization: Organization, payment: import('./').Payment) {
         const data = {
             type: EmailTemplateType.RegistrationTransferDetails
         };
 
         // First fetch template
-        let templates = (await EmailTemplate.where({ type: data.type, organizationId: user.organizationId, groupId: null }))
+        let templates = (await EmailTemplate.where({ type: data.type, organizationId: organization.id, groupId: null }))
 
         if (templates.length == 0) {
             templates = (await EmailTemplate.where({ type: data.type, organizationId: null, groupId: null }))
@@ -320,8 +295,6 @@ export class Registration extends Model {
         }
 
         const template = templates[0]
-
-        const organization = user.organization;
 
         const paymentGeneral = await payment.getGeneralStructure();
         const registrations = paymentGeneral.registrations

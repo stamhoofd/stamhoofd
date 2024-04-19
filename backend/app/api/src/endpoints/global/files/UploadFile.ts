@@ -1,13 +1,14 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Token } from '@stamhoofd/models';
 import { File } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import formidable from 'formidable';
 import { promises as fs } from "fs";
 import { v4 as uuidv4 } from "uuid";
+
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = {};
@@ -48,17 +49,12 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOptionalOrganizationScope()
+        await Context.authenticate();
 
-        if (!user.hasReadAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        if (!Context.auth.canUpload()) {
+            throw Context.auth.error()
         }
-
 
         if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({

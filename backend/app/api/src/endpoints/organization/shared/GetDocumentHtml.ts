@@ -1,7 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { signInternal } from "@stamhoofd/backend-env";
-import { Document, Member, Token } from "@stamhoofd/models";
+import { Document } from "@stamhoofd/models";
+
+import { Context } from "../../../helpers/Context";
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined
@@ -22,30 +24,18 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope()
+        await Context.authenticate()
 
         const document = await Document.getByID(request.params.id)
-        if (!document || document.organizationId != user.organizationId) {
+        if (!document || !(await Context.auth.canAccessDocument(document))) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Onbekend document"
             })
         }
 
-        if (!user.hasFullAccess()) {
-            // Get members
-            const members = !document.memberId ? [] : (await Member.getMembersWithRegistrationForUser(user))
-            if (!document.memberId || !members.find(m => m.id == document.memberId)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "Je hebt geen toegang tot documenten"
-                })
-            }
-        }
-
-
-        const html = await document.getRenderedHtml(user.organization);
+        const html = await document.getRenderedHtml(organization);
         if (!html) {
             throw new SimpleError({
                 code: "failed_generating",

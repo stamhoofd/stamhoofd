@@ -4,14 +4,14 @@ import { Formatter } from "@stamhoofd/utility";
 
 import { Member, MemberWithRegistrations } from "../models/Member";
 import { Organization } from "../models/Organization";
-import { UserWithOrganization } from "../models/User";
+import { User } from "../models/User";
 import { EmergencyContactFactory } from './EmergencyContactFactory';
 import { OrganizationFactory } from './OrganizationFactory';
 import { ParentFactory } from './ParentFactory';
 
 class Options {
     organization?: Organization;
-    user?: UserWithOrganization;
+    user?: User;
 
     /// In order to add something to the keychain, we need the private key of the user (since everything needs to be signed)
     userPrivateKey?: string;
@@ -23,7 +23,6 @@ class Options {
 export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
     async create(): Promise<MemberWithRegistrations> {
         const organization = this.options.organization
-            ?? this.options.user?.organization
             ?? await new OrganizationFactory({}).create()
 
         const memberDetails = new MemberDetails()

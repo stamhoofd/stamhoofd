@@ -1,8 +1,10 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Document, DocumentTemplate, Member, Registration, Token } from '@stamhoofd/models';
-import { Document as DocumentStruct, DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures";
+import { Document, DocumentTemplate, Group, Member, Registration, Token } from '@stamhoofd/models';
+import { Document as DocumentStruct, DocumentStatus, DocumentTemplatePrivate, PermissionLevel } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -26,38 +28,21 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions to access documents",
-                human: "Je hebt geen toegang tot documenten"
-            })
+        if (!Context.auth.canManageDocuments(PermissionLevel.Write)) {
+            throw Context.auth.error()
         }
 
         const updatedDocuments: DocumentStruct[] = []
 
         for (const patch of request.body.getPatches()) {
             const document = await Document.getByID(patch.id)
-            if (!document || document.organizationId != user.organizationId) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Document not found",
-                    human: "Document niet gevonden"
-                })
+            if (!document || !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))) {
+                throw Context.auth.notFoundOrNoAccess("Onbekend document")
             }
-            const template = await DocumentTemplate.getByID(document.templateId)
-            if (!template || template.organizationId != user.organizationId) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Document not found",
-                    human: "Document niet gevonden"
-                })
-            }
-
+           
             if (patch.data) {
                 document.data.patchOrPut(patch.data)
             }          
@@ -67,6 +52,15 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                const template = await DocumentTemplate.getByID(document.templateId)
+                if (!template) {
+                    throw new SimpleError({
+                        code: "not_found",
+                        message: "Document not found",
+                        human: "Document niet gevonden"
+                    })
+                }
+
                 document.status = template.status
             }
             
@@ -80,7 +74,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const {put} of request.body.getPuts()) {
             // Create a new document
             const template = await DocumentTemplate.getByID(put.templateId)
-            if (!template || template.organizationId != user.organizationId) {
+            if (!template || !Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Document template not found",
@@ -88,7 +82,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 })
             }
             const document = new Document();
-            document.organizationId = user.organizationId
+            document.organizationId = organization.id
             document.templateId = template.id
             document.status = put.status
             document.data = put.data
@@ -110,8 +104,8 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 put.memberId = registration.memberId
             }
             if (put.memberId) {
-                const member = await Member.getByID(put.memberId)
-                if (!member || member.organizationId != user.organizationId) {
+                const member = await Member.getWithRegistrations(put.memberId)
+                if (!member || !Context.auth.canAccessMember(member, await Group.getAll(organization.id), PermissionLevel.Read)) {
                     throw new SimpleError({
                         code: "not_found",
                         message: "Member not found",

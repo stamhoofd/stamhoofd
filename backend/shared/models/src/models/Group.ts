@@ -1,8 +1,8 @@
 import { column, Database, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationMetaData, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { Member, MemberWithRegistrations, Payment, Registration, User, UserWithOrganization } from './';
+import { Member, MemberWithRegistrations, Payment, Registration, User } from './';
 
 if (Member === undefined) {
     throw new Error("Import Member is undefined")
@@ -30,11 +30,9 @@ export class Group extends Model {
     settings: GroupSettings;
 
     @column({ 
-        type: "json", decoder: GroupPrivateSettings, beforeSave(value) {
-            return value ?? GroupPrivateSettings.create({})
-        } 
+        type: "json", decoder: GroupPrivateSettings
     })
-    privateSettings: GroupPrivateSettings;
+    privateSettings = GroupPrivateSettings.create({})
 
     @column({ type: "string" })
     organizationId: string;
@@ -107,26 +105,6 @@ export class Group extends Model {
         return [...map.values()]
     }
 
-    hasAccess(user: UserWithOrganization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        if (!user.permissions || user.organizationId != this.organizationId) {
-            return false
-        }
-
-        if (this.privateSettings.permissions.userHasAccess(user, permissionLevel)) {
-            return true;
-        }
-
-        // Check parent categories
-        const parentCategories = this.getParentCategories(user.organization.meta.categories)
-        for (const category of parentCategories) {
-            if (category.settings.permissions.groupPermissions.userHasAccess(user, permissionLevel)) {
-                return true
-            }
-        }
-
-        return false;
-    }
-
     /**
      * Fetch all members with their corresponding (valid) registrations, users
      */
@@ -188,15 +166,11 @@ export class Group extends Model {
     }
 
     getStructure() {
-        return GroupStruct.create(Object.assign({}, this, { privateSettings: null }))
+        return GroupStruct.create({ ...this, privateSettings: null })
     }
 
-    getPrivateStructure(user?: UserWithOrganization) {
-        const struct = GroupStruct.create(this)
-        if (user && !this.hasAccess(user)) {
-            struct.privateSettings = null
-        }
-        return struct
+    getPrivateStructure() {
+        return GroupStruct.create(this)
     }
 
     private static async getCount(where: string, params: any[]) {

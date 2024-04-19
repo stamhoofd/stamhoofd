@@ -1,7 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Token } from '@stamhoofd/models';
+import { Group } from '@stamhoofd/models';
 import { Group as GroupStruct } from "@stamhoofd/structures";
+
+import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
+import { Context } from "../../../../helpers/Context";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -21,19 +23,16 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot dit onderdeel"
-            })
+        if (!Context.auth.canAccessArchivedGroups()) {
+            throw Context.auth.error()
         }
 
         // Get all admins
-        const groups = await Group.where({ organizationId: user.organization.id, deletedAt: { sign: '!=', value: null } })
-        return new Response(groups.map(g => g.getPrivateStructure(user)));
+        const groups = await Group.where({ organizationId: organization.id, deletedAt: { sign: '!=', value: null } })
+        return new Response(groups.map(g => AuthenticatedStructures.group(g)));
     }
 }

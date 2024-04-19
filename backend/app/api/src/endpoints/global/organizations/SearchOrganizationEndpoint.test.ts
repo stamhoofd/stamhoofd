@@ -1,9 +1,9 @@
-import { Database } from '@simonbackx/simple-database';
 import { Request } from "@simonbackx/simple-endpoints";
-import { Organization, OrganizationSimple } from '@stamhoofd/structures';
+import { OrganizationFactory } from '@stamhoofd/models';
+import { OrganizationSimple } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { OrganizationFactory } from '@stamhoofd/models';
+import { testServer } from '../../../../tests/helpers/TestServer';
 import { SearchOrganizationEndpoint } from "./SearchOrganizationEndpoint";
 
 describe("Endpoint.SearchOrganization", () => {
@@ -20,7 +20,7 @@ describe("Endpoint.SearchOrganization", () => {
             query: organization.name
         };
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         expect(response.body).toHaveLength(1)
 
@@ -45,7 +45,7 @@ describe("Endpoint.SearchOrganization", () => {
             query: city
         };
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         expect(response.body).toHaveLength(2)
 

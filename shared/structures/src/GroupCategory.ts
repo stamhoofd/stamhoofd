@@ -26,7 +26,7 @@ export class GroupCategoryPermissions extends AutoEncoder {
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    getPermissionLevel(permissions: Permissions, allRoles: PermissionRoleDetailed[]): PermissionLevel.None | "Create" {
+    getCreatePermissionLevel(permissions: Permissions, allRoles: PermissionRoleDetailed[]): PermissionLevel.None | "Create" {
         if (permissions.hasFullAccess(allRoles)) {
             return "Create"
         }

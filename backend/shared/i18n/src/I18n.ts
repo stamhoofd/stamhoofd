@@ -1,4 +1,4 @@
-import { DecodedRequest } from '@simonbackx/simple-endpoints';
+import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { promises as fs } from "fs";
 import { countries, languages } from "@stamhoofd/locales"
 import { Country } from '@stamhoofd/structures';
@@ -125,7 +125,7 @@ export class I18n {
         this.messages = m
     }
 
-    static fromRequest(request: DecodedRequest<any, any, any>): I18n {
+    static fromRequest(request: Request|DecodedRequest<any, any, any>): I18n {
         if ((request as any)._cached_i18n) {
             return (request as any)._cached_i18n
         }

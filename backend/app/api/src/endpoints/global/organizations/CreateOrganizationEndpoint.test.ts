@@ -1,8 +1,9 @@
 
 import { Request } from "@simonbackx/simple-endpoints";
-import { Organization,OrganizationFactory, RegisterCode, RegisterCodeFactory, STCredit } from "@stamhoofd/models";
-import { Address, Country, CreateOrganization, NewUser, Organization as OrganizationStruct,Version } from "@stamhoofd/structures";
+import { Organization, OrganizationFactory, RegisterCodeFactory, STCredit } from "@stamhoofd/models";
+import { Address, Country, CreateOrganization, NewUser, Organization as OrganizationStruct, Version } from "@stamhoofd/structures";
 
+import { testServer } from "../../../../tests/helpers/TestServer";
 import { CreateOrganizationEndpoint } from "./CreateOrganizationEndpoint";
 
 function expect_toBeDefined<T>(arg: T): asserts arg is NonNullable<T> {
@@ -33,7 +34,7 @@ describe("Endpoint.CreateOrganization", () => {
             }),
         }).encode({version: Version}));
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body.token).not.toBeEmpty();
     });
 
@@ -57,7 +58,7 @@ describe("Endpoint.CreateOrganization", () => {
             })
         }).encode({version: Version}));
 
-        await expect(endpoint.test(r)).rejects.toThrow(/name/);
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(/name/);
     });
 
     test("Can create an organization with a register code and apply the discount", async () => {
@@ -89,7 +90,7 @@ describe("Endpoint.CreateOrganization", () => {
             })
         );
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body.token).not.toBeEmpty();
 
         const organization = await Organization.getByURI(uri);

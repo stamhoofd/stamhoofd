@@ -1,9 +1,9 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { StripeAccount, Token } from '@stamhoofd/models';
-import { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { StripeAccount } from '@stamhoofd/models';
+import { PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 
+import { Context } from '../../../../helpers/Context';
 import { StripeHelper } from '../../../../helpers/StripeHelper';
 
 type Params = { id: string };
@@ -27,24 +27,18 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Deze actie is enkel beschikbaar voor beheerders",
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Read)) {
+            throw Context.auth.error()
         }
 
        // Search account in database
         const model = await StripeAccount.getByID(request.params.id)
-        if (!model || model.organizationId != user.organizationId) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Account niet gevonden",
-                statusCode: 400
-            })
+        if (!model || model.organizationId != organization.id) {
+            throw Context.auth.notFoundOrNoAccess("Account niet gevonden")
         }
 
         // Get account

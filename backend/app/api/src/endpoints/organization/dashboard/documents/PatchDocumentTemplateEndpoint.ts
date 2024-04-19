@@ -2,7 +2,9 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { DocumentTemplate, Token } from '@stamhoofd/models';
-import { DocumentTemplatePrivate } from "@stamhoofd/structures";
+import { DocumentTemplatePrivate, PermissionLevel } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -30,16 +32,11 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions to access documents",
-                human: "Je hebt geen toegang tot documenten"
-            })
+        if (!Context.auth.canManageDocuments(PermissionLevel.Write)) {
+            throw Context.auth.error()
         }
 
         const updatedTemplates: DocumentTemplatePrivate[] = []
@@ -52,7 +49,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             template.status = put.status
             template.html = put.html
             template.updatesEnabled = put.updatesEnabled
-            template.organizationId = user.organizationId
+            template.organizationId = organization.id
             await template.save();
 
             // todo: Generate documents (maybe in background)
@@ -64,12 +61,8 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
 
         for (const patch of request.body.getPatches()) {
             const template = await DocumentTemplate.getByID(patch.id)
-            if (!template || template.organizationId != user.organizationId) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Template not found",
-                    human: "Template niet gevonden"
-                })
+            if (!template || !Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
+                throw Context.auth.notFoundOrNoAccess("Onbekende template")
             }
 
             if (patch.privateSettings) {
@@ -103,7 +96,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
 
         for (const id of request.body.getDeletes()) {
             const template = await DocumentTemplate.getByID(id)
-            if (!template || template.organizationId != user.organizationId) {
+            if (!template || !Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Template not found",

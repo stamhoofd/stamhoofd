@@ -2,11 +2,10 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { EmailVerificationCode } from '@stamhoofd/models';
-import { Organization } from "@stamhoofd/models";
-import { PasswordToken } from '@stamhoofd/models';
-import { User } from "@stamhoofd/models";
+import { EmailVerificationCode, PasswordToken, User } from '@stamhoofd/models';
 import { NewUser, SignupResponse } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -30,7 +29,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Context.setOrganizationScope()
 
         const u = await User.getForRegister(organization, request.body.email)
 
@@ -59,9 +58,9 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
             if (u.hasAccount()) {
                 // Send an e-mail to say you already have an account + follow password forgot flow
-                const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, request.i18n)
+                const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n)
                 const { from, replyTo } = {
-                    from: (user.permissions ? Email.getInternalEmailFor(request.i18n) : user.organization.getStrongEmail(request.i18n)),
+                    from: (user.permissions ? Email.getInternalEmailFor(request.i18n) : organization.getStrongEmail(request.i18n)),
                     replyTo: undefined
                 }
                 
@@ -97,7 +96,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         const code = await EmailVerificationCode.createFor(user, user.email)
 
         if (sendCode) {
-            code.send(user, request.i18n)
+            code.send(user, organization, request.i18n)
         }
 
         return new Response(SignupResponse.create({

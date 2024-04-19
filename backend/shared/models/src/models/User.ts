@@ -1,13 +1,11 @@
 
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { EmailInterfaceRecipient } from "@stamhoofd/email";
-import { ApiUser, LoginProviderType, NewUser, Organization as OrganizationStruct, Permissions, UserMeta, User as UserStruct } from "@stamhoofd/structures";
+import { LoginProviderType, NewUser, Permissions, User as UserStruct,UserMeta } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization, Token } from "./";
-
-export type UserWithOrganization = User & { organization: Organization };
+import { Organization } from "./";
 
 export class User extends Model {
     static table = "users";
@@ -38,6 +36,10 @@ export class User extends Model {
     @column({ type: "boolean" })
     verified = false
 
+    /**
+     * This field is cached and recalculated when permissions are changed. This avoids database joins on every request.
+     * It is a combination of all user_permissions rows for this user and globalPermissions
+     */
     @column({ type: "json", decoder: Permissions, nullable: true })
     permissions: Permissions | null = null
 
@@ -153,18 +155,6 @@ export class User extends Model {
         await other.delete()
     }
 
-    hasReadAccess(this: UserWithOrganization): this is { permissions: Permissions } {
-        return this.permissions?.hasReadAccess(this.organization.privateMeta.roles) ?? false
-    }
-
-    hasWriteAccess(this: UserWithOrganization): this is { permissions: Permissions } {
-        return this.permissions?.hasWriteAccess(this.organization.privateMeta.roles) ?? false
-    }
-
-    hasFullAccess(this: UserWithOrganization): this is { permissions: Permissions } {
-        return this.permissions?.hasFullAccess(this.organization.privateMeta.roles) ?? false
-    }
-
     static async login(organizationId: string, email: string, password: string): Promise<User | undefined> {
         const user = await User.getForAuthentication(organizationId, email)
         if (!user || !user.hasKeys() || user.isApiUser) {
@@ -198,23 +188,6 @@ export class User extends Model {
         return rows
     }
 
-    static async getFull(id: string): Promise<User | undefined> {
-        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`id\` = ? LIMIT 1`, [id]);
-
-        if (rows.length == 0) {
-            return undefined;
-        }
-
-        // Read member + address from first row
-        const user = this.fromRow(rows[0][this.table]) 
-
-        if (!user) {
-            return undefined
-        }
-        
-        return user as User;
-    }
-
     hasPasswordBasedAccount() {
         if (this.password) {
             return true;
@@ -225,24 +198,6 @@ export class User extends Model {
 
     get isApiUser() {
         return !this.email.includes('@') && this.email.endsWith('.api') && this.verified
-    }
-
-    isPlatformAdmin(this: UserWithOrganization) {
-        return (this.email.endsWith('@stamhoofd.be') || this.email.endsWith('@stamhoofd.nl')) && this.verified && this.hasFullAccess()
-    }
-
-    async toApiUserStruct() {
-        const [lastToken] = await Token.where({
-            userId: this.id
-        }, {limit: 1})
-
-        return ApiUser.create({
-            id: this.id,
-            name: this.name,
-            permissions: this.permissions,
-            expiresAt: lastToken?.accessTokenValidUntil ?? null,
-            createdAt: this.createdAt,
-        })
     }
 
     hasAccount() {
@@ -267,7 +222,7 @@ export class User extends Model {
         return false;
     }
 
-    static async getForRegister(organization: Organization, email: string): Promise<UserWithOrganization | undefined> {
+    static async getForRegister(organization: Organization, email: string): Promise<User | undefined> {
         const user = await this.getForRegisterWithoutOrg(organization.id, email)
 
         if (!user) {
@@ -275,7 +230,7 @@ export class User extends Model {
         }
 
         // Read member + address from first row
-        return user.setRelation(User.organization, organization);
+        return user
     }
 
     static async getForRegisterWithoutOrg(organizationId: string, email: string): Promise<User | undefined> {
@@ -317,7 +272,7 @@ export class User extends Model {
     static async register(
         organization: Organization,
         data: NewUser
-    ): Promise<UserWithOrganization | undefined> {
+    ): Promise<User | undefined> {
         const {
             email,
             password,
@@ -330,7 +285,8 @@ export class User extends Model {
             throw new Error("A password is required for new users")
         }
 
-        const user = new User().setRelation(User.organization, organization);
+        const user = new User();
+        user.organizationId = organization.id
         user.id = id ?? uuidv4()
         user.email = email;
         user.password = await this.hash(password)
@@ -348,7 +304,6 @@ export class User extends Model {
             throw e;
         }
 
-        //user.eraseProperty('password');
         return user;
     }
 
@@ -362,7 +317,7 @@ export class User extends Model {
     static async registerSSO(
         organization: Organization,
         data: {email, id, firstName, lastName, type: LoginProviderType, sub: string}
-    ): Promise<UserWithOrganization | undefined> {
+    ): Promise<User | undefined> {
         const {
             email,
             id,
@@ -370,7 +325,8 @@ export class User extends Model {
             lastName
         } = data;
 
-        const user = new User().setRelation(User.organization, organization);
+        const user = new User();
+        user.organizationId = organization.id
         user.id = id ?? uuidv4()
         user.email = email;
         user.verified = false;
@@ -393,14 +349,6 @@ export class User extends Model {
 
     async changePassword(password: string) {
         this.password = await User.hash(password)
-    }
-
-    async getOrganizationStructure(this: UserWithOrganization): Promise<OrganizationStruct> {
-        const organization = this.organization
-        if (organization.id != this.organizationId) {
-            throw new Error("Unexpected permission failure")
-        }
-        return this.permissions ? await organization.getPrivateStructure(this) : await organization.getStructure()
     }
 
     getStructure() {

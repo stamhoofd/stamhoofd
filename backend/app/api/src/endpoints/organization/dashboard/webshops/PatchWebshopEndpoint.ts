@@ -6,6 +6,8 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<PrivateWebshop>;
@@ -32,34 +34,19 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
         }
 
         // Halt all order placement and validation + pause stock updates
         return await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id)
-            if (!webshop || webshop.organizationId != user.organizationId) {
-                throw new SimpleError({
-                    code: "not_found",
-                    message: "Webshop not found",
-                    human: "De webshop die je wilt aanpassen bestaat niet (meer)"
-                })
-            }
-
-            if (!webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "You do not have permissions for this endpoint",
-                    statusCode: 403
-                })
+            if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+                throw Context.auth.notFoundOrNoAccess()
             }
 
             // Do all updates
@@ -98,8 +85,8 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                             const active = !!knownWebshops.find(k => k.meta.domainActive)
 
                             if (active) {
-                                const sameOrg = knownWebshops.find(w => w.organizationId === user.organizationId)
-                                const otherOrg = knownWebshops.find(w => w.organizationId !== user.organizationId)
+                                const sameOrg = knownWebshops.find(w => w.organizationId === organization.id)
+                                const otherOrg = knownWebshops.find(w => w.organizationId !== organization.id)
                                 if (otherOrg && !sameOrg) {
                                     throw new SimpleError({
                                         code: "domain_already_used",
@@ -165,35 +152,30 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             if (request.body.uri !== undefined) {
-                if (request.request.getVersion() < 134) {   
-                    // Only set the legacy url
-                    webshop.legacyUri = request.body.uri
-                } else {
-                    // Validate
-                    if (request.body.uri.length == 0) {
-                        throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Uri cannot be empty",
-                            human: "De link mag niet leeg zijn",
-                            field: "uri"
-                        })
-                    }
-
-                    if (request.body.uri != Formatter.slug(request.body.uri)) {
-                        throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Uri contains invalid characters",
-                            human: "Een link mag geen spaties, hoofdletters of speciale tekens bevatten",
-                            field: "uri"
-                        })
-                    }
-
-                    webshop.uri = request.body.uri
+                // Validate
+                if (request.body.uri.length == 0) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Uri cannot be empty",
+                        human: "De link mag niet leeg zijn",
+                        field: "uri"
+                    })
                 }
+
+                if (request.body.uri != Formatter.slug(request.body.uri)) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Uri contains invalid characters",
+                        human: "Een link mag geen spaties, hoofdletters of speciale tekens bevatten",
+                        field: "uri"
+                    })
+                }
+
+                webshop.uri = request.body.uri
             }
 
             // Verify if we still have full access
-            if (!webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
+            if (!Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "missing_permissions",
                     message: "You cannot restrict your own permissions",

@@ -1,10 +1,11 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { StripeAccount, Token } from '@stamhoofd/models';
-import { StripeAccount as StripeAccountStruct, StripeMetaData } from "@stamhoofd/structures";
+import { StripeAccount } from '@stamhoofd/models';
+import { PermissionLevel, StripeAccount as StripeAccountStruct } from "@stamhoofd/structures";
 import Stripe from 'stripe';
 
+import { Context } from '../../../../helpers/Context';
 import { StripeHelper } from '../../../../helpers/StripeHelper';
 type Params = Record<string, never>;
 type Body = undefined;
@@ -26,18 +27,16 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je moet hoofdbeheerder zijn om Stripe te kunnen connecteren"
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Full)) {
+            throw Context.auth.error()
         }
 
-        const models = await StripeAccount.where({ organizationId: user.organizationId, status: "active" })
+        const models = await StripeAccount.where({ organizationId: organization.id, status: "active" })
 
         const canCreateMultipleStripeAccounts = models.every(a => (a.meta.charges_enabled && a.meta.payouts_enabled) || (a.meta.details_submitted))
         if (models.length > 0 && !canCreateMultipleStripeAccounts) {
@@ -50,27 +49,8 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         const type = 'express'
 
         let expressData: Stripe.AccountCreateParams = {
-            country: user.organization.address.country,
+            country: organization.address.country,
             // Problem: we cannot set company or business_type, because then it defaults the structure of the company to one that requires a company number
-            /*
-            business_type: 'non_profit',
-            company: {
-                name: user.organization.meta.companyName ?? undefined,
-                tax_id: user.organization.meta.companyNumber ?? undefined,
-                vat_id: user.organization.meta.VATNumber ?? undefined,
-                structure: 'unincorporated_non_profit',
-                address: {
-                    line1: user.organization.address.street + " " + user.organization.address.number,
-                    city: user.organization.address.city,
-                    postal_code: user.organization.address.postalCode,
-                    country: user.organization.address.country
-                },
-            },*/
-            // business_profile: {
-            //     mcc: '8398', // charitable_and_social_service_organizations_fundraising <-> 8641 civic_social_fraternal_associations
-            //     //name: user.organization.name,
-            //     //url: user.organization.website ?? undefined,
-            // },
             capabilities: {
                 card_payments: { requested: true },
                 transfers: { requested: true },
@@ -101,7 +81,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
 
         // Save the Stripe account in the database
         const model = new StripeAccount();
-        model.organizationId = user.organizationId;
+        model.organizationId = organization.id;
         model.accountId = account.id;
         model.setMetaFromStripeAccount(account)
         await model.save();

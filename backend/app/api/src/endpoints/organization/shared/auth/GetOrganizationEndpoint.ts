@@ -1,6 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Organization, Token } from '@stamhoofd/models';
 import { KeychainedResponse, Organization as OrganizationStruct } from "@stamhoofd/structures";
+
+import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
+import { Context } from "../../../../helpers/Context";
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -20,13 +23,12 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.optionalAuthenticate(request, {allowWithoutAccount: true});
-        const user = token?.user
-        const organization = user?.organization ?? await Organization.fromApiHost(request.host);
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.optionalAuthenticate({allowWithoutAccount: true})
 
         return new Response(new KeychainedResponse({
-            data: user ? await user.getOrganizationStructure() : await organization.getStructure(),
+            data: await AuthenticatedStructures.organization(organization)
         }));
     }
 }

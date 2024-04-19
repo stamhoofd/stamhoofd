@@ -1,7 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Document, DocumentTemplate, Member, Token } from '@stamhoofd/models';
-import { Document as DocumentStruct, DocumentStatus } from "@stamhoofd/structures";
+import { Document, DocumentTemplate, Member } from '@stamhoofd/models';
+import { Document as DocumentStruct,DocumentStatus } from "@stamhoofd/structures";
 import { Sorter } from "@stamhoofd/utility";
+
+import { Context } from "../../../helpers/Context";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -25,12 +27,12 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        const templates = await DocumentTemplate.where({ status: 'Published', organizationId: user.organizationId })
+        const templates = await DocumentTemplate.where({ status: 'Published', organizationId: organization.id })
         const memberIds = members.map(m => m.id)
         const templateIds = templates.map(t => t.id)
 

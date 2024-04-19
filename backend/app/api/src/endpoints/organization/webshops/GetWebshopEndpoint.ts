@@ -1,14 +1,15 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Token } from '@stamhoofd/models';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
-import { PermissionLevel, PrivateWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { PrivateWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
+
+import { AuthenticatedStructures } from "../../../helpers/AuthenticatedStructures";
+import { Context } from "../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined
 type ResponseBody = PrivateWebshop | WebshopStruct;
-
 
 export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -25,8 +26,8 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.optionalAuthenticate(request);
-        const errors = new SimpleErrors()
+        await Context.setOrganizationScope();
+        await Context.optionalAuthenticate()
 
         const webshop = await Webshop.getByID(request.params.id)
         if (!webshop) {
@@ -37,19 +38,8 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             })
         }
         
-        errors.throwIfNotEmpty()
-
-        if (
-            token 
-            && token.user.permissions 
-            && token.user.organizationId == webshop.organizationId 
-            && (
-                webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Read)
-                || webshop.privateMeta.scanPermissions.userHasAccess(token.user, PermissionLevel.Read)
-            )
-        ) {
-            return new Response(PrivateWebshop.create(webshop));
-        }
-        return new Response(WebshopStruct.create(webshop));
+        return new Response(
+            AuthenticatedStructures.webshop(webshop)
+        );
     }
 }

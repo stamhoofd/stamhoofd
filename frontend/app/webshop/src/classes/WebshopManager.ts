@@ -12,17 +12,24 @@ export class WebshopManagerStatic {
     /**
      * Doing authenticated requests
      */
-    get server() {
+    get optionalAuthenticatedServer() {
         if (SessionManager.currentSession) {
             return SessionManager.currentSession.optionalAuthenticatedServer
         }
+        return this.server
+    }
+
+    /**
+     * Doing authenticated requests
+     */
+    get server() {
         const server = NetworkManager.server
         server.host = "https://" + this.organization.id + "." + STAMHOOFD.domains.api;
         return server
     }
 
     async reload() {
-        const response = await NetworkManager.server.request({
+        const response = await this.server.request({
             method: "GET",
             path: "/webshop/"+this.webshop.id,
             decoder: Webshop as Decoder<Webshop>

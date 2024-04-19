@@ -1,8 +1,8 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { SimpleError } from '@simonbackx/simple-errors';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Organization, RegisterCode, STCredit, UsedRegisterCode } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
 import { RegisterCodeStatus, UsedRegisterCode as UsedRegisterCodeStruct } from '@stamhoofd/structures';
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -24,25 +24,21 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        // If the user has permission, we'll also search if he has access to the organization's key
-        if (user.permissions === null) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "No permissions for this endpoint"
-            })
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
         }
 
-        const codes = await RegisterCode.where({ organizationId: user.organizationId })
+        const codes = await RegisterCode.where({ organizationId: organization.id })
         let code = codes[0]
 
         if (codes.length == 0) {
             code = new RegisterCode()
-            code.organizationId = user.organizationId
-            code.description = "Doorverwezen door "+user.organization.name
+            code.organizationId = organization.id
+            code.description = "Doorverwezen door "+ organization.name
             code.value = 2500
             await code.generateCode()
             await code.save()

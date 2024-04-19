@@ -1,8 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Order } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
-import { Order as OrderStruct, Payment as PaymentStruct } from "@stamhoofd/structures";
+import { Order as OrderStruct } from "@stamhoofd/structures";
+
+import { Context } from "../../../helpers/Context";
 type Params = { id: string; orderId: string };
 type Query = undefined;
 type Body = undefined
@@ -23,9 +24,10 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope()
         const order = await Order.getByID(request.params.orderId)
 
-        if (!order || order.webshopId != request.params.id) {
+        if (!order || order.webshopId != request.params.id || order.organizationId != organization.id) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Order not found",

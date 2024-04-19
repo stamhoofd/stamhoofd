@@ -1,6 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Token, User } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
+
+import { Context } from "../../../../helpers/Context";
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined
@@ -28,31 +30,29 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
-        if ((!user.permissions || !user.hasFullAccess()) || user.id == request.params.id) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang om deze gebruiker te verwijderen"
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManageAdmins()) {
+            throw Context.auth.error()
         }
 
-        const editUser = await User.getByID(request.params.id)
-        if (editUser?.organizationId != user.organizationId) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang om deze gebruiker te verwijderen"
-            })
-        }
-
-         if (editUser.id === user.id) {
+        if (user.id == request.params.id) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je kan jezelf niet verwijderen"
             })
         }
 
+        const editUser = await User.getByID(request.params.id)
+        if (!editUser || !Context.auth.checkScope(editUser.organizationId)) {
+            throw new SimpleError({
+                code: "permission_denied",
+                message: "Je hebt geen toegang om deze gebruiker te verwijderen"
+            })
+        }
+        
         await editUser.delete();
 
         return new Response(undefined);      

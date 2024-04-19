@@ -1,10 +1,8 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { GroupFactory } from '@stamhoofd/models';
-import { OrganizationFactory } from '@stamhoofd/models';
-import { UserFactory } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
+import { GroupFactory, OrganizationFactory } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/structures';
 
+import { testServer } from "../../../../tests/helpers/TestServer";
 import { GetOrganizationFromDomainEndpoint } from './GetOrganizationFromDomainEndpoint';
 
 describe("Endpoint.GetOrganizationFromDomain", () => {
@@ -20,7 +18,7 @@ describe("Endpoint.GetOrganizationFromDomain", () => {
             "domain": organization.uri+".stamhoofd.dev",
         }
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
         if (!(response.body instanceof Organization)) {
@@ -40,7 +38,7 @@ describe("Endpoint.GetOrganizationFromDomain", () => {
             "domain": "inschrijven.mijnscouts.be",
         }
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
         if (!(response.body instanceof Organization)) {

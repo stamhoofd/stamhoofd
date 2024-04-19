@@ -1,9 +1,10 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { StripeAccount, Token } from '@stamhoofd/models';
+import { StripeAccount } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/structures';
 
-import { StripeHelper } from '../../../../helpers/StripeHelper';
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
 type Body = undefined;
@@ -26,34 +27,28 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Deze actie is enkel beschikbaar voor hoofdbeheerders",
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Full)) {
+            throw Context.auth.error()
         }
 
        // Search account in database
         const model = await StripeAccount.getByID(request.params.id)
-        if (!model || model.organizationId != user.organizationId || model.status !== "active") {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Account niet gevonden",
-                statusCode: 400
-            })
+        if (!model || model.organizationId != organization.id || model.status !== "active") {
+            throw Context.auth.notFoundOrNoAccess("Account niet gevonden")
         }
 
-        // Get account
-        const stripe = StripeHelper.getInstance()
-
-        try {
-            await stripe.accounts.del(model.accountId);
-        } catch (e) {
-            console.error('Tried deleting account but failed', e)
-        }
+        // For now we don't delete them in Stripe because this causes issues with data access
+        // const stripe = StripeHelper.getInstance()
+        // 
+        // try {
+        //     await stripe.accounts.del(model.accountId);
+        // } catch (e) {
+        //     console.error('Tried deleting account but failed', e)
+        // }
 
         // If that succeeded
         model.status = "deleted"

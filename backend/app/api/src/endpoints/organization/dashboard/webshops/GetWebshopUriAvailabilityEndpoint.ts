@@ -1,10 +1,9 @@
-import { AutoEncoder, AutoEncoderPatchType,Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { QueueHandler } from '@stamhoofd/queues';
-import { PrivateWebshop, WebshopUriAvailabilityResponse } from "@stamhoofd/structures";
+import { PermissionLevel, WebshopUriAvailabilityResponse } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = { id: string };
 type Body = undefined;
@@ -35,17 +34,19 @@ export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, B
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        // Fast throw first (more in depth checking for patches later)
+        if (!Context.auth.hasSomeAccess()) {
+            throw Context.auth.error()
         }
 
+        const webshop = await Webshop.getByID(request.params.id)
+        if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            throw Context.auth.notFoundOrNoAccess()
+        }
+        
         const q = await Webshop.where({ 
             uri: request.query.uri, 
             id: {

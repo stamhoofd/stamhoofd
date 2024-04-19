@@ -1,8 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { EmailVerificationCode } from '@stamhoofd/models';
-import { Organization } from "@stamhoofd/models";
 import { PollEmailVerificationRequest, PollEmailVerificationResponse } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -26,7 +27,7 @@ export class PollEmailVerificationEndpoint extends Endpoint<Params, Query, Body,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Context.setOrganizationScope()
         const valid = await EmailVerificationCode.poll(organization.id, request.body.token)
         
         return new Response(PollEmailVerificationResponse.create({

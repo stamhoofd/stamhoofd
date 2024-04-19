@@ -2,7 +2,9 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
-import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
+import { NewUser, PermissionLevel, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
+
+import { Context } from '../../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
@@ -26,29 +28,28 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request, {allowWithoutAccount: true});
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        const {user, token} = await Context.authenticate({allowWithoutAccount: true})
 
-        if (((!user.permissions || !user.hasFullAccess()) && user.id != request.body.id) || request.params.id != request.body.id) {
+        if (request.body.id !== request.params.id) {
             throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang om deze gebruiker te wijzigen"
+                code: "invalid_request",
+                message: "Invalid request: id mismatch",
+                statusCode: 400
             })
         }
 
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id)
-        if (editUser?.organizationId !== user.organizationId || editUser.isApiUser) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang om deze gebruiker te wijzigen"
-            })
+        
+        if (!editUser || !Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {
+            throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang om deze gebruiker te wijzigen")
         }
 
         editUser.firstName = request.body.firstName ?? editUser.firstName
         editUser.lastName = request.body.lastName ?? editUser.lastName
 
         if (request.body.permissions !== undefined) {
-            if (!user.hasFullAccess()) {
+            if (!Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je hebt geen rechten om de rechten van deze gebruiker te wijzigen"
@@ -61,7 +62,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 editUser.permissions = request.body.permissions
             }
 
-            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess(user.organization.privateMeta.roles))) {
+            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess(Context.auth.getAllRoles()))) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
@@ -79,19 +80,10 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         await editUser.save();
 
         if (request.body.email && request.body.email !== editUser.email) {
-            const fullUser = await User.getFull(user.id)
-            if (!fullUser) {
-                console.error("Unexpected user not found while fetching full user")
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "Je hebt geen toegang om deze gebruiker te wijzigen"
-                })
-            }
-
             // Create an validation code
             // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
             const code = await EmailVerificationCode.createFor(editUser, request.body.email)
-            code.send(editUser.setRelation(User.organization, user.organization), request.i18n, editUser.id === user.id)
+            code.send(editUser, organization, request.i18n, editUser.id === user.id)
 
             throw new SimpleError({
                 code: "verify_email",

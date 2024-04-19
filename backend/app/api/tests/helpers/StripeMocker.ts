@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { StripeWebookEndpoint } from "../../src/endpoints/global/payments/StripeWebhookEndpoint";
 import { StripeHelper } from "../../src/helpers/StripeHelper";
+import { testServer } from "./TestServer";
 
 export class StripeMocker {
     paymentIntents: {id: string}[] = []
@@ -166,7 +167,7 @@ export class StripeMocker {
             payload: JSON.stringify(payload),
             secret: STAMHOOFD.STRIPE_ENDPOINT_SECRET
         })
-        await endpoint.test(r);
+        await testServer.test(endpoint, r);
     }
 
     decodeBody(body: string) {

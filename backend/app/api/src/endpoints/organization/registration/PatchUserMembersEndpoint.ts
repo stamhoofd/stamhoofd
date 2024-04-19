@@ -1,10 +1,10 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Document, Member, Token } from '@stamhoofd/models';
+import { Document, Member } from '@stamhoofd/models';
 import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, User as UserStruct } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
 
+import { Context } from '../../../helpers/Context';
 import { PatchOrganizationMembersEndpoint } from '../dashboard/members/PatchOrganizationMembersEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
@@ -31,10 +31,8 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
-
-        // TODO: process everything and throw combined errors
+        const organization = await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
 
         // Process changes
         const addedMembers: Member[] = []
@@ -43,7 +41,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             const member = new Member()
             member.id = struct.id
-            member.organizationId = user.organizationId
+            member.organizationId = organization.id
 
             struct.details.cleanData()
             member.details = struct.details

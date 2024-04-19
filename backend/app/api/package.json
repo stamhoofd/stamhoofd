@@ -27,7 +27,7 @@
     "dependencies": {
         "@mollie/api-client": "^3.4.0",
         "@simonbackx/simple-database": "1.24.0",
-        "@simonbackx/simple-endpoints": "^1.12.1",
+        "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "aws-sdk": "^2.885.0",
         "axios": "^0.24.0",

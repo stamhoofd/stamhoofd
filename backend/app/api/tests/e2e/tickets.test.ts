@@ -7,8 +7,9 @@ import { Organization, OrganizationFactory, StripeAccount, Ticket, Token, UserFa
 import { Cart, CartItem, CartReservedSeat, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from "@stamhoofd/structures";
 
 import { PatchWebshopOrdersEndpoint } from "../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint";
-import { PlaceOrderEndpoint } from '../../src/endpoints/global/webshops/PlaceOrderEndpoint';
+import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint';
 import { StripeMocker } from "../helpers/StripeMocker";
+import { testServer } from "../helpers/TestServer";
 
 const customer = Customer.create({
     firstName: 'John',
@@ -195,7 +196,7 @@ describe("E2E.Tickets", () => {
         
         const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         const order = response.body.order;
 
@@ -296,7 +297,7 @@ describe("E2E.Tickets", () => {
         
         const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         const order = response.body.order;
 
@@ -321,7 +322,7 @@ describe("E2E.Tickets", () => {
         const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
         r2.headers.authorization = "Bearer " + token.accessToken
 
-        await patchWebshopOrdersEndpoint.test(r2);
+        await testServer.test(patchWebshopOrdersEndpoint, r2);
 
         const ticketsAfter = await Ticket.where({orderId: order.id});
         expect(ticketsAfter).toHaveLength(9);
@@ -444,7 +445,7 @@ describe("E2E.Tickets", () => {
         
         const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         const order = response.body.order;
 
@@ -466,7 +467,7 @@ describe("E2E.Tickets", () => {
         const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
         r2.headers.authorization = "Bearer " + token.accessToken
 
-        await patchWebshopOrdersEndpoint.test(r2);
+        await testServer.test(patchWebshopOrdersEndpoint, r2);
 
         const ticketsAfter = await Ticket.where({orderId: order.id});
         expect(ticketsAfter).toHaveLength(7);
@@ -506,7 +507,7 @@ describe("E2E.Tickets", () => {
         
         const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         const order = response.body.order;
 
@@ -525,7 +526,7 @@ describe("E2E.Tickets", () => {
         const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
         r2.headers.authorization = "Bearer " + token.accessToken
 
-        await patchWebshopOrdersEndpoint.test(r2);
+        await testServer.test(patchWebshopOrdersEndpoint, r2);
 
         const ticketsAfter = await Ticket.where({orderId: order.id});
         expect(ticketsAfter).toHaveLength(7);
@@ -562,7 +563,7 @@ describe("E2E.Tickets", () => {
         
         const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         const order = response.body.order;
 
@@ -587,7 +588,7 @@ describe("E2E.Tickets", () => {
             const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r2.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r2);
+            await testServer.test(patchWebshopOrdersEndpoint, r2);
         }
 
         let ticketsAfter = await Ticket.where({orderId: order.id});
@@ -618,7 +619,7 @@ describe("E2E.Tickets", () => {
             const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r2.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r2);
+            await testServer.test(patchWebshopOrdersEndpoint, r2);
         }
 
         ticketsAfter = await Ticket.where({orderId: order.id});
@@ -669,7 +670,7 @@ describe("E2E.Tickets", () => {
         
         const r = Request.buildJson("POST", `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
-        const response = await endpoint.test(r);
+        const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
         const order = response.body.order;
 
@@ -734,7 +735,7 @@ describe("E2E.Tickets", () => {
             const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r2.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r2);
+            await testServer.test(patchWebshopOrdersEndpoint, r2);
         }
 
         let ticketsAfter = await Ticket.where({orderId: order.id});
@@ -799,7 +800,7 @@ describe("E2E.Tickets", () => {
             const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r2.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r2);
+            await testServer.test(patchWebshopOrdersEndpoint, r2);
         }
 
         ticketsAfter = await Ticket.where({orderId: order.id});
@@ -868,7 +869,7 @@ describe("E2E.Tickets", () => {
             const r2 = Request.buildJson("PATCH", `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
             r2.headers.authorization = "Bearer " + token.accessToken
 
-            await patchWebshopOrdersEndpoint.test(r2);
+            await testServer.test(patchWebshopOrdersEndpoint, r2);
         }
 
         ticketsAfter = await Ticket.where({orderId: order.id});

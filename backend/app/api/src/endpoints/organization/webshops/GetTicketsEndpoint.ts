@@ -3,6 +3,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Order, Ticket } from '@stamhoofd/models';
 import { TicketOrder, TicketPublic } from "@stamhoofd/structures";
+
+import { Context } from "../../../helpers/Context";
 type Params = { id: string };
 
 class Query extends AutoEncoder {
@@ -40,11 +42,15 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope()
+        
         if (request.query.secret) {
             const [ticket] = await Ticket.where({ 
                 secret: request.query.secret, 
-                webshopId: request.params.id
+                webshopId: request.params.id,
+                organizationId: organization.id
             }, { limit: 1 })
+
             if (!ticket || (request.query.orderId && ticket.orderId !== request.query.orderId) || ticket.isDeleted) {
                 throw new SimpleError({
                     code: "not_found",
@@ -107,6 +113,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             const tickets = await Ticket.where({ 
                 orderId: request.query.orderId, 
                 webshopId: request.params.id,
+                organizationId: organization.id,
                 deletedAt: null
             })
             return new Response(

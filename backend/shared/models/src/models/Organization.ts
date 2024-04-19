@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, PrivatePaymentConfiguration, TransferSettings, WebshopPreview, EmailTemplateType, Recipient, Replacement, STPackageType, Country } from "@stamhoofd/structures";
+import { Address, Country, DNSRecordStatus, EmailTemplateType, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
@@ -11,9 +11,9 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuidv4 } from "uuid";
 
 import { validateDNSRecords } from "../helpers/DNSValidator";
-import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { EmailTemplate, Group, StripeAccount, UserWithOrganization, Webshop } from "./";
 import { getEmailBuilder } from "../helpers/EmailBuilder";
+import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
+import { EmailTemplate, Group, StripeAccount } from "./";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -269,29 +269,6 @@ export class Organization extends Model {
         }
 
         return struct
-    }
-
-    async getPrivateStructure(user?: UserWithOrganization): Promise<OrganizationStruct> {
-        const Group = (await import("./Group")).Group
-        const groups = await Group.getAll(this.id)
-        const webshops = await Webshop.where({ organizationId: this.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
-        return OrganizationStruct.create({
-            id: this.id,
-            name: this.name,
-            meta: this.meta,
-            address: this.address,
-            registerDomain: this.registerDomain,
-            uri: this.uri,
-            website: this.website,
-            groups: groups.map(g => g.getPrivateStructure(user)).sort(GroupStruct.defaultSort),
-            privateMeta: this.privateMeta,
-            webshops: webshops.flatMap(w => {
-                if (user && (!w.privateMeta.permissions.userHasAccess(user, PermissionLevel.Read) && !w.privateMeta.scanPermissions.userHasAccess(user, PermissionLevel.Read))) {
-                    return []
-                }
-                return [WebshopPreview.create(w)]
-            })
-        })
     }
 
     async cleanCategories(groups: {id: string}[]) {

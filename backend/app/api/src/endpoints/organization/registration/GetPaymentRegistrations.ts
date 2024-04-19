@@ -1,9 +1,11 @@
 import { ManyToOneRelation } from "@simonbackx/simple-database";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Member, Payment, Registration, Token } from '@stamhoofd/models';
+import { Group, Member, Payment } from '@stamhoofd/models';
 import { PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
+
+import { Context } from "../../../helpers/Context";
 type Params = {id: string};
 type Query = undefined
 type Body = undefined
@@ -24,8 +26,8 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        await Context.setOrganizationScope();
+        const {user} = await Context.authenticate()
         
         const payment = await Payment.getByID(request.params.id)
         if (!payment) {

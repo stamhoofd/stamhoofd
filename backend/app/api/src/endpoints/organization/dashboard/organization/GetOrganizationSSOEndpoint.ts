@@ -1,7 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Token } from '@stamhoofd/models';
 import { OpenIDClientConfiguration } from "@stamhoofd/structures";
+
+import { Context } from "../../../../helpers/Context";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -26,19 +26,14 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+    async handle(_: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
-        if (!user.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
+        if (!Context.auth.canManageSSOSettings()) {
+            throw Context.auth.error()
         }
-
-        const organization = user.organization
+        
         return new Response(organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({
             clientId: "",
             clientSecret: "",

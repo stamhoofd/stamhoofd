@@ -2,6 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { STPackage, Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
+
+import { Context } from "../../../../helpers/Context";
 type Params = {id: string};
 type Query = undefined;
 type ResponseBody = undefined;
@@ -22,20 +24,16 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
-        const user = token.user
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate()
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (user.permissions === null || !user.permissions.hasFinanceAccess(user.organization.privateMeta.roles)) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You don't have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
+        if (!Context.auth.canDeactivatePackages()) {
+            throw Context.auth.error()
+        }        
 
-        await QueueHandler.schedule("billing/invoices-"+user.organizationId, async () => {
-            const packages = await STPackage.getForOrganization(user.organizationId)
+        await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
+            const packages = await STPackage.getForOrganization(organization.id)
 
             const pack = packages.find(p => p.id === request.params.id)
             if (!pack) {
@@ -60,7 +58,7 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
             pack.removeAt.setTime(pack.removeAt.getTime() - 1000)
             await pack.save()
 
-            await STPackage.updateOrganizationPackages(user.organizationId)
+            await STPackage.updateOrganizationPackages(organization.id)
         });
 
         return new Response(undefined)

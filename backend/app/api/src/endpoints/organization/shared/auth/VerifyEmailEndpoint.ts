@@ -1,13 +1,10 @@
-import { Database } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email, EmailInterface, EmailInterfaceBase } from '@stamhoofd/email';
-import { EmailVerificationCode, Member } from '@stamhoofd/models';
-import { Organization } from "@stamhoofd/models";
-import { Token } from '@stamhoofd/models';
-import { User } from "@stamhoofd/models";
+import { EmailVerificationCode, Token, User } from '@stamhoofd/models';
 import { Token as TokenStruct, VerifyEmailRequest } from "@stamhoofd/structures";
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -31,7 +28,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Context.setOrganizationScope()
 
         const code = await EmailVerificationCode.verify(organization.id, request.body.token, request.body.code)
 

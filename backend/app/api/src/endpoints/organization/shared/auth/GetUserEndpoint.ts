@@ -2,6 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Token, User } from '@stamhoofd/models';
 import { MyUser, User as UserStruct } from '@stamhoofd/structures';
 
+import { Context } from '../../../../helpers/Context';
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
@@ -23,14 +25,8 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request, {allowWithoutAccount: true});
-
-        // Get user unrestriced
-        const user = await User.getFull(token.user.id)
-
-        if (!user) {
-            throw new Error("Unexpected error")
-        }
+        await Context.setOrganizationScope()
+        const {user} = await Context.authenticate({allowWithoutAccount: true})
 
         if (request.request.getVersion() < 243) {
             // Password

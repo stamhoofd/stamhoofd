@@ -1,11 +1,9 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode } from '@stamhoofd/models';
-import { Organization } from '@stamhoofd/models';
-import { PasswordToken } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
-import { ChallengeGrantStruct, CreateTokenStruct,PasswordGrantStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
+import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
+import { ChallengeGrantStruct, CreateTokenStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
+
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -36,8 +34,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - check if not multiple attempts for the same username are started in parallel
         // - Limit the amount of failed attemps by IP (will only make it a bit harder)
         // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
-        const organization = await Organization.fromApiHost(request.host);
-
+        const organization = await Context.setOrganizationScope()
         
         switch (request.body.grantType) {
         case "refresh_token": {
@@ -96,7 +93,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             // if not: throw a validation error (e-mail validation is required)
             if (!user.verified) {
                 const code = await EmailVerificationCode.createFor(user, user.email)
-                code.send(user.setRelation(User.organization, organization), request.i18n)
+                code.send(user, organization, request.i18n)
                 
                 throw new SimpleError({
                     code: "verify_email",
