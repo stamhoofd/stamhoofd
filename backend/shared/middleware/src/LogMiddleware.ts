@@ -104,7 +104,7 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
 
         if (error) {
             if (isSimpleError(error) || isSimpleErrors(error)) {
-                if (!error.hasCode("expired_access_token")) {
+                if (!error.hasCode("expired_access_token") && !error.hasCode('unknown_domain') && !error.hasCode('unknown_webshop')) {
                     logger.error(
                         ...requestPrefix(request, 'error'),
                         "Request with error in response ",
