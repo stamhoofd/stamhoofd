@@ -498,7 +498,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && !group.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization)) {
+            if(group.privateSettings && group.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization)) {
                 return true
             }
         }
