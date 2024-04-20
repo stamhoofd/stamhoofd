@@ -119,8 +119,8 @@
     },
     "resolutions": {
         "vue": "^2.6.14",
-        "**/axios": "^0.24.0",
-        "axios": "^0.24.0",
+        "**/axios": "^0.28.1",
+        "axios": "0.28.1",
         "elliptic": "^6.5.4",
         "sortablejs": "^1.15.0",
         "nodemailer": "6.9.13",
