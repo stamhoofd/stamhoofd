@@ -211,7 +211,7 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
         return this.balanceItem.patch(this.patchBalanceItem)
     }
 
-    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<MemberBalanceItem>>) {
+    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<BalanceItem>>|PartialWithoutMethods<AutoEncoderPatchType<MemberBalanceItem>>) {
         this.patchBalanceItem = this.patchBalanceItem.patch(patch)
     }
 

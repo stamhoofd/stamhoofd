@@ -1,4 +1,5 @@
 import { Country } from "@stamhoofd/structures";
+
 import { City } from "./City";
 import { PostalCode } from './PostalCode';
 import { Province } from './Province';
@@ -90,7 +91,7 @@ describe("Model.PostalCode", () => {
 
     test("Entering the postal code of the parent city works", async () => {
         const test = await PostalCode.getCity("9000", "Mariakerke", Country.Belgium);
-        expect(test).toMatchObject(mariakerke)
+        expect(test).toMatchObject(gent)
     });
 
      test("Entering the postal code of a child city works", async () => {

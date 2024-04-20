@@ -1,13 +1,9 @@
 /* eslint-disable no-constant-condition */
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-//var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // no 5 support atm
-// const CircularDependencyPlugin = require('circular-dependency-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
-const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
 const fs = require("fs")
 const path = require("path")
@@ -75,7 +71,8 @@ module.exports = {
         chunkFilename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[contenthash].js',
         globalObject: 'this', // needed for webworkers
         //pathinfo: process.env.NODE_ENV === "production" ? true : false,
-        assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext][query]' : 'images/[name].[contenthash][ext][query]'
+        assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext][query]' : 'images/[name].[contenthash][ext][query]',
+        clean: true
     },
     devServer: {
         host: '0.0.0.0',
@@ -255,7 +252,7 @@ module.exports = {
                         }
                     },
                     {
-                        loader: '@simonbackx/webfonts-loader',
+                        loader: 'webfonts-loader',
                         options: {}
                     }
                 ]
@@ -265,7 +262,6 @@ module.exports = {
     plugins: [
         // make sure to include the plugin!
         //new FriendlyErrorsWebpackPlugin(),
-        new CleanWebpackPlugin(), // Clear the dist folder before building
         new VueLoaderPlugin(), // Allow .vue files
         ...(!useMiniCssExtractPlugin) ? [] : [new MiniCssExtractPlugin({
             filename: '[name].[contenthash].css',

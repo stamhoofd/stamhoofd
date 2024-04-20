@@ -4,6 +4,7 @@ import { GroupPrice, GroupPrices } from "../../GroupPrices"
 import { GroupSettings } from "../../GroupSettings"
 import { PaymentConfiguration } from "../../PaymentConfiguration"
 import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistrations"
+import { MemberDetails } from "../MemberDetails"
 import { Registration } from "../Registration"
 import { IDRegisterCart } from "./RegisterCart"
 import { IDRegisterItem } from "./RegisterItem"
@@ -102,14 +103,17 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const tom = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
@@ -269,18 +273,22 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const tom = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const linda = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
@@ -434,6 +442,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
@@ -444,10 +453,12 @@ describe("Test register cart price calculations", () => {
             ]
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const tom = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
@@ -577,6 +588,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
@@ -587,6 +599,7 @@ describe("Test register cart price calculations", () => {
             ]
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
@@ -597,6 +610,7 @@ describe("Test register cart price calculations", () => {
             ]
         })
         const tom = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
@@ -665,14 +679,17 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const tom = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
@@ -790,6 +807,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
@@ -800,10 +818,12 @@ describe("Test register cart price calculations", () => {
             ]
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
         const tom = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
@@ -915,6 +935,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
@@ -925,6 +946,7 @@ describe("Test register cart price calculations", () => {
             ]
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
@@ -1041,6 +1063,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const bart = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
@@ -1051,6 +1074,7 @@ describe("Test register cart price calculations", () => {
             ]
         })
         const alice = EncryptedMemberWithRegistrations.create({
+            details: MemberDetails.create({}),
             users: [],
             registrations: []
         })

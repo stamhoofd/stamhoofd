@@ -58,7 +58,7 @@ export default {
 
                 if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
                     try {
-                        el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+                        el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent?.$emit("pop");
                     } catch (e) {
                         // Ignore
                     }
@@ -72,7 +72,7 @@ export default {
     unbind(el, binding, vnode) {
         if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
             try {
-                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent?.$emit("pop");
             } catch (e) {
                 // Ignore
             }

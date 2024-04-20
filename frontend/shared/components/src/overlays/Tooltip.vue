@@ -20,22 +20,22 @@ export default class Tooltip extends Vue {
     @Prop({
         default: "No tooltip text set",
     })
-    text!: string;
+        text!: string;
 
     @Prop({
         default: null,
     })
-    icon!: string | null;
+        icon!: string | null;
     
     @Prop({
         default: 0,
     })
-    x!: number;
+        x!: number;
 
     @Prop({
         default: 0,
     })
-    y!: number;
+        y!: number;
 
     top: number | null = null
     left: number | null = null
@@ -47,14 +47,14 @@ export default class Tooltip extends Vue {
     @Prop({
         default: "right",
     })
-    xPlacement!: "right" | "left";
+        xPlacement!: "right" | "left";
 
     usedXPlacement: "right" | "left" = this.xPlacement
 
     @Prop({
         default: "bottom",
     })
-    yPlacement!: "bottom" | "top";
+        yPlacement!: "bottom" | "top";
 
     usedYPlacement: "bottom" | "top" = this.yPlacement
 
@@ -64,7 +64,7 @@ export default class Tooltip extends Vue {
     @Prop({
         default: null,
     })
-    wrapWidth!: number | null
+        wrapWidth!: number | null
 
     /**
      * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
@@ -72,7 +72,7 @@ export default class Tooltip extends Vue {
     @Prop({
         default: null,
     })
-    wrapHeight!: number | null
+        wrapHeight!: number | null
 
     usedPreferredHeight: number | null = null;
     usedPreferredWidth: number | null = null;
@@ -192,7 +192,7 @@ export default class Tooltip extends Vue {
     }
 
     hide() {
-        this.$parent.$emit("pop")
+        this.$parent?.$emit("pop")
     }
 }
 </script>

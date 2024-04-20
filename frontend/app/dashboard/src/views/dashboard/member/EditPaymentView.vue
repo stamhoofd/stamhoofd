@@ -216,7 +216,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<PaymentGeneral>>) {
-        this.patchPayment = this.patchPayment.patch(patch)
+        this.patchPayment = this.patchPayment.patch(patch as any)
     }
 
     get price() {

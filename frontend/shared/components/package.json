@@ -6,5 +6,15 @@
     "sideEffects": [
         "*.vue",
         "*.css"
-    ]
+    ],
+    "dependencies": {
+        "@tiptap/extension-image": "^2.3.0",
+        "@tiptap/extension-link": "^2.3.0",
+        "@tiptap/extension-typography": "^2.3.0",
+        "@tiptap/extension-underline": "^2.3.0",
+        "@tiptap/pm": "^2.3.0",
+        "@tiptap/starter-kit": "^2.3.0",
+        "@tiptap/vue-2": "^2.3.0",
+        "ibantools": "^3.1.0"
+    }
 }

@@ -202,7 +202,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         return "https://"+this.webshop.getUrl(this.organization) + "/tickets/"+this.ticket.secret
     }
 
-    timer: NodeJS.Timer;
+    timer: NodeJS.Timeout;
 
     mounted() {
         this.generateQRCode().catch(console.error)

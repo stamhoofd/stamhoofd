@@ -91,7 +91,7 @@ export default class RegistrationPageSettingsView extends Mixins(NavigationMixin
         this.present(displayedComponent.setDisplayStyle("overlay"));
 
         setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
+            displayedComponent.vnode?.componentInstance?.$parent?.$emit("pop");
         }, 1000);
     }
 }

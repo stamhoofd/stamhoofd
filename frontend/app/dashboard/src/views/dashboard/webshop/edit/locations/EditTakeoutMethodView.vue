@@ -82,13 +82,13 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    takeoutMethod!: WebshopTakeoutMethod | WebshopOnSiteMethod
+        takeoutMethod!: WebshopTakeoutMethod | WebshopOnSiteMethod
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-    webshop: PrivateWebshop
+        webshop: PrivateWebshop
 
     patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod> = this.takeoutMethod.type === CheckoutMethodType.Takeout ? WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id }) : WebshopOnSiteMethod.patch({ id: this.takeoutMethod.id })
 
@@ -96,7 +96,7 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-    saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
     get isTakeout() {
         return this.takeoutMethod.type === CheckoutMethodType.Takeout
@@ -138,7 +138,7 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
     }
 
     addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod>>) {
-        this.patchTakeoutMethod = this.patchTakeoutMethod.patch(patch)
+        this.patchTakeoutMethod = this.patchTakeoutMethod.patch(patch as any)
     }
    
     patchTimeSlots(patch: AutoEncoderPatchType<WebshopTimeSlots>) {

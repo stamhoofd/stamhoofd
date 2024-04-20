@@ -1,8 +1,19 @@
+import {jest} from '@jest/globals';
 import { Formatter } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
-import { MatcherCategory } from "./MatcherCategory";
-import { DateColumnMatcher } from "./matchers";
+// I18N controller is loaded at some point by the matchers, which require vue-app-navigation (which we cannot load in a node context, so we mock it)
+jest.mock('@stamhoofd/frontend-i18n', () => ({
+    I18nController: {shared: undefined}
+}));
+
+// We need to use 'require' here, otherwise jest won't be able to mock the modules
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const {MatcherCategory} = require('./MatcherCategory');
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const {DateColumnMatcher} = require('./matchers');
 
 describe("DateColumnMatcher", () => {
 

@@ -329,7 +329,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
         
         return new Response(OrderResponse.create({
-            order: OrderStruct.create(Object.assign({}, order, { payment: null }))
+            order: order.getStructureWithoutPayment()
         }));
     }
 }

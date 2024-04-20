@@ -745,7 +745,17 @@ export class Order extends Model {
     }
 
     getStructureWithoutPayment()  {
-        return OrderStruct.create({...this});
+        return OrderStruct.create({
+            id: this.id,
+            webshopId: this.webshopId,
+            number: this.number,
+            data: this.data,
+            status: this.status,
+            balanceItems: [],
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            validAt: this.validAt,
+        });
     }
 
     static async getStructures(orders: Order[]): Promise<OrderStruct[]> {

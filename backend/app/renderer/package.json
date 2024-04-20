@@ -10,8 +10,6 @@
         "build:full": "yarn clear && yarn build",
         "clear": "rm -rf ./dist",
         "start": "yarn build && node --enable-source-maps ./dist/index.js",
-        "test": "yarn build && jest",
-        "test:reset": "yarn build:full && jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
@@ -22,14 +20,10 @@
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1",
-        "aws-sdk": "^2.885.0",
         "axios": "^0.24.0",
-        "base-x": "^3.0.9",
         "luxon": "^2.2.0",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
-        "node-rsa": "^1.1.1",
-        "postmark": "^2.8.1",
-        "puppeteer": "^19.6.0"
+        "puppeteer": "22.6.5"
     }
 }

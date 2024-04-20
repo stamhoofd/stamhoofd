@@ -45,12 +45,12 @@ const helper = {
         }).catch(console.error)
 
         setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
+            displayedComponent.vnode?.componentInstance?.$parent?.$emit("pop");
         }, 1000);
 
         if (el.$tooltipDisplayedComponent) {
             try {
-                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent?.$emit("pop");
                 el.$tooltipDisplayedComponent = null;
             } catch (e) {
                 // ignore

@@ -612,7 +612,7 @@ export default class ContextMenuView extends Vue {
         }
         this.isPopped = true
         this.popChildMenu()
-        this.$parent.$parent.$emit("pop");
+        this.$parent?.$parent?.$emit("pop");
 
         if (popParents && this.parentMenu) {
             this.parentMenu.pop(true)

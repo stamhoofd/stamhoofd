@@ -14,17 +14,14 @@
         "build": " tsc -b . esm",
         "build:full": "rm -rf ./dist && rm -rf ./esm/dist && tsc -b . esm",
         "test": "jest",
-        "test:reset": "yarn build:full && jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
-        "@simonbackx/simple-encoding": "^2.8.2",
         "@simonbackx/simple-errors": "^1.4",
         "@types/uuid": "^8.3.0",
         "uuid": "^8.3.2"
     },
     "peerDependencies": {
-        "@simonbackx/simple-encoding": "^2.8.2",
         "@simonbackx/simple-errors": "^1.4",
         "uuid": "^8.3.2"
     }

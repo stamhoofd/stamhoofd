@@ -1,5 +1,5 @@
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core'
-import { TextSelection } from 'prosemirror-state'
+import { TextSelection } from '@tiptap/pm/state'
 
 export class EditorSmartVariable {
     id: string;
