@@ -189,9 +189,9 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
         // Include name in form field
         if (sender.name) {
-            from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            from = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
         } else {
-            from = '"'+organization.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            from = '"'+organization.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
         }
 
         const email = request.body

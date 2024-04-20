@@ -948,16 +948,16 @@ export class Organization extends Model {
 
             // Include name in form field
             if (sender.name) {
-                from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+                from = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
             }  else {
-                from = '"'+this.name.replace("\"", "\\\"")+"\" <"+from+">" 
+                from = '"'+this.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
             }
 
             if (replyTo) {
                 if (sender.name) {
-                    replyTo = '"'+sender.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                    replyTo = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
                 }  else {
-                    replyTo = '"'+this.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                    replyTo = '"'+this.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
                 }
             }
             return { from, replyTo }
@@ -986,20 +986,20 @@ export class Organization extends Model {
 
             // Include name in form field
             if (sender.name) {
-                from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+                from = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
             }  else {
-                from = '"'+this.name.replace("\"", "\\\"")+"\" <"+from+">" 
+                from = '"'+this.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
             }
 
             if (replyTo) {
                 if (sender.name) {
-                    replyTo = '"'+sender.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                    replyTo = '"'+sender.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
                 }  else {
-                    replyTo = '"'+this.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                    replyTo = '"'+this.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
                 }
             }
         } else {
-            from = '"'+this.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            from = '"'+this.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
         }
 
         return {
