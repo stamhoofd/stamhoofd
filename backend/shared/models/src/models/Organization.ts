@@ -924,7 +924,7 @@ export class Organization extends Model {
         if (!withName) {
             return ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email"));
         }
-        return '"'+this.name.replace("\"", "\\\"")+'" <'+ ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
+        return '"'+this.name.replaceAll("\"", "\\\"")+'" <'+ ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
     }
 
     getEmail(id: string | null, strongDefault = false): { from: string; replyTo: string | undefined } {
