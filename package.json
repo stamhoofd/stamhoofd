@@ -97,7 +97,7 @@
         "maildev": "^2.1.0",
         "mini-css-extract-plugin": "2.9.0",
         "nodemon": "^3.1.0",
-        "postcss": "^8.4.5",
+        "postcss": "8.4.38",
         "postcss-loader": "^6.2.1",
         "raw-loader": "^4.0.2",
         "sass": "^1.45.1",
