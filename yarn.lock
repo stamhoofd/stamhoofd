@@ -1653,7 +1653,7 @@
     yargs "17.7.2"
     yargs-parser "21.1.1"
 
-"@mollie/api-client@^3.4.0":
+"@mollie/api-client@3.7.0":
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/@mollie/api-client/-/api-client-3.7.0.tgz#e7db8b7ab0556b76cd1bc0e2fd36a0dad55b5116"
   integrity sha512-8pYq08xwv7VJIQvOJU+3nThZbXuNLhtD8iJQQ4UYW67kxHw4eC6cVE9SNVtUuHRfxTwcKLv5wrZd9jFb3BFqiA==
@@ -3670,7 +3670,16 @@ aws-sdk@^2.885.0:
     uuid "8.0.0"
     xml2js "0.6.2"
 
-axios@0.28.1, axios@^0.27.2, axios@^0.28.1, axios@^1.6.0, axios@^1.6.1, axios@^1.6.2:
+axios@1.6.8, axios@^1.6.0, axios@^1.6.1, axios@^1.6.2:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.8.tgz#66d294951f5d988a00e87a0ffb955316a619ea66"
+  integrity sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==
+  dependencies:
+    follow-redirects "^1.15.6"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
+
+axios@^0.27.2, axios@^0.28.1:
   version "0.28.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.28.1.tgz#2a7bcd34a3837b71ee1a5ca3762214b86b703e70"
   integrity sha512-iUcGA5a7p0mVb4Gm/sy+FSECNkPFT4y7wt6OM/CDpO/OnNCvSs3PoMG8ibrC9jRoGYU0gUK5pXVC4NPXq6lHRQ==
@@ -6074,7 +6083,7 @@ flatted@^3.2.9:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.3.1.tgz#21db470729a6734d4997002f439cb308987f567a"
   integrity sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==
 
-follow-redirects@^1.0.0, follow-redirects@^1.15.0:
+follow-redirects@^1.0.0, follow-redirects@^1.15.0, follow-redirects@^1.15.6:
   version "1.15.6"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.6.tgz#7f815c0cda4249c74ff09e95ef97c23b5fd0399b"
   integrity sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==

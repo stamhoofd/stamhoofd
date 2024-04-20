@@ -25,12 +25,12 @@
         "qs": "^6.11.2"
     },
     "dependencies": {
-        "@mollie/api-client": "^3.4.0",
+        "@mollie/api-client": "3.7.0",
         "@simonbackx/simple-database": "1.24.0",
         "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "aws-sdk": "^2.885.0",
-        "axios": "0.28.1",
+        "axios": "1.6.8",
         "cookie": "^0.5.0",
         "formidable": "^2.1.1",
         "handlebars": "^4.7.7",
@@ -39,9 +39,9 @@
         "mailparser": "3.7.0",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
+        "node-rsa": "1.1.1",
         "openid-client": "^5.4.0",
         "postmark": "4.0.2",
-        "stripe": "^11.5.0",
-        "node-rsa": "1.1.1"
+        "stripe": "^11.5.0"
     }
 }
