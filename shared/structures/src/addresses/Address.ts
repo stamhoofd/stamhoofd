@@ -28,14 +28,7 @@ export class Address extends AutoEncoder {
         return this.street + " " + this.number + ", " + this.city
     }
 
-    cityString(currentCountry: string): string {
-        if (this.country == currentCountry) {
-            return this.city
-        }
-        return this.city + ", " + CountryHelper.getName(this.country)
-    }
-
-    anonymousString(currentCountry: string): string {
+    anonymousString(currentCountry: Country): string {
         if (this.country == currentCountry) {
             return this.street + ', ' + this.city
         }
@@ -169,6 +162,16 @@ export class Address extends AutoEncoder {
                 human: "De straat bevat een komma. Verwijder die uit het adres en kijk na of het wel correct werd ingevuld."
             })
         }
+
+        if (addressLine1.length > 500) {
+            // Helps with DoS attacks on the Regex
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty address line 1",
+                human: "Het adres is te lang. Controleer of het correct werd ingevuld."
+            })
+        }
+
         // Get position of last letter
         const match = /^\s*([^0-9\s][^0-9]+?)[\s,]+([0-9].*?)\s*$/.exec(addressLine1)
         if (!match) {
