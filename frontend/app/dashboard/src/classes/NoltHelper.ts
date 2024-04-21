@@ -4,18 +4,29 @@ import { SessionManager } from "@stamhoofd/networking"
 
 class ResponseBody extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    jwt: string
+        jwt: string
 }
 
 export async function openNolt(check = false) {
     if (check) {
-        if (!document.referrer || (!document.referrer.startsWith("https://"+STAMHOOFD.NOLT_URL) && !document.referrer.startsWith("https://www.stamhoofd.be") && !document.referrer.startsWith("https://www.stamhoofd.nl"))) {
+        let url: URL|null = null
+        if (document.referrer) {
+            try {
+                url = new URL(document.referrer)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        // Request permission if coming from an untrusted domain
+        if (!url || (url.hostname !== STAMHOOFD.NOLT_URL && url.hostname !== 'www.stamhoofd.be' && url.hostname !== 'www.stamhoofd.nl' )) {
             if (!await CenteredMessage.confirm("Wil je inloggen in het feedback systeem?", "Ja, open Feedback", "Je logt in op het feedback systeem met dit account: "+SessionManager.currentSession!.user!.email+". Je kan eerst van vereniging veranderen als je met een ander account wilt inloggen.", undefined, false)) {
                 return
             }
         }
     }
-        // Create token
+    
+    // Create token
     const toast = new Toast("Feedback systeem openen...", "spinner").setHide(null).show()
     try {
         const response = await SessionManager.currentSession!.authenticatedServer!.request({
