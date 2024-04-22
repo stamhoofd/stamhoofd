@@ -1,7 +1,16 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { promises as fs } from 'fs';
 
 export class FileCache {
     static async write(cacheId: string, timestamp: Date, data: Buffer) {
+        if (cacheId.includes("/")) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Invalid cache id",
+                field: "cacheId"
+            })
+        }
+        
         const folder = STAMHOOFD.CACHE_PATH + "/" + cacheId;
         await fs.mkdir(folder, { recursive: true })
 
@@ -19,6 +28,14 @@ export class FileCache {
     }
 
     static async read(cacheId: string, timestamp: Date): Promise<Buffer | null> {
+        if (cacheId.includes("/")) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Invalid cache id",
+                field: "cacheId"
+            })
+        }
+
         const folder = STAMHOOFD.CACHE_PATH + "/" + cacheId;
         const path = folder + "/" + timestamp.getTime() + ".pdf";
         try {
