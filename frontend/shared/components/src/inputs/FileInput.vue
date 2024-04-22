@@ -4,7 +4,7 @@
             <Spinner v-if="uploading" />
             <span v-else-if="value == null" class="icon center upload" />
 
-            <span v-if="value" class="icon file" />
+            <span v-if="value" :class="'icon '+getFileIcon(value)" />
             <span v-if="value">{{ value.name }}</span>
 
             <span v-if="!required && value" class="icon trash" @click="deleteMe" />
@@ -56,6 +56,22 @@ export default class FileInput extends Mixins(NavigationMixin) {
             window.open(this.value.getPublicPath(), 'Privacyvoorwaarden')
             event.preventDefault();
         }
+    }
+
+    getFileIcon(file: File) {
+        if (file.path.endsWith(".png") || file.path.endsWith(".jpg") || file.path.endsWith(".jpeg") || file.path.endsWith(".gif")) {
+            return "file-image"
+        }
+        if (file.path.endsWith(".pdf")) {
+            return "file-pdf color-pdf"
+        }
+        if (file.path.endsWith(".xlsx") || file.path.endsWith(".xls")) {
+            return "file-excel color-excel"
+        }
+        if (file.path.endsWith(".docx") || file.path.endsWith(".doc")) {
+            return "file-word color-word"
+        }
+        return "file"
     }
 
     beforeDestroy() {
@@ -160,9 +176,8 @@ export default class FileInput extends Mixins(NavigationMixin) {
         display: none;
     }
 
-    .icon.file {
+    .icon:first-child {
         margin-right: 10px;
-        color: $color-dark;
 
         &+ span {
             color: $color-dark;
