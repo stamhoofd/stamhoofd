@@ -15,7 +15,8 @@
     "devDependencies": {
         "@types/luxon": "^2.0.8",
         "@types/mysql": "^2.15.20",
-        "@types/node": "^18.11.17"
+        "@types/node": "^18.11.17",
+        "@types/formidable": "3.4.5"
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.13.0",
@@ -23,6 +24,7 @@
         "luxon": "^2.2.0",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
-        "puppeteer": "22.6.5"
+        "puppeteer": "22.6.5",
+        "formidable": "3.5.1"
     }
 }

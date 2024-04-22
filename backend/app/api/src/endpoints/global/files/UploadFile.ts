@@ -70,13 +70,30 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const form = formidable({ maxFileSize: 20 * 1024 * 1024, maxFields: 1, keepExtensions: true });
         const file = await new Promise<FormidableFile>((resolve, reject) => {
-            form.parse(request.request.request, (err, fields, file: {file: FormidableFile}) => {
+            if (!request.request.request) {
+                reject(new SimpleError({
+                    code: "invalid_request",
+                    message: "Invalid request",
+                    statusCode: 500
+                }));
+                return;
+            }
+            form.parse(request.request.request, (err, fields, files) => {
                 if (err) {
                     reject(err);
                     return;
                 }
+
+                if (!files.file || !Array.isArray(files.file) || files.file.length !== 1){
+                    reject(new SimpleError({
+                        code: "missing_field",
+                        message: "Missing file",
+                        field: "file"
+                    }))
+                    return;
+                }
                
-                resolve(file.file);
+                resolve(files.file[0]);
             });
         });
 

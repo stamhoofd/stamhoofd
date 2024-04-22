@@ -32,7 +32,7 @@
         "aws-sdk": "^2.885.0",
         "axios": "1.6.8",
         "cookie": "^0.5.0",
-        "formidable": "^2.1.1",
+        "formidable": "3.5.1",
         "handlebars": "^4.7.7",
         "jsonwebtoken": "9.0.0",
         "luxon": "^2.2.0",

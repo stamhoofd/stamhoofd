@@ -3,6 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { verifyInternalSignature } from "@stamhoofd/backend-env";
 import { QueueHandler } from "@stamhoofd/queues";
 import formidable from 'formidable';
+import { firstValues } from 'formidable/src/helpers/firstValues.js';
 import { promises as fs } from "fs";
 import puppeteer, { Browser } from "puppeteer";
 
@@ -34,15 +35,26 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const form = formidable({ 
             maxTotalFileSize: 20 * 1024 * 1024, 
-            keepExtensions: true
+            keepExtensions: false,
+            maxFiles: 1
         });
+
         const {html, cacheId, timestamp, signature} = await new Promise<{html: string, cacheId: string, timestamp: Date, signature: string}>((resolve, reject) => {
-            form.parse(request.request.request, async (err, fields, files) => {
+            if (!request.request.request) {
+                reject(new SimpleError({
+                    code: "invalid_request",
+                    message: "Invalid request",
+                    statusCode: 500
+                }));
+                return;
+            }
+
+            form.parse(request.request.request, async (err, fieldsMultiple, files) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-                if (!files.html) {
+                if (!files.html || files.html.length !== 1) {
                     reject(new SimpleError({
                         code: "missing_field",
                         message: "Field html is required",
@@ -50,6 +62,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     }))
                     return
                 }
+                const fields = firstValues(form, fieldsMultiple);
+
                 if (!fields.signature || typeof fields.signature !== "string") {
                     reject(new SimpleError({
                         code: "missing_field",
@@ -77,7 +91,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
                 let html;
                 try {
-                    html = await fs.readFile(files.html.filepath as string , 'utf8')
+                    html = await fs.readFile(files.html[0].filepath as string , 'utf8')
                 } catch (e) {
                     reject(new SimpleError({
                         code: "invalid_field",

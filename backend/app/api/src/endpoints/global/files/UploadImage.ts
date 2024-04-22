@@ -66,14 +66,28 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new Error("Not supported without real request")
         }
 
-        const form = formidable({ maxFileSize: 5 * 1024 * 1024, keepExtensions: true, maxFiles: 1 });
+        const form = formidable({ 
+            maxFileSize: 5 * 1024 * 1024, 
+            keepExtensions: true, 
+            maxFiles: 1 
+        });
+
         const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
+            if (!request.request.request) {
+                reject(new SimpleError({
+                    code: "invalid_request",
+                    message: "Invalid request",
+                    statusCode: 500
+                }));
+                return;
+            }
+
             form.parse(request.request.request, (err, fields, files) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-                if (!fields.resolutions) {
+                if (!fields.resolutions || !Array.isArray(fields.resolutions) || fields.resolutions.length !== 1){
                     reject(new SimpleError({
                         code: "missing_field",
                         message: "Field resolutions is required",
@@ -81,7 +95,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                     }))
                     return;
                 }
-                if (!files.file) {
+                if (!files.file || !Array.isArray(files.file) || files.file.length !== 1){
                     reject(new SimpleError({
                         code: "missing_field",
                         message: "Missing file",
@@ -90,8 +104,8 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                     return;
                 }
                 try {   
-                    const resolutions = new ObjectData(JSON.parse(fields.resolutions), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>)
-                    resolve([files.file, resolutions]);
+                    const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>)
+                    resolve([files.file[0], resolutions]);
                 } catch (e) {
                     reject(e)
                 }
