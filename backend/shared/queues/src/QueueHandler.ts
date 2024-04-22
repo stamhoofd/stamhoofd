@@ -39,8 +39,12 @@ export class QueueHandler {
             return await handler();
         }
 
+        // We need to save the current AsyncLocalStorage context
+        // otherwise we could run items on the queue with the wrong context
+        const snapshot = AsyncLocalStorage.snapshot()
+
         const item = new QueueItem<T>()
-        item.handler = handler
+        item.handler = () => snapshot(handler)
         
         const promise = new Promise<T>((resolve, reject) => {
             item.resolve = resolve

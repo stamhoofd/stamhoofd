@@ -11,6 +11,8 @@
     ],
     "scripts": {
         "build": "tsc -b",
-        "build:full": "rm -rf ./dist && yarn build"
+        "build:full": "rm -rf ./dist && yarn build",
+        "test": "jest --runInBand",
+        "test:reset": "yarn build:full && jest --runInBand"
     }
 }
