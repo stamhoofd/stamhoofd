@@ -49,6 +49,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 return;
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             form.parse(request.request.request, async (err, fieldsMultiple, files) => {
                 if (err) {
                     reject(err);
@@ -91,7 +92,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
                 let html;
                 try {
-                    html = await fs.readFile(files.html[0].filepath as string , 'utf8')
+                    html = await fs.readFile(files.html[0].filepath , 'utf8')
                 } catch (e) {
                     reject(new SimpleError({
                         code: "invalid_field",
@@ -107,6 +108,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     cacheId: fields.cacheId,
                     timestamp: new Date(parseInt(fields.timestamp as string))
                 })
+                return
             });
         });
 
