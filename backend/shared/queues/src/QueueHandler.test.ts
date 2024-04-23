@@ -2,6 +2,32 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { QueueHandler } from './QueueHandler';
 
 describe('QueueHandler', () => {
+    it('Guards against deadlocks', async () => {
+        const result = await QueueHandler.schedule('test', async () => {
+            return QueueHandler.schedule('test', async () => {
+                return 'test';
+            });
+        })
+
+        expect(result).toBe('test');
+    });
+
+    it('Guards against deep deadlocks', async () => {
+        const result = await QueueHandler.schedule('test', async () => {
+            return QueueHandler.schedule('other', async () => {
+                return QueueHandler.schedule('test', async () => {
+                    return QueueHandler.schedule('other', async () => {
+                        return QueueHandler.schedule('test', async () => {
+                            return 'test';
+                        });
+                    });
+                });
+            });
+        })
+
+        expect(result).toBe('test');
+    });
+
     it('Inherits the right AsyncLocalStorage context', async () => {
         const context = new AsyncLocalStorage<string>();
 

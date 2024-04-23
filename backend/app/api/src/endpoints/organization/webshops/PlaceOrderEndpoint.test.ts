@@ -113,6 +113,9 @@ describe("Endpoint.PlaceOrderEndpoint", () => {
 
     afterAll(() => {
         stripeMocker.stop();
+    });
+
+    afterEach(() => {
         sinon.restore();
     });
 

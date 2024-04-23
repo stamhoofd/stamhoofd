@@ -846,7 +846,7 @@ export class Order extends Model {
 
 
     async getStructure()  {
-       return (await Order.getStructures([this]))[0]!
+       return (await Order.getStructures([this]))[0]
     }
 
     async sendEmailTemplate(this: Order & { webshop: Webshop & { organization: Organization } }, data: {
@@ -932,7 +932,6 @@ export class Order extends Model {
             payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings)
 
             if (!payment.transferSettings.iban) {
-                console.log("throw no iban")
                 throw new SimpleError({
                     code: "missing_iban",
                     message: "Missing IBAN",

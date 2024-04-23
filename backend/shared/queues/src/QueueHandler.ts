@@ -44,7 +44,12 @@ export class QueueHandler {
         const snapshot = AsyncLocalStorage.snapshot()
 
         const item = new QueueItem<T>()
-        item.handler = () => snapshot(handler)
+        item.handler = () => snapshot(async () => {
+            const currentQueues = this.asyncLocalStorage.getStore() ?? [];
+            return await this.asyncLocalStorage.run([...currentQueues, queue], async () => {
+                return await handler();
+            });
+        })
         
         const promise = new Promise<T>((resolve, reject) => {
             item.resolve = resolve
@@ -87,14 +92,7 @@ export class QueueHandler {
         // console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
 
         try {
-            // We add an async local storage here to avoid deadlocks
-            // We add a list of queues to the context
-            const currentQueues = this.asyncLocalStorage.getStore() ?? [];
-            const result = await this.asyncLocalStorage.run([...currentQueues, queue], async () => {
-                return await next.handler()
-            });
-
-            next.resolve(result)
+            next.resolve(await next.handler())
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
             next.reject(e)

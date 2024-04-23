@@ -228,7 +228,7 @@ describe("E2E.Stock", () => {
 
     async function checkStock(orderId: string, cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
         const otherOrders = (await Order.where({webshopId: webshop.id})).filter(o => o.id !== orderId)
-        return (await checkStocks([orderId, ...otherOrders.map(o => o.id)], [...cartItems, ...otherOrders.flatMap(o => o.data.cart.items)], excludedCartItems))[0]!
+        return (await checkStocks([orderId, ...otherOrders.map(o => o.id)], [...cartItems, ...otherOrders.flatMap(o => o.data.cart.items)], excludedCartItems))[0]
     }
 
     /** Allows to change the stock */
