@@ -73,7 +73,7 @@
                 </div>
                 <div v-if="payment.price > 0" class="hide-smartphone rectangle">
                     <div class="rectangle-top">
-                        Of schrijf over met deze apps*
+                        Kopieer in app
                     </div>
                     <div class="rectangle-bottom">
                         <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
