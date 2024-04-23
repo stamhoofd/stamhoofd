@@ -54,7 +54,7 @@
         "luxon": "^2.3.2",
         "path-browserify": "^1.0.1",
         "pdfkit": "0.15.0",
-        "qrcode": "1.5.2",
+        "qrcode": "1.5.3",
         "sharp": "^0.32",
         "tslib": "^2.3.1",
         "uuid": "^9.0.0",
