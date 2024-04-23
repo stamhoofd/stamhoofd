@@ -115,6 +115,8 @@ declare global {
 
         // Communication with other internal services
         readonly INTERNAL_SECRET_KEY: string
+
+        readonly CRONS_DISABLED: boolean
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

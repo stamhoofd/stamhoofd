@@ -816,6 +816,11 @@ export function areCronsRunning(): boolean {
 }
 
 export const crons = async () => {
+    if (STAMHOOFD.CRONS_DISABLED) {
+        console.log("Crons are disabled. Make sure to enable them in the environment variables.")
+        return;
+    }
+    
     schedulingJobs = true;
     for (const job of registeredCronJobs) {
         if (stopCrons) {
@@ -827,7 +832,9 @@ export const crons = async () => {
         job.running = true
         run(job.name, job.method).finally(() => {
             job.running = false
-        })
+        }).catch(e => {
+            console.error(e)
+        });
 
         // Prevent starting too many jobs at once
         if (STAMHOOFD.environment !== "development") {
