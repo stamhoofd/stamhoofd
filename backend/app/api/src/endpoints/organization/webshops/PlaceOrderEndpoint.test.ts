@@ -405,7 +405,6 @@ describe("Endpoint.PlaceOrderEndpoint", () => {
 
             const stub = sinon.stub(Webshop, 'getByID').callsFake(async function (...args) {
                 counter += 1;
-                console.error('Waiting for hanging promise ' +counter)
 
                 if (counter === 1) {
                     setTimeout(() => {
