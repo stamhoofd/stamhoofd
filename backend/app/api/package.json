@@ -22,7 +22,8 @@
         "@types/mysql": "^2.15.20",
         "@types/node": "^18.11.17",
         "nock": "^13.5.1",
-        "qs": "^6.11.2"
+        "qs": "^6.11.2",
+        "sinon": "^17.0.1"
     },
     "dependencies": {
         "@mollie/api-client": "3.7.0",

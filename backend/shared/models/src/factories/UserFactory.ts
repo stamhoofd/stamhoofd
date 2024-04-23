@@ -9,6 +9,8 @@ class Options {
     organization?: Organization;
     email?: string;
     password?: string;
+    firstName?: string;
+    lastName?: string;
     /**
      * Default is true
      */
@@ -39,6 +41,8 @@ export class UserFactory extends Factory<Options, User> {
         }
 
         user.permissions = this.options.permissions ?? null
+        user.firstName = this.options.firstName ?? null;
+        user.lastName = this.options.lastName ?? null;
         
         if (this.options.verified === undefined || this.options.verified === true) {
             user.verified = true;
