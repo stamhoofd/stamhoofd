@@ -530,6 +530,7 @@ export class WebshopManager {
      * Warning: might stream same orders multiple times if they have been changed
      */
     async streamOrders(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
+        let callbackError = false;
         try {
             const db = await this.getDatabase()
 
@@ -554,15 +555,29 @@ export class WebshopManager {
                     const cursor = event.target.result;
                     if (cursor) {
                         const rawOrder = cursor.value
+
+                        let order: PrivateOrder;
                         try {
-                            const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
-                            callback(order)
+                            order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
                         } catch (e) {
                             // Decoding error: ignore
                             // force fetch all again
                             this.clearLastFetchedOrder().catch(console.error)
 
+                            // Stop reading without throwing an error
+                            return;
                         }
+
+                        try {
+                            callback(order)
+                        } catch (e) {
+                            console.error('callback failed', e)
+                            // Propagate error
+                            callbackError = true;
+                            reject(e);
+                            return;
+                        }
+
                         cursor.continue();
                     } else {
                         // no more results
@@ -572,7 +587,7 @@ export class WebshopManager {
             })
         } catch (e) {
             console.error(e);
-            if (!networkFetch) {
+            if (!networkFetch || callbackError) {
                 throw e;
             }
         }

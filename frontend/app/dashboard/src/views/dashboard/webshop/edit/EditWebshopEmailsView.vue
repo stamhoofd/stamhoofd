@@ -1,6 +1,8 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" @save="save">
         <h1>{{ viewTitle }}</h1>
+        <p>Hoofdbeheerders kunnen via Instellingen → E-mailadressen ook het e-mailadres wijzigen van waaruit de e-mails verstuurd worden.</p>
+
         <p>Wijzig de automatische e-mails die op bepaalde momenten verstuurd worden. Sommige e-mails zijn mogelijks niet van toepassing op deze webshop (afhankelijk van de betaalmethodes die ingesteld zijn).</p>
 
         <STErrorsDefault :error-box="errorBox" />
@@ -55,7 +57,7 @@ import { WebshopManager } from "../WebshopManager";
 })
 export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    webshopManager: WebshopManager
+        webshopManager: WebshopManager
     
     saving = false
     loading = true

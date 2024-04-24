@@ -9,6 +9,10 @@
             We hebben het formaat gewijzigd van webshop links. Maar jouw webshop is (en blijft) ook bereikbaar via {{ legacyUrl }}. In toekomstige communicaties gebruik je best de nieuwe link, maar pas de nieuwe link eerst aan naar wens.
         </p>
 
+        <p v-if="hasOrders" class="warning-box">
+            Opgelet: als je de link naar jouw webshop aanpast, werken mogelijks sommige links in al verzonden e-mails niet meer. De enige uitzondering hierop is als je van een standaard Stamhoofd link overschakelt op een eigen domeinnaam (dan blijven oude links werken). Doe dit dus enkel in het begin van een verkoop.
+        </p>
+
         <STErrorsDefault :error-box="errorBox" />
 
         <STInputBox title="Domeinnaam">
@@ -168,6 +172,18 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     checkedUri = ""
 
     selectedDomain: string | null = null
+    hasOrders = false
+
+    created() {
+        this.hasOrders = !!this.webshopManager?.lastFetchedOrder
+
+        if (!this.hasOrders && this.webshopManager) {
+            this.webshopManager.streamOrders(() => {
+                this.hasOrders = true;
+                throw new Error("Stop streaming")
+            }, true).then().catch(console.error)
+        }
+    }
 
     mounted() {
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/link")
