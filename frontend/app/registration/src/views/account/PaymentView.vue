@@ -174,7 +174,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
     async reload() {
         try {
             this.loading = true;
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: 'GET',
                 path: `/payments/${this.initialPayment.id}`,
                 decoder: PaymentGeneral as Decoder<PaymentGeneral>,

@@ -341,7 +341,7 @@ import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInp
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+
 import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
 import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue";
 import ChooseSeatingPlanView from '../seating/ChooseSeatingPlanView.vue';
@@ -476,7 +476,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     getFeatureFlag(flag: string) {

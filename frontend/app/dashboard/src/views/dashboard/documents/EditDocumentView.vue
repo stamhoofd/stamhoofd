@@ -154,7 +154,7 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
                 patch.addPatch(this.patchDocument)
             }
 
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/organization/documents",
                 body: patch,

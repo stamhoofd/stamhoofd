@@ -155,7 +155,7 @@ import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateS
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import GroupMembersView from "./GroupMembersView.vue";
@@ -294,11 +294,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get tree() {
-        return GroupCategoryTree.build(this.reactiveCategory, this.organization, {permissions: OrganizationManager.user.permissions})
+        return GroupCategoryTree.build(this.reactiveCategory, this.organization, {permissions: this.$organizationManager.user.permissions})
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get isRoot() {
@@ -314,11 +314,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get canEdit() {
-        return OrganizationManager.user.permissions ? this.category.canEdit(OrganizationManager.user.permissions, this.organization.privateMeta?.roles ?? []) : false
+        return this.$organizationManager.user.permissions ? this.category.canEdit(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? []) : false
     }
 
     get canCreate() {
-        return OrganizationManager.user.permissions ? this.category.canCreate(OrganizationManager.user.permissions, this.organization.meta.categories, this.organization.privateMeta?.roles ?? []) : false
+        return this.$organizationManager.user.permissions ? this.category.canCreate(this.$organizationManager.user.permissions, this.organization.meta.categories, this.organization.privateMeta?.roles ?? []) : false
     }
 
     get groups() {
@@ -393,7 +393,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
             group, 
             organization: this.organization.patch(p), 
             saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                await OrganizationManager.patch(p.patch(patch))
+                await this.$organizationManager.patch(p.patch(patch))
             }
         }).setDisplayStyle("popup"))
     }
@@ -405,7 +405,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
                 organization: this.organization, 
                 saveHandler: async (patch) => {
                     patch.id = this.organization.id
-                    await OrganizationManager.patch(patch)
+                    await this.$organizationManager.patch(patch)
                 }
             })
         }).setDisplayStyle("popup"))

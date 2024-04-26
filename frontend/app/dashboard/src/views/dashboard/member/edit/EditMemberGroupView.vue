@@ -56,7 +56,7 @@ import { Group, GroupCategoryTree, MemberDetails, MemberWithRegistrations, Regis
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 
 
 class PendingRegistration {
@@ -94,13 +94,13 @@ class PendingRegistration {
 })
 export default class EditMemberGroupView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    memberDetails: MemberDetails
+        memberDetails: MemberDetails
 
     @Prop({ default: null })
-    member: MemberWithRegistrations | null
+        member: MemberWithRegistrations | null
 
     @Prop({ required: true })
-    familyManager: FamilyManager
+        familyManager: FamilyManager
 
     groups: Group[] = []
 
@@ -117,7 +117,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
     waitingList = false;
 
     mounted() {
-        this.groups = OrganizationManager.organization.groups
+        this.groups = this.$organization.groups
     }
 
     get isNew() {
@@ -125,9 +125,9 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
     }
 
     get suggestedTree() {
-        return OrganizationManager.organization.getCategoryTree({
+        return this.$organization.getCategoryTree({
             maxDepth: 1, 
-            permissions: SessionManager.currentSession!.user!.permissions, 
+            permissions: this.$user!.permissions, 
             smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
             filterGroups: g => {
                 const member: UnknownMemberWithRegistrations = this.member ?? {
@@ -135,14 +135,14 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                     registrations: [],
                     details: this.memberDetails
                 }
-                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, OrganizationManager.organization.getGroupsForPermissions(OrganizationManager.user?.permissions), OrganizationManager.organization.availableCategories, [])
+                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, this.$organization.getGroupsForPermissions(this.$organizationManager.user?.permissions), this.$organization.availableCategories, [])
                 return !canRegister.closed || canRegister.waitingList
             }
         })
     }
 
     get categoryTree() {
-        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, smartCombine: true, permissions: SessionManager.currentSession?.user?.permissions})
+        return this.$organization.getCategoryTree({maxDepth: 1, smartCombine: true, permissions: this.$context.user?.permissions})
     }
 
     getSelectedGroupForCategory(category: GroupCategoryTree): Group | null {
@@ -352,7 +352,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                         registeredAt: new Date()
                     })
 
-                    registration.price = RegisterCartPriceCalculator.calculateSinglePrice(this.member, registration, this.familyManager.members, OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+                    registration.price = RegisterCartPriceCalculator.calculateSinglePrice(this.member, registration, this.familyManager.members, this.$organization.groups, this.$organization.meta.categories)
                     patchRegistrations.addPut(
                         registration
                     )
@@ -380,7 +380,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                         registeredAt: new Date()
                     });
 
-                    registration.price = RegisterCartPriceCalculator.calculateSinglePriceForNewMember(this.memberDetails, registration, this.familyManager.members, OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+                    registration.price = RegisterCartPriceCalculator.calculateSinglePriceForNewMember(this.memberDetails, registration, this.familyManager.members, this.$organization.groups, this.$organization.meta.categories)
                     registrations.push(
                         registration
                     )

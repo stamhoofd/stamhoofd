@@ -70,6 +70,11 @@ export class UrlHelper {
     getParts(options?: { removeLocale?: boolean, removePrefix?: boolean, appendPrefix?: string }) {
         const parts = this.path?.substring(1).split("/") ?? []
 
+        // Remove empty suffix
+        if (parts.length > 0 && parts[parts.length-1] === "") {
+            parts.pop()
+        }
+
         if (
             parts.length > 0 
             && (

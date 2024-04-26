@@ -19,7 +19,9 @@
             </STInputBox>
         </div>
 
-        <p class="style-description-small">Deze kortingen worden op de volledige bestelling toegepast.</p>
+        <p class="style-description-small">
+            Deze kortingen worden op de volledige bestelling toegepast.
+        </p>
 
         <hr>
         <h2>
@@ -30,13 +32,13 @@
         <STList v-if="patchedDiscount.productDiscounts.length">
             <STListItem v-for="productDiscount of patchedDiscount.productDiscounts" :key="productDiscount.id" class="right-description right-stack" :selectable="true" @click="editProductDiscount(productDiscount)">
                 <h3 class="style-title-list">
-                    {{productDiscount.getTitle(webshop, true).title}}
+                    {{ productDiscount.getTitle(webshop, true).title }}
                 </h3>
                 <p class="style-description-small">
-                     {{productDiscount.getTitle(webshop, true).description}}
+                    {{ productDiscount.getTitle(webshop, true).description }}
                 </p>
                 <p class="style-description-small">
-                     {{productDiscount.getTitle(webshop, true).footnote}}
+                    {{ productDiscount.getTitle(webshop, true).footnote }}
                 </p>
 
                 <template slot="right">
@@ -61,10 +63,10 @@
         <STList v-if="patchedDiscount.requirements.length">
             <STListItem v-for="requirement of patchedDiscount.requirements" :key="requirement.id" class="right-description right-stack" :selectable="true" @click="editRequirement(requirement)">
                 <h3 class="style-title-list">
-                    {{requirement.amount}} x {{requirement.product.getName(webshop, true).name}}
+                    {{ requirement.amount }} x {{ requirement.product.getName(webshop, true).name }}
                 </h3>
                 <p class="style-description-small">
-                    {{requirement.product.getName(webshop, true).footnote}}
+                    {{ requirement.product.getName(webshop, true).footnote }}
                 </p>
 
                 <template slot="right">
@@ -110,11 +112,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator, PermyriadInput, PriceInput, Checkbox } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscount, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
 import EditProductDiscountView from './EditProductDiscountView.vue';
 
@@ -158,7 +160,7 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     getFeatureFlag(flag: string) {
@@ -315,7 +317,7 @@ export default class EditDiscountView extends Mixins(NavigationMixin) {
             return
         }
 
-       const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray()
+        const p: PatchableArrayAutoEncoder<Discount> = new PatchableArray()
         p.addDelete(this.discount.id)
         this.saveHandler(p)
         this.pop({ force: true })

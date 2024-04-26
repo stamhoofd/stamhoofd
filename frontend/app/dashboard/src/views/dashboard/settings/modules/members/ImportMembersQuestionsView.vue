@@ -182,7 +182,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../../classes/FamilyManager';
 import { ImportingMember } from '../../../../../classes/import/ImportingMember';
-import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+
 import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
 
 @Component({
@@ -205,7 +205,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     @Prop({ required: true })
         members: ImportingMember[]
@@ -225,7 +225,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     get needsPaidStatus() {
@@ -707,7 +707,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                     // Already synced: prevent doing it twice
                     continue
                 }
-                const family =  new FamilyManager([])
+                const family =  new FamilyManager(this.$memberManager, [])
 
                 if (member.equal) {
                     // Merge data (this is an edge case)

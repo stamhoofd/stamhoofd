@@ -79,7 +79,7 @@ import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanR
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+
 import EditSeatingPlanView from './EditSeatingPlanView.vue';
 
 @Component({
@@ -123,7 +123,7 @@ export default class ChooseSeatingPlanView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     addPatch(patch: AutoEncoderPatchType<Product>) {

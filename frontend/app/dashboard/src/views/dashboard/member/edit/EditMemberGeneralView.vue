@@ -49,7 +49,7 @@ import { Address, Gender } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -80,11 +80,11 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     validator: Validator
 
     isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address") {
-        return OrganizationManager.organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(MemberDetails.getBaseFilterDefinitions()).doesMatch(this.details) ?? false
+        return this.$organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(MemberDetails.getBaseFilterDefinitions()).doesMatch(this.details) ?? false
     }
 
     isPropertyRequired(name: "emailAddress" | "birthDay" | "phone" | "address") {
-        return this.isPropertyEnabled(name) && (OrganizationManager.organization.meta.recordsConfiguration[name]?.requiredWhen?.decode(MemberDetails.getBaseFilterDefinitions()).doesMatch(this.details) ?? false)
+        return this.isPropertyEnabled(name) && (this.$organization.meta.recordsConfiguration[name]?.requiredWhen?.decode(MemberDetails.getBaseFilterDefinitions()).doesMatch(this.details) ?? false)
     }
 
     mounted() {

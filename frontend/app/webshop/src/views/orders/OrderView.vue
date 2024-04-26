@@ -404,11 +404,11 @@ export default class OrderView extends Mixins(NavigationMixin){
     loadingTickets = false
 
     get organization() {
-        return WebshopManager.organization
+        return this.$webshopManager.organization
     }
 
     get webshop() {
-        return WebshopManager.webshop
+        return this.$webshopManager.webshop
     }
 
     get singleTicket() {
@@ -494,9 +494,9 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     share() {
         navigator.share({
-            title: "Bestelling "+WebshopManager.webshop.meta.name,
-            text: "Bekijk mijn bestelling bij "+WebshopManager.webshop.meta.name+" via deze link.",
-            url: WebshopManager.webshop.getUrl(this.organization)+"/order/"+this.order!.id,
+            title: "Bestelling "+this.$webshopManager.webshop.meta.name,
+            text: "Bekijk mijn bestelling bij "+this.$webshopManager.webshop.meta.name+" via deze link.",
+            url: this.$webshopManager.webshop.getUrl(this.organization)+"/order/"+this.order!.id,
         }).catch(e => console.error(e))
     }
 
@@ -514,8 +514,8 @@ export default class OrderView extends Mixins(NavigationMixin){
                 root: new ComponentWithProperties(TransferPaymentView, {
                     type: "order",
                     payment,
-                    organization: WebshopManager.organization,
-                    settings: WebshopManager.webshop.meta.transferSettings,
+                    organization: this.$webshopManager.organization,
+                    settings: this.$webshopManager.webshop.meta.transferSettings,
                     isPopup: true
                 })
             }).setDisplayStyle("popup"))
@@ -534,9 +534,9 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.loadingTickets = true
 
         try {
-            const response = await WebshopManager.server.request({
+            const response = await this.$webshopManager.server.request({
                 method: "GET",
-                path: "/webshop/" +WebshopManager.webshop.id + "/tickets",
+                path: "/webshop/" +this.$webshopManager.webshop.id + "/tickets",
                 query: {
                     // Required because we don't need to repeat item information (network + database impact)
                     orderId: this.order.id
@@ -553,10 +553,10 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     mounted() {
         if (this.success) {
-            CheckoutManager.clear()
+            this.$checkoutManager.clear()
 
             // Update stock in background
-            WebshopManager.reload().catch(e => {
+            this.$webshopManager.reload().catch(e => {
                 console.error(e)
             })
         }
@@ -569,10 +569,10 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (this.orderId) {
             UrlHelper.setUrl("/order/"+this.orderId)
 
-            WebshopManager.server
+            this.$webshopManager.server
                 .request({
                     method: "GET",
-                    path: "/webshop/" +WebshopManager.webshop.id + "/order/"+this.orderId,
+                    path: "/webshop/" +this.$webshopManager.webshop.id + "/order/"+this.orderId,
                     decoder: Order as Decoder<Order>,
                 }).then(response => {
                     const order = response.data
@@ -588,10 +588,10 @@ export default class OrderView extends Mixins(NavigationMixin){
             if (!this.paymentId) {
                 throw new Error("Missing payment id or order id")
             }
-            WebshopManager.server
+            this.$webshopManager.server
                 .request({
                     method: "GET",
-                    path: "/webshop/" +WebshopManager.webshop.id + "/payment/"+this.paymentId+"/order",
+                    path: "/webshop/" +this.$webshopManager.webshop.id + "/payment/"+this.paymentId+"/order",
                     decoder: Order as Decoder<Order>,
                 }).then(response => {
                     const order = response.data
@@ -614,7 +614,7 @@ export default class OrderView extends Mixins(NavigationMixin){
             '@stamhoofd/ticket-builder'
         )).TicketBuilder
 
-        const builder = new TicketBuilder(this.publicTickets, this.webshop, WebshopManager.organization, this.order ?? undefined)
+        const builder = new TicketBuilder(this.publicTickets, this.webshop, this.$webshopManager.organization, this.order ?? undefined)
         await builder.download()
     }
 

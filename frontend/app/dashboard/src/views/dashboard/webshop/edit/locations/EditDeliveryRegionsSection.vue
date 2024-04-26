@@ -82,7 +82,7 @@ const throttle = (func, limit) => {
 export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) {
   
     @Prop({ required: true })
-    deliveryMethod!: WebshopDeliveryMethod
+        deliveryMethod!: WebshopDeliveryMethod
 
     searchQuery = ""
     throttledSearch = throttle(this.doSearch.bind(this), 300);
@@ -118,7 +118,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
         const c = this.searchCount
 
         // search
-        const response = await SessionManager.currentSession!.server.request({
+        const response = await this.$context.server.request({
             method: "GET",
             path: "/address/search",
             query: {

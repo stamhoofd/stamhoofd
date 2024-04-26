@@ -90,7 +90,7 @@ import { CenteredMessage, ErrorBox, FillRecordCategoryView, PropertyFilterInput,
 import { MemberDetailsWithGroups, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, RecordSettings } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
+
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import EditRecordView from "./EditRecordView.vue";
 import RecordRow from "./RecordRow.vue";
@@ -175,7 +175,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get title(): string {

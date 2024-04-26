@@ -1,4 +1,4 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation"
 
 import GeneralContextMenuView from "./GeneralContextMenuView.vue"
 import { ModalStackEventBus } from "./ModalStackEventBus"
@@ -49,7 +49,7 @@ export class ContextMenu {
         return new ComponentWithProperties(GeneralContextMenuView, { menu: this})
     }
 
-    async show(position: { clickEvent?: TouchEvent | MouseEvent, button?: HTMLElement, x?: number, y?: number, xPlacement?: "right" | "left", yPlacement?: "bottom" | "top" , wrapWidth?: number, wrapHeight?: number, yOffset?: number, xOffset?: number }) {
+    async show(position: { component?: NavigationMixin, clickEvent?: TouchEvent | MouseEvent, button?: HTMLElement, x?: number, y?: number, xPlacement?: "right" | "left", yPlacement?: "bottom" | "top" , wrapWidth?: number, wrapHeight?: number, yOffset?: number, xOffset?: number }) {
         if (position.button) {
             const bounds = position.button.getBoundingClientRect()
 
@@ -83,14 +83,21 @@ export class ContextMenu {
             position.x += position.xOffset
         }
 
-        const component = new ComponentWithProperties(GeneralContextMenuView, {
+        const menuComponent = new ComponentWithProperties(GeneralContextMenuView, {
             menu: this,
             ...position
         })
-        await ModalStackEventBus.sendEvent("present", {
-            components: [component],
-            modalDisplayStyle: "overlay",
-        })
+        if (position.component) {
+            position.component.present({
+                components: [menuComponent],
+                modalDisplayStyle: "overlay",
+            })
+        } else {
+            await ModalStackEventBus.sendEvent("present", {
+                components: [menuComponent],
+                modalDisplayStyle: "overlay",
+            })
+        }
         return this
     }
 }

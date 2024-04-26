@@ -597,7 +597,7 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return SessionManager.currentSession!.organization!
+        return this.$context.organization!
     }
 
     get count() {

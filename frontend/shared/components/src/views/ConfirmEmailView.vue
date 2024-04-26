@@ -73,9 +73,6 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
     @Prop({ default: false })
         login!: boolean
 
-    @Prop({ required: true })
-        session!: Session
-
     timer: any = null
 
     startTime = new Date()
@@ -116,7 +113,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         this.retrying = true
 
         try {
-            const stop = await LoginHelper.retryEmail(this.session, this.token)
+            const stop = await LoginHelper.retryEmail(this.$context, this.token)
             this.startTime = new Date()
             if (stop) {
                 this.dismiss({ force: true })
@@ -136,7 +133,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         this.polling = true
 
         try {
-            const stop = await LoginHelper.pollEmail(this.session, this.token)
+            const stop = await LoginHelper.pollEmail(this.$context, this.token)
             if (stop) {
                 this.dismiss({ force: true })
                 return
@@ -164,7 +161,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
-            await LoginHelper.verifyEmail(this.session, this.code, this.token)
+            await LoginHelper.verifyEmail(this.$context, this.code, this.token)
             new Toast("Jouw e-mailadres is geverifieerd!", "success green").setHide(3000).show()
 
             // Yay!

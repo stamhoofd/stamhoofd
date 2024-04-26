@@ -22,12 +22,10 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
 import { MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberManager } from "../../classes/MemberManager";
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 import MemberBox from "../../components/MemberBox.vue";
 
 @Component({
@@ -41,17 +39,17 @@ import MemberBox from "../../components/MemberBox.vue";
     }
 })
 export default class GroupsView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
+    
 
     @Prop({ required: false })
         member!: MemberWithRegistrations
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get fullTree() {
-        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: !!SessionManager.currentSession!.user!.permissions, smartCombine: true})
+        return this.$organization.getCategoryTree({maxDepth: 1, admin: !!this.$user!.permissions, smartCombine: true})
     }
 
     get categories() {

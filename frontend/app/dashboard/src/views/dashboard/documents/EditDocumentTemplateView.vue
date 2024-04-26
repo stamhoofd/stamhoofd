@@ -79,7 +79,9 @@
 
             <hr>
             <h2>Bedrag</h2>
-            <Checkbox v-model="paidOnly">Enkel aanmaken indien gekoppelde prijs groter is dan 0 euro</Checkbox>
+            <Checkbox v-model="paidOnly">
+                Enkel aanmaken indien gekoppelde prijs groter is dan 0 euro
+            </Checkbox>
         </template>
     </SaveView>
 </template>
@@ -89,13 +91,13 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patch
 import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager } from "@stamhoofd/networking";
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType, Version } from "@stamhoofd/structures";
 import { StringCompare } from "@stamhoofd/utility";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import ChooseDocumentTemplateGroup from "./ChooseDocumentTemplateGroup.vue";
 import { fiscal } from "./definitions/fiscal";
 import { participation } from "./definitions/participation";
@@ -524,7 +526,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     getDefaultGlobalData() {
@@ -601,7 +603,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
     recordCategoriesFor(field: RecordSettings) {
         const type = field.type
-        return RecordCategory.filterRecordsWith(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, (record) => record.type == type)
+        return RecordCategory.filterRecordsWith(this.$organization.meta.recordsConfiguration.recordCategories, (record) => record.type == type)
     }
 
     get hasChanges() {
@@ -668,13 +670,13 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     }
 
     getGroupName(group: DocumentTemplateGroup) {
-        const groups = OrganizationManager.organization.groups
+        const groups = this.$organization.groups
         const g = groups.find(g => g.id == group.groupId)
         return g?.settings?.name ?? "Onbekende groep"
     }
 
     getGroupDescription(group: DocumentTemplateGroup) {
-        const groups = OrganizationManager.organization.groups
+        const groups = this.$organization.groups
         const g = groups.find(g => g.id == group.groupId)
         const currentCycle = g?.cycle ?? 0
         const cycleOffset = currentCycle - group.cycle
@@ -799,7 +801,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 patch.addPatch(this.patchDocument)
             }
 
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/organization/document-templates",
                 body: patch,

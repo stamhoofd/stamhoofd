@@ -40,7 +40,7 @@ import { ApiUser, ApiUserWithToken, PermissionLevel, Permissions, User, Version 
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import CopyApiTokenView from './CopyApiTokenView.vue';
 import EditUserPermissionsBox from './EditUserPermissionsBox.vue';
 
@@ -99,7 +99,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get patchedUser() {
@@ -152,7 +152,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
         try {
             let user: ApiUser;
             if (this.isNew) {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                const response = await this.$context.authenticatedServer.request({
                     method: "POST",
                     path: "/api-keys",
                     body: this.patchedUser,
@@ -160,7 +160,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
                 })
                 user = response.data;
             } else {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                const response = await this.$context.authenticatedServer.request({
                     method: "PATCH",
                     path: "/api-keys/"+this.user.id,
                     body: this.patchUser,
@@ -211,7 +211,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
 
         try {
             // Patch the user
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "DELETE",
                 path: "/api-keys/"+this.user.id,
             })

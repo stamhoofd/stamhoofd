@@ -1,11 +1,11 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors'
 import { Request } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { NetworkManager, SessionManager } from '@stamhoofd/networking'
+import { NetworkManager, Session } from '@stamhoofd/networking'
 import { Document } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 
-export async function getDocumentPdfBuffer(document: Document, owner?: any): Promise<Buffer> {
+export async function getDocumentPdfBuffer($context: Session, document: Document, owner?: any): Promise<Buffer> {
     const cacheId = "document-"+document.id
     const timestamp = document.updatedAt.getTime()
 
@@ -40,7 +40,7 @@ export async function getDocumentPdfBuffer(document: Document, owner?: any): Pro
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const response = await SessionManager.currentSession!.authenticatedServer.request({
+    const response = await this.$context.authenticatedServer.request({
         method: "GET",
         path: "/documents/" + encodeURIComponent(document.id) + "/html",
         shouldRetry: true,
@@ -74,9 +74,9 @@ export async function getDocumentPdfBuffer(document: Document, owner?: any): Pro
     return pdfResponse.data as Buffer
 }
 
-export async function downloadDocument(document: Document, owner?: any) {
+export async function downloadDocument($context: Session, document: Document, owner?: any) {
     try {
-        const buffer = await getDocumentPdfBuffer(document, owner)
+        const buffer = await getDocumentPdfBuffer($context, document, owner)
         const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
         saveAs(buffer, Formatter.fileSlug(document.data.name + " - " + document.data.description) + ".pdf")
     } catch (e) {
@@ -88,9 +88,9 @@ export async function downloadDocument(document: Document, owner?: any) {
     }
 }
 
-export async function downloadDocuments(documents: Document[], owner?: any) {
+export async function downloadDocuments($context: Session, documents: Document[], owner?: any) {
     if (documents.length === 1) {
-        await downloadDocument(documents[0], owner)
+        await downloadDocument($context, documents[0], owner)
         return
     }
 
@@ -106,7 +106,7 @@ export async function downloadDocuments(documents: Document[], owner?: any) {
         
         const promises = new Array(maxConcurrency).fill(0).map(async () => {
             for (const [index, document] of entries) {
-                const buffer = await getDocumentPdfBuffer(document, owner)
+                const buffer = await getDocumentPdfBuffer($context, document, owner)
                 zip.file(Formatter.fileSlug(document.id + " - " + document.data.name + " - " + document.data.description) + ".pdf", buffer)
                 pendingToast?.setProgress((index + 1) / documents.length)
             }

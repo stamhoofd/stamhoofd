@@ -44,11 +44,10 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Dropdown, EmailInput, ErrorBox, PhoneInput, SaveView, SelectionAddressInput, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { Dropdown, EmailInput, ErrorBox, PhoneInput, STErrorsDefault, STInputBox, SaveView, SelectionAddressInput, Validator } from "@stamhoofd/components";
 import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberManager } from '../../../classes/MemberManager';
 
 @Component({
     components: {
@@ -84,7 +83,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
 
     validator = new Validator()
 
-    MemberManager = MemberManager
+    
 
     get hasAccess() {
         return this.memberDetails?.parentsHaveAccess ?? false
@@ -110,7 +109,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
     }
 
     get availableAddresses() {
-        const addresses = MemberManager.getAddresses()
+        const addresses = this.$memberManager.getAddresses()
         if (this.memberDetails) {
             for (const parent of this.memberDetails.parents) {
                 if (parent.address && !addresses.find(a => a.toString() == parent.address!.toString())) {
@@ -122,7 +121,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
     }
 
     modifyAddress({ from, to }: { from: Address, to: Address }) {
-        MemberManager.updateAddress(from, to)
+        this.$memberManager.updateAddress(from, to)
         if (this.memberDetails) {
             this.memberDetails.updateAddress(from, to)
         }
@@ -178,7 +177,7 @@ export default class ParentView extends Mixins(NavigationMixin) {
             this.parent.email = this.email
             this.parent.address = this.address
             this.parent.type = this.type
-            MemberManager.updateParent(this.parent)
+            this.$memberManager.updateParent(this.parent)
             if (this.memberDetails) {
                 this.memberDetails.updateParent(this.parent)
             }

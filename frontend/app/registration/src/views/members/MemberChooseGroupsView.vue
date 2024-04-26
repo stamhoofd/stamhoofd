@@ -69,13 +69,10 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
 import { MemberWithRegistrations, Registration } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from "../../classes/MemberManager";
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 import MemberBox from "../../components/MemberBox.vue";
 import GroupsView from "./GroupsView.vue";
 
@@ -94,8 +91,8 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     @Prop({ required: true })
         member!: MemberWithRegistrations
 
-    CheckoutManager = CheckoutManager
-    MemberManager = MemberManager
+    
+    
     showMore = false
 
     mounted() {
@@ -105,7 +102,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     }
 
     getGroup(groupId: string) {
-        return OrganizationManager.organization.groups.find(g => g.id === groupId)
+        return this.$organization.groups.find(g => g.id === groupId)
     }
 
     imageSrc(registration: Registration) {
@@ -117,19 +114,19 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     }
 
     get tree() {
-        return OrganizationManager.organization.getCategoryTree({
+        return this.$organization.getCategoryTree({
             maxDepth: 1, 
-            admin: !!SessionManager.currentSession!.user!.permissions, 
+            admin: !!this.$user!.permissions, 
             smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
             filterGroups: g => {
-                const canRegister = this.member.canRegister(g, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items);
+                const canRegister = this.member.canRegister(g, this.$memberManager.members ?? [], this.$organization.meta.categories, this.$checkoutManager.cart.items);
                 return !canRegister.closed || canRegister.waitingList
             }
         })
     }
 
     get fullTree() {
-        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: !!SessionManager.currentSession!.user!.permissions, smartCombine: true})
+        return this.$organization.getCategoryTree({maxDepth: 1, admin: !!this.$user!.permissions, smartCombine: true})
     }
 
     get categories() {
@@ -148,7 +145,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     }
 
     get hasMore() {
-        return !this.showMore && this.tree.getAllGroups().length !== OrganizationManager.organization.getGroupsForPermissions(SessionManager.currentSession?.user?.permissions).length
+        return !this.showMore && this.tree.getAllGroups().length !== this.$organization.getGroupsForPermissions(this.$context.user?.permissions).length
     }
 
     get hasLess() {

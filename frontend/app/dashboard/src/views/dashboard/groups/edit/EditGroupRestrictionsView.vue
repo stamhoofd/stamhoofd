@@ -129,7 +129,7 @@ import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveV
 import { Country, GroupGenderType, GroupSettings } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
 import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import SelectGroupsView from '../SelectGroupsView.vue';
@@ -166,14 +166,14 @@ export default class EditGroupRestrictionsView extends Mixins(EditGroupMixin) {
     }
 
     isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address" | "gender") {
-        return !!OrganizationManager.organization.meta.recordsConfiguration[name]
+        return !!this.$organization.meta.recordsConfiguration[name]
     }
 
     getGroupName(id: string) {
         const group = this.patchedOrganization.groups.find(g => g.id === id)
         if (!group) {
             // Search deleted groups (in non patched one)
-            const deleted = OrganizationManager.organization.groups.find(g => g.id === id)
+            const deleted = this.$organization.groups.find(g => g.id === id)
             if (deleted) {
                 return deleted.settings.name +" (verwijderd)"
             }

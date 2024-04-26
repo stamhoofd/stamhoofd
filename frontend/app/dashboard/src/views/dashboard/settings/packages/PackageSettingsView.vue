@@ -88,7 +88,7 @@ import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STP
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import PackageConfirmView from "./PackageConfirmView.vue";
 import PackageDetailsView from "./PackageDetailsView.vue";
 
@@ -225,7 +225,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = true
 
         try {
-            this.status = await OrganizationManager.loadBillingStatus({
+            this.status = await this.$organizationManager.loadBillingStatus({
                 owner: this
             })
         } catch (e) {

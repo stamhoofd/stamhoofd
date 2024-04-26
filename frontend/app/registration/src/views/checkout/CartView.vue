@@ -150,17 +150,13 @@
 
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton, StepperInput, Steps, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { BalanceItemCartItem, Group, MemberBalanceItem, RegisterItem } from '@stamhoofd/structures';
+import { ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, StepperInput, Steps } from '@stamhoofd/components';
+import { UrlHelper } from '@stamhoofd/networking';
+import { BalanceItemCartItem, Group, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Watch } from 'vue-property-decorator';
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
-import { MemberManager } from '../../classes/MemberManager';
-import { OrganizationManager } from '../../classes/OrganizationManager';
 import { Suggestion, SuggestionBuilder } from '../../classes/SuggestionBuilder';
 import GroupView from '../groups/GroupView.vue';
 import ChooseMemberView from '../overview/register-flow/ChooseMemberView.vue';
@@ -183,13 +179,11 @@ import ChooseMemberView from '../overview/register-flow/ChooseMemberView.vue';
     }
 })
 export default class CartView extends Mixins(NavigationMixin){
-    CheckoutManager = CheckoutManager
-
     loading = false
     errorBox: ErrorBox | null = null
 
     get cart() {
-        return this.CheckoutManager.cart
+        return this.$checkoutManager.cart
     }
 
     get title() {
@@ -222,16 +216,16 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport) {
+            if (this.$organization.meta.recordsConfiguration.financialSupport) {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FinancialSupportView.vue')).default;
                 this.show(
                     new ComponentWithProperties(Steps, { 
                         root: new ComponentWithProperties(component, {}),
-                        totalSteps: OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null ? 3 : 2
+                        totalSteps: this.$organization.meta.recordsConfiguration.freeContribution !== null ? 3 : 2
                     })
                 );
-            } else if(OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null) {
+            } else if(this.$organization.meta.recordsConfiguration.freeContribution !== null) {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FreeContributionView.vue')).default;
                 this.show(
@@ -274,13 +268,13 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     deleteItem(item: RegisterItem) {
-        CheckoutManager.cart.removeItem(item)
-        CheckoutManager.saveCart()
+        this.$checkoutManager.cart.removeItem(item)
+        this.$checkoutManager.saveCart()
     }
 
     deleteBalanceItem(item: BalanceItemCartItem) {
-        CheckoutManager.cart.removeBalanceItem(item)
-        CheckoutManager.saveCart()
+        this.$checkoutManager.cart.removeBalanceItem(item)
+        this.$checkoutManager.saveCart()
     }
 
     mounted() {
@@ -295,23 +289,23 @@ export default class CartView extends Mixins(NavigationMixin){
     onCartChanged() {
         try {
             this.cart.calculatePrices(
-                MemberManager.members ?? [], 
-                OrganizationManager.organization.groups, 
-                OrganizationManager.organization.meta.categories,
-                OrganizationManager.organization.meta.registrationPaymentConfiguration
+                this.$memberManager.members ?? [], 
+                this.$organization.groups, 
+                this.$organization.meta.categories,
+                this.$organization.meta.registrationPaymentConfiguration
             )
         } catch (e) {
             // error in calculation!
             console.error(e)
         }
-        CheckoutManager.saveCart()
+        this.$checkoutManager.saveCart()
     }
 
     async recalculate() {
         try {
-            await CheckoutManager.recalculateCart(
+            await this.$checkoutManager.recalculateCart(
                 // Refresh on every open of the cart, but not if last full refresh was less than 10 seconds ago
-                CheckoutManager.isLastFullRefetchOld(10)
+                this.$checkoutManager.isLastFullRefetchOld(10)
             )
             this.errorBox = null
         } catch (e) {
@@ -321,11 +315,11 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     get members() {
-        return MemberManager.members ?? []
+        return this.$memberManager.members ?? []
     }
 
     get suggestedRegistrations(): Suggestion[] {
-        return SuggestionBuilder.getSuggestions(this.members)
+        return SuggestionBuilder.getSuggestions(this.$checkoutManager, this.members)
     }
 
     startRegistrationFlow(suggestion: Suggestion) {

@@ -238,7 +238,7 @@ import { RecordEditorSettings } from '@stamhoofd/structures';
 import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
+
 import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import PreviewRecordView from './PreviewRecordView.vue';
@@ -620,7 +620,7 @@ export default class EditRecordView<T> extends Mixins(NavigationMixin) {
     }
 
     set sensitive(sensitive: boolean) {
-        if (sensitive && OrganizationManager.organization.meta.recordsConfiguration.dataPermission === null) {
+        if (sensitive && this.$organization.meta.recordsConfiguration.dataPermission === null) {
             new Toast("Voor je kan instellen dat toestemming verplicht is voor dit kenmerk, moet je de functie om toestemming te vragen inschakelen.", "error red").show()
             this.manageDataPermission(true)
             return

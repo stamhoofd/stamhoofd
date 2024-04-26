@@ -327,7 +327,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from "../../../classes/MemberManager";
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
@@ -373,7 +373,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get currentCountry() {
-        return OrganizationManager.organization.address.country
+        return this.$organization.address.country
     }
 
     formatCountry(country: Country) {
@@ -382,7 +382,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategoriesForAnswers(
-            OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
+            this.$organization.meta.recordsConfiguration.recordCategories, 
             this.member.details.recordAnswers
         )
     }
@@ -439,19 +439,19 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             warnings.push(...answer.getWarnings())
         }
 
-        if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport) {
+        if (this.$organization.meta.recordsConfiguration.financialSupport) {
             if (this.member.details.requiresFinancialSupport && this.member.details.requiresFinancialSupport.value) {
                 warnings.push(RecordWarning.create({
-                    text: OrganizationManager.organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
+                    text: this.$organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
                     type: RecordWarningType.Error
                 }))
             }
         }
         
-        if (OrganizationManager.organization.meta.recordsConfiguration.dataPermission) {
+        if (this.$organization.meta.recordsConfiguration.dataPermission) {
             if (this.member.details.dataPermissions && !this.member.details.dataPermissions.value) {
                 warnings.push(RecordWarning.create({
-                    text: OrganizationManager.organization.meta.recordsConfiguration.dataPermission?.warningText || DataPermissionsSettings.defaultWarningText,
+                    text: this.$organization.meta.recordsConfiguration.dataPermission?.warningText || DataPermissionsSettings.defaultWarningText,
                     type: RecordWarningType.Error
                 }))
             }
@@ -471,7 +471,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             markReviewed: false,
             hasNextStep: false,
             dataPermission: this.member.details.dataPermissions?.value ?? false,
-            filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
+            filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(this.$organization, {member: this.member}),
             filterValueForAnswers: (answers) => {
                 const details = this.member.details.patch({
                     recordAnswers: answers
@@ -488,17 +488,17 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get hasWrite(): boolean {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
 
-        if (OrganizationManager.user.permissions.hasWriteAccess(OrganizationManager.organization.privateMeta?.roles ?? [])) {
+        if (this.$organizationManager.user.permissions.hasWriteAccess(this.$organization.privateMeta?.roles ?? [])) {
             // Can edit members without groups
             return true
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && group.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization)) {
+            if(group.privateSettings && group.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization)) {
                 return true
             }
         }
@@ -529,7 +529,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
         if (emails.length > 0) {
             try {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                const response = await this.$context.authenticatedServer.request({
                     method: "POST",
                     path: "/email/check-bounces",
                     body: emails,
@@ -587,7 +587,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
         try {
             // Update the users that are connected to these members
-            const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = MemberManager.getMembersAccessPatch([this.member])
+            const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.$memberManager.getMembersAccessPatch([this.member])
 
             // Add delete user
             const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
@@ -599,7 +599,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
                 })
             )
 
-            await MemberManager.patchMembersAndSync([this.member], encryptedMembers, false)
+            await this.$memberManager.patchMembersAndSync([this.member], encryptedMembers, false)
         } catch (e) {
             // Reset
             console.error(e)
@@ -723,6 +723,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         const bounds = el.getBoundingClientRect()
 
         const builder = new MemberActionBuilder({
+            $organizationManager: this.$organizationManager,
+            $memberManager: this.$memberManager,
             component: this,
             groups: this.member.groups,
             cycleOffset: 0,
@@ -754,6 +756,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         }
 
         const builder = new MemberActionBuilder({
+            $organizationManager: this.$organizationManager,
+            $memberManager: this.$memberManager,
             component: this,
             groups: [group],
             cycleOffset: group.cycle - registration.cycle,

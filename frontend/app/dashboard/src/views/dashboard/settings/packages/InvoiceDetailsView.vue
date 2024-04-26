@@ -99,7 +99,7 @@ import { STInvoice, STPendingInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import PackageConfirmView from "./PackageConfirmView.vue";
 
 @Component({
@@ -130,7 +130,7 @@ export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get paymentFailedDeactivateDate() {

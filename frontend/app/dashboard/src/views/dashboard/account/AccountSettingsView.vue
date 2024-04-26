@@ -32,13 +32,12 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ChangePasswordView,Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, SaveView, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { UrlHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, SaveView, Toast, Validator } from "@stamhoofd/components";
+import { LoginHelper, UrlHelper } from '@stamhoofd/networking';
+import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+
 
 @Component({
     components: {
@@ -60,11 +59,11 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     showDomainSettings = true
     
     get user() {
-        return User.create(SessionManager.currentSession!.user!)
+        return User.create(this.$user!)
     }
 
     userPatch = User.patch({ id: this.user.id })
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     mounted() {
         UrlHelper.setUrl("/account")
@@ -124,10 +123,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            const result = await LoginHelper.patchUser(SessionManager.currentSession!, this.userPatch)
+            const result = await LoginHelper.patchUser(this.$context, this.userPatch)
 
             if (result.verificationToken) {
-                this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken, email: this.patchedUser.email ?? ""}).setDisplayStyle("sheet"))
+                this.present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: this.patchedUser.email ?? ""}).setDisplayStyle("sheet"))
             } else {
                 const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
                 toast.show()

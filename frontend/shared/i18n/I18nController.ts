@@ -1,7 +1,7 @@
 //i18n-setup.js
 import { HistoryManager } from "@simonbackx/vue-app-navigation"
 import { countries, languages } from "@stamhoofd/locales"
-import { SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
+import { Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
@@ -33,12 +33,15 @@ export class I18nController {
 
     // Allows you to set and remove meta data
     vueMetaApp?: VueMetaApp
+    
+    $context: Session|null|undefined
 
     get locale() {
         return this.language+"-"+this.country
     }
 
-    constructor(language: string, country: Country, namespace: string) {
+    constructor($context: Session|undefined|null, language: string, country: Country, namespace: string) {
+        this.$context = $context;
         this.namespace = namespace
         this.language = language
         this.country = country
@@ -181,7 +184,7 @@ export class I18nController {
         return countries.includes(country)
     }
 
-    static async loadDefault(namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
+    static async loadDefault($context: Session|null|undefined, namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
         let language: string | undefined = undefined
         let needsSave = false
 
@@ -320,19 +323,25 @@ export class I18nController {
             country = defaultCountry ?? Country.Belgium
         }
 
-        const def = new I18nController(language, country, namespace)
+        if (I18nController.shared) {
+            // Remove listeners
+            I18nController.shared.$context?.removeListener(I18nController.shared)
+        }
+
+        const def = new I18nController($context, language, country, namespace)
         def.defaultCountry = defaultCountry ?? def.defaultCountry
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage
+        def.loadedLocale = I18nController.shared.loadedLocale
         I18nController.shared = def
         def.vueMetaApp = ((window as any).app as any).$meta().addApp('i18n')
 
         // Automatically set country when the organization is loaded
-        SessionManager.addListener(def, (changed) => {
-            if (!SessionManager.currentSession?.organization) {
+        $context?.addListener(def, (changed) => {
+            if (!$context?.organization) {
                 return
             }
-            if (changed == "session" || changed == "organization") {
-                def.switchToLocale({ country: SessionManager.currentSession.organization.address.country }).catch(console.error)
+            if (changed == "organization") {
+                def.switchToLocale({ country: $context?.organization.address.country }).catch(console.error)
             }
         })
 

@@ -25,7 +25,7 @@ import { Checkbox, STListItem } from "@stamhoofd/components";
 import { Group, GroupPrivateSettings, Organization, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, PermissionsByRole } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 
 @Component({
@@ -65,7 +65,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
     }
 
     get isMe() {
-        return !!OrganizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
+        return !!this.$organizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
     }
 
     set selectGroup(selected: boolean) {

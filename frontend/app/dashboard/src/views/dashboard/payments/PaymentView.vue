@@ -294,7 +294,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return SessionManager.currentSession!.organization!
+        return this.$context.organization!
     }
 
     get title() {
@@ -310,11 +310,11 @@ export default class PaymentView extends Mixins(NavigationMixin) {
     }
 
     get canWrite() {
-        const user = SessionManager.currentSession?.user
+        const user = this.$context.user
         if (!user || !user.permissions) {
             return false
         }
-        const organization = SessionManager.currentSession?.organization
+        const organization = this.$context.organization
         if (!organization) {
             return false
         }
@@ -456,7 +456,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
     async reload() {
         try {
             this.loading = true;
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: 'GET',
                 path: `/payments/${this.initialPayment.id}`,
                 decoder: PaymentGeneral as Decoder<PaymentGeneral>,
@@ -578,7 +578,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             }));
 
             // Create a patch for this payment
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/organization/payments",
                 body: data,
@@ -607,7 +607,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
                 const arr: PatchableArrayAutoEncoder<BalanceItemDetailed> = new PatchableArray();
                 patch.id = balanceItem.id;
                 arr.addPatch(patch)
-                await SessionManager.currentSession!.authenticatedServer.request({
+                await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,

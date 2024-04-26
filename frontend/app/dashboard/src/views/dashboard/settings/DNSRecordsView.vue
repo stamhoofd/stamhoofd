@@ -45,7 +45,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationDomains } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';
 import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
 
@@ -68,14 +68,14 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     saving = false
 
-    session = SessionManager.currentSession
+    session = this.$context
 
     get records() {
-        return OrganizationManager.organization.privateMeta?.dnsRecords ?? []
+        return this.$organization.privateMeta?.dnsRecords ?? []
     }
 
     get mailDomain() {
-        return OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain  ?? "?"
+        return this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain  ?? "?"
     }
    
     async validate() {
@@ -86,17 +86,17 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/organization/domain",
                 body: OrganizationDomains.create({
                     mailDomain: this.mailDomain,
-                    registerDomain: OrganizationManager.organization.privateMeta?.pendingRegisterDomain ?? OrganizationManager.organization.registerDomain
+                    registerDomain: this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain
                 }),
                 decoder: Organization as Decoder<Organization>
             })
 
-            OrganizationManager.organization.set(response.data)
+            this.$organization.set(response.data)
             this.saving = false
 
             if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null && response.data.privateMeta.pendingRegisterDomain === null) {

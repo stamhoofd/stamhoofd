@@ -10,6 +10,9 @@
         "test": "jest",
         "lint": "eslint ../.. --ext .js,.jsx,.ts,.tsx,.vue"
     },
+    "files": [
+        "dist"
+    ],
     "dependencies": {
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",

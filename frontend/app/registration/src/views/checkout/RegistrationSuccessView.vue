@@ -24,13 +24,11 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, GlobalEventBus, LoadingButton,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Checkbox, GlobalEventBus, LoadingButton, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from '../../classes/MemberManager';
 
 @Component({
     components: {
@@ -47,7 +45,7 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     @Prop({ required: true })
         registrations: RegistrationWithMember[]
 
-    MemberManager = MemberManager
+    
     step = 4
     isStepsPoppable = false
     loading = false
@@ -94,17 +92,17 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
 
     mounted() {
         // Clear cart
-        CheckoutManager.cart.clear()
-        CheckoutManager.saveCart()
+        this.$checkoutManager.cart.clear()
+        this.$checkoutManager.saveCart()
 
         // Clear balance (probably changed)
-        CheckoutManager.fetchBalance().catch(console.error)
+        this.$checkoutManager.fetchBalance().catch(console.error)
 
         // Switch to register tab
         GlobalEventBus.sendEvent("checkout-complete", undefined).catch(e => console.error(e))
 
-        MemberManager.loadMembers().catch(console.error)
-        MemberManager.loadDocuments().catch(console.error)
+        this.$memberManager.loadMembers().catch(console.error)
+        this.$memberManager.loadDocuments().catch(console.error)
     }
 
     close() {

@@ -143,7 +143,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -200,7 +200,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get title() {

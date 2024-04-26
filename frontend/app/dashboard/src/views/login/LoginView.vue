@@ -39,7 +39,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
-import { AppManager, LoginHelper, Session, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
 @Component({
@@ -53,9 +53,6 @@ import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
     },
 })
 export default class LoginView extends Mixins(NavigationMixin){
-    @Prop({ required: true})
-        session!: Session
-
     loading = false
 
     @Prop({ default: ""})
@@ -81,7 +78,7 @@ export default class LoginView extends Mixins(NavigationMixin){
         emailInput: EmailInput
 
     mounted() {
-        this.email = this.initialEmail ? this.initialEmail : (this.session.user?.email ?? "");
+        this.email = this.initialEmail ? this.initialEmail : (this.$context.user?.email ?? "");
 
         if (this.email.length == 0) {
             setTimeout(() => {
@@ -101,7 +98,8 @@ export default class LoginView extends Mixins(NavigationMixin){
         UrlHelper.shared.clear()
 
         // Reset url if we log out
-        UrlHelper.setUrl("/login/" + this.session.organizationId)
+        console.log('seturl', '/login')
+        UrlHelper.setUrl("/login")
     }
 
     help() {
@@ -110,7 +108,6 @@ export default class LoginView extends Mixins(NavigationMixin){
 
     gotoPasswordForgot() {
         this.show(new ComponentWithProperties(ForgotPasswordView, {
-            session: this.session,
             initialEmail: this.email,
             isAdmin: true
         }))
@@ -130,10 +127,10 @@ export default class LoginView extends Mixins(NavigationMixin){
         this.loading = true
         
         try {
-            const result = await LoginHelper.login(this.session, this.email, this.password)
+            const result = await LoginHelper.login(this.$context, this.email, this.password)
 
             if (result.verificationToken) {
-                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken, email: this.email }))
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, token: result.verificationToken, email: this.email }))
             } else {
                 this.dismiss({ force: true });
             }

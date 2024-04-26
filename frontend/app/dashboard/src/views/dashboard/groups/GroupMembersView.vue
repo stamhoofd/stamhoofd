@@ -26,7 +26,7 @@ import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
@@ -57,7 +57,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     openMemberOnLoad: string | null = null
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     mounted() {
@@ -159,6 +159,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     
     get actions(): TableAction<MemberWithRegistrations>[] {
         const builder = new MemberActionBuilder({
+            $organizationManager: this.$organizationManager,
+            $memberManager: this.$memberManager,
             component: this,
             groups: this.groups,
             cycleOffset: this.cycleOffset,
@@ -422,12 +424,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get hasWrite() {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
 
         for (const group of this.groups) {
-            if (!group.privateSettings || !group.hasWriteAccess(OrganizationManager.user.permissions, this.organization)) {
+            if (!group.privateSettings || !group.hasWriteAccess(this.$organizationManager.user.permissions, this.organization)) {
                 return false
             }
         }
@@ -436,12 +438,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get hasFull() {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
         
         for (const group of this.groups) {
-            if (!group.privateSettings || !group.hasFullAccess(OrganizationManager.user.permissions, this.organization)) {
+            if (!group.privateSettings || !group.hasFullAccess(this.$organizationManager.user.permissions, this.organization)) {
                 return false
             }
         }
@@ -472,7 +474,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get recordCategories(): RecordCategory[] {
         // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
+        return this.$organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
             if (category.childCategories.length > 0) {
                 return category.childCategories
             }
@@ -486,7 +488,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get filterDefinitions() {
-        const base: FilterDefinition<MemberWithRegistrations>[] = MemberWithRegistrations.getBaseFilterDefinitions(OrganizationManager.organization)
+        const base: FilterDefinition<MemberWithRegistrations>[] = MemberWithRegistrations.getBaseFilterDefinitions(this.$organization)
 
         base.push(
             ...RecordCategory.getRecordCategoryDefinitions<MemberWithRegistrations>(this.recordCategories, (member) => member.details.recordAnswers)
@@ -496,7 +498,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     created() {
-        MemberManager.addListener(this, this.onUpdateMember)
+        this.$memberManager.addListener(this, this.onUpdateMember)
     }
 
     activated() {
@@ -553,7 +555,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     beforeDestroy() {
-        MemberManager.removeListener(this)
+        this.$memberManager.removeListener(this)
         Request.cancelAll(this)
     }
 
@@ -580,9 +582,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     reload(visibleReload = true) {
         Request.cancelAll(this)
         this.loading = visibleReload;
-        MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset, this).then((members) => {
+        this.$memberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset, this).then((members) => {
             // Make sure we keep as many references as possible
-            MemberManager.sync(this.allValues, members)
+            this.$memberManager.sync(this.allValues, members)
             this.allValues = members
 
             if (this.openMemberOnLoad) {

@@ -101,7 +101,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationDomains } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+
 import DNSRecordsView from './DNSRecordsView.vue';
 
 @Component({
@@ -120,8 +120,8 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
     useDkim1024bit = false
-    registerDomain = OrganizationManager.organization.privateMeta?.pendingRegisterDomain ?? OrganizationManager.organization.registerDomain ?? ""
-    mailDomain = OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain ?? ""
+    registerDomain = this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain ?? ""
+    mailDomain = this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? ""
     customRegisterDomain = this.registerDomain && this.mailDomain && (this.registerDomain !== 'inschrijven.' + this.mailDomain)
     allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/)
 
@@ -152,7 +152,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     }
 
     get isStamhoofd() {
-        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
+        return this.$organizationManager.user.email.endsWith("@stamhoofd.be") || this.$organizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
     get isMailOk() {
@@ -164,7 +164,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     } 
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get enableMemberModule() {
@@ -172,7 +172,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     }
 
     get isAlreadySet() {
-        return !!(OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain)
+        return !!(this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain)
     }
 
     domainChanged() {
@@ -246,7 +246,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
 
         try {
             const registerDomain = this.usedRegisterDomain;
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/organization/domain",
                 body: OrganizationDomains.create({
@@ -256,7 +256,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
                 }),
                 decoder: Organization as Decoder<Organization>
             })
-            OrganizationManager.organization.set(response.data)
+            this.$organization.set(response.data)
             this.show(new ComponentWithProperties(DNSRecordsView, {}))
             this.saving = false
         } catch (e) {
@@ -280,7 +280,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/organization/domain",
                 body: OrganizationDomains.create({
@@ -289,7 +289,8 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
                 }),
                 decoder: Organization as Decoder<Organization>
             })
-            OrganizationManager.organization = response.data
+
+            this.$context.updateOrganization(response.data)
             this.pop({ force: true })
             this.saving = false
         } catch (e) {

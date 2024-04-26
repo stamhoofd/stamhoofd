@@ -134,7 +134,7 @@ import { UrlHelper } from '@stamhoofd/networking';
 import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+
 import EditRecordCategoryQuestionsView from './records/EditRecordCategoryQuestionsView.vue';
 import EditRecordCategoryView from './records/EditRecordCategoryView.vue';
 import RecordCategoryRow from "./records/RecordCategoryRow.vue";
@@ -155,16 +155,15 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     saving = false
 
     // Make it reactive
-    OrganizationManager = OrganizationManager
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get AskRequirement() {
         return AskRequirement
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get patchedOrganization() {
@@ -342,8 +341,8 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await OrganizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+            await this.$organizationManager.patch(this.organizationPatch)
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
             new Toast('De wijzigingen zijn opgeslagen', "success green").show()
             this.dismiss({ force: true })
         } catch (e) {
@@ -354,7 +353,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {

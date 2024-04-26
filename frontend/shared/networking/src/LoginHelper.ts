@@ -52,16 +52,8 @@ export class LoginHelper {
         })
 
         if (!response.data.valid) {
-            // the code has been used or is expired
-
             // Check if we are now logged in (link might have been opened in a new tab)
             await session.loadFromStorage()
-            if (session.canGetCompleted()) {
-                // yay! We are signed in
-                await SessionManager.setCurrentSession(session)
-                return true
-            }
-
             return true
         }
         return false
@@ -97,7 +89,7 @@ export class LoginHelper {
             session.preventComplete = false
         }
        
-        await SessionManager.setCurrentSession(session)
+        // await SessionManager.setCurrentSession(session)
     }
 
     static async login(
@@ -138,7 +130,7 @@ export class LoginHelper {
             // need to wait on this because it changes the permissions
         }
 
-        await SessionManager.setCurrentSession(session)
+        // await SessionManager.setCurrentSession(session)
         return {}
     }
 
@@ -165,8 +157,7 @@ export class LoginHelper {
         return response.data.token
     }
 
-    static async loadAdmins(shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
-        const session = SessionManager.currentSession!
+    static async loadAdmins(session: Session, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/admins",

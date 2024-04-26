@@ -52,7 +52,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import ActivatedView from './modules/members/ActivatedView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
 
@@ -65,10 +65,9 @@ import MembersStructureSetupView from './modules/members/MembersStructureSetupVi
 })
 export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     loadingModule: STPackageType | null = null
-    OrganizationManager = OrganizationManager
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get isMembersTrial() {
@@ -206,7 +205,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         this.loadingModule = bundle as any as STPackageType
 
         try {
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/billing/activate-packages",
                 body: {
@@ -216,7 +215,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>,
                 shouldRetry: false
             })
-            await SessionManager.currentSession!.fetchOrganization(false)
+            await this.$context.fetchOrganization(false)
             new Toast(message, "success green").show()
         } catch (e) {
             Toast.fromError(e).show()
@@ -232,7 +231,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         this.loadingModule = type
 
         try {
-            const status = await OrganizationManager.loadBillingStatus({
+            const status = await this.$organizationManager.loadBillingStatus({
                 shouldRetry: false,
                 owner: this
             })
@@ -240,17 +239,17 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             const pack = packages.find(p => p.meta.type === type)
 
             if (pack) {
-                await SessionManager.currentSession!.authenticatedServer.request({
+                await this.$context.authenticatedServer.request({
                     method: "POST",
                     path: "/billing/deactivate-package/"+pack.id,
                     owner: this,
                     shouldRetry: false
                 })
-                await SessionManager.currentSession!.fetchOrganization(false)
+                await this.$context.fetchOrganization(false)
                 new Toast(message, "success green").show()
             } else {
                 // Update out of date
-                await SessionManager.currentSession!.fetchOrganization(false)
+                await this.$context.fetchOrganization(false)
             }
         } catch (e) {
             Toast.fromError(e).show()

@@ -199,7 +199,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
         arr.addPatch(patch)
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/organization/document-templates",
                 body: arr,
@@ -259,7 +259,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
         patch.addDelete(this.template.id)
 
         try {
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/organization/document-templates",
                 body: patch,
@@ -292,7 +292,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
 
     async generateXML(): Promise<Blob> {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/organization/document-templates/" + encodeURIComponent(this.template.id) + "/xml",
             shouldRetry: true,

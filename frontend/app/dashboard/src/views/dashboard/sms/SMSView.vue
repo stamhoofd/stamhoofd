@@ -58,7 +58,7 @@ import { CenteredMessage, Dropdown, SegmentedControl, STInputBox, STNavigationBa
 import { Customer, Member } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../registration/src/classes/OrganizationManager";
+
 
 @Component({
     components: {
@@ -90,7 +90,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
     }
 
     get parentsEnabled() {
-        const enabled = OrganizationManager.organization.meta.recordsConfiguration.parents !== null
+        const enabled = this.$organization.meta.recordsConfiguration.parents !== null
         return enabled && this.members.some(member => member.details.parents.length > 0)
     }
 

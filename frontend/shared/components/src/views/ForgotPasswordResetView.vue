@@ -101,9 +101,6 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    @Prop({ default: () => SessionManager.currentSession })
-    initialSession!: Session
-
     @Prop({ required: true })
     token!: string
 
@@ -138,7 +135,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
             
             this.loadingToken = true;
 
-            this.initialSession.server.request({
+            this.$context.server.request({
                 method: "POST",
                 path: "/oauth/token",
                 body: {
@@ -150,9 +147,9 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                 decoder: Token
             }).then(async (response) => {
                 // Create new session to prevent signing in
-                this.session = new Session(this.initialSession.organizationId)
+                this.session = new Session(this.$context.organizationId)
                 this.session.setToken(response.data)
-                this.session.organization = this.initialSession.organization
+                this.session.organization = this.$context.organization
                 await this.session.updateData(false, false)
                 return this.session
             })
@@ -273,12 +270,15 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
 
             // Also change the email if it has been changed
             const {verificationToken} = await LoginHelper.patchUser(this.session, patch)
-            await SessionManager.setCurrentSession(this.session)
+            //await SessionManager.setCurrentSession(this.session)
+            await SessionManager.prepareSessionForUsage(this.session)
+
+            // todo: switch current $context to session
 
             // If email has been changed or needs verification
             if (verificationToken) {
                 // Present instead of show, because the confirm is only needed to change the email address
-                this.present(new ComponentWithProperties(ConfirmEmailView, { session: this.session, token: verificationToken, email: this.email }).setDisplayStyle("sheet"))
+                this.present(new ComponentWithProperties(ConfirmEmailView, { token: verificationToken, email: this.email }).setDisplayStyle("sheet"))
             }
 
             if (this.hasAccount) {

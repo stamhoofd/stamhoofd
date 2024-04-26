@@ -95,7 +95,7 @@ import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatu
 import { StringCompare } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
 import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import EditGroupMixin from './EditGroupMixin';
@@ -128,13 +128,13 @@ export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
 
     mounted() {
         // Auto assign roles
-        if (this.isNew && OrganizationManager.user.permissions && !this.group.privateSettings!.permissions.hasFullAccess(OrganizationManager.user.permissions, this.patchedOrganization.privateMeta?.roles ?? [])) {
+        if (this.isNew && this.$organizationManager.user.permissions && !this.group.privateSettings!.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.patchedOrganization.privateMeta?.roles ?? [])) {
             const categories = this.patchedOrganization.meta.categories.filter(c => c.groupIds.includes(this.group.id))
             for (const cat of categories) {
                 // Get all roles that have create permissions in the categories that this group will get added into
                 const roles = cat.settings.permissions.create.flatMap(r => {
-                    const role = OrganizationManager.organization.privateMeta?.roles.find(i => i.id === r.id)
-                    const has = OrganizationManager.user.permissions?.roles.find(i => i.id === r.id)
+                    const role = this.$organization.privateMeta?.roles.find(i => i.id === r.id)
+                    const has = this.$organizationManager.user.permissions?.roles.find(i => i.id === r.id)
                     if (role && has) {
                         return [PermissionRole.create(role)]
                     }

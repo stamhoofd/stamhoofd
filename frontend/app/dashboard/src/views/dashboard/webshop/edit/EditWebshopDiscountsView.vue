@@ -124,7 +124,7 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
     async fetchDiscountCodes() {
         this.fetchingDiscountCodes = true;
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: 'GET',
                 path: `/webshop/${this.webshop.id}/discount-codes`,
                 decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
@@ -141,7 +141,7 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
     }
     
     get organization() {
-        return SessionManager.currentSession!.organization!
+        return this.$context
     }
 
     get defaultDiscounts() {
@@ -263,7 +263,7 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
             return;
         }
 
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.$context.authenticatedServer.request({
             method: 'PATCH',
             path: `/webshop/${this.webshop.id}/discount-codes`,
             body: this.patchDiscountCodes,

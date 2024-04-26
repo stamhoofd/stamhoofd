@@ -87,7 +87,7 @@ import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import EditMemberEmergencyContactView from './EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './EditMemberParentView.vue';
 
@@ -135,11 +135,11 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
     cachedParents: SelectableParent[] | null = null
 
     get areParentsEnabled() {
-        return !!OrganizationManager.organization.meta.recordsConfiguration.parents
+        return !!this.$organization.meta.recordsConfiguration.parents
     }
 
     get areEmergencyContactsAsked() {
-        return !!OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts
+        return !!this.$organization.meta.recordsConfiguration.emergencyContacts
     }
 
     editParent(selectable: SelectableParent) {

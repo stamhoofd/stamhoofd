@@ -68,14 +68,14 @@ export default class LegalFooter extends Vue {
         webshop!: Webshop | null;
 
     get isLoggedIn() {
-        return SessionManager.currentSession?.isComplete() ?? false
+        return this.$context.isComplete() ?? false
     }
 
     async logout() {
         if (!(await CenteredMessage.confirm('Wil je uitloggen?', 'Ja, uitloggen', 'Hiermee zal je worden afgemeld.'))) {
             return
         }
-        SessionManager.currentSession?.logout()
+        this.$context.logout()
     }
 
     get privacyUrl() {

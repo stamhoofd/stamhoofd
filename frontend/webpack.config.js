@@ -50,6 +50,8 @@ if (process.env.LOAD_ENV) {
     throw new Error("ENV_FILE or LOAD_ENV environment variables are missing")
 }
 
+const transpileOnly = false; //process.env.NODE_ENV !== "production" || true;
+
 module.exports = {
     mode: "development",
     target: 'web',
@@ -133,9 +135,10 @@ module.exports = {
                     {
                         loader: 'ts-loader',
                         options: { 
-                            appendTsSuffixTo: [/\.vue$/],
-                            transpileOnly: process.env.NODE_ENV !== "production" || true,
-                            happyPackMode: process.env.NODE_ENV !== "production" || true,
+                            appendTsSuffixTo: ['\\.vue$'],
+                            transpileOnly,
+                            happyPackMode: transpileOnly,
+                            projectReferences: true
                         },
                     }
                 ]
@@ -277,7 +280,7 @@ module.exports = {
             // add errors to webpack instead of warnings
             failOnError: true,
         })*/
-        ...(process.env.NODE_ENV === "production" && false) ? [] : [new ForkTsCheckerWebpackPlugin(
+        ...(!transpileOnly) ? [] : [new ForkTsCheckerWebpackPlugin(
             {
                 typescript: {
                     enabled: true,
@@ -286,6 +289,8 @@ module.exports = {
                             enabled: true,
                         }
                     },
+                    build: true,
+                    mode: 'write-references',
                     diagnosticOptions: {
                         semantic: true,
                         syntactic: true,

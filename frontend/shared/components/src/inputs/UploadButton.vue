@@ -80,7 +80,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
         this.uploading = true;
         //this.errorBox = null;
 
-        SessionManager.currentSession!.authenticatedServer
+        this.$context.authenticatedServer
             .request({
                 method: "POST",
                 path: "/upload-image",

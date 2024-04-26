@@ -48,7 +48,7 @@ export default class EditWebshopPermissionsView extends Mixins(EditWebshopMixin)
     }
 
     get organization() {
-        return SessionManager.currentSession!.organization!
+        return this.$context.organization!
     }
 
     get roles() {

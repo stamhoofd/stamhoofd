@@ -81,6 +81,7 @@ import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, Error
 import { LoginHelper, Session, Storage } from "@stamhoofd/networking"
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+import { getScopedDashboardRoot } from '../../getRootViews';
 
 @Component({
     components: {
@@ -202,7 +203,13 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             this.loading = false;
 
             const session = new Session(this.organization.id)
-            this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
+            const dashboardContext = getScopedDashboardRoot(session, {
+                loginComponents: [
+                    new ComponentWithProperties(ConfirmEmailView, { token, email: this.email })
+                ]
+            })
+            
+            this.show(dashboardContext)
 
             try {
                 Storage.keyValue.removeItem("savedRegisterCode").catch(console.error)

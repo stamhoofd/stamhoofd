@@ -65,12 +65,11 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,CenteredMessage,Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, Parent, RegisterItem, Version } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, Parent, RegisterItem, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberManager } from '../../../classes/MemberManager';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import ParentView from './ParentView.vue';
 
 class SelectableParent {
@@ -124,7 +123,7 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
     }
 
     get isOptional() {
-        return !OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('parents')).doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
+        return !this.$organization.meta.recordsConfiguration.parents?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('parents')).doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
     }
 
     editParent(parent: Parent) {
@@ -159,7 +158,7 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
         const autoSelect = this.parents.length == 0
 
         // Read parents from membermanager
-        for (const parent of MemberManager.getParents()) {
+        for (const parent of this.$memberManager.getParents()) {
             if (!this.parents.find(p => p.parent.id == parent.id)) {
                 this.parents.push(new SelectableParent(parent, autoSelect))
             }

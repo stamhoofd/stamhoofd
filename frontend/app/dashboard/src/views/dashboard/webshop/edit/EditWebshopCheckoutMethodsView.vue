@@ -49,7 +49,7 @@ import { AnyCheckoutMethod, CheckoutMethod, PrivateWebshop, WebshopDeliveryMetho
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import EditWebshopMixin from './EditWebshopMixin';
 import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
 import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
@@ -73,7 +73,7 @@ export default class EditWebshopCheckoutMethodsView extends Mixins(EditWebshopMi
 
     addOnSiteMethod() {
         const onSiteMethod = WebshopOnSiteMethod.create({
-            address: OrganizationManager.organization.address
+            address: this.$organization.address
         })
        
         const p = PrivateWebshop.patch({})
@@ -94,7 +94,7 @@ export default class EditWebshopCheckoutMethodsView extends Mixins(EditWebshopMi
 
     addTakeoutMethod() {
         const takeoutMethod = WebshopTakeoutMethod.create({
-            address: OrganizationManager.organization.address
+            address: this.$organization.address
         })
        
         const p = PrivateWebshop.patch({})

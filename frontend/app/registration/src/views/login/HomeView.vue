@@ -64,11 +64,11 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LegalFooter,LoadingButton, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LegalFooter, LoadingButton, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 import GroupTree from '../../components/GroupTree.vue';
 import LoginView from './LoginView.vue';
 import SignupView from './SignupView.vue';
@@ -86,7 +86,7 @@ import SignupView from './SignupView.vue';
     },
     metaInfo() {
         return {
-            title: "Inschrijven bij "+OrganizationManager.organization.name,
+            title: "Inschrijven bij "+this.$organization.name,
             meta: [
                 {
                     vmid: 'description',
@@ -96,12 +96,12 @@ import SignupView from './SignupView.vue';
                 {
                     hid: 'og:site_name',
                     name: 'og:site_name',
-                    content: OrganizationManager.organization.name,
+                    content: this.$organization.name,
                 },
                 {
                     hid: 'og:title',
                     name: 'og:title',
-                    content: "Inschrijven bij "+OrganizationManager.organization.name,
+                    content: "Inschrijven bij "+this.$organization.name,
                 },
                 ...(this.firstImageResolution ? [
                     {
@@ -133,8 +133,6 @@ export default class HomeView extends Mixins(NavigationMixin){
     loading = false;
     email = ""
     password = ""
-
-    session = SessionManager.currentSession!
 
     mounted() {
         const parts =  UrlHelper.shared.getParts()
@@ -192,7 +190,7 @@ export default class HomeView extends Mixins(NavigationMixin){
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get rootCategory() {
@@ -200,11 +198,11 @@ export default class HomeView extends Mixins(NavigationMixin){
     }
 
     get privacyUrl() {
-        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization.meta.privacyPolicyUrl
+        if (this.$organization.meta.privacyPolicyUrl) {
+            return this.$organization.meta.privacyPolicyUrl
         }
-        if (OrganizationManager.organization.meta.privacyPolicyFile) {
-            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
+        if (this.$organization.meta.privacyPolicyFile) {
+            return this.$organization.meta.privacyPolicyFile.getPublicPath()
         }
         return null
     }
@@ -241,8 +239,8 @@ export default class HomeView extends Mixins(NavigationMixin){
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use "~@stamhoofd/scss/base/text-styles.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #home-view {
     .stamhoofd-footer {

@@ -78,7 +78,7 @@ export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMix
     }
 
     get organization() {
-        return SessionManager.currentSession!.organization!
+        return this.$context.organization!
     }
 
     

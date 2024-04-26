@@ -91,7 +91,7 @@ import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionR
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import AdminRolesView from './AdminRolesView.vue';
 import AdminView from './AdminView.vue';
 
@@ -132,7 +132,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     async load(force = false) {
-        await OrganizationManager.loadAdmins(force, true, this)
+        await this.$organizationManager.loadAdmins(force, true, this)
         this.loading = false
     }
 
@@ -146,7 +146,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get enableMemberModule() {
@@ -154,7 +154,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     get me() {
-        return this.SessionManager.currentSession!.user
+        return this.$context.user
     }
 
     permissionList(user: User) {
@@ -208,7 +208,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             id: this.organization.id,
             privateMeta
         })
-        OrganizationManager.patch(patch).catch(e => Toast.fromError(e).show())
+        this.$organizationManager.patch(patch).catch(e => Toast.fromError(e).show())
     }
 
     moveRoleDown(index: number, role: PermissionRoleDetailed) {
@@ -222,7 +222,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             id: this.organization.id,
             privateMeta
         })
-        OrganizationManager.patch(patch).catch(e => Toast.fromError(e).show())
+        this.$organizationManager.patch(patch).catch(e => Toast.fromError(e).show())
     }
 
     editAdmin(admin: User) {

@@ -71,7 +71,7 @@ import { ApiUser, PermissionLevel, Permissions, User } from '@stamhoofd/structur
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import AdminView from './AdminView.vue';
 import ApiUserView from './ApiUserView.vue';
 
@@ -106,7 +106,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
 
     async load() {
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/api-keys",
                 decoder: new ArrayDecoder(ApiUser as Decoder<ApiUser>),
@@ -123,7 +123,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     formatDate(date: Date) {

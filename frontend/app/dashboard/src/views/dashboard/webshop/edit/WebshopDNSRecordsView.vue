@@ -72,12 +72,12 @@ import { WebshopManager } from '../WebshopManager';
 })
 export default class WebshopDNSRecordsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    webshopManager: WebshopManager
+        webshopManager: WebshopManager
 
     errorBox: ErrorBox | null = null
     saving = false
 
-    session = SessionManager.currentSession
+    session = this.$context
 
     get records() {
         return this.webshopManager.webshop?.privateMeta.dnsRecords ?? []
@@ -102,7 +102,7 @@ export default class WebshopDNSRecordsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/webshop/"+this.webshopManager.webshop!.id+"/verify-domain",
                 decoder: PrivateWebshop as Decoder<PrivateWebshop>,

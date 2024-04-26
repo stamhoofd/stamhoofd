@@ -2,12 +2,11 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { UrlHelper } from '@stamhoofd/networking';
 import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, RecordAnswer, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 
 export enum CheckoutStepType {
     "Method" = "Method",
@@ -75,10 +74,28 @@ export class CheckoutStep {
 }
 
 export class CheckoutStepsManager {
+    $checkoutManager: CheckoutManager;
+
+    private constructor($checkoutManager: CheckoutManager) {
+        this.$checkoutManager = $checkoutManager
+    }
+
+    get $webshopManager() {
+        return this.$checkoutManager.$webshopManager
+    }
+
+    get $context() {
+        return this.$webshopManager.$context
+    }
+
+    static for($checkoutManager: CheckoutManager) {
+        return new CheckoutStepsManager($checkoutManager)
+    }
+
     /// Return all the steps that are confirmed with the current checkout configuration
-    static getSteps(): CheckoutStep[] {
-        const webshop = WebshopManager.webshop
-        const checkout = CheckoutManager.checkout
+    getSteps(): CheckoutStep[] {
+        const webshop = this.$webshopManager.webshop
+        const checkout = this.$checkoutManager.checkout
         const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id === checkout.checkoutMethod?.id) ?? (webshop.meta.checkoutMethods[0] as CheckoutMethod | undefined) ?? null;
         const steps: CheckoutStep[] = []
 
@@ -90,8 +107,8 @@ export class CheckoutStepsManager {
                 skipHandler: () => {
                     // Skip behaviour
                     // Set to the only available checkout method
-                    CheckoutManager.checkout.checkoutMethod = WebshopManager.webshop.meta.checkoutMethods.length == 0 ? null : WebshopManager.webshop.meta.checkoutMethods[0]
-                    CheckoutManager.saveCheckout()
+                    this.$checkoutManager.checkout.checkoutMethod = this.$webshopManager.webshop.meta.checkoutMethods.length == 0 ? null : this.$webshopManager.webshop.meta.checkoutMethods[0]
+                    this.$checkoutManager.saveCheckout()
                 },
                 getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
                 validate: (checkout, webshop, organizationMeta) => checkout.validateCheckoutMethod(webshop, organizationMeta)
@@ -105,13 +122,13 @@ export class CheckoutStepsManager {
                 active: checkoutMethod !== null && checkoutMethod.timeSlots.timeSlots.length > 1,
                 skipHandler: () => {
                     // Use default or set to null if none available
-                    if (CheckoutManager.checkout.checkoutMethod && CheckoutManager.checkout.checkoutMethod.timeSlots.timeSlots.length == 1) {
-                        CheckoutManager.checkout.timeSlot = CheckoutManager.checkout.checkoutMethod.timeSlots.timeSlots[0]
+                    if (this.$checkoutManager.checkout.checkoutMethod && this.$checkoutManager.checkout.checkoutMethod.timeSlots.timeSlots.length == 1) {
+                        this.$checkoutManager.checkout.timeSlot = this.$checkoutManager.checkout.checkoutMethod.timeSlots.timeSlots[0]
                     } else {
-                        CheckoutManager.checkout.timeSlot = null
+                        this.$checkoutManager.checkout.timeSlot = null
                     }
                     
-                    CheckoutManager.saveCheckout()
+                    this.$checkoutManager.saveCheckout()
                 },
                 getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
                 validate: (checkout, webshop, organizationMeta) => checkout.validateTimeSlot(webshop, organizationMeta)
@@ -126,23 +143,23 @@ export class CheckoutStepsManager {
                 skipHandler: () => {
                     // Skip behaviour
                     // Clear address
-                    CheckoutManager.checkout.address = null
-                    CheckoutManager.saveCheckout()
+                    this.$checkoutManager.checkout.address = null
+                    this.$checkoutManager.saveCheckout()
                 },
                 getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
                 validate: (checkout, webshop, organizationMeta) => checkout.validateDeliveryAddress(webshop, organizationMeta)
             })
         )
 
-        const loggedIn = SessionManager.currentSession?.isComplete() ?? false;
-        const user = loggedIn ? (SessionManager.currentSession?.user ?? null) : null;
+        const loggedIn = this.$context.isComplete() ?? false;
+        const user = loggedIn ? (this.$context.user ?? null) : null;
 
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Customer,
             url: "/checkout/"+CheckoutStepType.Customer.toLowerCase(),
             active: !loggedIn || webshop.meta.phoneEnabled || !user?.firstName || !user?.lastName,
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {})),
-            validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n, false, loggedIn ? (SessionManager.currentSession?.user ?? null) : null)
+            validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n, false, loggedIn ? (this.$context.user ?? null) : null)
         }))
 
         // Now add all the Record Category steps
@@ -167,13 +184,13 @@ export class CheckoutStepsManager {
                         filterDefinitions,
                         saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
                             checkout.recordAnswers = answers
-                            CheckoutManager.saveCheckout()
+                            this.$checkoutManager.saveCheckout()
 
                             // Force a save if nothing changed (to fix timeSlot + updated data)
-                            await CheckoutStepsManager.goNext(id, component)
+                            await this.goNext(id, component)
                         },
                         filterValueForAnswers: (answers: RecordAnswer[]) => {
-                            const checkout = Checkout.create(CheckoutManager.checkout)
+                            const checkout = Checkout.create(this.$checkoutManager.checkout)
                             checkout.recordAnswers = answers
                             return checkout;
                         }
@@ -184,12 +201,12 @@ export class CheckoutStepsManager {
                 },
                 skipHandler: () => {
                     for (const record of category.getAllRecords()) {
-                        const index = CheckoutManager.checkout.recordAnswers.findIndex(a => a.settings.id == record.id)
+                        const index = this.$checkoutManager.checkout.recordAnswers.findIndex(a => a.settings.id == record.id)
                         if (index != -1) {
-                            CheckoutManager.checkout.recordAnswers.splice(index, 1)
+                            this.$checkoutManager.checkout.recordAnswers.splice(index, 1)
                         }
                     }
-                    CheckoutManager.saveCheckout()
+                    this.$checkoutManager.saveCheckout()
                 }
             }))
         }
@@ -205,19 +222,19 @@ export class CheckoutStepsManager {
         return steps
     }
 
-    static getActiveSteps() {
+    getActiveSteps() {
         return this.getSteps().filter(s => s.active)
     }
 
-    static async getNextStep(stepId: string | undefined, reload = false) {
+    async getNextStep(stepId: string | undefined, reload = false) {
         if (reload) {
-            await WebshopManager.reload()
+            await this.$webshopManager.reload()
         }
 
         try {
-            CheckoutManager.checkout.validateCart(WebshopManager.webshop, WebshopManager.organization.meta);
+            this.$checkoutManager.checkout.validateCart(this.$webshopManager.webshop, this.$webshopManager.organization.meta);
         } finally {
-            CheckoutManager.checkout.update(WebshopManager.webshop)
+            this.$checkoutManager.checkout.update(this.$webshopManager.webshop)
         }
 
         const steps = this.getSteps()
@@ -233,12 +250,12 @@ export class CheckoutStepsManager {
                 }
 
                 // Also validate skipped steps
-                s.validate(CheckoutManager.checkout, WebshopManager.webshop, WebshopManager.organization.meta)
+                s.validate(this.$checkoutManager.checkout, this.$webshopManager.webshop, this.$webshopManager.organization.meta)
                 continue
             }
 
             // Validate all steps along the way
-            s.validate(CheckoutManager.checkout, WebshopManager.webshop, WebshopManager.organization.meta)
+            s.validate(this.$checkoutManager.checkout, this.$webshopManager.webshop, this.$webshopManager.organization.meta)
             if (s.id === stepId) {
                 next = true
             }
@@ -248,18 +265,18 @@ export class CheckoutStepsManager {
         return undefined
     }
 
-    static async goNext(step: string | undefined, component: NavigationMixin) {
-        const webshop = WebshopManager.webshop
+    async goNext(step: string | undefined, component: NavigationMixin) {
+        const webshop = this.$webshopManager.webshop
         let nextStep: CheckoutStep | undefined;
 
         // Force a save if nothing changed (to fix timeSlot + updated data)
         try {
-            nextStep = await CheckoutStepsManager.getNextStep(step, true)
+            nextStep = await this.getNextStep(step, true)
         } catch (error) {
             if (isSimpleError(error) || isSimpleErrors(error)) {
                 if (error.hasFieldThatStartsWith("cart")) {
                     // A cart error: force a reload and go back to the cart.
-                    await WebshopManager.reload()
+                    await this.$webshopManager.reload()
                     
                     if (webshop.shouldEnableCart) {
                         component.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
@@ -269,7 +286,7 @@ export class CheckoutStepsManager {
                     Toast.fromError(error).show()
                 } else if (error.hasFieldThatStartsWith("fieldAnswers")) {
                     // A cart error: force a reload and go back to the cart.
-                    await WebshopManager.reload()
+                    await this.$webshopManager.reload()
 
                     if (webshop.shouldEnableCart) {
                         component.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))

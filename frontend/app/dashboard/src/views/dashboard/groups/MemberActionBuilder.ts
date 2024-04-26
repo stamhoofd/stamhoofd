@@ -4,10 +4,10 @@ import { EncryptedMemberWithRegistrations, Group, GroupCategoryTree, MemberWithR
 import { Formatter } from "@stamhoofd/utility";
 
 import { MemberManager } from "../../../classes/MemberManager";
-import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import SMSView from "../sms/SMSView.vue";
+import { OrganizationManager } from "@stamhoofd/networking";
 
 
 export class MemberActionBuilder {
@@ -16,19 +16,25 @@ export class MemberActionBuilder {
     cycleOffset: number
     hasWrite: boolean
     inWaitingList = false
+    $organizationManager: OrganizationManager
+    $memberManager: MemberManager
 
     constructor(settings: {
         component: any,
         hasWrite: boolean,
         cycleOffset: number,
         groups: Group[],
-        inWaitingList?: boolean
+        inWaitingList?: boolean,
+        $organizationManager: OrganizationManager,
+        $memberManager: MemberManager
     }) {
         this.component = settings.component
         this.hasWrite = settings.hasWrite
         this.cycleOffset = settings.cycleOffset
         this.groups = settings.groups
         this.inWaitingList = settings.inWaitingList ?? false
+        this.$organizationManager = settings.$organizationManager
+        this.$memberManager = settings.$memberManager
     }
 
     getRegisterActions(cycleOffset?: number): TableAction<MemberWithRegistrations>[] {
@@ -51,15 +57,15 @@ export class MemberActionBuilder {
                     name: "Wachtlijst van",
                     groupIndex: 0,
                     childActions: () => [
-                        ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle, true))
+                        ...this.getActionsForCategory(this.$organizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle, true))
                     ]
                 }),
-                ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle, false))
+                ...this.getActionsForCategory(this.$organizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle, false))
             ]
         }
 
         return [
-            ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle - cycleOffset, false))
+            ...this.getActionsForCategory(this.$organizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle - cycleOffset, false))
         ]
     }
 
@@ -112,7 +118,7 @@ export class MemberActionBuilder {
                         this.moveToWaitingList(members)
                     }
                 }),
-                ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.moveRegistrations(members, group))
+                ...this.getActionsForCategory(this.$organizationManager.organization.adminCategoryTree, (members, group) => this.moveRegistrations(members, group))
             ]
         })
     }
@@ -330,7 +336,7 @@ export class MemberActionBuilder {
                 members,
                 group: this.groups.length === 1 ? this.groups[0] : undefined,
                 defaultSubject: subject,
-                defaultReplacements: OrganizationManager.organization.meta.getEmailReplacements()
+                defaultReplacements: this.$organizationManager.organization.meta.getEmailReplacements()
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
@@ -380,7 +386,7 @@ export class MemberActionBuilder {
             .addButton(new CenteredMessageButton("Behoud contactgegevens", {
                 action: async () => {
                     if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam, e-mailadres en telefoonnummer (van leden zelf en ouders indien -18jaar) worden verwijderd.")) {
-                        await MemberManager.deleteDataExceptContacts(members)
+                        await this.$memberManager.deleteDataExceptContacts(members)
                         new Toast(`De gegevens van ${member} zijn verwijderd.`, "success green").show()
                     }
                 },
@@ -390,7 +396,7 @@ export class MemberActionBuilder {
             .addButton(new CenteredMessageButton("Behoud enkel naam", {
                 action: async () => {
                     if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam worden verwijderd.")) {
-                        await MemberManager.deleteData(members)
+                        await this.$memberManager.deleteData(members)
                         new Toast(`De gegevens van ${member} zijn verwijderd.`, "success green").show()
                     }
                 },
@@ -408,7 +414,7 @@ export class MemberActionBuilder {
                 action: () => {
                     CenteredMessage.confirm("Begrijp je dat dit alles verwijdert?", "Ja, verwijderen", 'Alle inschrijvingen, betaalgegevens, gegevens en accounts gaan verloren.').then(async (confirmed) => {
                         if (confirmed) {
-                            await MemberManager.deleteMembers(members)
+                            await this.$memberManager.deleteMembers(members)
                             new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} verwijderd`, "success green").show()
                         }
                     }).catch(console.error)
@@ -428,7 +434,7 @@ export class MemberActionBuilder {
                 action: () => {
                     (async () => {
                         if (members.length == 1 || await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
-                            await MemberManager.unregisterMembers(members, this.groups, this.cycleOffset, this.inWaitingList)
+                            await this.$memberManager.unregisterMembers(members, this.groups, this.cycleOffset, this.inWaitingList)
                             new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} uitgeschreven`, "success green").show()
                         }
                     })().catch(console.error)
@@ -456,9 +462,9 @@ export class MemberActionBuilder {
         }
 
         try {
-            const patches = MemberManager.getPatchArray()
+            const patches = this.$memberManager.getPatchArray()
             for (const member of members) {
-                const registrationsPatch = MemberManager.getRegistrationsPatchArray()
+                const registrationsPatch = this.$memberManager.getRegistrationsPatchArray()
 
                 const registrations = member.filterRegistrations({groups: this.groups, waitingList: true, cycleOffset: this.cycleOffset, canRegister: !allow})
 
@@ -474,7 +480,7 @@ export class MemberActionBuilder {
                     registrations: registrationsPatch
                 }))
             }
-            await MemberManager.patchMembersAndSync(members, patches, false)
+            await this.$memberManager.patchMembersAndSync(members, patches, false)
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()
@@ -493,7 +499,7 @@ export class MemberActionBuilder {
         new CenteredMessage(`${member} inschrijven?`, "We raden sterk aan om leden toe te laten en daarna uit te nodigen om in te schrijven via een e-mail. Dan zijn ze verplicht om de rest van hun gegevens aan te vullen en de betaling in orde te brengen.")
             .addButton(new CenteredMessageButton("Ja, inschrijven", {
                 action: async () => {
-                    await MemberManager.acceptFromWaitingList(members, this.groups, this.cycleOffset)
+                    await this.$memberManager.acceptFromWaitingList(members, this.groups, this.cycleOffset)
                     new Toast(members.length+" leden zijn ingeschreven", "success green").show()
                 },
                 type: "destructive",
@@ -508,7 +514,7 @@ export class MemberActionBuilder {
         new CenteredMessage(`${member} naar de wachtlijst verplaatsen?`)
             .addButton(new CenteredMessageButton("Ja, verplaats", {
                 action: async () => {
-                    await MemberManager.moveToWaitingList(members, this.groups, this.cycleOffset)
+                    await this.$memberManager.moveToWaitingList(members, this.groups, this.cycleOffset)
                     new Toast(members.length+" leden zijn naar de wachtlijst verplaatst", "success green").show()
                 },
                 icon: "clock"
@@ -522,7 +528,7 @@ export class MemberActionBuilder {
         new CenteredMessage(`${member} verplaatsen naar ${group.settings.name}?`)
             .addButton(new CenteredMessageButton("Ja, verplaats", {
                 action: async () => {
-                    await MemberManager.moveRegistrations(members, this.groups, this.cycleOffset, this.inWaitingList, group)
+                    await this.$memberManager.moveRegistrations(members, this.groups, this.cycleOffset, this.inWaitingList, group)
                     new Toast(members.length+` leden zijn naar ${group.settings.name} verplaatst`, "success green").show()
                 },
                 icon: "sync"
@@ -548,7 +554,7 @@ export class MemberActionBuilder {
             .addButton(new CenteredMessageButton("Ja, inschrijven", {
                 action: async () => {
                     const n = members.length == 1 ? members[0].name + ' is' : members.length+" leden zijn"
-                    await MemberManager.registerMembers(members, group, cycle, waitingList)
+                    await this.$memberManager.registerMembers(members, group, cycle, waitingList)
                     new Toast(waitingList ? n+` op de wachtlijst geplaatst voor ${group.settings.name}${periodText}` : n + ` ingeschreven voor ${group.settings.name}${periodText}`, "success green").show()
                 }
             }))
@@ -570,7 +576,7 @@ export class MemberActionBuilder {
         new CenteredMessage(`${member} verplaatsen naar ${cycleName}?`)
             .addButton(new CenteredMessageButton("Ja, verplaats", {
                 action: async () => {
-                    await MemberManager.moveCycle(members, this.groups, this.cycleOffset, this.inWaitingList, cycleOffset)
+                    await this.$memberManager.moveCycle(members, this.groups, this.cycleOffset, this.inWaitingList, cycleOffset)
                     new Toast(members.length+` leden zijn naar ${cycleName} verplaatst`, "success green").show()
                 },
                 icon: "sync"

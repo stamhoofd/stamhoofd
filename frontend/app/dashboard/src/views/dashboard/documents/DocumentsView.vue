@@ -17,7 +17,7 @@ import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import { DocumentActionBuilder } from "./DocumentActionBuilder";
 import DocumentView from "./DocumentView.vue";
 
@@ -34,7 +34,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     allValues: Document[] = []
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     mounted() {
@@ -60,6 +60,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     
     get actions(): TableAction<Document>[] {
         const builder = new DocumentActionBuilder({
+            $context: this.$context,
             template: this.template,
             component: this,
             addDocument: (document: Document) => {
@@ -210,7 +211,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
         this.loading = visibleReload;
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/organization/document-templates/" + encodeURIComponent(this.template.id) + "/documents",
                 decoder: new ArrayDecoder(Document as Decoder<Document>),

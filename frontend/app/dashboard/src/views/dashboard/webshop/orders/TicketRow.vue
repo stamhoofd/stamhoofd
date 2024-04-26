@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => openMenu(e)" class="right-stack" @contextmenu.prevent="openMenu" @click="openTicket" :selectable="true">
+    <STListItem v-long-press="(e) => openMenu(e)" class="right-stack" :selectable="true" @contextmenu.prevent="openMenu" @click="openTicket">
         <h3 class="style-title-list">
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
@@ -32,7 +32,7 @@ import { Order, ProductDateRange, TicketPrivate, TicketPublicPrivate, WebshopTic
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import TicketAlreadyScannedView from "../tickets/status/TicketAlreadyScannedView.vue";
 import ValidTicketView from "../tickets/status/ValidTicketView.vue";
 import { WebshopManager } from "../WebshopManager";
@@ -90,15 +90,15 @@ export default class TicketRow extends Mixins(NavigationMixin){
     }
 
     get hasWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.$context.user?.permissions
         if (!p) {
             return false
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
     }
 
     openTicket() {
-         this.present({
+        this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(!this.ticket.scannedAt ? ValidTicketView : TicketAlreadyScannedView, {
@@ -157,7 +157,7 @@ export default class TicketRow extends Mixins(NavigationMixin){
                             id: this.ticket.id,
                             secret: this.ticket.secret, // needed for lookups
                             scannedAt: new Date(),
-                            scannedBy: SessionManager.currentSession!.user?.firstName ?? null
+                            scannedBy: this.$context.user?.firstName ?? null
                         })).catch(console.error)
                         return true;
                     },
@@ -196,7 +196,7 @@ export default class TicketRow extends Mixins(NavigationMixin){
     }
 
     get qrMessage() {
-        return "https://"+this.webshop.getUrl(OrganizationManager.organization) + "/tickets/"+this.ticket.secret
+        return "https://"+this.webshop.getUrl(this.$organization) + "/tickets/"+this.ticket.secret
     }
 
     async download() {
@@ -206,7 +206,7 @@ export default class TicketRow extends Mixins(NavigationMixin){
             '@stamhoofd/ticket-builder'
         )).TicketBuilder
  
-        const builder = new TicketBuilder([this.ticket], this.webshop, OrganizationManager.organization, this.order ?? undefined)
+        const builder = new TicketBuilder([this.ticket], this.webshop, this.$organization, this.order ?? undefined)
         await builder.download()
     }
 }

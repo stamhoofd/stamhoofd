@@ -23,22 +23,21 @@ type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organi
  * You can also request the available sessions, so you can hint the user in which organizations he is already signed in.
  */
 export class SessionManagerStatic {
-    currentSession: Session | null = null
-    currentOrganization: Organization | null = null
+    // currentSession: Session | null = null
 
     protected cachedStorage?: SessionStorage
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
-    async restoreLastSession() {
+    async getLastSession() {
         // Restore keychain before setting the current session
         // to prevent fetching the organization to refetch the missing keychain items
 
-        const id = (await this.getSessionStorage(false)).lastOrganizationId
+        const storage = await this.getSessionStorage(false)
+        const id = storage.lastOrganizationId
         if (id) {
-            const session = await this.getSessionForOrganization(id)
+            const session = await this.getContextForOrganization(id)
             if (session && session.canGetCompleted()) {
-                
-                await this.setCurrentSession(session)
+                return session
             } else {
                 console.log("session can not get completed, no autosignin")
                 console.log(session)
@@ -58,21 +57,6 @@ export class SessionManagerStatic {
         for (const listener of this.listeners.values()) {
             listener(changed)
         }
-    }
-
-    deactivateSession() {
-        if (this.currentSession) {
-            this.currentSession.removeListener(this)
-        }
-        this.currentSession = null;
-        this.callListeners("session");
-
-        // Not important async block: we don't need to wait for a save here
-        (async () => {
-            const storage = await this.getSessionStorage(false)
-            storage.lastOrganizationId = null
-            this.saveSessionStorage(storage)
-        })().catch(console.error)
     }
 
     async addOrganizationToStorage(organization: Organization, options: {updateOnly?: boolean} = {}) {
@@ -101,33 +85,7 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
-    logout() {
-        if (this.currentSession) {
-            this.currentSession.logout()
-        }
-        this.clearCurrentSession()
-    }
-
-    clearCurrentSession() {
-        console.error("Clear current session")
-        if (this.currentSession) {
-            this.currentSession.removeListener(this)
-        }
-        this.currentSession = null
-        this.callListeners("session")
-    }
-
-    /**
-     * 
-     * @param session 
-     * @param shouldRetry If you set this to false, setting the session might fail, so make sure to catch this
-     */
-    async setCurrentSession(session: Session, shouldRetry = true) {
-        console.log("Changing current session")
-        if (this.currentSession) {
-            this.currentSession.removeListener(this)
-        }
-
+    async prepareSessionForUsage(session: Session, shouldRetry = true) {        
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
             // session.user = null
@@ -183,7 +141,6 @@ export class SessionManagerStatic {
                 })
             }
         }
-        this.currentSession = session
 
         const storage = await this.getSessionStorage(false)
         storage.lastOrganizationId = session.organizationId
@@ -195,40 +152,46 @@ export class SessionManagerStatic {
 
         this.callListeners("session")
 
-        this.currentSession.addListener(this, (changed: "user" | "organization" | "token") => {
+        session.addListener(this, (changed: "user" | "organization" | "token") => {
             if (session.organization) {
                 this.addOrganizationToStorage(session.organization).catch(console.error)
             }
-            this.setUserId();
+            this.setUserId(session);
             this.callListeners(changed)
 
             if (changed === 'token' || changed === 'user') {
-                this.currentSession?.saveToStorage()
+                session.saveToStorage()
             }
         })
 
-        this.setUserId();
-        this.currentSession.saveToStorage()
+        this.setUserId(session);
+        session.saveToStorage();
+        return session
     }
 
-    setUserId() {
-        if (this.currentSession && this.currentSession.user) {
-            const id = this.currentSession.user.id;
+    setUserId(session: Session) {
+        if (session.user) {
+            const id = session.user.id;
             Sentry.configureScope(function(scope) {
                 scope.setUser({"id": id});
             });
         }
     }
 
-    async getSessionForOrganization(id: string) {
-        if (this.currentSession && this.currentSession.organizationId == id) {
-            return this.currentSession
+    async getContextForOrganization(id: string) {
+        const sessionStorage = await this.getSessionStorage(false)
+        const organization = sessionStorage.organizations.find(o => o.id === id)
+
+        if (organization) {
+            const session = new Session(id)
+            session.setOrganization(organization)
+            await session.loadFromStorage()
+            return session
         }
-        for (const session of await this.availableSessions()) {
-            if (session.organizationId === id) {
-                return session
-            }
-        }
+
+        const session = new Session(id)
+        await session.loadFromStorage()
+        return session
     }
 
     saveSessionStorage(storage: SessionStorage, retryWithLess = true) {
@@ -287,27 +250,29 @@ export class SessionManagerStatic {
         return sessions
     }
 
-    lastOrganizationFetch = new Date()
+    async getPreparedContextForOrganization(organization: Organization) {
+        if (document.activeElement) {
+            // Blur currently focused element, to prevent from opening the login view multiple times
+            (document.activeElement as HTMLElement).blur()
+        }
 
-    listenForOrganizationUpdates() {
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === 'visible') {
-                // TODO
-                console.info("Window became visible again")
-
-                if (!this.currentSession || !this.currentSession.isComplete()) {
-                    return
-                }
-
-                if (this.lastOrganizationFetch.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
-                    // Update when at least 5 minutes inactive
-                    console.info("Updating organization")
-                    this.lastOrganizationFetch = new Date()
-
-                    this.currentSession.updateData(true, false, false).catch(console.error)
-                }
+        try {
+            const session = await this.getContextForOrganization(organization.id)
+            session.setOrganization(organization)
+            await this.prepareSessionForUsage(session, false)
+            return session;
+        } catch (e) {
+            if (e.hasCode("invalid_organization")) {
+                // Clear from session storage
+                await this.removeOrganizationFromStorage(organization.id)
+                throw new SimpleError({
+                    code: "invalid_organization",
+                    message: e.message,
+                    human: "Deze vereniging bestaat niet (meer)"
+                })
             }
-        });
+            throw e;
+        }
     }
 }
 

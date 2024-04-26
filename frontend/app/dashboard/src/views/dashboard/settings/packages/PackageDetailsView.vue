@@ -204,11 +204,11 @@ export default class PackageDetailsView extends Mixins(NavigationMixin) {
         this.deactivating = true
 
         try {
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/billing/deactivate-package/"+this.pack.id,
             })
-            await SessionManager.currentSession!.fetchOrganization()
+            await this.$context.fetchOrganization()
             this.pop({ force: true })
         } catch (e) {
             Toast.fromError(e).show()

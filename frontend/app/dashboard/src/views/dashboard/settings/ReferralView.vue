@@ -5,13 +5,15 @@
 
         <main>
             <h1 v-if="!status.invoiceValue">
-                Geef {{status.value | price}}, krijg tot 100 euro tegoed* per vereniging
+                Geef {{ status.value | price }}, krijg tot 100 euro tegoed* per vereniging
             </h1>
             <h1 v-else>
-                Jouw doorverwijzingslink van {{status.value | price}}
+                Jouw doorverwijzingslink van {{ status.value | price }}
             </h1>
 
-            <p v-if="!status.invoiceValue">Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.</p>
+            <p v-if="!status.invoiceValue">
+                Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.
+            </p>
 
             <button class="button text" type="button" @click="showBilling">
                 <span class="icon card" />
@@ -96,7 +98,7 @@
                         <p v-else-if="!status.invoiceValue" class="style-description">
                             Registreerde op {{ used.createdAt | date }}. Je ontvangt jouw tegoed zodra deze vereniging 1 euro heeft besteed.
                         </p>
-                         <p v-else class="style-description">
+                        <p v-else class="style-description">
                             Registreerde op {{ used.createdAt | date }}. Er werd nog niets aangekocht of gefactureerd.
                         </p>
                         <span v-if="used.creditValue" slot="right" class="style-tag large success">{{ used.creditValue | price }}</span>
@@ -108,7 +110,7 @@
                 </p>
 
                 <hr v-if="!status.invoiceValue">
-                <p class="style-description-small" v-if="!status.invoiceValue">
+                <p v-if="!status.invoiceValue" class="style-description-small">
                     * We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Stamhoofd aan te kopen. Je kan je tegoed niet doorgeven aan een andere vereniging. Je kan geen tegoed krijgen voor een vereniging die al Stamhoofd gebruikt of al heeft geregistreerd. Ook als die persoon al een andere vereniging heeft op Stamhoofd kan je er geen tegoed meer voor krijgen. 
                     Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen.
                     Meerdere verenigingen zelf aanmaken om zo tegoed te krijgen is niet toegestaan.
@@ -128,7 +130,7 @@ import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import BillingSettingsView from "./packages/BillingSettingsView.vue";
 
 @Component({
@@ -165,11 +167,11 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
 
     get href() {
-        return "https://"+STAMHOOFD.domains.dashboard+"/aansluiten?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(OrganizationManager.organization.name)
+        return "https://"+STAMHOOFD.domains.dashboard+"/aansluiten?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(this.$organization.name)
     }
 
     get isYouth() {
-        return OrganizationManager.organization.meta.type === OrganizationType.Youth
+        return this.$organization.meta.type === OrganizationType.Youth
     }
 
     get referralText() {
@@ -209,7 +211,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
         this.loading = true;
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/register-code",
                 decoder: RegisterCodeStatus as Decoder<RegisterCodeStatus>

@@ -1,3 +1,5 @@
+import { Session } from "./Session";
+
 // TODO: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
 type PermissionState = 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied';
 export interface PermissionStatus {
@@ -82,7 +84,7 @@ export class AppManager {
     /**
      * Mark a place in the app where an app review is appropriate.
      */
-    markReviewMoment = () => {
+    markReviewMoment = ($context: Session) => {
         // No default implementation
     }
 

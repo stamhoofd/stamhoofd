@@ -102,12 +102,10 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
 import { Address, MemberWithRegistrations, Parent } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { MemberManager } from "../../classes/MemberManager";
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 import AddressView from "../members/details/AddressView.vue";
 import { createMemberComponent } from "../members/details/createMemberComponent";
 import ParentView from "../members/details/ParentView.vue";
@@ -123,33 +121,33 @@ import MemberView from "../members/MemberView.vue";
     }
 })
 export default class CheckDataView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
+    
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get members() {
-        if (MemberManager.members) {
-            return MemberManager.members
+        if (this.$memberManager.members) {
+            return this.$memberManager.members
         }
         return []
     }
 
     get parents() {
-        return this.MemberManager.getParents()
+        return this.$memberManager.getParents()
     }
 
     get addresses() {
-        return this.MemberManager.getAddresses()
+        return this.$memberManager.getAddresses()
     }
 
     get isAcceptingNewMembers() {
-        return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
+        return this.organization.isAcceptingNewMembers(!!this.$context.user?.permissions)
     }
 
     async addMember() {
-        const component = await createMemberComponent()
+        const component = await createMemberComponent(this.$memberManager)
         if (component) {
             this.show(component)
         }
@@ -165,7 +163,7 @@ export default class CheckDataView extends Mixins(NavigationMixin){
         this.present(new ComponentWithProperties(ParentView, {
             parent,
             handler: async (parent: Parent, component: NavigationMixin) => {
-                await MemberManager.patchAllMembersWith()
+                await this.$memberManager.patchAllMembersWith()
                 component.pop({ force: true })
             }
         }).setDisplayStyle("popup"))
@@ -175,7 +173,7 @@ export default class CheckDataView extends Mixins(NavigationMixin){
         this.present(new ComponentWithProperties(AddressView, {
             address,
             handler: async (address: Address, component: NavigationMixin) => {
-                await MemberManager.patchAllMembersWith()
+                await this.$memberManager.patchAllMembersWith()
                 component.pop({ force: true })
             }
         }).setDisplayStyle("sheet"))

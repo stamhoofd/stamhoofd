@@ -47,7 +47,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { OrganizationEmail, OrganizationPrivateMetaData } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+
 import EditEmailView from './EditEmailView.vue';
 
 @Component({
@@ -69,10 +69,10 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
     saving = false
 
     // Make session (organization) reactive
-    reactiveSession = SessionManager.currentSession
+    reactiveSession = this.$context
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get emails() {
@@ -85,7 +85,7 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
     
     addEmail() {
         const email = OrganizationEmail.create({ email: "" })
-        const patch = OrganizationManager.getPatch()
+        const patch = this.$organizationManager.getPatch()
         patch.privateMeta = OrganizationPrivateMetaData.patchType().create({})
         patch.privateMeta!.emails.addPut(email)
         this.present(new ComponentWithProperties(EditEmailView, { initialPatch: patch, emailId: email.id, isNew: true }).setDisplayStyle('popup'))

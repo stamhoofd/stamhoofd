@@ -46,7 +46,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
     validator = new Validator()
 
     get email() {
-        return SessionManager.currentSession?.user?.email ?? ""
+        return this.$context.user?.email ?? ""
     }
 
     async submit() {
@@ -74,7 +74,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
-            await LoginHelper.changePassword(SessionManager.currentSession!, this.password)
+            await LoginHelper.changePassword(this.$context, this.password)
             this.dismiss({ force: true });
             new Toast('Jouw nieuwe wachtwoord is opgeslagen', "success").show()
         } catch (e) {

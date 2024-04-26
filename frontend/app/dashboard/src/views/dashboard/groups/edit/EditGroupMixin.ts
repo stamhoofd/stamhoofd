@@ -4,13 +4,14 @@ import { CenteredMessage, ErrorBox, Toast, Validator } from "@stamhoofd/componen
 import { FinancialSupportSettings, Group, GroupPrices, GroupPrivateSettings, GroupSettings, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
-
 @Component
 export default class EditGroupMixin extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         group: Group
 
+    /**
+     *  == patched organization <-> $organization (= unpatched)
+     */
     @Prop({ required: true })
         organization: Organization
 
@@ -23,7 +24,7 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
     get isNew() {
-        return !OrganizationManager.organization.groups.find(g => g.id === this.group.id)
+        return !this.$organization.groups.find(g => g.id === this.group.id)
     }
 
     saving = false

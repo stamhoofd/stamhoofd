@@ -64,7 +64,7 @@ import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { OpenIDClientConfiguration } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 
 @Component({
     components: {
@@ -81,7 +81,7 @@ export default class SSOSettingsView extends Mixins(NavigationMixin) {
     ssoConfiguration: OpenIDClientConfiguration | null = null
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get redirectUri() {
@@ -131,7 +131,7 @@ export default class SSOSettingsView extends Mixins(NavigationMixin) {
 
     async loadConfiguration() {
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/organization/sso",
                 decoder: OpenIDClientConfiguration as Decoder<OpenIDClientConfiguration>,
@@ -149,7 +149,7 @@ export default class SSOSettingsView extends Mixins(NavigationMixin) {
         }
         this.saving = true
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/organization/sso",
                 decoder: OpenIDClientConfiguration as Decoder<OpenIDClientConfiguration>,

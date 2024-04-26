@@ -48,7 +48,7 @@ import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationMeta
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 
 @Component({
     components: {
@@ -78,7 +78,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
 
     async load() {
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/organization/deleted-groups",
                 decoder: new ArrayDecoder(Group as Decoder<Group>),
@@ -98,11 +98,11 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get allCategories() {
-        return this.organization.getCategoryTree({admin: true, permissions: OrganizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
+        return this.organization.getCategoryTree({admin: true, permissions: this.$organizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
     }
 
     async restoreGroup(event, group: Group) {
@@ -158,7 +158,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
         }))
 
         try {
-            await OrganizationManager.patch(patch)
+            await this.$organizationManager.patch(patch)
         } catch (e) {
             Toast.fromError(e).show()
         }

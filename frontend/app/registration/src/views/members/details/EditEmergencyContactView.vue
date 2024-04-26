@@ -75,12 +75,11 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CenteredMessage, ErrorBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { AddressInput, CenteredMessage, ErrorBox, PhoneInput, STErrorsDefault, STInputBox, SaveView, Validator } from "@stamhoofd/components";
 import { EmergencyContact, FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RegisterItem, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberManager } from '../../../classes/MemberManager';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -160,7 +159,7 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
             this.title = contact.title
             this.phone = contact.phone
         } else {
-            const contact = MemberManager.getEmergencyContact()
+            const contact = this.$memberManager.getEmergencyContact()
             if (contact) {
                 this.name = contact.name
                 this.title = contact.title
@@ -170,8 +169,8 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     }
 
     get isOptional() {
-        return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('emergencyContacts')).doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
-        //return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.Required
+        return !this.$organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('emergencyContacts')).doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
+        //return this.$organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.Required
     }
 
     async skipStep() {

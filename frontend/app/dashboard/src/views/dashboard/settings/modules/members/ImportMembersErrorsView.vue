@@ -51,7 +51,7 @@ import { Organization, OrganizationPatch } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { ImportError } from '../../../../../classes/import/ImportingMember';
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+
 
 @Component({
     components: {
@@ -70,13 +70,13 @@ export default class ImportMembersErrorsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     @Prop({ required: true })
         errors: ImportError[]
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 }
 </script>

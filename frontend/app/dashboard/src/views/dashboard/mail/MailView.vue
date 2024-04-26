@@ -107,7 +107,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import MissingFirstNameView from './MissingFirstNameView.vue';
 
@@ -186,7 +186,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         group!: Group | null
 
     // Make session (organization) reactive
-    reactiveSession = SessionManager.currentSession
+    reactiveSession = this.$context
 
     emailId: string | null = null
     subject = this.defaultSubject ?? ""
@@ -641,7 +641,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         this.checkingBounces = true
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/email/check-bounces",
                 body: [...this.allRecipients.values()].map(r => r.email),
@@ -675,7 +675,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
+        return this.$user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     getDefaultEmailId() {
@@ -946,7 +946,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
 
             // Check if all the parents + members already have access (and an account) when they should have access
-            MemberManager.updateMembersAccess(this.members).then(() => {
+            this.$memberManager.updateMembersAccess(this.members).then(() => {
                 // We created some users, so we might check the button again
                 if (this.hasAllUsers && !this.didInsertButton) {
                     this.insertSignInButton()
@@ -1010,7 +1010,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get hasFirstName() {
@@ -1640,7 +1640,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 defaultReplacements: this.defaultReplacements
             })
 
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/email",
                 body: emailRequest,
@@ -1649,7 +1649,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             new Toast("Jouw e-mail is verstuurd", "success").show()
 
             // Mark review moment
-            AppManager.shared.markReviewMoment()
+            AppManager.shared.markReviewMoment(this.$context)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

@@ -118,7 +118,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         this.errorBox = null;
 
         Request.cancelAll(this)
-        SessionManager.currentSession!.authenticatedServer
+        this.$context.authenticatedServer
             .request({
                 method: "POST",
                 path: "/upload-image",

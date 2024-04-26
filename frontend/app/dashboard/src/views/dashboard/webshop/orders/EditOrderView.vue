@@ -137,13 +137,13 @@
             <h2>Winkelmandje</h2>
 
             <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+                <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" @click="deleteCode(code)" />
             </p>
 
             <STList v-if="webshopFull">
-                <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
+                <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
             </STList>
 
             <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
@@ -170,14 +170,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, CartItemRow, STList, CheckoutPriceBreakdown, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
+import { AddressInput, CartItemRow, CartItemView, CenteredMessage, CheckoutPriceBreakdown, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager } from "@stamhoofd/networking";
 import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import { WebshopManager } from "../WebshopManager";
 import AddItemView from "./AddItemView.vue";
 
@@ -296,7 +296,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get webshop() {
@@ -535,7 +535,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             await this.$nextTick();
 
             const orderData = this.patchedOrder.data
-            orderData.validate(this.webshopManager.webshop!, OrganizationManager.organization.meta, I18nController.i18n, true);
+            orderData.validate(this.webshopManager.webshop!, this.$organization.meta, I18nController.i18n, true);
 
             // Save validated record answers (to delete old answers)
             this.recordAnswersClone = orderData.recordAnswers

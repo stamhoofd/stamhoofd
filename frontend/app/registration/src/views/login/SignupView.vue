@@ -51,10 +51,10 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
+import { LoginHelper, Session } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -86,17 +86,15 @@ export default class SignupView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    session = SessionManager.currentSession!
-
     @Ref("emailInput")
         emailInput: EmailInput
 
     get privacyUrl() {
-        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization.meta.privacyPolicyUrl
+        if (this.$organization.meta.privacyPolicyUrl) {
+            return this.$organization.meta.privacyPolicyUrl
         }
-        if (OrganizationManager.organization.meta.privacyPolicyFile) {
-            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
+        if (this.$organization.meta.privacyPolicyFile) {
+            return this.$organization.meta.privacyPolicyFile.getPublicPath()
         }
         return null
     }
@@ -142,14 +140,9 @@ export default class SignupView extends Mixins(NavigationMixin){
         
         // Request the key constants
         try {
-            const session = new Session(OrganizationManager.organization.id)
-            session.organization = OrganizationManager.organization
-
-            const token = await LoginHelper.signUp(session, this.email, this.password)
-            
+            const token = await LoginHelper.signUp(this.$context, this.email, this.password)
             this.loading = false;
-
-            this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
+            this.show(new ComponentWithProperties(ConfirmEmailView, { token, email: this.email }))
             return
             
         } catch (e) {

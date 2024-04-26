@@ -200,17 +200,13 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LegalFooter,LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { downloadDocument } from "@stamhoofd/document-helper"
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { Document, DocumentStatus, MemberWithRegistrations } from "@stamhoofd/structures";
-import { MemberBalanceItem, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
+import { CenteredMessage, LegalFooter, LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { downloadDocument } from "@stamhoofd/document-helper";
+import { UrlHelper } from "@stamhoofd/networking";
+import { Document, DocumentStatus, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from "../../classes/MemberManager";
-import { OrganizationManager } from "../../classes/OrganizationManager";
 import { Suggestion, SuggestionBuilder } from "../../classes/SuggestionBuilder";
 import AccountSettingsView from "../account/AccountSettingsView.vue";
 import PaymentsView from "../account/PaymentsView.vue";
@@ -234,27 +230,25 @@ import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
 })
 export default class NewOverviewView extends Mixins(NavigationMixin){
     loadingBalance = false
-    MemberManager = MemberManager
-    CheckoutManager = CheckoutManager
 
     created() {
         this.updateCartAndBalance().catch(console.error)
     }
 
     get balanceItems() {
-        return CheckoutManager.balanceItems ?? []
+        return this.$checkoutManager.balanceItems ?? []
     }
 
     get isAcceptingNewMembers() {
-        return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
+        return this.organization.isAcceptingNewMembers(!!this.$context.user?.permissions)
     }
 
     get isAcceptingExistingMembers() {
-        return this.organization.isAcceptingExistingMembers(!!SessionManager.currentSession?.user?.permissions)
+        return this.organization.isAcceptingExistingMembers(!!this.$context.user?.permissions)
     }
 
     get documents() {
-        return this.MemberManager.documents ?? []
+        return this.$memberManager.documents ?? []
     }
 
     mounted() {
@@ -279,7 +273,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
             const paymentId = searchParams.get("id")
             const cancel = searchParams.get("cancel") === "true"
 
-            const session = SessionManager.currentSession!
+            const session = this.$context
             const component = new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
@@ -329,7 +323,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
     async updateCartAndBalance() {
         this.loadingBalance = true;
         try {
-            await CheckoutManager.recalculateCart(false)
+            await this.$checkoutManager.recalculateCart(false)
         } catch (e) {
             // Fail silently here
             console.error(e);
@@ -342,12 +336,12 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get members() {
-        if (MemberManager.members) {
-            return MemberManager.members
+        if (this.$memberManager.members) {
+            return this.$memberManager.members
         }
         return []
     }
@@ -357,10 +351,11 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
     }
 
     getStepsManagerMissingData(member: MemberWithRegistrations) {
-        const items = CheckoutManager.cart.items.filter(item => item.memberId === member.id)
-        const steps = EditMemberStepsManager.getAllSteps(items, member, false, true)
+        const items = this.$checkoutManager.cart.items.filter(item => item.memberId === member.id)
+        const steps = EditMemberStepsManager.getAllSteps(this.$context, false, true)
 
         const stepManager = new EditMemberStepsManager(
+            this.$memberManager,
             steps, 
             items,
             member,
@@ -386,11 +381,11 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
     }
 
     get cart() {
-        return CheckoutManager.cart
+        return this.$checkoutManager.cart
     }
 
     get suggestedRegistrations(): Suggestion[] {
-        return SuggestionBuilder.getSuggestions(this.members)
+        return SuggestionBuilder.getSuggestions(this.$checkoutManager, this.members)
     }
 
     startRegistrationFlow(suggestion: Suggestion) {
@@ -422,7 +417,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
 
     async registerMember() {
         if (this.members.length == 0) {
-            const component = await createMemberComponent()
+            const component = await createMemberComponent(this.$memberManager)
             this.present({
                 components: [
                     new ComponentWithProperties(
@@ -504,7 +499,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
         }
         this.downloadingDocuments.push(document)
         try {
-            await downloadDocument(document);
+            await downloadDocument(this.$context, document);
         } catch (e) {
             console.error(e);
         }

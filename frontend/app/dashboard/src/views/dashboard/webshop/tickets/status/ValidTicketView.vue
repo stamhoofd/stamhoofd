@@ -394,7 +394,7 @@ import { BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGe
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+
 import EditPaymentView from "../../../member/EditPaymentView.vue";
 import PaymentView from "../../../payments/PaymentView.vue";
 import { OrderActionBuilder } from "../../orders/OrderActionBuilder";
@@ -489,6 +489,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
     get actionBuilder() {
         return new OrderActionBuilder({
+            organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
             component: this,
         })
@@ -507,22 +508,22 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
     }
 
     get hasWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.$context.user?.permissions
         if (!p) {
             return false
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
     }
 
     get hasPaymentsWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.$context.user?.permissions
         if (!p) {
             return false
         }
-        if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])) {
+        if (p.canManagePayments(this.$organization.privateMeta?.roles ?? [])) {
             return true
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
     }
 
     openPayment(payment: Payment) {
@@ -596,7 +597,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
                 id: this.ticket.id,
                 secret: this.ticket.secret, // needed for lookups
                 scannedAt: new Date(),
-                scannedBy: SessionManager.currentSession!.user?.firstName ?? null
+                scannedBy: this.$context.user?.firstName ?? null
             }))
         }
 
@@ -666,7 +667,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
             saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
                 const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
                 arr.addPut(payment.patch(patch))
-                await SessionManager.currentSession!.authenticatedServer.request({
+                await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/payments',
                     body: arr,

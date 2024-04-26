@@ -67,7 +67,7 @@ import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 import PaymentsView from "./PaymentsView.vue";
 
 
@@ -93,15 +93,15 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     showDomainSettings = true
 
     // Needed to make the current session (and user reactive)
-    session = SessionManager.currentSession!
+    session = this.$context
     
     get user() {
         console.log("user updated!")
-        return User.create(SessionManager.currentSession!.user!)
+        return User.create(this.$user!)
     }
 
     userPatch = User.patch({ id: this.user.id })
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get patchedUser() {
         return this.user.patch(this.userPatch)
@@ -136,11 +136,11 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     }
 
     get privacyUrl() {
-        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization.meta.privacyPolicyUrl
+        if (this.$organization.meta.privacyPolicyUrl) {
+            return this.$organization.meta.privacyPolicyUrl
         }
-        if (OrganizationManager.organization.meta.privacyPolicyFile) {
-            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
+        if (this.$organization.meta.privacyPolicyFile) {
+            return this.$organization.meta.privacyPolicyFile.getPublicPath()
         }
         return null
     }
@@ -170,10 +170,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            const result = await LoginHelper.patchUser(SessionManager.currentSession!, this.userPatch)
+            const result = await LoginHelper.patchUser(this.$context, this.userPatch)
 
             if (result.verificationToken) {
-                this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken, email: this.patchedUser.email }).setDisplayStyle("sheet"))
+                this.present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: this.patchedUser.email }).setDisplayStyle("sheet"))
             } else {
                 const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
                 toast.show()
@@ -205,7 +205,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
     async logout() {
         if (await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
-            SessionManager.currentSession?.logout()
+            this.$context.logout()
         }
     }
 }

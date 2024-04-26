@@ -1,9 +1,8 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { SessionManager } from '@stamhoofd/networking';
+import { Toast } from '@stamhoofd/components';
 import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDetails, MemberWithRegistrations, Parent, Registration, User } from '@stamhoofd/structures';
 
-import { Toast } from '../../../../shared/components';
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 import { MemberManager } from './MemberManager';
 
@@ -11,8 +10,10 @@ import { MemberManager } from './MemberManager';
 export class FamilyManager {
     /// Currently saved members
     members: MemberWithRegistrations[]
+    $memberManager: MemberManager
 
-    constructor(members: MemberWithRegistrations[]) {
+    constructor($memberManager: MemberManager, members: MemberWithRegistrations[]) {
+        this.$memberManager = $memberManager
         this.members = members
 
         if (members.length == 1) {
@@ -23,24 +24,27 @@ export class FamilyManager {
         }
     }
 
+    get $context() {
+        return this.$memberManager.$context
+    }
+
     async loadFamily(id: string) {
-        const session = SessionManager.currentSession!
         // Send the request
-        const response = await session.authenticatedServer.request({
+        const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/organization/members/"+id+"/family",
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
             shouldRetry: false
         })
-        this.setMembers(MemberManager.decryptMembersWithRegistrations(response.data))
+        this.setMembers(this.$memberManager.decryptMembersWithRegistrations(response.data))
 
         for (const member of this.members) {
-            MemberManager.callListeners("updated", member)
+            this.$memberManager.callListeners("updated", member)
         }
     }
 
     async addMember(memberDetails: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
-        const session = SessionManager.currentSession!
+        const session = this.$context
 
         // Add all the needed users that need to have access
         const users: User[] = []
@@ -71,7 +75,7 @@ export class FamilyManager {
 
         // Patch other members
         const members = (this.members ?? [])
-        patch.merge(MemberManager.getEncryptedMembersPatch(members))
+        patch.merge(this.$memberManager.getEncryptedMembersPatch(members))
         
         // Send the request
         const response = await session.authenticatedServer.request({
@@ -82,7 +86,7 @@ export class FamilyManager {
             shouldRetry: false
         })
 
-        this.setMembers(MemberManager.decryptMembersWithRegistrations(response.data))
+        this.setMembers(this.$memberManager.decryptMembersWithRegistrations(response.data))
         const m = this.members?.find(m => m.id == encryptedMember.id) ?? null
 
         // Update group counts only when succesfully adjusted
@@ -96,7 +100,7 @@ export class FamilyManager {
             sizeUpdater.save(session)
         }
 
-        MemberManager.callListeners("created", m)
+        this.$memberManager.callListeners("created", m)
         return m;
     }
 
@@ -107,7 +111,7 @@ export class FamilyManager {
             registrations
         }))
  
-        const session = SessionManager.currentSession!
+        const session = this.$context
 
         const oldRegistrations = member.registrations.slice()
 
@@ -119,7 +123,7 @@ export class FamilyManager {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
             shouldRetry: false
         })
-        const m = (MemberManager.decryptMembersWithRegistrations(response.data))[0]
+        const m = (this.$memberManager.decryptMembersWithRegistrations(response.data))[0]
 
         const i = this.members.findIndex(_m => _m.id === m.id)
         if (i != -1) {
@@ -143,7 +147,7 @@ export class FamilyManager {
             sizeUpdater.save(session)
         }
 
-        MemberManager.callListeners("changedGroup", member)
+        this.$memberManager.callListeners("changedGroup", member)
         return member
     }
 
@@ -160,8 +164,8 @@ export class FamilyManager {
         // Search for duplicate addresses and duplicate parents
         this.removeDuplicates()
 
-        const patchArray = MemberManager.getEncryptedMembersPatch(members)
-        const session = SessionManager.currentSession!
+        const patchArray = this.$memberManager.getEncryptedMembersPatch(members)
+        const session = this.$context
 
         // Send the request
         const response = await session.authenticatedServer.request({
@@ -172,7 +176,7 @@ export class FamilyManager {
             shouldRetry: false
         })
 
-        this.setMembers(MemberManager.decryptMembersWithRegistrations(response.data))
+        this.setMembers(this.$memberManager.decryptMembersWithRegistrations(response.data))
     }
 
     setMembers(newMembers: MemberWithRegistrations[]) {

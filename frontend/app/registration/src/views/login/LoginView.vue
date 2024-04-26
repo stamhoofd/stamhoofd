@@ -39,7 +39,7 @@ import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPassword
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -68,13 +68,11 @@ export default class LoginView extends Mixins(NavigationMixin){
     email = this.initialEmail
     password = ""
 
-    session = SessionManager.currentSession!
-
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     gotoPasswordForgot() {
@@ -100,10 +98,10 @@ export default class LoginView extends Mixins(NavigationMixin){
         this.loading = true
         
         try {
-            const result = await LoginHelper.login(this.session, this.email, this.password)
+            const result = await LoginHelper.login(this.$context, this.email, this.password)
 
             if (result.verificationToken) {
-                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken, email: this.email }))
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, token: result.verificationToken, email: this.email }))
             }
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {

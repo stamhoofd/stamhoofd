@@ -32,7 +32,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+
 
 @Component({
     components: {
@@ -50,7 +50,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
 })
 export default class DNSRecordsDoneView extends Mixins(NavigationMixin) {
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get enableMemberModule() {
@@ -58,11 +58,11 @@ export default class DNSRecordsDoneView extends Mixins(NavigationMixin) {
     }
 
     get registerDomain() {
-        return OrganizationManager.organization.registerDomain ?? "?"
+        return this.$organization.registerDomain ?? "?"
     }
    
     get mailDomain() {
-        return OrganizationManager.organization.privateMeta?.mailDomain ?? "?"
+        return this.$organization.privateMeta?.mailDomain ?? "?"
     }
 
 }

@@ -1,22 +1,33 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
-import { SessionManager } from '@stamhoofd/networking';
 import { IDRegisterCheckout, MemberBalanceItem, RegisterCheckout, RegisterItem, Version } from '@stamhoofd/structures';
 
 import { EditMemberStepsManager } from '../views/members/details/EditMemberStepsManager';
 import { MemberManager } from './MemberManager';
-import { OrganizationManager } from './OrganizationManager';
 import { TabBarItem } from './TabBarItem';
 
 /**
  * Convenient access to the organization of the current session
  */
-export class CheckoutManagerStatic {
+export class CheckoutManager {
     private _checkout: RegisterCheckout | null = null
 
     watchTabBar: TabBarItem | null = null
     balanceItems: MemberBalanceItem[] | null = null
+    $memberManager: MemberManager
+
+    constructor($memberManager: MemberManager) {
+        this.$memberManager = $memberManager
+    }
+
+    get $organization() {
+        return this.$memberManager.$context.organization!
+    }
+
+    get $context() {
+        return this.$memberManager.$context
+    }
 
     saveCart() {
         this.saveCheckout()
@@ -39,7 +50,7 @@ export class CheckoutManagerStatic {
             if (json) {
                 const obj = JSON.parse(json)
                 const versionBox = new VersionBoxDecoder(IDRegisterCheckout as Decoder<IDRegisterCheckout>).decode(new ObjectData(obj, { version: Version }))
-                return versionBox.data.convert(OrganizationManager.organization, MemberManager.members ?? [])
+                return versionBox.data.convert(this.$organization, this.$memberManager.members ?? [])
             }
         } catch (e) {
             console.error("Failed to load cart")
@@ -68,7 +79,7 @@ export class CheckoutManagerStatic {
         toast.show()
 
         this.cart.addItem(item)
-        CheckoutManager.saveCart()
+        this.saveCart()
     }
 
     async startAddToCartFlow(component: NavigationMixin, item: RegisterItem, callback: (component) => void) {
@@ -83,7 +94,8 @@ export class CheckoutManagerStatic {
         const items = [...this.cart.items.filter(i => i.memberId === item.member.id), item]
 
         const stepManager = new EditMemberStepsManager(
-            EditMemberStepsManager.getAllSteps(items, item.member, false, false), 
+            this.$memberManager,
+            EditMemberStepsManager.getAllSteps(this.$memberManager.$context, false, false), 
             items,
             item.member,
             (c: NavigationMixin) => {
@@ -115,7 +127,7 @@ export class CheckoutManagerStatic {
     }
 
     async _fetchBalance() {
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.$memberManager.$context.authenticatedServer.request({
             method: 'GET',
             path: '/balance',
             decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>)
@@ -134,7 +146,7 @@ export class CheckoutManagerStatic {
         try {
             // Reload groups
             if (refetch) {
-                await OrganizationManager.reloadGroups()
+                await this.$context.fetchOrganization()
             }
 
             if (refetch || this.balanceItems === null) {
@@ -146,18 +158,18 @@ export class CheckoutManagerStatic {
             )
 
             // Revalidate
-            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories, this.balanceItems!)
+            this.cart.validate(this.$memberManager.members ?? [], this.$organization.groups, this.$organization.meta.categories, this.balanceItems!)
 
-            if (OrganizationManager.organization.meta.recordsConfiguration.freeContribution === null) {
+            if (this.$organization.meta.recordsConfiguration.freeContribution === null) {
                 this.cart.freeContribution = 0
             }
         } finally {
             try {
                 this.cart.calculatePrices(
-                    MemberManager.members ?? [], 
-                    OrganizationManager.organization.groups, 
-                    OrganizationManager.organization.meta.categories,
-                    OrganizationManager.organization.meta.registrationPaymentConfiguration
+                    this.$memberManager.members ?? [], 
+                    this.$organization.groups, 
+                    this.$organization.meta.categories,
+                    this.$organization.meta.registrationPaymentConfiguration
                 )
             } catch (e) {
                 // error in calculation!
@@ -168,5 +180,3 @@ export class CheckoutManagerStatic {
         
     }
 }
-
-export const CheckoutManager = new CheckoutManagerStatic()

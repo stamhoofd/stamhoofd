@@ -175,7 +175,7 @@ import { Group, GroupCategory, Organization, OrganizationPrivateMetaData, Permis
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import EditRoleCategoriesView from './EditRoleCategoriesView.vue';
 import EditRoleGroupsView from './EditRoleGroupsView.vue';
 import EditRoleWebshopsView from './EditRoleWebshopsView.vue';
@@ -476,7 +476,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     async load() {
-        await OrganizationManager.loadAdmins(false, true, this)
+        await this.$organizationManager.loadAdmins(false, true, this)
         this.loading = false
     }
 

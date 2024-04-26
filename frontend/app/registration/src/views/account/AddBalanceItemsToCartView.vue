@@ -47,14 +47,12 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Checkbox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { BalanceItemCartItem, MemberBalanceItem } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from '../../classes/MemberManager';
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 import CartView from "../checkout/CartView.vue";
 
 @Component({
@@ -71,7 +69,7 @@ import CartView from "../checkout/CartView.vue";
     }
 })
 export default class AddBalanceItemsToCartView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
+    
 
     @Prop(({required: true}))
         balanceItems: MemberBalanceItem[]
@@ -95,11 +93,11 @@ export default class AddBalanceItemsToCartView extends Mixins(NavigationMixin){
     }
 
     get multipleMembers() {
-        return (MemberManager.members?.length ?? 0) > 1
+        return (this.$memberManager.members?.length ?? 0) > 1
     }
 
     getMember(memberId: string) {
-        return MemberManager.members?.find(m => m.id === memberId)
+        return this.$memberManager.members?.find(m => m.id === memberId)
     }
 
     get outstandingItems() {
@@ -107,7 +105,7 @@ export default class AddBalanceItemsToCartView extends Mixins(NavigationMixin){
     }
     
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }    
 
     formatDate(date: Date) {
@@ -148,9 +146,9 @@ export default class AddBalanceItemsToCartView extends Mixins(NavigationMixin){
 
     startPayment() {
         for (const item of this.selectedItems) {
-            CheckoutManager.cart.addBalanceItem(item)
+            this.$checkoutManager.cart.addBalanceItem(item)
         }
-        CheckoutManager.saveCart()
+        this.$checkoutManager.saveCart()
         this.show({
             components: [
                 new ComponentWithProperties(CartView, {})

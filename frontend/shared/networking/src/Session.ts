@@ -289,7 +289,7 @@ export class Session implements RequestMiddleware {
     }
 
     canGetCompleted(): boolean {
-        console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
+        //console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
         return !!this.token
     }
 

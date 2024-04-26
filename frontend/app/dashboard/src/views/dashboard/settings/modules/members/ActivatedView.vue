@@ -87,7 +87,7 @@ import { BackButton, LoadingButton, STInputBox, STList, STListItem,STNavigationB
 import { OrganizationType } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+
 import { buildManageGroupsComponent } from "../../buildManageGroupsComponent";
 import RecordsSettingsView from "./RecordsSettingsView.vue";
 
@@ -107,7 +107,7 @@ import RecordsSettingsView from "./RecordsSettingsView.vue";
 })
 export default class ActivatedView extends Mixins(NavigationMixin) {
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get isYouth() {
@@ -121,7 +121,7 @@ export default class ActivatedView extends Mixins(NavigationMixin) {
     }
 
     manageGroups() {
-        const component = buildManageGroupsComponent(this.organization)
+        const component = buildManageGroupsComponent(this.$organizationManager)
             
         this.present(new ComponentWithProperties(NavigationController, {
             root: component

@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-networking";
-import { AppManager } from "@stamhoofd/networking";
+import { AppManager, SessionManager } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
 import Vue from "vue";
 
@@ -122,6 +122,49 @@ export class VueGlobalHelper {
                 price: Formatter.price.bind(Formatter),
                 date: Formatter.date.bind(Formatter),
                 dateTime: Formatter.dateTime.bind(Formatter)
+            },
+            inject: {
+                $context: {
+                    default: function () {
+                        // console.warn('No session provided to component', this)
+                        // if (!SessionManager.currentSession) {
+                        //     console.error('No session available')
+                        //     //throw new Error('No session available')
+                        // }
+
+                        return null; // SessionManager.currentSession
+                    }
+                },
+                $organization: {
+                    default: function () {
+                        return null;
+                    }
+                },
+                $user: {
+                    default: function () {
+                        return null;
+                    }
+                },
+                $organizationManager: {
+                    default: function () {
+                        return null;
+                    }
+                },
+                $memberManager: {
+                    default: function () {
+                        return null;
+                    }
+                },
+                $webshopManager: {
+                    default: function () {
+                        return null;
+                    }
+                },
+                $checkoutManager: {
+                    default: function () {
+                        return null;
+                    }
+                },
             },
             beforeDestroy() {
                 // Clear all pending requests

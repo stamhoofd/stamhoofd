@@ -19,8 +19,14 @@
                 @blur="cleanCode"
             >
         </STInputBox>
-        <p class="style-description-small" v-if="!code">Kies zelf een code of <button type="button" class="inline-link" @click="generateCode()">genereer één willekeurig</button></p>
-        <p class="style-description-small" v-else>De kortingscode kan gebruikt worden via <span class="style-copyable style-inline-code" v-copyable="'https://'+link">{{link}}</span></p>
+        <p v-if="!code" class="style-description-small">
+            Kies zelf een code of <button type="button" class="inline-link" @click="generateCode()">
+                genereer één willekeurig
+            </button>
+        </p>
+        <p v-else class="style-description-small">
+            De kortingscode kan gebruikt worden via <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
+        </p>
 
         <STInputBox title="Beschrijving" class="max" error-fields="description" :error-box="errorBox">
             <textarea
@@ -28,9 +34,11 @@
                 class="input"
                 placeholder="Optioneel"
                 autocomplete=""
-            ></textarea>
+            />
         </STInputBox>
-        <p class="style-description-small">De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.</p>
+        <p class="style-description-small">
+            De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.
+        </p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -57,12 +65,12 @@
         <STList v-if="patchedDiscountCode.discounts.length">
             <STListItem v-for="discount of patchedDiscountCode.discounts" :key="discount.id" class="right-description right-stack" :selectable="true" @click="editDiscount(discount)">
                 <h3 class="style-title-list">
-                    {{getDiscountTitle(discount).title}}
+                    {{ getDiscountTitle(discount).title }}
                 </h3>
-                <p class="style-description-small" v-if="getDiscountTitle(discount).description">
-                    {{getDiscountTitle(discount).description}}
+                <p v-if="getDiscountTitle(discount).description" class="style-description-small">
+                    {{ getDiscountTitle(discount).description }}
                 </p>
-                <p v-if="getDiscountTitle(discount).footnote" class="style-description-small pre-wrap" v-text="getDiscountTitle(discount).footnote"/>
+                <p v-if="getDiscountTitle(discount).footnote" class="style-description-small pre-wrap" v-text="getDiscountTitle(discount).footnote" />
 
                 <template slot="right">
                     <span class="icon arrow-right-small gray" />
@@ -95,12 +103,12 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator, PermyriadInput, PriceInput, Checkbox } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { Discount, DiscountCode, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscount, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
 import EditDiscountView from './EditDiscountView.vue';
 import EditProductDiscountView from './EditProductDiscountView.vue';
@@ -145,7 +153,7 @@ export default class EditDiscountCodeView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get link() {
@@ -300,7 +308,7 @@ export default class EditDiscountCodeView extends Mixins(NavigationMixin) {
             return
         }
 
-       const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray()
+        const p: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray()
         p.addDelete(this.discountCode.id)
         this.saveHandler(p)
         this.pop({ force: true })

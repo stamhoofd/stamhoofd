@@ -7,14 +7,15 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager, LoginHelper, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Organization } from '@stamhoofd/structures';
-import { Country, EmailAddressSettings, Token } from '@stamhoofd/structures';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { AppManager, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
+import AdminApp from './AdminApp.vue';
+import RegistrationApp from './RegistrationApp.vue';
+import { getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 @Component({
@@ -27,20 +28,6 @@ export default class App extends Vue {
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
             try {
-                // First check if the URL is an organization specific or not
-                // Specific -> Load organization and set session -> go to login view for this organization or (directly to the dashboard / no permissions view)
-                // const initialPath = UrlHelper.shared.getParts()
-
-                // const testOrganization = Organization.create({})
-                // const session = new Session(testOrganization.id)
-
-                // 
-                await SessionManager.restoreLastSession()
-
-                // Default language for dashboard is nl-BE, but if we are signed in, always force set the country to the organization country
-                await I18nController.loadDefault("dashboard", Country.Belgium, "nl", SessionManager.currentSession?.organization?.address?.country)
-
-
                 if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
                     // Load Windows stylesheet
                     try {
@@ -53,13 +40,26 @@ export default class App extends Vue {
 
                 this.checkGlobalRoutes()
 
-                return new ComponentWithProperties(AuthenticatedView, {
-                    root: new ComponentWithProperties(SplitViewController, {
-                        root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-                    }),
-                    loginRoot: new ComponentWithProperties(OrganizationSelectionView),
-                    noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
-                });
+                let app: 'dashboard' | 'admin' | 'registration' = 'dashboard';
+
+                const parts = UrlHelper.shared.getParts();
+                if (parts.length >= 1 && parts[0] == 'admin') {
+                    app = 'admin';
+                } else if (parts.length >= 1 && parts[0] == 'beheerders') {
+                    app = 'dashboard';
+                } else if (parts.length >= 1 && parts[0] == 'leden') {
+                    app = 'registration';
+                }
+
+                if (app == 'dashboard') {
+                    return await getScopedDashboardRootFromUrl()
+                }
+                
+                if (app == 'admin') {
+                    return new ComponentWithProperties(AdminApp, {})
+                }
+
+                return new ComponentWithProperties(RegistrationApp, {})
             } catch (e) {
                 console.error(e)
                 Toast.fromError(e).setHide(null).show()
@@ -88,8 +88,6 @@ export default class App extends Vue {
 
     checkGlobalRoutes() {
         // Always set initial route
-        UrlHelper.setUrl("/")
-
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
         const parts = UrlHelper.shared.getParts();
         const queryString = UrlHelper.shared.getSearchParams()
@@ -144,6 +142,8 @@ export default class App extends Vue {
                     .then(() => {
                         toast.hide()
                         new Toast("E-mailadres is gevalideerd", "success green").show()
+
+                        // todo: go to dashboard for this session?
                     }).catch(e => {
                         toast.hide()
                         CenteredMessage.fromError(e).addCloseButton().show()
@@ -153,9 +153,6 @@ export default class App extends Vue {
     }
 
     mounted() {
-        // Update organization when opening an old tab again
-        SessionManager.listenForOrganizationUpdates()
-
         ModalStackEventBus.addListener(this, "present", async (options: PushOptions | ComponentWithProperties) => {
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
@@ -166,6 +163,14 @@ export default class App extends Vue {
             } else {
                 (this.$refs.modalStack as any).present(options)
             }
+        })
+
+        ReplaceRootEventBus.addListener(this, "replace", async (component: ComponentWithProperties) => {
+            if (this.$refs.modalStack === undefined) {
+                // Could be a webpack dev server error (HMR) (not fixable) or called too early
+                await this.$nextTick()
+            }
+            (this.$refs.modalStack as any).replace(component, false)
         })
         
         CenteredMessage.addListener(this, async (centeredMessage) => {
@@ -253,10 +258,7 @@ export default class App extends Vue {
             return
         }
         try {
-            let session = await SessionManager.getSessionForOrganization(organizationId)
-            if (!session) {
-                session = new Session(organizationId)
-            }
+            const session = await SessionManager.getContextForOrganization(organizationId)
 
             if (session.user) {
                 // Clear user
@@ -268,7 +270,7 @@ export default class App extends Vue {
                 refreshToken,
                 accessTokenValidUntil: new Date(0)
             }))
-            await SessionManager.setCurrentSession(session, false)           
+            await ReplaceRootEventBus.sendEvent("replace", getScopedDashboardRoot(session))
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()

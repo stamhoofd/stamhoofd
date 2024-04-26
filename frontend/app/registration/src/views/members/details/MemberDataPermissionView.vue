@@ -16,7 +16,7 @@ import { Checkbox, ErrorBox, SaveView, STErrorsDefault, Validator } from "@stamh
 import { BooleanStatus, DataPermissionsSettings, MemberDetails } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -77,7 +77,7 @@ export default class MemberDataPermissionView extends Mixins(NavigationMixin) {
     }
 
     get settings(): DataPermissionsSettings {
-        return OrganizationManager.organization.meta.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
+        return this.$organization.meta.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
     }
 }
 </script>

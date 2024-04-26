@@ -15,7 +15,6 @@ import { AddressInput, Dropdown, EmailInput, ErrorBox, PhoneInput, SaveView, STE
 import { Address } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberManager } from '../../../classes/MemberManager';
 
 @Component({
     components: {
@@ -37,14 +36,14 @@ export default class AddressView extends Mixins(NavigationMixin) {
     validator = new Validator()
     loading = false
 
-    MemberManager = MemberManager
+    
     
     @Prop({ required: true })
         handler: (parent: Address, component: AddressView) => Promise<void>|undefined;
 
 
     modifyAddress({ from, to }: { from: Address, to: Address }) {
-        MemberManager.updateAddress(from, to)
+        this.$memberManager.updateAddress(from, to)
     }
 
     async save() {
@@ -60,7 +59,7 @@ export default class AddressView extends Mixins(NavigationMixin) {
             return;
         }
 
-        MemberManager.updateAddress(this.address, this.editAddress)
+        this.$memberManager.updateAddress(this.address, this.editAddress)
 
         try {
             await this.handler(this.editAddress, this)

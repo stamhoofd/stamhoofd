@@ -86,13 +86,13 @@ export class ImportingMember {
         return false;
     }
 
-    static async importAll(sheet: XLSX.WorkSheet, columns: MatchedColumn[], organization: Organization): Promise<ImportResult> {
+    static async importAll(sheet: XLSX.WorkSheet, columns: MatchedColumn[], $memberManager: MemberManager, organization: Organization): Promise<ImportResult> {
         if (!sheet['!ref']) {
             throw new Error("Missing ref in sheet")
         }
 
         // Start! :D
-        const allMembers = await MemberManager.loadMembers([], null, null)
+        const allMembers = await $memberManager.loadMembers([], null, null)
 
         const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
         const result = new ImportResult()

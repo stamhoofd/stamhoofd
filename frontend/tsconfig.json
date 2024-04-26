@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "baseUrl": "../",
+        "rootDir": "../",
         "target": "es2017",
         "module": "esnext",
         "jsx": "preserve",
@@ -19,19 +21,30 @@
         "types": [
             "node",
             "jest"
-        ]
+        ],
+        "composite": true,
+        "resolveJsonModule": true
     },
+    "files": [],
     "include": [
-        "app/**/*.ts",
-        "app/**/*.ts.map",
-        "app/**/*.vue",
-        "shared/**/*.ts",
-        "shared/**/*.ts.map",
-        "shared/**/*.vue",
+        "**/*",
         "../*.d.ts",
         "*.d.ts"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+    ],
+    "references": [
+        { "path": "./app/registration" },
+        { "path": "./app/dashboard" },
+        { "path": "./app/registration" },
+        { "path": "./app/mobile" },
+        { "path": "./shared/components" },
+        { "path": "./shared/assets" },
+        { "path": "./shared/document-helper" },
+        { "path": "./shared/i18n" },
+        { "path": "./shared/networking" },
+        { "path": "./shared/scss" },
+        { "path": "./shared/ticket-builder" }
     ]
 }

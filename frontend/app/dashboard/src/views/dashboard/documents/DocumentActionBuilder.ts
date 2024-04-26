@@ -1,7 +1,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { downloadDocuments } from "@stamhoofd/document-helper"
-import { SessionManager } from "@stamhoofd/networking"
+import { Session } from "@stamhoofd/networking"
 import { Document, DocumentData, DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid"
 
@@ -9,15 +9,18 @@ export class DocumentActionBuilder {
     component: any
     template: DocumentTemplatePrivate
     addDocument?: (document: Document) => void
+    $context: Session
 
     constructor(settings: {
         component: any,
         template: DocumentTemplatePrivate,
-        addDocument?: (document: Document) => void
+        addDocument?: (document: Document) => void,
+        $context: Session
     }) {
         this.component = settings.component
         this.template = settings.template
         this.addDocument = settings.addDocument
+        this.$context = settings.$context
     }
 
     getActions() {
@@ -106,7 +109,7 @@ export class DocumentActionBuilder {
                     status: DocumentStatus.Deleted
                 }))
             }
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 body: patch,
                 path: "/organization/documents",
@@ -138,7 +141,7 @@ export class DocumentActionBuilder {
                     status: DocumentStatus.Draft
                 }))
             }
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 body: patch,
                 path: "/organization/documents",
@@ -172,7 +175,7 @@ export class DocumentActionBuilder {
                 status: DocumentStatus.Draft,
             }))
 
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 body: patch,
                 path: "/organization/documents",
@@ -202,7 +205,7 @@ export class DocumentActionBuilder {
         }
         const validDocuments = documents.filter(d => d.status !== DocumentStatus.MissingData)
         if (validDocuments.length) {
-            await downloadDocuments(validDocuments, this.component)
+            await downloadDocuments(this.$context, validDocuments, this.component)
         }
     }
 
@@ -222,7 +225,7 @@ export class DocumentActionBuilder {
             }
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/organization/documents",
                 body: arr,

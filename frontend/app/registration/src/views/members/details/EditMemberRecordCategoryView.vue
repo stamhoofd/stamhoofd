@@ -8,7 +8,7 @@ import { FillRecordCategoryView } from '@stamhoofd/components';
 import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 
 /**
  * This component removes any member specific logic from FillRecordCategoryView and puts it separately so we can reuse
@@ -46,7 +46,7 @@ export default class EditMemberCategoryView extends Mixins(NavigationMixin) {
     }
 
     get filterDefinitions() {
-        return MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member, registerItems: this.items})
+        return MemberDetailsWithGroups.getFilterDefinitions(this.$organization, {member: this.member, registerItems: this.items})
     }
 
     get dataPermission() {

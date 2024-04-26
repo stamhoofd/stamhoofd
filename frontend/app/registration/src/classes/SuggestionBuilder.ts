@@ -1,13 +1,10 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { SessionManager } from "@stamhoofd/networking";
 import { Group, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import GroupView from "../views/groups/GroupView.vue";
 import MemberChooseGroupsView from "../views/members/MemberChooseGroupsView.vue";
 import { CheckoutManager } from "./CheckoutManager";
-import { MemberManager } from "./MemberManager";
-import { OrganizationManager } from "./OrganizationManager";
 
 export class Suggestion {
     group?: Group;
@@ -67,9 +64,12 @@ export class Suggestion {
 
 
 export class SuggestionBuilder {
-    static getSuggestions(members: MemberWithRegistrations[]) {
+    static getSuggestions($checkoutManager: CheckoutManager, members: MemberWithRegistrations[]) {
+        const $memberManager = $checkoutManager.$memberManager;
+        const $context = $memberManager.$context;
+
         const suggestions: Suggestion[] = []
-        const groups = SessionManager.currentSession?.user?.permissions ? OrganizationManager.organization.adminAvailableGroups : OrganizationManager.organization.availableGroups
+        const groups = $context.user?.permissions ? $context.organization!.adminAvailableGroups : $context.organization!.availableGroups
 
         // Rules for suggesting registrations
         // Multiple registrations possible -> suggest one general item
@@ -77,11 +77,11 @@ export class SuggestionBuilder {
 
         for (const member of members) {
             for (const group of groups) {
-                const canRegister = member.canRegister(group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items);
+                const canRegister = member.canRegister(group, $memberManager.members ?? [], $context.organization!.meta.categories, $checkoutManager.cart.items);
                 
                 // Check in cart
                 const item = new RegisterItem(member, group, { reduced: false, waitingList: canRegister.waitingList })
-                if (CheckoutManager.cart.hasItem(item)) {
+                if ($checkoutManager.cart.hasItem(item)) {
                     continue;
                 }
                 

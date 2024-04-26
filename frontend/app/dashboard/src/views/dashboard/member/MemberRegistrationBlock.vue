@@ -38,7 +38,7 @@ import { Registration } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 
 @Component({
     components: {
@@ -56,7 +56,7 @@ export default class MemberRegistrationBlock extends Mixins(NavigationMixin) {
     registration!: Registration;
 
     getGroup(groupId: string) {
-        return OrganizationManager.organization.groups.find(g => g.id === groupId)
+        return this.$organization.groups.find(g => g.id === groupId)
     }
 
     get isEditable() {

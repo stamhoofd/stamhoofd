@@ -1,5 +1,4 @@
 {
-    "editor.formatOnSave": false,
     "javascript.format.enable": false,
     "search.exclude": {
         "**/dist": true,
@@ -22,10 +21,11 @@
     "vetur.validation.template": false,
     "vetur.format.enable": false,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
+        "source.fixAll.eslint": "never"
     },
-    "editor.formatOnPaste": true,
-    "eslint.format.enable": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": false,
+    "eslint.format.enable": false,
     "eslint.validate": [
         "typescript",
         "javascript",
@@ -34,7 +34,8 @@
     "eslint.workingDirectories": [
         "./backend/app/*",
         "./backend/shared/*",
-        "./frontend",
+        "./frontend/app/*",
+        "./frontend/shared/*",
         "./devops",
         "./shared/*"
     ],
@@ -43,7 +44,6 @@
     "vetur.format.defaultFormatter.ts": "none",
     "search.useIgnoreFiles": false,
     "vetur.trace.server": "messages",
-
     "i18n-ally.autoDetection": false,
     "i18n-ally.localesPaths": [
         "shared/locales/src"

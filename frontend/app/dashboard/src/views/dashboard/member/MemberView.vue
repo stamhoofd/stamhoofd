@@ -32,7 +32,7 @@ import { Gender, Group, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberView from "./edit/EditMemberView.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
@@ -72,7 +72,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
     tabLabels = ["Gegevens", "Rekening"];
     tab = this.tabs[this.initialTab && this.initialTab < this.tabs.length ? (this.initialTab) : 0];
 
-    familyManager = new FamilyManager([this.member]);
+    familyManager = new FamilyManager(this.$memberManager, [this.member]);
 
     @Prop({ default: null })
         getNextMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
@@ -192,17 +192,17 @@ export default class MemberView extends Mixins(NavigationMixin) {
     }
 
     get hasWrite(): boolean {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
 
-        if (OrganizationManager.user.permissions.hasFullAccess(OrganizationManager.organization.privateMeta?.roles ?? [])) {
+        if (this.$organizationManager.user.permissions.hasFullAccess(this.$organization.privateMeta?.roles ?? [])) {
             // Can edit members without groups
             return true
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && group.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization)) {
+            if(group.privateSettings && group.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization)) {
                 return true
             }
         }
@@ -212,6 +212,8 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     get actions() {
         const builder = new MemberActionBuilder({
+            $organizationManager: this.$organizationManager,
+            $memberManager: this.$memberManager,
             component: this,
             groups: this.group ? [this.group] : this.member.groups,
             cycleOffset: this.cycleOffset,

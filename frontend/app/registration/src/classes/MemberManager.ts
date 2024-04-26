@@ -2,19 +2,24 @@
 
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
+import { MemberManagerBase, Session, SessionManager } from '@stamhoofd/networking';
 import { Address, Document, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
 import { Vue } from "vue-property-decorator";
 
-import { OrganizationManager } from './OrganizationManager';
 
 /**
  * Controls the fetching and decrypting of members
  */
-export class MemberManagerStatic extends MemberManagerBase {
+export class MemberManager extends MemberManagerBase {
     /// Currently saved members
+    $context: Session
     members: MemberWithRegistrations[] | null = null
     documents: Document[] | null = null
+
+    constructor($context: Session) {
+        super()
+        this.$context = $context
+    }
 
     /**
      * Set the members, but keep all the existing member references
@@ -22,7 +27,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
         // Save keychain items
         const s: MemberWithRegistrations[] = []
-        const groups = OrganizationManager.organization.groups
+        const groups = this.$context.organization!.groups
 
         for (const member of data.data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
@@ -48,8 +53,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async loadMembers() {
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
+        const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/members",
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
@@ -58,8 +62,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async loadDocuments() {
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
+        const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/documents",
             decoder: new ArrayDecoder(Document as Decoder<Document>)
@@ -68,11 +71,10 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async addMember(memberDetails: MemberDetails): Promise<MemberWithRegistrations | null> {
-        const session = SessionManager.currentSession!
 
         // Add encryption blobs
         // Add encryption blob (only one)
-        if (!session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
+        if (!this.$context.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
             throw new SimpleError({
                 code: "not_accepted_terms",
                 message: 'Deze vereniging lijkt inactief te zijn. Neem contact op met de vereniging.'
@@ -94,14 +96,14 @@ export class MemberManagerStatic extends MemberManagerBase {
         patch.patch(this.getEncryptedMembers(members))
 
         // Send the request
-        const response = await session.authenticatedServer.request({
+        const response = await this.$context.authenticatedServer.request({
             method: "PATCH",
             path: "/members",
             body: patch,
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
 
-        MemberManager.setMembers(response.data)
+        this.setMembers(response.data)
         this.loadDocuments().catch(console.error)
 
         // Search same id, or return newly created member with different id (duplicate member detection)
@@ -128,10 +130,9 @@ export class MemberManagerStatic extends MemberManagerBase {
 
     async patchMembers(members: MemberWithRegistrations[]) {
         const patch = this.getEncryptedMembers(members)
-        const session = SessionManager.currentSession!
 
         // Send the request
-        const response = await session.authenticatedServer.request({
+        const response = await this.$context.authenticatedServer.request({
             method: "PATCH",
             path: "/members",
             body: patch,
@@ -243,7 +244,3 @@ export class MemberManagerStatic extends MemberManagerBase {
         return Array.from(addresses.values())
     }
 }
-
-export const MemberManager = new MemberManagerStatic();
-
-(window as any).MemberManager = MemberManager;

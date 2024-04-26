@@ -1,11 +1,10 @@
 
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { BalanceItem, EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberBalanceItem, MemberWithRegistrations, PermissionLevel, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
+import { MemberManagerBase, Session } from '@stamhoofd/networking';
+import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
-import { OrganizationManager } from './OrganizationManager';
 
 export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment" | 'updated'
 export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWithRegistrations | null) => void
@@ -14,8 +13,14 @@ export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWit
 /**
  * Controls the fetching and decrypting of members
  */
-export class MemberManagerStatic extends MemberManagerBase {
+export class MemberManager extends MemberManagerBase {
     protected listeners: Map<any, MembersChangedListener> = new Map()
+    $context: Session;
+
+    constructor($context: Session) {
+        super();
+        this.$context = $context;
+    }
 
     addListener(owner: any, listener: MembersChangedListener) {
         this.listeners.set(owner, listener)
@@ -33,7 +38,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
     decryptMembersWithRegistrations(data: EncryptedMemberWithRegistrations[]): MemberWithRegistrations[] {
         const members: MemberWithRegistrations[] = []
-        const groups = OrganizationManager.organization.groups
+        const groups = this.$context.organization!.groups
 
         for (const member of data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
@@ -64,7 +69,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             return Object.values(members.reduce((acc,cur)=>Object.assign(acc,{[cur.id]:cur}),{}))
         }
 
-        const session = SessionManager.currentSession!
+        const session = this.$context
 
         if (groupIds.length === 0) {
             const members: MemberWithRegistrations[] = []
@@ -194,7 +199,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async patchMembers(patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {
-        const session = SessionManager.currentSession!
+        const session = this.$context
         const response = await session.authenticatedServer.request({
             method: "PATCH",
             path: "/organization/members",
@@ -293,7 +298,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
  
         await this.patchMembersAndSync(members, patchArray, false)
-        const session = SessionManager.currentSession!
+        const session = this.$context
         sizeUpdater.save(session)
 
         for (const member of members) {
@@ -325,7 +330,7 @@ export class MemberManagerStatic extends MemberManagerBase {
    
         await this.patchMembersAndSync(members, patchArray, false)
 
-        const session = SessionManager.currentSession!
+        const session = this.$context
         sizeUpdater.save(session)
 
         for (const member of members) {
@@ -349,7 +354,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                 const group = member.allGroups.find(g => g.id === registration.groupId)
                 let price: number | undefined = undefined
                 if (group) {
-                    price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+                    price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
                 }
 
                 patchMember.registrations.addPatch(Registration.patch({
@@ -367,7 +372,7 @@ export class MemberManagerStatic extends MemberManagerBase {
    
         await this.patchMembersAndSync(members, patchArray, false)
 
-        const session = SessionManager.currentSession!
+        const session = this.$context
         sizeUpdater.save(session)
 
         for (const member of members) {
@@ -390,7 +395,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                     sizeUpdater.add({groupId: group.id, waitingList: true, cycle: registration.cycle}, -1);
                     sizeUpdater.add({groupId: group.id, waitingList: false, cycle: registration.cycle}, 1);
 
-                    const price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+                    const price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
                     
                     // Do a patch to move this member from the waiting list
                     patchMember.registrations.addPatch(Registration.patch({
@@ -415,7 +420,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                 registeredAt: new Date()
             })
 
-            reg.price = RegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            reg.price = RegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
             patchMember.registrations.addPut(reg)
 
             sizeUpdater.add({groupId: group.id, waitingList, cycle}, 1)
@@ -424,7 +429,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         await this.patchMembersAndSync(members, patchArray, false)
         
-        const session = SessionManager.currentSession!
+        const session = this.$context
         sizeUpdater.save(session)
 
         for (const member of members) {
@@ -471,7 +476,7 @@ export class MemberManagerStatic extends MemberManagerBase {
  
         await this.patchMembersAndSync(members, patchArray, false)
         
-        const session = SessionManager.currentSession!
+        const session = this.$context
         sizeUpdater.save(session)
         
         for (const member of members) {
@@ -515,7 +520,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         await this.patchMembersAndSync(members, patchArray, false)
         
-        const session = SessionManager.currentSession!
+        const session = this.$context
         sizeUpdater.save(session)
         
         for (const member of members) {
@@ -555,7 +560,7 @@ export class MemberManagerStatic extends MemberManagerBase {
  
         await this.patchMembersAndSync(members, patchArray, false)
 
-        const session = SessionManager.currentSession!
+        const session = this.$context
         sizeUpdater.save(session)
         
         for (const member of members) {
@@ -563,5 +568,3 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
     }
 }
-
-export const MemberManager = new MemberManagerStatic()

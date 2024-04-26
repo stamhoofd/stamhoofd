@@ -79,7 +79,7 @@ import { Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRo
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import EditRoleView from "./EditRoleView.vue";
 
 @Component({
@@ -123,7 +123,7 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
     }
 
     async load(force = false) {
-        await OrganizationManager.loadAdmins(force, true, this)
+        await this.$organizationManager.loadAdmins(force, true, this)
         this.loading = false
     }
 
@@ -136,7 +136,7 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get patchedOrganization() {
@@ -225,8 +225,8 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
         try {
             this.patchOrganization.id = this.organization.id
             const doSave = this.patchOrganization
-            await OrganizationManager.patch(this.patchOrganization)
-            this.patchOrganization = Organization.patch({ id: OrganizationManager.organization.id })
+            await this.$organizationManager.patch(this.patchOrganization)
+            this.patchOrganization = Organization.patch({ id: this.$organization.id })
 
             if (doSave.admins) {
                 await this.load(true)
@@ -242,7 +242,7 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchOrganization, OrganizationManager.organization, { version: Version })
+        return patchContainsChanges(this.patchOrganization, this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {

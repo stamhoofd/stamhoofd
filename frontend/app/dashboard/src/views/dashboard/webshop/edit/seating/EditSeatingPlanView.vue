@@ -123,7 +123,7 @@ import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, Seati
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+
 import EditSeatingPlanCategoryView from './EditSeatingPlanCategoryView.vue';
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';
 
@@ -173,7 +173,7 @@ export default class EditSeatingPlanView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get title() {

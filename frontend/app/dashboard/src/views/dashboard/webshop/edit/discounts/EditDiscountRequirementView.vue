@@ -9,7 +9,7 @@
         
         <STErrorsDefault :error-box="errorBox" />
 
-        <ProductSelectorBox :productSelector="productSelector" @patch="patchProductSelector" :webshop="webshop" :validator="validator" />
+        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="validator" @patch="patchProductSelector" />
 
         <STInputBox title="Aantal" error-fields="amount" :error-box="errorBox" class="max">
             <NumberInput
@@ -40,7 +40,7 @@ import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, Price
 import { DiscountRequirement, PrivateWebshop, ProductSelector, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../classes/OrganizationManager';
+
 import ProductSelectorBox from './ProductSelectorBox.vue';
 
 @Component({
@@ -84,7 +84,7 @@ export default class EditDiscountRequirementView extends Mixins(NavigationMixin)
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get productSelector() {
@@ -127,7 +127,7 @@ export default class EditDiscountRequirementView extends Mixins(NavigationMixin)
             return
         }
 
-       const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray()
+        const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray()
         p.addDelete(this.discountRequirement.id)
         this.saveHandler(p)
         this.pop({ force: true })

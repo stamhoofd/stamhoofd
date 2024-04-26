@@ -162,7 +162,7 @@ import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import PackageSettingsView, { SelectablePackage } from "./PackageSettingsView.vue";
 
 const throttle = (func, limit) => {
@@ -228,7 +228,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
 
     selectedPaymentMethod: PaymentMethod = PaymentMethod.Unknown
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
     userPatch = User.patch({ id: this.user.id })
 
     throttledReload = throttle(this.loadProForma, 1000)
@@ -262,7 +262,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
         const c = this.loadingProFormaCount
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/billing/activate-packages",
                 body: {
@@ -289,7 +289,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 
     get user() {
-        return User.create(SessionManager.currentSession!.user!)
+        return User.create(this.$user!)
     }
 
     get patchedUser() {
@@ -297,7 +297,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     get firstName() {
@@ -460,7 +460,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                     field: "terms"
                 })
             }
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/billing/activate-packages",
                 body: {
@@ -478,7 +478,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
             } else {
                 // Reload organization
                 try {
-                    await SessionManager.currentSession?.fetchOrganization();
+                    await this.$context.fetchOrganization();
                 } catch (e) {
                     console.error(e)
                 }

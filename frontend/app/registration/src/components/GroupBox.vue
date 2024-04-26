@@ -23,11 +23,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Group, WaitingListType } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { CheckoutManager } from "../classes/CheckoutManager";
 import GroupView from "../views/groups/GroupView.vue";
 import GroupTag from "./GroupTag.vue";
 
@@ -46,7 +45,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
     @Prop({ required: true })
     group: Group
 
-    CheckoutManager = CheckoutManager
+    
     
     
     get imageSrc() {
@@ -54,7 +53,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
     }
 
     get selectedCount() {
-        return CheckoutManager.cart.items.filter(i => i.group.id === this.group.id).length
+        return this.$checkoutManager.cart.items.filter(i => i.group.id === this.group.id).length
     }
 
     get preRegistrations() {

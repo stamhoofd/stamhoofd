@@ -329,7 +329,7 @@ import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import AdminsView from '../admins/AdminsView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
@@ -365,12 +365,12 @@ import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.v
     }
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
-    temp_organization = OrganizationManager.organization
+    temp_organization = this.$organization
     loadingStripeAccounts = false;
     stripeAccounts: StripeAccount[] = []
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get isSGV() {
@@ -394,7 +394,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.loadingStripeAccounts = true
             if (recheckStripeAccount) {
                 try {
-                    await SessionManager.currentSession!.authenticatedServer.request({
+                    await this.$context.authenticatedServer.request({
                         method: "POST",
                         path: "/stripe/accounts/" + encodeURIComponent(recheckStripeAccount),
                         decoder: StripeAccount as Decoder<StripeAccount>,
@@ -404,7 +404,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                     console.error(e)
                 }
             }
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/stripe/accounts",
                 decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
@@ -415,7 +415,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             if (!recheckStripeAccount) {
                 for (const account of this.stripeAccounts) {
                     try {
-                        const response = await SessionManager.currentSession!.authenticatedServer.request({
+                        const response = await this.$context.authenticatedServer.request({
                             method: "POST",
                             path: "/stripe/accounts/" + encodeURIComponent(account.id),
                             decoder: StripeAccount as Decoder<StripeAccount>,
@@ -627,7 +627,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     manageGroups(animated = true) {
-        const component = buildManageGroupsComponent(this.organization)
+        const component = buildManageGroupsComponent(this.$organizationManager)
             
         this.present({
             animated,

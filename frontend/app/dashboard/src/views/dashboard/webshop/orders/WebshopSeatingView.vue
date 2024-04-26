@@ -51,7 +51,7 @@ import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, Reserve
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import EditSeatingPlanView from "../edit/seating/EditSeatingPlanView.vue";
 import { WebshopManager } from '../WebshopManager';
 import OrderView from './OrderView.vue';
@@ -76,7 +76,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     loading = false;
@@ -292,11 +292,11 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
     }
 
     get hasWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.$context.user?.permissions
         if (!p) {
             return false
         }
-        return this.preview.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])    
+        return this.preview.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])    
     }
 
     isLoadingOrders = true
@@ -398,7 +398,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
 
 
     get hasFullPermissions() {
-        return this.preview.privateMeta.permissions.hasFullAccess(OrganizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])
     }
 
     reload() {

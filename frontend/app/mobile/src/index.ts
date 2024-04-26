@@ -11,7 +11,7 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { RateApp } from 'capacitor-rate-app';
 import Vue from "vue";
 import VueMeta from 'vue-meta';
@@ -165,20 +165,18 @@ AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 }
 
-async function markReviewMoment() {
+async function markReviewMoment($context: Session) {
     // 1. Check if we are signed in.
-    const session = SessionManager.currentSession
-
-    if (!session) {
+    if (!$context) {
         return
     }
 
-    if (!session.organization) {
+    if (!$context.organization) {
         return
     }
     
     // Check if at least one package active (only ask reviews to organizations who bought the app)
-    if ((session.organization.meta.packages.useMembers && !session.organization.meta.packages.isMembersTrial) || (session.organization.meta.packages.useWebshops && !session.organization.meta.packages.isWebshopsTrial)) {
+    if (($context.organization.meta.packages.useMembers && !$context.organization.meta.packages.isMembersTrial) || ($context.organization.meta.packages.useWebshops && !$context.organization.meta.packages.isWebshopsTrial)) {
         // Use a counter, that can only increment once a day
         const counterRaw = await Storage.keyValue.getItem("reviewCounter")
         let counter = counterRaw ? parseInt(counterRaw) : 0
@@ -207,8 +205,8 @@ async function markReviewMoment() {
     }
 }
 
-AppManager.shared.markReviewMoment = () => {
-    markReviewMoment().catch(console.error)
+AppManager.shared.markReviewMoment = ($context: Session) => {
+    markReviewMoment($context).catch(console.error)
 }
 
 

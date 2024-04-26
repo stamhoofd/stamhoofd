@@ -42,20 +42,20 @@ export default class TicketView extends Mixins(NavigationMixin){
     tickets: TicketPublic[] = []
 
     get organization() {
-        return WebshopManager.organization
+        return this.$webshopManager.organization
     }
 
     get webshop() {
-        return WebshopManager.webshop
+        return this.$webshopManager.webshop
     }
 
     async downloadTickets() {
         this.loading = true
 
         try {
-            const response = await WebshopManager.server.request({
+            const response = await this.$webshopManager.server.request({
                 method: "GET",
-                path: "/webshop/" +WebshopManager.webshop.id + "/tickets",
+                path: "/webshop/" +this.$webshopManager.webshop.id + "/tickets",
                 query: {
                     // Required because we don't need to repeat item information (network + database impact)
                     secret: this.secret

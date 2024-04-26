@@ -25,13 +25,14 @@
 
 <script lang="ts">
 import { SimpleError } from "@simonbackx/simple-errors";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, ErrorBox, ReplaceRootEventBus, SaveView, STErrorsDefault } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Organization, OrganizationMetaData } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
+import OrganizationSelectionView from "../login/OrganizationSelectionView.vue";
 
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 
 
 @Component({
@@ -80,9 +81,9 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
                 })
             }
 
-            await OrganizationManager.patch(
+            await this.$organizationManager.patch(
                 Organization.patch({
-                    id: OrganizationManager.organization.id,
+                    id: this.$organization.id,
                     meta: OrganizationMetaData.patch({
                         lastSignedTerms: new Date()
                     })
@@ -98,9 +99,9 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
         }
     }
 
-    shouldNavigateAway() {
+    async shouldNavigateAway() {
         // Force session logout
-        SessionManager.deactivateSession();
+        await ReplaceRootEventBus.sendEvent('replace', new ComponentWithProperties(OrganizationSelectionView, {}))
         return true;
     }
 }

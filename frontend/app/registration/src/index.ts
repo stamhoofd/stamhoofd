@@ -28,6 +28,21 @@ import App from "./App.vue";
 document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 VueGlobalHelper.setup()
 
+Vue.mixin({
+    inject: {
+        $checkoutManager: {
+            default: function () {
+                return null;
+            }
+        },
+        $memberManager: {
+            default: function () {
+                return null;
+            }
+        },
+    }
+})
+
 const i18n = I18nController.getI18n()
 I18nController.fixedCountry = true
 

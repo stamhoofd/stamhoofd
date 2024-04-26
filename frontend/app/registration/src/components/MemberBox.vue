@@ -33,15 +33,12 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Group, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import CartView from "../../../webshop/src/views/checkout/CartView.vue";
-import { CheckoutManager } from "../classes/CheckoutManager";
-import { MemberManager } from "../classes/MemberManager";
-import { OrganizationManager } from "../classes/OrganizationManager";
+
 import GroupView from "../views/groups/GroupView.vue";
 
 @Component({
@@ -67,15 +64,15 @@ export default class MemberBox extends Mixins(NavigationMixin){
     @Prop({ default: "member" })
         type: "group" | "member"
 
-    CheckoutManager = CheckoutManager
-    Cart = CheckoutManager.cart
+    
+    Cart = this.$checkoutManager.cart
 
     get imageSrc() {
         return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
 
     get canRegister() {
-        return this.member.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
+        return this.member.canRegister(this.group, this.$memberManager.members ?? [], this.$organization.meta.categories, this.$checkoutManager.cart.items)
     }
 
     get item() {
@@ -88,7 +85,7 @@ export default class MemberBox extends Mixins(NavigationMixin){
     }
 
     get selected() {
-        return this.CheckoutManager.cart.hasItem(this.item)
+        return this.$checkoutManager.cart.hasItem(this.item)
     }
 
     openGroup() {

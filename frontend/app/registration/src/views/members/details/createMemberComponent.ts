@@ -1,11 +1,13 @@
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 
-import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "./EditMemberStepsManager"
+import { MemberManager } from "../../../classes/MemberManager";
+import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "./EditMemberStepsManager";
 
-export async function createMemberComponent() {
+export async function createMemberComponent($memberManager: MemberManager) {
     const stepManager = new EditMemberStepsManager(
+        $memberManager,
         [
-            new BuiltInEditMemberStep(EditMemberStepType.Details, true, false)
+            new BuiltInEditMemberStep($memberManager.$context, EditMemberStepType.Details, true, false)
         ], 
         [],
         undefined,

@@ -50,7 +50,7 @@ import { BackButton, LoadingButton, STInputBox, STList, STListItem, STNavigation
 import { OrganizationType } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 
 @Component({
     components: {
@@ -68,7 +68,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
 })
 export default class RegistrationPageSettingsView extends Mixins(NavigationMixin) {
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get isYouth() {

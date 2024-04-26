@@ -31,7 +31,7 @@ import { FramedComponent, NavigationController, NavigationMixin } from "@simonba
 import { OrganizationLogo, STNavigationBar } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 import { TabBarItem } from "../../classes/TabBarItem";
 
 @Component({
@@ -43,7 +43,7 @@ import { TabBarItem } from "../../classes/TabBarItem";
 })
 export default class TabBarController extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    items!: TabBarItem[]
+        items!: TabBarItem[]
 
     selectedItem: null | TabBarItem = null
 
@@ -56,7 +56,7 @@ export default class TabBarController extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     selectItem(item: TabBarItem) {

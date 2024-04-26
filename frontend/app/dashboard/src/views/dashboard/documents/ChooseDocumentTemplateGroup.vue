@@ -43,7 +43,7 @@ import { BackButton, Spinner, STList, STListItem, STNavigationBar, STToolbar, To
 import { DocumentTemplateGroup, Group, RecordCategory } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import ChooseDocumentTemplateCycle from "./ChooseDocumentTemplateCycle.vue";
 
 @Component({
@@ -67,7 +67,7 @@ export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin)
     loadingGroups = true
 
     get categoryTree() {
-        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true})
+        return this.$organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true})
     }
 
     selectGroup(group: Group) {
@@ -100,7 +100,7 @@ export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin)
 
     async load() {
         try {
-            this.archivedGroups = await OrganizationManager.loadArchivedGroups({owner: this})
+            this.archivedGroups = await this.$organizationManager.loadArchivedGroups({owner: this})
         } catch (e) {
             Toast.fromError(e).show()
         }

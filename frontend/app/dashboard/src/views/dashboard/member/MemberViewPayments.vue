@@ -155,7 +155,7 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import PaymentView from '../payments/PaymentView.vue';
 import EditBalanceItemView from './balance/EditBalanceItemView.vue';
 import EditPaymentView from './EditPaymentView.vue';
@@ -189,7 +189,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
 
     balanceItems: MemberBalanceItem[] = []
 
-    organization = OrganizationManager.organization
+    organization = this.$organization
 
     created() {
         this.reload().catch(e => {
@@ -218,17 +218,17 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     }
 
     get hasWrite(): boolean {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
 
-        if (OrganizationManager.user.permissions.hasFullAccess(OrganizationManager.organization.privateMeta?.roles ?? []) || OrganizationManager.user.permissions.canManagePayments(this.organization.privateMeta?.roles ?? []) ) {
+        if (this.$organizationManager.user.permissions.hasFullAccess(this.$organization.privateMeta?.roles ?? []) || this.$organizationManager.user.permissions.canManagePayments(this.organization.privateMeta?.roles ?? []) ) {
             // Can edit members without groups
             return true
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && group.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization)) {
+            if(group.privateSettings && group.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization)) {
                 return true
             }
         }
@@ -295,7 +295,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
                 const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
                 arr.addPut(balanceItem.patch(patch))
-                await SessionManager.currentSession!.authenticatedServer.request({
+                await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,
@@ -328,7 +328,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
                 const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
                 arr.addPut(payment.patch(patch))
-                await SessionManager.currentSession!.authenticatedServer.request({
+                await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/payments',
                     body: arr,
@@ -357,7 +357,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
                 patch.id = balanceItem.id;
                 arr.addPatch(patch)
-                await SessionManager.currentSession!.authenticatedServer.request({
+                await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,
@@ -414,7 +414,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     async reload() {
         try {
             this.loadingPayments = true;
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: 'GET',
                 path: `/organization/members/${this.member.id}/balance`,
                 decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>),

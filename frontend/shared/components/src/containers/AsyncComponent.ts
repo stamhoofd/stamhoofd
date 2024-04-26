@@ -1,6 +1,6 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation"
 
-import { sleep } from "../../../../../shared/utility/dist"
+import { sleep } from "@stamhoofd/utility"
 import { AppManager } from "../../../networking"
 import { Toast } from "../overlays/Toast"
 import PromiseView from "./PromiseView.vue"

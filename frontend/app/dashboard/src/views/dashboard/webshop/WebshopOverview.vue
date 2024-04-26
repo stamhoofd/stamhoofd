@@ -130,7 +130,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)" v-if="getFeatureFlag('webshop-discounts')">
+                    <STListItem v-if="getFeatureFlag('webshop-discounts')" :selectable="true" class="left-center" @click="editDiscounts(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/discount.svg">
                         <h2 class="style-title-list">
                             Kortingen
@@ -329,7 +329,7 @@ import { EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, Webshop
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
@@ -367,7 +367,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     loading = false
 
-    webshopManager = new WebshopManager(this.preview)
+    webshopManager = new WebshopManager(this.$context, this.preview)
 
     reload() {
         this.loading = true;
@@ -397,7 +397,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get title() {
@@ -405,35 +405,35 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     get webshopUrl() {
-        return this.preview.getUrl(OrganizationManager.organization)
+        return this.preview.getUrl(this.$organization)
     }
 
     get hasFullPermissions() {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
-        return this.preview.privateMeta.permissions.hasFullAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
     }
 
     get hasWritePermissions() {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
-        return this.preview.privateMeta.permissions.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
     }
 
     get hasReadPermissions() {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
-        return this.preview.privateMeta.permissions.hasReadAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasReadAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
     }
 
     get hasScanPermissions() {
-        if (!OrganizationManager.user.permissions) {
+        if (!this.$organizationManager.user.permissions) {
             return false
         }
-        return this.hasWritePermissions || this.preview.privateMeta.scanPermissions.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.hasWritePermissions || this.preview.privateMeta.scanPermissions.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
     }
 
     get isTicketsOnly() {
@@ -650,7 +650,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     get canCreateWebshops() {
-        const result = SessionManager.currentSession!.user!.permissions!.canCreateWebshops(this.organization.privateMeta?.roles ?? [])
+        const result = this.$user!.permissions!.canCreateWebshops(this.organization.privateMeta?.roles ?? [])
         return result
     }
 
@@ -677,7 +677,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                         // Set usedStock to 0
                         duplicate.clearStock();
 
-                        const response = await SessionManager.currentSession!.authenticatedServer.request({
+                        const response = await this.$context.authenticatedServer.request({
                             method: "GET",
                             path: "/email-templates",
                             query: { webshopId: webshop.id },
@@ -709,7 +709,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                                     }
 
                                     if (patchedArray.getPuts().length > 0) {
-                                        await SessionManager.currentSession!.authenticatedServer.request({
+                                        await this.$context.authenticatedServer.request({
                                             method: "PATCH",
                                             path: "/email-templates",
                                             body: patchedArray,
@@ -811,17 +811,17 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         }
 
         try {
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "DELETE",
                 path: "/webshop/"+this.webshopManager.preview.id,
                 shouldRetry: false
             })
             new Toast("Webshop verwijderd", "success green").show()
 
-            OrganizationManager.organization.webshops = OrganizationManager.organization.webshops.filter(w => w.id != this.webshopManager.preview.id)
+            this.$organization.webshops = this.$organization.webshops.filter(w => w.id != this.webshopManager.preview.id)
 
             // Save updated organization to cache
-            OrganizationManager.save().catch(console.error)
+            this.$organizationManager.save().catch(console.error)
 
             if (this.canPop) {
                 this.pop({ force: true })

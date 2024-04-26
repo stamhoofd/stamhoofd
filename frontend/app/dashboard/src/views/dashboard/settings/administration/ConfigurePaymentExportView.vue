@@ -120,7 +120,7 @@ import { BalanceItemPaymentDetailed, Country, PaymentGeneral, PaymentMethod, Pay
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import PaymentExportView from "./PaymentExportView.vue";
 
 class DateRangeSuggestion {
@@ -151,7 +151,6 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     validator = new Validator()
     saving = false
 
-    OrganizationManager = OrganizationManager
 
     internalStartDate = new Date()
     internalEndDate = new Date()
@@ -273,7 +272,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get enableMemberModule() {
@@ -327,7 +326,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     async loadStripeAccounts() {
         try {
             this.loadingStripeAccounts = true
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/stripe/accounts",
                 decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
@@ -509,7 +508,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     async downloadUntil(arr: PaymentGeneral[], params: { afterId?: string, paidSince?: number } = {}) {
         const limit = 100
         
-        const session = SessionManager.currentSession!
+        const session = this.$context
 
         const response = await session.authenticatedServer.request({
             method: "GET",

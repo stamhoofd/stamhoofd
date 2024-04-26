@@ -25,7 +25,7 @@ import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STLis
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import GroupPermissionRow from './GroupPermissionRow.vue';
 
 @Component({
@@ -90,7 +90,7 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchOrganization, OrganizationManager.organization, { version: Version })
+        return patchContainsChanges(this.patchOrganization, this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {

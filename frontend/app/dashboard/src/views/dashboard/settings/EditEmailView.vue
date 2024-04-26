@@ -86,7 +86,7 @@ import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefa
 import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version, WebshopPreview, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 
 class SelectableGroup {
     group: Group;
@@ -134,15 +134,14 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
         initialPatch!: AutoEncoderPatchType<Organization> | null;
     
-    organizationPatch = this.initialPatch ? this.initialPatch : OrganizationManager.getPatch()
+    organizationPatch = this.initialPatch ? this.initialPatch : this.$organizationManager.getPatch()
 
     groups: SelectableGroup[] = []
     webshops: SelectableWebshop[] = []
 
-    OrganizationManager = OrganizationManager
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     get enableMemberModule() {
@@ -164,7 +163,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
     }
 
     get unpatchedOrganizationEmail() {
-        const organization = OrganizationManager.organization
+        const organization = this.$organization
         for (const email of organization.privateMeta?.emails ?? []) {
             if (email.id === this.emailId) {
                 return email
@@ -288,7 +287,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await OrganizationManager.patch(patch)
+            await this.$organizationManager.patch(patch)
             this.pop({ force: true })
             this.saving = false
         } catch (e) {
@@ -315,7 +314,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
             }
         }
 
-        return patchContainsChanges(this.organizationPatch, this.initialPatch ? OrganizationManager.organization.patch(this.initialPatch) : OrganizationManager.organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.initialPatch ? this.$organization.patch(this.initialPatch) : this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {
@@ -377,7 +376,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await OrganizationManager.patch(this.organizationPatch)
+            await this.$organizationManager.patch(this.organizationPatch)
             this.pop({ force: true })
             this.saving = false
         } catch (e) {

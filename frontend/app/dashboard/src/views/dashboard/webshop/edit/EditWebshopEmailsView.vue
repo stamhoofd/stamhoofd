@@ -44,7 +44,7 @@ import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EmailTemplat
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import { WebshopManager } from "../WebshopManager";
 
 @Component({
@@ -73,7 +73,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
     async loadTemplates() {
         this.loading = true
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/email-templates",
                 query: { webshopId: this.webshopManager.preview.id },
@@ -103,7 +103,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get hasTickets() {
@@ -247,7 +247,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
         this.saving = true;
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/email-templates",
                 body: this.patchTemplates,

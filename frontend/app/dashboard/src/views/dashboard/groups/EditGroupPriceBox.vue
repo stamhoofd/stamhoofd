@@ -108,7 +108,7 @@ import { Group, GroupPrice, GroupPrices, Organization } from "@stamhoofd/structu
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -146,14 +146,14 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         patchedOrganization!: Organization | null
 
     get enableFinancialSupport() {
-        return (this.patchedOrganization ?? OrganizationManager.organization).meta.recordsConfiguration.financialSupport !== null
+        return (this.patchedOrganization ?? this.$organization).meta.recordsConfiguration.financialSupport !== null
     }
 
     get canRegisterMultipleGroups() {
         if (!this.group) {
             return true
         }
-        const parents = this.group.getParentCategories((this.patchedOrganization ?? OrganizationManager.organization).meta.categories, false)
+        const parents = this.group.getParentCategories((this.patchedOrganization ?? this.$organization).meta.categories, false)
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== 1) {
                 return true
@@ -250,7 +250,7 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         if (!this.group) {
             return null
         }
-        const parents = this.group.getParentCategories((this.patchedOrganization ?? OrganizationManager.organization).meta.categories, false)
+        const parents = this.group.getParentCategories((this.patchedOrganization ?? this.$organization).meta.categories, false)
         return parents[0] ?? null
     }
 

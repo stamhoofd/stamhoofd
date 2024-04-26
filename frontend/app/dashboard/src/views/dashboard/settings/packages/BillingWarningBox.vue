@@ -90,7 +90,7 @@ import { STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import FinancesView from "../FinancesView.vue";
 import BillingSettingsView from "./BillingSettingsView.vue";
 import PackageSettingsView from "./PackageSettingsView.vue";
@@ -105,7 +105,6 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
     @Prop({ default: null })
         filterTypes: "members" | "webshops" | null
 
-    OrganizationManager = OrganizationManager
 
     shouldFilter(type: "members" | "webshops") {
         if (this.filterTypes === null) {
@@ -151,7 +150,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get paymentFailedDeactivateDate() {
@@ -253,7 +252,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
     }
 
     openPackages() {
-        if (!SessionManager.currentSession!.user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
+        if (!this.$user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
             new CenteredMessage("Enkel voor hoofdbeheerders", "Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.").addCloseButton().show()
             return
         }
@@ -268,7 +267,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
             return
         }
 
-        if (!SessionManager.currentSession!.user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
+        if (!this.$user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
             new CenteredMessage("Enkel voor hoofdbeheerders", "Betalingen zijn enkel beschikbaar voor hoofdbeheerders. Vraag hen om de betaling in orde te brengen.").addCloseButton().show()
             return
         }

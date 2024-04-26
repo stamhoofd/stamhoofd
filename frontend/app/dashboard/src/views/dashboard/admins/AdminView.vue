@@ -60,7 +60,7 @@ import { PermissionLevel, PermissionRole, Permissions, User, Version } from "@st
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import AdminRolesView from './AdminRolesView.vue';
 import EditUserPermissionsBox from './EditUserPermissionsBox.vue';
 
@@ -109,7 +109,7 @@ export default class AdminView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get patchedUser() {
@@ -169,7 +169,7 @@ export default class AdminView extends Mixins(NavigationMixin) {
         try {
             let user: User;
             if (this.isNew) {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                const response = await this.$context.authenticatedServer.request({
                     method: "POST",
                     path: "/user",
                     body: this.patchedUser,
@@ -178,7 +178,7 @@ export default class AdminView extends Mixins(NavigationMixin) {
                 user = response.data;
                 new Toast("Beheerder "+user.firstName+" is toegevoegd en heeft een uitnodiging via email ontvangen.", "success").setHide(5000).show()
             } else {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                const response = await this.$context.authenticatedServer.request({
                     method: "PATCH",
                     path: "/user/"+this.user.id,
                     body: this.patchUser,
@@ -223,7 +223,7 @@ export default class AdminView extends Mixins(NavigationMixin) {
 
         try {
             // Patch the user
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/user/"+this.user.id,
                 body: User.patch({
@@ -306,7 +306,7 @@ export default class AdminView extends Mixins(NavigationMixin) {
             let user: User;
 
             // Note: we don't use the patchedUser, because that would save any changes too
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/user",
                 body: this.user,

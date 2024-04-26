@@ -185,6 +185,7 @@ export default class DocumentView extends Mixins(NavigationMixin){
 
     get actionBuilder() {
         return new DocumentActionBuilder({
+            $context: this.$context,
             template: this.template,
             component: this,
         })

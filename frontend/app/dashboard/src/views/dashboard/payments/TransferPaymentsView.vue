@@ -19,7 +19,7 @@ import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFi
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import PaymentView from "./PaymentView.vue";
 
 @Component({
@@ -36,7 +36,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     mounted() {
@@ -154,7 +154,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     async mail(payments: PaymentGeneral[]) {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../mail/MailView.vue"), {
             payments,
-            defaultReplacements: OrganizationManager.organization.meta.getEmailReplacements()
+            defaultReplacements: this.$organization.meta.getEmailReplacements()
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
@@ -189,7 +189,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new ChoicesFilterDefinition<PaymentGeneral>({
                 id: "registrations", 
                 name: "Inschrijvingen", 
-                choices: this.organization.getGroupsForPermissions(OrganizationManager.user?.permissions).map(group => new ChoicesFilterChoice(group.id, group.settings.name)),
+                choices: this.organization.getGroupsForPermissions(this.$organizationManager.user?.permissions).map(group => new ChoicesFilterChoice(group.id, group.settings.name)),
                 getValue: (payment) => {
                     return payment.registrations.map(r => r.groupId)
                 },
@@ -337,7 +337,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     async loadPayments() {
-        const session = SessionManager.currentSession!
+        const session = this.$context
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/payments",
@@ -409,7 +409,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             if (!await CenteredMessage.confirm("Ben je zeker?", paid ? "Markeer als betaald" : "Markeer als niet betaald", paid && hasOrder ? "De besteller(s) van bestellingen ontvangen een automatische e-mail." : undefined)) {
                 return;
             }
-            const session = SessionManager.currentSession!
+            const session = this.$context
 
             try {
                 const response = await session.authenticatedServer.request({

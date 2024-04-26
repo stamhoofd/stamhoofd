@@ -36,15 +36,13 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList,Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { KeychainedResponse, Payment, PaymentMethod, PaymentStatus, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
-import { MemberManager } from '../../classes/MemberManager';
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
 
 @Component({
@@ -64,9 +62,8 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
     }
 })
 export default class PaymentSelectionView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
-    OrganizationManager = OrganizationManager
-    CheckoutManager = CheckoutManager
+    
+    
 
     loading = false
     errorBox: ErrorBox | null = null
@@ -76,16 +73,16 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get selectedPaymentMethod() {
-        return CheckoutManager.checkout.paymentMethod
+        return this.$checkoutManager.checkout.paymentMethod
     }
 
     set selectedPaymentMethod(paymentMethod: PaymentMethod) {
-        CheckoutManager.checkout.paymentMethod = paymentMethod
-        CheckoutManager.saveCheckout()
+        this.$checkoutManager.checkout.paymentMethod = paymentMethod
+        this.$checkoutManager.saveCheckout()
     }
 
     get paymentMethods() {
-        return OrganizationManager.organization.meta.paymentMethods
+        return this.$organization.meta.paymentMethods
     }
 
     get needsPay() {
@@ -93,38 +90,37 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get organization() {
-        return this.OrganizationManager.organization
+        return this.$organization
     }
 
     async goNext() {
         if (this.loading || (this.selectedPaymentMethod === PaymentMethod.Unknown && this.needsPay)) {
             return
         }
-        const session = SessionManager.currentSession!
         this.loading = true
 
         try {
-            const response = await session.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/members/register",
-                body: CheckoutManager.checkout.convert(),
+                body: this.$checkoutManager.checkout.convert(),
                 decoder: RegisterResponse as Decoder<RegisterResponse>,
                 shouldRetry: false
             })
 
             const payment = response.data.payment
-            const registrations = MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
-            MemberManager.setMembers(new KeychainedResponse({ data: response.data.members }))
+            const registrations = this.$memberManager.decryptRegistrationsWithMember(response.data.registrations, this.$organization.groups)
+            this.$memberManager.setMembers(new KeychainedResponse({ data: response.data.members }))
 
             if (payment && payment.status !== PaymentStatus.Succeeded) {
                 PaymentHandler.handlePayment({
-                    server: session.authenticatedServer, 
-                    organization: OrganizationManager.organization, 
+                    server: this.$context.authenticatedServer, 
+                    organization: this.$organization, 
                     payment, 
                     paymentUrl: response.data.paymentUrl, 
                     returnUrl: "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id),
                     component: this,
-                    transferSettings: OrganizationManager.organization.meta.transferSettings,
+                    transferSettings: this.$organization.meta.transferSettings,
                     type: "registration"
                 }, (payment: Payment) => {
                     // success
@@ -147,8 +143,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                 }, (payment: Payment) => {
                     // Transfer view opened:
                     // Clear cart
-                    CheckoutManager.cart.clear()
-                    CheckoutManager.saveCart()
+                    this.$checkoutManager.cart.clear()
+                    this.$checkoutManager.saveCart()
                 })
                 return;
             }
@@ -177,12 +173,12 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get cart() {
-        return this.CheckoutManager.cart
+        return this.$checkoutManager.cart
     }
 
     async recalculate(refetch = false) {
         try {
-            await CheckoutManager.recalculateCart(refetch)
+            await this.$checkoutManager.recalculateCart(refetch)
             this.errorBox = null
         } catch (e) {
             console.error(e)

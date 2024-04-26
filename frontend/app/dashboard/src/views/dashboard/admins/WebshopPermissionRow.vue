@@ -30,7 +30,7 @@ import { Checkbox, ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/c
 import { Organization, PermissionLevel, PermissionRole, PermissionRoleDetailed, PermissionsByRole, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -62,7 +62,7 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
     }
 
     get isMe() {
-        return !!OrganizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
+        return !!this.$organizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
     }
 
     get selected() {

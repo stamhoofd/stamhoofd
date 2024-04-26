@@ -45,7 +45,7 @@ import { UrlHelper } from '@stamhoofd/networking';
 import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 
 @Component({
     components: {
@@ -63,16 +63,16 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     saving = false
 
     // Make organization reactive
-    temp_organization = OrganizationManager.organization
+    temp_organization = this.$organization
 
     // Keep track of selected option
-    defaultSelectedType = OrganizationManager.organization.meta.privacyPolicyUrl ? "website" : (OrganizationManager.organization.meta.privacyPolicyFile ? "file" : "none")
+    defaultSelectedType = this.$organization.meta.privacyPolicyUrl ? "website" : (this.$organization.meta.privacyPolicyFile ? "file" : "none")
     selectedPrivacyType = this.defaultSelectedType
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     get privacyPolicyUrl() {
@@ -134,8 +134,8 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await OrganizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+            await this.$organizationManager.patch(this.organizationPatch)
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
             new Toast('De wijzigingen zijn opgeslagen', "success green").show()
             this.dismiss({ force: true })
         } catch (e) {
@@ -146,7 +146,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return this.selectedPrivacyType !== this.defaultSelectedType || patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+        return this.selectedPrivacyType !== this.defaultSelectedType || patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {

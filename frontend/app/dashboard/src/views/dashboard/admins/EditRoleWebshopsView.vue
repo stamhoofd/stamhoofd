@@ -24,7 +24,7 @@ import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STList, STListIte
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 import WebshopPermissionRow from './WebshopPermissionRow.vue';
 
 @Component({
@@ -87,7 +87,7 @@ export default class EditRoleWebshopsView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchOrganization, OrganizationManager.organization, { version: Version })
+        return patchContainsChanges(this.patchOrganization, this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {

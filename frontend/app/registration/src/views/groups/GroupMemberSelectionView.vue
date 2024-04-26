@@ -35,15 +35,13 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from "../../classes/MemberManager";
-import { OrganizationManager } from "../../classes/OrganizationManager";
-import MemberBox from "../../components/MemberBox.vue"
+
+import MemberBox from "../../components/MemberBox.vue";
 import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
 
 @Component({
@@ -64,11 +62,11 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
     @Prop({ required: true })
         group!: Group
 
-    MemberManager = MemberManager
-    CheckoutManager = CheckoutManager
+    
+    
 
     get members() {
-        return this.MemberManager.members ?? []
+        return this.$memberManager.members ?? []
     }
 
     get closed() {
@@ -76,21 +74,21 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
     }
 
     get canRegister() {
-        return !!this.members.find(m => !m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items).closed)
+        return !!this.members.find(m => !m.canRegister(this.group, this.$memberManager.members ?? [], this.$organization.meta.categories, this.$checkoutManager.cart.items).closed)
     }
     
     get createMemberDisabled() {  //vereniging c69512bc-ea0c-427a-ab90-08c3dcf1c856 biedt ouders geen knop om zelf een lid aan te maken
-        return OrganizationManager.organization.id === "c69512bc-ea0c-427a-ab90-08c3dcf1c856"
+        return this.$organization.id === "c69512bc-ea0c-427a-ab90-08c3dcf1c856"
     }
 
     get hasItems() {
-        return !!CheckoutManager.cart.items.find(i => i.group.id === this.group.id)
+        return !!this.$checkoutManager.cart.items.find(i => i.group.id === this.group.id)
     }
 
     goToBasket() {
         this.dismiss({ force: true })
 
-        if (CheckoutManager.cart.items.find(i => i.group.id === this.group.id)) {
+        if (this.$checkoutManager.cart.items.find(i => i.group.id === this.group.id)) {
             new Toast("Ga door naar het mandje om de inschrijvingen te bevestigen", "basket green").setHide(3000).show()
         }
     }
@@ -99,9 +97,10 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
         // Only ask details + parents for new members
         // We'll ask the other things when selecting the details
         const stepManager = new EditMemberStepsManager(
+            this.$memberManager,
             [
-                new BuiltInEditMemberStep(EditMemberStepType.Details, true, false),
-                new BuiltInEditMemberStep(EditMemberStepType.Parents, true, false)
+                new BuiltInEditMemberStep(this.$context, EditMemberStepType.Details, true, false),
+                new BuiltInEditMemberStep(this.$context, EditMemberStepType.Parents, true, false)
             ], 
             [],
             undefined,

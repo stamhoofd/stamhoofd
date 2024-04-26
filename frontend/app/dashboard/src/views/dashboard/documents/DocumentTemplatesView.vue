@@ -50,7 +50,7 @@ import { DocumentTemplatePrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import DocumentTemplateOverview from "./DocumentTemplateOverview.vue";
 import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";
 
@@ -77,7 +77,7 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     activated() {
@@ -94,7 +94,7 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
 
     async loadTemplates() {
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/organization/document-templates",
                 decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),

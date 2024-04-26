@@ -83,15 +83,15 @@ export default class CartView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
 
     get cart() {
-        return this.CheckoutManager.cart
+        return this.$checkoutManager.cart
     }
 
     get checkout() {
-        return this.CheckoutManager.checkout
+        return this.$checkoutManager.checkout
     }
 
     get webshop() {
-        return WebshopManager.webshop
+        return this.$webshopManager.webshop
     }
 
     async goToCheckout() { 
@@ -103,7 +103,7 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            await CheckoutStepsManager.goNext(undefined, this)
+            await CheckoutStepsManager.for(this.$checkoutManager).goNext(undefined, this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
@@ -112,23 +112,23 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     deleteCode(code: DiscountCode) {
-        CheckoutManager.removeCode(code)
+        this.$checkoutManager.removeCode(code)
     }
 
     deleteItem(cartItem: CartItem) {
-        CheckoutManager.cart.removeItem(cartItem)
-        CheckoutManager.checkout.update(this.webshop);
-        CheckoutManager.saveCart()
+        this.$checkoutManager.cart.removeItem(cartItem)
+        this.$checkoutManager.checkout.update(this.webshop);
+        this.$checkoutManager.saveCart()
     }
 
     setCartItemAmount(cartItem: CartItem, amount: number) {
         cartItem.amount = amount
-        CheckoutManager.checkout.update(this.webshop);
-        CheckoutManager.saveCart()
+        this.$checkoutManager.checkout.update(this.webshop);
+        this.$checkoutManager.saveCart()
     }
 
     async applyCode(code: string) {
-        return await CheckoutManager.applyCode(code)
+        return await this.$checkoutManager.applyCode(code)
     }
 
     editCartItem(cartItem: CartItem ) {
@@ -138,17 +138,17 @@ export default class CartView extends Mixins(NavigationMixin){
                     root: new ComponentWithProperties(CartItemView, { 
                         cartItem: cartItem.clone(), 
                         oldItem: cartItem,
-                        cart: CheckoutManager.cart,
-                        webshop: WebshopManager.webshop,
-                        checkout: CheckoutManager.checkout,
+                        cart: this.$checkoutManager.cart,
+                        webshop: this.$webshopManager.webshop,
+                        checkout: this.$checkoutManager.checkout,
                         saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                             component?.dismiss({force: true})
                             if (oldItem) {
-                                CheckoutManager.cart.replaceItem(oldItem, cartItem)
+                                this.$checkoutManager.cart.replaceItem(oldItem, cartItem)
                             } else {
-                                CheckoutManager.cart.addItem(cartItem)
+                                this.$checkoutManager.cart.addItem(cartItem)
                             }
-                            CheckoutManager.saveCart()
+                            this.$checkoutManager.saveCart()
                         }
                     })
                 })
@@ -165,23 +165,23 @@ export default class CartView extends Mixins(NavigationMixin){
 
     async check() {
         try {
-            await WebshopManager.reload()
+            await this.$webshopManager.reload()
         } catch (e) {
             // Possible: but don't skip validation
             console.error(e);
         }
 
          try {
-            this.cart.validate(WebshopManager.webshop)
+            this.cart.validate(this.$webshopManager.webshop)
             this.errorBox = null
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
         }
-        CheckoutManager.saveCart()
+        this.$checkoutManager.saveCart()
 
         try {
-            await CheckoutManager.validateCodes()
+            await this.$checkoutManager.validateCodes()
         }  catch (e) {
             console.error(e);
         }
@@ -193,7 +193,7 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     countFor(cartItem: CartItem) {
-        return CheckoutManager.cart.items.reduce((prev, item) => {
+        return this.$checkoutManager.cart.items.reduce((prev, item) => {
             if (item.product.id != cartItem.product.id) {
                 return prev
             }

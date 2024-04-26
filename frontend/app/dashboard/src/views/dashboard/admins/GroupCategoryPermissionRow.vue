@@ -30,7 +30,7 @@ import { Checkbox, ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/c
 import { GroupCategory, GroupCategoryPermissions, GroupCategorySettings, Organization, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, PermissionsByRole } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -67,7 +67,7 @@ export default class GroupCategoryPermissionRow extends Mixins(NavigationMixin) 
     }
 
     get isMe() {
-        return !!OrganizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
+        return !!this.$organizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
     }
 
     get selected() {

@@ -66,7 +66,7 @@ import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefau
 import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -106,7 +106,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get title(): string {

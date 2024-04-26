@@ -1,14 +1,20 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
-import { WebshopManager } from './WebshopManager'
 import { Toast } from '@stamhoofd/components'
+import { WebshopManager } from './WebshopManager'
 
 /**
  * Convenient access to the organization of the current session
  */
-export class CheckoutManagerStatic {
+export class CheckoutManager {
     private _checkout: Checkout | null = null
+
+    $webshopManager: WebshopManager
+
+    constructor($webshopManager: WebshopManager) {
+        this.$webshopManager = $webshopManager
+    }
 
     saveCart() {
         this.saveCheckout()
@@ -31,15 +37,15 @@ export class CheckoutManagerStatic {
         }
         try {
             // Validate code
-            const response = await WebshopManager.server.request({
+            const response = await this.$webshopManager.server.request({
                 method: "POST",
-                path: "/webshop/"+WebshopManager.webshop.id + '/discount-codes',
+                path: "/webshop/"+this.$webshopManager.webshop.id + '/discount-codes',
                 body: this.checkout.discountCodes.map(c => c.code),
                 decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
             })
 
             this.checkout.discountCodes = response.data;
-            this.checkout.update(WebshopManager.webshop)
+            this.checkout.update(this.$webshopManager.webshop)
             this.saveCheckout()
 
         } catch (e) {
@@ -52,15 +58,15 @@ export class CheckoutManagerStatic {
 
         try {
             // Validate code
-            const response = await WebshopManager.server.request({
+            const response = await this.$webshopManager.server.request({
                 method: "POST",
-                path: "/webshop/"+WebshopManager.webshop.id + '/discount-codes',
+                path: "/webshop/"+this.$webshopManager.webshop.id + '/discount-codes',
                 body: [...this.checkout.discountCodes.map(c => c.code), code],
                 decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
             })
 
             this.checkout.discountCodes = response.data;
-            this.checkout.update(WebshopManager.webshop)
+            this.checkout.update(this.$webshopManager.webshop)
             this.saveCheckout()
 
             if (this.checkout.discountCodes.find(c => c.code === code)) {
@@ -78,13 +84,13 @@ export class CheckoutManagerStatic {
 
     removeCode(discountCode: DiscountCode) {
         this.checkout.discountCodes = this.checkout.discountCodes.filter(c => c.id !== discountCode.id)
-        this.checkout.update(WebshopManager.webshop)
+        this.checkout.update(this.$webshopManager.webshop)
         this.saveCheckout()
     }
 
     loadCheckout() {
         try {
-            const json = localStorage.getItem(WebshopManager.webshop.id+"-checkout")
+            const json = localStorage.getItem(this.$webshopManager.webshop.id+"-checkout")
             if (json) {
                 const obj = JSON.parse(json)
                 const versionBox = new VersionBoxDecoder(Checkout as Decoder<Checkout>).decode(new ObjectData(obj, { version: Version }))
@@ -99,10 +105,10 @@ export class CheckoutManagerStatic {
 
     saveCheckout() {
         try {
-            this.checkout.update(WebshopManager.webshop)
+            this.checkout.update(this.$webshopManager.webshop)
             const data = new VersionBox(this.checkout).encode({ version: Version })
             const json = JSON.stringify(data)
-            localStorage.setItem(WebshopManager.webshop.id+"-checkout", json)
+            localStorage.setItem(this.$webshopManager.webshop.id+"-checkout", json)
         } catch (e) {
             console.error("Failed to save cart")
             console.error(e)
@@ -115,5 +121,3 @@ export class CheckoutManagerStatic {
         this.saveCheckout()
     }
 }
-
-export const CheckoutManager = new CheckoutManagerStatic()

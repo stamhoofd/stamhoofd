@@ -113,7 +113,7 @@ import { Country, Organization, OrganizationMetaData, OrganizationPatch, Organiz
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import ApiUsersView from '../admins/ApiUsersView.vue';
 
 @Component({
@@ -133,10 +133,10 @@ export default class LabsView extends Mixins(NavigationMixin) {
     saving = false
     downloadingSettings = false
     uploadingSettings = false
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     openApiUsers(animated = true) {
@@ -153,7 +153,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
     }
 
     get isStamhoofd() {
-        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
+        return this.$organizationManager.user.email.endsWith("@stamhoofd.be") || this.$organizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
     get enableBuckaroo() {
@@ -237,8 +237,8 @@ export default class LabsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await OrganizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+            await this.$organizationManager.patch(this.organizationPatch)
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
             new Toast('De wijzigingen zijn opgeslagen', "success green").show()
             this.dismiss({ force: true })
         } catch (e) {
@@ -249,7 +249,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {
@@ -276,7 +276,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
         // Remove private data
         const organization = Organization.create({
-            ...OrganizationManager.organization,
+            ...this.$organization,
             admins: [],
             webshops: []
         });
@@ -354,7 +354,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
             })
         }
 
-        const existing = OrganizationManager.organization;
+        const existing = this.$organization;
 
         const privatePatch = OrganizationPrivateMetaData.patch({});
         
@@ -407,7 +407,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         }
 
         // Send to server
-        await OrganizationManager.patch(organizationPatch)
+        await this.$organizationManager.patch(organizationPatch)
     }
 
     applyDiscountCode() {
@@ -418,7 +418,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
                     description: 'De kortingscode zal meteen worden toegepast op deze vereniging. De andere vereniging ontvangt een e-mail dat de kortingscode is gebruikt, en zal meteen tegoed ontvangen als de vereniging al een betalende klant is (in het andere geval pas later).',
                     placeholder: 'Vul hier de code in',
                     saveHandler: async (code: string) => {
-                        await SessionManager.currentSession!.authenticatedServer.request({
+                        await this.$context.authenticatedServer.request({
                             method: 'POST',
                             path: '/organization/register-code',
                             body: {

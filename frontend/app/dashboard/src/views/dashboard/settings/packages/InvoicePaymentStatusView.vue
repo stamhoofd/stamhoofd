@@ -67,7 +67,7 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
 
     onSuccess() {
         // Reload organization
-        SessionManager.currentSession?.fetchOrganization().catch(e => console.error)
+        this.$context.fetchOrganization().catch(e => console.error)
 
         new CenteredMessage("Betaling gelukt!", "Bedankt voor jouw betaling. Het pakket wordt meteen geactiveerd").addCloseButton().show()
         this.dismiss({ force: true })
@@ -75,7 +75,7 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
 
     onTransfer() {
         // Reload organization
-        SessionManager.currentSession?.fetchOrganization().catch(e => console.error)
+        this.$context.fetchOrganization().catch(e => console.error)
 
         new CenteredMessage("Betalen via overschrijving", "Jouw pakket is tijdelijk geactiveerd. Zorg zeker voor een snelle afhandeling van de betaling. Als we jouw overschrijving niet ontvangen zal het pakket terug gedeactiveerd worden. Eventuele latere betalingen worden dan automatisch terugbetaald.").addCloseButton().show()
         this.dismiss({ force: true })
@@ -84,7 +84,7 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
     poll() {
         this.timer = null;
         const paymentId = this.paymentId;
-        SessionManager.currentSession!.authenticatedServer
+        this.$context.authenticatedServer
             .request({
                 method: "POST",
                 path: "/billing/payments/" +paymentId,

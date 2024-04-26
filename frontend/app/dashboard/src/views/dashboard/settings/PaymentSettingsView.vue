@@ -313,16 +313,15 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, PatchableArray, patchContainsChanges, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, LoadingButton, LoadingView, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPatch, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
-import EditStripeAccountView from './EditStripeAccountView.vue';
 
 @Component({
     components: {
@@ -348,17 +347,17 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
-    temp_organization = OrganizationManager.organization
+    temp_organization = this.$organization
     loadingMollie = false
     loadingStripeAccounts = false
     creatingStripeAccount = false
     stripeAccounts: StripeAccount[] = []
     mollieProfiles: MollieProfile[] = []
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     get selectedMollieProfile() {
@@ -383,7 +382,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get isStamhoofd() {
-        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
+        return this.$organizationManager.user.email.endsWith("@stamhoofd.be") || this.$organizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
     formatDateUnix(date: number) {
@@ -509,11 +508,11 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get payconiqActive() {
-        return (OrganizationManager.organization.privateMeta?.payconiqApiKey ?? "").length > 0
+        return (this.$organization.privateMeta?.payconiqApiKey ?? "").length > 0
     }
 
     get isBuckarooActive() {
-        return this.enableBuckaroo && (OrganizationManager.organization.privateMeta?.buckarooSettings?.key ?? "").length > 0 && (OrganizationManager.organization.privateMeta?.buckarooSettings?.secret ?? "").length > 0
+        return this.enableBuckaroo && (this.$organization.privateMeta?.buckarooSettings?.key ?? "").length > 0 && (this.$organization.privateMeta?.buckarooSettings?.secret ?? "").length > 0
     }
 
     get buckarooPaymentMethodsString() {
@@ -571,8 +570,8 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await OrganizationManager.patch(this.organizationPatch)
-            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+            await this.$organizationManager.patch(this.organizationPatch)
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
             new Toast('De wijzigingen zijn opgeslagen', "success green").show()
             this.dismiss({ force: true })
         } catch (e) {
@@ -583,7 +582,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })
     }
 
     async shouldNavigateAway() {
@@ -613,7 +612,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     async disconnectMollie() {
         if (await CenteredMessage.confirm("Ben je zeker dat je Mollie wilt loskoppelen?", "Ja, loskoppelen", "Jouw Mollie account blijft behouden en kan je later terug koppelen als je dat wilt.")) {
             try {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                const response = await this.$context.authenticatedServer.request({
                     method: "POST",
                     path: "/mollie/disconnect",
                     decoder: Organization as Decoder<Organization>,
@@ -621,7 +620,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                     shouldRetry: false
                 })
 
-                SessionManager.currentSession!.setOrganization(response.data)
+                this.$context.updateOrganization(response.data)
                 new Toast("Mollie is losgekoppeld", "success green").show()
             } catch (e) {
                 new Toast("Loskoppelen mislukt", "error red").show()
@@ -641,7 +640,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                     human: "Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via "+this.$t('shared.emails.general')+" als je Mollie probeert te koppelen en het blijft mislukken."
                 })
             }
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/mollie/connect",
                 body: {
@@ -652,7 +651,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 shouldRetry: false
             })
 
-            SessionManager.currentSession!.setOrganization(response.data)
+            this.$context.updateOrganization(response.data)
             toast.hide()
             new Toast("Mollie is gekoppeld", "success green").show()
             await Storage.keyValue.removeItem("mollie-saved-state")
@@ -713,7 +712,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             this.loadingStripeAccounts = true
             if (recheckStripeAccount) {
                 try {
-                    await SessionManager.currentSession!.authenticatedServer.request({
+                    await this.$context.authenticatedServer.request({
                         method: "POST",
                         path: "/stripe/accounts/" + encodeURIComponent(recheckStripeAccount),
                         decoder: StripeAccount as Decoder<StripeAccount>,
@@ -723,7 +722,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                     console.error(e)
                 }
             }
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/stripe/accounts",
                 decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
@@ -734,7 +733,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             if (!recheckStripeAccount) {
                 for (const account of this.stripeAccounts) {
                     try {
-                        const response = await SessionManager.currentSession!.authenticatedServer.request({
+                        const response = await this.$context.authenticatedServer.request({
                             method: "POST",
                             path: "/stripe/accounts/" + encodeURIComponent(account.id),
                             decoder: StripeAccount as Decoder<StripeAccount>,
@@ -783,7 +782,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         try {
             tab = tab ?? (AppManager.shared.isNative ? null : window.open('about:blank'));
             this.creatingStripeAccount = true
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/stripe/connect",
                 decoder: StripeAccount as Decoder<StripeAccount>,
@@ -821,7 +820,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                     url: string
             }
 
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 body: {
                     accountId: accountId,
@@ -856,7 +855,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
 
         try {
-            await SessionManager.currentSession!.authenticatedServer.request({
+            await this.$context.authenticatedServer.request({
                 method: "DELETE",
                 path: "/stripe/accounts/" + encodeURIComponent(accountId),
                 owner: this
@@ -879,7 +878,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                     url: string
             }
 
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 body: {
                     accountId: accountId
@@ -904,7 +903,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
     async updateMollie() {
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/mollie/check",
                 decoder: CheckMollieResponse as Decoder<CheckMollieResponse>,
@@ -913,7 +912,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             })
 
             this.mollieProfiles = response.data.profiles
-            SessionManager.currentSession!.setOrganization(response.data.organization)
+            this.$context.updateOrganization(response.data.organization)
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()
@@ -935,7 +934,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
 
         try {
-            const url = await SessionManager.currentSession!.authenticatedServer.request({
+            const url = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/mollie/dashboard",
                 shouldRetry: false,

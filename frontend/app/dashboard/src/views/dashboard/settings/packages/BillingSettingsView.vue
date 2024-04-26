@@ -134,7 +134,7 @@ import { STBillingStatus, STCredit, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import GeneralSettingsView from "../GeneralSettingsView.vue";
 import CreditsView from "./CreditsView.vue";
 import InvoiceDetailsView from "./InvoiceDetailsView.vue";
@@ -174,7 +174,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get companyName() {
@@ -197,7 +197,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = true
 
         try {
-            this.status = await OrganizationManager.loadBillingStatus({
+            this.status = await this.$organizationManager.loadBillingStatus({
                 owner: this
             })
         } catch (e) {
@@ -250,7 +250,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     get hasFullAccess() {
-        return SessionManager.currentSession?.user?.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [], ) ?? false
+        return this.$context.user?.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [], ) ?? false
     }
 
     openGeneralSettings() {

@@ -35,7 +35,7 @@ import { Logo,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/
 import { SessionManager } from "@stamhoofd/networking";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -49,7 +49,7 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 export default class NoPermissionsView extends Mixins(NavigationMixin){
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     gotoRegistration() {
@@ -57,7 +57,7 @@ export default class NoPermissionsView extends Mixins(NavigationMixin){
     }
 
     logout() {
-        SessionManager.logout()
+        this.$context.logout()
     }
 }
 </script>

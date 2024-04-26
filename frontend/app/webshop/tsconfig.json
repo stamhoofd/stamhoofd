@@ -1,14 +1,9 @@
 {
     "extends": "../../tsconfig.json",
-    "exclude": [
-        "node_modules",
-        "dist",
-        "../registration",
-        "../dashboard",
-        "../admin",
-        "../mobile",
-    ],
     "compilerOptions": {
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "composite": true,
+        "rootDir": "./../../../",
+        "baseUrl": "./"
     }
 }

@@ -35,7 +35,7 @@ import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from "@stamh
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import EditWebshopMixin from "./EditWebshopMixin";
 
 
@@ -52,11 +52,11 @@ import EditWebshopMixin from "./EditWebshopMixin";
 })
 export default class EditWebshopNotificationsView extends Mixins(EditWebshopMixin) {
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get user() {
-        return OrganizationManager.user
+        return this.$organizationManager.user
     }
 
     get viewTitle() {
@@ -143,7 +143,7 @@ export default class EditWebshopNotificationsView extends Mixins(EditWebshopMixi
         this.checkingBounces = true
 
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "POST",
                 path: "/email/check-bounces",
                 body: this.emails,

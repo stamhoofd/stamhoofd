@@ -55,7 +55,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Address, Gender, MemberDetails, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -104,13 +104,13 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address"|"gender") {
-        return OrganizationManager.organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(
+        return this.$organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(
             MemberDetails.getBaseFilterDefinitions()
         ).doesMatch(this.details) ?? false
     }
 
     isPropertyRequired(name: "emailAddress" | "birthDay" | "phone" | "address") {
-        return this.isPropertyEnabled(name) && (OrganizationManager.organization.meta.recordsConfiguration[name]?.requiredWhen?.decode(
+        return this.isPropertyEnabled(name) && (this.$organization.meta.recordsConfiguration[name]?.requiredWhen?.decode(
             MemberDetails.getBaseFilterDefinitions()
         ).doesMatch(this.details) ?? false)
     }
@@ -237,7 +237,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
         if (this.details.age && this.details.age >= 18) {
             if (!this.email) {
                 // Recommend the current user's email
-                this.email = SessionManager.currentSession?.user?.email ?? null
+                this.email = this.$context.user?.email ?? null
                 this.didAutofillEmail = this.email !== null
             }
             

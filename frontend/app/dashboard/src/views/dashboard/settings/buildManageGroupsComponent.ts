@@ -1,12 +1,13 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, } from "@simonbackx/vue-app-navigation";
-import { GroupCategory, GroupCategorySettings,GroupCategoryTree, Organization, OrganizationMetaData, OrganizationTypeHelper } from "@stamhoofd/structures";
+import { OrganizationManager } from "@stamhoofd/networking";
+import { GroupCategory, GroupCategorySettings, GroupCategoryTree, Organization, OrganizationMetaData, OrganizationTypeHelper } from "@stamhoofd/structures";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditCategoryGroupsView from '../groups/EditCategoryGroupsView.vue';
 
 // You can declare mixins as the same style as components.
-export function buildManageGroupsComponent(organization: Organization) {
+export function buildManageGroupsComponent($organizationManager: OrganizationManager) {
+    const organization = $organizationManager.organization
     const enableActivities = organization.meta.modules.useActivities
 
     if (!organization.meta.rootCategory) {
@@ -27,7 +28,7 @@ export function buildManageGroupsComponent(organization: Organization) {
             organization: organization.patch(p), 
             saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
                 patch.id = organization.id
-                await OrganizationManager.patch(p.patch(patch))
+                await $organizationManager.patch(p.patch(patch))
             }
         })
     }
@@ -74,7 +75,7 @@ export function buildManageGroupsComponent(organization: Organization) {
         organization: organization.patch(p),
         saveHandler: async (patch) => {
             patch.id = organization.id
-            await OrganizationManager.patch(p.patch(patch))
+            await $organizationManager.patch(p.patch(patch))
         }
     })
 }

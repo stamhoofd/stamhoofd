@@ -132,6 +132,27 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
 
+            // Check scope
+            if (organization && passwordToken.user.organizationId && passwordToken.user.organizationId != organization.id) {
+                // user of a different organization
+                throw new SimpleError({
+                    code: "invalid_token",
+                    message: "Invalid token",
+                    human: "Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.",
+                    statusCode: 400
+                });
+            }
+
+            if (!organization && passwordToken.user.organizationId) {
+                // User is scoped to a single organization, while the request is not
+                throw new SimpleError({
+                    code: "invalid_token",
+                    message: "Invalid token",
+                    human: "Deze link is ongeldig of is al vervallen. Je zal nogmaals een e-mail moeten versturen om je wachtwoord te herstellen.",
+                    statusCode: 400
+                });
+            }
+
             // Important to create a new token before adjusting the old token
             const token = await Token.createToken(passwordToken.user);
 

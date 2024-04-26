@@ -1,11 +1,9 @@
 import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, GlobalEventBus, Toast,Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
+import { CenteredMessage, ErrorBox, GlobalEventBus, Toast, Validator } from "@stamhoofd/components";
+import { OrganizationManager, SessionManager } from '@stamhoofd/networking';
 import { PrivateWebshop, Version, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import { WebshopManager } from '../WebshopManager';
 
 @Component
@@ -78,7 +76,7 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
             await this.validate()
 
             if (this.isNew) {
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                const response = await this.$context.authenticatedServer.request({
                     method: "POST",
                     path: "/webshop",
                     body: this.webshop,
@@ -93,13 +91,13 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                 }
 
                 const preview = WebshopPreview.create(response.data)
-                OrganizationManager.organization.webshops.push(preview)
+                this.$organizationManager.organization.webshops.push(preview)
 
                 // Save updated organization to cache
-                OrganizationManager.save().catch(console.error)
+                this.$organizationManager.save().catch(console.error)
 
                 // Save to database
-                const manager = new WebshopManager(preview)
+                const manager = new WebshopManager(this.$context, preview)
                 await manager.storeWebshop(response.data)
                 manager.close()
 

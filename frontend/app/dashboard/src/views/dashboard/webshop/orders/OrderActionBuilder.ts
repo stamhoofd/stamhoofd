@@ -1,21 +1,23 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, GlobalEventBus, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
-import { SessionManager } from "@stamhoofd/networking"
+import { OrganizationManager, SessionManager } from "@stamhoofd/networking"
 import { OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures"
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager"
 import { WebshopManager } from "../WebshopManager"
 
 export class OrderActionBuilder {
     component: any
     webshopManager: WebshopManager
+    organizationManager: OrganizationManager
 
     constructor(settings: {
         component: any,
-        webshopManager: WebshopManager
+        webshopManager: WebshopManager,
+        organizationManager: OrganizationManager
     }) {
         this.component = settings.component
         this.webshopManager = settings.webshopManager
+        this.organizationManager = settings.organizationManager
     }
 
     getStatusActions() {
@@ -48,7 +50,7 @@ export class OrderActionBuilder {
                                 id: ticket.id,
                                 secret: ticket.secret, // needed for lookups
                                 scannedAt: new Date(),
-                                scannedBy: SessionManager.currentSession!.user?.firstName ?? null
+                                scannedBy: this.organizationManager.$context.user?.firstName ?? null
                             }))
                         }
                     }
@@ -172,7 +174,7 @@ export class OrderActionBuilder {
                 handler: async (orders: PrivateOrder[]) => {
                     const order = orders[0]
                     // copy the link to clipboard
-                    await navigator.clipboard.writeText("https://" + this.webshopManager.preview.getUrl(OrganizationManager.organization)+"/order/"+order!.id)
+                    await navigator.clipboard.writeText("https://" + this.webshopManager.preview.getUrl(this.organizationManager.organization)+"/order/"+order!.id)
                     new Toast("Link gekopieerd naar klembord", 'success').show()
                 }
             }),
@@ -257,7 +259,7 @@ export class OrderActionBuilder {
             webshop: this.webshopManager.preview,
             defaultReplacements: [
                 ...this.webshopManager.preview.meta.getEmailReplacements(),
-                ...OrganizationManager.organization.meta.getEmailReplacements()
+                ...this.organizationManager.organization.meta.getEmailReplacements()
             ]
         });
         this.component.present(displayedComponent.setDisplayStyle("popup"));
@@ -359,7 +361,7 @@ export class OrderActionBuilder {
             if (willSendEmail && !await CenteredMessage.confirm("Ben je zeker?", paid ? "Markeer als betaald" : "Markeer als niet betaald", paid ? "De besteller ontvangt een automatische e-mail." : undefined)) {
                 return;
             }
-            const session = SessionManager.currentSession!
+            const session = this.organizationManager.$context
 
             try {
                 const response = await session.authenticatedServer.request({

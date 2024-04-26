@@ -64,8 +64,8 @@
 
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LegalFooter,LoadingView, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LegalFooter, LoadingView, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
 import { CartItem, LoginProviderType, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -99,23 +99,23 @@ import TicketView from "./orders/TicketView.vue";
     },
     metaInfo() {
         return {
-            title: WebshopManager.webshop.meta.name,
-            titleTemplate: '%s | '+WebshopManager.organization.name,
+            title: this.$webshopManager.webshop.meta.name,
+            titleTemplate: '%s | '+this.$webshopManager.organization.name,
             meta: [
                 {
                     vmid: 'description',
                     name: 'description',
-                    content: WebshopManager.webshop.meta.description.text,
+                    content: this.$webshopManager.webshop.meta.description.text,
                 },
                 {
                     hid: 'og:site_name',
                     name: 'og:site_name',
-                    content: WebshopManager.organization.name
+                    content: this.$webshopManager.organization.name
                 },
                 {
                     hid: 'og:title',
                     name: 'og:title',
-                    content: WebshopManager.webshop.meta.title ?? WebshopManager.webshop.meta.name
+                    content: this.$webshopManager.webshop.meta.title ?? this.$webshopManager.webshop.meta.name
                 },
                 ...(this.bannerImageSrc ? [
                     {
@@ -150,23 +150,23 @@ export default class WebshopView extends Mixins(NavigationMixin){
     visible = true
 
     get isLoggedIn() {
-        return SessionManager.currentSession?.isComplete() ?? false
+        return this.$context.isComplete() ?? false
     }
 
     get userName() {
-        return SessionManager.currentSession?.user?.firstName ?? ""
+        return this.$context.user?.firstName ?? ""
     }
 
     logout() {
-        SessionManager.currentSession?.logout()
+        this.$context.logout()
     }
 
     switchAccount() {
         // Do a silent logout
-        SessionManager.currentSession?.removeFromStorage()
+        this.$context.removeFromStorage()
 
         // Redirect to login
-        SessionManager.currentSession!.startSSO({
+        this.$context.startSSO({
             webshopId: this.webshop.id,
             prompt: 'select_account',
             providerType: LoginProviderType.SSO
@@ -174,11 +174,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     get organization() {
-        return WebshopManager.organization
+        return this.$webshopManager.organization
     }
     
     get webshop() {
-        return WebshopManager.webshop
+        return this.$webshopManager.webshop
     }
 
     get cartEnabled() {
@@ -194,21 +194,21 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     get checkout() {
-        return CheckoutManager.checkout
+        return this.$checkoutManager.checkout
     }
 
     get cart() {
-        return CheckoutManager.cart
+        return this.$checkoutManager.cart
     }
 
     get cartCount() {
-        return CheckoutManager.cart.count
+        return this.$checkoutManager.cart.count
     }
 
     async openCheckout(animated = true) {
         try {
             // Force a save if nothing changed (to fix timeSlot + updated data)
-            const nextStep = await CheckoutStepsManager.getNextStep(undefined, false)
+            const nextStep = await CheckoutStepsManager.for(this.$checkoutManager).getNextStep(undefined, false)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",
@@ -311,11 +311,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
 
             if (oldItem) {
-                CheckoutManager.cart.replaceItem(oldItem, cartItem)
+                this.$checkoutManager.cart.replaceItem(oldItem, cartItem)
             } else {
-                CheckoutManager.cart.addItem(cartItem)
+                this.$checkoutManager.cart.addItem(cartItem)
             }
-            CheckoutManager.saveCart()
+            this.$checkoutManager.saveCart()
 
             this.openCart(true)
             // if (this.products.length === 1) {
@@ -324,12 +324,12 @@ export default class WebshopView extends Mixins(NavigationMixin){
             //new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
             // }
         } else {
-            CheckoutManager.cart.clear();
+            this.$checkoutManager.cart.clear();
             if (component) {
                 component.dismiss({force: true})
             }
-            CheckoutManager.cart.addItem(cartItem)
-            CheckoutManager.saveCart()
+            this.$checkoutManager.cart.addItem(cartItem)
+            this.$checkoutManager.saveCart()
             this.openCheckout(true).catch(console.error)
         }
     }
@@ -339,14 +339,14 @@ export default class WebshopView extends Mixins(NavigationMixin){
      */
     async check() {
         try {
-            this.cart.validate(WebshopManager.webshop)
+            this.cart.validate(this.$webshopManager.webshop)
         } catch (e) {
             console.error(e)
         }
-        CheckoutManager.saveCart()
+        this.$checkoutManager.saveCart()
 
         try {
-            await CheckoutManager.validateCodes()
+            await this.$checkoutManager.validateCodes()
         }  catch (e) {
             console.error(e);
         }
@@ -367,7 +367,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
             
             const code = path[1];
-            CheckoutManager.applyCode(code).catch(console.error);
+            this.$checkoutManager.applyCode(code).catch(console.error);
         } else if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];
             this.present({
@@ -390,19 +390,22 @@ export default class WebshopView extends Mixins(NavigationMixin){
             const paymentId = params.get("id")
             const cancel = params.get("cancel") === "true"
             const me = this
+            
             this.present({
                 adjustHistory: false,
                 animated: false,
                 force: true,
                 components: [
                     new ComponentWithProperties(PaymentPendingView, { 
-                        server: WebshopManager.server, 
+                        server: this.$webshopManager.server, 
                         paymentId,
                         cancel,
                         finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
                             if (payment && payment.status == PaymentStatus.Succeeded) {
-                                if (this.modalNavigationController) {
-                                    // We are not in a popup: on mobile
+                                if (!this.modalOrPopup || this.modalOrPopup === this.modalNavigationController) {
+                                    console.log("Presenting order by replacing current view")
+
+                                    // We are not in a popup/sheet on mobile
                                     // So replace with a force instead of dimissing
                                     this.present({
                                         components: [
@@ -412,20 +415,21 @@ export default class WebshopView extends Mixins(NavigationMixin){
                                         force: true
                                     })
                                 } else {
+                                    // In popup/sheet on desktop
                                     // Desktop: push
+                                    this.dismiss({force: true, animated: true})
                                     this.present({
                                         components: [
                                             new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true })
                                         ]
                                     })
-                                    this.dismiss({force: true})
                                 }
                             } else {
                                 this.dismiss({force: true})
                                 
                                 // Force reload webshop (stock will have changed: prevent invalidating the cart)
                                 // Update stock in background
-                                WebshopManager.reload().catch(e => {
+                                this.$webshopManager.reload().catch(e => {
                                     console.error(e)
                                 })
 
@@ -454,7 +458,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
         while (!step || step.url !== destination) {
             try {
-                const nextStep = await CheckoutStepsManager.getNextStep(step?.id)
+                const nextStep = await CheckoutStepsManager.for(this.$checkoutManager).getNextStep(step?.id)
                 if (!nextStep) {
                     break;
                 }

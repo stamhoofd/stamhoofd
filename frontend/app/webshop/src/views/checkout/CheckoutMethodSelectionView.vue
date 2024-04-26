@@ -61,7 +61,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     CheckoutManager = CheckoutManager
 
     get webshop() {
-        return WebshopManager.webshop
+        return this.$webshopManager.webshop
     }
 
     get checkoutMethods() {
@@ -69,8 +69,8 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     }
 
     get selectedMethod(): CheckoutMethod {
-        if (this.CheckoutManager.checkout.checkoutMethod) {
-            const search = this.CheckoutManager.checkout.checkoutMethod.id
+        if (this.$checkoutManager.checkout.checkoutMethod) {
+            const search = this.$checkoutManager.checkout.checkoutMethod.id
             const f = this.webshop.meta.checkoutMethods.find(c => c.id == search)
             if (f) {
                 return f
@@ -80,8 +80,8 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     }
 
     set selectedMethod(method: CheckoutMethod) {
-        CheckoutManager.checkout.checkoutMethod = method
-        CheckoutManager.saveCheckout()
+        this.$checkoutManager.checkout.checkoutMethod = method
+        this.$checkoutManager.saveCheckout()
     }
 
     getTypeName(type: CheckoutMethodType) {
@@ -103,7 +103,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         this.errorBox = null
 
         try {
-            await CheckoutStepsManager.goNext(CheckoutStepType.Method, this)
+            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Method, this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

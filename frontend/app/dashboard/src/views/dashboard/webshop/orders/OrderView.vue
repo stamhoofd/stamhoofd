@@ -317,7 +317,7 @@ import { BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentG
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import EditPaymentView from "../../member/EditPaymentView.vue";
 import PaymentView from "../../payments/PaymentView.vue";
 import { WebshopManager } from "../WebshopManager";
@@ -461,23 +461,23 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get hasPaymentsWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.$context.user?.permissions
         if (!p) {
             return false
         }
-        if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])) {
+        if (p.canManagePayments(this.$organization.privateMeta?.roles ?? [])) {
             return true
         }
 
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
     }
 
     get hasWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.$context.user?.permissions
         if (!p) {
             return false
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
     }
 
     get hasSingleTickets() {
@@ -494,6 +494,7 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get actionBuilder() {
         return new OrderActionBuilder({
+            organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
             component: this,
         })
@@ -754,7 +755,7 @@ export default class OrderView extends Mixins(NavigationMixin){
             saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
                 const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
                 arr.addPut(payment.patch(patch))
-                await SessionManager.currentSession!.authenticatedServer.request({
+                await this.$context.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/payments',
                     body: arr,

@@ -54,13 +54,11 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton, ErrorBox, LoadingButton, PriceInput, Radio, RadioGroup, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from '../../classes/MemberManager';
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 import PaymentSelectionView from './PaymentSelectionView.vue';
 
 @Component({
@@ -81,8 +79,8 @@ import PaymentSelectionView from './PaymentSelectionView.vue';
     }
 })
 export default class FreeContributionView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
-    CheckoutManager = CheckoutManager
+    
+    
 
     amountOption = this.amounts.includes(this.cart.freeContribution) || this.cart.freeContribution == 0 ? this.cart.freeContribution : (this.otherValue)
     amount = this.cart.freeContribution
@@ -97,11 +95,11 @@ export default class FreeContributionView extends Mixins(NavigationMixin){
     }
 
     get amounts() {
-        return (OrganizationManager.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).filter(a => a > 0)
+        return (this.$organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).filter(a => a > 0)
     }
 
     get description() {
-        return OrganizationManager.organization.meta.recordsConfiguration.freeContribution?.description ?? ""  
+        return this.$organization.meta.recordsConfiguration.freeContribution?.description ?? ""  
     }
 
     @Watch("amountOption")
@@ -120,12 +118,12 @@ export default class FreeContributionView extends Mixins(NavigationMixin){
     }
 
     get cart() {
-        return this.CheckoutManager.cart
+        return this.$checkoutManager.cart
     }
 
     async recalculate() {
         try {
-            await CheckoutManager.recalculateCart()
+            await this.$checkoutManager.recalculateCart()
             this.errorBox = null
         } catch (e) {
             console.error(e)

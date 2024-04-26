@@ -67,7 +67,7 @@ import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDe
 import { Group } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../classes/OrganizationManager';
+
 
 @Component({
     components: {
@@ -105,7 +105,7 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
     loadingGroups = true
 
     get categoryTree() {
-        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true, filterGroups: this.filterGroup})
+        return this.$organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true, filterGroups: this.filterGroup})
     }
 
     filterGroup(group: Group) {
@@ -167,7 +167,7 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
         }
 
         try {
-            this.archivedGroups = (await OrganizationManager.loadArchivedGroups({owner: this})).filter(this.filterGroup)
+            this.archivedGroups = (await this.$organizationManager.loadArchivedGroups({owner: this})).filter(this.filterGroup)
         } catch (e) {
             Toast.fromError(e).show()
         }

@@ -16,13 +16,14 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, LoadComponent, LongPressDirective,OrganizationAvatar } from '@stamhoofd/components';
+import { ComponentWithProperties, ModalStackComponentFinderMixin, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ContextMenu, ContextMenuItem, LoadComponent, LongPressDirective, OrganizationAvatar } from '@stamhoofd/components';
 import { Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
+import { getScopedDashboardRoot } from "../../getRootViews";
 
 @Component({
     components: {
@@ -32,24 +33,23 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
         LongPress: LongPressDirective
     }
 })
-export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
+export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalStackComponentFinderMixin) {
     SessionManager = SessionManager // needed to make session reactive
-    OrganizationManager = OrganizationManager
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get userName() {
-        return SessionManager.currentSession?.user ? (SessionManager.currentSession.user.firstName + ' ' + SessionManager.currentSession.user.lastName):  ""
+        return this.$user ? (this.$user.firstName + ' ' + this.$user.lastName):  ""
     }
 
     switchOrganization() {
-        SessionManager.deactivateSession()
+        this.modalStackComponent!.modalNavigationController!.popToRoot().catch(console.error)
     }
 
     get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
+        return this.$user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     async manageSettings(animated = true) {
@@ -83,7 +83,7 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
         if (!await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
             return;
         }
-        SessionManager.logout()
+        this.$context.logout()
     }
 
     availableSessions: Session[] = []
@@ -140,8 +140,20 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
                                 name: o.name,
                                 description: o.address.city,
                                 action: () => {
-                                    OrganizationManager.switchOrganization(this, o.id).then(() => {
-                                        this.updateDefault().catch(console.error)
+                                    SessionManager.getPreparedContextForOrganization(o).then((context) => {
+                                        const nav = this.modalStackComponent
+                                        if (!nav) {
+                                            throw new Error("No navigation controller found")
+                                        }
+                                        nav.emitParents('present', {
+                                            components: [
+                                                getScopedDashboardRoot(context)
+                                            ],
+                                            animated: true,
+                                            modalDisplayStyle: "popup"
+                                        })
+
+
                                     }).catch(console.error)
                                     return true;
                                 }
@@ -162,7 +174,7 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
                 }),
             ]
         ])
-        menu.show({ button: this.$el as HTMLElement, xPlacement: "left", yPlacement: "bottom" }).catch(console.error)
+        menu.show({ component: this, button: this.$el as HTMLElement, xPlacement: "left", yPlacement: "bottom" }).catch(console.error)
     }
 }
 </script>

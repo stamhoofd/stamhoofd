@@ -32,7 +32,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { GroupPrices, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STPackageBundle, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+
 import EditGroupPriceBox from '../../../groups/EditGroupPriceBox.vue';
 import ActivatedView from './ActivatedView.vue';
 
@@ -50,12 +50,12 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
-    temp_organization = OrganizationManager.organization
+    temp_organization = this.$organization
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     addMetaPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationMetaData>> ) {
@@ -73,7 +73,7 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
     }
 
     async checkout(bundle: STPackageBundle) {
-        await SessionManager.currentSession!.authenticatedServer.request({
+        await this.$context.authenticatedServer.request({
             method: "POST",
             path: "/billing/activate-packages",
             body: {
@@ -81,7 +81,7 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
                 paymentMethod: PaymentMethod.Unknown
             }
         })
-        await SessionManager.currentSession!.fetchOrganization()
+        await this.$context.fetchOrganization()
     }
 
     async save() {
@@ -108,9 +108,9 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            await OrganizationManager.patch(this.organizationPatch)
+            await this.$organizationManager.patch(this.organizationPatch)
             await this.checkout(STPackageBundle.TrialMembers)
-            this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+            this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
             new Toast('Je kan nu de ledenadministratie uittesten', "success green").show()
 
             this.show({
@@ -126,7 +126,7 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+        if (!patchContainsChanges(this.organizationPatch, this.$organization, { version: Version })) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

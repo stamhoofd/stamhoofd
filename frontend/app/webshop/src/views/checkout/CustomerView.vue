@@ -22,20 +22,19 @@
 
         <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
-        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
+        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="this.$checkoutManager.checkout.fieldAnswers" :error-box="errorBox" />
     </SaveView>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { UrlHelper } from '@stamhoofd/networking';
 import { WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 
@@ -68,11 +67,11 @@ export default class CustomerView extends Mixins(NavigationMixin){
     }
 
     get isLoggedIn() {
-        return SessionManager.currentSession?.isComplete() ?? false
+        return this.$context.isComplete() ?? false
     }
     
     get checkoutMethod() {
-        return CheckoutManager.checkout.checkoutMethod!
+        return this.$checkoutManager.checkout.checkoutMethod!
     }
 
     get emailPlaceholder() {
@@ -94,43 +93,43 @@ export default class CustomerView extends Mixins(NavigationMixin){
     }
 
     get webshop() {
-        return WebshopManager.webshop
+        return this.$webshopManager.webshop
     }
 
     get firstName() {
-        return CheckoutManager.checkout.customer.firstName
+        return this.$checkoutManager.checkout.customer.firstName
     }
 
     set firstName(firstName: string) {
-        CheckoutManager.checkout.customer.firstName = firstName
-        CheckoutManager.saveCheckout()
+        this.$checkoutManager.checkout.customer.firstName = firstName
+        this.$checkoutManager.saveCheckout()
     } 
 
     get lastName() {
-        return CheckoutManager.checkout.customer.lastName
+        return this.$checkoutManager.checkout.customer.lastName
     }
 
     set lastName(lastName: string) {
-        CheckoutManager.checkout.customer.lastName = lastName
-        CheckoutManager.saveCheckout()
+        this.$checkoutManager.checkout.customer.lastName = lastName
+        this.$checkoutManager.saveCheckout()
     } 
 
     get email() {
-        return CheckoutManager.checkout.customer.email
+        return this.$checkoutManager.checkout.customer.email
     }
 
     set email(email: string) {
-        CheckoutManager.checkout.customer.email = email
-        CheckoutManager.saveCheckout()
+        this.$checkoutManager.checkout.customer.email = email
+        this.$checkoutManager.saveCheckout()
     } 
 
     get phone() {
-        return CheckoutManager.checkout.customer.phone
+        return this.$checkoutManager.checkout.customer.phone
     }
 
     set phone(phone: string) {
-        CheckoutManager.checkout.customer.phone = phone
-        CheckoutManager.saveCheckout()
+        this.$checkoutManager.checkout.customer.phone = phone
+        this.$checkoutManager.saveCheckout()
     } 
 
     async goNext() {
@@ -147,7 +146,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
         // Clear old open fields
 
         try {
-            await CheckoutStepsManager.goNext(CheckoutStepType.Customer, this)
+            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Customer, this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

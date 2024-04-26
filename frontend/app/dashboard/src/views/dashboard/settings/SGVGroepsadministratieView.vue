@@ -64,7 +64,7 @@ import { UrlHelper } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie";
 
 @Component({
@@ -89,10 +89,10 @@ import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie"
 })
 export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) {
     loading = false;
-    SGVGroepsadministratie = SGVGroepsadministratie
+    SGVGroepsadministratie = new SGVGroepsadministratie(this.$context, this.$memberManager)
 
     mounted() {
-        SGVGroepsadministratie.checkUrl();
+        this.SGVGroepsadministratie.checkUrl();
 
         UrlHelper.setUrl("/scouts-en-gidsen-vlaanderen")
     }
@@ -102,11 +102,11 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
     }
 
     get isLoggedIn() {
-        return SGVGroepsadministratie.hasToken
+        return this.SGVGroepsadministratie.hasToken
     }
 
     get isStamhoofd() {
-        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
+        return this.$organizationManager.user.email.endsWith("@stamhoofd.be") || this.$organizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
     async sync() {
@@ -118,17 +118,17 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
         try {
             this.setLeave()
-            await SGVGroepsadministratie.downloadAll()
-            const { matchedMembers, newMembers } = await SGVGroepsadministratie.matchAndSync(this, () => {
+            await this.SGVGroepsadministratie.downloadAll()
+            const { matchedMembers, newMembers } = await this.SGVGroepsadministratie.matchAndSync(this, () => {
                 toast.hide()
             })
             toast.hide();
 
-            const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
+            const { oldMembers, action } = await this.SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
             const toast2 = new Toast("Synchroniseren...", "spinner").setProgress(0).setHide(null).show()
 
             try {
-                await SGVGroepsadministratie.sync(this, matchedMembers, newMembers, oldMembers, action, (status, progress) => {
+                await this.SGVGroepsadministratie.sync(this, matchedMembers, newMembers, oldMembers, action, (status, progress) => {
                     toast2.message = status
                     toast2.setProgress(progress)
                 })
@@ -151,7 +151,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
     login() {
         console.log("Login, start OAuth")
-        SGVGroepsadministratie.startOAuth()
+        this.SGVGroepsadministratie.startOAuth()
     }
 
     beforeDestroy() {

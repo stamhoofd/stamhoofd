@@ -1,7 +1,7 @@
 <template>
     <div class="st-menu st-view dashboard-menu">
         <main ref="main" class="sticky-navigation-bar">
-            <STNavigationBar :title="organization.name" :sticky="true" class="block-width">
+            <STNavigationBar :title="$organization.name" :sticky="true" class="block-width">
                 <OrganizationSwitcher slot="middle" />
             </STNavigationBar>
 
@@ -10,20 +10,6 @@
             </form>
 
             <hr class="first">
-
-            <!--<h1 v-if="isNative" @click="switchOrganization">
-                <span>{{ organization.name }}</span>
-                <span class="icon arrow-down-small grayy" />
-            </h1>
-
-            <div v-else class="padding-group">
-                <Logo />
-                <button id="organization-switcher" type="button" @click="switchOrganization">
-                    <span class="text">{{ organization.name }}</span>
-                    <span class="icon arrow-down-small grayy" />
-                </button>
-            </div>-->
-
 
             <button v-if="!enableWebshopModule && !enableMemberModule" type="button" class="menu-button button cta" @click="openSignupSelection()">
                 <span class="icon flag" />
@@ -205,13 +191,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
-import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Group, GroupCategory, GroupCategoryTree, Permissions, PrivateWebshop, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { openNolt } from "../../classes/NoltHelper";
-import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 import OrganizationSwitcher from './OrganizationSwitcher.vue';
 import InvoicePaymentStatusView from "./settings/packages/InvoicePaymentStatusView.vue";
@@ -228,31 +213,17 @@ import InvoicePaymentStatusView from "./settings/packages/InvoicePaymentStatusVi
     }
 })
 export default class DashboardMenu extends Mixins(NavigationMixin) {
-    SessionManager = SessionManager // needed to make session reactive
     currentlySelected: string | null = null
     whatsNewBadge = ""
-    OrganizationManager = OrganizationManager
     collapsedSections: string[] = []
 
-    get organization() {
-        return OrganizationManager.organization
-    }
-
-    get userName() {
-        return SessionManager.currentSession?.user ? (SessionManager.currentSession.user.firstName + ' ' + SessionManager.currentSession.user.lastName):  ""
-    }
-
-    get isNative() {
-        return AppManager.shared.isNative
-    }
-
     get isBelgium() {
-        return this.organization.address.country == Country.Belgium
+        return this.$organization.address.country == Country.Belgium
     }
 
     get tree() {
-        return this.organization.getCategoryTree({
-            permissions: OrganizationManager.user.permissions ?? Permissions.create({})
+        return this.$organization.getCategoryTree({
+            permissions: this.$user?.permissions ?? Permissions.create({})
         })
     }
 
@@ -265,17 +236,17 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get logoSrc() {
-        if (!this.organization.meta.squareLogo) {
+        if (!this.$organization.meta.squareLogo) {
             return null
         }
-        return this.organization.meta.squareLogo.getPathForSize(undefined, 50)
+        return this.$organization.meta.squareLogo.getPathForSize(undefined, 50)
     }
 
     get logoSrcSet() {
-        if (!this.organization.meta.squareLogo) {
+        if (!this.$organization.meta.squareLogo) {
             return null
         }
-        return this.organization.meta.squareLogo.getPathForSize(undefined, 50) + " 1x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*2)+" 2x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*3)+" 3x"
+        return this.$organization.meta.squareLogo.getPathForSize(undefined, 50) + " 1x, "+this.$organization.meta.squareLogo.getPathForSize(undefined, 50*2)+" 2x, "+this.$organization.meta.squareLogo.getPathForSize(undefined, 50*3)+" 3x"
     }
 
     toggleCollapse(id: string) {
@@ -373,7 +344,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         }
 
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "category") {
-            for (const category of this.organization.meta.categories) {
+            for (const category of this.$organization.meta.categories) {
                 if (parts[1] == Formatter.slug(category.settings.name)) {
                     if (parts[2] && parts[2] == "all") {
                         this.openCategoryMembers(category, false).catch(console.error)
@@ -387,7 +358,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         }
 
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
-            for (const group of this.organization.groups) {
+            for (const group of this.$organization.groups) {
                 if (parts[1] == Formatter.slug(group.settings.name)) {
                     this.openGroup(group, false).catch(console.error)
                     didSet = true
@@ -397,7 +368,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         }
 
         if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
-            for (const webshop of this.organization.webshops) {
+            for (const webshop of this.$organization.webshops) {
                 if (parts[1] == Formatter.slug(webshop.meta.name)) {
                     this.openWebshop(webshop, false).catch(console.error)
                     didSet = true
@@ -417,7 +388,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             }
         }
 
-        document.title = "Stamhoofd - "+OrganizationManager.organization.name
+        document.title = "Stamhoofd - "+this.$organization.name
 
         const currentCount = localStorage.getItem("what-is-new")
         if (currentCount) {
@@ -431,7 +402,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
         if (!didSet && this.fullAccess) {
             console.log('openSignupSelection')
-            if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
+            if (!this.$organization.meta.modules.useMembers && !this.$organization.meta.modules.useWebshops) {
                 this.openSignupSelection(true).catch(console.error);
             }
         }
@@ -440,7 +411,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             await this.openWebshop(webshop, false)
         })
 
-        if (this.fullAccess && !this.organization.meta.didAcceptLatestTerms) {
+        if (this.fullAccess && !this.$organization.meta.didAcceptLatestTerms) {
             // Show new terms view if needed
             LoadComponent(() => import(/* webpackChunkName: "AcceptTermsView" */ "./AcceptTermsView.vue"), {}, { instant: true }).then((component) => {
                 this.present(component.setDisplayStyle("popup").setAnimated(false))
@@ -463,21 +434,17 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get isAppReview() {
-        return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
+        return this.$isNative && this.$organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
     }
 
     get webshops() {
-        return this.organization.webshops
+        return this.$organization.webshops
             .filter(webshop => webshop.meta.status !== WebshopStatus.Archived)
             .sort((a, b) => Sorter.stack(Sorter.byBooleanValue(b.isClosed(), a.isClosed()), Sorter.byStringValue(a.meta.name, b.meta.name)))
     }
 
     get hasWebshopArchive() {
-        return this.organization.webshops.some(webshop => webshop.meta.status == WebshopStatus.Archived)
-    }
-
-    switchOrganization() {
-        SessionManager.deactivateSession()
+        return this.$organization.webshops.some(webshop => webshop.meta.status == WebshopStatus.Archived)
     }
 
     async openSignupSelection(animated = true) {
@@ -521,7 +488,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, { 
                     root: await LoadComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */ "./groups/GroupMembersView.vue"), {
-                        category: GroupCategoryTree.build(category, this.organization)
+                        category: GroupCategoryTree.build(category, this.$organization)
                     }, { instant: !animated })
                 })
             ]
@@ -620,7 +587,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         if (!await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
             return;
         }
-        SessionManager.logout()
+        this.$context.logout()
     }
 
     async openDocuments(animated = true) {
@@ -656,36 +623,36 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get canCreateWebshops() {
-        const result = SessionManager.currentSession!.user!.permissions!.canCreateWebshops(this.organization.privateMeta?.roles ?? [])
+        const result = this.$user!.permissions!.canCreateWebshops(this.$organization.privateMeta?.roles ?? [])
         return result
     }
 
     get canManagePayments() {
-        return SessionManager.currentSession!.user!.permissions!.canManagePayments(this.organization.privateMeta?.roles ?? [])
+        return this.$user!.permissions!.canManagePayments(this.$organization.privateMeta?.roles ?? [])
     }
 
     get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
+        return this.$user!.permissions!.hasFullAccess(this.$organization.privateMeta?.roles ?? [])
     }
 
     get fullReadAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasReadAccess(this.organization.privateMeta?.roles ?? [])
+        return this.$user!.permissions!.hasReadAccess(this.$organization.privateMeta?.roles ?? [])
     }
 
     get enableMemberModule() {
-        return this.organization.meta.modules.useMembers
+        return this.$organization.meta.modules.useMembers
     }
 
     get enableWebshopModule() {
-        return this.organization.meta.modules.useWebshops
+        return this.$organization.meta.modules.useWebshops
     }
 
     isCategoryDeactivated(category: GroupCategoryTree) {
-        return this.organization.isCategoryDeactivated(category)
+        return this.$organization.isCategoryDeactivated(category)
     }
 
     async gotoFeedback(check = false) {
-        await openNolt(check)
+        await openNolt(this.$context, check)
     }
 }
 </script>

@@ -45,7 +45,7 @@ import { Group } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import GroupOverview from "./GroupOverview.vue";
 
 @Component({
@@ -80,7 +80,7 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
 
     async load() {
         try {
-            this.groups = await OrganizationManager.loadArchivedGroups({owner: this})
+            this.groups = await this.$organizationManager.loadArchivedGroups({owner: this})
         } catch (e) {
             Toast.fromError(e).show()
         }
@@ -93,11 +93,11 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get allCategories() {
-        return this.organization.getCategoryTree({admin: true, permissions: OrganizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
+        return this.organization.getCategoryTree({admin: true, permissions: this.$organizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
     }
 
     openGroup(group: Group) {

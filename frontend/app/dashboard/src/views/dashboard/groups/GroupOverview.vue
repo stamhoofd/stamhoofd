@@ -276,7 +276,7 @@ import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Or
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import CategoryView from './CategoryView.vue';
 import EditGroupEmailsView from './edit/EditGroupEmailsView.vue';
@@ -312,7 +312,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get isStamhoofd() {
-        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
+        return this.$organizationManager.user.email.endsWith("@stamhoofd.be") || this.$organizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
     get isPublic() {
@@ -345,7 +345,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get title() {
@@ -361,11 +361,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get hasFullPermissions() {
-        return this.group.hasFullAccess(OrganizationManager.user.permissions, this.organization)
+        return this.group.hasFullAccess(this.$organizationManager.user.permissions, this.organization)
     }
 
     get hasWritePermissions() {
-        return this.group.hasWriteAccess(OrganizationManager.user.permissions, this.organization)
+        return this.group.hasWriteAccess(this.$organizationManager.user.permissions, this.organization)
     }
    
     openMembers(animated = true, cycleOffset = 0) {
@@ -428,13 +428,13 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
                 promise: async () => {
                     try {
                         // Make sure we have an up to date group
-                        await OrganizationManager.forceUpdate()
+                        await this.$organizationManager.forceUpdate()
                         return new ComponentWithProperties(component, {
                             group: this.group, 
-                            organization: OrganizationManager.organization, 
+                            organization: this.$organization, 
                             saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                                patch.id = OrganizationManager.organization.id
-                                await OrganizationManager.patch(patch)
+                                patch.id = this.$organization.id
+                                await this.$organizationManager.patch(patch)
                             }
                         })
                     } catch (e) {
@@ -530,7 +530,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
 
         try {
             const patch = Organization.patch({
-                id: OrganizationManager.organization.id
+                id: this.$organization.id
             })
             const p = Group.patch({
                 id: this.group.id,
@@ -549,7 +549,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
                 })
             }
             patch.groups.addPatch(p)
-            await OrganizationManager.patch(patch)
+            await this.$organizationManager.patch(patch)
             new Toast("De inschrijvingen zijn terug open", "success green").show()
         } catch (e) {
             Toast.fromError(e).show()
@@ -567,7 +567,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
 
         try {
             const patch = Organization.patch({
-                id: OrganizationManager.organization.id
+                id: this.$organization.id
             })
 
             const cycleInformation = this.group.settings.cycleSettings.get(this.group.cycle - 1)
@@ -579,7 +579,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
                     endDate: cycleInformation?.endDate ?? undefined,
                 })
             }))
-            await OrganizationManager.patch(patch)
+            await this.$organizationManager.patch(patch)
             new Toast("De inschrijvingsperiode is ongedaan gemaakt", "success green").show()
         } catch (e) {
             Toast.fromError(e).show()
@@ -603,7 +603,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             }
 
             const patch = Organization.patch({
-                id: OrganizationManager.organization.id,
+                id: this.$organization.id,
                 meta: metaPatch
             })
             patch.groups.addPatch(Group.patch({
@@ -612,7 +612,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             }))
 
            
-            await OrganizationManager.patch(patch)
+            await this.$organizationManager.patch(patch)
 
             // Force update because the patch won't get the group in the response
             this.group.status = GroupStatus.Archived
@@ -639,11 +639,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             }
 
             const patch = Organization.patch({
-                id: OrganizationManager.organization.id,
+                id: this.$organization.id,
                 meta: metaPatch
             })
             patch.groups.addDelete(this.group.id)
-            await OrganizationManager.patch(patch)
+            await this.$organizationManager.patch(patch)
             new Toast("De groep is verwijderd", "success green").show()
             this.pop({force: true})
         } catch (e) {
@@ -652,7 +652,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get allCategories() {
-        return this.organization.getCategoryTree({admin: true, permissions: OrganizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
+        return this.organization.getCategoryTree({admin: true, permissions: this.$organizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
     }
 
     async restoreGroup(event) {
@@ -711,9 +711,9 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             }))
 
             try {
-                await OrganizationManager.patch(patch)
+                await this.$organizationManager.patch(patch)
                 // Manually update this group
-                const foundGroup = OrganizationManager.organization.groups.find(g => g.id == group.id)
+                const foundGroup = this.$organization.groups.find(g => g.id == group.id)
                 if (foundGroup) {
                     // Bit ugly, but only reliable way
                     this.group = foundGroup
@@ -736,13 +736,13 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
 
         try {
             const patch = Organization.patch({
-                id: OrganizationManager.organization.id
+                id: this.$organization.id
             })
             patch.groups.addPatch(Group.patch({
                 id: this.group.id,
                 status: GroupStatus.Closed
             }))
-            await OrganizationManager.patch(patch)
+            await this.$organizationManager.patch(patch)
             new Toast(wasArchive ? "De inschrijvingsgroep is teruggezet" : "De inschrijvingen zijn gesloten", "success green").show()
         } catch (e) {
             Toast.fromError(e).show()

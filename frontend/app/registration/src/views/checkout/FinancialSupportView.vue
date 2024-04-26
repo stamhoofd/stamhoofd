@@ -26,15 +26,12 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { BooleanStatus } from "@stamhoofd/structures";
-import { FinancialSupportSettings } from "@stamhoofd/structures";
+import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { BooleanStatus, FinancialSupportSettings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from '../../classes/MemberManager';
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 import FreeContributionView from "./FreeContributionView.vue";
 import PaymentSelectionView from './PaymentSelectionView.vue';
 
@@ -54,18 +51,18 @@ import PaymentSelectionView from './PaymentSelectionView.vue';
     }
 })
 export default class FinancialSupportView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
-    CheckoutManager = CheckoutManager
+    
+    
 
     reduced = false
     loading = false
     errorBox: ErrorBox | null = null
 
     mounted() {
-        this.reduced = !!CheckoutManager.checkout.cart.items.find(i => i.reduced)
+        this.reduced = !!this.$checkoutManager.checkout.cart.items.find(i => i.reduced)
 
         if (!this.reduced) {
-            for (const item of CheckoutManager.checkout.cart.items) {
+            for (const item of this.$checkoutManager.checkout.cart.items) {
                 const member = item.member
                 if (member.details.requiresFinancialSupport?.value) {
                     this.reduced = true;
@@ -88,18 +85,18 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     }
 
     get settings(): FinancialSupportSettings {
-        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
+        return this.$organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
     }
 
     @Watch("reduced")
     onChangeReduced() {
         if (this.reduced) {
-            for (const item of CheckoutManager.checkout.cart.items) {
+            for (const item of this.$checkoutManager.checkout.cart.items) {
                 item.reduced = true
             }
-            CheckoutManager.cart.freeContribution = 0
+            this.$checkoutManager.cart.freeContribution = 0
         } else {
-            for (const item of CheckoutManager.checkout.cart.items) {
+            for (const item of this.$checkoutManager.checkout.cart.items) {
                 item.reduced = false
             }
         }
@@ -114,7 +111,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
 
         try {
             if (this.reduced) {
-                for (const item of CheckoutManager.checkout.cart.items) {
+                for (const item of this.$checkoutManager.checkout.cart.items) {
                     const member = item.member
                     // Check if we are allowed to gather this information
                     member.details.requiresFinancialSupport = BooleanStatus.create({ value: true })
@@ -122,19 +119,19 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                 }
                 
             } else {
-                for (const item of CheckoutManager.checkout.cart.items) {
+                for (const item of this.$checkoutManager.checkout.cart.items) {
                     const member = item.member
                     member.details.requiresFinancialSupport = BooleanStatus.create({ value: false })
                     item.reduced = false
                 }
             }
 
-            await MemberManager.patchAllMembersWith(...CheckoutManager.checkout.cart.items.map(i => i.member))
+            await this.$memberManager.patchAllMembersWith(...this.$checkoutManager.checkout.cart.items.map(i => i.member))
             
             this.loading = false
 
             // TODO: check if free contribution is enabled
-            if (!this.reduced && OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null) {
+            if (!this.reduced && this.$organization.meta.recordsConfiguration.freeContribution !== null) {
                 this.show(new ComponentWithProperties(FreeContributionView, {}))
             } else {
                 this.show(new ComponentWithProperties(PaymentSelectionView, {}))
@@ -147,12 +144,12 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     }
 
     get cart() {
-        return this.CheckoutManager.cart
+        return this.$checkoutManager.cart
     }
 
     async recalculate() {
         try {
-            await CheckoutManager.recalculateCart()
+            await this.$checkoutManager.recalculateCart()
             this.errorBox = null
         } catch (e) {
             console.error(e)

@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware, RequestResult, Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
-import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, Session, sleep, UrlHelper } from '@stamhoofd/networking';
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
@@ -11,11 +11,10 @@ import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembers
 import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
 import SGVVerifyProbablyEqualView from '../views/dashboard/scouts-en-gidsen/SGVVerifyProbablyEqualView.vue';
 import { MemberManager } from './MemberManager';
-import { OrganizationManager } from './OrganizationManager';
 import { getDefaultGroepFuncties, getPatch, GroepFunctie, isManaged, schrappen, SGVSyncReport } from './SGVGroepsadministratieSync';
-import { SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
+import { SGVFoutenDecoder, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVZoekenResponse, SGVZoekLid } from "./SGVStructures";
 
-class SGVGroepsadministratieStatic implements RequestMiddleware {
+export class SGVGroepsadministratie implements RequestMiddleware {
     token: {accessToken: string; refreshToken: string; validUntil: Date} | null = null // null to keep reactive
     clientId = "groep-O2209G-Prins-Boudewijn-Wetteren"
     redirectUri = "https://stamhoofd.app/oauth/sgv"
@@ -28,6 +27,14 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     groupNumber: string | null = null
     group: SGVGroep | null = null
     functies: GroepFunctie[] = []
+
+    $context: Session
+    $memberManager: MemberManager
+
+    constructor($context: Session, $memberManager: MemberManager) {
+        this.$context = $context;
+        this.$memberManager = $memberManager;
+    }
 
     get hasToken() {
         return !!this.token //|| this.dryRun
@@ -143,7 +150,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             decoder: SGVGroepResponse as Decoder<SGVGroepResponse>
         })
 
-        const organization = OrganizationManager.organization
+        const organization = this.$context.organization!
 
         // Search for the group
         for (const group of response.data.groepen) {
@@ -314,7 +321,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const probablyEqualList: SGVLidMatchVerify[] = []
 
         // Start! :D
-        const allMembers = await MemberManager.loadMembers([], false)
+        const allMembers = await this.$memberManager.loadMembers([], false)
 
         if (this.dryRun && allMembers.length > 1) {
             // Add some fake data
@@ -645,7 +652,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 // Mark as synced in Stamhoofd
                 match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
                 match.stamhoofd.details.lastExternalSync = new Date()
-                await MemberManager.patchMembersDetails([match.stamhoofd])
+                await this.$memberManager.patchMembersDetails([match.stamhoofd])
             } catch (e) {
                 console.error(e)
                 throw e;
@@ -702,7 +709,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     // Mark as synced in Stamhoofd
                     member.details.memberNumber = updateResponse.data.verbondsgegevens?.lidnummer ?? null
                     member.details.lastExternalSync = new Date()
-                    await MemberManager.patchMembersDetails([member])
+                    await this.$memberManager.patchMembersDetails([member])
                 }
             } catch (e) {
                 console.error(e)
@@ -771,6 +778,3 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         request.headers["Authorization"] = "Bearer " + this.token.accessToken;
     }
 }
-
-
-export const SGVGroepsadministratie = new SGVGroepsadministratieStatic() 

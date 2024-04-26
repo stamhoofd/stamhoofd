@@ -229,7 +229,7 @@ export default class EditPaymentMethodsBox extends Vue {
     async loadStripeAccounts() {
         try {
             this.loadingStripeAccounts = true
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: "GET",
                 path: "/stripe/accounts",
                 decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),

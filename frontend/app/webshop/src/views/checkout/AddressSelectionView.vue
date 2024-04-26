@@ -59,34 +59,34 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
     CheckoutManager = CheckoutManager
 
     get checkoutMethod() {
-        return CheckoutManager.checkout.checkoutMethod!
+        return this.$checkoutManager.checkout.checkoutMethod!
     }
 
     get deliveryMethod() {
-        return CheckoutManager.checkout.deliveryMethod
+        return this.$checkoutManager.checkout.deliveryMethod
     }
 
     get checkout() {
-        return CheckoutManager.checkout
+        return this.$checkoutManager.checkout
     }
 
     get webshop() {
-        return WebshopManager.webshop
+        return this.$webshopManager.webshop
     }
 
     get address() {
-        return CheckoutManager.checkout.address
+        return this.$checkoutManager.checkout.address
     }
 
     set address(address: ValidatedAddress | Address | null) {
         if (address instanceof ValidatedAddress) {
-            CheckoutManager.checkout.address = address
-            CheckoutManager.saveCheckout()
+            this.$checkoutManager.checkout.address = address
+            this.$checkoutManager.saveCheckout()
         }
     } 
 
     get unscopedServer() {
-        return WebshopManager.unscopedServer
+        return this.$webshopManager.unscopedServer
     }
 
     async goNext() {
@@ -102,7 +102,7 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            await CheckoutStepsManager.goNext(CheckoutStepType.Address, this)
+            await CheckoutStepsManager.for(this.$checkoutManager).goNext(CheckoutStepType.Address, this)
             
         } catch (e) {
             console.error(e)

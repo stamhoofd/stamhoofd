@@ -216,13 +216,12 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, RecordCategoryAnswersBox,STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components"
+import { BackButton, Checkbox, RecordCategoryAnswersBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { OrganizationManager } from "../../classes/OrganizationManager";
+
 import GroupTree from "../../components/GroupTree.vue";
 import { BuiltInEditMemberStep, EditMemberStep, EditMemberStepsManager, EditMemberStepType, RecordCategoryStep } from "./details/EditMemberStepsManager";
 import MemberChooseGroupsView from "./MemberChooseGroupsView.vue";
@@ -251,8 +250,8 @@ export default class MemberView extends Mixins(NavigationMixin){
     async editGeneral() {
         await this.openSteps(
             [
-                new BuiltInEditMemberStep(EditMemberStepType.Details, true, false), 
-                new BuiltInEditMemberStep(EditMemberStepType.Parents, true, false)
+                new BuiltInEditMemberStep(this.$context, EditMemberStepType.Details, true, false), 
+                new BuiltInEditMemberStep(this.$context, EditMemberStepType.Parents, true, false)
             ],
             false
         )
@@ -260,27 +259,27 @@ export default class MemberView extends Mixins(NavigationMixin){
 
     async editParents() {
         await this.openSteps([
-            new BuiltInEditMemberStep(EditMemberStepType.Parents, true, false)
+            new BuiltInEditMemberStep(this.$context, EditMemberStepType.Parents, true, false)
         ])
     }
 
     async editEmergencyContact() {
         await this.openSteps([
-            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, true, false)
+            new BuiltInEditMemberStep(this.$context, EditMemberStepType.EmergencyContact, true, false)
         ])
     }
 
     async editRecordCategory(category: RecordCategory) {
         await this.openSteps([
-            new RecordCategoryStep(category, true, false)
+            new RecordCategoryStep(this.$context, category, true, false)
         ])
     }
 
     get recordCategories(): RecordCategory[] {
-        const definitions = MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, { member: this.member, registerItems: this.cartItems })
+        const definitions = MemberDetailsWithGroups.getFilterDefinitions(this.$organization, { member: this.member, registerItems: this.cartItems })
 
         return RecordCategory.filterCategories(
-            OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
+            this.$organization.meta.recordsConfiguration.recordCategories, 
             new MemberDetailsWithGroups(this.member.details, this.member, this.cartItems), 
             definitions,
             this.dataPermission
@@ -301,12 +300,12 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 
     async fullCheck() {
-        const items = CheckoutManager.cart.items.filter(item => item.memberId === this.member.id)
-        await this.openSteps(EditMemberStepsManager.getAllSteps(items, this.member, true, false), false)
+        await this.openSteps(EditMemberStepsManager.getAllSteps(this.$context, true, false), false)
     }
 
     async openSteps(steps: EditMemberStep[], force = true, lastSaveHandler?: (details: MemberDetails) => Promise<void>) {
         const stepManager = new EditMemberStepsManager(
+            this.$memberManager,
             steps, 
             this.cartItems,
             this.member,
@@ -333,7 +332,7 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 
     getGroup(groupId: string) {
-        return OrganizationManager.organization.groups.find(g => g.id === groupId)
+        return this.$organization.groups.find(g => g.id === groupId)
     }
 
     chooseGroups() {
@@ -347,7 +346,7 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 
     get cartItems() {
-        return CheckoutManager.cart.items.filter(i => i.member.id === this.member.id)
+        return this.$checkoutManager.cart.items.filter(i => i.member.id === this.member.id)
     }
 
     imageSrc(registration: Registration) {

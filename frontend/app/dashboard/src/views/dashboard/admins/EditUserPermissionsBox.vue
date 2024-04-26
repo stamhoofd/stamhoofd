@@ -36,7 +36,7 @@ import { Checkbox, STList, STListItem } from "@stamhoofd/components";
 import { PermissionLevel, PermissionRole, Permissions, User } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import AdminRolesView from './AdminRolesView.vue';
 
 @Component({
@@ -51,7 +51,7 @@ export default class EditUserPermissionsBox extends Mixins(NavigationMixin) {
         user!: User
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get patchedUser() {

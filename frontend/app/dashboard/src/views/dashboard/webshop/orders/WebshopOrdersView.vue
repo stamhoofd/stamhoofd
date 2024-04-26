@@ -16,7 +16,7 @@ import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterD
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from "./OrderActionBuilder";
 import OrderView from './OrderView.vue';
@@ -39,7 +39,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     loading = false;
@@ -55,6 +55,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     get actions(): TableAction<PrivateOrderWithTickets>[] {
         const builder = new OrderActionBuilder({
+            organizationManager: this.$organizationManager,
             webshopManager: this.webshopManager,
             component: this
         })
@@ -557,11 +558,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get hasWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.$context.user?.permissions
         if (!p) {
             return false
         }
-        return this.preview.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])    
+        return this.preview.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])    
     }
 
     beforeDestroy() {
@@ -690,7 +691,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get webshopUrl() {
-        return this.preview.getUrl(OrganizationManager.organization)
+        return this.preview.getUrl(this.$organization)
     }
 
     formatDateTime(date: Date) {
@@ -699,7 +700,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get hasFullPermissions() {
-        return this.preview.privateMeta.permissions.hasFullAccess(OrganizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])
     }
 
     reload() {

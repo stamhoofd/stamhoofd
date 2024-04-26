@@ -122,7 +122,7 @@ import { STBillingStatus, STCredit } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
@@ -147,7 +147,6 @@ import PackageSettingsView from "./packages/PackageSettingsView.vue";
     }
 })
 export default class FinancesView extends Mixins(NavigationMixin) {
-    OrganizationManager = OrganizationManager
     loadingStatus = true
 
     status: STBillingStatus | null = null
@@ -157,7 +156,7 @@ export default class FinancesView extends Mixins(NavigationMixin) {
 
         try {
             if (this.hasFinanceAccess) {
-                this.status = await OrganizationManager.loadBillingStatus({
+                this.status = await this.$organizationManager.loadBillingStatus({
                     owner: this
                 })
             }
@@ -187,11 +186,11 @@ export default class FinancesView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get hasFinanceAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])
+        return this.$user!.permissions!.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     get balance() {

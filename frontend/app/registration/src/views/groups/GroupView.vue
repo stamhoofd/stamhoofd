@@ -82,19 +82,16 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Group, MemberWithRegistrations, RegisterItem, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../dashboard/src/classes/OrganizationManager";
-import { CheckoutManager } from "../../classes/CheckoutManager";
-import { MemberManager } from "../../classes/MemberManager";
-import GroupTag from "../../components/GroupTag.vue"
-import MemberBox from "../../components/MemberBox.vue"
+
+import GroupTag from "../../components/GroupTag.vue";
+import MemberBox from "../../components/MemberBox.vue";
 import CartView from "../checkout/CartView.vue";
-import GroupMemberSelectionView from "./GroupMemberSelectionView.vue";
 
 @Component({
     components: {
@@ -124,15 +121,15 @@ export default class GroupView extends Mixins(NavigationMixin){
     @Prop({ default: true })
         registerButton!: boolean
 
-    MemberManager = MemberManager
+    
     SessionManager = SessionManager
 
     get members() {
-        return this.MemberManager.members ?? []
+        return this.$memberManager.members ?? []
     }
 
     get isSignedIn() {
-        return SessionManager.currentSession && SessionManager.currentSession.isComplete()
+        return this.$context && this.$context.isComplete()
     }
 
     get closed() {
@@ -142,7 +139,7 @@ export default class GroupView extends Mixins(NavigationMixin){
     get canRegister() {
         if (!this.member) {
             return !!this.members.find((m) => {
-                const r = m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
+                const r = m.canRegister(this.group, this.$memberManager.members ?? [], this.$organization.meta.categories, this.$checkoutManager.cart.items)
                 return !r.closed || r.waitingList
             })
         }
@@ -154,7 +151,7 @@ export default class GroupView extends Mixins(NavigationMixin){
     }
 
     get itemCanRegister() {
-        return this.member!.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
+        return this.member!.canRegister(this.group, this.$memberManager.members ?? [], this.$organization.meta.categories, this.$checkoutManager.cart.items)
     }
 
     registerMember() {
@@ -162,7 +159,7 @@ export default class GroupView extends Mixins(NavigationMixin){
             return
         }
         const item = new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.itemCanRegister.waitingList })
-        CheckoutManager.startAddToCartFlow(this, item, (c: NavigationMixin) => {
+        this.$checkoutManager.startAddToCartFlow(this, item, (c: NavigationMixin) => {
             // If the cart is already visible, dismiss
             if (c.navigationController?.$attrs['fromCart']) {
                 return c.dismiss({force: true})
@@ -284,7 +281,7 @@ export default class GroupView extends Mixins(NavigationMixin){
         
 
         if (this.group.settings.requireGroupIds.length > 0) {
-            const prefix = Formatter.joinLast(this.group.settings.requireGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
+            const prefix = Formatter.joinLast(this.group.settings.requireGroupIds.map(id => this.$organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
             if (!who) {
                 who += prefix
             } else {
@@ -293,7 +290,7 @@ export default class GroupView extends Mixins(NavigationMixin){
         }
 
         if (this.group.settings.preventPreviousGroupIds.length > 0) {
-            const prefix = "Iedereen die de vorige keer niet ingeschreven was bij "+Formatter.joinLast(this.group.settings.preventPreviousGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
+            const prefix = "Iedereen die de vorige keer niet ingeschreven was bij "+Formatter.joinLast(this.group.settings.preventPreviousGroupIds.map(id => this.$organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
             if (!who) {
                 who += prefix
             } else {
@@ -302,7 +299,7 @@ export default class GroupView extends Mixins(NavigationMixin){
         }
 
         if (this.group.settings.requirePreviousGroupIds.length > 0) {
-            const prefix = "Iedereen die de vorige keer ingeschreven was bij "+Formatter.joinLast(this.group.settings.requirePreviousGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
+            const prefix = "Iedereen die de vorige keer ingeschreven was bij "+Formatter.joinLast(this.group.settings.requirePreviousGroupIds.map(id => this.$organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
             if (!who) {
                 who += prefix
             } else {

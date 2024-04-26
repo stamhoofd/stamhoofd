@@ -121,7 +121,7 @@ import { ImportingMember } from "../../../../../classes/import/ImportingMember";
 import { MatchedColumn } from "../../../../../classes/import/MatchedColumn";
 import { MatcherCategory } from '../../../../../classes/import/MatcherCategory';
 import { AddressColumnMatcher, DateColumnMatcher,TextColumnMatcher } from "../../../../../classes/import/matchers";
-import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
@@ -143,7 +143,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
     file: null | string = null
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     rowCount = 0
     columnCount = 0
@@ -287,7 +287,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.$organization.patch(this.organizationPatch)
     }
 
     get hasMembers() {
@@ -464,7 +464,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            const result = await ImportingMember.importAll(this.sheet, this.columns, this.organization)
+            const result = await ImportingMember.importAll(this.sheet, this.columns, this.$memberManager, this.organization)
 
             if (result.errors.length > 0) {
                 this.show(new ComponentWithProperties(ImportMembersErrorsView, {

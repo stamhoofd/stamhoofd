@@ -1,22 +1,28 @@
 import { Decoder } from '@simonbackx/simple-encoding'
-import { NetworkManager, SessionManager } from '@stamhoofd/networking'
+import { NetworkManager, Session, SessionManager } from '@stamhoofd/networking'
 import { Organization, Webshop } from '@stamhoofd/structures'
 
 /**
  * Convenient access to the organization of the current session
  */
-export class WebshopManagerStatic {
-    organization!: Organization
+export class WebshopManager {
     webshop!: Webshop
+    $context: Session
+
+    get organization() {
+        return this.$context.organization!
+    }
+
+    constructor($context: Session, webshop: Webshop) {
+        this.webshop = webshop
+        this.$context = $context
+    }
 
     /**
      * Doing authenticated requests
      */
     get optionalAuthenticatedServer() {
-        if (SessionManager.currentSession) {
-            return SessionManager.currentSession.optionalAuthenticatedServer
-        }
-        return this.server
+        return this.$context.optionalAuthenticatedServer
     }
 
     /**
@@ -41,5 +47,3 @@ export class WebshopManagerStatic {
         this.webshop = response.data
     }
 }
-
-export const WebshopManager = new WebshopManagerStatic()

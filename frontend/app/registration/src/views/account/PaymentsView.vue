@@ -114,14 +114,13 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingView,STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { ErrorBox, LoadingView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
 import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { MemberManager } from '../../classes/MemberManager';
-import { OrganizationManager } from '../../classes/OrganizationManager';
+
 import AddBalanceItemsToCartView from "./AddBalanceItemsToCartView.vue";
 import PaymentView from "./PaymentView.vue";
 
@@ -141,7 +140,7 @@ import PaymentView from "./PaymentView.vue";
     }
 })
 export default class PaymentsView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
+    
     loading = true
     balanceItems: MemberBalanceItem[] = []
     errorBox: ErrorBox | null = null
@@ -159,11 +158,11 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     get multipleMembers() {
-        return (MemberManager.members?.length ?? 0) > 1
+        return (this.$memberManager.members?.length ?? 0) > 1
     }
 
     getMember(memberId: string) {
-        return MemberManager.members?.find(m => m.id === memberId)
+        return this.$memberManager.members?.find(m => m.id === memberId)
     }
 
     get succeededPayments() {
@@ -185,7 +184,7 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     async load() {
         this.loading = true;
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 method: 'GET',
                 path: '/balance',
                 decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>)
@@ -208,7 +207,7 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     getPaymentPeriod(payment: Payment) {
@@ -273,8 +272,8 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     get members() {
-        if (MemberManager.members) {
-            return MemberManager.members
+        if (this.$memberManager.members) {
+            return this.$memberManager.members
         }
         return []
     }

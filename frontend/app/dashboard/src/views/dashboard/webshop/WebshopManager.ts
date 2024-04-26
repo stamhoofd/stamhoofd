@@ -2,10 +2,8 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArray
 import { isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Request, RequestResult } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { OrganizationManager, Session } from "@stamhoofd/networking";
 import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
-
-import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -39,24 +37,27 @@ export class WebshopManager {
     ticketsEventBus = new EventBus<string, TicketPrivate[]>()
     ticketPatchesEventBus = new EventBus<string, AutoEncoderPatchType<TicketPrivate>[]>()
 
-    constructor(preview: WebshopPreview) {
+    context: Session
+
+    constructor(context: Session, preview: WebshopPreview) {
+        this.context = context
         this.preview = preview
     }
 
     get hasWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.context.user?.permissions
         if (!p) {
             return false
         }
-        return this.preview.privateMeta.permissions.hasWriteAccess(p, SessionManager.currentSession!.organization?.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasWriteAccess(p, this.context.organization?.privateMeta?.roles ?? [])
     }
 
     get hasRead() {
-        const p = SessionManager.currentSession?.user?.permissions
+        const p = this.context.user?.permissions
         if (!p) {
             return false
         }
-        return this.preview.privateMeta.permissions.hasReadAccess(p, SessionManager.currentSession!.organization?.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasReadAccess(p, this.context.organization?.privateMeta?.roles ?? [])
     }
 
     /**
@@ -70,7 +71,7 @@ export class WebshopManager {
      * Fetch a webshop every time
      */
     private async fetchWebshop(shouldRetry = true) {
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.context.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id,
             decoder: PrivateWebshop as Decoder<PrivateWebshop>,
@@ -79,7 +80,7 @@ export class WebshopManager {
         })
 
         // Clone data and keep references
-        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
+        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(response.data)
         this.preview.set(response.data)
 
         // Save async (could fail in some unsupported browsers)
@@ -89,7 +90,7 @@ export class WebshopManager {
     }
 
     async patchWebshop(webshopPatch: AutoEncoderPatchType<PrivateWebshop>) {
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.context.authenticatedServer.request({
             method: "PATCH",
             path: "/webshop/"+this.preview.id,
             body: webshopPatch,
@@ -108,9 +109,9 @@ export class WebshopManager {
         }
 
         // Clone data and keep references
-        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(webshop)
+        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop)
         this.preview.set(webshop)
-        OrganizationManager.save().catch(console.error)
+        new OrganizationManager(this.context).save().catch(console.error)
 
         // Save async (could fail in some unsupported browsers)
         this.storeWebshop(webshop).catch(console.error)
@@ -124,7 +125,7 @@ export class WebshopManager {
         const webshop = PrivateWebshop.decode(new ObjectData(raw, { version: Version }))
 
         // Clone data and keep references
-        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(webshop)
+        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop)
         this.preview.set(webshop)
 
         return webshop
@@ -683,7 +684,7 @@ export class WebshopManager {
     }
 
     async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<PrivateOrder, WebshopOrdersQuery>> {
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.context.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id+"/orders",
             query,
@@ -696,7 +697,7 @@ export class WebshopManager {
     }
 
     async patchOrders(patches: PatchableArrayAutoEncoder<PrivateOrder>) {
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.context.authenticatedServer.request({
             method: "PATCH",
             path: "/webshop/"+this.preview.id+"/orders",
             decoder: new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>),
@@ -784,7 +785,7 @@ export class WebshopManager {
         // Then make one try for a request (might fail if we don't have internet)
         let response: RequestResult<TicketPrivate[]>
         try {
-            response = await SessionManager.currentSession!.authenticatedServer.request({
+            response = await this.context.authenticatedServer.request({
                 method: "PATCH",
                 path: "/webshop/"+this.preview.id+"/tickets/private",
                 decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
@@ -1083,7 +1084,7 @@ export class WebshopManager {
     }
 
     async fetchTickets(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<TicketPrivate, WebshopTicketsQuery>> {
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
+        const response = await this.context.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id+"/tickets/private",
             query,

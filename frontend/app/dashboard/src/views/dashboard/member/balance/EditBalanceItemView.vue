@@ -156,7 +156,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import PaymentView from '../../payments/PaymentView.vue';
 import MemberRegistrationBlock from '../MemberRegistrationBlock.vue';
 
@@ -189,7 +189,7 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         saveHandler: ((patch: AutoEncoderPatchType<BalanceItem>) => Promise<void>);
 
-    familyManager = new FamilyManager([]);
+    familyManager = new FamilyManager(this.$memberManager, []);
 
     get title() {
         return this.isNew ? 'Verschuldigd bedrag toevoegen' : 'Verschuldigd bedrag bewerken';
@@ -234,7 +234,7 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
                 })
             ],
             member.registrations.map(r => {
-                const group = OrganizationManager.organization.groups.find(g => g.id === r.groupId)
+                const group = this.$organization.groups.find(g => g.id === r.groupId)
                 return new ContextMenuItem({
                     name: group?.settings.name ?? '?',
                     description: r.cycle === group?.cycle ? 'Huidige periode' : ((group?.cycle ?? 0) - r.cycle) + " periode(s) geleden",

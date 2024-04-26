@@ -85,10 +85,10 @@
         <div class="container">
             <hr>
             <h2>Nummering</h2>
-            <p class="warning-box" v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous">
+            <p v-if="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" class="warning-box">
                 Je kan de bestelnummering niet meer wijzigen van willekeurig naar opeenvolgend (dupliceer de webshop als je dat toch nog wilt doen). 
             </p>
-            <p class="warning-box" v-else-if="numberingType == WebshopNumberingType.Random">
+            <p v-else-if="numberingType == WebshopNumberingType.Random" class="warning-box">
                 Je kan de bestelnummering achteraf niet meer wijzigen van willekeurig naar opeenvolgend. 
             </p>
 
@@ -186,7 +186,7 @@ import { PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePayment
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
+
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import WebshopPermissionRow from '../../admins/WebshopPermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';
@@ -211,10 +211,10 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/general")
         
         // Auto assign roles
-        if (this.isNew && OrganizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(OrganizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])) {
+        if (this.isNew && this.$organizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])) {
             // By default, add full permissions for all the roles this user has, that also have create webshop permissions
-            const roles = OrganizationManager.organization.privateMeta?.roles.flatMap(r => {
-                const has = OrganizationManager.user.permissions?.roles.find(i => i.id === r.id)
+            const roles = this.$organization.privateMeta?.roles.flatMap(r => {
+                const has = this.$organizationManager.user.permissions?.roles.find(i => i.id === r.id)
                 if (r.createWebshops && has) {
                     return [PermissionRole.create(r)]
                 }
@@ -364,7 +364,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     }
 
     get organization() {
-        return SessionManager.currentSession!.organization!
+        return this.$context.organization!
     }
 
     get useAvailableUntil() {

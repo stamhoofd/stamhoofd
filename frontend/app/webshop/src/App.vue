@@ -17,12 +17,12 @@ import { DarkMode, GetWebshopFromDomainResult, WebshopAuthType } from '@stamhoof
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
-import { WebshopManager } from './classes/WebshopManager';
 import ChooseWebshopView from './views/ChooseWebshopView.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
 import PrerenderRedirectView from './views/errors/PrerenderRedirectView.vue';
 import RequiredLoginView from './views/RequiredLoginView.vue';
 import WebshopView from './views/WebshopView.vue';
+import { getWebshopRootView } from './getRootView';
 
 @Component({
     components: {
@@ -96,7 +96,6 @@ export default class App extends Vue {
                 }
 
                 I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
-                await I18nController.loadDefault("webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
 
                 // Set color
                 if (response.data.webshop?.meta.color) {
@@ -110,8 +109,11 @@ export default class App extends Vue {
                 const session = new Session(response.data.organization.id)
                 await session.loadFromStorage()       
                 session.setOrganization(response.data.organization)
+
+                await I18nController.loadDefault(session, "webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
+
                 await session.checkSSO()
-                await SessionManager.setCurrentSession(session)
+                await SessionManager.prepareSessionForUsage(session)
 
                 if (!response.data.webshop) {
                     return new ComponentWithProperties(NavigationController, { 
@@ -122,33 +124,18 @@ export default class App extends Vue {
                     })
                 }
 
-                WebshopManager.organization = response.data.organization
-                WebshopManager.webshop = response.data.webshop
-                document.title = WebshopManager.webshop.meta.name +" - "+WebshopManager.organization.name
+                const organization = response.data.organization
+                const webshop = response.data.webshop
 
-                // Do we need to require login?
-                if (response.data.webshop.meta.authType === WebshopAuthType.Required) {
-                    return new ComponentWithProperties(AuthenticatedView, {
-                        root: new ComponentWithProperties(NavigationController, { 
-                            root: new ComponentWithProperties(WebshopView, {}) 
-                        }),
-                        loginRoot: new ComponentWithProperties(ModalStackComponent, {
-                            root: new ComponentWithProperties(NavigationController, { 
-                                root: new ComponentWithProperties(RequiredLoginView, {}) 
-                            })
-                        })
-                    });
-                }
+                document.title = webshop.meta.name +" - "+organization.name
 
-                return new ComponentWithProperties(NavigationController, { 
-                    root: new ComponentWithProperties(WebshopView, {}) 
-                })
+                return getWebshopRootView(session, webshop)
             } catch (e) {
                 console.log(e)
                 // Check if we have an organization on this domain
                 if (!I18nController.shared) {
                     try {
-                        await I18nController.loadDefault("webshop", undefined, "nl")
+                        await I18nController.loadDefault(null, "webshop", undefined, "nl")
                     } catch (e) {
                         console.error(e)
                     }

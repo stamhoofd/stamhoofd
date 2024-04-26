@@ -127,7 +127,7 @@ import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from 
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import EditWebshopMixin from "./EditWebshopMixin";
 import WebshopDNSRecordsView from "./WebshopDNSRecordsView.vue";
 
@@ -262,7 +262,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get viewTitle() {
@@ -270,11 +270,11 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     get legacyUrl() {
-        return this.webshop.getLegacyUrl(OrganizationManager.organization)
+        return this.webshop.getLegacyUrl(this.$organization)
     }
 
     get defaultUrl() {
-        return this.webshop.getDefaultUrl(OrganizationManager.organization)
+        return this.webshop.getDefaultUrl(this.$organization)
     }
 
     updateUri(){
@@ -309,7 +309,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
 
         try {
             this.errorBox = null
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
+            const response = await this.$context.authenticatedServer.request({
                 path: "/webshop/"+this.webshop.id+"/check-uri",
                 method: "GET",
                 query: {
@@ -351,11 +351,11 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     get defaultDomain() {
-        return this.webshop.getDefaultDomain(OrganizationManager.organization)
+        return this.webshop.getDefaultDomain(this.$organization)
     }
 
     get url() {
-        return "https://"+this.webshop.getUrl(SessionManager.currentSession!.organization!)
+        return "https://"+this.webshop.getUrl(this.$organization)
     }
 
     get customUrl() {

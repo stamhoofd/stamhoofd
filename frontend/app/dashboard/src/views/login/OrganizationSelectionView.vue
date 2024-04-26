@@ -45,7 +45,7 @@
                     </div>
                     <Spinner v-else-if="loading" class="gray center" />
                     <template v-else>
-                        <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" type="button" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
+                        <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" type="button" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization)">
                             <OrganizationAvatar :organization="organization" />
                             <div>
                                 <h1>{{ organization.name }}</h1>
@@ -81,13 +81,13 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STGradientBackground,STNavigationBar, Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, ModalStackComponentFinderMixin, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STGradientBackground, STNavigationBar, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../classes/OrganizationManager';
+import { getScopedDashboardRoot } from '../../getRootViews';
 import VersionFooter from '../dashboard/settings/VersionFooter.vue';
 
 const throttle = (func, limit) => {
@@ -135,7 +135,7 @@ const throttle = (func, limit) => {
         }
     }
 })
-export default class OrganizationSelectionView extends Mixins(NavigationMixin){
+export default class OrganizationSelectionView extends Mixins(NavigationMixin, ModalStackComponentFinderMixin){
     loading = false;
     loadingSession: string | null = null;
     q = ""
@@ -181,6 +181,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         const parts =  UrlHelper.shared.getParts()
         const queryString =  UrlHelper.shared.getSearchParams()
 
+        console.log(parts, queryString)
+
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
             try {
                 let code = queryString.get("code")
@@ -206,11 +208,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             }
         }
 
-        if (parts.length >= 2 && parts[0] == 'login') {
-            const id = parts[1]
-            this.loginOrganization(id, false).catch(console.error);
-        }
-
         if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
             // do not clear url here, so we can pass on the auth to the dashboard menu
             new Toast("Kies een vereniging en log in. Daarna kan je inloggen in het feedback systeem.", "error red").setHide(15*1000).show()
@@ -218,6 +215,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             UrlHelper.shared.clear()
 
             // Reset url if we log out
+            console.log('seturl', '/')
             UrlHelper.setUrl("/")
         }
 
@@ -318,14 +316,14 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         }
     }
 
-    async loginOrganization(organizationId: string, animated = true) {
+    async loginOrganization(organization: Organization, animated = true) {
         if (this.loadingSession) {
             return
         }
-        this.loadingSession = organizationId
+        this.loadingSession = organization.id
 
-        if (animated == true && organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
-            await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
+        if (animated == true && organization.id === "34541097-44dd-4c68-885e-de4f42abae4c") {
+            await Storage.keyValue.setItem('next_url_load', '/beheerders/'+organization.uri)
             await AppManager.shared.checkUpdates({
                 // Always load the staging build
                 customText: 'Bezig met laden...',
@@ -339,8 +337,15 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         }
         
         try {
-            await OrganizationManager.switchOrganization(this, organizationId, animated)
+            const session = await SessionManager.getPreparedContextForOrganization(organization);
+            this.present({
+                components: [
+                    getScopedDashboardRoot(session)
+                ],
+                animated: true
+            })
         } catch (e) {
+            console.error(e)
             Toast.fromError(e).show()
         }
 

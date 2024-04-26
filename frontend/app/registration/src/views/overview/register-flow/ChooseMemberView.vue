@@ -38,12 +38,10 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
 import { MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { MemberManager } from "../../../classes/MemberManager";
-import { OrganizationManager } from "../../../classes/OrganizationManager";
+
 import { createMemberComponent } from "../../members/details/createMemberComponent";
 import MemberChooseGroupsView from "../../members/MemberChooseGroupsView.vue";
 
@@ -57,19 +55,19 @@ import MemberChooseGroupsView from "../../members/MemberChooseGroupsView.vue";
     }
 })
 export default class ChooseMemberView extends Mixins(NavigationMixin){
-    MemberManager = MemberManager
+    
 
     get isAcceptingNewMembers() {
-        return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
+        return this.organization.isAcceptingNewMembers(!!this.$context.user?.permissions)
     }
 
     get organization() {
-        return OrganizationManager.organization
+        return this.$organization
     }
 
     get members() {
-        if (MemberManager.members) {
-            return MemberManager.members
+        if (this.$memberManager.members) {
+            return this.$memberManager.members
         }
         return []
     }
@@ -81,7 +79,7 @@ export default class ChooseMemberView extends Mixins(NavigationMixin){
     }
 
     async addNewMember() {
-        const component = await createMemberComponent()
+        const component = await createMemberComponent(this.$memberManager)
         if (component) {
             this.show(component)
         }

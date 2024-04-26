@@ -55,7 +55,7 @@ import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from "../../../../classes/FamilyManager";
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+
 import EditMemberContactsView from './EditMemberContactsView.vue';
 import EditMemberGeneralView from './EditMemberGeneralView.vue';
 import EditMemberGroupView from './EditMemberGroupView.vue';
@@ -85,7 +85,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
         member!: MemberWithRegistrations | null;
 
-    familyManager = this.initialFamily ?? new FamilyManager(this.member ? [this.member] : []);
+    familyManager = this.initialFamily ?? new FamilyManager(this.$memberManager, this.member ? [this.member] : []);
 
     memberDetails = this.member ? this.member.details.clone() : MemberDetails.create({})// do not link with member, only link on save!
 
@@ -93,14 +93,13 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
     errorBox: ErrorBox | null = null
 
-    OrganizationManager = OrganizationManager
 
     get supportSettings(): FinancialSupportSettings {
-        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
+        return this.$organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
     }
 
     get financialSupportEnabled() {
-        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport !== null
+        return this.$organization.meta.recordsConfiguration.financialSupport !== null
     }
 
     get financialSupportTitle() {
@@ -125,11 +124,11 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
 
     get dataPermissionsSettings(): DataPermissionsSettings {
-        return OrganizationManager.organization.meta.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
+        return this.$organization.meta.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
     }
 
     get dataPermissionsEnabled() {
-        return OrganizationManager.organization.meta.recordsConfiguration.dataPermission !== null
+        return this.$organization.meta.recordsConfiguration.dataPermission !== null
     }
 
     get dataPermissionsTitle() {
@@ -195,7 +194,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             this.pop({ force: true })
 
             // Mark review moment
-            AppManager.shared.markReviewMoment()
+            AppManager.shared.markReviewMoment(this.$context)
             return true
         } catch (e) {
             if (this.member && o) {
@@ -209,14 +208,14 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
     get recordCategories(): RecordCategory[] {
         console.log("get recordCategories")
-        return this.filterRecordCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories)
+        return this.filterRecordCategories(this.$organization.meta.recordsConfiguration.recordCategories)
     }
 
     getCategoryFillStatus(category: RecordCategory) {
         // Check all the properties in this category and check their last review times
         const records = category.getAllFilteredRecords(
             new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), 
-            MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
+            MemberDetailsWithGroups.getFilterDefinitions(this.$organization, {member: this.member ?? undefined}),
             this.dataPermissionsValue
         )
 
@@ -247,7 +246,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         return RecordCategory.flattenCategories(
             categories, 
             new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), 
-            MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
+            MemberDetailsWithGroups.getFilterDefinitions(this.$organization, {member: this.member ?? undefined}),
             this.dataPermissionsValue
         )
     }
@@ -258,7 +257,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             answers: this.memberDetails.recordAnswers,
             dataPermission: this.dataPermissionsValue,
             hasNextStep: false,
-            filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
+            filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(this.$organization, {member: this.member ?? undefined}),
             markReviewed: false,
             filterValueForAnswers: (answers) => {
                 const details = this.memberDetails.patch({

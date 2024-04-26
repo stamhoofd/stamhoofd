@@ -610,7 +610,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
         this.reviewTimer = setTimeout(() => {
             if (!this.loading && (this.totalOrders > 10 || this.totalRevenue > 50000)) {
-                AppManager.shared.markReviewMoment()
+                AppManager.shared.markReviewMoment(this.$context)
             }
         }, 5*1000)
     }
