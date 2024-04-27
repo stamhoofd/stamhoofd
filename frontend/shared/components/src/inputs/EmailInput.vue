@@ -7,9 +7,12 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { DataValidator } from "@stamhoofd/utility";
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+
+import {ErrorBox} from "../errors/ErrorBox";
+import {Validator} from "../errors/Validator";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {
@@ -21,29 +24,29 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 })
 export default class EmailInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     emailRaw = "";
     valid = true;
 
     @Prop({ default: null })
-    value!: string | null
+        value!: string | null
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-    nullable!: boolean
+        nullable!: boolean
 
     @Prop({ default: false })
-    disabled!: boolean
+        disabled!: boolean
 
     errorBox: ErrorBox | null = null
 

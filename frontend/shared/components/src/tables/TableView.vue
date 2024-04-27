@@ -1521,8 +1521,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles' as *;
+@use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/text-styles' as *;
 
 .table-view {
     --st-vertical-padding: 10px;

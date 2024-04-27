@@ -16,7 +16,7 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="createAdmin">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/account-add.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/account-add.svg">
                     <h2 class="style-title-list">
                         Nieuwe beheerder
                     </h2>
@@ -29,7 +29,7 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="editRoles(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin-role.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                     <h2 class="style-title-list">
                         Rollen beheren
                     </h2>

@@ -23,9 +23,13 @@
 
 <script lang="ts">
 import { FramedComponent,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Radio, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import Radio from "../inputs/Radio.vue";
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
+import STNavigationBar from "../navigation/STNavigationBar.vue";
+import STToolbar from "../navigation/STToolbar.vue";
 import { UIFilter } from './UIFilter';
 
 @Component({

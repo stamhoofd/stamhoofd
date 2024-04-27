@@ -4,9 +4,9 @@
             <div class="centered-message" @mousedown.stop="" @touchdown.stop="">
                 <div class="header">
                     <Spinner v-if="centeredMessage.type == 'loading'" class="" />
-                    <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg">
-                    <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
-                    <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg">
+                    <img v-else-if="centeredMessage.type == 'clock'" class="center" src="@stamhoofd/assets/images/illustrations/clock.svg">
+                    <img v-else-if="centeredMessage.type == 'health'" class="center" src="@stamhoofd/assets/images/illustrations/health-data.svg">
+                    <img v-else-if="centeredMessage.type == 'sync'" class="center" src="@stamhoofd/assets/images/illustrations/sync.svg">
                     <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
                 </div>
 
@@ -213,8 +213,8 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use '~@stamhoofd/scss/base/text-styles.scss';
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use '@stamhoofd/scss/base/text-styles.scss';
 
 .centered-message {
     position: fixed;

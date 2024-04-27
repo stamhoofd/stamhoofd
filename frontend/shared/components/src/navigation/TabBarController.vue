@@ -16,21 +16,18 @@
 
 <script lang="ts">
 import { FramedComponent, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { OrganizationLogo, STNavigationBar } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { TabBarItem } from "./TabBarItem";
 
 @Component({
     components: {
-        FramedComponent,
-        STNavigationBar,
-        OrganizationLogo
+        FramedComponent
     }
 })
 export default class TabBarController extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    items!: TabBarItem[]
+        items!: TabBarItem[]
 
     selectedItem: null | TabBarItem = null
 

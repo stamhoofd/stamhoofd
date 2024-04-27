@@ -162,7 +162,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
         }
     }
 
-    get unpatchedOrganizationEmail() {
+    get unpatchedOrganizationEmail(): OrganizationEmail | null {
         const organization = this.$organization
         for (const email of organization.privateMeta?.emails ?? []) {
             if (email.id === this.emailId) {
@@ -172,7 +172,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
         if (this.saving) {
             return OrganizationEmail.create({ email: "" })
         }
-        throw new Error("Email not found")
+        return null;
     }
 
     get organizationEmail() {

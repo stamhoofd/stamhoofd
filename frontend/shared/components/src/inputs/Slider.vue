@@ -236,7 +236,7 @@ export default class Slider extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 $slider-height: 6px;
 

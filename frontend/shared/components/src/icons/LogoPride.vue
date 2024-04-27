@@ -23,7 +23,7 @@
 </template>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 .stamhoofd-logo {
     display: inline-block;
     width: 179px;

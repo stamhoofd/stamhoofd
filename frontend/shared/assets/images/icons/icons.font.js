@@ -9,6 +9,7 @@ module.exports = {
   'types': ['woff2', 'woff'],
   'fileName': 'icons.[hash].[ext]',
   'cssTemplate': "./iconCss.hbs",
+  'cssFontsUrl': '/', // this is required to resolve the correct css path in case we are not on the root url
   "cssContext": function(ctx, options, handlebars) {
     // Move specific icons in a separate variable
     ctx.box_icons = {}

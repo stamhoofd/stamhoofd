@@ -13,7 +13,7 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="createUser">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop-add.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
                     <h2 class="style-title-list">
                         Nieuwe API-key
                     </h2>

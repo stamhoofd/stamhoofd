@@ -2,7 +2,7 @@
     <div class="pricing-box">
         <STList>
             <STListItem v-for="(item, index) of checkout.priceBreakown" :key="index">
-                {{item.name}}
+                {{ item.name }}
 
                 <template slot="right">
                     {{ item.price | price }}
@@ -14,10 +14,12 @@
 
 
 <script lang="ts">
-import { STList, STListItem } from '@stamhoofd/components';
 import { Checkout } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
 
 @Component({
     components: {
@@ -30,6 +32,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 })
 export default class CheckoutPriceBreakdown extends Vue {
     @Prop({required: true })
-    checkout: Checkout
+        checkout: Checkout
 }
 </script>

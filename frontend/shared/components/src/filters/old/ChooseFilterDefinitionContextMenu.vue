@@ -8,9 +8,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenuItemView, ContextMenuLine,ContextMenuView } from "@stamhoofd/components";
 import { Filter, FilterDefinition } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import ContextMenuItemView from "../../overlays/ContextMenuItemView.vue";
+import ContextMenuLine from "../../overlays/ContextMenuLine.vue";
+import ContextMenuView from "../../overlays/ContextMenuView.vue";
 
 @Component({
     components: {
@@ -21,16 +24,16 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 })
 export default class ChooseFilterDefinitionContextMenu extends Mixins(NavigationMixin) {    
     @Prop({ default: 0 })
-    x!: number;
+        x!: number;
 
     @Prop({ default: 0 })
-    y!: number;
+        y!: number;
 
     @Prop({ required: true })
-    definitions!: FilterDefinition<any, Filter<any>, any>[]
+        definitions!: FilterDefinition<any, Filter<any>, any>[]
 
     @Prop()
-    handler!: (definition: FilterDefinition<any, Filter<any>, any>) => void
+        handler!: (definition: FilterDefinition<any, Filter<any>, any>) => void
    
     chooseDefinition(definition) {
         this.handler(definition)

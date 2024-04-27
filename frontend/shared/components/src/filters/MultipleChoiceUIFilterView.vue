@@ -15,10 +15,11 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { StringFilterMode } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import Checkbox from "../inputs/Checkbox.vue";
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
 import { MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 
 @Component({
@@ -26,8 +27,6 @@ import { MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './Multiple
         STListItem,
         STList,
         Checkbox,
-        STNavigationBar,
-        STToolbar
     }
 })
 export default class MultipleChoiceUIFilterView extends Mixins(NavigationMixin) {

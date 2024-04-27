@@ -98,7 +98,7 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="downloadSettings(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/box-download.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/box-download.svg">
                     <h2 class="style-title-list">
                         Exporteer zaalplan
                     </h2>

@@ -13,7 +13,7 @@
 
         <STList class="illustration-list">    
             <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
-                <img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg">
+                <img slot="left" src="@stamhoofd/assets/images/illustrations/laptop.svg">
                 <h2 class="style-title-list">
                     API-keys
                 </h2>
@@ -24,7 +24,7 @@
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="downloadSettings(true)">
-                <img slot="left" src="~@stamhoofd/assets/images/illustrations/box-download.svg">
+                <img slot="left" src="@stamhoofd/assets/images/illustrations/box-download.svg">
                 <h2 class="style-title-list">
                     Exporteer instellingen
                 </h2>
@@ -37,7 +37,7 @@
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="uploadSettings(true)">
-                <img slot="left" src="~@stamhoofd/assets/images/illustrations/box-upload.svg">
+                <img slot="left" src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 <h2 class="style-title-list">
                     Importeer instellingen
                 </h2>

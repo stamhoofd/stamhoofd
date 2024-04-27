@@ -91,7 +91,7 @@ export default class ToastBox extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .toast-box {
     position: fixed;

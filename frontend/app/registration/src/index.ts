@@ -2,7 +2,8 @@
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
 // Load icon font
-require('@stamhoofd/assets/images/icons/icons.font');
+// require('@stamhoofd/assets/images/icons/icons.font');
+import 'virtual:vite-svg-2-webfont.css';
 
 import * as Sentry from "@sentry/vue";
 import { ViewportHelper, VueGlobalHelper } from "@stamhoofd/components";

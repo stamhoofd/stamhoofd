@@ -30,8 +30,9 @@
 </template>
 
 <script lang="ts">
-import { STInputBox } from "@stamhoofd/components"
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {
@@ -40,7 +41,7 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 })
 export default class PasswordStrength extends Vue {
     @Prop({ default: null })
-    value!: string | null
+        value!: string | null
 
     strength = 0
     duration = 0
@@ -136,7 +137,7 @@ export default class PasswordStrength extends Vue {
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .password-strength {
     width: 100%;

@@ -213,8 +213,8 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles';
+@use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/text-styles';
 
 .edit-regions-search-bar {
     display: block;

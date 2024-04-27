@@ -6,10 +6,13 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Country } from "@stamhoofd/structures"
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+
+import {ErrorBox} from "../errors/ErrorBox";
+import {Validator} from "../errors/Validator";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {

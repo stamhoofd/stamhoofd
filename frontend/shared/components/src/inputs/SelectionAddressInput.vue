@@ -22,9 +22,24 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput,ErrorBox, Radio,STErrorsDefault, STInputBox, STList,STListItem,Validator } from "@stamhoofd/components"
 import { Address, ValidatedAddress} from "@stamhoofd/structures"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+
+import {ErrorBox} from "../errors/ErrorBox";
+import STErrorsDefault from "../errors/STErrorsDefault.vue";
+import {Validator} from "../errors/Validator";
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
+import AddressInput from "./AddressInput.vue";
+import Checkbox from "./Checkbox.vue";
+import DateSelection from "./DateSelection.vue";
+import EmailInput from "./EmailInput.vue";
+import ImageInput from "./ImageInput.vue";
+import NumberInput from "./NumberInput.vue";
+import PhoneInput from "./PhoneInput.vue";
+import PriceInput from "./PriceInput.vue";
+import Radio from "./Radio.vue";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {
@@ -38,23 +53,23 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 })
 export default class SelectionAddressInput extends Vue {
     @Prop({ required: true }) 
-    addresses: Address[];
+        addresses: Address[];
 
     @Prop({ default: true })
-    required: boolean
+        required: boolean
 
     /**
      * Assign a validator if you want to offload the validation to components
      */
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     errorBox: ErrorBox | null = null
 
     internalValidator = new Validator()
     
     @Prop({ default: null })
-    value: Address | ValidatedAddress | null
+        value: Address | ValidatedAddress | null
 
     selectedAddress: Address | null = null
     customAddress: Address | null = null

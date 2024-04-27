@@ -24,8 +24,8 @@ export default class LoadingView extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles';
+@use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/text-styles';
 
 .loading-view {
     position: absolute;

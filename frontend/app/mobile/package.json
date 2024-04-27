@@ -2,14 +2,15 @@
   "name": "@stamhoofd/mobile",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "NODE_ENV=development ENV_FILE=../../.env.json webpack serve --hot",
-    "build": "NODE_ENV=development ENV_FILE=../../.env.json webpack --progress ",
+    "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
+    "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
+    "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build",
     "sync": "cap sync",
     "sync:production": "mv -n capacitor.config.ts capacitor.config.development.ts && mv -n capacitor.config.production.ts capacitor.config.ts; cap sync; mv -n capacitor.config.ts capacitor.config.production.ts && mv -n capacitor.config.development.ts capacitor.config.ts ",
     "ios": "cap open ios",
-    "android": "cap open android",
-    "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production webpack --performance-hints warning"
+    "android": "cap open android"
   },
   "dependencies": {
     "@capacitor-community/http": "1.4.1",

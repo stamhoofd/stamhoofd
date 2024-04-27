@@ -22,11 +22,13 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, TooltipDirective } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import Checkbox from "../inputs/Checkbox.vue";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
-
+import ContextMenuItemView from "./ContextMenuItemView.vue";
+import ContextMenuLine from "./ContextMenuLine.vue";
+import ContextMenuView from "./ContextMenuView.vue";
 
 @Component({
     components: {
@@ -34,14 +36,11 @@ import { ContextMenu, ContextMenuItem } from "./ContextMenu";
         ContextMenuItemView,
         ContextMenuLine,
         Checkbox
-    },
-    directives: {
-        tooltip: TooltipDirective
     }
 })
 export default class GeneralContextMenuView extends Mixins(NavigationMixin) {
     @Prop({ required: false })
-    menu: ContextMenu;
+        menu: ContextMenu;
 
     handleAction(item: ContextMenuItem, event) {
         if (!item.action || item.disabled) {

@@ -2,20 +2,22 @@
     font-family: "Metropolis";
     font-weight: bold;
     font-style: normal;
-    src: url("~@stamhoofd/assets/fonts/clarity-city/WOFF2/ClarityCity-Bold.woff2") format("woff2"),
-        url("~@stamhoofd/assets/fonts/clarity-city/WOFF/ClarityCity-Bold.woff") format("woff");
+    src: url("@stamhoofd/assets/fonts/clarity-city/WOFF2/ClarityCity-Bold.woff2") format("woff2"),
+        url("@stamhoofd/assets/fonts/clarity-city/WOFF/ClarityCity-Bold.woff") format("woff");
 }
+
 @font-face {
     font-family: "Metropolis";
     font-weight: 500;
     font-style: normal;
-    src: url("~@stamhoofd/assets/fonts/clarity-city/WOFF2/ClarityCity-Medium.woff2") format("woff2"),
-        url("~@stamhoofd/assets/fonts/clarity-city/WOFF/ClarityCity-Medium.woff") format("woff");
+    src: url("@stamhoofd/assets/fonts/clarity-city/WOFF2/ClarityCity-Medium.woff2") format("woff2"),
+        url("@stamhoofd/assets/fonts/clarity-city/WOFF/ClarityCity-Medium.woff") format("woff");
 }
+
 @font-face {
     font-family: "Metropolis";
     font-weight: 600;
     font-style: normal;
-    src: url("~@stamhoofd/assets/fonts/clarity-city/WOFF2/ClarityCity-SemiBold.woff2") format("woff2"),
-        url("~@stamhoofd/assets/fonts/clarity-city/WOFF/ClarityCity-SemiBold.woff") format("woff");
+    src: url("@stamhoofd/assets/fonts/clarity-city/WOFF2/ClarityCity-SemiBold.woff2") format("woff2"),
+        url("@stamhoofd/assets/fonts/clarity-city/WOFF/ClarityCity-SemiBold.woff") format("woff");
 }

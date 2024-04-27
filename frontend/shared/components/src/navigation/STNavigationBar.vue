@@ -168,9 +168,9 @@ export default class STNavigationBar extends Vue {
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use '~@stamhoofd/scss/layout/split-inputs.scss';
-@use '~@stamhoofd/scss/base/text-styles.scss';
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use '@stamhoofd/scss/layout/split-inputs.scss';
+@use '@stamhoofd/scss/base/text-styles.scss';
 
 .st-view > .st-navigation-bar.sticky {
     // Old sticky behaviour

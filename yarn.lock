@@ -2435,6 +2435,14 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.16.0.tgz#9df760744ffde43363056e1ffe276668cbcb7fbf"
   integrity sha512-41u4f+sR91YmEAyHoqLvqNmrrHZknwGBbs73QToV5vk4bCTam9eE4XQCBjcLBpVCbmWgDWdodzXChfMBV86e6A==
 
+"@simonbackx/vite-svg-2-webfont@^3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vite-svg-2-webfont/-/vite-svg-2-webfont-3.3.0.tgz#d2c7e36b4ca9996e4ce2150f2f7d08fda160bd61"
+  integrity sha512-76RNHGYWWVv0pgAAtlmmrbN231dJsZ1K0PfdUbr7stH6iWmZcV7jTQfgvbtaAfvW/1nwRu0pFL+r/ZLKLdMqFw==
+  dependencies:
+    "@vusion/webfonts-generator" "^0.8.0"
+    glob "^10.3.10"
+
 "@simonbackx/vue-app-navigation@1.28.0":
   version "1.28.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.28.0.tgz#88a5cfdbe029542109662090d7a14414ef782bcb"
@@ -13156,7 +13164,7 @@ vue-tsc@^2.0.14:
     "@vue/language-core" "2.0.14"
     semver "^7.5.4"
 
-vue@^2.6.14:
+vue@2.7.16, vue@^2.6.14:
   version "2.7.16"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.7.16.tgz#98c60de9def99c0e3da8dae59b304ead43b967c9"
   integrity sha512-4gCtFXaAA3zYZdTp5s4Hl2sozuySsgz4jy1EnpBHNfpMa9dK1ZCG7viqBPCwXtmgc8nHqUsAu3G4gtmXkkY3Sw==

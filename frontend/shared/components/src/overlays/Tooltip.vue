@@ -198,8 +198,8 @@ export default class Tooltip extends Vue {
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use '~@stamhoofd/scss/base/text-styles.scss';
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use '@stamhoofd/scss/base/text-styles.scss';
 
 .tooltip {
     position: fixed;

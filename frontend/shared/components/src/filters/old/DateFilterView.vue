@@ -69,9 +69,14 @@
 
 
 <script lang="ts">
-import { DateSelection, Radio, STList, STListItem, TimeInput } from "@stamhoofd/components"
 import { DateFilter, DateFilterMode } from "@stamhoofd/structures"
 import { Component, Prop,Vue } from "vue-property-decorator";
+
+import DateSelection from "../../inputs/DateSelection.vue";
+import Radio from "../../inputs/Radio.vue";
+import TimeInput from "../../inputs/TimeInput.vue";
+import STList from "../../layout/STList.vue";
+import STListItem from "../../layout/STListItem.vue";
 
 @Component({
     components: {
@@ -84,7 +89,7 @@ import { Component, Prop,Vue } from "vue-property-decorator";
 })
 export default class DateFilterView extends Vue {
     @Prop({ required: true }) 
-    filter: DateFilter<any>
+        filter: DateFilter<any>
 
     get DateFilterMode() {
         return DateFilterMode

@@ -65,9 +65,13 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { FilterEditor, Radio,STInputBox, STList, STListItem } from '@stamhoofd/components';
 import { FilterDefinition, FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import Radio from "../../inputs/Radio.vue";
+import STList from "../../layout/STList.vue";
+import STListItem from "../../layout/STListItem.vue";
+import FilterEditor from './FilterEditor.vue';
+import STInputBox from "../../inputs/STInputBox.vue";
 
 @Component({
     components: {

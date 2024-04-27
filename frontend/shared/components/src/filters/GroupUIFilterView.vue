@@ -35,20 +35,18 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Dropdown, STInputBox, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
 import { GroupUIFilter } from "./GroupUIFilter";
 import { UIFilter, UIFilterBuilder } from "./UIFilter";
 import UIFilterEditor from "./UIFilterEditor.vue";
 
 @Component({
     components: {
-        STInputBox,
         STListItem,
         STList,
-        Dropdown,
-        STNavigationBar
     }
 })
 export default class GroupUIFilterView extends Mixins(NavigationMixin)  {

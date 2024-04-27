@@ -361,8 +361,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin, M
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use "~@stamhoofd/scss/base/text-styles.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .organization-selection-view {
     max-width: 600px;

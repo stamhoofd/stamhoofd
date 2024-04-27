@@ -21,10 +21,10 @@
     "vetur.validation.template": false,
     "vetur.format.enable": false,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "never"
+        "source.fixAll.eslint": "always"
     },
     "editor.formatOnPaste": false,
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
     "eslint.format.enable": false,
     "eslint.validate": [
         "typescript",

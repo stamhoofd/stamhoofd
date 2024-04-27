@@ -20,8 +20,8 @@
 
                     <STList>
                         <STListItem v-for="webshop of webshops" :key="webshop.id" element-name="a" :selectable="true" :href="'https://'+webshop.getUrl(organization)" class="left-center">
-                            <img v-if="webshop.meta.hasTickets" slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg" class="style-illustration-img">
-                            <img v-else slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
+                            <img v-if="webshop.meta.hasTickets" slot="left" src="@stamhoofd/assets/images/illustrations/tickets.svg" class="style-illustration-img">
+                            <img v-else slot="left" src="@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
                             <h3 class="style-title-list">
                                 {{ webshop.meta.name }}
                             </h3>

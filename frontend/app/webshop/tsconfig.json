@@ -1,9 +1,3 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "resolveJsonModule": true,
-        "composite": true,
-        "rootDir": "./../../../",
-        "baseUrl": "./"
-    }
+    "extends": "../../tsconfig.json"
 }

@@ -7,8 +7,8 @@
 
             <STList class="illustration-list">
                 <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="selectMember(member)">
-                    <img v-if="member.details.gender === 'Female'" slot="left" src="~@stamhoofd/assets/images/illustrations/member-female.svg">
-                    <img v-else slot="left" src="~@stamhoofd/assets/images/illustrations/member-male.svg">
+                    <img v-if="member.details.gender === 'Female'" slot="left" src="@stamhoofd/assets/images/illustrations/member-female.svg">
+                    <img v-else slot="left" src="@stamhoofd/assets/images/illustrations/member-male.svg">
 
                     <h2 class="style-title-list">
                         {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
@@ -20,7 +20,7 @@
                 </STListItem>
 
                 <STListItem v-if="isAcceptingNewMembers" class="right-stack" :selectable="true" @click="addNewMember">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/account-add.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/account-add.svg">
 
                     <h2 class="style-title-list">
                         Nieuw lid toevoegen
@@ -40,7 +40,6 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
-
 
 import { createMemberComponent } from "../../members/details/createMemberComponent";
 import MemberChooseGroupsView from "../../members/MemberChooseGroupsView.vue";

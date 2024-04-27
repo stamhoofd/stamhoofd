@@ -59,9 +59,13 @@
 
 
 <script lang="ts">
-import { NumberInput,Radio, STList, STListItem } from "@stamhoofd/components"
 import { NumberFilter, NumberFilterMode } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
+
+import NumberInput from "../../inputs/NumberInput.vue";
+import Radio from "../../inputs/Radio.vue";
+import STList from "../../layout/STList.vue";
+import STListItem from "../../layout/STListItem.vue";
 
 @Component({
     components: {
@@ -73,7 +77,7 @@ import { Component, Prop,Vue } from "vue-property-decorator";
 })
 export default class NumberFilterView extends Vue {
     @Prop({ required: true }) 
-    filter: NumberFilter<any>
+        filter: NumberFilter<any>
 
     get NumberFilterMode() {
         return NumberFilterMode

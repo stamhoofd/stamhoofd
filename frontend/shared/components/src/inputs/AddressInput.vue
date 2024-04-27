@@ -22,10 +22,14 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
-import { Dropdown,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Address, Country, CountryHelper, ValidatedAddress} from "@stamhoofd/structures"
+import { Address, Country, CountryHelper, ValidatedAddress } from "@stamhoofd/structures";
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+
+import {ErrorBox} from "../errors/ErrorBox";
+import {Validator} from "../errors/Validator";
+import Dropdown from './Dropdown.vue';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
@@ -35,35 +39,35 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 })
 export default class AddressInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     /**
      * Assign a validator if you want to offload the validation to components
      */
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     errorBox: ErrorBox | null = null
     pendingErrorBox: ErrorBox | null = null
     
     @Prop({ default: null })
-    value: Address | ValidatedAddress | null
+        value: Address | ValidatedAddress | null
 
     /**
      * Validate on the server or not? -> will return a ValidatedAddress if this is true
      */
     @Prop({ default: null })
-    validateServer: Server | null
+        validateServer: Server | null
 
     @Prop({ default: true })
-    required: boolean
+        required: boolean
 
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
-    nullable!: boolean
+        nullable!: boolean
 
     addressLine1 = ""
     city = ""
@@ -71,7 +75,7 @@ export default class AddressInput extends Vue {
     country = this.getDefaultCountry()
 
     @Prop({ default: false })
-    linkCountryToLocale: boolean
+        linkCountryToLocale: boolean
 
     getDefaultCountry() {
         return I18nController.shared?.country ?? Country.Belgium

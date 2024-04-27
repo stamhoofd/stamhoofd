@@ -140,7 +140,7 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .multi-select-container {
     .input.placeholder {

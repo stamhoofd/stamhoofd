@@ -58,7 +58,7 @@ export default class STList extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .st-list {
     padding: 0;

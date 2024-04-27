@@ -50,9 +50,12 @@
 
 
 <script lang="ts">
-import { Radio, STList, STListItem } from "@stamhoofd/components"
 import { StringFilter, StringFilterMode } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
+
+import Radio from "../../inputs/Radio.vue";
+import STList from "../../layout/STList.vue";
+import STListItem from "../../layout/STListItem.vue";
 
 @Component({
     components: {

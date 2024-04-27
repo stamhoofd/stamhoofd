@@ -24,35 +24,36 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, STNavigationBar } from "@stamhoofd/components";
-import { BackButton, PropertyFilterInput, STToolbar } from "@stamhoofd/components";
 import { FilterDefinition, Organization, PropertyFilter, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import STNavigationBar from "../../navigation/STNavigationBar.vue";
+import STToolbar from "../../navigation/STToolbar.vue";
+import { CenteredMessage } from "../../overlays/CenteredMessage";
+import PropertyFilterInput from "./PropertyFilterInput.vue";
 
 @Component({
     components: {
         STNavigationBar,
-        BackButton,
         PropertyFilterInput,
         STToolbar
     },
 })
 export default class PropertyFilterView extends Mixins(NavigationMixin) {
     @Prop({ default: "" })
-    title!: string
+        title!: string
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
 
     @Prop({ required: true })
-    definitions: FilterDefinition[]
+        definitions: FilterDefinition[]
 
     @Prop({ required: true })
-    configuration!: PropertyFilter<any>
+        configuration!: PropertyFilter<any>
 
     @Prop({ required: true })
-    setConfiguration: (configuration: PropertyFilter<any>) => void
+        setConfiguration: (configuration: PropertyFilter<any>) => void
 
     editingConfiguration: PropertyFilter<any> = this.configuration
 

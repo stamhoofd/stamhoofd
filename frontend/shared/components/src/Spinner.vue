@@ -9,7 +9,7 @@
 </template>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .spinner-container > div.spinner {
     display: block;

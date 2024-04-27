@@ -17,7 +17,7 @@
 
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .st-gradient-background {
     pointer-events: none;

@@ -50,7 +50,7 @@
 
                         <STList>
                             <STListItem v-if="cart.count" class="left-center right-stack" :selectable="true" @click="openCart(true)">
-                                <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
+                                <img slot="left" src="@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
                                 <h3 class="style-title-list">
                                     Mandje afrekenen
                                 </h3>
@@ -66,7 +66,7 @@
                             </STListItem>
 
                             <STListItem v-for="member of membersWithMissingData" :key="'missing'+member.id" class="left-center" :selectable="true" @click="fillInMemberMissingData(member)">
-                                <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg" class="style-illustration-img">
+                                <img slot="left" src="@stamhoofd/assets/images/illustrations/health-data.svg" class="style-illustration-img">
                                 <h3 class="style-title-list">
                                     Vul ontbrekende gegevens aan van {{ member.details.firstName }}
                                 </h3>
@@ -78,7 +78,7 @@
                             </STListItem>
 
                             <STListItem v-if="notYetPaidBalance > 0" class="left-center" :selectable="true" @click="managePayments(true)">
-                                <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img">
+                                <img slot="left" src="@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img">
                                 <h3 class="style-title-list">
                                     Betaal jouw openstaand bedrag
                                 </h3>
@@ -90,7 +90,7 @@
                             </STListItem>
 
                             <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
-                                <img v-if="!suggestion.group" slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
+                                <img v-if="!suggestion.group" slot="left" src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
                                 <template v-else slot="left">
                                     <figure v-if="suggestion.group.squareImage" class="registration-image">
                                         <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
@@ -124,7 +124,7 @@
 
                     <STList class="illustration-list">    
                         <STListItem v-if="members.length || isAcceptingNewMembers" :selectable="true" class="left-center" @click="registerMember">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                            <img slot="left" src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                             <h2 class="style-title-list">
                                 Lid inschrijven
                             </h2>
@@ -135,7 +135,7 @@
                         </STListItem>
 
                         <STListItem v-if="members.length" :selectable="true" class="left-center" @click="checkData">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/magnifier.svg">
+                            <img slot="left" src="@stamhoofd/assets/images/illustrations/magnifier.svg">
                             <h2 class="style-title-list">
                                 Gegevens en inschrijvingen nakijken
                             </h2>
@@ -146,7 +146,7 @@
                         </STListItem>
 
                         <STListItem v-if="members.length" :selectable="true" class="left-center" @click="managePayments(true)">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
+                            <img slot="left" src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                             <h2 class="style-title-list">
                                 Afrekeningen en openstaande rekening
                             </h2>
@@ -157,7 +157,7 @@
                         </STListItem>
 
                         <STListItem :selectable="true" class="left-center" @click="manageAccount">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                            <img slot="left" src="@stamhoofd/assets/images/illustrations/admin.svg">
                             <h2 class="style-title-list">
                                 Account wijzigen
                             </h2>

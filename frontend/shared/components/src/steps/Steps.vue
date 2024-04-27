@@ -65,8 +65,8 @@ export default class Steps extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles' as *;
+@use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/text-styles' as *;
 
 .steps-layout {
     min-height: 100vh;

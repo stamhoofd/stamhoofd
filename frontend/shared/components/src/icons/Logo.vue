@@ -21,7 +21,7 @@
 </template>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .logo-container {
     gap: 10px;

@@ -19,7 +19,8 @@ import STErrorBox from "./STErrorBox.vue"
     components: {
         STErrorBox
     }
-})export default class STErrorsDefault extends Vue {
+})
+export default class STErrorsDefault extends Vue {
     @Prop() 
     errorBox: ErrorBox | null;
     

@@ -51,19 +51,19 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Radio, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { StringFilterMode } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import Radio from "../inputs/Radio.vue";
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
 import { StringUIFilter } from './StringUIFilter';
 
 @Component({
     components: {
         STListItem,
         STList,
-        Radio,
-        STNavigationBar,
-        STToolbar
+        Radio
     }
 })
 export default class StringUIFilterView extends Mixins(NavigationMixin) {

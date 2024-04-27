@@ -209,9 +209,9 @@ export default class App extends Vue {
 
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
-@use "~@stamhoofd/scss/main";
-@import "~@simonbackx/vue-app-navigation/dist/main.css";
-@import "~@stamhoofd/scss/base/dark-modus";
+@use "@stamhoofd/scss/main";
+@import "@simonbackx/vue-app-navigation/dist/main.css";
+@import "@stamhoofd/scss/base/dark-modus";
 
 body {
     --st-sheet-width: 450px;

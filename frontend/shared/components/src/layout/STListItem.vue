@@ -43,8 +43,8 @@ export default class STListItem extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles' as *;
+@use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/text-styles' as *;
 
 .st-list-description {
     @extend .style-description;

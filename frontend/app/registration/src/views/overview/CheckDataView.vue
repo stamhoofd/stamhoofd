@@ -19,8 +19,8 @@
 
                 <STList class="illustration-list">
                     <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
-                        <img v-if="member.details.gender === 'Female'" slot="left" src="~@stamhoofd/assets/images/illustrations/member-female.svg">
-                        <img v-else slot="left" src="~@stamhoofd/assets/images/illustrations/member-male.svg">
+                        <img v-if="member.details.gender === 'Female'" slot="left" src="@stamhoofd/assets/images/illustrations/member-female.svg">
+                        <img v-else slot="left" src="@stamhoofd/assets/images/illustrations/member-male.svg">
 
                         <h2 class="style-title-list">
                             {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
@@ -48,7 +48,7 @@
 
                 <STList class="illustration-list">
                     <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/admin.svg">
 
                         <h2 class="style-title-list">
                             {{ parent.firstName }} {{ parent.lastName || "" }}
@@ -79,7 +79,7 @@
 
                 <STList class="illustration-list">
                     <STListItem v-for="address in addresses" :key="address.id" class="right-stack" :selectable="true" @click.stop="editAddress(address)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/house.svg">
 
                         <h2 class="style-title-list">
                             {{ address.street }} {{ address.number }}
@@ -104,7 +104,6 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { Address, MemberWithRegistrations, Parent } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
-
 
 import AddressView from "../members/details/AddressView.vue";
 import { createMemberComponent } from "../members/details/createMemberComponent";

@@ -16,12 +16,13 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { STInputBox, Toast, Validator } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
 import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { Validator } from "../errors/Validator";
 import LoadingButton from "../navigation/LoadingButton.vue";
+import { Toast } from "../overlays/Toast";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {

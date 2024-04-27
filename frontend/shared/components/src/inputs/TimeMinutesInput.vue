@@ -6,10 +6,24 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
+import {ErrorBox} from "../errors/ErrorBox";
+import STErrorsDefault from "../errors/STErrorsDefault.vue";
+import {Validator} from "../errors/Validator";
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
+import AddressInput from "./AddressInput.vue";
+import Checkbox from "./Checkbox.vue";
+import DateSelection from "./DateSelection.vue";
+import EmailInput from "./EmailInput.vue";
+import ImageInput from "./ImageInput.vue";
+import NumberInput from "./NumberInput.vue";
+import PhoneInput from "./PhoneInput.vue";
+import PriceInput from "./PriceInput.vue";
+import Radio from "./Radio.vue";
+import STInputBox from "./STInputBox.vue";
 @Component({
     components: {
         STInputBox
@@ -17,29 +31,29 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 })
 export default class TimeMinutesInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
     
 
     timeRaw = "";
     valid = true;
 
     @Prop({ default: null })
-    value!: number | null
+        value!: number | null
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     @Prop({ default: false })
-    disabled!: boolean
+        disabled!: boolean
 
     @Prop({ default: "" })
-    placeholder!: string
+        placeholder!: string
 
     @Prop({ default: "" })
-    autocomplete!: string
+        autocomplete!: string
 
     errorBox: ErrorBox | null = null
 

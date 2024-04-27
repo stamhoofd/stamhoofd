@@ -1,50 +1,42 @@
 {
     "compilerOptions": {
-        "baseUrl": "../",
-        "rootDir": "../",
-        "target": "es2017",
-        "module": "esnext",
+        "target": "ES2020",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "lib": [
+            "ES2020",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "skipLibCheck": true,
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
         "jsx": "preserve",
-        "importHelpers": true,
-        "moduleResolution": "node",
+        /* Linting */
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
         "experimentalDecorators": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
         "sourceMap": true,
         "strictNullChecks": true,
-        "lib": [
-            "esnext",
-            "dom",
-            "dom.iterable",
-            "scripthost"
-        ],
-        "types": [
-            "node",
-            "jest"
-        ],
-        "composite": true,
-        "resolveJsonModule": true
+        "importHelpers": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
     },
-    "files": [],
     "include": [
-        "**/*",
         "../*.d.ts",
-        "*.d.ts"
-    ],
-    "exclude": [
-        "node_modules",
+        "*.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.vue"
     ],
     "references": [
-        { "path": "./app/registration" },
-        { "path": "./app/dashboard" },
-        { "path": "./app/registration" },
-        { "path": "./app/mobile" },
-        { "path": "./shared/components" },
-        { "path": "./shared/assets" },
-        { "path": "./shared/document-helper" },
-        { "path": "./shared/i18n" },
-        { "path": "./shared/networking" },
-        { "path": "./shared/scss" },
-        { "path": "./shared/ticket-builder" }
+        {
+            "path": "./tsconfig.node.json"
+        }
     ]
 }

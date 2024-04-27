@@ -81,21 +81,20 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Dropdown,FilterEditor,STInputBox, STListItem } from "@stamhoofd/components"
 import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, GroupFilterMode, NumberFilter, Organization, RegistrationsFilter, StringFilter } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import Dropdown from "../../inputs/Dropdown.vue"
 import ChoicesFilterView from "./ChoicesFilterView.vue"
 import ChooseFilterDefinitionContextMenu from "./ChooseFilterDefinitionContextMenu.vue";
 import DateFilterView from "./DateFilterView.vue"
+import FilterEditor from "./FilterEditor.vue";
 import NumberFilterView from "./NumberFilterView.vue"
 import RegistrationsFilterView from "./RegistrationsFilterView.vue"
 import StringFilterView from "./StringFilterView.vue"
 
 @Component({
     components: {
-        STInputBox,
-        STListItem,
         StringFilterView,
         NumberFilterView,
         ChoicesFilterView,

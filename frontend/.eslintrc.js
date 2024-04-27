@@ -79,7 +79,8 @@ module.exports = {
                 // Warning: the eslint indent rule is a bit broken (check github issue). Disabled for now. Enabled temporarily if needed
                 "indent": "off",
                 "@typescript-eslint/indent": ["warn", 4],
-                "getter-return": "off" // doesn't work with TypeScript
+                "getter-return": "off", // doesn't work with TypeScript
+                "vue/no-unused-components": "warn"
             },
         }
     ]

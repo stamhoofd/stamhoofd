@@ -78,9 +78,24 @@
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, ImageInput, NumberInput, PhoneInput,PriceInput, Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
+
+import {ErrorBox} from "../errors/ErrorBox";
+import STErrorsDefault from "../errors/STErrorsDefault.vue";
+import {Validator} from "../errors/Validator";
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
+import AddressInput from "./AddressInput.vue";
+import Checkbox from "./Checkbox.vue";
+import DateSelection from "./DateSelection.vue";
+import EmailInput from "./EmailInput.vue";
+import ImageInput from "./ImageInput.vue";
+import NumberInput from "./NumberInput.vue";
+import PhoneInput from "./PhoneInput.vue";
+import PriceInput from "./PriceInput.vue";
+import Radio from "./Radio.vue";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {

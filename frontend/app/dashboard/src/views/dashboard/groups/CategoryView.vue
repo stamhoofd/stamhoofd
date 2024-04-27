@@ -110,7 +110,7 @@
                     <h2>Vorige periodes</h2>
                     <STList class="illustration-list">
                         <STListItem v-for="offset in cycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openAll(true, offset)">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
+                            <img slot="left" src="@stamhoofd/assets/images/illustrations/package-members.svg">
                             <h2 v-if="offset === 1" class="style-title-list">
                                 Vorige inschrijvingsperiode
                             </h2>

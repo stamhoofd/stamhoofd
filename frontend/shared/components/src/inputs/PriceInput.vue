@@ -199,7 +199,7 @@ export default class PriceInput extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .price-input {
     position: relative;

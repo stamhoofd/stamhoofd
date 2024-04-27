@@ -41,7 +41,7 @@ export default class GroupAvatar extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .group-avatar {
     .letter-logo {

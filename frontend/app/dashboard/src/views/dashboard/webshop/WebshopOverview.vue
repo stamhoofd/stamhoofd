@@ -15,7 +15,7 @@
 
             <STList class="illustration-list">    
                 <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openOrders(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/cart.svg">
                     <h2 class="style-title-list">
                         Bestellingen
                     </h2>
@@ -26,7 +26,7 @@
                 </STListItem>
 
                 <STListItem v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center" @click="openSeating(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/seating-plan.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/seating-plan.svg">
                     <h2 class="style-title-list">
                         Zaaloverzicht
                     </h2>
@@ -37,7 +37,7 @@
                 </STListItem>
 
                 <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" @click="openTickets(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/scanner.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/scanner.svg">
                     <h2 class="style-title-list">
                         Scan tickets
                     </h2>
@@ -48,7 +48,7 @@
                 </STListItem>
 
                 <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openStatistics(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/diagram.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/diagram.svg">
                     <h2 class="style-title-list">
                         Statistieken
                     </h2>
@@ -59,7 +59,7 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" element-name="a" :href="'https://'+webshopUrl" target="_blank">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/earth.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/earth.svg">
                     <h2 class="style-title-list">
                         Bekijk jouw webshop
                     </h2>
@@ -76,7 +76,7 @@
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/flag.svg">
                         <h2 class="style-title-list">
                             Algemeen
                         </h2>
@@ -87,7 +87,7 @@
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-package.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/edit-package.svg">
                         <h2 class="style-title-list">
                             Productaanbod
                         </h2>
@@ -98,7 +98,7 @@
                     </STListItem>
 
                     <STListItem v-else :selectable="true" class="left-center" @click="editProducts(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/tickets.svg">
                         <h2 class="style-title-list">
                             Aanbod tickets en vouchers
                         </h2>
@@ -109,7 +109,7 @@
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/bike.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/bike.svg">
                         <h2 class="style-title-list">
                             Afhalen, leveren, ter plaatse eten
                         </h2>
@@ -120,7 +120,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPaymentMethods(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         <h2 class="style-title-list">
                             Betaalmethodes
                         </h2>
@@ -131,7 +131,7 @@
                     </STListItem>
 
                     <STListItem v-if="getFeatureFlag('webshop-discounts')" :selectable="true" class="left-center" @click="editDiscounts(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/discount.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/discount.svg">
                         <h2 class="style-title-list">
                             Kortingen
                         </h2>
@@ -142,7 +142,7 @@
                     </STListItem>
 
                     <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
                             Vrije invoervelden
                         </h2>
@@ -155,7 +155,7 @@
                     </STListItem>
 
                     <STListItem v-else :selectable="true" class="left-center" @click="editRecordSettings(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
                             Vragenlijsten en gegevens
                         </h2>
@@ -166,7 +166,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/lock.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/lock.svg">
                         <h2 class="style-title-list">
                             Toegangsbeheer
                         </h2>
@@ -177,7 +177,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editNotifications(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/notifications.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/notifications.svg">
                         <h2 class="style-title-list">
                             Meldingen
                         </h2>
@@ -193,7 +193,7 @@
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/palette.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/palette.svg">
                         <h2 class="style-title-list">
                             Tekst, uiterlijk, en externe links
                         </h2>
@@ -204,7 +204,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editLink(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/compass.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/compass.svg">
                         <h2 class="style-title-list">
                             Link
                         </h2>
@@ -215,7 +215,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg">
+                        <img slot="left" src="@stamhoofd/assets/images/illustrations/email.svg">
                         <h2 class="style-title-list">
                             E-mails
                         </h2>
@@ -329,7 +329,6 @@ import { EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, Webshop
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
@@ -367,7 +366,35 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     loading = false
 
-    webshopManager = new WebshopManager(this.$context, this.preview)
+    webshopManager = new WebshopManager(this.$context, (this.$props! as unknown as any).preview)
+
+    constructor() {
+        super()
+        console.log('Constructed new WebshopOverview', (this as any).$options.props)
+
+        // Fix
+        // proxy to actual vm
+        const keys = Object.getOwnPropertyNames(this)
+        // 2.2.0 compat (props are no longer exposed as self properties)
+        if (this.$options.props) {
+            for (const key in this.$options.props) {
+                if (!Object.prototype.hasOwnProperty.call(this, key)) {
+                    console.log('does not has own property', key)
+                    keys.push(key)
+                } else {
+                    console.log('has own property', key)
+                }
+            }
+        }
+        console.log('keys', keys)
+        // keys.forEach(key => {
+        //     Object.defineProperty(this, key, {
+        //         get: () => this[key],
+        //         set: value => { this[key] = value },
+        //         configurable: true
+        //     })
+        // })
+    }
 
     reload() {
         this.loading = true;

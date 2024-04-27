@@ -2,26 +2,26 @@
     <STListItem class="cart-item-row" :selectable="editable" @click="editItem()">
         <h3>
             <span>{{ cartItem.product.name }}</span>
-            <span class="icon arrow-right-small gray" v-if="editable" />
+            <span v-if="editable" class="icon arrow-right-small gray" />
         </h3>
         <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
-        <p class="discount-tags" v-if="labels.length > 0">
-            <span class="style-tag discount" v-for="discount of labels" :key="discount.id">
-                {{discount.cartLabel}}
+        <p v-if="labels.length > 0" class="discount-tags">
+            <span v-for="discount of labels" :key="discount.id" class="style-tag discount">
+                {{ discount.cartLabel }}
             </span>
         </p>
 
         <footer>
-            <p class="price" v-if="!cartItem.getFormattedPriceWithDiscount()">
+            <p v-if="!cartItem.getFormattedPriceWithDiscount()" class="price">
                 {{ cartItem.getFormattedPriceWithoutDiscount() }}
             </p>
-            <p class="price" v-else>
+            <p v-else class="price">
                 <span class="style-discount-old-price">{{ cartItem.getFormattedPriceWithoutDiscount() }}</span>
-                <span class="style-discount-price">{{cartItem.getFormattedPriceWithDiscount()}}</span>
+                <span class="style-discount-price">{{ cartItem.getFormattedPriceWithDiscount() }}</span>
             </p>
             <div @click.stop>
-                <span class="amount" v-if="cartItem.formattedAmount">{{cartItem.formattedAmount}}</span>
+                <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
                 <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length == 0 && (maximumRemaining === null || maximumRemaining > 1)" :value="cartItem.amount" :min="1" :max="maximumRemaining" @input="setAmount($event)" @click.native.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
             </div>
@@ -30,7 +30,7 @@
         <p v-if="cartItem.cartError" class="error-box small">
             {{ cartItem.cartError.getHuman() }}
 
-            <span class="button text" v-if="editable">
+            <span v-if="editable" class="button text">
                 <span>Corrigeren</span>
                 <span class="icon arrow-right-small" />
             </span>
@@ -44,19 +44,19 @@
 
 
 <script lang="ts">
-import { ImageComponent, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Cart, CartItem, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
+import StepperInput from '../inputs/StepperInput.vue';
+import STList from '../layout/STList.vue';
+import STListItem from '../layout/STListItem.vue';
+import ImageComponent from './ImageComponent.vue';
+
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
-        STErrorsDefault,
-        LoadingButton,
         StepperInput,
         ImageComponent
     },
@@ -66,19 +66,19 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 })
 export default class CartItemRow extends Vue {
     @Prop({required: true })
-    cart: Cart
+        cart: Cart
 
     @Prop({required: true })
-    webshop: Webshop
+        webshop: Webshop
 
     @Prop({default: false })
-    admin: boolean
+        admin: boolean
 
     @Prop({required: true })
-    cartItem: CartItem
+        cartItem: CartItem
 
     @Prop({required: false, default: false })
-    editable: boolean
+        editable: boolean
 
     editItem() {
         if (!this.editable) {

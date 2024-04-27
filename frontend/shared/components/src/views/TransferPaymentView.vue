@@ -90,7 +90,7 @@
 
                 <STList>
                     <STListItem element-name="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
-                        <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
+                        <img slot="left" class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg">
                         <h3 class="style-title-list">
                             KBC Mobile
                         </h3>
@@ -100,7 +100,7 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'bepingib://'">
-                        <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
+                        <img slot="left" class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg">
                         <h3 class="style-title-list">
                             ING Banking
                         </h3>
@@ -110,7 +110,7 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'BEPbelfius://'">
-                        <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
+                        <img slot="left" class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg">
                         <h3 class="style-title-list">
                             Belfius Mobile
                         </h3>
@@ -120,7 +120,7 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'easybanking://'">
-                        <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
+                        <img slot="left" class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png">
                         <h3 class="style-title-list">
                             Easy Banking App (BNP Paribas Fortis)
                         </h3>
@@ -130,7 +130,7 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'BEPargenta://'">
-                        <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
+                        <img slot="left" class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
                         <h3 class="style-title-list">
                             Argenta-app
                         </h3>
@@ -140,7 +140,7 @@
                     </STListItem>
 
                     <STListItem element-name="a" :href="'HBApp://'">
-                        <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/hello-bank/app.png">
+                        <img slot="left" class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png">
                         <h3 class="style-title-list">
                             Hello Bank! app
                         </h3>

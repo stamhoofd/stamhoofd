@@ -52,7 +52,7 @@ export default class OrganizationAvatar extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .organization-avatar {
     .letter-logo {

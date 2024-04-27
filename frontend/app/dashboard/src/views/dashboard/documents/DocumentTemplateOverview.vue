@@ -20,7 +20,7 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openDocuments">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/agreement.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     <h2 class="style-title-list">
                         Documenten
                     </h2>
@@ -31,7 +31,7 @@
                 </STListItem>
 
                 <STListItem v-if="isDraft || template.updatesEnabled" :selectable="true" class="left-center" @click="editSettings">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     <h2 class="style-title-list">
                         Instellingen
                     </h2>
@@ -42,7 +42,7 @@
                 </STListItem>
 
                 <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/code-export.svg">
+                    <img slot="left" src="@stamhoofd/assets/images/illustrations/code-export.svg">
                     <h2 class="style-title-list">
                         Exporteren naar XML
                     </h2>

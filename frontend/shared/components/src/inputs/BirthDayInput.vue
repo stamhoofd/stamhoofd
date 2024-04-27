@@ -40,31 +40,33 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Dropdown,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Formatter } from "@stamhoofd/utility"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
+import {ErrorBox} from "../errors/ErrorBox";
+import {Validator} from "../errors/Validator";
+import STInputBox from "./STInputBox.vue";
+
 @Component({
     components: {
-        STInputBox,
-        Dropdown
+        STInputBox
     }
 })
 export default class BirthDayInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     @Prop({ default: null})
-    value!: Date | null
+        value!: Date | null
 
     /**
      * Assign a validator if you want to offload the validation to components
      */
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     errorBox: ErrorBox | null = null
 
@@ -143,8 +145,8 @@ export default class BirthDayInput extends Vue {
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/text-styles.scss" as *;
-@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .input.birth-day-selection {
     padding-right: 0;

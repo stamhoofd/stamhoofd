@@ -77,8 +77,8 @@ export default class ToastView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles' as *;
+@use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/text-styles' as *;
 
 .toast-view-container {
     padding: 5px 0;

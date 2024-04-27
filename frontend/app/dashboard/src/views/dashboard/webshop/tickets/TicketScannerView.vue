@@ -54,8 +54,6 @@ import { sleep } from "@stamhoofd/utility";
 import QrScanner from 'qr-scanner';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import QrScannerWorkerPath from '!!file-loader!qr-scanner/qr-scanner-worker.min.js';
-
 import { WebshopManager } from "../WebshopManager";
 import TicketAlreadyScannedView from "./status/TicketAlreadyScannedView.vue";
 import ValidTicketView from "./status/ValidTicketView.vue";
@@ -513,8 +511,6 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
             return
         }
-
-        QrScanner.WORKER_PATH = QrScannerWorkerPath;
 
         if (this.pollInterval) {
             clearInterval(this.pollInterval)

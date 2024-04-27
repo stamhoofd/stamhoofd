@@ -52,16 +52,13 @@
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, patchContainsChanges, PatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
-import { SessionManager } from '@stamhoofd/networking';
-import { PermissionLevel, PermissionRole, Permissions, User, Version } from "@stamhoofd/structures";
+import { PermissionLevel, Permissions, User, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-
-import AdminRolesView from './AdminRolesView.vue';
 import EditUserPermissionsBox from './EditUserPermissionsBox.vue';
 
 @Component({

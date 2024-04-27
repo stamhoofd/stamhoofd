@@ -11,8 +11,11 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+
+import {ErrorBox} from "../errors/ErrorBox";
+import {Validator} from "../errors/Validator";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {
@@ -160,7 +163,7 @@ export default class ColorInput extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 
 .color-input-box {

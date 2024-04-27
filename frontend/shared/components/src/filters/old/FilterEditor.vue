@@ -24,15 +24,19 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, FilterGroupView, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Filter, FilterDefinition, FilterGroup, Organization } from "@stamhoofd/structures";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
+import Checkbox from "../../inputs/Checkbox.vue";
+import STList from "../../layout/STList.vue";
+import STListItem from "../../layout/STListItem.vue";
+import STNavigationBar from "../../navigation/STNavigationBar.vue";
+import STToolbar from "../../navigation/STToolbar.vue";
+import FilterGroupView from "./FilterGroupView.vue";
 
 @Component({
     components: {
         STNavigationBar,
-        BackButton,
         FilterGroupView,
         STToolbar
     },

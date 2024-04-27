@@ -6,9 +6,12 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Country } from '@stamhoofd/structures';
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+
+import {ErrorBox} from "../errors/ErrorBox";
+import {Validator} from "../errors/Validator";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {
@@ -17,10 +20,10 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 })
 export default class CompanyNumberInput extends Vue {
     @Prop({ required: true }) 
-    country!: Country;
+        country!: Country;
 
     @Prop({ default: "" })
-    title: string;
+        title: string;
 
     get calculatedTitle() {
         if (this.title) {
@@ -33,22 +36,22 @@ export default class CompanyNumberInput extends Vue {
     }
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
     
     companyNumberRaw = "";
     valid = true;
 
     @Prop({ default: null })
-    value!: string | null
+        value!: string | null
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     @Prop({ default: "Vul jouw BTW-nummer hier in" })
-    placeholder!: string
+        placeholder!: string
 
     @Prop({ default: "vat number" })
-    autocomplete!: string
+        autocomplete!: string
 
     errorBox: ErrorBox | null = null
 

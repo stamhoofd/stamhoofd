@@ -15,7 +15,7 @@ export default class STButtonToolbar extends Vue {
 </script>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .st-button-toolbar {
     margin: 0;

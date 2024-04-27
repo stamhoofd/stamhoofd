@@ -281,9 +281,9 @@ export default class App extends Vue {
 
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
-@use "~@stamhoofd/scss/main";
-@import "~@stamhoofd/scss/base/dark-modus";
-@import "~@simonbackx/vue-app-navigation/dist/main.css";
+@use "@stamhoofd/scss/main";
+@import "@stamhoofd/scss/base/dark-modus";
+@import "@simonbackx/vue-app-navigation/dist/main.css";
 
 html {
     -webkit-touch-callout:none;

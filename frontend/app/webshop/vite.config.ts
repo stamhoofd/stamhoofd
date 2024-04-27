@@ -4,5 +4,5 @@ import {buildConfig} from '../../vite.config.shared';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    ...buildConfig({port: 8081})
+    ...buildConfig({port: 8082})
 })

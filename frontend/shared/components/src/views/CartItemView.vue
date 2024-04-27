@@ -2,8 +2,8 @@
     <form class="st-view cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name" :pop="canPop" :dismiss="canDismiss">
             <p v-if="!webshop.isAllFree || pricedItem.getPriceWithDiscounts()" slot="left">
-                <span class="style-tag discount" v-if="formattedPriceWithDiscount">{{ formattedPriceWithDiscount }}</span>
-                <span class="style-tag" v-else>{{ formattedPriceWithoutDiscount }}</span>
+                <span v-if="formattedPriceWithDiscount" class="style-tag discount">{{ formattedPriceWithDiscount }}</span>
+                <span v-else class="style-tag">{{ formattedPriceWithoutDiscount }}</span>
             </p>
         </STNavigationBar>
         <main>
@@ -109,7 +109,6 @@
 
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || (pricedCheckout.totalPrice > 0 && cartItem.amount > 1))" class="pricing-box max">
                 <CheckoutPriceBreakdown :checkout="pricedCheckout" />
-
             </div>
         </main>
 
@@ -135,11 +134,19 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, CheckoutPriceBreakdown } from '@stamhoofd/components';
 import { Cart, CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator';
 
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import NumberInput from '../inputs/NumberInput.vue';
+import Radio from "../inputs/Radio.vue";
+import StepperInput from '../inputs/StepperInput.vue';
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
+import STNavigationBar from '../navigation/STNavigationBar.vue';
+import STToolbar from '../navigation/STToolbar.vue';
+import CheckoutPriceBreakdown from './CheckoutPriceBreakdown.vue';
 import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
@@ -156,7 +163,6 @@ import OptionMenuBox from './OptionMenuBox.vue';
         StepperInput,
         FieldBox,
         STErrorsDefault,
-        BackButton,
         CheckoutPriceBreakdown
     },
     filters: {
@@ -506,4 +512,10 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 }
 
-</style>
+</style>import { ErrorBox } from '../errors/ErrorBox';
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import NumberInput from '../inputs/NumberInput.vue';
+import StepperInput from '../inputs/StepperInput.vue';
+import STNavigationBar from '../navigation/STNavigationBar.vue';
+import STToolbar from '../navigation/STToolbar.vue';
+import CheckoutPriceBreakdown from './CheckoutPriceBreakdown.vue';

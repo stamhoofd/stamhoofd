@@ -13,13 +13,13 @@
                 </p>
 
                 <div v-if="paymentMethod == 'Payconiq'" class="payment-app-banner">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/hello-bank/app.png">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/payconiq/app.svg">
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg">
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg">
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg">
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png">
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png">
+                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
                 </div>
 
                 <img v-if="getLogo(paymentMethod) && (!$isMobile || paymentMethod !== 'Payconiq')" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">

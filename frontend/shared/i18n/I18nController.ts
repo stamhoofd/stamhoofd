@@ -140,7 +140,8 @@ export class I18nController {
         const i18n = I18nController.getI18n()
 
         // If the language hasn't been loaded yet
-        const messages = await import(/* webpackChunkName: "lang-[request]" */ `@stamhoofd/locales/dist/${this.namespace}/${locale}.json`)
+        const namespace = this.namespace
+        const messages = await import(/* webpackChunkName: "lang-[request]" */ `../../../shared/locales/dist/${namespace}/${locale}.json`)
         i18n.setLocaleMessage(locale, messages.default)
         i18n.locale = locale
         i18n.fallbackLocale = [this.language, "en"]
@@ -331,7 +332,7 @@ export class I18nController {
         const def = new I18nController($context, language, country, namespace)
         def.defaultCountry = defaultCountry ?? def.defaultCountry
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage
-        def.loadedLocale = I18nController.shared.loadedLocale
+        def.loadedLocale = I18nController.shared?.loadedLocale
         I18nController.shared = def
         def.vueMetaApp = ((window as any).app as any).$meta().addApp('i18n')
 

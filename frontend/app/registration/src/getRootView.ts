@@ -2,16 +2,20 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController } fr
 import { AuthenticatedView, ContextProvider, PromiseView } from "@stamhoofd/components";
 import { OrganizationManager, Session } from "@stamhoofd/networking";
 
+import { CheckoutManager } from "./classes/CheckoutManager";
 import { MemberManager } from "./classes/MemberManager";
 import HomeView from './views/login/HomeView.vue';
 import NewOverviewView from './views/overview/NewOverviewView.vue';
 
 export function getRootView(session: Session) {
+    const $memberManager = new MemberManager(session);
+
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: session,
             $organizationManager: new OrganizationManager(session),
-            $memberManager: new MemberManager(session)
+            $memberManager,
+            $checkoutManager: new CheckoutManager($memberManager)
         },
         calculatedContext: () => {
             return {

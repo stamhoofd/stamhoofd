@@ -17,12 +17,14 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import {ErrorBox} from "../errors/ErrorBox";
+import {Validator} from "../errors/Validator";
 import Spinner from "../Spinner.vue";
+import STInputBox from "./STInputBox.vue";
 
 @Component({
     components: {

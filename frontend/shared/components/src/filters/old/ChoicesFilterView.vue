@@ -16,9 +16,12 @@
 
 
 <script lang="ts">
-import { Checkbox, STList, STListItem } from "@stamhoofd/components"
 import { ChoicesFilter,ChoicesFilterChoice } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
+
+import Checkbox from "../../inputs/Checkbox.vue";
+import STList from "../../layout/STList.vue";
+import STListItem from "../../layout/STListItem.vue";
 
 @Component({
     components: {
