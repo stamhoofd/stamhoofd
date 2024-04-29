@@ -4,9 +4,9 @@
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
                     <STListItem :selectable="true">
-                        <div slot="left" v-if="product.images[0]" class="product-selector-image-preview">
+                        <template #left><div v-if="product.images[0]" class="product-selector-image-preview">
                             <ImageComponent :image="product.images[0]" :autoHeight="true" />
-                        </div>
+                        </div></template>
                         
                         <h2 class="style-title-list">
                             {{ product.name }}

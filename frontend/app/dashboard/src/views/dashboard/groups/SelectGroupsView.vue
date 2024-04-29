@@ -51,11 +51,11 @@
         </main>
 
         <STToolbar>
-            <LoadingButton slot="right" :loading="loading">
+            <template #right><LoadingButton :loading="loading">
                 <button class="button primary" type="button" @click="save">
                     Opslaan
                 </button>
-            </LoadingButton>
+            </LoadingButton></template>
         </STToolbar>
     </div>
 </template>

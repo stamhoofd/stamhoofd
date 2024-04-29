@@ -73,7 +73,7 @@
                         Geplaatst op
                     </h3>
                     <p class="style-definition-text">
-                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
+                        {{ capitalizeFirstLetter(formatDateTime(order.validAt)) }}
                     </p>
                 </STListItem>
 
@@ -85,7 +85,7 @@
                         <span>{{ statusName }}</span>
                         <span v-if="isCanceled" class="icon canceled" />
                     </p>
-                    <span v-if="hasWrite" slot="right" class="icon arrow-down-small gray" />
+                    <template v-if="hasWrite" #right><span class="icon arrow-down-small gray" /></template>
                 </STListItem>
 
                 <STListItem
@@ -105,7 +105,7 @@
                     </p>
 
                     <span v-if="order.payments.length > 1" slot="right">{{ formatPrice(payment.price) }}</span>
-                    <span v-if="hasPaymentsWrite" slot="right" class="icon arrow-right-small gray" />
+                    <template v-if="hasPaymentsWrite" #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
 
@@ -174,7 +174,7 @@
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
+                            {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
                         </p>
                     </STListItem>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
@@ -377,19 +377,18 @@
             <button v-if="ticket.scannedAt" slot="right" class="button secundary" type="button" @click="cancelScan">
                 Markering ongedaan maken
             </button>
-            <button slot="right" class="button primary" type="button" @click="markScanned">
+            <template #right><button class="button primary" type="button" @click="markScanned">
                 <span class="icon qr-code" />
                 <span>Markeer als gescand</span>
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { ArrayDecoder,AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemRow, ColorHelper, GlobalEventBus, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
 import { BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";

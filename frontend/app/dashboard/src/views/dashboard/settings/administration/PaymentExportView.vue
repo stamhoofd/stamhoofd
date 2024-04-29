@@ -87,7 +87,7 @@
                 <template #right>
                     {{ formatPrice(detail.price) }}
                 </template>
-                <span v-if="detail.filter" slot="right" class="icon arrow-right-small gray" />
+                <template v-if="detail.filter" #right><span class="icon arrow-right-small gray" /></template>
             </STListItem>
         </STList>
 
@@ -101,7 +101,7 @@
                 <template #right>
                     {{ formatPrice(detail.price) }}
                 </template>
-                <span v-if="detail.filter" slot="right" class="icon arrow-right-small gray" />
+                <template v-if="detail.filter" #right><span class="icon arrow-right-small gray" /></template>
             </STListItem>
         </STList>
 
@@ -117,7 +117,7 @@
                 <template #right>
                     {{ formatPrice(detail.price) }}
                 </template>
-                <span v-if="detail.filter" slot="right" class="icon arrow-right-small gray" />
+                <template v-if="detail.filter" #right><span class="icon arrow-right-small gray" /></template>
             </STListItem>
         </STList>
     </SaveView>

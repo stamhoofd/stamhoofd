@@ -72,10 +72,10 @@
                     <p class="style-description">
                         Maak alle documenten toegankelijk voor alle leden.
                     </p>
-                    <button slot="right" type="button" class="button secundary green hide-smartphone">
+                    <template #right><button type="button" class="button secundary green hide-smartphone">
                         <span class="icon success" />
                         <span>Publiceer</span>
-                    </button>
+                    </button></template>
                     <template #right><button type="button" class="button icon success only-smartphone" /></template>
                 </STListItem>
 
@@ -86,10 +86,10 @@
                     <p class="style-description">
                         Maak dit document terug onzichtbaar voor alle leden.
                     </p>
-                    <button slot="right" type="button" class="button secundary hide-smartphone">
+                    <template #right><button type="button" class="button secundary hide-smartphone">
                         <span class="icon edit" />
                         <span>Naar klad</span>
-                    </button>
+                    </button></template>
                     <template #right><button type="button" class="button icon edit only-smartphone" /></template>
                 </STListItem>
 
@@ -100,10 +100,10 @@
                     <p class="style-description">
                         Verwijder alle documenten definitief.
                     </p>
-                    <button slot="right" type="button" class="button secundary danger hide-smartphone">
+                    <template #right><button type="button" class="button secundary danger hide-smartphone">
                         <span class="icon trash" />
                         <span>Verwijder</span>
-                    </button>
+                    </button></template>
                     <template #right><button type="button" class="button icon trash only-smartphone" /></template>
                 </STListItem>
             </STList>

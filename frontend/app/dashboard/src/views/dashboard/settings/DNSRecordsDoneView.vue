@@ -1,7 +1,7 @@
 <template>
     <div id="dns-records-view" class="st-view">
         <STNavigationBar title="Gelukt!">
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <template v-if="canDismiss" #right><button class="button icon close gray" @click="dismiss" /></template>
         </STNavigationBar>
 
         <main>

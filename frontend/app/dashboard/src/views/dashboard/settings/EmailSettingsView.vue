@@ -18,9 +18,10 @@
                         {{ email.email }}
                     </p>
 
-                    <span v-if="email.default" slot="right" class="style-tag">Standaard</span>
-
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span v-if="email.default" class="style-tag">Standaard</span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
 

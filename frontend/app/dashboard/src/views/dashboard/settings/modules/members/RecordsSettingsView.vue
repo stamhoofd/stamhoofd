@@ -25,7 +25,7 @@
                 <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.phone.getString(getFilterDefinitionsForProperty('phone')) }}
                 </p>
-                <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" />
+                <template v-if="getEnableFilterConfiguration('phone')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" /></template>
             </STListItem>
             <STListItem>
                 <Checkbox #left :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
@@ -35,7 +35,7 @@
                 <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.emailAddress.getString(getFilterDefinitionsForProperty('emailAddress')) }}
                 </p>
-                <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" />
+                <template v-if="getEnableFilterConfiguration('emailAddress')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" /></template>
             </STListItem>
             <STListItem>
                 <Checkbox #left :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
@@ -45,7 +45,7 @@
                 <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.gender.getString(getFilterDefinitionsForProperty('gender')) }}
                 </p>
-                <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" />
+                <template v-if="getEnableFilterConfiguration('gender')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" /></template>
             </STListItem>
             <STListItem>
                 <Checkbox #left :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
@@ -55,7 +55,7 @@
                 <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.birthDay.getString(getFilterDefinitionsForProperty('birthDay')) }}
                 </p>
-                <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" />
+                <template v-if="getEnableFilterConfiguration('birthDay')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" /></template>
             </STListItem>
             <STListItem>
                 <Checkbox #left :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
@@ -65,7 +65,7 @@
                 <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.address.getString(getFilterDefinitionsForProperty('address')) }}
                 </p>
-                <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" />
+                <template v-if="getEnableFilterConfiguration('address')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" /></template>
             </STListItem>
             <STListItem>
                 <Checkbox #left :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
@@ -75,7 +75,7 @@
                 <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.parents.getString(getFilterDefinitionsForProperty('parents')) }}
                 </p>
-                <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" />
+                <template v-if="getEnableFilterConfiguration('parents')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" /></template>
             </STListItem>
             <STListItem>
                 <Checkbox #left :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
@@ -85,7 +85,7 @@
                 <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts.getString(getFilterDefinitionsForProperty('emergencyContacts')) }}
                 </p>
-                <button v-if="getEnableFilterConfiguration('emergencyContacts')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')" />
+                <template v-if="getEnableFilterConfiguration('emergencyContacts')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')" /></template>
             </STListItem>
         </STList>
 

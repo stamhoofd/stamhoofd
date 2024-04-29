@@ -6,7 +6,7 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :value="getEmail(n - 1)" placeholder="E-mailadres" :validator="validator" @input="setEmail(n - 1, $event)">
-            <span v-if="isBlocked(n-1)" slot="right" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
+            <template v-if="isBlocked(n-1)" #right><span v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" /></template>
             <template #right><button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" /></template>
         </EmailInput>
 

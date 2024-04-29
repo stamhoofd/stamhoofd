@@ -9,12 +9,12 @@
                 </button>
             </template>
 
-            <LoadingButton v-if="$isMobile || $isIOS || $isAndroid" slot="right" :loading="loading">
+            <template v-if="$isMobile || $isIOS || $isAndroid" #right><LoadingButton :loading="loading">
                 <button class="button navigation highlight" :disabled="disabled" type="submit">
                     {{ saveText }}
                 </button>
-            </LoadingButton>
-            <button v-else-if="$parent.canDismiss" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
+            </LoadingButton></template>
+            <template v-else-if="$parent.canDismiss" #right><button class="button navigation icon close" type="button" @click="$parent.dismiss" /></template>
         </STNavigationBar>
         <main ref="main" class="flex">
             <slot />
@@ -54,10 +54,10 @@
 
                             <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
                         </div>
-                        <button slot="right" class="button text" type="submit" @mousedown.prevent>
+                        <template #right><button class="button text" type="submit" @mousedown.prevent>
                             {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
-                        </button>
-                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                        </button></template>
+                        <template v-if="editor.isActive('link')" #right><button v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" /></template>
                     </STListItem>
                 </STList>
             </form>

@@ -1,19 +1,21 @@
 <template>
     <STListItem v-long-press="(e) => editRegistration(e)" :selectable="isEditable" class="left-center hover-box member-registration-block" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
-        <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
-            <img :src="imageSrc(registration)">
-            <div>
-                <span v-if="registration.waitingList" class="icon gray clock" />
-            </div>
-        </figure>
-        <figure v-else slot="left" class="registration-image">
-            <figure>
-                <span>{{ getGroup(registration.groupId).settings.getShortCode(2) }}</span>
+        <template #left>
+            <figure v-if="imageSrc(registration)" class="registration-image">
+                <img :src="imageSrc(registration)">
+                <div>
+                    <span v-if="registration.waitingList" class="icon gray clock" />
+                </div>
             </figure>
-            <div>
-                <span v-if="registration.waitingList" class="icon gray clock" />
-            </div>
-        </figure>
+            <figure v-else class="registration-image">
+                <figure>
+                    <span>{{ getGroup(registration.groupId).settings.getShortCode(2) }}</span>
+                </figure>
+                <div>
+                    <span v-if="registration.waitingList" class="icon gray clock" />
+                </div>
+            </figure>
+        </template>
         <h3 class="style-title-list">
             {{ getGroup(registration.groupId).settings.name }}
         </h3>
@@ -27,7 +29,7 @@
             Toegelaten om in te schrijven
         </p>
 
-        <span v-if="isEditable" slot="right" class="icon arrow-down-small gray" />
+        <template v-if="isEditable" #right><span class="icon arrow-down-small gray" /></template>
     </STListItem>
 </template>
 

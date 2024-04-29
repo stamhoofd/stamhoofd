@@ -53,5 +53,12 @@
     "i18n-ally.keepFulfilled": false,
     "i18n-ally.keystyle": "nested",
     "typescript.tsdk": "node_modules/typescript/lib",
-    "codeQL.githubDatabase.update": "never"
+    "codeQL.githubDatabase.update": "never",
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "[vue]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
 }

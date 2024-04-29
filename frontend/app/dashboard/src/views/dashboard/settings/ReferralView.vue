@@ -64,16 +64,16 @@
                         <STListItem v-for="n in 9" :key="n">
                             {{ n }}e vereniging
 
-                            <span slot="right" class="style-tag large">€ {{ n * 10 }}</span>
-                            <span v-if="referredCount >= n" slot="left" class="icon star yellow" />
-                            <span v-else slot="left" class="icon star-line light-gray" />
+                            <template #right><span class="style-tag large">€ {{ n * 10 }}</span></template>
+                            <template v-if="referredCount >= n" #left><span class="icon star yellow" /></template>
+                            <template v-else #left><span class="icon star-line light-gray" /></template>
                         </STListItem>
                         <STListItem>
                             10e, 11e, 12e... vereniging
 
-                            <span slot="right" class="style-tag large">€ 100</span>
-                            <span v-if="referredCount >= 10" slot="left" class="icon star yellow" />
-                            <span v-else slot="left" class="icon star-line light-gray" />
+                            <template #right><span class="style-tag large">€ 100</span></template>
+                            <template v-if="referredCount >= 10" #left><span class="icon star yellow" /></template>
+                            <template v-else #left><span class="icon star-line light-gray" /></template>
                         </STListItem>
                     </STList>            
                 </template>    
@@ -84,8 +84,8 @@
 
                 <STList v-if="status.usedCodes.length > 0">
                     <STListItem v-for="used in status.usedCodes" :key="used.id" class="right-description">
-                        <span v-if="used.creditValue !== null" slot="left" class="icon success green" />
-                        <span v-else slot="left" class="icon clock gray" />
+                        <template v-if="used.creditValue !== null" #left><span class="icon success green" /></template>
+                        <template v-else #left><span class="icon clock gray" /></template>
                         <h2 class="style-title-list">
                             {{ used.organizationName }}
                         </h2>

@@ -36,10 +36,10 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" type="submit" :disabled="selectedAmount !== amount">
+            <template #right><button class="button primary" type="submit" :disabled="selectedAmount !== amount">
                 <span>Bevestigen</span>
                 <span class="icon arrow-right" />
-            </button>
+            </button></template>
         </STToolbar>
     </form>
 </template>

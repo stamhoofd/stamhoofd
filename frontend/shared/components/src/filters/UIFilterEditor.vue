@@ -1,7 +1,7 @@
 <template>
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
         <STNavigationBar :title="filter.name" :dismiss="!canPop" :pop="canPop">
-            <button v-if="canDelete" slot="right" class="button icon trash" type="button" @click="deleteFilter" />
+            <template v-if="canDelete" #right><button class="button icon trash" type="button" @click="deleteFilter" /></template>
         </STNavigationBar>
 
         <main>
@@ -13,9 +13,9 @@
         </main>
 
         <STToolbar v-if="!live">
-            <button slot="right" class="button primary full" type="button" @click="applyFilter">
+            <template #right><button class="button primary full" type="button" @click="applyFilter">
                 Toepassen
-            </button>
+            </button></template>
         </STToolbar>
     </form>
 </template>

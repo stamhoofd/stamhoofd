@@ -27,15 +27,15 @@
                         <span class="icon arrow-down-small gray" />
                     </button>
                 </div>
-                <span slot="right" class="style-description-small">{{ recipients.length }}</span>
-                <button v-if="hasToWarnings" slot="right" class="button icon warning yellow" type="button" @click="showToWarnings" />
+                <template #right><span class="style-description-small">{{ recipients.length }}</span></template>
+                <template v-if="hasToWarnings" #right><button class="button icon warning yellow" type="button" @click="showToWarnings" /></template>
             </STListItem>
             <STListItem v-else class="no-padding right-stack">
                 <div class="list-input-box">
                     <span>Aan:</span>
                     <span class="list-input">{{ recipients.length == 1 ? recipients[0].firstName+" "+recipients[0].lastName : recipients.length +" ontvangers" }}</span>
                 </div>
-                <button v-if="hasToWarnings" slot="right" class="button icon warning yellow" type="button" @click="showToWarnings" />
+                <template v-if="hasToWarnings" #right><button class="button icon warning yellow" type="button" @click="showToWarnings" /></template>
             </STListItem>
             <STListItem class="no-padding" element-name="label">
                 <div class="list-input-box">
@@ -56,9 +56,9 @@
                     </div>
                 </div>
 
-                <button v-if="fullAccess" slot="right" class="button text" type="button" @click="manageEmails">
+                <template v-if="fullAccess" #right><button class="button text" type="button" @click="manageEmails">
                     <span class="icon settings" />
-                </button>
+                </button></template>
             </STListItem>
         </template>
 

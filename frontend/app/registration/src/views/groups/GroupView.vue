@@ -72,10 +72,10 @@
         </main>
 
         <STToolbar v-if="isSignedIn && registerButton && canRegister && member">
-            <button slot="right" class="primary button" type="button" @click="registerMember">
+            <template #right><button class="primary button" type="button" @click="registerMember">
                 <span>{{ member.firstName }} inschrijven</span>
                 <span class="icon arrow-right" />
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

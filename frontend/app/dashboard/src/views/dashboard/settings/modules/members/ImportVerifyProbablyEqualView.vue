@@ -26,14 +26,14 @@
                         </p>
                     </div>
 
-                    <div slot="right">
+                    <template #right><div>
                         <h2 class="style-title-list">
                             {{ match.probablyEqual.details.name }}
                         </h2>
                         <p class="style-description-small">
                             {{ match.probablyEqual.details.birthDayFormatted || "/" }}
                         </p>
-                    </div>
+                    </div></template>
 
                     <Checkbox #left :checked="getVerified(match)" @change="setVerified(match, $event)" />
                 </STListItem>

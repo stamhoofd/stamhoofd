@@ -12,10 +12,10 @@
             </p>
 
             <STInputBox title="Wachtwoord">
-                <button slot="right" class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
+                <template #right><button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
                     <span>Vergeten</span>
                     <span class="icon help" />
-                </button>
+                </button></template>
                 <input v-model="password" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
 

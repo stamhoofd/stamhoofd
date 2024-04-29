@@ -12,12 +12,14 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button secundary" type="button" @click="cancel">
-                Annuleren
-            </button>
-            <button slot="right" class="button primary" type="button" @click="save">
-                Opslaan
-            </button>
+            <template #right>
+                <button class="button secundary" type="button" @click="cancel">
+                    Annuleren
+                </button>
+                <button class="button primary" type="button" @click="save">
+                    Opslaan
+                </button>
+            </template>
         </STToolbar>
     </form>
 </template>

@@ -74,7 +74,7 @@
                             Aangemaakt op {{ formatDate(payment.createdAt) }}
                         </p>
 
-                        <span slot="right">{{ formatPrice(payment.price) }}</span>
+                        <template #right><span>{{ formatPrice(payment.price) }}</span></template>
                         <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
@@ -96,17 +96,17 @@
                             Betaald op {{ formatDate(payment.paidAt) }}
                         </p>
 
-                        <span slot="right">{{ formatPrice(payment.price) }}</span>
+                        <template #right><span>{{ formatPrice(payment.price) }}</span></template>
                         <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </template>
         </main>
         <STToolbar v-if="outstandingBalance.totalOpen > 0">
-            <button slot="right" class="button primary full" type="button" @click="startPayment">
+            <template #right><button class="button primary full" type="button" @click="startPayment">
                 <span class="icon card" />
                 <span>Betalen</span>
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

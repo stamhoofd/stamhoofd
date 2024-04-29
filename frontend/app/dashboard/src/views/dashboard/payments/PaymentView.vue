@@ -127,10 +127,10 @@
                             <p class="style-description">
                                 Wijzig de status terug naar 'wacht op betaling'.
                             </p>
-                            <button slot="right" type="button" class="button secundary hide-smartphone">
+                            <template #right><button type="button" class="button secundary hide-smartphone">
                                 <span class="icon clock" />
                                 <span>Heractiveer</span>
-                            </button>
+                            </button></template>
                             <template #right><button type="button" class="button icon success only-smartphone" /></template>
                         </STListItem>
 
@@ -144,11 +144,11 @@
                             <p v-if="mappedPayment.orders.length" class="style-description">
                                 Stuurt mogelijks een automatische e-mail ter bevestiging.
                             </p>
-                            <button slot="right" type="button" class="button secundary hide-smartphone">
+                            <template #right><button type="button" class="button secundary hide-smartphone">
                                 <span class="icon success" />
                                 <span v-if="payment.price >= 0">Betaald</span>
                                 <span v-else>Terugbetaald</span>
-                            </button>
+                            </button></template>
                             <template #right><button type="button" class="button icon success only-smartphone" /></template>
                         </STListItem>
 
@@ -165,11 +165,11 @@
                             <p v-else class="style-description">
                                 Betaling per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.
                             </p>
-                            <button slot="right" type="button" class="button secundary hide-smartphone">
+                            <template #right><button type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
                                 <span v-if="payment.price >= 0">Niet betaald</span>
                                 <span v-else>Niet terugbetaald</span>
-                            </button>
+                            </button></template>
                             <template #right><button type="button" class="button icon undo only-smartphone" /></template>
                         </STListItem>
 
@@ -183,10 +183,10 @@
                             <p v-else class="style-description">
                                 Annuleer de betaling als je denkt dat deze niet meer betaald zal worden.
                             </p>
-                            <button slot="right" type="button" class="button secundary danger hide-smartphone">
+                            <template #right><button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon canceled" />
                                 <span>Annuleren</span>
-                            </button>
+                            </button></template>
                             <template #right><button type="button" class="button icon canceled only-smartphone" /></template>
                         </STListItem>
                     </STList>

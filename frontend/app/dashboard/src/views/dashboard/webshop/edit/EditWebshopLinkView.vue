@@ -74,10 +74,10 @@
 
         <template v-else-if="selectedDomain !== null">
             <STInputBox title="Jouw webshop link" error-fields="domainUri" :error-box="errorBox" class="max">
-                <button slot="right" type="button" class="button text" @click="copyLink">
+                <template #right><button type="button" class="button text" @click="copyLink">
                     <span class="icon copy" />
                     <span>Kopiëren</span>
-                </button>
+                </button></template>
                 <PrefixInput v-model="domainUri" placeholder="bv. wafelbak" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" @blur="resetCache" />
             </STInputBox>
             <p class="style-description-small">
@@ -87,10 +87,10 @@
 
         <template v-else>
             <STInputBox title="Jouw webshop link" error-fields="uri" :error-box="errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}">
-                <button slot="right" type="button" class="button text" @click="copyLink">
+                <template #right><button type="button" class="button text" @click="copyLink">
                     <span class="icon copy" />
                     <span>Kopiëren</span>
-                </button>
+                </button></template>
                 <PrefixInput v-model="uri" placeholder="bv. wafelbak" :prefix="defaultDomain+'/'" @blur="updateUri" />
             </STInputBox>
 

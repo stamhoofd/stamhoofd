@@ -2,7 +2,7 @@
     <div class="st-view detailed-ticket-view">
         <STNavigationBar :title="name" :pop="canPop" :dismiss="canDismiss && allowDismiss" :sticky="false" :large="logo">
             <OrganizationLogo v-if="logo" slot="left" :organization="organization" />
-            <button v-if="canShare" slot="right" class="button icon share navigation" type="button" @click="share" />
+            <template v-if="canShare" #right><button class="button icon share navigation" type="button" @click="share" /></template>
         </STNavigationBar>
         <main>
             <figure class="qr-box">
@@ -82,10 +82,10 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" type="button" @click="download">
+            <template #right><button class="button primary" type="button" @click="download">
                 <span class="icon download" />
                 <span>Opslaan</span>
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

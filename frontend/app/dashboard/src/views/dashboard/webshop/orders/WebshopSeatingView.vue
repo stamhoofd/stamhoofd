@@ -2,7 +2,7 @@
     <LoadingView v-if="loading || !seatingPlan" />
     <div v-else class="st-view webshop-seating-view">
         <STNavigationBar title="Zaaloverzicht" :pop="canPop" :dismiss="canDismiss">
-            <button v-if="hasFullPermissions" slot="right" class="icon navigation edit button" type="button" @click="editSeatingPlan" />
+            <template v-if="hasFullPermissions" #right><button class="icon navigation edit button" type="button" @click="editSeatingPlan" /></template>
         </STNavigationBar>
 
         <main>

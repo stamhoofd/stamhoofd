@@ -13,7 +13,7 @@
         </main>
 
         <STToolbar>
-            <span slot="left">Totaal: {{ formatPrice(cart.price) }}</span>
+            <template #left><span>Totaal: {{ formatPrice(cart.price) }}</span></template>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goNext">
                     <span>Doorgaan</span>

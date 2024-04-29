@@ -20,7 +20,7 @@
                         <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.location" class="style-description-small" v-text="product.location.name" />
                         <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.dateRange" class="style-description-small" v-text="formatDateRange(product.dateRange)" />
 
-                        <span class="icon success primary" v-if="product.id == selectedProductId" slot="right" />
+                        <template v-if="product.id == selectedProductId" #right><span class="icon success primary" /></template>
                     </STListItem>
                 </STList>
             </div>

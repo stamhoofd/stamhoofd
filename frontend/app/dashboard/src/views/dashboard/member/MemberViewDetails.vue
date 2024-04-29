@@ -246,9 +246,9 @@
 
                 <STList>
                     <STListItem v-for="user in member.users" :key="user.id" class="hover-box">
-                        <span v-if="user.hasAccount && user.verified" slot="left" class="icon user small" />
-                        <span v-else-if="user.hasAccount && !user.verified" slot="left" v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" />
-                        <span v-else slot="left" v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" />
+                        <template v-if="user.hasAccount && user.verified" #left><span class="icon user small" /></template>
+                        <template v-else-if="user.hasAccount && !user.verified" #left><span v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" /></template>
+                        <template v-else #left><span v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" /></template>
 
                         <template v-if="user.firstName || user.lastName">
                             <h3 v-if="user.firstName || user.lastName" class="style-title-list">
@@ -274,8 +274,8 @@
                             Beheerder
                         </p>
 
-                        <span v-if="getInvalidEmailDescription(user.email)" slot="right" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
-                        <button v-if="isOldEmail(user.email)" slot="right" class="button icon trash hover-show" type="button" @click="unlinkUser(user)" />
+                        <template v-if="getInvalidEmailDescription(user.email)" #right><span v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" /></template>
+                        <template v-if="isOldEmail(user.email)" #right><button class="button icon trash hover-show" type="button" @click="unlinkUser(user)" /></template>
                     </STListItem>
                 </STList>
             </div>

@@ -1,9 +1,9 @@
 <template>
     <div id="member-parents-view" class="st-view">
         <STNavigationBar title="Ouders" :pop="canPop">
-            <button slot="right" class="button navigation highlight" :disabled="selectionCount === 0" type="button" @click="goNext">
+            <template #right><button class="button navigation highlight" :disabled="selectionCount === 0" type="button" @click="goNext">
                 {{ nextText }}
-            </button>
+            </button></template>
         </STNavigationBar>
         
         <main>
@@ -40,24 +40,24 @@
                         {{ parent.parent.address }}
                     </p>
 
-                    <button slot="right" class="button text limit-space" type="button" @click.stop="editParent(parent.parent)">
+                    <template #right><button class="button text limit-space" type="button" @click.stop="editParent(parent.parent)">
                         <span class="icon edit" />
                         <span>Bewerken</span>
-                    </button>
+                    </button></template>
                 </STListItem>
             </STList>
 
             <!-- todo: add checkboxes and parents of other members that are already known -->
         </main>
         <STToolbar>
-            <button slot="right" type="button" class="button" :class="{ primary: parents.length <= 1, secundary: parents.length > 1}" @click="addParent">
+            <template #right><button type="button" class="button" :class="{ primary: parents.length <= 1, secundary: parents.length > 1}" @click="addParent">
                 <span class="icon add" />
                 <span>Ouder toevoegen</span>
-            </button>
+            </button></template>
             <!-- Next buttons becomes primary button when two parents are selected. We know lot's of members will only have one parent, but we need to force parents to add both parents if they have two parents -->
-            <button slot="right" type="button" class="button" :class="{ secundary: parents.length <= 1, primary: parents.length > 1}" @click="goNext">
+            <template #right><button type="button" class="button" :class="{ secundary: parents.length <= 1, primary: parents.length > 1}" @click="goNext">
                 {{ nextText }}
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

@@ -173,10 +173,10 @@
                 <span class="icon help" />
                 <span>Het lukt niet</span>
             </button>
-            <button slot="right" class="button primary" type="button" @click="goNext">
+            <template #right><button class="button primary" type="button" @click="goNext">
                 <span>Doorgaan</span>
                 <span class="icon arrow-right" />
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

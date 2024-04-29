@@ -15,10 +15,10 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" type="button" @click="downloadAllTickets">
+            <template #right><button class="button primary" type="button" @click="downloadAllTickets">
                 <span class="icon download" />
                 <span>Download</span>
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

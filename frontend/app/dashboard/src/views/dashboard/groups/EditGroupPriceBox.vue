@@ -31,9 +31,10 @@
                         <STInputBox :title="priceGroup.prices.length <= 1 ? 'Prijs' : (ordinalNumber(priceGroup, index + 1, priceGroup.prices.length))" error-fields="price" :error-box="errorBox">
                             <PriceInput :value="p.price" placeholder="Gratis" @input="setPrice(priceGroup, index, $event)" />
 
-                            <button v-if="index > 0 && index == priceGroup.prices.length - 1" slot="right" type="button" class="button text" @click="removeFamilyPrice(priceGroup, index)">
+                            <template v-if="index > 0 && index == priceGroup.prices.length - 1" #right><button type="button" class="button text" @click="removeFamilyPrice(priceGroup, index)">
                                 <span class="icon trash" />
                             </button>
+                            </template>
                         </STInputBox>
 
                         <div v-if="p.reducedPrice !== null || enableFinancialSupport">

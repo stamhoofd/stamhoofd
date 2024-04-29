@@ -37,10 +37,10 @@
             </div>
         </main>
         <STToolbar>
-            <button slot="right" class="button primary full" type="button" :disabled="totalSelected === 0" @click="startPayment">
+            <template #right><button class="button primary full" type="button" :disabled="totalSelected === 0" @click="startPayment">
                 <span>Toevoegen</span>
                 <span class="icon arrow-right" />
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

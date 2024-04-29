@@ -16,13 +16,13 @@
                 </main>
                 
                 <STToolbar>
-                    <button slot="right" type="button" class="primary button" @click="gotoRegistration">
+                    <template #right><button type="button" class="primary button" @click="gotoRegistration">
                         <span>Naar ledenportaal</span>
-                    </button>
+                    </button></template>
 
-                    <button slot="right" type="button" class="button secundary" @click="logout">
+                    <template #right><button type="button" class="button secundary" @click="logout">
                         <span class="icon logout" /><span>Uitloggen</span>
-                    </button>
+                    </button></template>
                 </STToolbar>
             </div>
         </main>

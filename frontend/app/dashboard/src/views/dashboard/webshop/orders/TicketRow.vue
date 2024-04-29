@@ -16,10 +16,10 @@
 
         <p v-if="scannedAtDescription" class="style-description-small" v-text="scannedAtDescription" />
 
-        <button slot="right" class="button text" type="button" @click="markAs">
+        <template #right><button class="button text" type="button" @click="markAs">
             <span :class="'style-tag '+statusColor">{{ statusName }}</span>
             <span v-if="hasWrite" class="icon arrow-down-small" />
-        </button>
+        </button></template>
     </STListItem>
 </template>
 

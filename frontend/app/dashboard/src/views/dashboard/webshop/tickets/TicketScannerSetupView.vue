@@ -45,10 +45,10 @@
         </main>
 
         <STToolbar v-if="!noDatabaseSupport">
-            <button slot="right" class="button primary" type="button" @click="start">
+            <template #right><button class="button primary" type="button" @click="start">
                 <span class="icon play" />
                 <span>Starten</span>
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

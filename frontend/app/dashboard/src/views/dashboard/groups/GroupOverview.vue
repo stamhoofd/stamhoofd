@@ -32,7 +32,7 @@
                     <p v-else class="style-description">
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
-                    <span v-if="group.getMemberCount() !== null" slot="right" class="style-description-small">{{ group.getMemberCount() }}</span>
+                    <template #right><span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span></template>
                     <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
@@ -44,7 +44,7 @@
                     <p class="style-description">
                         Bekijk leden op de wachtlijst.
                     </p>
-                    <span v-if="group.settings.waitingListSize !== null" slot="right" class="style-description-small">{{ group.settings.waitingListSize }}</span>
+                    <template #right><span v-if="group.settings.waitingListSize !== null" class="style-description-small">{{ group.settings.waitingListSize }}</span></template>
                     <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
@@ -61,7 +61,7 @@
                         {{ group.getTimeRangeOffset(offset) }}
                     </p>
 
-                    <span v-if="group.getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
+                    <template #right><span v-if="group.getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span></template>
                     <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
@@ -170,10 +170,10 @@
                         <p class="style-description">
                             Open inschrijvingen van leden via het ledenportaal.
                         </p>
-                        <button slot="right" type="button" class="button secundary green hide-smartphone">
+                        <template #right><button type="button" class="button secundary green hide-smartphone">
                             <span class="icon power" />
                             <span>Open</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
@@ -184,10 +184,10 @@
                         <p class="style-description">
                             Stop inschrijvingen van leden via het ledenportaal. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.
                         </p>
-                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
+                        <template #right><button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon power" />
                             <span>Sluiten</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
@@ -198,10 +198,10 @@
                         <p class="style-description">
                             Zet de inschrijvingsgroep terug.
                         </p>
-                        <button slot="right" type="button" class="button secundary hide-smartphone">
+                        <template #right><button type="button" class="button secundary hide-smartphone">
                             <span class="icon undo" />
                             <span>Terugzetten</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon undo only-smartphone" /></template>
                     </STListItem>
 
@@ -212,10 +212,10 @@
                         <p class="style-description">
                             Maak de lijst met ingeschreven leden terug leeg, maar maak het mogelijk om de lijst van de vorige leden nog te raadplegen. Ideaal voor groepen die elk jaar opnieuw inschrijven.
                         </p>
-                        <button slot="right" type="button" class="button secundary hide-smartphone">
+                        <template #right><button type="button" class="button secundary hide-smartphone">
                             <span class="icon reverse" />
                             <span>Nieuw</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon reverse only-smartphone" /></template>
                     </STListItem>
 
@@ -226,10 +226,10 @@
                         <p class="style-description">
                             Keer terug naar de vorige inschrijvingsperiode.
                         </p>
-                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
+                        <template #right><button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon undo" />
                             <span>Terug</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon undo only-smartphone" /></template>
                     </STListItem>
 
@@ -240,10 +240,10 @@
                         <p class="style-description">
                             Verplaats de groep naar het archief, maar behoud alle gegevens zodat je ze later nog kan raadplegen. 
                         </p>
-                        <button slot="right" type="button" class="button secundary hide-smartphone">
+                        <template #right><button type="button" class="button secundary hide-smartphone">
                             <span class="icon archive" />
                             <span>Archiveren</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon archive only-smartphone" /></template>
                     </STListItem>
 
@@ -254,10 +254,10 @@
                         <p class="style-description">
                             Verwijder deze groep en alle daarbij horende informatie. Dit is meestal niet nodig.
                         </p>
-                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
+                        <template #right><button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon trash only-smartphone" /></template>
                     </STListItem>
                 </STList>

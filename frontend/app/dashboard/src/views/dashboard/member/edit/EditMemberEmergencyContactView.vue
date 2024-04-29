@@ -46,9 +46,9 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" @click="goNext">
+            <template #right><button class="button primary" @click="goNext">
                 {{ !contact ? 'Toevoegen' : 'Opslaan' }}
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

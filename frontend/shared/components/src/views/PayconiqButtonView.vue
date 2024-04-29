@@ -11,10 +11,10 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button secundary" type="button" @click="helpMe">
+            <template #right><button class="button secundary" type="button" @click="helpMe">
                 <span class="icon help" />
                 <span>Het lukt niet</span>
-            </button>
+            </button></template>
             <LoadingButton slot="right" :loading="payment && payment.status == 'Pending'">
                 <a :href="paymentUrl" class="button primary open-app">
                     <span class="icon external" /><span>Open de app</span>

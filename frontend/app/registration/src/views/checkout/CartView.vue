@@ -28,14 +28,14 @@
                         {{ item.waitingList ? "Wachtlijst van " : "Inschrijven voor " }}{{ item.group.settings.name }}
                     </p>
 
-                    <footer slot="right">
+                    <template #right><footer>
                         <p v-if="item.calculatedPrice" class="price">
                             {{ formatPrice(item.calculatedPrice) }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
                         </div>
-                    </footer>
+                    </footer></template>
                 </STListItem>
 
                 <STListItem v-for="item in cart.balanceItems" :key="item.id" class="cart-item-row">
@@ -46,14 +46,14 @@
                         Openstaand bedrag van {{ formatDate(item.item.createdAt) }}
                     </p>
 
-                    <footer slot="right">
+                    <template #right><footer>
                         <p class="price">
                             {{ formatPrice(item.price) }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" type="button" @click="deleteBalanceItem(item)" />
                         </div>
-                    </footer>
+                    </footer></template>
                 </STListItem>
             </STList>
 
@@ -130,12 +130,12 @@
         </main>
 
         <STToolbar v-if="!cart.isEmpty">
-            <span slot="left">Totaal: {{ formatPrice(cart.price) }}</span>
+            <template #left><span>Totaal: {{ formatPrice(cart.price) }}</span></template>
 
-            <button slot="right" class="button secundary" type="button" @click="addItem">
+            <template #right><button class="button secundary" type="button" @click="addItem">
                 <span class="icon add" />
                 <span>Inschrijving</span>
-            </button>
+            </button></template>
 
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goToCheckout">

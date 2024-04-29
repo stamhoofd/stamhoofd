@@ -73,10 +73,10 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" type="button" @click="dismiss">
+            <template #right><button class="button primary" type="button" @click="dismiss">
                 <span>Doorgaan</span>
                 <span class="icon arrow-right" />
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>

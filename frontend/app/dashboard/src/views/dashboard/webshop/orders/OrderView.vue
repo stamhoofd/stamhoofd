@@ -62,7 +62,7 @@
                         <span>{{ statusName }}</span>
                         <span v-if="isCanceled" class="icon canceled" />
                     </p>
-                    <span v-if="hasWrite" slot="right" class="icon arrow-down-small gray" />
+                    <template v-if="hasWrite" #right><span class="icon arrow-down-small gray" /></template>
                 </STListItem>
 
                 <STListItem
@@ -82,7 +82,7 @@
                     </p>
 
                     <span v-if="order.payments.length > 1" slot="right">{{ formatPrice(payment.price) }}</span>
-                    <span v-if="hasPaymentsWrite" slot="right" class="icon arrow-right-small gray" />
+                    <template v-if="hasPaymentsWrite" #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" @click="tickets.length > 0 ? openTickets($event) : null">
@@ -114,7 +114,7 @@
                         </span>
                     </p>
 
-                    <span v-if="tickets.length > 0" slot="right" class="icon arrow-right-small" />
+                    <template v-if="tickets.length > 0" #right><span class="icon arrow-right-small" /></template>
                 </STListItem>
             </STList>
 
@@ -258,7 +258,7 @@
                     </h3>
 
                     <p class="style-definition-text pre-wrap" v-text="order.data.comments" />
-                    <span v-if="hasWrite" slot="right" class="icon edit" />
+                    <template v-if="hasWrite" #right><span class="icon edit" /></template>
                 </STListItem>
             </STList>
 

@@ -21,10 +21,10 @@
                             {{ group.settings.name }}
                         </h2>
 
-                        <button v-if="category.settings.maximumRegistrations === 1 && getSelectedGroupForCategory(category) && getSelectedGroupForCategory(category).id === group.id" slot="right" type="button" class="button text gray" @click.stop.prevent="setSelectedGroupForCategory(category, null)">
+                        <template #right><button v-if="category.settings.maximumRegistrations === 1 && getSelectedGroupForCategory(category) && getSelectedGroupForCategory(category).id === group.id" type="button" class="button text gray" @click.stop.prevent="setSelectedGroupForCategory(category, null)">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
-                        </button>
+                        </button></template>
                     </STListItem>
                 </STList>
             </div>
@@ -37,11 +37,11 @@
             <template v-else-if="pendingRegistrations.length > 0" slot="left">
                 {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'inschrijving' : 'inschrijvingen' }}
             </template>
-            <LoadingButton slot="right" :loading="loading">
+            <template #right><LoadingButton :loading="loading">
                 <button class="button primary" type="button" @click="save">
                     Opslaan
                 </button>
-            </LoadingButton>
+            </LoadingButton></template>
         </STToolbar>
     </div>
 </template>

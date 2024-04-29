@@ -41,11 +41,11 @@
         </main>
 
         <STToolbar>
-            <LoadingButton slot="right" :loading="loading">
+            <template #right><LoadingButton :loading="loading">
                 <button class="button primary" @click="goNext">
                     {{ !parent ? 'Toevoegen' : 'Opslaan' }}
                 </button>
-            </LoadingButton>
+            </LoadingButton></template>
         </STToolbar>
     </div>
 </template>

@@ -31,10 +31,10 @@
                         {{ parent.parent.address }}
                     </p>
 
-                    <button slot="right" class="button text limit-space" @click.stop="editParent(parent)" type="button">
+                    <template #right><button class="button text limit-space" @click.stop="editParent(parent)" type="button">
                         <span class="icon edit" />
                         <span>Bewerken</span>
-                    </button>
+                    </button></template>
                 </STListItem>
             </STList>
 
@@ -64,10 +64,10 @@
                         {{ contact.phone }}
                     </p>
 
-                    <button slot="right" type="button" class="button text limit-space" @click.stop="editEmergencyContact()">
+                    <template #right><button type="button" class="button text limit-space" @click.stop="editEmergencyContact()">
                         <span class="icon edit" />
                         <span>Bewerken</span>
-                    </button>
+                    </button></template>
                 </STListItem>
             </STList>
 

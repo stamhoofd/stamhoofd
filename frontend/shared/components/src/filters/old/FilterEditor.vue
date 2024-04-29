@@ -15,9 +15,9 @@
             <button v-if="editingFilter.filters.length > 0" slot="right" class="button secundary full" type="button" @click="resetFilter()">
                 Resetten
             </button>
-            <button slot="right" class="button primary full" type="button" @click="applyFilter">
+            <template #right><button class="button primary full" type="button" @click="applyFilter">
                 Toepassen
-            </button>
+            </button></template>
         </STToolbar>
     </form>
 </template>

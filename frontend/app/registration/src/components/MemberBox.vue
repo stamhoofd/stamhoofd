@@ -1,6 +1,6 @@
 <template>
     <STListItem :selectable="true" class="member-box right-stack member-registration-block" @click="onClicked">
-        <span v-if="type == 'member'" slot="left" class="icon user" />
+        <template v-if="type == 'member'" #left><span class="icon user" /></template>
         <template v-else slot="left">
             <figure v-if="imageSrc" class="registration-image">
                 <img :src="imageSrc">

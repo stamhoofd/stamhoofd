@@ -150,8 +150,10 @@
                             Verzamel extra informatie van bestellers bij het afrekenen.
                         </p>
 
-                        <template #right><span v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " /></template>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " />
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-else :selectable="true" class="left-center" @click="editRecordSettings(true)">
@@ -237,11 +239,13 @@
                         <p class="style-description">
                             Sluit de webshop, zodat geen nieuwe bestellingen meer mogelijk zijn.
                         </p>
-                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
-                            <span class="icon power" />
-                            <span>Sluiten</span>
-                        </button>
-                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary danger hide-smartphone">
+                                <span class="icon power" />
+                                <span>Sluiten</span>
+                            </button>
+                            <button type="button" class="button icon power only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
@@ -251,11 +255,13 @@
                         <p class="style-description">
                             Open de webshop opnieuw.
                         </p>
-                        <button slot="right" type="button" class="button secundary green hide-smartphone">
-                            <span class="icon power" />
-                            <span>Openen</span>
-                        </button>
-                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary green hide-smartphone">
+                                <span class="icon power" />
+                                <span>Openen</span>
+                            </button>
+                            <button type="button" class="button icon power only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
@@ -265,11 +271,13 @@
                         <p class="style-description">
                             Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.
                         </p>
-                        <button slot="right" type="button" class="button secundary hide-smartphone">
-                            <span class="icon archive" />
-                            <span>Archiveren</span>
-                        </button>
-                        <template #right><button type="button" class="button icon archive only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon archive" />
+                                <span>Archiveren</span>
+                            </button>
+                            <button type="button" class="button icon archive only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
@@ -279,11 +287,13 @@
                         <p class="style-description">
                             Verplaats de webshop terug naar het hoofdmenu.
                         </p>
-                        <button slot="right" type="button" class="button secundary hide-smartphone">
-                            <span class="icon undo" />
-                            <span>Terugzetten</span>
-                        </button>
-                        <template #right><button type="button" class="button icon undo only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon undo" />
+                                <span>Terugzetten</span>
+                            </button>
+                            <button type="button" class="button icon undo only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem :selectable="true" @click="duplicateWebshop()">
@@ -293,11 +303,13 @@
                         <p class="style-description">
                             Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.
                         </p>
-                        <button slot="right" type="button" class="button secundary hide-smartphone">
-                            <span class="icon copy" />
-                            <span>Dupliceren</span>
-                        </button>
-                        <template #right><button type="button" class="button icon copy only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon copy" />
+                                <span>Dupliceren</span>
+                            </button>
+                            <button type="button" class="button icon copy only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
@@ -307,11 +319,13 @@
                         <p class="style-description">
                             Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.
                         </p>
-                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
-                            <span class="icon trash" />
-                            <span>Verwijderen</span>
-                        </button>
-                        <template #right><button type="button" class="button icon trash only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary danger hide-smartphone">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                            <button type="button" class="button icon trash only-smartphone" />
+                        </template>
                     </STListItem>
                 </STList>
             </template>

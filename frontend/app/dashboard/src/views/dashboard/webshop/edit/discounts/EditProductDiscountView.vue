@@ -19,7 +19,7 @@
 
         <div v-for="(d, index) in discounts" :key="d.id">
             <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errorBox" class="max">
-                <button v-if="discounts.length > 1" slot="right" class="button icon trash gray" type="button" @click="removeDiscount(d)" />
+                <template v-if="discounts.length > 1" #right><button class="button icon trash gray" type="button" @click="removeDiscount(d)" /></template>
 
                 <div class="split-inputs">
                     <div>

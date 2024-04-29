@@ -9,14 +9,14 @@
                 </button>
             </template>
 
-            <slot v-if="!$isMobile && !$isIOS" slot="right" name="buttons" />
+            <template v-if="!$isMobile && !$isIOS" #right><slot name="buttons" /></template>
 
-            <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" slot="right" :loading="loading">
+            <template v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" #right><LoadingButton :loading="loading">
                 <button class="button navigation highlight" :disabled="disabled" type="submit">
                     {{ saveText }}
                 </button>
-            </LoadingButton>
-            <button v-else-if="$parent.canDismiss && !$isAndroid && !$isMobile && !$isIOS" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
+            </LoadingButton></template>
+            <template v-else-if="$parent.canDismiss && !$isAndroid && !$isMobile && !$isIOS" #right><button class="button navigation icon close" type="button" @click="$parent.dismiss" /></template>
         </STNavigationBar>
         <main>
             <slot />

@@ -242,9 +242,9 @@
                                 {{ profile.website }}
                             </p>
 
-                            <span v-if="profile.status === 'verified'" slot="right" v-tooltip="'Geverifieerd'" class="icon success green" />
-                            <span v-else-if="profile.status === 'unverified'" slot="right" v-tooltip="'Wacht op verificatie'" class="icon clock gray" />
-                            <span v-else slot="right" v-tooltip="'Geblokkeerd'" class="icon canceled red" />
+                            <template v-if="profile.status === 'verified'" #right><span v-tooltip="'Geverifieerd'" class="icon success green" /></template>
+                            <template v-else-if="profile.status === 'unverified'" #right><span v-tooltip="'Wacht op verificatie'" class="icon clock gray" /></template>
+                            <template v-else #right><span v-tooltip="'Geblokkeerd'" class="icon canceled red" /></template>
                         </STListItem>
                     </STList>
                 </STInputBox>

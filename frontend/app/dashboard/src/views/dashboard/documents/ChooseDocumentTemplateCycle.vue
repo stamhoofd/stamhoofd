@@ -15,7 +15,7 @@
                         {{ group.getTimeRange(cycle.cycle) }}
                     </p>
 
-                    <span v-if="group.getMemberCount({cycle: cycle.cycle}) !== null" slot="right" class="style-description-small">{{ group.getMemberCount({cycle: cycle.cycle}) }}</span>
+                    <template #right><span v-if="group.getMemberCount({cycle: cycle.cycle}) !== null" class="style-description-small">{{ group.getMemberCount({cycle: cycle.cycle}) }}</span></template>
                     <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>

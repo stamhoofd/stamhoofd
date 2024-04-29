@@ -30,9 +30,9 @@
                                 {{ pack.description }}
                             </p>
 
-                            <p v-if="!pack.canSelect(availablePackages)" slot="right" class="style-description">
+                            <template v-if="!pack.canSelect(availablePackages)" #right><p class="style-description">
                                 Niet combineerbaar
-                            </p>
+                            </p></template>
                         </STListItem>
                     </STList>
                 </template>
@@ -42,7 +42,9 @@
 
                 <STList v-if="status && status.packages.length > 0">
                     <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" class="right-stack " @click="openPackageDetails(pack)">
-                        <img v-if="getPackageIcon(pack)" slot="left" :src="getPackageIcon(pack)">
+                        <template v-if="getPackageIcon(pack)" #left>
+                            <img :src="getPackageIcon(pack)">
+                        </template>
 
                         <h3 class="style-title-list">
                             {{ pack.meta.name }}
@@ -51,10 +53,12 @@
                             Geldig tot {{ formatDate(pack.validUntil, true) }}
                         </p>
 
-                        <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
-                            Verleng nu
-                        </button>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <button v-if="pack.shouldHintRenew()" class="button text gray" type="button">
+                                Verleng nu
+                            </button>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
 

@@ -68,7 +68,7 @@
                         <h2 class="style-title-list bolder">
                             Alle leden
                         </h2>
-                        <span v-if="getMemberCount() !== null" slot="right" class="style-description-small">{{ getMemberCount() }}</span>
+                        <template #right><span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span></template>
                         <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
@@ -78,7 +78,7 @@
                         <h2 class="style-title-list bolder">
                             Gemeenschappelijke wachtlijsten
                         </h2>
-                        <span v-if="getMemberCount({waitingList: true}) !== null" slot="right" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
+                        <template #right><span v-if="getMemberCount({waitingList: true}) !== null" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span></template>
                         <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                     
@@ -122,7 +122,7 @@
                                 {{ getTimeRangeOffset(offset) }}
                             </p>
 
-                            <span v-if="getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span>
+                            <template #right><span v-if="getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span></template>
                             <template #right><span class="icon arrow-right-small gray" /></template>
                         </STListItem>
                     </STList>

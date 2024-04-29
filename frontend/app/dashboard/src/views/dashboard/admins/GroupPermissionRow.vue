@@ -8,12 +8,12 @@
             Jij zit in deze groep
         </p>
 
-        <div v-if="selectGroup" slot="right">
+        <template #right><div v-if="selectGroup">
             <button class="button text" type="button" @click.stop.prevent="chooseGroupPermission(group, $event)">
                 <span>{{ getLevelText(getGroupPermission(group)) }}</span>
                 <span class="icon arrow-down-small" />
             </button>
-        </div>
+        </div></template>
     </STListItem>
 </template>
 

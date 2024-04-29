@@ -95,10 +95,10 @@
                             </Radio>
                         </RadioGroup>
 
-                        <button slot="right" class="button text" type="button" @click.stop="openAssignment">
+                        <template #right><button class="button text" type="button" @click.stop="openAssignment">
                             <span class="icon help" />
                             <span>Toon resultaat</span>
-                        </button>
+                        </button></template>
                     </STInputBox>
 
                     <template v-if="autoAssign">
@@ -119,10 +119,10 @@
                                 </STListItem>
                             </STList>
 
-                            <button slot="right" type="button" class="button text" @click.stop="openMultipleGroups">
+                            <template #right><button type="button" class="button text" @click.stop="openMultipleGroups">
                                 <span class="icon help" />
                                 <span>Toon leden</span>
-                            </button>
+                            </button></template>
                         </STInputBox>
 
 
@@ -137,10 +137,10 @@
                                 </option>
                             </Dropdown>
 
-                            <button slot="right" type="button" class="button text" @click.stop="openWithoutMatchingGroups">
+                            <template #right><button type="button" class="button text" @click.stop="openWithoutMatchingGroups">
                                 <span class="icon help" />
                                 <span>Toon leden</span>
-                            </button>
+                            </button></template>
                         </STInputBox>
                     </template>
                     <template v-else>

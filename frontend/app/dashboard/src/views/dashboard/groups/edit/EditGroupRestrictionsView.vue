@@ -51,10 +51,10 @@
             <STListItem v-for="id of patchedGroup.settings.requireGroupIds" :key="id">
                 {{ getGroupName(id) }}
 
-                <button slot="right" class="button text only-icon-smartphone" type="button" @click="removeRequireGroupId(id)">
+                <template #right><button class="button text only-icon-smartphone" type="button" @click="removeRequireGroupId(id)">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
-                </button>
+                </button></template>
             </STListItem>
         </STList>
         <p v-else class="info-box">
@@ -81,10 +81,10 @@
             <STListItem v-for="id of patchedGroup.settings.requirePreviousGroupIds" :key="id">
                 {{ getGroupName(id) }}
 
-                <button slot="right" class="button text only-icon-smartphone" type="button" @click="removeRequirePreviousGroupId(id)">
+                <template #right><button class="button text only-icon-smartphone" type="button" @click="removeRequirePreviousGroupId(id)">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
-                </button>
+                </button></template>
             </STListItem>
         </STList>
         <p v-else class="info-box">
@@ -111,10 +111,10 @@
             <STListItem v-for="id of patchedGroup.settings.preventPreviousGroupIds" :key="id">
                 {{ getGroupName(id) }}
 
-                <button slot="right" class="button text only-icon-smartphone" type="button" @click="removePreventPreviousGroupId(id)">
+                <template #right><button class="button text only-icon-smartphone" type="button" @click="removePreventPreviousGroupId(id)">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
-                </button>
+                </button></template>
             </STListItem>
         </STList>
         <p v-else class="info-box">

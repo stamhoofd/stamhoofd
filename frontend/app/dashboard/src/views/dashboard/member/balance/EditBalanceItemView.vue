@@ -90,9 +90,9 @@
                         Terugbetaald op {{ formatDate(payment.payment.paidAt) }}
                     </p>
 
-                    <span v-if="payment.payment.isFailed" slot="right" class="style-tag error">Mislukt</span>
-                    <span v-else-if="payment.payment.isPending" slot="right" class="style-tag warn">In verwerking</span>
-                    <span v-else-if="payment.payment.isSucceeded" slot="right" class="style-tag success">{{ formatPrice(payment.payment.price) }}</span>
+                    <template #right><span v-if="payment.payment.isFailed" class="style-tag error">Mislukt</span></template>
+                    <template #right><span v-else-if="payment.payment.isPending" class="style-tag warn">In verwerking</span></template>
+                    <template #right><span v-else-if="payment.payment.isSucceeded" class="style-tag success">{{ formatPrice(payment.payment.price) }}</span></template>
                     <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
@@ -134,10 +134,10 @@
                         <h2 class="style-title-list">
                             Verwijder deze aanrekening
                         </h2>
-                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
+                        <template #right><button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
-                        </button>
+                        </button></template>
                         <template #right><button type="button" class="button icon trash only-smartphone" /></template>
                     </STListItem>
                 </STList>

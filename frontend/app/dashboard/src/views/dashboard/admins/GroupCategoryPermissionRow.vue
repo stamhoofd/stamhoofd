@@ -13,12 +13,12 @@
             </p>
         </template>
 
-        <div v-if="selected" slot="right">
+        <template #right><div v-if="selected">
             <button class="button text" type="button" @click.stop.prevent="choosePermissions($event)">
                 <span>{{ levelText }}</span>
                 <span class="icon arrow-down-small" />
             </button>
-        </div>
+        </div></template>
     </STListItem>
 </template>
 

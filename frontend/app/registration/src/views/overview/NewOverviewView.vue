@@ -185,7 +185,7 @@
                                 <span v-if="document.status === 'MissingData'" class="style-tag error">Onvolledig</span>
 
                                 <Spinner v-if="isDocumentDownloading(document)" slot="right" class="gray" />
-                                <span v-else slot="right" class="icon download gray" />
+                                <template v-else #right><span class="icon download gray" /></template>
                             </STListItem>
                         </STList>
                     </template>

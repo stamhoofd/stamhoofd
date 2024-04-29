@@ -50,7 +50,7 @@
                 </STListItem>
 
                 <STListItem v-for="discountCode of patchedDiscountCodes" :key="discountCode.id" class="right-description right-stack left-center" :selectable="true" @click="editDiscountCode(discountCode)">
-                    <span class="icon label" slot="left" />
+                    <template #left><span class="icon label" /></template>
 
                     <h3 class="style-title-list">
                         <span class="style-discount-code">{{discountCode.code}}</span>

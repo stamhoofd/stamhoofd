@@ -10,14 +10,14 @@
         
             <STList>
                 <STListItem v-for="match in matches" :key="match.stamhoofd.id" element-name="label" :selectable="true">
-                    <div slot="left">
+                    <template #left><div>
                         <h2 class="style-title-list">
                             {{ match.stamhoofd.details.name }}
                         </h2>
                         <p class="style-description-small">
                             {{ match.stamhoofd.details.birthDayFormatted || "/" }}
                         </p>
-                    </div>
+                    </div></template>
 
                     <div>
                         <h2 class="style-title-list">

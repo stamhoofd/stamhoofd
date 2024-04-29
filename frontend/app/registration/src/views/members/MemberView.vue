@@ -202,14 +202,14 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="secundary button" type="button" @click="fullCheck">
+            <template #right><button class="secundary button" type="button" @click="fullCheck">
                 <span class="icon edit" />
                 <span>Nakijken</span>
-            </button>
-            <button slot="right" class="primary button" type="button" @click="chooseGroups">
+            </button></template>
+            <template #right><button class="primary button" type="button" @click="chooseGroups">
                 <span class="icon add" />
                 <span>Inschrijven</span>
-            </button>
+            </button></template>
         </STToolbar>
     </div>
 </template>
