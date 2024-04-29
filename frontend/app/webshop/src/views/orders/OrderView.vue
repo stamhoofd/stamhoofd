@@ -170,7 +170,7 @@
                                 <span v-else class="icon clock" />
                             </p>
 
-                            <span v-if="order.payments.length > 1" slot="right">{{ payment.price | price }}</span>
+                            <span v-if="order.payments.length > 1" slot="right">{{ formatPrice(payment.price) }}</span>
                         </STListItem>
                         <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
                             <h3 class="style-definition-label">
@@ -251,7 +251,7 @@
                                 </h3>
 
                                 <p class="style-definition-text">
-                                    {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
+                                    {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
                                 </p>
                             </STListItem>
                         </template>
@@ -261,7 +261,7 @@
                             </h3>
 
                             <p class="style-definition-text">
-                                {{ order.data.deliveryPrice | price }}
+                                {{ formatPrice(order.data.deliveryPrice) }}
                             </p>
                         </STListItem>
                         <STListItem v-if="order.data.administrationFee > 0" class="right-description">
@@ -270,7 +270,7 @@
                             </h3>
 
                             <p class="style-definition-text">
-                                {{ order.data.administrationFee | price }}
+                                {{ formatPrice(order.data.administrationFee) }}
                             </p>
                         </STListItem>
                         <STListItem v-if="order.data.totalPrice || !webshop.isAllFree" class="right-description">
@@ -279,7 +279,7 @@
                             </h3>
 
                             <p class="style-definition-text">
-                                {{ order.data.totalPrice | price }}
+                                {{ formatPrice(order.data.totalPrice) }}
                             </p>
                         </STListItem>
                     </STList>
@@ -324,7 +324,7 @@
                     </template>
                 </main>
                 <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || (!isPaid && isTransfer))" :sticky="false">
-                    <template slot="right">
+                    <template #right>
                         <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
                             <span class="icon share" />
                             <span>Delen</span>

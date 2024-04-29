@@ -4,7 +4,7 @@
             {{ field.name || 'Naamloos' }}
         </h2>
 
-        <template slot="right">
+        <template #right>
             <button type="button" class="button icon arrow-up gray" @click.stop="moveUp" />
             <button type="button" class="button icon arrow-down gray" @click.stop="moveDown" />
             <span class="icon arrow-right-small gray" />

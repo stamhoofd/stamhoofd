@@ -17,7 +17,7 @@
                 <STListItem>
                     Aantal leden
 
-                    <template slot="right">
+                    <template #right>
                         {{ pack.meta.paidAmount }}
                     </template>
                 </STListItem>
@@ -25,16 +25,16 @@
                 <STListItem>
                     Prijs
 
-                    <template slot="right">
-                        {{ pack.meta.unitPrice | price }} / jaar / lid
+                    <template #right>
+                        {{ formatPrice(pack.meta.unitPrice) }} / jaar / lid
                     </template>
                 </STListItem>
 
                 <STListItem>
                     Minimum bedrag per jaar
 
-                    <template slot="right">
-                        {{ pack.meta.minimumAmount * pack.meta.unitPrice | price }} 
+                    <template #right>
+                        {{ formatPrice(pack.meta.minimumAmount * pack.meta.unitPrice) }} 
                         ({{ pack.meta.minimumAmount }} leden)
                     </template>
                 </STListItem>
@@ -42,24 +42,24 @@
                 <STListItem>
                     Vanaf
 
-                    <template slot="right">
-                        {{ pack.meta.startDate | date }}
+                    <template #right>
+                        {{ formatDate(pack.meta.startDate) }}
                     </template>
                 </STListItem>
 
                 <STListItem v-if="pack.validUntil">
                     Geldig tot
 
-                    <template slot="right">
-                        {{ pack.validUntil | date }}
+                    <template #right>
+                        {{ formatDate(pack.validUntil) }}
                     </template>
                 </STListItem>
 
                 <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
                     Verlengbaar tot
 
-                    <template slot="right">
-                        {{ pack.removeAt | date }}
+                    <template #right>
+                        {{ formatDate(pack.removeAt) }}
                     </template>
                 </STListItem>
             </STList>
@@ -68,32 +68,32 @@
                 <STListItem>
                     Prijs
 
-                    <template slot="right">
-                        {{ pack.meta.unitPrice | price }} / jaar
+                    <template #right>
+                        {{ formatPrice(pack.meta.unitPrice) }} / jaar
                     </template>
                 </STListItem>
 
                 <STListItem>
                     Vanaf
 
-                    <template slot="right">
-                        {{ pack.meta.startDate | date }}
+                    <template #right>
+                        {{ formatDate(pack.meta.startDate) }}
                     </template>
                 </STListItem>
 
                 <STListItem v-if="pack.validUntil">
                     Geldig tot
 
-                    <template slot="right">
-                        {{ pack.validUntil | date }}
+                    <template #right>
+                        {{ formatDate(pack.validUntil) }}
                     </template>
                 </STListItem>
 
                 <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
                     Verlengbaar tot
 
-                    <template slot="right">
-                        {{ pack.removeAt | date }}
+                    <template #right>
+                        {{ formatDate(pack.removeAt) }}
                     </template>
                 </STListItem>
             </STList>
@@ -102,39 +102,39 @@
                 <STListItem>
                     Prijs
 
-                    <template slot="right">
-                        {{ pack.meta.unitPrice | price }}
+                    <template #right>
+                        {{ formatPrice(pack.meta.unitPrice) }}
                     </template>
                 </STListItem>
 
                 <STListItem>
                     Vanaf
 
-                    <template slot="right">
-                        {{ pack.meta.startDate | date }}
+                    <template #right>
+                        {{ formatDate(pack.meta.startDate) }}
                     </template>
                 </STListItem>
 
                 <STListItem v-if="pack.validUntil">
                     Geldig tot
 
-                    <template slot="right">
-                        {{ pack.validUntil | date }}
+                    <template #right>
+                        {{ formatDate(pack.validUntil) }}
                     </template>
                 </STListItem>
 
                 <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
                     Verlengbaar tot
 
-                    <template slot="right">
-                        {{ pack.removeAt | date }}
+                    <template #right>
+                        {{ formatDate(pack.removeAt) }}
                     </template>
                 </STListItem>
             </STList>
         </main>
 
         <STToolbar v-if="pack.meta.canDeactivate || pack.shouldHintRenew()">
-            <template slot="right">
+            <template #right>
                 <LoadingButton v-if="pack.meta.canDeactivate" :loading="deactivating">
                     <button class="button secundary" type="button" @click="deactivate">
                         Stopzetten

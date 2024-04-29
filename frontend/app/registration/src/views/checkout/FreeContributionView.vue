@@ -12,7 +12,7 @@
             </Radio>
 
             <Radio v-for="(a, index) in amounts" :key="index" v-model="amountOption" :value="a" name="contributionRadio">
-                {{ a | price }}
+                {{ formatPrice(a) }}
             </Radio>
             
             <Radio v-model="amountOption" :value="otherValue" name="contributionRadio">
@@ -41,7 +41,7 @@
         </main>
 
         <STToolbar>
-            <span slot="left">Totaal: {{ cart.price | price }}</span>
+            <span slot="left">Totaal: {{ formatPrice(cart.price) }}</span>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goNext">
                     <span>Doorgaan</span>

@@ -73,7 +73,7 @@
             <template v-else-if="proFormaInvoice">
                 <STList>
                     <STListItem v-for="item in proFormaInvoice.meta.items" :key="item.id">
-                        <template slot="left">
+                        <template #left>
                             {{ item.amount }}x
                         </template>
 
@@ -84,8 +84,8 @@
                             {{ item.description }}
                         </p>
 
-                        <template slot="right">
-                            {{ item.price | price }}
+                        <template #right>
+                            {{ formatPrice(item.price) }}
                         </template>
                     </STListItem>
                 </STList>
@@ -95,24 +95,24 @@
                         <STListItem>
                             Prijs excl. BTW
 
-                            <template slot="right">
-                                {{ proFormaInvoice.meta.priceWithoutVAT | price }}
+                            <template #right>
+                                {{ formatPrice(proFormaInvoice.meta.priceWithoutVAT) }}
                             </template>
                         </STListItem>
 
                         <STListItem>
                             BTW ({{ proFormaInvoice.meta.VATPercentage }}%)
         
-                            <template slot="right">
-                                {{ proFormaInvoice.meta.VAT | price }}
+                            <template #right>
+                                {{ formatPrice(proFormaInvoice.meta.VAT) }}
                             </template>
                         </STListItem>
 
                         <STListItem>
                             Te betalen
 
-                            <template slot="right">
-                                {{ proFormaInvoice.meta.priceWithVAT | price }}
+                            <template #right>
+                                {{ formatPrice(proFormaInvoice.meta.priceWithVAT) }}
                             </template> 
                         </STListItem>
                     </STList>
@@ -140,7 +140,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="checkout">
                         <span class="icon card" />

@@ -24,7 +24,7 @@
                             {{ match.sgv.firstName }} {{ match.sgv.lastName }}
                         </h2>
                         <p class="style-description-small">
-                            {{ match.sgv.birthDay | date }}
+                            {{ formatDate(match.sgv.birthDay) }}
                         </p>
                     </div>
 
@@ -34,7 +34,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button secundary" type="button" @click.prevent.stop="cancel">
                     <span>Annuleren</span>
                 </button>

@@ -10,7 +10,7 @@
 
         <STList>
             <STListItem>
-                <template slot="left">
+                <template #left>
                     <span class="icon layered">
                         <span class="icon user-admin-layer-1" />
                         <span class="icon user-admin-layer-2 yellow" />
@@ -24,7 +24,7 @@
                     Volledige toegang
                 </p>
 
-                <template slot="right">
+                <template #right>
                     <span v-if="getAdmins().length > 1" class="style-tag">
                         {{ getAdmins().length }}
                     </span>
@@ -36,7 +36,7 @@
 
             <STList v-if="roles.length" v-model="draggableRoles" :draggable="true">
                 <STListItem v-for="role in roles" :key="role.id" :selectable="true" class="right-stack" @click="editRole(role)">
-                    <template slot="left">
+                    <template #left>
                         <span class="icon user" />
                     </template>
 
@@ -47,7 +47,7 @@
                         {{ roleDescription(role) }}
                     </p>
 
-                    <template slot="right">
+                    <template #right>
                         <span v-if="getAdminsForRole(role).length > 1" class="style-tag">
                             {{ getAdminsForRole(role).length }}
                         </span>
@@ -57,9 +57,6 @@
                         <span v-else class="style-tag warn">
                             Ongebruikt
                         </span>
-                    </template>
-
-                    <template slot="right">
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
                     </template>

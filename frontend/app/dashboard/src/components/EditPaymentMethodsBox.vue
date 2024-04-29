@@ -108,7 +108,7 @@
             </Checkbox>
 
             <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
-                Voorbeeld: de aangerekende administratiekost bedraagt {{ exampleAdministrationFee1 | price }} op een bedrag van {{ exampleAdministrationFeeValue1 | price }}, en {{ exampleAdministrationFee2 | price }} op een bedrag van {{ exampleAdministrationFeeValue2 | price }}.
+                Voorbeeld: de aangerekende administratiekost bedraagt {{ formatPrice(exampleAdministrationFee1) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue1) }}, en {{ formatPrice(exampleAdministrationFee2) }} op een bedrag van {{ formatPrice(exampleAdministrationFeeValue2) }}.
             </p>
         </template>
     </div>

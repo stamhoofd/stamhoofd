@@ -4,8 +4,8 @@
             <STListItem v-for="(item, index) of checkout.priceBreakown" :key="index">
                 {{ item.name }}
 
-                <template slot="right">
-                    {{ item.price | price }}
+                <template #right>
+                    {{ formatPrice(item.price) }}
                 </template>
             </STListItem>
         </STList>

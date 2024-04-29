@@ -1,11 +1,11 @@
 <template>
     <section class="st-view box-shade choose-webshop-view">
         <STNavigationBar :large="true">
-            <template slot="left">
+            <template #left>
                 <OrganizationLogo :organization="organization" />
             </template>
 
-            <template slot="right">
+            <template #right>
                 <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                     <span class="icon external" />
                     <span>Terug naar website</span>

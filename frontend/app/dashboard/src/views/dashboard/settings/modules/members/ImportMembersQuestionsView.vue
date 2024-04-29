@@ -111,7 +111,7 @@
                                 <STListItem v-for="(group, index) of multipleGroups" :key="group.id" class="right-description">
                                     {{ index + 1 }}. {{ group.settings.name }}
 
-                                    <template slot="right">
+                                    <template #right>
                                         <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
                                         <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
                                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
@@ -157,7 +157,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button type="button" class="button secundary" @click="openResultView">
                     Toon wijzigingen
                 </button>

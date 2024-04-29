@@ -18,10 +18,10 @@
             {{ getGroup(registration.groupId).settings.name }}
         </h3>
         <p v-if="!registration.waitingList" class="style-description-small">
-            Ingeschreven op {{ registration.registeredAt | dateTime }}
+            Ingeschreven op {{ formatDateTime(registration.registeredAt) }}
         </p>
         <p v-else class="style-description-small">
-            Op wachtlijst sinds {{ registration.createdAt | dateTime }}
+            Op wachtlijst sinds {{ formatDateTime(registration.createdAt) }}
         </p>
         <p v-if="registration.waitingList && registration.canRegister" class="style-description-small">
             Toegelaten om in te schrijven

@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { CenteredMessage,EmailInput, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "vue-property-decorator";
 
 import PayconiqBannerView from "./PayconiqBannerView.vue";
 
@@ -39,7 +39,7 @@ import PayconiqBannerView from "./PayconiqBannerView.vue";
         STErrorsDefault
     }
 })
-export default class PayconiqButtonView extends PayconiqBannerView {
+export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
     @Prop({})
         paymentUrl: string;
 

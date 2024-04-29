@@ -17,7 +17,7 @@
                     <p class="style-description">
                         Alle betalingen, transactiekosten en uitbetalingen die via Stamhoofd verliepen.
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -30,7 +30,7 @@
                     <p class="style-description">
                         Markeer overschrijvingen als betaald.
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -56,12 +56,12 @@
                         <p v-else class="style-description">
                             Betaal je openstaande bedrag.
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span v-if="!isPaymentFailed" class="style-description-small">
-                                {{ status.pendingInvoice.meta.priceWithoutVAT | price }}
+                                {{ formatPrice(status.pendingInvoice.meta.priceWithoutVAT) }}
                             </span>
                             <span v-else class="style-tag error">
-                                {{ status.pendingInvoice.meta.priceWithoutVAT | price }}
+                                {{ formatPrice(status.pendingInvoice.meta.priceWithoutVAT) }}
                             </span>
                             <span class="icon arrow-right-small gray" />
                         </template>
@@ -75,9 +75,9 @@
                         <p class="style-description">
                             Dit bedrag zal automatisch gebruikt worden om jouw volgende aankoop te betalen.
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span class="style-description-small">
-                                {{ balance | price }}
+                                {{ formatPrice(balance) }}
                             </span>
                             <span class="icon arrow-right-small gray" />
                         </template>
@@ -91,7 +91,7 @@
                         <p class="style-description">
                             Wijzig je pakketten of activeer nieuwe functies
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -104,7 +104,7 @@
                         <p class="style-description">
                             Download jouw facturen en bekijk jouw tegoed.
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>

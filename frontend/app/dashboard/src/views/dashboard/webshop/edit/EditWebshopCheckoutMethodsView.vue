@@ -9,7 +9,7 @@
             <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" class="right-stack" @click="editCheckoutMethod(method)">
                 {{ method.typeName }}: {{ method.name }}
 
-                <template slot="right">
+                <template #right>
                     <button class="button icon arrow-up gray" type="button" @click.stop="moveCheckoutUp(method)" />
                     <button class="button icon arrow-down gray" type="button" @click.stop="moveCheckoutDown(method)" />
                     <span class="icon arrow-right-small gray" />

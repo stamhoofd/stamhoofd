@@ -7,7 +7,7 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <!-- Buttons -->
-        <template slot="buttons">
+        <template #buttons>
             <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
                 <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
@@ -17,7 +17,7 @@
         </template>
 
         <!-- List -->
-        <template slot="list">
+        <template #list>
             <STListItem v-if="members.length > 0" class="no-padding right-stack">
                 <div class="list-input-box">
                     <span>Aan:</span>
@@ -63,7 +63,7 @@
         </template>
 
         <!-- Editor footer -->
-        <template slot="footer">
+        <template #footer>
             <!-- E-mail attachments -->
             <STList v-if="files.length > 0">
                 <STListItem v-for="(file, index) in files" :key="index" class="file-list-item">

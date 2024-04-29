@@ -1,5 +1,5 @@
 import viteSvgToWebfont from '@simonbackx/vite-svg-2-webfont';
-import vue from '@vitejs/plugin-vue2';
+import vue from '@vitejs/plugin-vue';
 import fs from 'fs';
 import path, { resolve } from 'path';
 
@@ -47,8 +47,24 @@ if (process.env.LOAD_ENV) {
 // https://vitejs.dev/config/
 export function buildConfig(options: {port: number}) {
     return {
+        resolve: {
+            alias: {
+                vue: '@vue/compat',
+                'vue-property-decorator': '@simonbackx/vue-app-navigation/classes'
+            }
+        },
         plugins: [
-            vue(),
+            vue({
+                template: {
+                    compilerOptions: {
+                        comments: false,
+                        compatConfig: {
+                            MODE: 2,
+                            GLOBAL_MOUNT: false
+                        } as any
+                    }
+                }
+            }),
             viteSvgToWebfont({
                 ...iconConfig,
                 context: resolve(__dirname, './shared/assets/images/icons/'),
@@ -66,7 +82,10 @@ export function buildConfig(options: {port: number}) {
 
         },
         build: {
-            sourcemap: 'inline'
+            sourcemap: 'inline',
+            rollupOptions: {
+                treeshake: false,
+            }
         }
     }
 }

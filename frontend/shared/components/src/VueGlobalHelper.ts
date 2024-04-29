@@ -1,7 +1,7 @@
 import { Request } from "@simonbackx/simple-networking";
 import { AppManager, SessionManager } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
-import Vue from "vue";
+import Vue, {type App} from "vue";
 
 import { CopyableDirective, GlobalEventBus, LongPressDirective,TooltipDirective } from "..";
 
@@ -70,21 +70,22 @@ function focusNextElement () {
 }
 
 export class VueGlobalHelper {
-    static setup() {
-        Vue.prototype.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
-        Vue.prototype.$focusNext = () => {
+    static setup(app: App<Element>) {
+        app.config.globalProperties.$country = "BE" // todo
+        app.config.globalProperties.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
+        app.config.globalProperties.$focusNext = () => {
             focusNextElement()
         }
 
-        Vue.prototype.$OS = AppManager.shared.getOS()
-        Vue.prototype.$isNative = AppManager.shared.isNative
-        Vue.prototype.$isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)
+        app.config.globalProperties.$OS = AppManager.shared.getOS()
+        app.config.globalProperties.$isNative = AppManager.shared.isNative
+        app.config.globalProperties.$isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)
 
-        Vue.prototype.$isAndroid = Vue.prototype.$OS === "android"
-        Vue.prototype.$isIOS = Vue.prototype.$OS === "iOS"
-        Vue.prototype.$isMac = Vue.prototype.$OS === "macOS"
+        app.config.globalProperties.$isAndroid = app.config.globalProperties.$OS === "android"
+        app.config.globalProperties.$isIOS = app.config.globalProperties.$OS === "iOS"
+        app.config.globalProperties.$isMac = app.config.globalProperties.$OS === "macOS"
 
-        Vue.prototype.pluralText = function(num: number, singular: string, plural: string) {
+        app.config.globalProperties.pluralText = function(num: number, singular: string, plural: string) {
             return Formatter.pluralText(num, singular, plural)
         }
 
@@ -99,7 +100,7 @@ export class VueGlobalHelper {
             }
         })
 
-        if (Vue.prototype.$OS === "android") {
+        if (app.config.globalProperties.$OS === "android") {
             document.addEventListener('touchstart', (event) => {
                 const target = event.target as HTMLElement
                 if (target && target.tagName === 'BUTTON') {
@@ -112,7 +113,7 @@ export class VueGlobalHelper {
             }, { passive: true })
         }
 
-        Vue.mixin({
+        app.mixin({
             directives: {
                 tooltip: TooltipDirective,
                 copyable: CopyableDirective,
@@ -166,10 +167,20 @@ export class VueGlobalHelper {
                     }
                 },
             },
-            beforeDestroy() {
+            beforeUnmount() {
                 // Clear all pending requests
                 GlobalEventBus.removeListener(this)
                 Request.cancelAll(this)
+            },
+            methods: {
+                formatPrice: Formatter.price.bind(Formatter),
+                formatDate: Formatter.date.bind(Formatter),
+                formatDateTime: Formatter.dateTime.bind(Formatter),
+                formatPriceChange: Formatter.priceChange.bind(Formatter),
+                formatMinutes: Formatter.minutes.bind(Formatter),
+                capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
+                formatDateWithDay: Formatter.dateWithDay.bind(Formatter),
+                formatTime: Formatter.time.bind(Formatter),
             }
         })
     }

@@ -1,7 +1,7 @@
 <template>
     <div class="st-view cart-view">
         <STNavigationBar :pop="canPop" :dismiss="canDismiss">
-            <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
+            <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ formatPrice(cart.price) }}</span>
         </STNavigationBar>
 
         <main class="flex">
@@ -30,7 +30,7 @@
 
                     <footer slot="right">
                         <p v-if="item.calculatedPrice" class="price">
-                            {{ item.calculatedPrice | price }}
+                            {{ formatPrice(item.calculatedPrice) }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
@@ -43,12 +43,12 @@
                         <span>{{ item.item.description }}</span>
                     </h3>
                     <p class="style-description-small">
-                        Openstaand bedrag van {{ item.item.createdAt | date }}
+                        Openstaand bedrag van {{ formatDate(item.item.createdAt) }}
                     </p>
 
                     <footer slot="right">
                         <p class="price">
-                            {{ item.price | price }}
+                            {{ formatPrice(item.price) }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" type="button" @click="deleteBalanceItem(item)" />
@@ -97,32 +97,32 @@
                     <STListItem v-if="cart.administrationFee || cart.freeContribution">
                         Subtotaal
 
-                        <template slot="right">
-                            {{ cart.priceWithoutFees | price }}
+                        <template #right>
+                            {{ formatPrice(cart.priceWithoutFees) }}
                         </template>
                     </STListItem>
 
                     <STListItem v-if="cart.administrationFee">
                         Administratiekosten
 
-                        <template slot="right">
-                            {{ cart.administrationFee | price }}
+                        <template #right>
+                            {{ formatPrice(cart.administrationFee) }}
                         </template>
                     </STListItem>
 
                     <STListItem v-if="cart.freeContribution">
                         Vrije bijdrage
 
-                        <template slot="right">
-                            {{ cart.freeContribution | price }}
+                        <template #right>
+                            {{ formatPrice(cart.freeContribution) }}
                         </template>
                     </STListItem>
 
                     <STListItem>
                         Totaal
 
-                        <template slot="right">
-                            {{ cart.price | price }}
+                        <template #right>
+                            {{ formatPrice(cart.price) }}
                         </template> 
                     </STListItem>
                 </STList>
@@ -130,7 +130,7 @@
         </main>
 
         <STToolbar v-if="!cart.isEmpty">
-            <span slot="left">Totaal: {{ cart.price | price }}</span>
+            <span slot="left">Totaal: {{ formatPrice(cart.price) }}</span>
 
             <button slot="right" class="button secundary" type="button" @click="addItem">
                 <span class="icon add" />

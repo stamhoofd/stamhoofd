@@ -26,7 +26,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
                         Verifieer

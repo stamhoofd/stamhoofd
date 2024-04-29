@@ -18,10 +18,10 @@
             <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
                 <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
                 <h2 class="style-title-list">
-                    {{ slot.date | dateWithDay }}
+                    {{ formatDateWithDay(slot.date) }}
                 </h2> 
                 <p class="style-description">
-                    Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                    Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                 </p>
 
                 <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>

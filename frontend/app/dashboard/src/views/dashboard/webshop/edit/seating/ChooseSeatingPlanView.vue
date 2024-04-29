@@ -36,7 +36,7 @@
                 </p>
                 
 
-                <template slot="right">
+                <template #right>
                     <button class="button icon edit gray" type="button" @click="editSeatingPlan(plan)" />
                 </template>
             </STListItem>

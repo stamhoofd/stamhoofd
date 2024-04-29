@@ -18,7 +18,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button primary" @click="dismiss">
                     Sluiten
                 </button>

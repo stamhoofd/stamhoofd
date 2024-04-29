@@ -2,19 +2,19 @@
     <SaveView title="Kies je leveringsadres" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext">
         <h1>Kies je leveringsadres</h1>
         <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
-            Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
+            Bestel minimum {{ formatPrice(deliveryMethod.price.minimumPrice) }} om van een verlaagde leveringskost van {{ formatPrice(deliveryMethod.price.discountPrice) }} te genieten.
         </div>
 
         <p v-if="checkout.deliveryPrice == 0" class="success-box">
             Levering is gratis
             <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
-                vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
             </template>
         </p>
         <p v-else class="info-box">
-            De leveringskost bedraagt {{ checkout.deliveryPrice | price }}
+            De leveringskost bedraagt {{ formatPrice(checkout.deliveryPrice) }}
             <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === checkout.deliveryPrice" class="info-box">
-                vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
             </template>
         </p>
 

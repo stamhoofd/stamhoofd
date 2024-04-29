@@ -50,7 +50,7 @@
                 <STListItem v-if="group.settings.location" class="right-description">
                     Waar?
 
-                    <template slot="right">
+                    <template #right>
                         {{ group.settings.location }}
                     </template>
                 </STListItem>

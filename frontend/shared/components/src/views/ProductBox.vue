@@ -17,7 +17,7 @@
                 <p class="price">
                     {{ priceString }}
 
-                    <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ product.enableAfter | dateTime }}</span>
+                    <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ formatDateTime(product.enableAfter) }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">Onbeschikbaar</span>
                     <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
                     <span v-else-if="stockText !== null" class="style-tag" :class="stockText.style">{{ stockText.text }}</span>

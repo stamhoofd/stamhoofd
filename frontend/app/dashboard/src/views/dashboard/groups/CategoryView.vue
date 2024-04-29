@@ -1,7 +1,7 @@
 <template>
     <div class="st-view background category-view">
         <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
-            <template slot="right">
+            <template #right>
                 <button v-if="canEdit" class="navigation button icon settings" type="button" @click="editMe" />
             </template>
         </STNavigationBar>
@@ -46,14 +46,14 @@
                     </STListItem>
 
                     <STListItem v-for="category in categories" :key="category.id" :selectable="true" @click="openCategory(category)">
-                        <template slot="left">
+                        <template #left>
                             <span v-if="category.categories.length" class="icon category" />
                             <span v-else class="icon category" />
                         </template>
 
                         {{ category.settings.name }}
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -91,7 +91,7 @@
                             {{ group.settings.dateRangeDescription }}
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>

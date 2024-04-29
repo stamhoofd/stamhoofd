@@ -11,9 +11,9 @@ import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
 import Vue from "vue";
-import VueMeta from 'vue-meta'
+import { createApp } from 'vue'
+import App from "./App.vue";
 
-Vue.use(VueMeta)
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
 if (!isPrerender && STAMHOOFD.environment == "production") {
@@ -26,16 +26,13 @@ if (!isPrerender && STAMHOOFD.environment == "production") {
 
 document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 
-import App from "./App.vue";
-VueGlobalHelper.setup()
+const app = createApp(App);
+VueGlobalHelper.setup(app)
 
 const i18n = I18nController.getI18n()
-const app = new Vue({
-    i18n,
-    render: (h) => h(App),
-});
+app.use(i18n)
 
-(window as any).app = app;
+//(window as any).app = app;
 
 if (!isPrerender) {
     ViewportHelper.setup(true)
@@ -58,5 +55,5 @@ if (!isPrerender) {
         }
     }
 }
-
-app.$mount("#app")
+console.log('App:', App);
+app.mount("#app")

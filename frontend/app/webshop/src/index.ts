@@ -9,9 +9,6 @@ import { ViewportHelper, VueGlobalHelper } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { AppManager } from "@stamhoofd/networking";
 import Vue from "vue";
-import VueMeta from 'vue-meta'
-
-Vue.use(VueMeta)
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 

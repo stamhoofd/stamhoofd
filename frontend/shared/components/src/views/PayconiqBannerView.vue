@@ -11,7 +11,7 @@
 
         <LoadingButton :loading="payment && payment.status == 'Pending'" class="price-loading">
             <p class="price">
-                {{ price | price }}
+                {{ formatPrice(price) }}
             </p>
         </LoadingButton>
 

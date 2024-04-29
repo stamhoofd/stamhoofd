@@ -1,10 +1,10 @@
 <template>
     <div class="tab-bar-controller">
         <STNavigationBar :fixed="true" :large="true">
-            <template slot="left">
+            <template #left>
                 <OrganizationLogo :organization="organization" />
             </template>
-            <template slot="right">
+            <template #right>
                 <button v-for="item in items" :key="item.component.key" class="button text" :class="{ selected: activeItem === item }" type="button" @click="selectItem(item)">
                     <span :class="'icon '+item.icon" />
                     <span>{{ item.name }}</span>

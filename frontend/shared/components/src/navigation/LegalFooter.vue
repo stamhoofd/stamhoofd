@@ -11,9 +11,9 @@
                     Website
                 </a>
                 
-                <template v-for="policy in policies">
+                <template v-for="policy in policies" :key="policy.id">
                     -
-                    <a :key="policy.id" :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                    <a :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
                         {{ policy.name }}
                     </a>
                 </template>

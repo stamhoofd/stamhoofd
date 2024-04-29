@@ -15,7 +15,6 @@
     </div>
 </template>
 
-
 <style lang="scss">
 @use '@stamhoofd/scss/base/variables' as *;
 

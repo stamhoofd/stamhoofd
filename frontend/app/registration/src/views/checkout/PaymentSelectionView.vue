@@ -5,7 +5,7 @@
             <h1>Kies een betaalmethode</h1>
             <p>
                 <span>Te betalen: </span>
-                <span class="style-tag">{{ cart.price | price }}</span>
+                <span class="style-tag">{{ formatPrice(cart.price) }}</span>
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -20,7 +20,7 @@
         </main>
 
         <STToolbar>
-            <span slot="left">Totaal: {{ cart.price | price }}</span>
+            <span slot="left">Totaal: {{ formatPrice(cart.price) }}</span>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goNext">
                     <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Bevestigen</span>

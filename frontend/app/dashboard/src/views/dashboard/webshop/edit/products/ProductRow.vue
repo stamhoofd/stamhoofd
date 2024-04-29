@@ -1,6 +1,6 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
-        <template slot="left">
+        <template #left>
             <img v-if="imageSrc" :src="imageSrc" :width="imageResolution.width" :height="imageResolution.height" class="product-row-image">
         </template>
         
@@ -15,11 +15,11 @@
         </p>
         <p>
             <span class="style-tag">
-                {{ price | price }}
+                {{ formatPrice(price) }}
             </span>
         </p>
 
-        <template slot="right">
+        <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>

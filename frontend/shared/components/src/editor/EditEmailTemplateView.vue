@@ -10,13 +10,13 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <!-- Buttons -->
-        <template slot="buttons">
+        <template #buttons>
             <hr v-if="!$isMobile">
             <button v-if="!$isMobile" v-tooltip="'Voorbeeld tonen'" class="button icon eye" type="button" @click="openPreview" />
         </template>
 
         <!-- List -->
-        <template slot="list">
+        <template #list>
             <STListItem class="no-padding" element-name="label">
                 <div class="list-input-box">
                     <span>Onderwerp:</span>

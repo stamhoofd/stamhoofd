@@ -1,6 +1,6 @@
 <template>
     <STInputBox v-bind="$attrs">
-        <template slot="right">
+        <template #right>
             <button v-if="values.length" class="button text icon add" type="button" @click="openContextMenu" />
         </template>
         <div v-if="values.length == 0" class="multi-select-container input-icon-container right icon arrow-down-small gray">
@@ -14,7 +14,7 @@
                     <STListItem v-for="value of values" :key="value" :selectable="true" @click="openContextMenu($event, value)">
                         <span v-for="(label, index) of getValueLabels(value)" :key="index" :title="label" v-text="label" />
 
-                        <template slot="right">
+                        <template #right>
                             <span class="button icon arrow-down-small gray" />
                             <span v-if="draggableValues.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
                             <button class="button icon trash gray" type="button" @click="deleteValue(value)" />

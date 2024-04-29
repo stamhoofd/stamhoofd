@@ -1,6 +1,6 @@
 <template>
     <SaveView :loading="false" :title="title" :disabled="!hasChanges" @save="save">
-        <template slot="buttons">
+        <template #buttons>
             <button class="icon settings button gray" type="button" @click="editCategory()" />
         </template>
         <h1 class="style-navigation-title">

@@ -41,7 +41,7 @@
                     {{ productDiscount.getTitle(webshop, true).footnote }}
                 </p>
 
-                <template slot="right">
+                <template #right>
                     <span class="icon arrow-right-small gray" />
                 </template>
             </STListItem>
@@ -69,7 +69,7 @@
                     {{ requirement.product.getName(webshop, true).footnote }}
                 </p>
 
-                <template slot="right">
+                <template #right>
                     <span class="icon arrow-right-small gray" />
                 </template>
             </STListItem>

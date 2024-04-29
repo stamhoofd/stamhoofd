@@ -60,7 +60,7 @@
                             {{ checkoutMethod.description || checkoutMethod.address || "" }}
                         </p>
                         <p v-if="checkoutMethod.timeSlots.timeSlots.length == 1" class="style-description-small">
-                            {{ checkoutMethod.timeSlots.timeSlots[0].date | date | capitalizeFirstLetter }} tussen {{ checkoutMethod.timeSlots.timeSlots[0].startTime | minutes }} - {{ checkoutMethod.timeSlots.timeSlots[0].endTime | minutes }}
+                            {{ checkoutMethod.timeSlots.timeSlots[0].date | date | capitalizeFirstLetter }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
                         </p>
 
                         <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1">
@@ -97,10 +97,10 @@
                     <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
                         <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
                         <h2 class="style-title-list">
-                            {{ slot.date | dateWithDay }}
+                            {{ formatDateWithDay(slot.date) }}
                         </h2> 
                         <p class="style-description">
-                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                            Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                         </p>
 
                         <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
@@ -113,19 +113,19 @@
                 <hr>
                 <h2>Leveringsadres</h2>
                 <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== patchedOrder.data.deliveryPrice" class="info-box">
-                    Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
+                    Bestel minimum {{ formatPrice(deliveryMethod.price.minimumPrice) }} om van een verlaagde leveringskost van {{ formatPrice(deliveryMethod.price.discountPrice) }} te genieten.
                 </div>
 
                 <p v-if="patchedOrder.data.deliveryPrice == 0" class="success-box">
                     Levering is gratis
                     <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0">
-                        vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                        vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
                     </template>
                 </p>
                 <p v-else class="info-box">
-                    De leveringskost bedraagt {{ patchedOrder.data.deliveryPrice | price }}
+                    De leveringskost bedraagt {{ formatPrice(patchedOrder.data.deliveryPrice) }}
                     <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === patchedOrder.data.deliveryPrice">
-                        vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                        vanaf een bestelbedrag van {{ formatPrice(deliveryMethod.price.minimumPrice) }}.
                     </template>
                 </p>
 

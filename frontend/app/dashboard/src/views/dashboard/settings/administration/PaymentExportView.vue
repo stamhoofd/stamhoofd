@@ -84,7 +84,7 @@
                 </h3>
                 <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
 
-                <template slot="right">
+                <template #right>
                     {{ formatPrice(detail.price) }}
                 </template>
                 <span v-if="detail.filter" slot="right" class="icon arrow-right-small gray" />
@@ -98,7 +98,7 @@
                 </h3>
                 <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
 
-                <template slot="right">
+                <template #right>
                     {{ formatPrice(detail.price) }}
                 </template>
                 <span v-if="detail.filter" slot="right" class="icon arrow-right-small gray" />
@@ -114,7 +114,7 @@
                 </h3>
                 <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
 
-                <template slot="right">
+                <template #right>
                     {{ formatPrice(detail.price) }}
                 </template>
                 <span v-if="detail.filter" slot="right" class="icon arrow-right-small gray" />

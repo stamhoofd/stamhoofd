@@ -1,7 +1,7 @@
 <template>
     <div class="st-view box-shade">
         <STNavigationBar :large="true">
-            <template slot="left">
+            <template #left>
                 <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <Logo class="responsive" />
                 </a>

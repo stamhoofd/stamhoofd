@@ -59,7 +59,7 @@
                         <h3>{{ info.name }}</h3>
                         <p v-if="info.description" class="style-description-small pre-wrap" v-text="info.description" />
 
-                        <template slot="right">
+                        <template #right>
                             <p class="style-price-big">
                                 {{ loading ? '-' : info.amount }}
                             </p>

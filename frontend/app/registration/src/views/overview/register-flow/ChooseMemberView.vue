@@ -14,7 +14,7 @@
                         {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}
                     </h2>
 
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -26,7 +26,7 @@
                         Nieuw lid toevoegen
                     </h2>
 
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>

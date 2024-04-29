@@ -102,7 +102,7 @@
                     <STListItem>
                         Betaald
 
-                        <template slot="right">
+                        <template #right>
                             {{ formatPrice(outstanding.paid) }}
                         </template>
                     </STListItem>
@@ -110,7 +110,7 @@
                     <STListItem>
                         Nog te betalen
 
-                        <template slot="right">
+                        <template #right>
                             {{ formatPrice(outstanding.remaining) }}
                         </template>
                     </STListItem>
@@ -118,7 +118,7 @@
                     <STListItem v-if="outstanding.pending">
                         Waarvan in verwerking
 
-                        <template slot="right">
+                        <template #right>
                             {{ formatPrice(outstanding.pending) }}
                         </template>
                     </STListItem>

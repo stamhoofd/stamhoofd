@@ -97,7 +97,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <LoadingButton :loading="saving">
                     <button class="button primary" :disabled="!file || columns.length == 0 || rowCount === 0" type="button" @click="goNext">
                         Volgende
@@ -343,7 +343,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
                 new CenteredMessage("Dit bestand heeft geen werkbladen").addCloseButton().show()
                 return
             }
-            Vue.set(this, "sheets", workbook.Sheets)
+            this.sheets = workbook.Sheets
             this.file = file.name
             this.sheetKey = keys[0]
         };

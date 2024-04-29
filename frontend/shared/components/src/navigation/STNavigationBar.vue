@@ -65,9 +65,8 @@ export default class STNavigationBar extends Vue {
     scrolled = false;
     scrollElement!: HTMLElement | null;
 
-    $slots;
-
     get hasLeft() {
+        console.log('has left', this.$slots)
         return this.pop || (this.dismiss && (this as any).$isAndroid) || !!this.$slots['left']
     }
 

@@ -2,8 +2,8 @@
     <div ref="errors" :class="{'input-errors': errors.length > 0}">
         <slot />
         <div>
-            <template v-for="error in errors">
-                <STErrorBox :key="error.id">
+            <template v-for="error in errors" :key="error.id">
+                <STErrorBox>
                     {{ error.human || error.message }}
                 </STErrorBox>
             </template>

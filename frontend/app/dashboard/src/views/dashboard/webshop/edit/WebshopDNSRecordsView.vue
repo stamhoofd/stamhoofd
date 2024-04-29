@@ -30,7 +30,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button secundary" type="button" @click="skip">
                     Overslaan
                 </button>

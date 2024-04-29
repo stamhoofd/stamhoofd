@@ -1,11 +1,11 @@
 <template>
     <section class="st-view shade webshop-view">
         <STNavigationBar :large="true">
-            <template slot="left">
+            <template #left>
                 <OrganizationLogo :organization="organization" :webshop="webshop" />
             </template>
 
-            <template slot="right">
+            <template #right>
                 <button v-if="isLoggedIn" type="button" class="button text limit-space" @click="switchAccount">
                     <span class="icon user" />
                     <span>{{ userName }}</span>
@@ -32,13 +32,13 @@
                     <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
                     <p v-if="showOpenAt" class="info-box">
-                        Bestellen kan vanaf {{ webshop.meta.openAt | dateTime }}
+                        Bestellen kan vanaf {{ formatDateTime(webshop.meta.openAt) }}
                     </p>
                     <p v-else-if="closed" class="info-box">
                         Bestellingen zijn gesloten
                     </p>
                     <p v-else-if="almostClosed" class="info-box">
-                        Bestellen kan tot {{ webshop.meta.availableUntil | time }}
+                        Bestellen kan tot {{ formatTime(webshop.meta.availableUntil) }}
                     </p>
                     <p v-if="categories.length == 0 && products.length == 0" class="info-box">
                         Momenteel is er niets beschikbaar.

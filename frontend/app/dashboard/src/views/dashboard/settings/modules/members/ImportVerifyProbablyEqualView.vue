@@ -41,7 +41,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button primary" type="button" @click="goNext">
                     Verder
                 </button>

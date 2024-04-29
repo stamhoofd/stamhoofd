@@ -22,7 +22,7 @@
             {{ type == "member" ? member.name : group.settings.name }}
         </h4>
 
-        <template slot="right">
+        <template #right>
             <span v-if="selected" class="style-tag">In mandje</span>
             <span v-if="canRegister.message" class="style-tag" :class="{ error: canRegister.closed, warn: canRegister.waitingList }">{{ canRegister.message }}</span>
             <span class="icon arrow-right-small gray" />

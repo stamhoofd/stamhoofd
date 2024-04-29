@@ -44,12 +44,11 @@ export class MemberManager extends MemberManagerBase {
                 s.push(decryptedMember)
             }
         }
-
-        Vue.set(this, "members", s)
+        this.members = s
     }
 
     setDocuments(documents: Document[]) {
-        Vue.set(this, "documents", documents)
+        this.documents = documents
     }
 
     async loadMembers() {

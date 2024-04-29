@@ -13,11 +13,11 @@
             Nog {{ pluralText(productPrice.remainingStock, 'stuk', 'stuks') }} beschikbaar
         </p>
 
-        <template slot="right">
+        <template #right>
             <span><template v-if="productPrice.discountPrice">
-                      {{ productPrice.discountPrice | price }} /
+                      {{ formatPrice(productPrice.discountPrice) }} /
                   </template>
-                {{ productPrice.price | price }}</span>
+                {{ formatPrice(productPrice.price) }}</span>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>

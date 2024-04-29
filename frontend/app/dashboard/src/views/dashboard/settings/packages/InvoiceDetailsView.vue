@@ -25,7 +25,7 @@
             </p>
 
             <p v-if="invoice.invoice" class="info-box">
-                Een (deel) van de betaling van deze proforma factuur is in behandeling. Dit kan tot 3 werkdagen duren. Je kan in tussentijd zelf niet de betaling in orde brengen (om dubbele betaling te voorkomen). Gestart op: {{ invoice.invoice.createdAt | dateTime }}
+                Een (deel) van de betaling van deze proforma factuur is in behandeling. Dit kan tot 3 werkdagen duren. Je kan in tussentijd zelf niet de betaling in orde brengen (om dubbele betaling te voorkomen). Gestart op: {{ formatDateTime(invoice.invoice.createdAt) }}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -36,7 +36,7 @@
 
             <STList v-if="invoice.meta.items.length">
                 <STListItem v-for="item in invoice.meta.items" :key="item.id">
-                    <template slot="left">
+                    <template #left>
                         {{ item.amount }}x
                     </template>
 
@@ -47,8 +47,8 @@
                         {{ item.description }}
                     </p>
 
-                    <template slot="right">
-                        {{ item.price | price }}
+                    <template #right>
+                        {{ formatPrice(item.price) }}
                     </template>
                 </STListItem>
             </STList>
@@ -58,24 +58,24 @@
                     <STListItem>
                         Prijs excl. BTW
 
-                        <template slot="right">
-                            {{ invoice.meta.priceWithoutVAT | price }}
+                        <template #right>
+                            {{ formatPrice(invoice.meta.priceWithoutVAT) }}
                         </template>
                     </STListItem>
 
                     <STListItem>
                         BTW ({{ invoice.meta.VATPercentage }}%)
     
-                        <template slot="right">
-                            {{ invoice.meta.VAT | price }}
+                        <template #right>
+                            {{ formatPrice(invoice.meta.VAT) }}
                         </template>
                     </STListItem>
 
                     <STListItem>
                         Te betalen
 
-                        <template slot="right">
-                            {{ invoice.meta.priceWithVAT | price }}
+                        <template #right>
+                            {{ formatPrice(invoice.meta.priceWithVAT) }}
                         </template> 
                     </STListItem>
                 </STList>
@@ -83,7 +83,7 @@
         </main>
 
         <STToolbar v-if="!invoice.number && invoice.meta.priceWithVAT > 0">
-            <template slot="right">
+            <template #right>
                 <button class="button primary" :disabled="invoice.invoice" type="button" @click="charge">
                     Afrekenen
                 </button>

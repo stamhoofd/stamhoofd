@@ -5,10 +5,10 @@
 
         <main>
             <h1 v-if="!status.invoiceValue">
-                Geef {{ status.value | price }}, krijg tot 100 euro tegoed* per vereniging
+                Geef {{ formatPrice(status.value) }}, krijg tot 100 euro tegoed* per vereniging
             </h1>
             <h1 v-else>
-                Jouw doorverwijzingslink van {{ status.value | price }}
+                Jouw doorverwijzingslink van {{ formatPrice(status.value) }}
             </h1>
 
             <p v-if="!status.invoiceValue">
@@ -96,12 +96,12 @@
                             Aangerekend in je openstaande saldo.
                         </p>
                         <p v-else-if="!status.invoiceValue" class="style-description">
-                            Registreerde op {{ used.createdAt | date }}. Je ontvangt jouw tegoed zodra deze vereniging 1 euro heeft besteed.
+                            Registreerde op {{ formatDate(used.createdAt) }}. Je ontvangt jouw tegoed zodra deze vereniging 1 euro heeft besteed.
                         </p>
                         <p v-else class="style-description">
-                            Registreerde op {{ used.createdAt | date }}. Er werd nog niets aangekocht of gefactureerd.
+                            Registreerde op {{ formatDate(used.createdAt) }}. Er werd nog niets aangekocht of gefactureerd.
                         </p>
-                        <span v-if="used.creditValue" slot="right" class="style-tag large success">{{ used.creditValue | price }}</span>
+                        <span v-if="used.creditValue" slot="right" class="style-tag large success">{{ formatPrice(used.creditValue) }}</span>
                     </STListItem>
                 </STList>
                 

@@ -12,7 +12,7 @@
                 <STListItem v-for="webshop in webshops" :key="webshop.id" :selectable="true" @click="openWebshop(webshop)">
                     {{ webshop.meta.name }}
 
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>

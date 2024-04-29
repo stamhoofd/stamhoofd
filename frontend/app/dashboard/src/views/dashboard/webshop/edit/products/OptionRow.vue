@@ -13,8 +13,8 @@
             Nog {{ pluralText(option.remainingStock, 'stuk', 'stuks') }} beschikbaar
         </p>
 
-        <template slot="right">
-            <span>{{ option.price | priceChange }}</span>
+        <template #right>
+            <span>{{ formatPriceChange(option.price) }}</span>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>

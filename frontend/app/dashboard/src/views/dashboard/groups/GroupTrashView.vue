@@ -26,7 +26,7 @@
                         Verwijderd op {{ formatDate(group.deletedAt) }}
                     </p>
 
-                    <template slot="right">
+                    <template #right>
                         <span class="icon undo gray" />
                     </template>
                 </STListItem>

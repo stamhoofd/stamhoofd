@@ -11,12 +11,11 @@ import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptio
 import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
 import { AppManager, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, toNative } from 'vue-facing-decorator'
 
 import AdminApp from './AdminApp.vue';
 import RegistrationApp from './RegistrationApp.vue';
 import { getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
-import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 @Component({
     components: {
@@ -24,10 +23,12 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
         ToastBox
     },
 })
-export default class App extends Vue {
+export class App extends Vue {
+
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
             try {
+                console.log('promise loaded on app')
                 if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
                     // Load Windows stylesheet
                     try {
@@ -69,6 +70,8 @@ export default class App extends Vue {
     })
 
     created() {
+        console.log('created App')
+
         /*if (STAMHOOFD.environment == "development") {
             console.log('Debug mode activated', ComponentWithProperties)
             ComponentWithProperties.debug = true;
@@ -277,6 +280,9 @@ export default class App extends Vue {
         }
     }
 }
+
+//Transform class component to vue native component
+export default toNative(App)
 </script>
 
 <style lang="scss">

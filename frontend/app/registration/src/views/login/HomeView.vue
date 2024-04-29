@@ -1,11 +1,11 @@
 <template>
     <div id="home-view" class="st-view">
         <STNavigationBar :large="true">
-            <template slot="left">
+            <template #left>
                 <OrganizationLogo :organization="organization" />
             </template>
 
-            <template slot="right">
+            <template #right>
                 <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank">
                     <span class="icon privacy" />
                     <span>Privacy</span>

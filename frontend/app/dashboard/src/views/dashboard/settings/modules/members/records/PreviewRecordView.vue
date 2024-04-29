@@ -1,7 +1,7 @@
 <template>
     <div class="st-view preview-record-view">
         <STNavigationBar title="Voorbeeld">
-            <template slot="right">
+            <template #right>
                 <button class="button icon close gray" type="button" @click="pop" />
             </template>
         </STNavigationBar>
@@ -23,7 +23,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button secundary" type="button" @click="dismiss">
                     Sluiten
                 </button>

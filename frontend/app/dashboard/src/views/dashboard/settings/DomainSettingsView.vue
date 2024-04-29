@@ -77,7 +77,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button v-if="isAlreadySet" class="button secundary" type="button" @click="deleteMe">
                     <span class="icon trash" />
                     <span>Verwijderen</span>

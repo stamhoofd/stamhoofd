@@ -33,7 +33,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button secundary" @click="pop">
                     Sluiten
                 </button>

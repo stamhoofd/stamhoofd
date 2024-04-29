@@ -7,7 +7,7 @@
             {{ choice.description }}
         </p>
 
-        <template slot="right">
+        <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>

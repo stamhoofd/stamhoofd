@@ -29,7 +29,7 @@
                     <STListItem>
                         Totaal nu betalen
 
-                        <template slot="right">
+                        <template #right>
                             {{ formatPrice(totalSelected) }}
                         </template>
                     </STListItem>

@@ -39,7 +39,7 @@
                             <tr>
                                 <td>Bedrag</td>
                                 <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100" class="style-copyable">
-                                    {{ payment.price | price }}
+                                    {{ formatPrice(payment.price) }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">

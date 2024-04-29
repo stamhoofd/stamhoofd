@@ -42,7 +42,7 @@
             </p>
 
             <p v-if="remainingReduced > 0" class="info-box">
-                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
+                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ formatPrice(discountPrice) }} per stuk!
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -80,15 +80,15 @@
                         </h4>
 
                         <p v-if="price.discountPrice" class="style-description-small">
-                            {{ price.discountPrice | price }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount == 1 ? 'stuk' : 'stuks' }}
+                            {{ formatPrice(price.discountPrice) }} / stuk vanaf {{ price.discountAmount }} {{ price.discountAmount == 1 ? 'stuk' : 'stuks' }}
                         </p>
 
                         <p v-if="getPriceStockText(price)" class="style-description-small">
                             {{ getPriceStockText(price) }}
                         </p>
 
-                        <template slot="right">
-                            {{ price.price | price }}
+                        <template #right>
+                            {{ formatPrice(price.price) }}
                         </template>
                     </STListItem>
                 </STList>
@@ -512,10 +512,4 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 }
 
-</style>import { ErrorBox } from '../errors/ErrorBox';
-import STErrorsDefault from '../errors/STErrorsDefault.vue';
-import NumberInput from '../inputs/NumberInput.vue';
-import StepperInput from '../inputs/StepperInput.vue';
-import STNavigationBar from '../navigation/STNavigationBar.vue';
-import STToolbar from '../navigation/STToolbar.vue';
-import CheckoutPriceBreakdown from './CheckoutPriceBreakdown.vue';
+</style>

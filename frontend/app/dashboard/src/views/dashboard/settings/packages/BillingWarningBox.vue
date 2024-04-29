@@ -1,14 +1,14 @@
 <template>
     <div>
         <p v-if="!hasBillingListener && isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
-            Jouw betaling via domiciliëring/kredietkaart is mislukt. Breng de betaling zelf in orde via 'Boekhouding → Openstaand bedrag' voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
+            Jouw betaling via domiciliëring/kredietkaart is mislukt. Breng de betaling zelf in orde via 'Boekhouding → Openstaand bedrag' voor {{ formatDateTime(paymentFailedDeactivateDate) }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
 
             <button class="button text" type="button">
                 Nakijken
             </button>
         </p>
         <p v-else-if="hasBillingListener && isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
-            Een automatische betaling is mislukt. Breng de betaling zelf in orde voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
+            Een automatische betaling is mislukt. Breng de betaling zelf in orde voor {{ formatDateTime(paymentFailedDeactivateDate) }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
 
             <button class="button text" type="button">
                 Openen
@@ -24,7 +24,7 @@
         </p>
 
         <p v-if="!shouldFilter('webshops') && isNearing(webshopDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
-            Jouw webshops worden automatisch uitgeschakeld vanaf {{ webshopDeactivateDate | dateTime }}. Verleng jouw pakket om de webshop module langer in gebruik te houden.
+            Jouw webshops worden automatisch uitgeschakeld vanaf {{ formatDateTime(webshopDeactivateDate) }}. Verleng jouw pakket om de webshop module langer in gebruik te houden.
 
             <button class="button text" type="button">
                 Verlengen
@@ -64,7 +64,7 @@
         </p>
 
         <p v-if="!shouldFilter('members') && isNearing(membersDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
-            De ledenadministratie wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.
+            De ledenadministratie wordt uitgeschakeld vanaf {{ formatDateTime(membersDeactivateDate) }}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.
 
             <button class="button text" type="button">
                 Verlengen
@@ -72,7 +72,7 @@
         </p>
 
         <p v-if="!shouldFilter('members') && isNearing(membersActivitiesDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
-            De functionaliteiten 'Inschrijven voor activiteiten' worden uitgeschakeld vanaf {{ membersActivitiesDeactivateDate | dateTime }}. Verleng jouw pakket om de nieuwe functies te kunnen blijven gebruiken.
+            De functionaliteiten 'Inschrijven voor activiteiten' worden uitgeschakeld vanaf {{ formatDateTime(membersActivitiesDeactivateDate) }}. Verleng jouw pakket om de nieuwe functies te kunnen blijven gebruiken.
 
             <button class="button text" type="button">
                 Verlengen

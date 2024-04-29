@@ -23,7 +23,7 @@
                         {{ group.settings.dateRangeDescription }}
                     </p>
 
-                    <template slot="right">
+                    <template #right>
                         <span v-if="group.settings.registeredMembers !== null" class="style-description-small">{{ group.settings.registeredMembers }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>

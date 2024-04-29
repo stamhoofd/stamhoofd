@@ -21,7 +21,7 @@
     "vetur.validation.template": false,
     "vetur.format.enable": false,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "always"
+        "source.fixAll.eslint": "never"
     },
     "editor.formatOnPaste": false,
     "editor.formatOnSave": true,

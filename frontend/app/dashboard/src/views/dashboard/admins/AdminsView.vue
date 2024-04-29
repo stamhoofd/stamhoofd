@@ -23,7 +23,7 @@
                     <p class="style-description">
                         Nodig iemand uit om beheerder te worden.
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -36,7 +36,7 @@
                     <p class="style-description">
                         Maak rollen die je aan beheerders kan toekennen.
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -46,7 +46,7 @@
             <h2>Alle beheerders</h2>
             <STList>
                 <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
-                    <template slot="left">
+                    <template #left>
                         <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
                             <span class="icon user-admin-layer-1" />
                             <span class="icon user-admin-layer-2 yellow" />
@@ -68,7 +68,7 @@
                         {{ permissionList(admin) }}
                     </p>
 
-                    <template slot="right">
+                    <template #right>
                         <span v-if="admin.id === me.id" class="style-tag">
                             Ik
                         </span>

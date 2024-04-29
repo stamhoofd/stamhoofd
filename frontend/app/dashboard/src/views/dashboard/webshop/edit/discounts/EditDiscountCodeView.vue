@@ -72,7 +72,7 @@
                 </p>
                 <p v-if="getDiscountTitle(discount).footnote" class="style-description-small pre-wrap" v-text="getDiscountTitle(discount).footnote" />
 
-                <template slot="right">
+                <template #right>
                     <span class="icon arrow-right-small gray" />
                 </template>
             </STListItem>

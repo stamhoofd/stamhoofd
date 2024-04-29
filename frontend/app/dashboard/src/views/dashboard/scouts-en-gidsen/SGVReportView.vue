@@ -40,7 +40,7 @@
                                 {{ member.firstName }} {{ member.lastName }}
                             </h2>
                             <p class="style-description-small">
-                                {{ member.birthDay | date }}
+                                {{ formatDate(member.birthDay) }}
                             </p>
                         </div>
                     </STListItem>
@@ -57,7 +57,7 @@
                                 {{ member.details.firstName }} {{ member.details.lastName }}
                             </h2>
                             <p class="style-description-small">
-                                {{ member.details.birthDay | date }}
+                                {{ formatDate(member.details.birthDay) }}
                             </p>
                         </div>
                     </STListItem>
@@ -74,7 +74,7 @@
                                 {{ member.details.firstName }} {{ member.details.lastName }}
                             </h2>
                             <p class="style-description-small">
-                                {{ member.details.birthDay | date }}
+                                {{ formatDate(member.details.birthDay) }}
                             </p>
                         </div>
                     </STListItem>
@@ -91,7 +91,7 @@
                                 {{ member.details.firstName }} {{ member.details.lastName }}
                             </h2>
                             <p class="style-description-small">
-                                {{ member.details.birthDay | date }}
+                                {{ formatDate(member.details.birthDay) }}
                             </p>
                         </div>
                     </STListItem>
@@ -100,7 +100,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="goNext">
                         Sluiten

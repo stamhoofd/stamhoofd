@@ -55,7 +55,7 @@
                         Totaal te betalen
                     </h3>
                     <p class="style-definition-text">
-                        {{ order.totalToPay | price }}
+                        {{ formatPrice(order.totalToPay) }}
                     </p>
                 </STListItem>
 
@@ -64,7 +64,7 @@
                         Betaald bedrag
                     </h3>
                     <p class="style-definition-text">
-                        {{ order.pricePaid | price }}
+                        {{ formatPrice(order.pricePaid) }}
                     </p>
                 </STListItem>
 
@@ -104,7 +104,7 @@
                         <span v-else class="icon clock" />
                     </p>
 
-                    <span v-if="order.payments.length > 1" slot="right">{{ payment.price | price }}</span>
+                    <span v-if="order.payments.length > 1" slot="right">{{ formatPrice(payment.price) }}</span>
                     <span v-if="hasPaymentsWrite" slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>
@@ -174,7 +174,7 @@
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
+                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
                         </p>
                     </STListItem>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
@@ -183,7 +183,7 @@
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ order.data.deliveryPrice | price }}
+                            {{ formatPrice(order.data.deliveryPrice) }}
                         </p>
                     </STListItem>
                     <STListItem v-if="order.data.administrationFee > 0" class="right-description">
@@ -192,7 +192,7 @@
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ order.data.administrationFee | price }}
+                            {{ formatPrice(order.data.administrationFee) }}
                         </p>
                     </STListItem>
                 </STList>

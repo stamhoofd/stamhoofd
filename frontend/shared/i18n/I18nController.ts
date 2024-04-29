@@ -4,13 +4,10 @@ import { countries, languages } from "@stamhoofd/locales"
 import { Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
-import { MetaInfo, VueMetaApp } from "vue-meta"
-
-Vue.use(VueI18n)
+import { I18n, createI18n } from 'vue-i18n'
 
 export class I18nController {
-    static i18n: VueI18n
+    static i18n: I18n
     static shared: I18nController
     static addUrlPrefix = true
     static skipUrlPrefixForLocale?: string
@@ -46,20 +43,21 @@ export class I18nController {
         this.language = language
         this.country = country
         this.correctLocale()
-        Vue.prototype.$country = this.country
+        // app.config.globalProperties.$country = this.country
     }
 
-    static getI18n(): VueI18n {
+    static getI18n(): I18n {
         if (this.i18n) {
             return this.i18n
         }
-        this.i18n = new VueI18n({
+        this.i18n = createI18n({
             locale: "en", // set locale
             fallbackLocale: "en",
             messages: {
                 // not yet loaded
             }
         })
+        
         return this.i18n
     }
 
@@ -126,7 +124,7 @@ export class I18nController {
     }
 
     async loadLocale() {
-        Vue.prototype.$country = this.country
+        // app.config.globalProperties.$country = this.country
 
         const locale = this.locale
         console.info("[I18n] Loading locale "+locale)
@@ -142,9 +140,10 @@ export class I18nController {
         // If the language hasn't been loaded yet
         const namespace = this.namespace
         const messages = await import(/* webpackChunkName: "lang-[request]" */ `../../../shared/locales/dist/${namespace}/${locale}.json`)
-        i18n.setLocaleMessage(locale, messages.default)
-        i18n.locale = locale
-        i18n.fallbackLocale = [this.language, "en"]
+        
+        i18n.global.setLocaleMessage(locale, messages.default)
+        i18n.global.locale = locale
+        i18n.global.fallbackLocale = [this.language, "en"]
         this.loadedLocale = locale
 
         console.log("[I18n] Successfully loaded locale", locale)
@@ -334,7 +333,6 @@ export class I18nController {
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage
         def.loadedLocale = I18nController.shared?.loadedLocale
         I18nController.shared = def
-        def.vueMetaApp = ((window as any).app as any).$meta().addApp('i18n')
 
         // Automatically set country when the organization is loaded
         $context?.addListener(def, (changed) => {
@@ -379,17 +377,18 @@ export class I18nController {
     }
 
     /**
-     * Build list for vue-meta with all the available locales
+     * @todo
+     * This builds metadata info only for vue-meta, which is no longer maintained
      */
-    get metaInfo(): MetaInfo {
+    get metaInfo(): any {
         const listCountries = I18nController.fixedCountry ? [this.country] : countries
         const url = new UrlHelper()
         const path = url.getPath()
         const hostProtocol = url.getHostWithProtocol()
         const addPrefix = true
 
-        const links: MetaInfo["link"] = []
-        const meta: MetaInfo["meta"] = []
+        const links: any["link"] = []
+        const meta: any["meta"] = []
 
         // Add og:locale tag
         meta.push({

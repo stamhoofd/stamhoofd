@@ -19,7 +19,7 @@
                 </p>
 
                 <template v-if="option.price != 0" slot="right">
-                    {{ option.price | priceChange }}
+                    {{ formatPriceChange(option.price) }}
                 </template>
             </STListItem>
         </STList>

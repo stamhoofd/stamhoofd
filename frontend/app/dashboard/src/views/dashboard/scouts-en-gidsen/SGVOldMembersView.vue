@@ -15,7 +15,7 @@
                             {{ member.firstName }} {{ member.lastName }}
                         </h2>
                         <p class="style-description-small">
-                            {{ member.birthDay | date }}
+                            {{ formatDate(member.birthDay) }}
                         </p>
                     </div>
                 </STListItem>
@@ -23,7 +23,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button destructive" type="button" @click.prevent.stop="doDelete">
                     <span class="icon trash" /><span>Schrappen</span>
                 </button>

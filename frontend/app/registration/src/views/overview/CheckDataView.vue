@@ -32,7 +32,7 @@
                             Nog niet ingeschreven
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -60,7 +60,7 @@
                             {{ parent.phone }}
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -89,7 +89,7 @@
                         </p>
 
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>

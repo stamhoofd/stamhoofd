@@ -24,7 +24,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button primary" type="button" @click="dismiss">
                     Klaar
                 </button>

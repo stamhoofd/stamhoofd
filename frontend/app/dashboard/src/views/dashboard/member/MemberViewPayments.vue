@@ -27,7 +27,7 @@
                         <p class="style-description-small">
                             {{ formatPrice(item.price) }}
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span v-if="item.pricePaid === item.price" class="style-tag success">Betaald</span>
                             <span v-else-if="item.pricePaid > 0" class="style-tag warn">{{ formatPrice(item.pricePaid) }} betaald</span>
                             <span v-else-if="!item.hasPendingPayment" class="style-tag">Openstaand</span>
@@ -41,21 +41,21 @@
                         <STListItem v-if="outstandingBalance.total >= 0">
                             Totaal te betalen
 
-                            <template slot="right">
+                            <template #right>
                                 {{ formatPrice(outstandingBalance.total) }}
                             </template>
                         </STListItem>
                         <STListItem v-else-if="outstandingBalance.totalPending > 0">
                             Totaal te betalen
 
-                            <template slot="right">
+                            <template #right>
                                 {{ formatPrice(0) }}
                             </template>
                         </STListItem>
                         <STListItem v-if="outstandingBalance.totalPending > 0">
                             Waarvan in verwerking
 
-                            <template slot="right">
+                            <template #right>
                                 {{ formatPrice(outstandingBalance.totalPending) }}
                             </template>
                         </STListItem>
@@ -63,7 +63,7 @@
                         <STListItem v-if="outstandingBalance.total < 0">
                             Totaal terug te betalen
 
-                            <template slot="right">
+                            <template #right>
                                 {{ formatPrice(outstandingBalance.total) }}
                             </template>
                         </STListItem>

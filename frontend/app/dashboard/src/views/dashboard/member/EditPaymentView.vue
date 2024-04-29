@@ -44,7 +44,7 @@
                 <STListItem v-if="price >= 0">
                     Totaal betaald
 
-                    <template slot="right">
+                    <template #right>
                         {{ formatPrice(price) }}
                     </template>
                 </STListItem>
@@ -52,7 +52,7 @@
                 <STListItem v-else>
                     Totaal terugbetaald
 
-                    <template slot="right">
+                    <template #right>
                         {{ formatPrice(price) }}
                     </template>
                 </STListItem>

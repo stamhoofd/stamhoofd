@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ES2020",
-        "useDefineForClassFields": true,
+        "useDefineForClassFields": false, /* this makes sue we can still use this in class property definitions */
         "module": "ESNext",
         "lib": [
             "ES2020",

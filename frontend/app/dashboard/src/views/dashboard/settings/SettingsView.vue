@@ -19,7 +19,7 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
-                    <img slot="left" src="@stamhoofd/assets/images/illustrations/flag.svg">
+                    <template #left><img slot="left" src="@stamhoofd/assets/images/illustrations/flag.svg"></template>
                     <h2 class="style-title-list">
                         Algemeen
                     </h2>
@@ -48,7 +48,7 @@
                     <p class="style-description">
                         Verstuur e-mails vanaf je zelf gekozen e-mailadres
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span v-if="!hasPolicy" v-tooltip="'We hebben zeker één e-mailadres nodig voor communicatie en indien leden antwoorden op automatische e-mails'" class="icon warning yellow" />
                         <span class="icon arrow-right-small gray" />
                     </template>
@@ -62,7 +62,7 @@
                     <p class="style-description">
                         Geef anderen ook toegang tot deze vereniging
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -75,7 +75,7 @@
                     <p class="style-description">
                         Stel je privacyvoorwaarden in
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span v-if="!hasPolicy" v-tooltip="'Voeg je privacyvoorwaarden toe om in orde te zijn met GDPR'" class="icon warning yellow" />
                         <span class="icon arrow-right-small gray" />
                     </template>
@@ -89,7 +89,7 @@
                     <p class="style-description">
                         {{ $t('dashboard.settings.menu.paymentAccounts.description') }}
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -109,7 +109,7 @@
                             Via deze weg kunnen leden zelf online inschrijven
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -122,7 +122,7 @@
                         <p class="style-description">
                             {{ $t('dashboard.settings.menu.paymentMethods.description') }}
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
                             <span class="icon arrow-right-small gray" />
                         </template>
@@ -142,7 +142,7 @@
                             Leeftijdsgroepen aanmaken en beheren
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span v-if="!hasGroups" v-tooltip="'Je hebt nog geen inschrijvingsgroepen ingesteld'" class="icon warning yellow" />
                             <span class="icon arrow-right-small gray" />
                         </template>
@@ -159,7 +159,7 @@
                             Kies welke informatie je verzamelt van jouw leden
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -173,7 +173,7 @@
                             Steun kwetsbare gezinnen
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -187,7 +187,7 @@
                             Vaak heb je toestemming nodig om bepaalde gegevens te verzamelen. Dat stel je hier in.
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -201,7 +201,7 @@
                             Maak het mogelijk dat leden een (optionele) vrije bijdrage doen bij het inschrijven
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -215,7 +215,7 @@
                             Importeer leden vanaf een Excel of CSV bestand
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -229,7 +229,7 @@
                             Neem alle gegevens uit Stamhoofd over in de groepsadministratie
                         </p>
 
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -248,7 +248,7 @@
                         <p class="style-description">
                             Configureer een externe authenticatie server
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -267,7 +267,7 @@
                         <p class="style-description">
                             Wijzig je pakketten of activeer nieuwe functies
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -280,7 +280,7 @@
                         <p class="style-description">
                             Download jouw facturen en bekijk jouw tegoed
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -293,7 +293,7 @@
                         <p class="style-description">
                             Geef 25 euro en krijg zelf ook een tegoed
                         </p>
-                        <template slot="right">
+                        <template #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>

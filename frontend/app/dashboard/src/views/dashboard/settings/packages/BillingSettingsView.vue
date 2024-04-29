@@ -20,7 +20,7 @@
                         <STInputBox title="Openstaand bedrag">
                             <p class="button style-price-big" @click="openPendingInvoice">
                                 <span>
-                                    {{ status.pendingInvoice ? status.pendingInvoice.meta.priceWithoutVAT : 0 | price }}
+                                    {{ formatPrice(status.pendingInvoice ? status.pendingInvoice.meta.priceWithoutVAT : 0) }}
                                 </span>
                                 <span v-if="status.pendingInvoice && status.pendingInvoice.meta.priceWithoutVAT > 0" class="icon arrow-right" />
                             </p>
@@ -33,7 +33,7 @@
                     <div>
                         <STInputBox title="Jouw tegoed">
                             <p class="button style-price-big" @click="showCreditsHistory">
-                                <span>{{ balance | price }}</span>
+                                <span>{{ formatPrice(balance) }}</span>
                                 <span v-if="status.credits.length > 0" class="icon arrow-right" />
                             </p>
                         </STInputBox>
@@ -72,7 +72,7 @@
                                 Adres
                             </h3>
                             <p class="style-definition-text">
-                                {{ companyAddress.toString() | capitalizeFirstLetter }}
+                                {{ capitalizeFirstLetter(companyAddress.toString()) }}
                             </p>
                         </STListItem>
                         <STListItem v-if="VATNumber">
@@ -111,7 +111,7 @@
                             Factuur {{ invoice.number }}
                         </h3>
                         <p class="style-description">
-                            {{ (invoice.meta.date || invoice.paidAt || invoice.createdAt) | date }}
+                            {{ formatDate((invoice.meta.date || invoice.paidAt || invoice.createdAt)) }}
                         </p>
 
                         <span slot="right" class="icon download gray" />

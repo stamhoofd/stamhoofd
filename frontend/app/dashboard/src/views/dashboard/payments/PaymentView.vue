@@ -216,7 +216,7 @@
                             <p v-if="item.balanceItem.status === 'Hidden'" class="style-tag error">
                                 Verwijderd
                             </p>
-                            <template slot="right">
+                            <template #right>
                                 {{ formatPrice(item.price) }}
                             </template>
                         </STListItem>
@@ -227,7 +227,7 @@
                             <STListItem>
                                 Totaal
 
-                                <template slot="right">
+                                <template #right>
                                     {{ formatPrice(payment.price) }}
                                 </template>
                             </STListItem>

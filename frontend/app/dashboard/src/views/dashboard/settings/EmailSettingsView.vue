@@ -30,7 +30,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <button class="button primary" type="button" @click="addEmail">
                     <span class="icon add" />
                     <span>E-mailadres toevoegen</span>

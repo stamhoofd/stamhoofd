@@ -17,15 +17,15 @@
                         {{ credit.description }}
                     </h3>
                     <p class="style-description">
-                        {{ credit.createdAt | dateTime }}
+                        {{ formatDateTime(credit.createdAt) }}
                     </p>
 
                     <p v-if="credit.expireAt !== null" class="style-description">
-                        Vervalt op {{ credit.expireAt | dateTime }}
+                        Vervalt op {{ formatDateTime(credit.expireAt) }}
                         <span v-if="isExpired(credit)" class="style-tag error">Vervallen</span>
                     </p>
-                    <template slot="right">
-                        {{ credit.change | priceChange }}
+                    <template #right>
+                        {{ formatPriceChange(credit.change) }}
                     </template>
                 </STListItem>
             </STList>

@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Prop, Vue, toNative } from 'vue-facing-decorator'
 
 import LoadingView from "./LoadingView.vue"
 
@@ -17,8 +17,9 @@ import LoadingView from "./LoadingView.vue"
         ComponentWithPropertiesInstance,
         LoadingView
     },
+    mixins: [NavigationMixin]
 })
-export default class PromiseView extends Mixins(NavigationMixin) {
+export class PromiseView extends Vue {
     @Prop({required: true})
     promise: () => Promise<ComponentWithProperties>
 
@@ -51,4 +52,6 @@ export default class PromiseView extends Mixins(NavigationMixin) {
         return await (this.root.shouldNavigateAway());
     }
 }
+
+export default toNative(PromiseView)
 </script>

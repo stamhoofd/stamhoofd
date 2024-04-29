@@ -1,7 +1,7 @@
 <template>
     <div ref="errors">
-        <template v-for="error in errors">
-            <STErrorBox :key="error.id">
+        <template v-for="error in errors" :key="error.id">
+            <STErrorBox>
                 {{ getErrorMessage(error) }}
             </STErrorBox>
         </template>
@@ -22,7 +22,7 @@ import STErrorBox from "./STErrorBox.vue"
 })
 export default class STErrorsDefault extends Vue {
     @Prop() 
-    errorBox: ErrorBox | null;
+        errorBox: ErrorBox | null;
     
     errors: SimpleError[] = [];
 

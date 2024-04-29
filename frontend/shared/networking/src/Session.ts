@@ -369,7 +369,7 @@ export class Session implements RequestMiddleware {
      * Set the organization, including the reference
      */
     setOrganization(organization: Organization) {
-        Vue.set(this, "organization", organization)
+        this.organization = organization
     }
 
     /**

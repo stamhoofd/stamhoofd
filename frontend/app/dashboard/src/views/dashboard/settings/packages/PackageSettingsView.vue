@@ -48,7 +48,7 @@
                             {{ pack.meta.name }}
                         </h3>
                         <p v-if="pack.validUntil" class="style-description">
-                            Geldig tot {{ pack.validUntil | date }}
+                            Geldig tot {{ formatDate(pack.validUntil, true) }}
                         </p>
 
                         <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
@@ -65,7 +65,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" :disabled="!hasSelected" @click="checkout">
                         Doorgaan
@@ -139,12 +139,6 @@ export class SelectablePackage {
         STListItem,
         Spinner,
         Checkbox
-    },
-    filters: {
-        price: Formatter.price,
-        date: (date: Date) => {
-            return Formatter.date(date, true)
-        }
     }
 })
 export default class PackageSettingsView extends Mixins(NavigationMixin) {

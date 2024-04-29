@@ -20,7 +20,7 @@
                     <p class="style-description">
                         Maak een nieuwe key aan.
                     </p>
-                    <template slot="right">
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -34,7 +34,7 @@
             </p>
             <STList v-else>
                 <STListItem v-for="user in apiUsers" :key="user.id" :selectable="true" class="right-stack" @click="editUser(user)">
-                    <template slot="left">
+                    <template #left>
                         <span class="icon key" />
                     </template>
 
@@ -51,7 +51,7 @@
                         Geldig tot {{ formatDate(user.expiresAt) }}
                     </p>
 
-                    <template slot="right">
+                    <template #right>
                         <span><span class="icon gray edit" /></span>
                     </template>
                 </STListItem>

@@ -40,7 +40,7 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
+            <template #right>
                 <a href="https://groepsadmin.scoutsengidsenvlaanderen.be" target="_blank" class="button secundary">
                     Naar groepsadministratie
                 </a>

@@ -8,7 +8,7 @@
             <STListItem v-for="(filter, index) in filters" :key="filter.id" :selectable="true" class="right-stack" @click="editFilter(index, filter)">
                 <span v-for="(s, i) in filter.styledDescription" :key="i" :class="'styled-description ' + s.style" v-text="s.text" />
 
-                <template slot="right">
+                <template #right>
                     <button class="button icon trash gray" type="button" @click="deleteFilter(index, filter)" />
                     <span class="icon arrow-right-small gray" />
                 </template>
@@ -24,7 +24,7 @@
             <STListItem v-for="(builder, index) in builders" :key="index" :selectable="true" class="right-stack" @click="addFilter(builder)">
                 {{ builder.name }}
 
-                <template slot="left">
+                <template #left>
                     <span class="button icon add gray" />
                 </template>
             </STListItem>

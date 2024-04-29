@@ -14,7 +14,7 @@
             <STListItem v-for="city in cities" :key="city.id" class="right-description" :selectable="true" @click="toggleCity(city)">
                 {{ city.name }} ({{ city.province.name }}, {{ countryName(city.country) }})
 
-                <template slot="right">
+                <template #right>
                     <span v-if="hasCity(city)" class="icon trash" />
                     <span v-else class="icon plus" />
                 </template>
@@ -23,7 +23,7 @@
             <STListItem v-for="province in provinces" :key="province.id" class="right-description" :selectable="true" @click="toggleProvince(province)">
                 {{ province.name }} (provincie, {{ countryName(province.country) }})
 
-                <template slot="right">
+                <template #right>
                     <span v-if="hasProvince(province)" class="icon trash" />
                     <span v-else class="icon plus" />
                 </template>
@@ -32,7 +32,7 @@
             <STListItem v-for="country in countries" :key="country" class="right-description" :selectable="true" @click="toggleCountry(country)">
                 {{ countryName(country) }}
 
-                <template slot="right">
+                <template #right>
                     <span v-if="hasCountry(country)" class="icon trash" />
                     <span v-else class="icon plus" />
                 </template>

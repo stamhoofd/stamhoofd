@@ -21,7 +21,7 @@
                         {{ emailDefinition.description }}
                     </p>
 
-                    <template slot="right">
+                    <template #right>
                         <span v-if="hasTemplate(emailDefinition.type)" class="style-tag">Aangepast</span>
                         <span class="icon arrow-right-small gray" />
                     </template>

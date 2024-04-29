@@ -1,21 +1,21 @@
 <template>
     <dl class="details-grid hover">
-        <template v-for="record of records">
-            <dt :key="'dt-'+record.id" class="center">
+        <template v-for="record of records" :key="record.id">
+            <dt class="center">
                 {{ record.name }}
             </dt>
-            <dd v-if="!getAnswer(record)" :key="'dd-'+record.id">
+            <dd v-if="!getAnswer(record)" >
                 /
             </dd>
             <template v-else-if="getAnswer(record).settings.type === RecordType.Checkbox">
-                <dd :key="'dd-'+record.id" class="center icons">
+                <dd class="center icons">
                     <span v-if="getAnswer(record).selected" class="icon success primary" />
                     <span v-else class="icon canceled gray" />
                     <button v-if="canDelete" class="button icon trash" type="button" @click="$emit('delete', record)" />
                 </dd>
                 <dd v-if="getAnswer(record).comments" :key="'dd-description-'+record.id" class="description pre-wrap" v-text="getAnswer(record).comments" />
             </template>
-            <dd v-else :key="'dd-'+record.id" v-copyable>
+            <dd v-else  v-copyable>
                 {{ getAnswer(record).stringValue }}
 
                 <button v-if="canDelete" class="button icon trash" type="button" @click="$emit('delete', record)" />

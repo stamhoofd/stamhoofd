@@ -4,14 +4,14 @@
 
         <div class="st-view background transparent">
             <STNavigationBar v-if="!isNative" :large="true" class="transparent">
-                <template slot="left">
+                <template #left>
                     <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener" class="logo-container">
                         <Logo class="responsive" />
                         <span class="logo-text horizontal hide-medium">Beheerders</span>
                     </a>
                 </template>
 
-                <template slot="right">
+                <template #right>
                     <a v-if="!isNative" class="button text only-icon-smartphone" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                         <span class="icon external" />
                         <span>Terug naar website</span>
@@ -81,14 +81,14 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, ModalStackComponentFinderMixin, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STGradientBackground, STNavigationBar, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { Component, Mixins } from "vue-property-decorator";
 
 import { getScopedDashboardRoot } from '../../getRootViews';
 import VersionFooter from '../dashboard/settings/VersionFooter.vue';
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -135,7 +135,7 @@ const throttle = (func, limit) => {
         }
     }
 })
-export default class OrganizationSelectionView extends Mixins(NavigationMixin, ModalStackComponentFinderMixin){
+export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
     loading = false;
     loadingSession: string | null = null;
     q = ""

@@ -11,10 +11,9 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, Session, Storage, UrlHelper } from '@stamhoofd/networking';
 import { RateApp } from 'capacitor-rate-app';
 import Vue from "vue";
-import VueMeta from 'vue-meta';
 
 import App from "../../dashboard/src/App.vue";
 import { CapacitorStorage } from './CapacitorStorage';
@@ -22,8 +21,6 @@ import FileOpener from './FileOpenerPlugin';
 import QRScanner from './QRScannerPlugin';
 import { UpdateStatus } from './UpdateStatus';
 import { WrapperHTTPRequest } from './WrapperHTTPRequest';
-
-Vue.use(VueMeta)
 
 const throttle = (func, limit) => {
     let lastFunc;

@@ -1,7 +1,6 @@
 import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, GlobalEventBus, Toast, Validator } from "@stamhoofd/components";
-import { OrganizationManager, SessionManager } from '@stamhoofd/networking';
 import { PrivateWebshop, Version, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 import { WebshopManager } from '../WebshopManager';
@@ -9,13 +8,13 @@ import { WebshopManager } from '../WebshopManager';
 @Component
 export default class EditWebshopMixin extends Mixins(NavigationMixin) {
     @Prop({ required: false })
-        webshopManager?: WebshopManager
+    webshopManager?: WebshopManager
 
     @Prop({ required: false })
-        initialWebshop?: PrivateWebshop
+    initialWebshop?: PrivateWebshop
 
     @Prop({ required: false })
-        savedHandler?: (webshop: PrivateWebshop) => Promise<void>
+    savedHandler?: (webshop: PrivateWebshop) => Promise<void>
 
     originalWebshop: PrivateWebshop = this.webshopManager?.webshop ?? this.initialWebshop ?? PrivateWebshop.create({})
 
@@ -104,8 +103,8 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                 // Send system wide notification that we might need an update in data
                 await GlobalEventBus.sendEvent("new-webshop", response.data)
                 new Toast(
-                    response.data.meta.ticketType === WebshopTicketType.Tickets 
-                        ? "Jouw nieuwe ticketverkoop is aangemaakt. Je kan nu tickets of vouchers toevoegen die je wilt verkopen." 
+                    response.data.meta.ticketType === WebshopTicketType.Tickets
+                        ? "Jouw nieuwe ticketverkoop is aangemaakt. Je kan nu tickets of vouchers toevoegen die je wilt verkopen."
                         : "Jouw nieuwe webshop is aangemaakt. Je kan nu de producten toevoegen die je wilt verkopen en andere instellingen wijzigen."
                     , "success green").show()
             } else {
@@ -134,5 +133,5 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
 
         this.saving = false
     }
-  
+
 }
