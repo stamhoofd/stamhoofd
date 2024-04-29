@@ -20,7 +20,7 @@
                 <p class="style-description">
                     Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.
                 </p>
-                <span slot="right" class="icon arrow-right-small gray" />
+                <template #right><span class="icon arrow-right-small gray" /></template>
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="downloadSettings(true)">

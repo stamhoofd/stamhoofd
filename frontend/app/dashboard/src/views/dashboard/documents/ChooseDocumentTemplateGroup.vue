@@ -13,7 +13,7 @@
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
                         </h2>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </div>
@@ -26,7 +26,7 @@
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
                     </h2>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
             <p v-else class="info-box">

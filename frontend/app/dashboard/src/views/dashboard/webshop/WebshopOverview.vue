@@ -22,7 +22,7 @@
                     <p class="style-description">
                         Bekijk en exporteer bestellingen, e-mail en SMS klanten.
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center" @click="openSeating(true)">
@@ -33,7 +33,7 @@
                     <p class="style-description">
                         Bekijk welke plaatsen door welke personen zijn ingenomen.
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" @click="openTickets(true)">
@@ -44,7 +44,7 @@
                     <p class="style-description">
                         Gebruik je camera om snel tickets te scannen.
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openStatistics(true)">
@@ -55,7 +55,7 @@
                     <p class="style-description">
                         Bekijk jouw omzet en andere statistieken.
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" element-name="a" :href="'https://'+webshopUrl" target="_blank">
@@ -66,7 +66,7 @@
                     <p class="style-description">
                         Jouw webshop is bereikbaar via {{ webshopUrl }}
                     </p>
-                    <span slot="right" class="icon external gray" />
+                    <template #right><span class="icon external gray" /></template>
                 </STListItem>
             </STList>
 
@@ -83,7 +83,7 @@
                         <p class="style-description">
                             Naam, type en beschikbaarheid.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
@@ -94,7 +94,7 @@
                         <p class="style-description">
                             Bewerk welke artikels je verkoopt in jouw webshop.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-else :selectable="true" class="left-center" @click="editProducts(true)">
@@ -105,7 +105,7 @@
                         <p class="style-description">
                             Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
@@ -116,7 +116,7 @@
                         <p class="style-description">
                             Wijzig tijdstippen, locaties en afhaalmethodes.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPaymentMethods(true)">
@@ -127,7 +127,7 @@
                         <p class="style-description">
                             Kies welke betaalmethodes je wilt activeren, en stel eventueel administratiekosten in.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-if="getFeatureFlag('webshop-discounts')" :selectable="true" class="left-center" @click="editDiscounts(true)">
@@ -138,7 +138,7 @@
                         <p class="style-description">
                             Voeg kortingen toe aan je webshop.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
@@ -150,8 +150,8 @@
                             Verzamel extra informatie van bestellers bij het afrekenen.
                         </p>
 
-                        <span slot="right" v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " />
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " /></template>
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-else :selectable="true" class="left-center" @click="editRecordSettings(true)">
@@ -162,7 +162,7 @@
                         <p class="style-description">
                             Verzamel extra informatie van bestellers bij het afrekenen.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
@@ -173,7 +173,7 @@
                         <p class="style-description">
                             Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editNotifications(true)">
@@ -184,7 +184,7 @@
                         <p class="style-description">
                             Blijf zelf op de hoogte van nieuwe bestellingen.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
 
@@ -200,7 +200,7 @@
                         <p class="style-description">
                             Wijzig de teksten en uitzicht van jouw webshop.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editLink(true)">
@@ -211,7 +211,7 @@
                         <p class="style-description">
                             Wijzig de link van jouw webshop.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
@@ -222,7 +222,7 @@
                         <p class="style-description">
                             Wijzig de inhoud van automatische e-mails naar bestellers.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
 

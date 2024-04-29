@@ -39,13 +39,13 @@
         <p>Maak een zetelcategorie aan om een meerprijs in rekening te brengen voor sommige zetels of bepaalde zetels te reserveren. Selecteer daarna een rij of een zetel en klik op rechtermuisknop om de categorie van die rij of zetel te wijzigen.</p>
         <STList>
             <STListItem v-for="category in patchedSeatingPlan.categories" :key="category.id" :selectable="true" element-name="button" @click="editCategory(category)">
-                <span slot="left" class="icon dot gray custom-color" :style="{'--color': patchedSeatingPlan.getCategoryColor(category.id)}" />
+                <template #left><span class="icon dot gray custom-color" :style="{'--color': patchedSeatingPlan.getCategoryColor(category.id)}" /></template>
                 <h3 class="style-title-list">
                     {{ category.name }}
                 </h3>
             </STListItem>
             <STListItem :selectable="true" element-name="button" @click="addCategory">
-                <span slot="left" class="icon add gray" />
+                <template #left><span class="icon add gray" /></template>
                 <h3 class="style-title-list">
                     Nieuwe categorie
                 </h3>

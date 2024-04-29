@@ -93,7 +93,7 @@
                     <span v-if="payment.payment.isFailed" slot="right" class="style-tag error">Mislukt</span>
                     <span v-else-if="payment.payment.isPending" slot="right" class="style-tag warn">In verwerking</span>
                     <span v-else-if="payment.payment.isSucceeded" slot="right" class="style-tag success">{{ formatPrice(payment.payment.price) }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
 

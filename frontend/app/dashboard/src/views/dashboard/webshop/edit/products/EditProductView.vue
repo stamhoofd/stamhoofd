@@ -107,7 +107,7 @@
 
         <STList>
             <STListItem v-if="seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
-                <span slot="left" class="icon seat gray" />
+                <template #left><span class="icon seat gray" /></template>
                 <h3 class="style-title-list">
                     Zaalplan
                 </h3>
@@ -116,12 +116,12 @@
                     {{ seatingPlan.name }}
                 </p>
 
-                <span slot="right" class="icon success primary" />
-                <span slot="right" class="icon arrow-right-small gray" />
+                <template #right><span class="icon success primary" /></template>
+                <template #right><span class="icon arrow-right-small gray" /></template>
             </STListItem>
 
             <STListItem :selectable="true" element-name="button" @click="addOptionMenu">
-                <span slot="left" class="icon add gray" />
+                <template #left><span class="icon add gray" /></template>
 
                 <h3 class="style-title-list">
                     Keuzemenu
@@ -132,7 +132,7 @@
             </STListItem>
 
             <STListItem :selectable="true" element-name="button" @click="addField">
-                <span slot="left" class="icon add gray" />
+                <template #left><span class="icon add gray" /></template>
 
                 <h3 class="style-title-list">
                     Tekstveld (open vraag)
@@ -143,7 +143,7 @@
             </STListItem>
 
             <STListItem v-if="isTicket && !seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
-                <span slot="left" class="icon seat gray" />
+                <template #left><span class="icon seat gray" /></template>
                 <h3 class="style-title-list">
                     Zetelselectie instellen
                 </h3>
@@ -153,7 +153,7 @@
             </STListItem>
 
             <STListItem v-if="!image" :selectable="true" element-name="label" class="button">
-                <span slot="left" class="icon camera gray" />
+                <template #left><span class="icon camera gray" /></template>
 
                 <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">

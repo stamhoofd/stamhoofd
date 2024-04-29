@@ -16,7 +16,7 @@
                     </p>
 
                     <span v-if="group.getMemberCount({cycle: cycle.cycle}) !== null" slot="right" class="style-description-small">{{ group.getMemberCount({cycle: cycle.cycle}) }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
         </main>

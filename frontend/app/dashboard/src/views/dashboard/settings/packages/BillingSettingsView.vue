@@ -114,7 +114,7 @@
                             {{ formatDate((invoice.meta.date || invoice.paidAt || invoice.createdAt)) }}
                         </p>
 
-                        <span slot="right" class="icon download gray" />
+                        <template #right><span class="icon download gray" /></template>
                     </STListItem>
                 </STList>
 

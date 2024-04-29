@@ -22,7 +22,7 @@
             <template v-if="categories.length > 0">
                 <STList>
                     <STListItem v-if="categories.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
-                        <span slot="left" class="icon group" />
+                        <template #left><span class="icon group" /></template>
 
                         <h2 class="style-title-list bolder">
                             Alle leden
@@ -30,11 +30,11 @@
                         <p class="style-description-small">
                             Bekijk alle leden samen
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-if="categories.length > 1 && hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                        <span slot="left" class="icon clock" />
+                        <template #left><span class="icon clock" /></template>
 
                         <h2 class="style-title-list bolder">
                             Gemeenschappelijke wachtlijsten
@@ -42,7 +42,7 @@
                         <p class="style-description-small">
                             Bekijk alle wachtlijsten samen
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-for="category in categories" :key="category.id" :selectable="true" @click="openCategory(category)">
@@ -63,23 +63,23 @@
             <template v-else-if="groups.length > 0">
                 <STList>
                     <STListItem v-if="groups.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
-                        <span slot="left" class="icon group" />
+                        <template #left><span class="icon group" /></template>
 
                         <h2 class="style-title-list bolder">
                             Alle leden
                         </h2>
                         <span v-if="getMemberCount() !== null" slot="right" class="style-description-small">{{ getMemberCount() }}</span>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-if="hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                        <span slot="left" class="icon clock" />
+                        <template #left><span class="icon clock" /></template>
 
                         <h2 class="style-title-list bolder">
                             Gemeenschappelijke wachtlijsten
                         </h2>
                         <span v-if="getMemberCount({waitingList: true}) !== null" slot="right" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                     
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
@@ -123,7 +123,7 @@
                             </p>
 
                             <span v-if="getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span>
-                            <span slot="right" class="icon arrow-right-small gray" />
+                            <template #right><span class="icon arrow-right-small gray" /></template>
                         </STListItem>
                     </STList>
                 </template>

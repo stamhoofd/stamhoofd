@@ -27,7 +27,7 @@
                     <p class="style-description">
                         Bekijk en bewerk de aangemaakte documenten.
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="isDraft || template.updatesEnabled" :selectable="true" class="left-center" @click="editSettings">
@@ -38,7 +38,7 @@
                     <p class="style-description">
                         Wijzig de invulvelden en de instellingen van het document.
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
@@ -49,7 +49,7 @@
                     <p class="style-description">
                         {{ xmlExportDescription }}
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
 

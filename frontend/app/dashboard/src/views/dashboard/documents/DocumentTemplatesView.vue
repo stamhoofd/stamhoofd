@@ -26,7 +26,7 @@
                     </p>
 
                     <span v-if="template.status === 'Draft'" slot="right" class="style-tag">Klad</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
 

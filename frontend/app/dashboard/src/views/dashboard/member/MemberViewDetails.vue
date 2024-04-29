@@ -293,14 +293,14 @@
 
                 <STList>
                     <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
-                        <span slot="left" class="icon user small" />
+                        <template #left><span class="icon user small" /></template>
                         <h3 class="style-title-list">
                             {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
                         </h3>
                         <p v-if="familyMember.groups.length > 0" class="style-description-small">
                             {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </div>

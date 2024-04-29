@@ -62,7 +62,7 @@
                                 </p>
 
                                 <span v-if="cart.price" slot="right" class="style-tag">{{ formatPrice(cart.price) }}</span>
-                                <span slot="right" class="icon arrow-right-small gray" />
+                                <template #right><span class="icon arrow-right-small gray" /></template>
                             </STListItem>
 
                             <STListItem v-for="member of membersWithMissingData" :key="'missing'+member.id" class="left-center" :selectable="true" @click="fillInMemberMissingData(member)">
@@ -74,7 +74,7 @@
                                     Enkele gegevens van {{ member.details.firstName }} ontbreken. Vul ze hier in.
                                 </p>
 
-                                <span slot="right" class="icon arrow-right-small gray" />
+                                <template #right><span class="icon arrow-right-small gray" /></template>
                             </STListItem>
 
                             <STListItem v-if="notYetPaidBalance > 0" class="left-center" :selectable="true" @click="managePayments(true)">
@@ -86,7 +86,7 @@
                                     Je hebt een openstaand bedrag van {{ formatPrice(notYetPaidBalance) }}.
                                 </p>
 
-                                <span slot="right" class="icon arrow-right-small gray" />
+                                <template #right><span class="icon arrow-right-small gray" /></template>
                             </STListItem>
 
                             <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
@@ -114,7 +114,7 @@
                                     {{ suggestion.description }}
                                 </p>
 
-                                <span slot="right" class="icon arrow-right-small gray" />
+                                <template #right><span class="icon arrow-right-small gray" /></template>
                             </STListItem>
                         </STList>
                     </template>
@@ -131,7 +131,7 @@
                             <p class="style-description">
                                 Schrijf een lid in.
                             </p>
-                            <span slot="right" class="icon arrow-right-small gray" />
+                            <template #right><span class="icon arrow-right-small gray" /></template>
                         </STListItem>
 
                         <STListItem v-if="members.length" :selectable="true" class="left-center" @click="checkData">
@@ -142,7 +142,7 @@
                             <p class="style-description">
                                 Pas gegevens aan en bekijk alle inschrijvingen.
                             </p>
-                            <span slot="right" class="icon arrow-right-small gray" />
+                            <template #right><span class="icon arrow-right-small gray" /></template>
                         </STListItem>
 
                         <STListItem v-if="members.length" :selectable="true" class="left-center" @click="managePayments(true)">
@@ -153,7 +153,7 @@
                             <p class="style-description">
                                 Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.
                             </p>
-                            <span slot="right" class="icon arrow-right-small gray" />
+                            <template #right><span class="icon arrow-right-small gray" /></template>
                         </STListItem>
 
                         <STListItem :selectable="true" class="left-center" @click="manageAccount">
@@ -164,7 +164,7 @@
                             <p class="style-description">
                                 Wijzig het wachtwoord of e-mailadres van het account waarmee je inlogt.
                             </p>
-                            <span slot="right" class="icon arrow-right-small gray" />
+                            <template #right><span class="icon arrow-right-small gray" /></template>
                         </STListItem>
                     </STList>
 
@@ -175,7 +175,7 @@
                         </h2>
                         <STList>
                             <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="downloadDocument(document)">
-                                <span slot="left" class="icon file-pdf red" />
+                                <template #left><span class="icon file-pdf red" /></template>
                                 <h3 class="style-title-list">
                                     {{ document.data.name }}
                                 </h3>

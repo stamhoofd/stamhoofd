@@ -36,13 +36,13 @@
                         <h2 class="style-title-list">
                             Delen op Facebook
                         </h2>
-                        <span slot="left" class="icon share" />
+                        <template #left><span class="icon share" /></template>
                     </STListItem>
                     <STListItem v-if="canShare" :selectable="true" @click="share">
                         <h2 class="style-title-list">
                             Verstuur de link via SMS, e-mail, WhatsApp...
                         </h2>
-                        <span slot="left" class="icon share" />
+                        <template #left><span class="icon share" /></template>
                     </STListItem>
                     <STListItem v-if="!isNative" :selectable="true" @click="downloadQR">
                         <h2 class="style-title-list">
@@ -51,7 +51,7 @@
                         <p class="style-description-small">
                             Als je fysiek bij iemand bent, dan kan die deze QR-code scannen om de link te gebruiken. 
                         </p>
-                        <span slot="left" class="icon qr-code" />
+                        <template #left><span class="icon qr-code" /></template>
                     </STListItem>
                 </STList>
 

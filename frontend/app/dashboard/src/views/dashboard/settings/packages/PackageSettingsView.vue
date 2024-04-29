@@ -54,7 +54,7 @@
                         <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
                             Verleng nu
                         </button>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
 

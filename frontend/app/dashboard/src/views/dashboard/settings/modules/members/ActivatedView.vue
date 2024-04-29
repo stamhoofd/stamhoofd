@@ -61,12 +61,12 @@
 
             <STList>
                 <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/'" target="_blank">
-                    <span slot="left" class="icon link" />
+                    <template #left><span class="icon link" /></template>
                     Documentatie
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/ledenadministratie-instellen/'" target="_blank">
-                    <span slot="left" class="icon link" />
+                    <template #left><span class="icon link" /></template>
                     Ledenadministratie instellen
                 </STListItem>
             </STList>

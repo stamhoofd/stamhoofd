@@ -87,7 +87,7 @@
                             {{ suggestion.description }}
                         </p>
 
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </template>

@@ -33,7 +33,7 @@
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
                     <span v-if="group.getMemberCount() !== null" slot="right" class="style-description-small">{{ group.getMemberCount() }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center" @click="openWaitingList(true)">
@@ -45,7 +45,7 @@
                         Bekijk leden op de wachtlijst.
                     </p>
                     <span v-if="group.settings.waitingListSize !== null" slot="right" class="style-description-small">{{ group.settings.waitingListSize }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-for="offset in limitedCycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
@@ -62,7 +62,7 @@
                     </p>
 
                     <span v-if="group.getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
 
@@ -83,7 +83,7 @@
                         <p class="style-description">
                             Naam en periode
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPrices(true)">
@@ -94,7 +94,7 @@
                         <p class="style-description">
                             Wijzig de inschrijvingsprijs en eventuele kortingen
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editRestrictions(true)">
@@ -105,7 +105,7 @@
                         <p class="style-description">
                             Pas aan wie kan inschrijven
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editWaitinglist(true)">
@@ -116,7 +116,7 @@
                         <p class="style-description">
                             Stel het maximum aantal leden in of schakel de wachtlijst in
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
 
@@ -128,7 +128,7 @@
                         <p class="style-description">
                             Bepaal wie leden en instellingen van deze groep kan bekijken of wijzigen
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
 
@@ -144,7 +144,7 @@
                         <p class="style-description">
                             Wijzig de informatie die zichtbaar is op het ledenportaal.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
@@ -155,7 +155,7 @@
                         <p class="style-description">
                             Wijzig de inhoud van automatische e-mails naar leden.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
 

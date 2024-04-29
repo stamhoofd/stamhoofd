@@ -75,7 +75,7 @@
                         </p>
 
                         <span slot="right">{{ formatPrice(payment.price) }}</span>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </template>
@@ -97,7 +97,7 @@
                         </p>
 
                         <span slot="right">{{ formatPrice(payment.price) }}</span>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </template>

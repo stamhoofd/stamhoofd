@@ -26,7 +26,7 @@
                     <p class="style-description">
                         Naam, adres en website
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openPersonalize(true)">
@@ -37,7 +37,7 @@
                     <p class="style-description">
                         Logo, kleur en domeinnaam
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <template #right><span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="setupEmail(true)">
@@ -306,7 +306,7 @@
                         <p class="style-description">
                             Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.
                         </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <template #right><span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
 

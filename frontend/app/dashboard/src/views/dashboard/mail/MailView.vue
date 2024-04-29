@@ -67,7 +67,7 @@
             <!-- E-mail attachments -->
             <STList v-if="files.length > 0">
                 <STListItem v-for="(file, index) in files" :key="index" class="file-list-item">
-                    <span slot="left" :class="'icon '+getFileIcon(file)" />
+                    <template #left><span :class="'icon '+getFileIcon(file)" /></template>
                     <h3 class="style-title-list" v-text="file.name" />
                     <p class="style-description-small">
                         {{ file.size }}
