@@ -20,7 +20,7 @@
                 </STListItem>
 
                 <STListItem v-if="isAcceptingNewMembers" class="right-stack" :selectable="true" @click="addNewMember">
-                    <img slot="left" src="@stamhoofd/assets/images/illustrations/account-add.svg">
+                    <template #left><img src="@stamhoofd/assets/images/illustrations/account-add.svg"></template>
 
                     <h2 class="style-title-list">
                         Nieuw lid toevoegen

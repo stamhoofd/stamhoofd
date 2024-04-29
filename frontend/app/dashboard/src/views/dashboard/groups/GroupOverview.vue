@@ -19,7 +19,7 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openMembers(true)">
-                    <img slot="left" src="@stamhoofd/assets/images/illustrations/group.svg">
+                    <template #left><img src="@stamhoofd/assets/images/illustrations/group.svg"></template>
                     <h2 v-if="group.cycle > 0" class="style-title-list">
                         Inschrijvingen
                     </h2>
@@ -37,7 +37,7 @@
                 </STListItem>
 
                 <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                    <img slot="left" src="@stamhoofd/assets/images/illustrations/clock.svg">
+                    <template #left><img src="@stamhoofd/assets/images/illustrations/clock.svg"></template>
                     <h2 class="style-title-list">
                         Wachtlijst
                     </h2>
@@ -49,7 +49,7 @@
                 </STListItem>
 
                 <STListItem v-for="offset in limitedCycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
-                    <img slot="left" src="@stamhoofd/assets/images/illustrations/package-members.svg">
+                    <template #left><img src="@stamhoofd/assets/images/illustrations/package-members.svg"></template>
                     <h2 v-if="offset === 1" class="style-title-list">
                         Vorige inschrijvingsperiode
                     </h2>
@@ -76,7 +76,7 @@
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/flag.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/flag.svg"></template>
                         <h2 class="style-title-list">
                             Algemeen
                         </h2>
@@ -87,7 +87,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPrices(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg"></template>
                         <h2 class="style-title-list">
                             Prijs
                         </h2>
@@ -98,7 +98,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editRestrictions(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/account.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/account.svg"></template>
                         <h2 class="style-title-list">
                             Inschrijvingsbeperkingen
                         </h2>
@@ -109,7 +109,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editWaitinglist(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/clock.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/clock.svg"></template>
                         <h2 class="style-title-list">
                             Wachtlijst, voorinschrijvingen en limieten
                         </h2>
@@ -121,7 +121,7 @@
 
 
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/lock.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/lock.svg"></template>
                         <h2 class="style-title-list">
                             Toegangsbeheer
                         </h2>
@@ -137,7 +137,7 @@
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/palette.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/palette.svg"></template>
                         <h2 class="style-title-list">
                             Beschrijving, locatie en foto's
                         </h2>
@@ -148,7 +148,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/email.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/email.svg"></template>
                         <h2 class="style-title-list">
                             E-mails
                         </h2>

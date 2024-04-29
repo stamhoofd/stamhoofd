@@ -56,7 +56,7 @@
         <STList class="illustration-list">    
             <STListItem :selectable="true" class="left-center" element-name="label">
                 <input type="file" multiple="multiple" style="display: none;" accept=".plan" @change="importSeatingPlan">
-                <img slot="left" src="@stamhoofd/assets/images/illustrations/box-upload.svg">
+                <template #left><img src="@stamhoofd/assets/images/illustrations/box-upload.svg"></template>
                 <h2 class="style-title-list">
                     Importeer zaalplan
                 </h2>

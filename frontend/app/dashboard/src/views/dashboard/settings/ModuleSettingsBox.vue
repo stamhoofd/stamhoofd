@@ -2,7 +2,7 @@
     <div class="module-settings-box">
         <div class="module-box">
             <label class="box" :class="{ selected: enableWebshopModule }">
-                <div><img slot="left" src="@stamhoofd/assets/images/illustrations/cart.svg"></div>
+                <div><template #left><img src="@stamhoofd/assets/images/illustrations/cart.svg"></template></div>
                 <div>
                     <h2 class="style-title-list">Webshops, tickets, geldinzameling en openbare inschrijvingen</h2>
                     <p v-if="enableWebshopModule && !isWebshopsTrial && !loadingWebshopModule" class="style-description">Dit zit in jouw pakket inbegrepen</p>
@@ -17,7 +17,7 @@
             </label>
             
             <label v-if="!hasLegacy" class="box" :class="{ selected: enableMemberModule }">
-                <div><img slot="left" src="@stamhoofd/assets/images/illustrations/group.svg"></div>
+                <div><template #left><img src="@stamhoofd/assets/images/illustrations/group.svg"></template></div>
                 <div>
                     <h2 class="style-title-list">Ledenadministratie en online inschrijvingen</h2>
                     <p v-if="enableMemberModule && !isMembersTrial && !loadingMembers" class="style-description">Dit zit in jouw pakket inbegrepen</p>
@@ -30,7 +30,7 @@
             </label>
 
             <label v-else class="box" :class="{ selected: enableActivities }">
-                <div><img slot="left" src="@stamhoofd/assets/images/illustrations/group.svg"></div>
+                <div><template #left><img src="@stamhoofd/assets/images/illustrations/group.svg"></template></div>
                 <div>
                     <h2 class="style-title-list">Ledenadministratie</h2>
                     <p class="style-description-small">Laat leden inschrijven voor meerdere groepen (bv. voor activiteiten) en maak documenten/attesten aan.</p>

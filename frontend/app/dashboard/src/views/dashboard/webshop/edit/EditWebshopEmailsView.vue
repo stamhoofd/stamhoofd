@@ -13,7 +13,7 @@
             <p>{{ category.description }}</p>
             <STList>
                 <STListItem v-for="emailDefinition in category.definitions" :key="emailDefinition.type" :selectable="true" class="left-center right-stack" @click="editEmail(emailDefinition)">
-                    <img slot="left" :src="emailDefinition.illustration" class="style-illustration-img">
+                    <template #left><img :src="emailDefinition.illustration" class="style-illustration-img"></template>
                     <h2 class="style-title-list">
                         {{ emailDefinition.name }}
                     </h2>

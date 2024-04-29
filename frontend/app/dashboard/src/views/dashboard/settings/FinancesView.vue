@@ -10,7 +10,7 @@
 
             <STList class="illustration-list">    
                 <STListItem v-if="hasFinanceAccess" :selectable="true" class="left-center" @click="openPayments(true)">
-                    <img slot="left" src="@stamhoofd/assets/images/illustrations/calculator.svg">
+                    <template #left><img src="@stamhoofd/assets/images/illustrations/calculator.svg"></template>
                     <h2 class="style-title-list">
                         Betalingen exporteren
                     </h2>
@@ -23,7 +23,7 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openTransfers(true)">
-                    <img slot="left" src="@stamhoofd/assets/images/illustrations/check-transfer.svg">
+                    <template #left><img src="@stamhoofd/assets/images/illustrations/check-transfer.svg"></template>
                     <h2 class="style-title-list">
                         Overschrijvingen controleren
                     </h2>
@@ -43,7 +43,7 @@
 
                 <STList class="illustration-list">    
                     <STListItem v-if="status && status.pendingInvoice && status.pendingInvoice.meta.priceWithoutVAT" :selectable="true" class="left-center right-stack" @click="openPendingInvoice(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg"></template>
                         <h2 v-if="!isPaymentFailed" class="style-title-list">
                             Volgende aanrekening
                         </h2>
@@ -68,7 +68,7 @@
                     </STListItem>
 
                     <STListItem v-if="status && status.credits.length" :selectable="true" class="left-center" @click="showCreditsHistory(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/credits.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/credits.svg"></template>
                         <h2 class="style-title-list">
                             Tegoed
                         </h2>
@@ -84,7 +84,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/stock.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/stock.svg"></template>
                         <h2 class="style-title-list">
                             Pakketten aankopen
                         </h2>
@@ -97,7 +97,7 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/transfer.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/transfer.svg"></template>
                         <h2 class="style-title-list">
                             Facturen en betalingen
                         </h2>

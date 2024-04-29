@@ -48,7 +48,7 @@
 
                 <STList class="illustration-list">
                     <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/admin.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/admin.svg"></template>
 
                         <h2 class="style-title-list">
                             {{ parent.firstName }} {{ parent.lastName || "" }}
@@ -79,7 +79,7 @@
 
                 <STList class="illustration-list">
                     <STListItem v-for="address in addresses" :key="address.id" class="right-stack" :selectable="true" @click.stop="editAddress(address)">
-                        <img slot="left" src="@stamhoofd/assets/images/illustrations/house.svg">
+                        <template #left><img src="@stamhoofd/assets/images/illustrations/house.svg"></template>
 
                         <h2 class="style-title-list">
                             {{ address.street }} {{ address.number }}
