@@ -9,7 +9,7 @@
 
         <STList v-if="roles.length > 0">
             <STListItem>
-                <Checkbox slot="left" :checked="true" :disabled="true" />
+                <Checkbox #left :checked="true" :disabled="true" />
                 Hoofdbeheerders
             </STListItem>
 

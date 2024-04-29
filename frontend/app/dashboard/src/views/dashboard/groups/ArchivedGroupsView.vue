@@ -14,7 +14,7 @@
             <Spinner v-if="loadingGroups" />
             <STList v-else-if="groups.length">
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                    <GroupAvatar slot="left" :group="group" />
+                    <GroupAvatar #left :group="group" />
                     
                     <h2 class="style-title-list">
                         {{ group.settings.name }}

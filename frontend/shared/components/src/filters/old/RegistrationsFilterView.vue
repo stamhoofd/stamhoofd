@@ -16,7 +16,7 @@
         </Dropdown>
         <STList>
             <STListItem v-for="choice of choices" :key="choice.id" :selectable="true" element-name="label">
-                <Checkbox slot="left" :checked="isChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
+                <Checkbox #left :checked="isChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
                 <p>
                     {{ choice.name }}
                 </p>

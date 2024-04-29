@@ -22,7 +22,7 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Radio slot="left" v-model="basePermission" value="None" />
+                <Radio #left v-model="basePermission" value="None" />
                 <h3 class="style-title-list">
                     Geen
                 </h3>
@@ -32,7 +32,7 @@
             </STListItem>
 
             <STListItem :selectable="true" element-name="label">
-                <Radio slot="left" v-model="basePermission" value="Read" />
+                <Radio #left v-model="basePermission" value="Read" />
                 <h3 class="style-title-list">
                     Lezen
                 </h3>
@@ -42,7 +42,7 @@
             </STListItem>
 
             <STListItem :selectable="true" element-name="label">
-                <Radio slot="left" v-model="basePermission" value="Write" />
+                <Radio #left v-model="basePermission" value="Write" />
                 <h3 class="style-title-list">
                     Bewerken
                 </h3>
@@ -95,7 +95,7 @@
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Checkbox slot="left" v-model="createWebshops" />
+                    <Checkbox #left v-model="createWebshops" />
                     Kan nieuwe webshops maken
                 </STListItem>
                 <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" type="webshop" @patch="addPatch" />
@@ -114,7 +114,7 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox slot="left" v-model="financeDirector" />
+                <Checkbox #left v-model="financeDirector" />
                 <h3 class="style-title-list">
                     Volledige toegang
                 </h3>
@@ -123,7 +123,7 @@
                 </p>
             </STListItem>
             <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
-                <Checkbox slot="left" v-model="managePayments" />
+                <Checkbox #left v-model="managePayments" />
                 <h3 class="style-title-list">
                     Overschrijvingen beheren
                 </h3>
@@ -150,7 +150,7 @@
 
         <STList>
             <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
-                <Checkbox slot="left" :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
+                <Checkbox #left :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
 
                 <h2 class="style-title-list">
                     {{ admin.firstName }} {{ admin.lastName }}

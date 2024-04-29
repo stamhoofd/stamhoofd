@@ -72,7 +72,7 @@
     
             <STList v-if="roles.length > 0">
                 <STListItem>
-                    <Checkbox slot="left" :checked="true" :disabled="true" />
+                    <Checkbox #left :checked="true" :disabled="true" />
                     Hoofdbeheerders
                 </STListItem>
                 <GroupCategoryPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :category="patchedCategory" :organization="patchedOrganization" @patch="addCategoryPatch" />

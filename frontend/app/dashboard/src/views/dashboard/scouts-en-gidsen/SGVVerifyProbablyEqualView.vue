@@ -28,7 +28,7 @@
                         </p>
                     </div>
 
-                    <Checkbox slot="right" v-model="match.verify" />
+                    <Checkbox #right v-model="match.verify" />
                 </STListItem>
             </STList>
         </main>
