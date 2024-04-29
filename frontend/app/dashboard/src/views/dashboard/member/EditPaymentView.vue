@@ -15,7 +15,7 @@
 
         <STList>
             <STListItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true">
-                <Checkbox #left :checked="isItemSelected(item)" @change="setItemSelected(item, $event)" />
+                <Checkbox slot="left" :checked="isItemSelected(item)" @change="setItemSelected(item, $event)" />
 
                 <h3 class="style-title-list">
                     {{ item.description }}

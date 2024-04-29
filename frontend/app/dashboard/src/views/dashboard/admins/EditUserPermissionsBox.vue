@@ -2,7 +2,7 @@
     <div>
         <STList>
             <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                <Checkbox #left v-model="fullAccess" />
+                <Checkbox slot="left" v-model="fullAccess" />
                 Hoofdbeheerder
 
                 <template #right>
@@ -11,7 +11,7 @@
             </STListItem>
 
             <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                <Checkbox #left :checked="getRole(role)" @change="setRole(role, $event)" />
+                <Checkbox slot="left" :checked="getRole(role)" @change="setRole(role, $event)" />
                 {{ role.name }}
             </STListItem>
         </STList>

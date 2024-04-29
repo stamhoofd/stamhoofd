@@ -25,7 +25,7 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="useStock" />
+                <Checkbox slot="left" v-model="useStock" />
 
                 <h3 class="style-title-list">
                     Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)

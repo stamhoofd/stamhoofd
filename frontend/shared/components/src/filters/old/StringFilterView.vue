@@ -1,7 +1,7 @@
 <template>
     <STList>
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Contains" @change="onChange" />
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Contains" @change="onChange" />
             <p class="style-title-list">
                 Bevat...
             </p>
@@ -9,7 +9,7 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotContains" @change="onChange" />
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotContains" @change="onChange" />
             <p class="style-title-list">
                 Bevat niet...
             </p>
@@ -17,7 +17,7 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Equals" @change="onChange" />
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Equals" @change="onChange" />
             <p class="style-title-list">
                 Is gelijk aan...
             </p>
@@ -25,7 +25,7 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotEquals" @change="onChange" />
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotEquals" @change="onChange" />
             <p class="style-title-list">
                 Is niet gelijk aan...
             </p>
@@ -33,14 +33,14 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Empty" @change="onChange" />
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Empty" @change="onChange" />
             <p class="style-title-list">
                 Is leeg
             </p>
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotEmpty" @change="onChange" />
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotEmpty" @change="onChange" />
             <p class="style-title-list">
                 Is niet leeg
             </p>

@@ -22,7 +22,7 @@
 
                     <STList>
                         <STListItem v-for="pack of availablePackages" :key="pack.bundle" element-name="label" :selectable="true">
-                            <Checkbox #left v-model="pack.selected" :disabled="!pack.canSelect(availablePackages)" />
+                            <Checkbox slot="left" v-model="pack.selected" :disabled="!pack.canSelect(availablePackages)" />
                             <h3 class="style-title-list">
                                 {{ pack.title }}
                             </h3>

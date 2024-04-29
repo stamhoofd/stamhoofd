@@ -25,7 +25,7 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="layout" :value="WebshopLayout.Split" />
+                <Radio slot="left" v-model="layout" :value="WebshopLayout.Split" />
                 <h3 class="style-title-list">
                     Naast elkaar
                 </h3>
@@ -34,7 +34,7 @@
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="layout" :value="WebshopLayout.Default" />
+                <Radio slot="left" v-model="layout" :value="WebshopLayout.Default" />
                 <h3 class="style-title-list">
                     Onder elkaar
                 </h3>

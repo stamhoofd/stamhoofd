@@ -1,6 +1,6 @@
 <template>
     <STListItem element-name="label" :selectable="true">
-        <Checkbox #left v-model="selected" />
+        <Checkbox slot="left" v-model="selected" />
         <h2 v-if="type === 'category'" class="style-title-list">
             {{ category.settings.name }}
         </h2>

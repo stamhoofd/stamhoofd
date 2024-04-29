@@ -39,7 +39,7 @@
         <div v-else>
             <STList v-if="patchedDiscountCodes.length || allowDiscountCodeEntry">
                 <STListItem :selectable="true" element-name="label">
-                    <Checkbox #left v-model="allowDiscountCodeEntry" />
+                    <Checkbox slot="left" v-model="allowDiscountCodeEntry" />
 
                     <h3 class="style-title-list">
                         Sta invullen van kortingscodes toe

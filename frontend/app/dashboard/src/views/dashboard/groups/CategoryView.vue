@@ -83,7 +83,7 @@
                     </STListItem>
                     
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                        <GroupAvatar #left :group="group" />
+                        <GroupAvatar slot="left" :group="group" />
                         <h3 class="style-title-list">
                             {{ group.settings.name }}
                         </h3>

@@ -14,7 +14,7 @@
 
         <STList>
             <STListItem element-name="label" :selectable="true">
-                <Checkbox #left v-model="phoneEnabled" />
+                <Checkbox slot="left" v-model="phoneEnabled" />
                 <p class="style-title-list">
                     {{ $t('shared.inputs.mobile.label') }}
                 </p>

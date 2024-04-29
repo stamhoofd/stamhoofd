@@ -23,7 +23,7 @@
 
             <STList>
                 <STListItem v-for="(property, index) of memberProperties" :key="index" :selectable="true" element-name="label">
-                    <Checkbox #left v-model="property.selected" />
+                    <Checkbox slot="left" v-model="property.selected" />
                     {{ property.name }}
                 </STListItem>
             </STList>
@@ -41,7 +41,7 @@
 
             <STList>
                 <STListItem v-for="(property, index) of groupProperties" :key="index" :selectable="true" element-name="label">
-                    <Checkbox #left v-model="property.selected" />
+                    <Checkbox slot="left" v-model="property.selected" />
                     {{ property.name }}
                 </STListItem>
             </STList>

@@ -1,6 +1,6 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
-        <GroupAvatar #left :group="group" />
+        <GroupAvatar slot="left" :group="group" />
         
         <h2 class="style-title-list">
             {{ group.settings.name }}

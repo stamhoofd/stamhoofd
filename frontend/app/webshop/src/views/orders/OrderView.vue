@@ -2,7 +2,7 @@
     <LoadingView v-if="!order" />
     <div v-else class="st-view order-view box-shade">
         <STNavigationBar :large="true" :sticky="false">
-            <OrganizationLogo #left :organization="organization" :webshop="webshop" />
+            <OrganizationLogo slot="left" :organization="organization" :webshop="webshop" />
             <button slot="right" class="text button" type="button" @click="pop">
                 Sluiten
             </button>

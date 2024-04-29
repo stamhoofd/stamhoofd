@@ -3,13 +3,13 @@
         <STInputBox v-if="addresses.length > 0" title="Kies een adres" :error-box="errorBox" error-fields="selectedAddress">
             <STList>
                 <STListItem v-for="_address in addresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
-                    <Radio #left v-model="selectedAddress" :value="_address" @change="changeSelected" />
+                    <Radio slot="left" v-model="selectedAddress" :value="_address" @change="changeSelected" />
                     {{ _address.street }} {{ _address.number }}<br>
                     {{ _address.postalCode }} {{ _address.city }}
                     <template #right><button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)" /></template>
                 </STListItem>
                 <STListItem element-name="label" :selectable="true" class="left-center">
-                    <Radio #left v-model="selectedAddress" :value="null" @change="changeSelected" />
+                    <Radio slot="left" v-model="selectedAddress" :value="null" @change="changeSelected" />
                     Een ander adres ingeven
                 </STListItem>
             </STList>

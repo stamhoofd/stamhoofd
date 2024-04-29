@@ -1,6 +1,6 @@
 <template>
     <STListItem element-name="label" :selectable="true">
-        <Checkbox #left v-model="selected" />
+        <Checkbox slot="left" v-model="selected" />
         <h2 v-if="type === 'webshop'" class="style-title-list">
             {{ webshop.meta.name }}
         </h2>

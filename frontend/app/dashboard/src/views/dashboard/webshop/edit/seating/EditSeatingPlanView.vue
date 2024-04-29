@@ -23,7 +23,7 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="requireOptimalReservation" />
+                <Checkbox slot="left" v-model="requireOptimalReservation" />
 
                 <h3 class="style-title-list">
                     Verplicht optimale zaalbezetting

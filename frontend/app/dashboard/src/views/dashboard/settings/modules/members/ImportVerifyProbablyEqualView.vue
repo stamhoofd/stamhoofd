@@ -35,7 +35,7 @@
                         </p>
                     </div>
 
-                    <Checkbox #left :checked="getVerified(match)" @change="setVerified(match, $event)" />
+                    <Checkbox slot="left" :checked="getVerified(match)" @change="setVerified(match, $event)" />
                 </STListItem>
             </STList>
         </main>

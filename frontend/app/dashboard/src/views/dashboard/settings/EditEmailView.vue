@@ -39,7 +39,7 @@
 
             <STList>
                 <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
-                    <Checkbox #left v-model="group.selected" />
+                    <Checkbox slot="left" v-model="group.selected" />
                     <h3 class="style-title-list">
                         {{ group.group.settings.name }}<h3 />
                     </h3>
@@ -56,7 +56,7 @@
 
             <STList>
                 <STListItem v-for="webshop in webshops" :key="webshop.webshop.id" element-name="label" :selectable="true">
-                    <Checkbox #left v-model="webshop.selected" />
+                    <Checkbox slot="left" v-model="webshop.selected" />
                     <h3 class="style-title-list">
                         {{ webshop.webshop.meta.name }}<h3 />
                     </h3>

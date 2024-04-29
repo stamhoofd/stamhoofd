@@ -17,7 +17,7 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="useDiscount" />
+                <Checkbox slot="left" v-model="useDiscount" />
 
                 <h3 class="style-title-list">
                     Korting vanaf een bepaald aantal stuks
@@ -38,7 +38,7 @@
             </STListItem>
 
             <STListItem v-if="!isSingle || hidden" :selectable="true" element-name="label">
-                <Checkbox #left v-model="hidden" />
+                <Checkbox slot="left" v-model="hidden" />
 
                 <h3 class="style-title-list">
                     Verbergen op webshop
@@ -49,7 +49,7 @@
             </STListItem>
 
             <STListItem v-if="useStock || !isSingle" :selectable="true" element-name="label">
-                <Checkbox #left v-model="useStock" />
+                <Checkbox slot="left" v-model="useStock" />
 
                 <h3 class="style-title-list">
                     Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)

@@ -52,7 +52,7 @@
 
                 <STList>
                     <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio #left v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
+                        <Radio slot="left" v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
                         <h2 class="style-title-list">
                             {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
                         </h2>
@@ -95,7 +95,7 @@
 
                 <STList>
                     <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio #left v-model="selectedSlot" name="choose-time-slot" :value="slot" />
+                        <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
                         <h2 class="style-title-list">
                             {{ formatDateWithDay(slot.date) }}
                         </h2> 
