@@ -5,17 +5,17 @@
 .split-view-controller {
     --split-view-width: 280px;
 
-    > .master {
+    >.master {
         z-index: 100;
         overscroll-behavior: contain;
     }
 
-    > .detail {
+    >.detail {
         background: var(--color-current-background);
     }
 
     &[data-has-detail="true"] {
-        > .master {
+        >.master {
             border-right: $border-width-thin solid $color-border;
             background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
@@ -50,7 +50,7 @@
         }
     }
 
-    > div {
+    >div {
         position: absolute;
         left: 50%;
         top: 50%;
@@ -59,12 +59,12 @@
         touch-action: auto;
         background: $color-background;
         border-radius: $border-radius-modals;
-        
+
         //width: 400px;
         //width: min(100vw, var(--st-sheet-width, 400px));
         width: auto;
         max-width: none;
-        
+
         // max-width: 100vw;
         // min-width: min(100vw, var(--st-sheet-width, 400px));
 
@@ -75,8 +75,9 @@
         }
 
         overscroll-behavior: contain;
-        box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
-        
+        box-shadow: 0px 10px 60px 0px $color-overlay-shadow,
+        0px 15px 30px 0px $color-overlay-shadow;
+
         --st-safe-area-bottom: 0px;
         --keyboard-height: 0px;
         --bottom-padding: 0px;
@@ -89,10 +90,14 @@
 
         --popup-height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100) - var(--popup-padding-top-outside, 0px) - var(--popup-padding-bottom-outside, 0px));
         max-height: var(--popup-height);
-        transition: transform 0.3s, opacity 0.3s, max-height 0.3s;
-        will-change: transform, opacity, max-height;
+        transition: transform 0.3s,
+        opacity 0.3s,
+        max-height 0.3s;
+        will-change: transform,
+        opacity,
+        max-height;
 
-        > * {
+        >* {
             --vh: calc(var(--popup-height, 0px) / 100);
         }
 
@@ -125,13 +130,112 @@
 }
 
 .side-view {
+    // DO NOT ADD MAX HEIGHT HERE! Always add it to the children of the navigation controllers!
+    background: rgba(black, 0.7);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 10000;
+    visibility: visible;
+    opacity: 1;
+    transition: background-color 0.3s, opacity 0.3s, visibility step-start 0.3s;
+
+    ~.side-view {
+        background-color: rgba(black, 0.4);
+    }
+
+    // Improve performance
+
+    &>div {
+        position: fixed;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 800px;
+        background: white;
+        background: var(--color-white, white);
+        border-radius: 0px;
+
+        // Rounded corners need overflow hidden on scroll
+        overflow: hidden;
+
+        height: 100%;
+
+        overflow: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+
+        box-sizing: border-box;
+
+        // Fix chrome bug that scrollbars are not visible anymore
+        transform: translate3d(0, 0, 0);
+
+        // Push down
+        transition: transform 0.3s, border-radius 0.3s;
+        transform-origin: 0% 50%;
+    }
+
+    &.push-down-full {
+        transition: background-color 0.3s, opacity 0.3s, visibility step-end 0.3s;
+        visibility: hidden;
+        opacity: 0;
+        background-color: rgba(black, 0.6);
+
+        &>div {
+            transform: scale(0.9, 0.9) translate3d(-15px, 0, 0);
+            border-radius: 5px;
+        }
+    }
+
+    &.push-down {
+        background-color: rgba(black, 0.6);
+
+        &>div {
+            transform: scale(0.95, 0.95) translate3d(-10px, 0, 0);
+            border-radius: 5px;
+        }
+    }
+
+    &.fade-enter-active,
+    &.fade-leave-active,
+    &[data-extended-enter="true"] {
+        position: fixed;
+
+        &>div {
+            transition: transform 0.3s;
+        }
+    }
+
+    &.fade-enter,
+    &.fade-leave-to
+
+    /* .fade-leave-active below version 2.1.8 */
+        {
+        background-color: rgba(black, 0);
+
+        &>div {
+            transform: translate(100%, 0);
+        }
+    }
+
+    &.fade-enter-active,
+    &.fade-leave-active {
+        z-index: 10000;
+    }
+}
+
+.side-view {
     transform: translate3d(0, 0, 0);
 
     @media (prefers-color-scheme: dark) {
         background: rgba(8, 8, 8, 0.7);
     }
 
-    & > div {
+    &>div {
         max-width: 400px;
         overscroll-behavior: contain;
 

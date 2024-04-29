@@ -22,7 +22,7 @@
         "noFallthroughCasesInSwitch": true,
         "experimentalDecorators": true,
         "sourceMap": true,
-        "strictNullChecks": true,
+        "strict": true,
         "importHelpers": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true
