@@ -1,7 +1,7 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
         <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="emailRaw = $event.target.value; onTyping();">
-        <slot slot="right" name="right" />
+        <template #right><slot name="right" /></template>
     </STInputBox>
 </template>
 

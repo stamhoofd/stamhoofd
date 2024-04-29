@@ -57,7 +57,7 @@
                 <STListItem class="right-description wrap">
                     Wie?
 
-                    <div slot="right" v-text="who" />
+                    <template #right><div v-text="who" /></template>
                 </STListItem>
 
                 <STListItem v-for="(price, index) of priceList" :key="index">
@@ -66,7 +66,7 @@
                         {{ price.description }}
                     </p>
 
-                    <div slot="right" class="style-description" v-text="price.price" />
+                    <template #right><div class="style-description" v-text="price.price" /></template>
                 </STListItem>
             </STList>
         </main>
