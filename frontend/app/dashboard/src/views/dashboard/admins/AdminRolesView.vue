@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="loading" />
     <SaveView v-else class="st-view background" title="Rollen" :loading="saving" :disabled="!hasChanges" @save="save">
-        <button slot="buttons" class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
+        <template #buttons><button class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" /></template>
     
         <h1>Beheerdersrollen</h1>
         <p>Maak rollen aan om toegang te regelen tot bepaalde onderdelen. Daarna kan je één of meerdere rollen toekennen aan een beheerder. In Stamhoofd kan je zo bijvoorbeeld alle beheerders met een bepaalde rol toegang geven tot een webshop, in plaats van individueel per beheerder. Als beheerders later van rol veranderen of de vereniging verlaten, hoef je enkel maar de rollen van een beheerder te wijzigen.</p>

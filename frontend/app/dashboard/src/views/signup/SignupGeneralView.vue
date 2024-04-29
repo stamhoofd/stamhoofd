@@ -2,7 +2,7 @@
     <LoadingView v-if="loadingRegisterCode" />
     <form v-else id="signup-general-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar title="Nieuwe vereniging">
-            <button slot="right" type="button" class="button icon close gray" @click="pop" />
+            <template #right><button type="button" class="button icon close gray" @click="pop" /></template>
         </STNavigationBar>
         
         <main>

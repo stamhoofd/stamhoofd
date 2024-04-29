@@ -1,7 +1,7 @@
 <template>
     <form class="signup-view st-view" @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
-            <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
+            <template #right><button type="button" class="button icon gray close" @click="dismiss" /></template>
         </STNavigationBar>
 
         <main>

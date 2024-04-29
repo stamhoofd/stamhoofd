@@ -76,7 +76,7 @@
                         <span class="icon success" />
                         <span>Publiceer</span>
                     </button>
-                    <button slot="right" type="button" class="button icon success only-smartphone" />
+                    <template #right><button type="button" class="button icon success only-smartphone" /></template>
                 </STListItem>
 
                 <STListItem v-if="!isDraft" :selectable="true" @click="draftTemplate()">
@@ -90,7 +90,7 @@
                         <span class="icon edit" />
                         <span>Naar klad</span>
                     </button>
-                    <button slot="right" type="button" class="button icon edit only-smartphone" />
+                    <template #right><button type="button" class="button icon edit only-smartphone" /></template>
                 </STListItem>
 
                 <STListItem v-if="isDraft" :selectable="true" @click="deleteTemplate()">
@@ -104,7 +104,7 @@
                         <span class="icon trash" />
                         <span>Verwijder</span>
                     </button>
-                    <button slot="right" type="button" class="button icon trash only-smartphone" />
+                    <template #right><button type="button" class="button icon trash only-smartphone" /></template>
                 </STListItem>
             </STList>
         </main>

@@ -131,7 +131,7 @@
                                 <span class="icon clock" />
                                 <span>Heractiveer</span>
                             </button>
-                            <button slot="right" type="button" class="button icon success only-smartphone" />
+                            <template #right><button type="button" class="button icon success only-smartphone" /></template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markPaid">
@@ -149,7 +149,7 @@
                                 <span v-if="payment.price >= 0">Betaald</span>
                                 <span v-else>Terugbetaald</span>
                             </button>
-                            <button slot="right" type="button" class="button icon success only-smartphone" />
+                            <template #right><button type="button" class="button icon success only-smartphone" /></template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isSucceeded" :selectable="true" @click="markPending">
@@ -170,7 +170,7 @@
                                 <span v-if="payment.price >= 0">Niet betaald</span>
                                 <span v-else>Niet terugbetaald</span>
                             </button>
-                            <button slot="right" type="button" class="button icon undo only-smartphone" />
+                            <template #right><button type="button" class="button icon undo only-smartphone" /></template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markFailed">
@@ -187,7 +187,7 @@
                                 <span class="icon canceled" />
                                 <span>Annuleren</span>
                             </button>
-                            <button slot="right" type="button" class="button icon canceled only-smartphone" />
+                            <template #right><button type="button" class="button icon canceled only-smartphone" /></template>
                         </STListItem>
                     </STList>
                 </template>

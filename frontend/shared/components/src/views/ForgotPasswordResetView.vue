@@ -3,7 +3,7 @@
         <LoadingView v-if="loadingSession" key="loadingView" />
         <form v-else key="form" class="forgot-password-reset-view st-view" @submit.prevent="submit">
             <STNavigationBar :title="title">
-                <button slot="right" class="button icon gray close" type="button" @click="pop" />
+                <template #right><button class="button icon gray close" type="button" @click="pop" /></template>
             </STNavigationBar>
             <main>
                 <h1>{{ title }}</h1>

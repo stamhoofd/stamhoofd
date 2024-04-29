@@ -61,7 +61,7 @@
                     </h2>
                     <p class="style-description-small pre-wrap" v-text="getGroupDescription(group)" />
 
-                    <button slot="right" class="button icon text trash" type="button" @click="removeGroup(group)" />
+                    <template #right><button class="button icon text trash" type="button" @click="removeGroup(group)" /></template>
                 </STListItem>
             </STList>
             <p>

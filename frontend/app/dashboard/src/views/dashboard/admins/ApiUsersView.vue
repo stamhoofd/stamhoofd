@@ -2,7 +2,7 @@
     <LoadingView v-if="loading" />
     <div v-else class="st-view background">
         <STNavigationBar title="Beheerders" :dismiss="canDismiss" :pop="canPop">
-            <button slot="right" class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
+            <template #right><button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" /></template>
         </STNavigationBar>
 
     

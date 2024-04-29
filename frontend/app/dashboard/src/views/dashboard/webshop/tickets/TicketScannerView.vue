@@ -1,7 +1,7 @@
 <template>
     <div class="st-view scanner-view">
         <STNavigationBar title="Scan een ticket" :show-title="true">
-            <button slot="left" class="icon button close" type="button" @click="dismiss" />
+            <template #left><button class="icon button close" type="button" @click="dismiss" /></template>
         </STNavigationBar>
 
         <div class="video-container" :class="{ native: disableWebVideo }">

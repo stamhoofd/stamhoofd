@@ -2,7 +2,7 @@
     <form class="st-view forgot-password-view" @submit.prevent="submit">
         <STNavigationBar title="Wachtwoord vergeten">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button slot="right" class="button icon gray close" type="button" @click="dismiss" />
+            <template #right><button class="button icon gray close" type="button" @click="dismiss" /></template>
         </STNavigationBar>
         <main>
             <h1>Wachtwoord vergeten</h1>

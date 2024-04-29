@@ -241,7 +241,7 @@
                             <span class="icon power" />
                             <span>Sluiten</span>
                         </button>
-                        <button slot="right" type="button" class="button icon power only-smartphone" />
+                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
@@ -255,7 +255,7 @@
                             <span class="icon power" />
                             <span>Openen</span>
                         </button>
-                        <button slot="right" type="button" class="button icon power only-smartphone" />
+                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
@@ -269,7 +269,7 @@
                             <span class="icon archive" />
                             <span>Archiveren</span>
                         </button>
-                        <button slot="right" type="button" class="button icon archive only-smartphone" />
+                        <template #right><button type="button" class="button icon archive only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
@@ -283,7 +283,7 @@
                             <span class="icon undo" />
                             <span>Terugzetten</span>
                         </button>
-                        <button slot="right" type="button" class="button icon undo only-smartphone" />
+                        <template #right><button type="button" class="button icon undo only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem :selectable="true" @click="duplicateWebshop()">
@@ -297,7 +297,7 @@
                             <span class="icon copy" />
                             <span>Dupliceren</span>
                         </button>
-                        <button slot="right" type="button" class="button icon copy only-smartphone" />
+                        <template #right><button type="button" class="button icon copy only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
@@ -311,7 +311,7 @@
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <button slot="right" type="button" class="button icon trash only-smartphone" />
+                        <template #right><button type="button" class="button icon trash only-smartphone" /></template>
                     </STListItem>
                 </STList>
             </template>

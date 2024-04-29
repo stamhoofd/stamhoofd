@@ -1,7 +1,7 @@
 <template>
     <form class="login-view st-view auto" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
-            <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
+            <template #right><button type="button" class="button icon gray close" @click="dismiss" /></template>
         </STNavigationBar>
         <main>
             <h1>Inloggen</h1>

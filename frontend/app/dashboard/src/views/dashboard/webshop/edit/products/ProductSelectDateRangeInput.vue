@@ -6,7 +6,7 @@
                 <h3>
                     {{ formatDate(_dateRange) }}
                 </h3>
-                <button slot="right" type="button" class="button icon gray edit" @click.stop="doEditDateRange(_dateRange)" />
+                <template #right><button type="button" class="button icon gray edit" @click.stop="doEditDateRange(_dateRange)" /></template>
             </STListItem>
             <STListItem element-name="label" :selectable="true" class="left-center">
                 <Radio slot="left" v-model="selectedDateRange" :value="null" @change="changeSelected" />

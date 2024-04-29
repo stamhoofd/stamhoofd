@@ -9,7 +9,7 @@
                 <p v-if="_location.address" class="style-description">
                     {{ _location.address }}
                 </p>
-                <button slot="right" type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)" />
+                <template #right><button type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)" /></template>
             </STListItem>
             <STListItem element-name="label" :selectable="true" class="left-center">
                 <Radio slot="left" v-model="selectedLocation" :value="null" @change="changeSelected" />

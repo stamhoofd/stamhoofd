@@ -1,7 +1,7 @@
 <template>
     <div class="st-view payconiq-button-view">
         <STNavigationBar title="Payconiq by Bancontact">
-            <button slot="right" class="button icon gray close" type="button" @click="close" />
+            <template #right><button class="button icon gray close" type="button" @click="close" /></template>
         </STNavigationBar>
 
         <main>

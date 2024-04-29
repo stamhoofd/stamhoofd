@@ -174,7 +174,7 @@
                             <span class="icon power" />
                             <span>Open</span>
                         </button>
-                        <button slot="right" type="button" class="button icon power only-smartphone" />
+                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
@@ -188,7 +188,7 @@
                             <span class="icon power" />
                             <span>Sluiten</span>
                         </button>
-                        <button slot="right" type="button" class="button icon power only-smartphone" />
+                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="restoreGroup($event)">
@@ -202,7 +202,7 @@
                             <span class="icon undo" />
                             <span>Terugzetten</span>
                         </button>
-                        <button slot="right" type="button" class="button icon undo only-smartphone" />
+                        <template #right><button type="button" class="button icon undo only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="hasMembers && !isArchive" :selectable="true" @click="newPeriod()">
@@ -216,7 +216,7 @@
                             <span class="icon reverse" />
                             <span>Nieuw</span>
                         </button>
-                        <button slot="right" type="button" class="button icon reverse only-smartphone" />
+                        <template #right><button type="button" class="button icon reverse only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!hasMembers && cycleOffsets.length && !isArchive" @click="undoPeriod()">
@@ -230,7 +230,7 @@
                             <span class="icon undo" />
                             <span>Terug</span>
                         </button>
-                        <button slot="right" type="button" class="button icon undo only-smartphone" />
+                        <template #right><button type="button" class="button icon undo only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveGroup()">
@@ -244,7 +244,7 @@
                             <span class="icon archive" />
                             <span>Archiveren</span>
                         </button>
-                        <button slot="right" type="button" class="button icon archive only-smartphone" />
+                        <template #right><button type="button" class="button icon archive only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteGroup()">
@@ -258,7 +258,7 @@
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <button slot="right" type="button" class="button icon trash only-smartphone" />
+                        <template #right><button type="button" class="button icon trash only-smartphone" /></template>
                     </STListItem>
                 </STList>
             </template>

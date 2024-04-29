@@ -138,7 +138,7 @@
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <button slot="right" type="button" class="button icon trash only-smartphone" />
+                        <template #right><button type="button" class="button icon trash only-smartphone" /></template>
                     </STListItem>
                 </STList>
             </template>

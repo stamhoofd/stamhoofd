@@ -7,7 +7,7 @@
 
         <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :value="getEmail(n - 1)" placeholder="E-mailadres" :validator="validator" @input="setEmail(n - 1, $event)">
             <span v-if="isBlocked(n-1)" slot="right" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
-            <button slot="right" class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+            <template #right><button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" /></template>
         </EmailInput>
 
         <p v-if="emailCount == 0" class="info-box">
