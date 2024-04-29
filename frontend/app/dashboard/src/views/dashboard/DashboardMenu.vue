@@ -2,7 +2,7 @@
     <div class="st-menu st-view dashboard-menu">
         <main ref="main" class="sticky-navigation-bar">
             <STNavigationBar :title="$organization.name" :sticky="true" class="block-width">
-                <OrganizationSwitcher slot="middle" />
+                <OrganizationSwitcher #middle />
             </STNavigationBar>
 
             <form v-if="false" class="input-icon-container icon search grayy">

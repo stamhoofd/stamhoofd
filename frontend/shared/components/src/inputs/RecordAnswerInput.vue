@@ -11,7 +11,7 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errorBox">
             <STList>
                 <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
-                    <Checkbox slot="left" :checked="getChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
+                    <Checkbox #left :checked="getChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
@@ -24,7 +24,7 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.ChooseOne" class="max" :title="label" error-fields="input" :error-box="errorBox">
             <STList>
                 <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="answer.selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
+                    <Radio #left v-model="answer.selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>

@@ -27,7 +27,7 @@
 
         <STList>
             <STListItem element-name="label" :selectable="true">
-                <Checkbox slot="left" v-model="onTickets" />
+                <Checkbox #left v-model="onTickets" />
 
                 <h3 class="style-title-list">
                     Toon op tickets

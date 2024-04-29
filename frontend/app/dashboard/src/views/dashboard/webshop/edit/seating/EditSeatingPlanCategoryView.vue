@@ -25,7 +25,7 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox slot="left" v-model="adminOnly" />
+                <Checkbox #left v-model="adminOnly" />
 
                 <h3 class="style-title-list">
                     Enkel voor beheerders

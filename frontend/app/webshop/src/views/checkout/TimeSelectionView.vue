@@ -16,7 +16,7 @@
 
         <STList>
             <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
-                <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
+                <Radio #left v-model="selectedSlot" name="choose-time-slot" :value="slot" />
                 <h2 class="style-title-list">
                     {{ formatDateWithDay(slot.date) }}
                 </h2> 

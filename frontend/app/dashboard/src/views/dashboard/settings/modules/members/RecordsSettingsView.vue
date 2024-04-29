@@ -18,7 +18,7 @@
 
         <STList>
             <STListItem>
-                <Checkbox slot="left" :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
+                <Checkbox #left :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
                 <p class="style-title-list">
                     {{ $t('shared.inputs.mobile.label') }} (van lid zelf)
                 </p>
@@ -28,7 +28,7 @@
                 <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" />
             </STListItem>
             <STListItem>
-                <Checkbox slot="left" :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
+                <Checkbox #left :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
                 <p class="style-title-list">
                     E-mailadres (van lid zelf)
                 </p>
@@ -38,7 +38,7 @@
                 <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" />
             </STListItem>
             <STListItem>
-                <Checkbox slot="left" :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
+                <Checkbox #left :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
                 <p class="style-title-list">
                     Geslacht
                 </p>
@@ -48,7 +48,7 @@
                 <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" />
             </STListItem>
             <STListItem>
-                <Checkbox slot="left" :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
+                <Checkbox #left :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
                 <p class="style-title-list">
                     Geboortedatum
                 </p>
@@ -58,7 +58,7 @@
                 <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" />
             </STListItem>
             <STListItem>
-                <Checkbox slot="left" :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
+                <Checkbox #left :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
                 <p class="style-title-list">
                     Adres (van lid zelf)
                 </p>
@@ -68,7 +68,7 @@
                 <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" />
             </STListItem>
             <STListItem>
-                <Checkbox slot="left" :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
+                <Checkbox #left :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
                 <p class="style-title-list">
                     Ouders
                 </p>
@@ -78,7 +78,7 @@
                 <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" />
             </STListItem>
             <STListItem>
-                <Checkbox slot="left" :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
+                <Checkbox #left :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
                 <p class="style-title-list">
                     Noodcontactpersoon
                 </p>

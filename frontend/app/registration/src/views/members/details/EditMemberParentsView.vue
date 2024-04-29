@@ -25,7 +25,7 @@
 
             <STList>
                 <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
-                    <Checkbox slot="left" v-model="parent.selected" @change="onChangedSelection" />
+                    <Checkbox #left v-model="parent.selected" @change="onChangedSelection" />
 
                     <h2 class="parent-name">
                         {{ parent.parent.firstName }} {{ parent.parent.lastName }}

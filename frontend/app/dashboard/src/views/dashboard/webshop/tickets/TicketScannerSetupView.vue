@@ -31,7 +31,7 @@
                     </h2>
                     <STList>
                         <STListItem v-for="product in getCategoryProducts(category)" :key="product.id" :selectable="true" element-name="label">
-                            <Checkbox slot="left" :checked="isProductSelected(product)" @change="setProductSelected(product, $event)" />
+                            <Checkbox #left :checked="isProductSelected(product)" @change="setProductSelected(product, $event)" />
 
                             <h3 class="style-title-list">
                                 {{ product.name }}

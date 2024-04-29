@@ -2,7 +2,7 @@
     <LoadingView v-if="loading" />
     <div v-else class="st-view ticket-view">
         <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
-            <OrganizationLogo slot="left" :organization="organization" />
+            <OrganizationLogo #left :organization="organization" />
         </STNavigationBar>
     </div>
 </template>

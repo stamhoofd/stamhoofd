@@ -14,7 +14,7 @@
                 <h2>{{ category.settings.name }}</h2>
                 <STList>
                     <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Checkbox slot="left" :checked="getSelectedGroup(group)" @change="setSelectedGroup(group, $event)" />
+                        <Checkbox #left :checked="getSelectedGroup(group)" @change="setSelectedGroup(group, $event)" />
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
                         </h2>
@@ -33,7 +33,7 @@
 
                     <STList>
                         <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
-                            <Checkbox slot="left" :checked="getSelectedGroup(group)" @change="setSelectedGroup(group, $event)" />
+                            <Checkbox #left :checked="getSelectedGroup(group)" @change="setSelectedGroup(group, $event)" />
                             <h2 class="style-title-list">
                                 {{ group.settings.name }}
                             </h2>

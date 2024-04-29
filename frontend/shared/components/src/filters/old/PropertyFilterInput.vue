@@ -3,14 +3,14 @@
         <STInputBox title="Wanneer ingeschakeld?" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" :model-value="isAlwaysEnabled()" :value="true" @change="setAlwaysEnabled()" />
+                    <Radio #left :model-value="isAlwaysEnabled()" :value="true" @change="setAlwaysEnabled()" />
                     <h3 class="style-title-list">
                         Altijd
                     </h3>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" :model-value="isAlwaysEnabled()" :value="false" @change="setEnabledWhen(true)" />
+                    <Radio #left :model-value="isAlwaysEnabled()" :value="false" @change="setEnabledWhen(true)" />
                     <h3 class="style-title-list">
                         Als...
                     </h3>
@@ -28,21 +28,21 @@
         <STInputBox v-if="allowOptional" title="Wanneer verplicht invullen?*" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" :model-value="isAlwaysRequired()" :value="true" @change="setAlwaysRequired()" />
+                    <Radio #left :model-value="isAlwaysRequired()" :value="true" @change="setAlwaysRequired()" />
                     <h3 class="style-title-list">
                         Stap kan niet worden overgeslagen
                     </h3>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" :model-value="isNeverRequired()" :value="true" @change="setNeverRequired()" />
+                    <Radio #left :model-value="isNeverRequired()" :value="true" @change="setNeverRequired()" />
                     <h3 class="style-title-list">
                         Stap kan altijd worden overgeslagen
                     </h3>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" :model-value="!isAlwaysRequired() && !isNeverRequired()" :value="true" @change="setRequiredWhen(true)" />
+                    <Radio #left :model-value="!isAlwaysRequired() && !isNeverRequired()" :value="true" @change="setRequiredWhen(true)" />
                     <h3 class="style-title-list">
                         Als...
                     </h3>

@@ -79,7 +79,7 @@
 
             <STList>
                 <STListItem>
-                    <Checkbox slot="left" :checked="true" :disabled="true" />
+                    <Checkbox #left :checked="true" :disabled="true" />
                     Hoofdbeheerders
                 </STListItem>
 
