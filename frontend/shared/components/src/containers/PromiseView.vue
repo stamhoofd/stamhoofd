@@ -28,7 +28,7 @@ export class PromiseView extends Vue {
     created() {
         this.run()
     }
-
+    
     run() {
         this.promise.call(this).then((value) => {
             // We need to make a copy, or we risk having the same component twice in the DOM

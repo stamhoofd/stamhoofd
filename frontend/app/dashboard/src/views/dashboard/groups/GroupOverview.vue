@@ -32,8 +32,8 @@
                     <p v-else class="style-description">
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
-                    <template #right><span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span></template>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right><span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
+                    <span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center" @click="openWaitingList(true)">
@@ -44,8 +44,8 @@
                     <p class="style-description">
                         Bekijk leden op de wachtlijst.
                     </p>
-                    <template #right><span v-if="group.settings.waitingListSize !== null" class="style-description-small">{{ group.settings.waitingListSize }}</span></template>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right><span v-if="group.settings.waitingListSize !== null" class="style-description-small">{{ group.settings.waitingListSize }}</span>
+                    <span class="icon arrow-right-small gray" /></template>
                 </STListItem>
 
                 <STListItem v-for="offset in limitedCycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
@@ -61,8 +61,8 @@
                         {{ group.getTimeRangeOffset(offset) }}
                     </p>
 
-                    <template #right><span v-if="group.getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span></template>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right><span v-if="group.getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
+                    <span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
 
@@ -173,8 +173,8 @@
                         <template #right><button type="button" class="button secundary green hide-smartphone">
                             <span class="icon power" />
                             <span>Open</span>
-                        </button></template>
-                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
+                        </button>
+                        <button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
@@ -187,8 +187,8 @@
                         <template #right><button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon power" />
                             <span>Sluiten</span>
-                        </button></template>
-                        <template #right><button type="button" class="button icon power only-smartphone" /></template>
+                        </button>
+                        <button type="button" class="button icon power only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="restoreGroup($event)">
@@ -201,8 +201,8 @@
                         <template #right><button type="button" class="button secundary hide-smartphone">
                             <span class="icon undo" />
                             <span>Terugzetten</span>
-                        </button></template>
-                        <template #right><button type="button" class="button icon undo only-smartphone" /></template>
+                        </button>
+                        <button type="button" class="button icon undo only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="hasMembers && !isArchive" :selectable="true" @click="newPeriod()">
@@ -215,8 +215,8 @@
                         <template #right><button type="button" class="button secundary hide-smartphone">
                             <span class="icon reverse" />
                             <span>Nieuw</span>
-                        </button></template>
-                        <template #right><button type="button" class="button icon reverse only-smartphone" /></template>
+                        </button>
+                        <button type="button" class="button icon reverse only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!hasMembers && cycleOffsets.length && !isArchive" @click="undoPeriod()">
@@ -229,8 +229,8 @@
                         <template #right><button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon undo" />
                             <span>Terug</span>
-                        </button></template>
-                        <template #right><button type="button" class="button icon undo only-smartphone" /></template>
+                        </button>
+                        <button type="button" class="button icon undo only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveGroup()">
@@ -243,8 +243,8 @@
                         <template #right><button type="button" class="button secundary hide-smartphone">
                             <span class="icon archive" />
                             <span>Archiveren</span>
-                        </button></template>
-                        <template #right><button type="button" class="button icon archive only-smartphone" /></template>
+                        </button>
+                        <button type="button" class="button icon archive only-smartphone" /></template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteGroup()">
@@ -257,8 +257,8 @@
                         <template #right><button type="button" class="button secundary danger hide-smartphone">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
-                        </button></template>
-                        <template #right><button type="button" class="button icon trash only-smartphone" /></template>
+                        </button>
+                        <button type="button" class="button icon trash only-smartphone" /></template>
                     </STListItem>
                 </STList>
             </template>

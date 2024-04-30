@@ -342,6 +342,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
                 components: [
                     getScopedDashboardRoot(session)
                 ],
+                replace: 1,
                 animated: true
             })
         } catch (e) {

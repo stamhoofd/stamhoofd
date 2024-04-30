@@ -2,6 +2,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 
 import GeneralContextMenuView from "./GeneralContextMenuView.vue"
 import { ModalStackEventBus } from "./ModalStackEventBus"
+import { markRaw } from "vue"
 
 export class ContextMenuItem {
     name: string
@@ -29,6 +30,7 @@ export class ContextMenuItem {
     childMenu: ContextMenu | null = null
 
     constructor(settings: Partial<ContextMenuItem>) {
+        markRaw(this)
         Object.assign(this, settings)
     }
 }
@@ -42,6 +44,7 @@ export class ContextMenu {
     items: ContextMenuItem[][]
 
     constructor(items: ContextMenuItem[][]) {
+        markRaw(this)
         this.items = items.filter(i => i.length > 0)
     }
 
@@ -83,12 +86,15 @@ export class ContextMenu {
             position.x += position.xOffset
         }
 
+        const component = position.component;
+        delete position.component
+
         const menuComponent = new ComponentWithProperties(GeneralContextMenuView, {
             menu: this,
             ...position
         })
-        if (position.component) {
-            position.component.present({
+        if (component) {
+            component.present({
                 components: [menuComponent],
                 modalDisplayStyle: "overlay",
             })

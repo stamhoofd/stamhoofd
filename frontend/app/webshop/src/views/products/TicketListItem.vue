@@ -12,8 +12,8 @@
         <p v-if="cartItem.product.location && cartItem.product.location.address" class="description" v-text="cartItem.product.location.address" />
         <p v-if="ticket.getIndexDescriptionString(webshop)" class="description" v-text="ticket.getIndexDescriptionString(webshop)" />
 
-        <template #right><span class="icon qr-code" /></template>
-        <template #right><span class="icon arrow-right-small gray" /></template>
+        <template #right><span class="icon qr-code" />
+        <span class="icon arrow-right-small gray" /></template>
     </STListItem>
 </template>
 

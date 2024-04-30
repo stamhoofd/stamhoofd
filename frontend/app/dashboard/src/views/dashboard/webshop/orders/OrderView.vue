@@ -50,7 +50,7 @@
                         Geplaatst op
                     </h3>
                     <p class="style-definition-text">
-                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
+                        {{ capitalizeFirstLetter(formatDateTime(order.validAt)) }}
                     </p>
                 </STListItem>
 
@@ -196,7 +196,7 @@
                         </h3>
 
                         <p class="style-definition-text">
-                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
+                            {{ capitalizeFirstLetter(formatDate(order.data.timeSlot.date)) }}<br>{{ formatMinutes(order.data.timeSlot.startTime) }} - {{ formatMinutes(order.data.timeSlot.endTime) }}
                         </p>
                     </STListItem>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">

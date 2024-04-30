@@ -1,6 +1,6 @@
 <template>
-    <ContextMenuView v-bind="{ x, y }">
-        <ContextMenuItemView v-for="definition in definitions" :key="definition.id" @click="chooseDefinition(definition)">
+    <ContextMenuView v-bind="{ x, y }" ref="contextMenuView">
+        <ContextMenuItemView v-for="definition in definitions" :key="definition.id" @click="chooseDefinition(definition)" :contextMenuView="$refs.contextMenuView">
             {{ definition.name }}
         </ContextMenuItemView>
     </ContextMenuView>

@@ -1,12 +1,12 @@
 <template>
-    <ContextMenuView v-bind="{ x, y, xPlacement, yPlacement }">
-        <ContextMenuItemView @click="setPermission('read')">
+    <ContextMenuView v-bind="{ x, y, xPlacement, yPlacement }" ref="contextMenuView">
+        <ContextMenuItemView @click="setPermission('read')" :contextMenuView="$refs.contextMenuView">
             Lezen
         </ContextMenuItemView>
-        <ContextMenuItemView @click="setPermission('write')">
+        <ContextMenuItemView @click="setPermission('write')" :contextMenuView="$refs.contextMenuView">
             Bewerken
         </ContextMenuItemView>
-        <ContextMenuItemView @click="setPermission('full')">
+        <ContextMenuItemView @click="setPermission('full')" :contextMenuView="$refs.contextMenuView">
             Volledige toegang
         </ContextMenuItemView>
     </ContextMenuView>

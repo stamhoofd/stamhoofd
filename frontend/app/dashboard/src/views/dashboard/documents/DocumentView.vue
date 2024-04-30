@@ -66,7 +66,7 @@
                         Aangemaakt op
                     </h3>
                     <p class="style-definition-text">
-                        {{ document.createdAt | dateTime | capitalizeFirstLetter }}
+                        {{ capitalizeFirstLetter(formatDateTime(document.createdAt)) }}
                     </p>
                 </STListItem>
 

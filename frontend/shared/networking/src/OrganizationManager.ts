@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
 import { Group, Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures';
+import { reactive } from 'vue';
 
 
 /**
@@ -11,6 +12,7 @@ export class OrganizationManager {
     $context: Session
 
     constructor($context: Session) {
+        // Make reactive
         this.$context = $context
     }
 
@@ -56,6 +58,7 @@ export class OrganizationManager {
         const admins = this.$context.organization.admins
 
         this.$context.setOrganization(response.data)
+        console.log("Organization updated", this.$context)
 
         if (admins && !response.data.admins && patch.admins) {
             this.$context.organization.admins = patch.admins.applyTo(admins)

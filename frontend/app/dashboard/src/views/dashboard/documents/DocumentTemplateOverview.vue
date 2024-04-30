@@ -75,8 +75,7 @@
                     <template #right><button type="button" class="button secundary green hide-smartphone">
                         <span class="icon success" />
                         <span>Publiceer</span>
-                    </button></template>
-                    <template #right><button type="button" class="button icon success only-smartphone" /></template>
+                    </button>                    <button type="button" class="button icon success only-smartphone" /></template>
                 </STListItem>
 
                 <STListItem v-if="!isDraft" :selectable="true" @click="draftTemplate()">
@@ -89,8 +88,7 @@
                     <template #right><button type="button" class="button secundary hide-smartphone">
                         <span class="icon edit" />
                         <span>Naar klad</span>
-                    </button></template>
-                    <template #right><button type="button" class="button icon edit only-smartphone" /></template>
+                    </button>                    <button type="button" class="button icon edit only-smartphone" /></template>
                 </STListItem>
 
                 <STListItem v-if="isDraft" :selectable="true" @click="deleteTemplate()">
@@ -103,8 +101,7 @@
                     <template #right><button type="button" class="button secundary danger hide-smartphone">
                         <span class="icon trash" />
                         <span>Verwijder</span>
-                    </button></template>
-                    <template #right><button type="button" class="button icon trash only-smartphone" /></template>
+                    </button>                    <button type="button" class="button icon trash only-smartphone" /></template>
                 </STListItem>
             </STList>
         </main>

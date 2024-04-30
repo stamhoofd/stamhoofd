@@ -37,12 +37,14 @@
        
 
         <STToolbar>
-            <template #right><button class="button secundary" @click="viewTicket">
-                Ticket toch bekijken
-            </button></template>
-            <template #right><button class="button primary" @click="pop">
-                Terug
-            </button></template>
+            <template #right>
+                <button class="button secundary" @click="viewTicket">
+                    Ticket toch bekijken
+                </button>
+                <button class="button primary" @click="pop">
+                    Terug
+                </button>
+            </template>
         </STToolbar>
     </div>
 </template>

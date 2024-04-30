@@ -74,8 +74,8 @@
                             Aangemaakt op {{ formatDate(payment.createdAt) }}
                         </p>
 
-                        <template #right><span>{{ formatPrice(payment.price) }}</span></template>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right><span>{{ formatPrice(payment.price) }}</span>
+                        <span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </template>
@@ -96,8 +96,8 @@
                             Betaald op {{ formatDate(payment.paidAt) }}
                         </p>
 
-                        <template #right><span>{{ formatPrice(payment.price) }}</span></template>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right><span>{{ formatPrice(payment.price) }}</span>
+                        <span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                 </STList>
             </template>

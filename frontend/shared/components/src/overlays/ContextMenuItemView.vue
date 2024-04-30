@@ -14,7 +14,8 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
+import ContextMenuView from "./ContextMenuView.vue";
 
 @Component
 export default class ContextMenuItemView extends Mixins(NavigationMixin) {
@@ -27,20 +28,24 @@ export default class ContextMenuItemView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     childContextMenu!: ComponentWithProperties | null;
 
+    @Prop({required: true})
+    contextMenuView!: InstanceType<typeof ContextMenuView>;
+
     get isOpen() {
-        return (this.$parent as any).childMenu && (this.$parent as any).childMenu === this.childContextMenu
+        return (this.contextMenuView)?.childMenu && (this.contextMenuView).childMenu === this.childContextMenu
     }
 
     onMouseOver() {
-        (this.$parent as any).onHoverItem(this)
+        console.log('hover', this.contextMenuView);
+        (this.contextMenuView).onHoverItem(this)
     }
 
     onMouseLeave() {
-        (this.$parent as any).onMouseLeaveItem(this)
+        (this.contextMenuView).onMouseLeaveItem(this)
     }
 
     onClick(event) {
-        (this.$parent as any).onClickItem(this, event)
+        (this.contextMenuView).onClickItem(this, event)
         
     }
 }

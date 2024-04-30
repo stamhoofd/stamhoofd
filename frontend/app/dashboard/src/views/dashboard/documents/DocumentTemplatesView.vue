@@ -25,8 +25,8 @@
                         Aangemaakt op {{ formatDate(template.createdAt) }}
                     </p>
 
-                    <template #right><span v-if="template.status === 'Draft'" class="style-tag">Klad</span></template>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right><span v-if="template.status === 'Draft'" class="style-tag">Klad</span>
+                    <span class="icon arrow-right-small gray" /></template>
                 </STListItem>
             </STList>
 

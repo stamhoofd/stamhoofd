@@ -54,7 +54,7 @@
       },
       "personalize": {
         "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.nl) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
-        "domainDescription": "Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.nl). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt."
+        "domainDescription": "{'Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.nl). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.'}"
       },
       "registrationPage": {
         "linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.nl"

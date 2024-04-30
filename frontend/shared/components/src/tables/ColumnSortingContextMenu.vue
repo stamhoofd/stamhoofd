@@ -1,6 +1,6 @@
 <template>
-    <ContextMenuView v-bind="$attrs">
-        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" @click="setSortByColumn(column)">
+    <ContextMenuView v-bind="$attrs" ref="contextMenuView">
+        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" @click="setSortByColumn(column)" :contextMenuView="$refs.contextMenuView">
             <template v-if="getSortByColumn(column)" #left><span :class="'icon '+getSortDirectionIcon()" /></template>
             <template v-else #left><span class="icon" /></template>
             {{ column.name }}

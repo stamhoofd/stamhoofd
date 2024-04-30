@@ -2,7 +2,7 @@
     <div class="st-menu st-view dashboard-menu">
         <main ref="main" class="sticky-navigation-bar">
             <STNavigationBar :title="$organization.name" :sticky="true" class="block-width">
-                <OrganizationSwitcher #middle />
+                <template #middle><OrganizationSwitcher /></template>
             </STNavigationBar>
 
             <form v-if="false" class="input-icon-container icon search grayy">
@@ -190,7 +190,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
+import { AsyncComponent, CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
 import { Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Group, GroupCategory, GroupCategoryTree, Permissions, PrivateWebshop, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
@@ -376,18 +376,11 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
                 }
             }
         }
-        
-        if (!didSet && !this.splitViewController?.shouldCollapse()) {
-            UrlHelper.shared.clear()
-            if (this.fullAccess) {
-                this.manageSettings(false).catch(console.error)
-            } else if (this.canManagePayments) {
-                this.openFinances(false).catch(console.error)
-            } else {
-                this.manageAccount(false).catch(console.error)
-            }
-        }
 
+        if (!didSet) {
+            UrlHelper.shared.clear()
+        }
+        
         document.title = "Stamhoofd - "+this.$organization.name
 
         const currentCount = localStorage.getItem("what-is-new")
@@ -536,17 +529,27 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         );
     }
 
+    getManageFinances() {
+        return new ComponentWithProperties(NavigationController, { 
+            root: AsyncComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './settings/FinancesView.vue'), {})
+        })
+    }
+
     async openFinances(animated = true) {
         this.currentlySelected = "manage-finances"
         this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './settings/FinancesView.vue'), {}, { instant: !animated })
-                })
+                this.getManageFinances()
             ]
         });
+    }
+
+    getManageSettings() {
+        return new ComponentWithProperties(NavigationController, { 
+            root: AsyncComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './settings/SettingsView.vue'), {})
+        })
     }
 
     async manageSettings(animated = true) {
@@ -556,22 +559,24 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             adjustHistory: animated,
             animated,
             components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './settings/SettingsView.vue'), {}, { instant: !animated })
-                })
+                this.getManageSettings()
             ],
         });
     }
 
-    async manageAccount(animated = true) {
+    getManageAccount() {
+        return new ComponentWithProperties(NavigationController, { 
+            root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './account/AccountSettingsView.vue'), {})
+        })
+    }
+
+    manageAccount(animated = true) {
         this.currentlySelected = "manage-account"
         this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './account/AccountSettingsView.vue'), {}, { instant: !animated })
-                })
+                this.getManageAccount()
             ]
         });
     }

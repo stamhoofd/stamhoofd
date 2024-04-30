@@ -18,9 +18,9 @@
                 <STToolbar>
                     <template #right><button type="button" class="primary button" @click="gotoRegistration">
                         <span>Naar ledenportaal</span>
-                    </button></template>
+                    </button>
 
-                    <template #right><button type="button" class="button secundary" @click="logout">
+                    <button type="button" class="button secundary" @click="logout">
                         <span class="icon logout" /><span>Uitloggen</span>
                     </button></template>
                 </STToolbar>

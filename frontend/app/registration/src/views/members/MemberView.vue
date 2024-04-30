@@ -205,8 +205,8 @@
             <template #right><button class="secundary button" type="button" @click="fullCheck">
                 <span class="icon edit" />
                 <span>Nakijken</span>
-            </button></template>
-            <template #right><button class="primary button" type="button" @click="chooseGroups">
+            </button>
+            <button class="primary button" type="button" @click="chooseGroups">
                 <span class="icon add" />
                 <span>Inschrijven</span>
             </button></template>

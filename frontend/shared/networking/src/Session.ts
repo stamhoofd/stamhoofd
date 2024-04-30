@@ -9,6 +9,7 @@ import { AppManager, UrlHelper } from '..'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
+import { reactive } from 'vue'
 
 type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organization" | "token") => void
 
@@ -378,7 +379,7 @@ export class Session implements RequestMiddleware {
      */
     updateOrganization(organization: Organization) {
         if (!this.organization) {
-            this.organization = organization
+            this.setOrganization(organization)
         } else {
             const oldGroups = this.organization.groups
             const oldWebshopPreviews = this.organization.webshops

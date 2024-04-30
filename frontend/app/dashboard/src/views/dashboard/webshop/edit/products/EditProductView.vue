@@ -116,8 +116,8 @@
                     {{ seatingPlan.name }}
                 </p>
 
-                <template #right><span class="icon success primary" /></template>
-                <template #right><span class="icon arrow-right-small gray" /></template>
+                <template #right><span class="icon success primary" />
+                <span class="icon arrow-right-small gray" /></template>
             </STListItem>
 
             <STListItem :selectable="true" element-name="button" @click="addOptionMenu">

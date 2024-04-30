@@ -1,8 +1,8 @@
 <template>
-    <ContextMenuView v-bind="$attrs">
+    <ContextMenuView v-bind="$attrs" ref="contextMenuView">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :class="{'disabled': isDisabled(action)}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
+            <ContextMenuItemView v-for="(action, index) of actions" :contextMenuView="$refs.contextMenuView" :key="groupIndex+'-'+index" :class="{'disabled': isDisabled(action)}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
                 {{ action.name }}
                 <template v-if="action.hasChildActions" #right><span class="icon arrow-right-small" /></template>
                 <template v-else-if="action.icon" #right><span :class="'icon '+action.icon" /></template>

@@ -34,6 +34,7 @@ function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
 }
 
 @Component({
+    inheritAttrs: false
 })
 export default class ContextMenuView extends Vue {
     @Prop({

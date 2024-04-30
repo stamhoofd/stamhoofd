@@ -14,7 +14,7 @@
                     {{ checkoutMethod.description || checkoutMethod.address || "" }}
                 </p>
                 <p v-if="checkoutMethod.timeSlots.timeSlots.length == 1" class="style-description-small">
-                    {{ checkoutMethod.timeSlots.timeSlots[0].date | date | capitalizeFirstLetter }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
+                    {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
                 </p>
 
                 <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1">

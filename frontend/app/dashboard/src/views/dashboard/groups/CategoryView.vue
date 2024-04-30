@@ -68,8 +68,8 @@
                         <h2 class="style-title-list bolder">
                             Alle leden
                         </h2>
-                        <template #right><span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span></template>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right><span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
+                        <span class="icon arrow-right-small gray" /></template>
                     </STListItem>
 
                     <STListItem v-if="hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
@@ -78,8 +78,8 @@
                         <h2 class="style-title-list bolder">
                             Gemeenschappelijke wachtlijsten
                         </h2>
-                        <template #right><span v-if="getMemberCount({waitingList: true}) !== null" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span></template>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right><span v-if="getMemberCount({waitingList: true}) !== null" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
+                        <span class="icon arrow-right-small gray" /></template>
                     </STListItem>
                     
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
@@ -122,8 +122,8 @@
                                 {{ getTimeRangeOffset(offset) }}
                             </p>
 
-                            <template #right><span v-if="getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span></template>
-                            <template #right><span class="icon arrow-right-small gray" /></template>
+                            <template #right><span v-if="getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span>
+                            <span class="icon arrow-right-small gray" /></template>
                         </STListItem>
                     </STList>
                 </template>

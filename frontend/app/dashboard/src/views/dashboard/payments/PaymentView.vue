@@ -130,8 +130,8 @@
                             <template #right><button type="button" class="button secundary hide-smartphone">
                                 <span class="icon clock" />
                                 <span>Heractiveer</span>
-                            </button></template>
-                            <template #right><button type="button" class="button icon success only-smartphone" /></template>
+                            </button>
+                            <button type="button" class="button icon success only-smartphone" /></template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markPaid">
@@ -148,8 +148,8 @@
                                 <span class="icon success" />
                                 <span v-if="payment.price >= 0">Betaald</span>
                                 <span v-else>Terugbetaald</span>
-                            </button></template>
-                            <template #right><button type="button" class="button icon success only-smartphone" /></template>
+                            </button>
+                            <button type="button" class="button icon success only-smartphone" /></template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isSucceeded" :selectable="true" @click="markPending">
@@ -169,8 +169,7 @@
                                 <span class="icon undo" />
                                 <span v-if="payment.price >= 0">Niet betaald</span>
                                 <span v-else>Niet terugbetaald</span>
-                            </button></template>
-                            <template #right><button type="button" class="button icon undo only-smartphone" /></template>
+                            </button><button type="button" class="button icon undo only-smartphone" /></template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markFailed">
@@ -186,8 +185,7 @@
                             <template #right><button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon canceled" />
                                 <span>Annuleren</span>
-                            </button></template>
-                            <template #right><button type="button" class="button icon canceled only-smartphone" /></template>
+                            </button><button type="button" class="button icon canceled only-smartphone" /></template>
                         </STListItem>
                     </STList>
                 </template>

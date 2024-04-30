@@ -1,9 +1,10 @@
 <template>
-    <ContextMenuView v-bind="$attrs" @mousedown.native.prevent>
-        <template v-for="(items, groupIndex) of menu.items">
-            <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
+    <div>
+    <ContextMenuView v-bind="$attrs" @mousedown.native.prevent ref="contextMenuView">
+        <template v-for="(items, groupIndex) of menu.items" :key="groupIndex+'-group'" >
+            <ContextMenuLine v-if="groupIndex > 0" />
 
-            <ContextMenuItemView v-for="(item, index) of items" :key="groupIndex+'-'+index" v-tooltip="item.disabled" :class="{'disabled': !!item.disabled, 'with-description': !!item.description}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item, $event)">
+            <ContextMenuItemView v-for="(item, index) of items" :contextMenuView="$refs.contextMenuView" :key="index" v-tooltip="item.disabled" :class="{'disabled': !!item.disabled, 'with-description': !!item.description}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item, $event)">
                 <template v-if="item.selected !== null" #left ><Checkbox :checked="item.selected" :only-line="true" /></template>
                 <template v-else-if="item.leftIcon !== null" #left><span :class="'icon '+item.leftIcon" /></template>
                 <p>{{ item.name }}</p>
@@ -18,6 +19,7 @@
             </ContextMenuItemView>
         </template>
     </ContextMenuView>
+    </div>
 </template>
 
 <script lang="ts">
@@ -52,7 +54,7 @@ export default class GeneralContextMenuView extends Mixins(NavigationMixin) {
         } else {
             // Don't dismiss
         }
-    }
+    } 
 
 }
 </script>
