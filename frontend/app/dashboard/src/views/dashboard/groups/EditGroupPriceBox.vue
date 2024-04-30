@@ -74,14 +74,14 @@
             
             <STInputBox v-if="!priceGroup.sameMemberOnlyDiscount && priceGroup.prices.length > 1" title="Aantal gezinsleden tellen als..." error-fields="genderType" :error-box="errorBox" class="max">
                 <RadioGroup>
-                    <Radio :model-value="getOnlySameGroup(priceGroup)" :value="true" @change="setOnlySameGroup(priceGroup, $event)">
+                    <Radio :modelValue="getOnlySameGroup(priceGroup)" :value="true" @update:modelValue="setOnlySameGroup(priceGroup, $event)">
                         Gezinsleden die inschrijven voor deze inschrijvingsgroep
                         <template v-if="group">
                             ({{ group.settings.name }})
                         </template>
                     </Radio>
 
-                    <Radio :model-value="getOnlySameGroup(priceGroup)" :value="false" @change="setOnlySameGroup(priceGroup, $event)">
+                    <Radio :modelValue="getOnlySameGroup(priceGroup)" :value="false" @update:modelValue="setOnlySameGroup(priceGroup, $event)">
                         Gezinsleden die inschrijven voor gelijk welke inschrijvingsgroep in de bovenliggende categorie
                         <template v-if="category">
                             ({{ category.settings.name }})

@@ -2,7 +2,7 @@
     <STList>
         <STListItem v-for="option of options" :key="option.id" :selectable="true" element-name="label">
             <template #left>
-                <Checkbox :checked="isOptionSelected(option)" @change="setOptionSelected(option, $event)" />
+                <Checkbox :modelValue="isOptionSelected(option)" @update:modelValue="setOptionSelected(option, $event)" />
             </template>
             <h3 class="style-title-list">
                 {{ option.name }}

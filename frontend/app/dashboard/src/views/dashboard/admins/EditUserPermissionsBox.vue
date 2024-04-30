@@ -14,7 +14,7 @@
 
             <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
                 <template #left>
-                    <Checkbox :checked="getRole(role)" @change="setRole(role, $event)" />
+                    <Checkbox :modelValue="getRole(role)" @update:modelValue="setRole(role, $event)" />
                 </template>
                 {{ role.name }}
             </STListItem>

@@ -7,7 +7,7 @@
         <STList>
             <STListItem v-for="option in optionMenu.options" :key="option.id" class="no-border right-price" :selectable="canSelectOption(option)" :disabled="!canSelectOption(option)" element-name="label">
                 <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" :disabled="!canSelectOption(option)" />
-                <Checkbox v-else slot="left" :checked="isOptionSelected(option)" :disabled="!canSelectOption(option)" @change="selectOption(option, $event)" />
+                <Checkbox v-else slot="left" :modelValue="isOptionSelected(option)" :disabled="!canSelectOption(option)" @update:modelValue="selectOption(option, $event)" />
 
 
                 <h4 class="style-title-list">

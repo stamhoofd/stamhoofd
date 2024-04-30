@@ -12,7 +12,7 @@
             <STList>
                 <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :checked="getChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
+                        <Checkbox :modelValue="getChoiceSelected(choice)" @update:modelValue="setChoiceSelected(choice, $event)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ choice.name }}

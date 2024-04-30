@@ -62,7 +62,7 @@
                 <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
                     <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
-                            <Checkbox :checked="isAllSelected" @change="setSelectAll($event)" />
+                            <Checkbox :modelValue="isAllSelected" @update:modelValue="setSelectAll($event)" />
                         </div>
 
                         <div class="columns">
@@ -88,7 +88,7 @@
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
                         <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
-                                <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
+                                <Checkbox v-if="row.value" :key="row.value.id" :modelValue="row.cachedSelectionValue" @update:modelValue="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
                             </label>
                             <div v-if="showPrefix" class="prefix-column" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">

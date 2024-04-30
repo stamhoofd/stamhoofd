@@ -64,7 +64,7 @@
             Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
         </p>
 
-        <Checkbox :checked="getFeatureFlag('webshop-discounts')" @change="setFeatureFlag('webshop-discounts', !!$event)">
+        <Checkbox :modelValue="getFeatureFlag('webshop-discounts')" @update:modelValue="setFeatureFlag('webshop-discounts', !!$event)">
             Kortingen en kortingscodes in webshops
         </Checkbox>
         <p class="style-description-small">
@@ -81,19 +81,19 @@
                 Activeer test-modus voor betalingen
             </Checkbox>
 
-            <Checkbox :checked="getFeatureFlag('stamhoofd-pay-by-transfer')" @change="setFeatureFlag('stamhoofd-pay-by-transfer', !!$event)">
+            <Checkbox :modelValue="getFeatureFlag('stamhoofd-pay-by-transfer')" @update:modelValue="setFeatureFlag('stamhoofd-pay-by-transfer', !!$event)">
                 Stamhoofd betalen via overschrijving
             </Checkbox>
 
-            <Checkbox :checked="getFeatureFlag('stamhoofd-pay-by-saved')" @change="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
+            <Checkbox :modelValue="getFeatureFlag('stamhoofd-pay-by-saved')" @update:modelValue="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
                 Stamhoofd betalen via opgeslagen betaalmethode
             </Checkbox>
 
-            <Checkbox :checked="getFeatureFlag('sso')" @change="setFeatureFlag('sso', !!$event)">
+            <Checkbox :modelValue="getFeatureFlag('sso')" @update:modelValue="setFeatureFlag('sso', !!$event)">
                 Single-Sign-On
             </Checkbox>
 
-            <Checkbox :checked="getFeatureFlag('webshop-auth')" @change="setFeatureFlag('webshop-auth', !!$event)">
+            <Checkbox :modelValue="getFeatureFlag('webshop-auth')" @update:modelValue="setFeatureFlag('webshop-auth', !!$event)">
                 Webshop auth
             </Checkbox>
 

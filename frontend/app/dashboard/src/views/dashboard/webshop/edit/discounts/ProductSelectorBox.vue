@@ -29,7 +29,7 @@
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
                      <template #left>
-                         <Checkbox :checked="isPriceSelected(price)" @change="setPriceSelected(price, $event)" />
+                         <Checkbox :modelValue="isPriceSelected(price)" @update:modelValue="setPriceSelected(price, $event)" />
                      </template>
 
                     <h2 class="style-title-list">
@@ -43,7 +43,7 @@
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
                      <template #left>
-                         <Checkbox :checked="isOptionSelected(optionMenu, option)" @change="setOptionSelected(optionMenu, option, $event)" />
+                         <Checkbox :modelValue="isOptionSelected(optionMenu, option)" @update:modelValue="setOptionSelected(optionMenu, option, $event)" />
                      </template>
 
                     <h2 class="style-title-list">

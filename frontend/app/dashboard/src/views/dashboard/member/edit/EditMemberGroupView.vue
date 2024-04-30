@@ -15,8 +15,8 @@
                 <h2>{{ category.settings.name }}</h2>
                 <STList>
                     <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio v-if="category.settings.maximumRegistrations === 1" slot="left" :name="'choose-group'+category.id" :value="group" :model-value="getSelectedGroupForCategory(category)" @change="setSelectedGroupForCategory(category, $event)" />
-                        <Checkbox v-else slot="left" :checked="getSelectedGroup(group)" @change="setSelectedGroup(group, $event)" />
+                        <Radio v-if="category.settings.maximumRegistrations === 1" slot="left" :name="'choose-group'+category.id" :value="group" :modelValue="getSelectedGroupForCategory(category)" @update:modelValue="setSelectedGroupForCategory(category, $event)" />
+                        <Checkbox v-else slot="left" :modelValue="getSelectedGroup(group)" @update:modelValue="setSelectedGroup(group, $event)" />
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
                         </h2>

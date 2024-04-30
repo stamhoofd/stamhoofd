@@ -87,19 +87,19 @@
                 <hr>
                 <h2>Hoe ken je Stamhoofd?</h2>
 
-                <Checkbox :checked="getBooleanType(AcquisitionType.Recommended)" @change="setBooleanType(AcquisitionType.Recommended, $event)">
+                <Checkbox :modelValue="getBooleanType(AcquisitionType.Recommended)" @update:modelValue="setBooleanType(AcquisitionType.Recommended, $event)">
                     Op aanraden van andere vereniging / persoon
                 </Checkbox>
-                <Checkbox :checked="getBooleanType(AcquisitionType.Seen)" @change="setBooleanType(AcquisitionType.Seen, $event)">
+                <Checkbox :modelValue="getBooleanType(AcquisitionType.Seen)" @update:modelValue="setBooleanType(AcquisitionType.Seen, $event)">
                     Gezien bij andere vereniging
                 </Checkbox>
-                <Checkbox :checked="getBooleanType(AcquisitionType.SocialMedia)" @change="setBooleanType(AcquisitionType.SocialMedia, $event)">
+                <Checkbox :modelValue="getBooleanType(AcquisitionType.SocialMedia)" @update:modelValue="setBooleanType(AcquisitionType.SocialMedia, $event)">
                     Via sociale media
                 </Checkbox>
-                <Checkbox :checked="getBooleanType(AcquisitionType.Search)" @change="setBooleanType(AcquisitionType.Search, $event)">
+                <Checkbox :modelValue="getBooleanType(AcquisitionType.Search)" @update:modelValue="setBooleanType(AcquisitionType.Search, $event)">
                     Via opzoekwerk (bv. Google)
                 </Checkbox>
-                <Checkbox :checked="getBooleanType(AcquisitionType.Other)" @change="setBooleanType(AcquisitionType.Other, $event)">
+                <Checkbox :modelValue="getBooleanType(AcquisitionType.Other)" @update:modelValue="setBooleanType(AcquisitionType.Other, $event)">
                     Andere
                 </Checkbox>
 

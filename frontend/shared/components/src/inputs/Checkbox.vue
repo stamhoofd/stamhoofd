@@ -24,17 +24,13 @@
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
-    model: {
-        prop: 'checked',
-        event: 'change'
-    },
 })
 export default class Checkbox extends Vue {
     @Prop({ default: "", type: String })
     name!: string;
 
     @Prop({ default: false })
-    checked!: boolean;
+    modelValue!: boolean;
 
     @Prop({ default: false })
     onlyLine!: boolean;
@@ -51,11 +47,11 @@ export default class Checkbox extends Vue {
     }
 
     get checkboxValue() {
-        return this.checked;
+        return this.modelValue;
     }
 
     set checkboxValue(value) {
-        this.$emit("change", value)
+        this.$emit("update:modelValue", value)
 
         // Add support for a model that doesn't change
         this.$nextTick(() => {
