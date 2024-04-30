@@ -45,7 +45,7 @@
                 <div class="input-with-buttons">
                     <div>
                         <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                            <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="searchQuery = $event.target.value">
+                            <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @input="searchQuery = $event.target.value">
                         </form>
                     </div>
                     <div v-if="canFilter">

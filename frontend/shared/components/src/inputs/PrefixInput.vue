@@ -7,7 +7,7 @@
             ref="input"
             v-model="internalValue"
             type="text"
-            spellcheck="false"
+            :spellcheck="false"
             autocorrect="off"
             autocomplete="off"
             autocapitalize="none"
