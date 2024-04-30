@@ -79,7 +79,9 @@
 
             <STList>
                 <STListItem>
-                    <Checkbox #left :checked="true" :disabled="true" />
+                    <template #left>
+                        <Checkbox :checked="true" :disabled="true" />
+                    </template>
                     Hoofdbeheerders
                 </STListItem>
 

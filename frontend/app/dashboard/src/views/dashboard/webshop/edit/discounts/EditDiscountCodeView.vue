@@ -42,7 +42,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="useMaximumUsage" />
+                <template #left>
+                    <Checkbox v-model="useMaximumUsage" />
+                </template>
 
                 <h3 class="style-title-list">
                     Beperk aantal keer te gebruiken (waarvan al {{ patchedDiscountCode.usageCount }} keer gebruikt)

@@ -28,7 +28,9 @@
         <STInputBox title="Prijskeuzes" error-fields="productPriceIds" :error-box="errorBox" class="max" v-if="product && product.prices.length > 1">
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
-                     <Checkbox #left :checked="isPriceSelected(price)" @change="setPriceSelected(price, $event)" />
+                     <template #left>
+                         <Checkbox :checked="isPriceSelected(price)" @change="setPriceSelected(price, $event)" />
+                     </template>
 
                     <h2 class="style-title-list">
                         {{ price.name || 'Naamloos' }}
@@ -40,7 +42,9 @@
         <STInputBox :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errorBox" class="max" v-for="optionMenu of product.optionMenus" :key="optionMenu.id">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
-                     <Checkbox #left :checked="isOptionSelected(optionMenu, option)" @change="setOptionSelected(optionMenu, option, $event)" />
+                     <template #left>
+                         <Checkbox :checked="isOptionSelected(optionMenu, option)" @change="setOptionSelected(optionMenu, option, $event)" />
+                     </template>
 
                     <h2 class="style-title-list">
                         {{ option.name || 'Naamloos' }}

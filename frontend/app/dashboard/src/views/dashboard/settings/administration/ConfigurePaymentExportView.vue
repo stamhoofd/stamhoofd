@@ -27,7 +27,9 @@
 
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label">
-                <Checkbox #left :checked="getPaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
+                <template #left>
+                    <Checkbox :checked="getPaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
+                </template>
                 <h3 class="style-title-list">
                     {{ getMethodName(method) }}
                 </h3>
@@ -41,7 +43,9 @@
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">
-                    <Checkbox #left :checked="getProvider(provider)" @change="setProvider(provider, $event)" />
+                    <template #left>
+                        <Checkbox :checked="getProvider(provider)" @change="setProvider(provider, $event)" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ getProviderName(provider) }}
                     </h3>
@@ -54,7 +58,9 @@
             <h2>Tijdzone</h2>
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Checkbox #left v-model="useUTCTimezone" />
+                    <template #left>
+                        <Checkbox v-model="useUTCTimezone" />
+                    </template>
                     <h3 class="style-title-list">
                         Gebruik UTC-tijdzone
                     </h3>
@@ -70,7 +76,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Checkbox #left v-model="allWebshopsSelected" />
+                <template #left>
+                    <Checkbox v-model="allWebshopsSelected" />
+                </template>
                 <h3 class="style-title-list">
                     Alle webshops
                 </h3>
@@ -78,7 +86,9 @@
 
             <template v-if="!allWebshopsSelected">
                 <STListItem v-for="webshop in allWebshops" :key="webshop.id" :selectable="true" element-name="label">
-                    <Checkbox #left :checked="getWebshop(webshop.id)" @change="setWebshop(webshop.id, $event)" />
+                    <template #left>
+                        <Checkbox :checked="getWebshop(webshop.id)" @change="setWebshop(webshop.id, $event)" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ webshop.meta.name }}
                     </h3>
@@ -91,7 +101,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Checkbox #left v-model="allGroupsSelected" />
+                <template #left>
+                    <Checkbox v-model="allGroupsSelected" />
+                </template>
                 <h3 class="style-title-list">
                     Alle inschrijvingsgroepen
                 </h3>
@@ -99,7 +111,9 @@
 
             <template v-if="!allGroupsSelected">
                 <STListItem v-for="group in allGroups" :key="group.id" :selectable="true" element-name="label">
-                    <Checkbox #left :checked="getGroup(group.id)" @change="setGroup(group.id, $event)" />
+                    <template #left>
+                        <Checkbox :checked="getGroup(group.id)" @change="setGroup(group.id, $event)" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ group.settings.name }}
                     </h3>

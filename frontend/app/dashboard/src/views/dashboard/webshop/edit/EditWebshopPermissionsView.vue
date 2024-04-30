@@ -11,7 +11,9 @@
 
         <STList>
             <STListItem>
-                <Checkbox #left :checked="true" :disabled="true" />
+                <template #left>
+                    <Checkbox :checked="true" :disabled="true" />
+                </template>
                 Hoofdbeheerders
             </STListItem>
             <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />

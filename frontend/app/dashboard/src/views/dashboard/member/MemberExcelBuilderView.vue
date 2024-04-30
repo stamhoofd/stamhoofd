@@ -27,7 +27,9 @@
 
                 <STList>
                     <STListItem v-for="(property, i) of group.properties" :key="i" :selectable="true" element-name="label">
-                        <Checkbox #left v-model="property.selected" />
+                        <template #left>
+                            <Checkbox v-model="property.selected" />
+                        </template>
                         <h3 class="style-title-list">
                             {{ property.name }}
                         </h3>

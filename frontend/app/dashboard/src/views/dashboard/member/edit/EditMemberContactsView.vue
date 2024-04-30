@@ -16,7 +16,9 @@
 
             <STList v-if="parents.length > 0">
                 <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
-                    <Checkbox #left v-model="parent.selected" @change="onChangedSelection" />
+                    <template #left>
+                        <Checkbox v-model="parent.selected" @change="onChangedSelection" />
+                    </template>
 
                     <h2 class="style-title-list">
                         {{ parent.parent.firstName }} {{ parent.parent.lastName }}

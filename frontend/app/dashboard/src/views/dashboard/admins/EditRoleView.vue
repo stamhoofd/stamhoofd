@@ -101,7 +101,9 @@
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Checkbox #left v-model="createWebshops" />
+                    <template #left>
+                        <Checkbox v-model="createWebshops" />
+                    </template>
                     Kan nieuwe webshops maken
                 </STListItem>
                 <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" type="webshop" @patch="addPatch" />
@@ -120,7 +122,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="financeDirector" />
+                <template #left>
+                    <Checkbox v-model="financeDirector" />
+                </template>
                 <h3 class="style-title-list">
                     Volledige toegang
                 </h3>
@@ -129,7 +133,9 @@
                 </p>
             </STListItem>
             <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
-                <Checkbox #left v-model="managePayments" />
+                <template #left>
+                    <Checkbox v-model="managePayments" />
+                </template>
                 <h3 class="style-title-list">
                     Overschrijvingen beheren
                 </h3>
@@ -156,7 +162,9 @@
 
         <STList>
             <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
-                <Checkbox #left :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
+                <template #left>
+                    <Checkbox :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
+                </template>
 
                 <h2 class="style-title-list">
                     {{ admin.firstName }} {{ admin.lastName }}

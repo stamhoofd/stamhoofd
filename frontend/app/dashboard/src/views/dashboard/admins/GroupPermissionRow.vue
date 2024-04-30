@@ -1,6 +1,8 @@
 <template>
     <STListItem element-name="label" :selectable="true">
-        <Checkbox #left v-model="selectGroup" />
+        <template #left>
+            <Checkbox v-model="selectGroup" />
+        </template>
         <h2 class="style-title-list">
             {{ showRole ? role.name : group.settings.name }}
         </h2>

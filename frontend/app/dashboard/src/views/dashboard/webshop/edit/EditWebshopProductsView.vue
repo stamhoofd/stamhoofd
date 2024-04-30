@@ -42,7 +42,9 @@
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Checkbox #left v-model="cartEnabled" />
+                    <template #left>
+                        <Checkbox v-model="cartEnabled" />
+                    </template>
                     <h3 class="style-title-list">
                         Winkelmandje gebruiken
                     </h3>

@@ -11,7 +11,9 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errorBox">
             <STList>
                 <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
-                    <Checkbox #left :checked="getChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
+                    <template #left>
+                        <Checkbox :checked="getChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>

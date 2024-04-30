@@ -192,7 +192,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="hidden" />
+                <template #left>
+                    <Checkbox v-model="hidden" />
+                </template>
 
                 <h3 class="style-title-list">
                     Verbergen op webshop
@@ -205,7 +207,9 @@
 
             <template v-if="!hidden">
                 <STListItem :selectable="true" element-name="label">
-                    <Checkbox #left v-model="disabled" />
+                    <template #left>
+                        <Checkbox v-model="disabled" />
+                    </template>
 
                     <h3 class="style-title-list">
                         Onbeschikbaar
@@ -217,7 +221,9 @@
 
                 <template v-if="!disabled">
                     <STListItem :selectable="true" :element-name="useEnableAfter ? 'div' : 'label'">
-                        <Checkbox #left v-model="useEnableAfter" />
+                        <template #left>
+                            <Checkbox v-model="useEnableAfter" />
+                        </template>
 
                         <h3 class="style-title-list">
                             Beschikbaar vanaf datum
@@ -235,7 +241,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" :element-name="useDisableAfter ? 'div' : 'label'">
-                        <Checkbox #left v-model="useDisableAfter" />
+                        <template #left>
+                            <Checkbox v-model="useDisableAfter" />
+                        </template>
 
                         <h3 class="style-title-list">
                             Onbeschikbaar na datum
@@ -253,7 +261,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Checkbox #left v-model="useStock" />
+                        <template #left>
+                            <Checkbox v-model="useStock" />
+                        </template>
 
                         <h3 class="style-title-list">
                             Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
@@ -271,7 +281,9 @@
                     </STListItem>
 
                     <STListItem v-if="false && useStock" :selectable="true" element-name="label">
-                        <Checkbox #left v-model="resetStock" />
+                        <template #left>
+                            <Checkbox v-model="resetStock" />
+                        </template>
 
                         <h3 class="style-title-list">
                             Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht)
@@ -289,7 +301,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Checkbox #left v-model="useMaxPerOrder" />
+                        <template #left>
+                            <Checkbox v-model="useMaxPerOrder" />
+                        </template>
 
                         <h3 class="style-title-list">
                             Beperk het maximaal aantal stuks per bestelling
@@ -309,7 +323,9 @@
             </template>
 
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="notAllowMultiple" />
+                <template #left>
+                    <Checkbox v-model="notAllowMultiple" />
+                </template>
 
                 <h3 class="style-title-list">
                     Keuze voor aantal stuks verbergen

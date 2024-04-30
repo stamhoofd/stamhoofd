@@ -8,7 +8,9 @@
 
             <STList>
                 <STListItem v-for="item in outstandingItems" :key="item.id" :selectable="true" element-name="label">
-                    <Checkbox #left :checked="isItemSelected(item)" @change="setItemSelected(item, $event)" />
+                    <template #left>
+                        <Checkbox :checked="isItemSelected(item)" @change="setItemSelected(item, $event)" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ item.description }}
                     </h3>

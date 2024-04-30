@@ -84,7 +84,9 @@
 
         <STList v-if="patchedDiscount.requirements.length">
             <STListItem :selectable="true" element-name="label">
-                <Checkbox #left v-model="applyMultipleTimes" />
+                <template #left>
+                    <Checkbox v-model="applyMultipleTimes" />
+                </template>
 
                 <h3 class="style-title-list">
                     Meerdere keren toepassen
