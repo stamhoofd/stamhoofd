@@ -881,7 +881,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         }
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Clear all pending requests
         Request.cancelAll(this)
         this.webshopManager.close()

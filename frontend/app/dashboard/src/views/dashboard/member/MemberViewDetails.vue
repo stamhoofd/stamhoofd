@@ -368,7 +368,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.checkBounces().catch(e => console.error(e))
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

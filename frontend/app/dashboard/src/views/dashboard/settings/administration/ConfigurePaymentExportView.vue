@@ -267,7 +267,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         return Formatter.dateIso(this.startDate) == Formatter.dateIso(suggestion.startDate) && Formatter.dateIso(this.endDate) == Formatter.dateIso(suggestion.endDate)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

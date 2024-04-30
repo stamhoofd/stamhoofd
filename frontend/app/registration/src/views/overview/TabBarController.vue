@@ -117,7 +117,7 @@ export default class TabBarController extends Mixins(NavigationMixin) {
         }
     }
 
-    destroyed() {
+    unmounted() {
         console.log("Destroyed tab bar controller");
 
         // Prevent memory issues by removing all references and destroying kept alive components

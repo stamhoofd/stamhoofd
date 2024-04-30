@@ -80,7 +80,7 @@ export default class ToastBox extends Vue {
         }
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Toast.removeListener(this)
         this.components = [];
     }

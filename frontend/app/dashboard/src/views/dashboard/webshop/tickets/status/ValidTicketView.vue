@@ -649,7 +649,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         })
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.webshopManager.ordersEventBus.removeListener(this)
     }
 

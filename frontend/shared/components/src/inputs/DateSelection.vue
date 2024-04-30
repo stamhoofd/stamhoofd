@@ -374,7 +374,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         document.removeEventListener("keydown", this.onKey);
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.removeEventListener("keydown", this.onKey);
     }

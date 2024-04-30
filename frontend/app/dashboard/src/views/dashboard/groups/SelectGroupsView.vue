@@ -174,7 +174,7 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
         this.loadingGroups = false
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Cancel all requests
         Request.cancelAll(this)
     }

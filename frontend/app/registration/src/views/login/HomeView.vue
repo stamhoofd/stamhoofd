@@ -185,7 +185,7 @@ export default class HomeView extends Mixins(NavigationMixin){
         return this.firstImage?.getResolutionForSize(2000, 2000)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         CenteredMessage.removeListener(this)
     }
 

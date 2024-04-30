@@ -107,7 +107,7 @@ export default class WYSIWYGTextInput extends Vue {
         }
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.editor.destroy()
     }
 

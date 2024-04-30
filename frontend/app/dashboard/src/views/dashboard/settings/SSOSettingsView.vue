@@ -165,7 +165,7 @@ export default class SSOSettingsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

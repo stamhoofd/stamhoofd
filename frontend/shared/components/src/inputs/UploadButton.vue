@@ -48,7 +48,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
 
     uploading = false
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

@@ -159,7 +159,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
         }
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

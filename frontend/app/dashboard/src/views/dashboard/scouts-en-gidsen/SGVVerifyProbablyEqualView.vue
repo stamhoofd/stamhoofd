@@ -83,7 +83,7 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
     @Prop({ required: true })
     onCancel: () => void
 
-    beforeDestroy() {
+    beforeUnmount() {
         if (!this.didVerify) {
             this.didVerify = true;
             this.onCancel()

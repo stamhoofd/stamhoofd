@@ -83,7 +83,7 @@ export default class CheckUpdateView extends Mixins(NavigationMixin) {
         }, 3500)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         if (this.interval) {
             clearInterval(this.interval)
         }

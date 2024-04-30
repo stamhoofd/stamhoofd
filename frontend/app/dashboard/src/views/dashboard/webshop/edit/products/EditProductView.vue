@@ -403,7 +403,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         document.body.addEventListener("paste", this.onPaste);
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         document.body.removeEventListener("paste", this.onPaste);
     }
 

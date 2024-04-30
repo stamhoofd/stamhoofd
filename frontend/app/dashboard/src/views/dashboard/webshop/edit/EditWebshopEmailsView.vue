@@ -94,7 +94,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
         this.loadTemplates().catch(console.error)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

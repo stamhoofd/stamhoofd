@@ -615,7 +615,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
         }, 5*1000)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         if (this.reviewTimer) {
             clearTimeout(this.reviewTimer)
         }

@@ -631,7 +631,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.stopScanning()
     }
 }

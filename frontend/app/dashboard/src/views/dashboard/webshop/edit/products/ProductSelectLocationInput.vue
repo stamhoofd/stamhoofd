@@ -119,7 +119,7 @@ export default class ProductSelectLocationInput extends Vue {
         }
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

@@ -73,7 +73,7 @@ export default class EmailInput extends Vue {
         this.emailRaw = this.value ?? ""
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

@@ -84,7 +84,7 @@ export default class BirthDayInput extends Vue {
         }
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

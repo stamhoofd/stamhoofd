@@ -73,7 +73,7 @@ export default class CompanyNumberInput extends Vue {
         this.companyNumberRaw = this.value ?? ""
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

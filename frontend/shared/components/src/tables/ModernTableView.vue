@@ -626,7 +626,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         window.removeEventListener("resize", this.onResize)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Remove event listeners
         this.getScrollElement(this.$refs["table"] as HTMLElement).removeEventListener("scroll", this.onScroll)
         window.removeEventListener("resize", this.onResize)

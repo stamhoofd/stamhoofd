@@ -230,7 +230,7 @@ export default class ContextMenuView extends VueComponent {
         }
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.popChildMenu()
         window.removeEventListener("touchmove", this.onTouchMove);
         window.removeEventListener("touchend", this.onTouchUp);

@@ -85,7 +85,7 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
         this.loadTemplates().catch(console.error)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

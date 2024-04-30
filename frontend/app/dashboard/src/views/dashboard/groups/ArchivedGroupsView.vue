@@ -87,7 +87,7 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
         this.loadingGroups = false
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Cancel all requests
         Request.cancelAll(this)
     }

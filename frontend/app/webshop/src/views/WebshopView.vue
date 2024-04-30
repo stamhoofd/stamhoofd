@@ -480,7 +480,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         this.visible = false
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         GlobalEventBus.removeListener(this)
     }
 

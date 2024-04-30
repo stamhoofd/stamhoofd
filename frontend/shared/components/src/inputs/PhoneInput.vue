@@ -71,7 +71,7 @@ export default class PhoneInput extends Vue {
         this.phoneRaw = this.value ?? ""
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

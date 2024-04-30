@@ -156,6 +156,7 @@ import CheckoutPriceBreakdown from './CheckoutPriceBreakdown.vue';
 import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
+import type {ErrorBox} from '../errors/ErrorBox'
 
 @Component({
     components: {

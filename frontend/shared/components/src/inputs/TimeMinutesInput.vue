@@ -79,7 +79,7 @@ export default class TimeMinutesInput extends Vue {
 
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

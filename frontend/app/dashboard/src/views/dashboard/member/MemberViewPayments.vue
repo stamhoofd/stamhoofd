@@ -389,7 +389,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         return MemberBalanceItem.getOutstandingBalance(this.balanceItems)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         GlobalEventBus.removeListener(this)
         Request.cancelAll(this)
     }

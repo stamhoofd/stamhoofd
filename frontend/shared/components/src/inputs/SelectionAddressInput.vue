@@ -126,7 +126,7 @@ export default class SelectionAddressInput extends Vue {
         }
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

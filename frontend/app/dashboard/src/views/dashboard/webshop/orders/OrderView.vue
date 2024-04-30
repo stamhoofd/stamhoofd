@@ -669,7 +669,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         return Promise.resolve()
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.webshopManager.ticketsEventBus.removeListener(this)
         this.webshopManager.ticketPatchesEventBus.removeListener(this)
         this.webshopManager.ordersEventBus.removeListener(this)

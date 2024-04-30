@@ -956,7 +956,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         this.loadingMollie = false;
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
         document.removeEventListener("visibilitychange", this.doRefresh)
     }

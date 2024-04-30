@@ -770,7 +770,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         errors.throwIfNotEmpty()
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

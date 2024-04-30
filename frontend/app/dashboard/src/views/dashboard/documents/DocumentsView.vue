@@ -202,7 +202,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
         });
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

@@ -88,7 +88,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         }
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

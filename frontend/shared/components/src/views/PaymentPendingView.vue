@@ -125,7 +125,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
             })
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         if (this.timer) {
             clearTimeout(this.timer)
             this.timer = null

@@ -348,7 +348,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         this.setPayments(response.data)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

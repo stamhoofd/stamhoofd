@@ -554,7 +554,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         GlobalEventBus.removeListener(this)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.$memberManager.removeListener(this)
         Request.cancelAll(this)
     }

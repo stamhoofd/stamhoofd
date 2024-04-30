@@ -92,7 +92,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
         this.loadingGroups = false
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Cancel all requests
         Request.cancelAll(this)
     }

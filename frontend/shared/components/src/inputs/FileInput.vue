@@ -76,7 +76,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
         return "file"
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

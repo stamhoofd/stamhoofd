@@ -105,7 +105,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         document.title = this.preview.meta.name+" - Zaalplan"
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.webshopManager.ordersEventBus.removeListener(this)
         this.webshopManager.ticketsEventBus.removeListener(this)
         this.webshopManager.ticketPatchesEventBus.removeListener(this)

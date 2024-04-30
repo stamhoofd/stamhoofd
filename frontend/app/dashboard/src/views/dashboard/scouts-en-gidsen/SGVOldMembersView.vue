@@ -74,7 +74,7 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     onCancel: () => void
 
-    beforeDestroy() {
+    beforeUnmount() {
         if (!this.didSetAction) {
             this.onCancel()
         }

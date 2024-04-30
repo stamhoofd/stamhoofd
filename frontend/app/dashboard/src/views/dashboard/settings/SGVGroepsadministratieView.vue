@@ -154,7 +154,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
         this.SGVGroepsadministratie.startOAuth()
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         console.log("destroy")
         this.removeLeave()
     }

@@ -90,7 +90,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
         }
     }
 
-    destroyed() {
+    unmounted() {
         this.stopPolling()
     }
 

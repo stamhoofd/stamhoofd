@@ -74,7 +74,7 @@ export default class VATNumberInput extends Vue {
         this.VATNumberRaw = this.value ?? ""
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

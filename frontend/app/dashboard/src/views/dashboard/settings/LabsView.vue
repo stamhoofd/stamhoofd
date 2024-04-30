@@ -269,7 +269,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         UrlHelper.setUrl("/settings/labs")
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

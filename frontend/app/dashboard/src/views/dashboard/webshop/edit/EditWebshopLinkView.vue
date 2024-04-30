@@ -290,7 +290,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
         this.cachedCustomUrl = null
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

@@ -103,7 +103,7 @@ export default class ProductSelectorBox extends Mixins(NavigationMixin) {
         }
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

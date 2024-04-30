@@ -81,7 +81,7 @@ export default class ColorInput extends Vue {
         this.hasColor = this.colorRaw
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

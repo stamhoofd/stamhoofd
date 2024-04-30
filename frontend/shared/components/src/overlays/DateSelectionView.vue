@@ -93,7 +93,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         this.updateMonthTitle()
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.onClose()
     }
 

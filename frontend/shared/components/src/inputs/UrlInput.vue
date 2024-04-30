@@ -69,7 +69,7 @@ export default class UrlInput extends Vue {
         this.urlRaw = this.value ?? ""
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

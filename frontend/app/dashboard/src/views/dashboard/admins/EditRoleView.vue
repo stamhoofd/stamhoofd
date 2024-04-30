@@ -480,7 +480,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         this.loading = false
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Clear all pending requests
         Request.cancelAll(this)
     }

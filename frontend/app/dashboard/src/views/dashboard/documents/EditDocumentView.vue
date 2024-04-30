@@ -123,7 +123,7 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
         // todo: validate information before continueing
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

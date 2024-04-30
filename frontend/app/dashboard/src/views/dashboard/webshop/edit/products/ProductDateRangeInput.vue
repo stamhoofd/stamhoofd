@@ -48,7 +48,7 @@ export default class ProductDateRangeInput extends Vue {
         }
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

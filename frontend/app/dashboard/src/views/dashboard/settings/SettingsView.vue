@@ -827,7 +827,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         this.loadStripeAccounts(null).catch(console.error);
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Clear all pending requests
         Request.cancelAll(this)
     }

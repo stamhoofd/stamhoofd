@@ -93,7 +93,7 @@ export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin)
         this.load().catch(console.error)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Cancel all requests
         Request.cancelAll(this)
     }

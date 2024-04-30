@@ -201,7 +201,7 @@ export default class EditorView extends Vue {
 
     editor = this.buildEditor()
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.editor.destroy()
     }
 

@@ -59,7 +59,7 @@ export default class IBANInput extends Vue {
         this.ibanRaw = this.value ?? ""
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

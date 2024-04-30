@@ -123,7 +123,7 @@ export default class ProductSelectDateRangeInput extends Vue {
         }
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

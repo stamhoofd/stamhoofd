@@ -173,7 +173,7 @@ export default class RecordAnswerInput extends Vue {
         this.answer = (this.answer as any)
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

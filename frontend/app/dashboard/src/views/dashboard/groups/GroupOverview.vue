@@ -517,7 +517,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         })
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Clear all pending requests
         Request.cancelAll(this)
     }

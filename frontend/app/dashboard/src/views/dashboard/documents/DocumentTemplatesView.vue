@@ -84,7 +84,7 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
         this.loadTemplates().catch(console.error)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

@@ -218,7 +218,7 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         }, 3000)
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         clearInterval(this.timer);
     }
 

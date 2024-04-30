@@ -63,7 +63,7 @@ export default class EditWebshopNotificationsView extends Mixins(EditWebshopMixi
         return "Meldingen"
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         Request.cancelAll(this)
     }
 

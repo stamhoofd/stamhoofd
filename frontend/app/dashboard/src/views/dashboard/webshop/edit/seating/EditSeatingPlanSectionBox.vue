@@ -312,7 +312,7 @@ export default class EditSeatingPlanSectionBox extends Mixins(NavigationMixin) {
         window.addEventListener("blur", this.onVisibilityChange);
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

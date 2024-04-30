@@ -281,7 +281,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         return "unknown"
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         window.removeEventListener("beforeunload", this.preventLeave);
     }
 

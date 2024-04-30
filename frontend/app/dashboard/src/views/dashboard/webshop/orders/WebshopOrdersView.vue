@@ -565,7 +565,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return this.preview.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])    
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.webshopManager.ordersEventBus.removeListener(this)
         this.webshopManager.ticketsEventBus.removeListener(this)
         this.webshopManager.ticketPatchesEventBus.removeListener(this)

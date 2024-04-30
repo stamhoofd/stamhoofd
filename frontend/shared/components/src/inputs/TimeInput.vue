@@ -71,7 +71,7 @@ export default class TimeInput extends Vue {
 
     }
 
-    destroyed() {
+    unmounted() {
         if (this.validator) {
             this.validator.removeValidation(this)
         }

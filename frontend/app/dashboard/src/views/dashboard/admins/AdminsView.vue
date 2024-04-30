@@ -136,7 +136,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         this.loading = false
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         // Clear all pending requests
         Request.cancelAll(this)
     }

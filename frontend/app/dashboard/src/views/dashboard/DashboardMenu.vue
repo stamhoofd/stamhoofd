@@ -6,7 +6,7 @@
             </STNavigationBar>
 
             <form v-if="false" class="input-icon-container icon search grayy">
-                <input class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off">
+                <input class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
             </form>
 
             <hr class="first">

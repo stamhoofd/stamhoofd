@@ -46,7 +46,7 @@ export default class AuthenticatedView extends Vue {
         document.addEventListener("visibilitychange", this.onVisibilityChange);
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         this.$context.removeListener(this);
         document.removeEventListener("visibilitychange", this.onVisibilityChange);
     }

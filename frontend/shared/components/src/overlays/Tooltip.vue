@@ -185,7 +185,7 @@ export default class Tooltip extends Vue {
         document.addEventListener("wheel", this.hide, { passive: true })
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         document.removeEventListener("touchstart", this.hide)
         document.removeEventListener("pointerdown", this.hide)
         document.removeEventListener("wheel", this.hide)

@@ -133,7 +133,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             });
     }
 
-    beforeDestroy() {
+    beforeUnmount() {
         if (this.timer) {
             clearTimeout(this.timer)
             this.timer = null
