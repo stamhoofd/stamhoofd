@@ -16,7 +16,7 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <STInputBox title="Domeinnaam">
-            <Dropdown v-model="selectedDomain" @change="onChangeSelectedDomain">
+            <Dropdown v-model="selectedDomain" @update:model-value="onChangeSelectedDomain">
                 <option :value="null">
                     {{ defaultDomain }}
                 </option>

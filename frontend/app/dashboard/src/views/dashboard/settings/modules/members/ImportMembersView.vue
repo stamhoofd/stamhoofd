@@ -74,7 +74,7 @@
                             </Checkbox>
                         </td>
                         <td>
-                            <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
+                            <Dropdown v-model="column.matcherCode" @update:model-value="didChangeColumn(column)">
                                 <option :value="null" disabled>
                                     Maak een keuze
                                 </option>

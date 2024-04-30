@@ -27,7 +27,7 @@
                         <PermyriadInput v-else :value="getDiscountPercentageDiscount(d)" :required="true" @input="setDiscountPercentageDiscount(d, $event)" />
                     </div>
                     <div>
-                        <Dropdown :value="getDiscountType(d)" @change="setDiscountType(d, $event)">
+                        <Dropdown :value="getDiscountType(d)" @update:model-value="setDiscountType(d, $event)">
                             <option value="percentageDiscount">
                                 Percentage
                             </option>
