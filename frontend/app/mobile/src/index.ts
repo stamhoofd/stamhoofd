@@ -1,5 +1,5 @@
 // Load icon font
-require('@stamhoofd/assets/images/icons/icons.font');
+import 'virtual:vite-svg-2-webfont.css';
 
 import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
@@ -14,6 +14,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager, Session, Storage, UrlHelper } from '@stamhoofd/networking';
 import { RateApp } from 'capacitor-rate-app';
 import Vue from "vue";
+import { createApp } from 'vue'
 
 import App from "../../dashboard/src/App.vue";
 import { CapacitorStorage } from './CapacitorStorage';
@@ -127,11 +128,14 @@ document.body.style.userSelect = "none";
 
 // Override XMLHttpRequest in some situation (S&GV) since we don't have domain here
 AppManager.shared.overrideXMLHttpRequest = WrapperHTTPRequest
+document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
+
+const app = createApp(App);
+VueGlobalHelper.setup(app)
+
 const i18n = I18nController.getI18n()
 I18nController.addUrlPrefix = false
-
-document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
-VueGlobalHelper.setup()
+app.use(i18n)
 
 CapacitorUpdater.notifyAppReady().catch(console.error);
 
@@ -298,9 +302,4 @@ Storage.keyValue.getItem('next_url_load').then((path) => {
     }
 }).catch(console.error)
 
-const app = new Vue({
-    i18n,
-    render: (h) => h(App),
-}).$mount("#app");
-
-(window as any).app = app;
+app.mount("#app")

@@ -39,7 +39,7 @@ export default class STList extends Vue {
     }
 
     set list(changed: any[] | null) {
-        this.$emit('input', changed);
+        this.$emit('update:modelValue', changed);
     }
 
     onStart() {

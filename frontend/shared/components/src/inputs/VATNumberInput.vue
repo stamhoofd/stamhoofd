@@ -85,7 +85,7 @@ export default class VATNumberInput extends Vue {
 
         if (!this.required && this.VATNumberRaw.length == 0) {
             this.errorBox = null
-            this.$emit("input", null)
+            this.$emit('update:modelValue', null)
             return true
         }
 
@@ -107,7 +107,7 @@ export default class VATNumberInput extends Vue {
 
         } else {
             this.VATNumberRaw = result.value ?? this.VATNumberRaw
-            this.$emit("input", this.VATNumberRaw)
+            this.$emit('update:modelValue', this.VATNumberRaw)
             this.errorBox = null
             return true
         }

@@ -163,7 +163,7 @@ export default class AddressInput extends Vue {
             }
 
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return true
         }
@@ -175,7 +175,7 @@ export default class AddressInput extends Vue {
                 }
 
                 if (this.nullable && this.value !== null) {
-                    this.$emit("input", null)
+                    this.$emit('update:modelValue', null)
                 }
                 return false
             }
@@ -199,12 +199,12 @@ export default class AddressInput extends Vue {
                     if (!this.hasFocus) {
                         this.updateValues(response.data)
                     }
-                    this.$emit("input", response.data)
+                    this.$emit('update:modelValue', response.data)
                 } else {
                     if (!this.hasFocus) {
                         this.updateValues(address)
                     }
-                    this.$emit("input", address)
+                    this.$emit('update:modelValue', address)
                 }
             } else {
                 if (!this.hasFocus) {
@@ -237,7 +237,7 @@ export default class AddressInput extends Vue {
             }
 
             if (!this.required && !silent) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return false
         }

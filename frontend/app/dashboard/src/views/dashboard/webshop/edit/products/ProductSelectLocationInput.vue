@@ -102,9 +102,9 @@ export default class ProductSelectLocationInput extends Vue {
 
             if (!this.value) {
                 if (this.locations.length > 0) {
-                    this.$emit("input", this.locations[0])
+                    this.$emit('update:modelValue', this.locations[0])
                 } else {
-                    this.$emit("input", ProductLocation.create({
+                    this.$emit('update:modelValue', ProductLocation.create({
                         name: "",
                         address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
                     }))
@@ -140,12 +140,12 @@ export default class ProductSelectLocationInput extends Vue {
             })
         }
         if (a) {
-            this.$emit("input", a)
+            this.$emit('update:modelValue', a)
         }
     }
 
     doEditLocation(location: ProductLocation) {
-        this.$emit("input", location)
+        this.$emit('update:modelValue', location)
         this.editingLocation = true
         this.selectedLocation = location
         this.customLocation = location
@@ -159,10 +159,10 @@ export default class ProductSelectLocationInput extends Vue {
         if (this.editingLocation && this.selectedLocation && location) {
             this.$emit("modify", { from: this.selectedLocation, to: location })
             this.selectedLocation = location
-            this.$emit("input", location)
+            this.$emit('update:modelValue', location)
             this.editingLocation = true
         } else {
-            this.$emit("input", location)
+            this.$emit('update:modelValue', location)
         }
         this.customLocation = location
     }
@@ -175,7 +175,7 @@ export default class ProductSelectLocationInput extends Vue {
         }
 
         if (this.selectedLocation) {
-            this.$emit("input", this.selectedLocation)
+            this.$emit('update:modelValue', this.selectedLocation)
             this.errorBox = null
             return true
         }
@@ -190,7 +190,7 @@ export default class ProductSelectLocationInput extends Vue {
         }
         
         this.errorBox = null
-        this.$emit("input", this.customLocation)
+        this.$emit('update:modelValue', this.customLocation)
         return true
     }
 }

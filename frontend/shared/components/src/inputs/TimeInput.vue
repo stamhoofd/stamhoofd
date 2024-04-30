@@ -114,7 +114,7 @@ export default class TimeInput extends Vue {
  
             const d = new Date(this.value.getTime())
             d.setHours(hours, minutes, 0, 0)
-            this.$emit("input", d)
+            this.$emit('update:modelValue', d)
 
             this.errorBox = null
             return true

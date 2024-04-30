@@ -130,20 +130,24 @@
         </main>
 
         <STToolbar v-if="!cart.isEmpty">
-            <template #left><span>Totaal: {{ formatPrice(cart.price) }}</span></template>
+            <template #left>
+                <span>Totaal: {{ formatPrice(cart.price) }}</span>
+            </template>
 
-            <template #right><button class="button secundary" type="button" @click="addItem">
-                <span class="icon add" />
-                <span>Inschrijving</span>
-            </button></template>
-
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" type="button" @click="goToCheckout">
-                    <span class="icon flag" />
-                    <span v-if="cart.price">Afrekenen</span>
-                    <span v-else>Bevestigen</span>
+            <template #right>
+                <button class="button secundary" type="button" @click="addItem">
+                    <span class="icon add" />
+                    <span>Inschrijving</span>
                 </button>
-            </LoadingButton>
+
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="button" @click="goToCheckout">
+                        <span class="icon flag" />
+                        <span v-if="cart.price">Afrekenen</span>
+                        <span v-else>Bevestigen</span>
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>

@@ -84,7 +84,7 @@ export default class CompanyNumberInput extends Vue {
 
         if (!this.required && this.companyNumberRaw.length == 0) {
             this.errorBox = null
-            this.$emit("input", null)
+            this.$emit('update:modelValue', null)
             return true
         }
 
@@ -97,7 +97,7 @@ export default class CompanyNumberInput extends Vue {
             return false
 
         } else {
-            this.$emit("input", this.companyNumberRaw)
+            this.$emit('update:modelValue', this.companyNumberRaw)
             this.errorBox = null
             return true
         }

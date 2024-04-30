@@ -7,7 +7,7 @@
                 <ComponentWithPropertiesInstance
                     ref="children"
                     :component="component"
-                    @pop="removeAt(index, component.key)"
+                    :custom-provide="getCustomProvide(index, component.key)"
                 />
             </div>
         </transition-group>
@@ -34,6 +34,18 @@ export default class ToastBox extends Vue {
 
     mounted() {
         Toast.addListener(this, this.showToast)
+    }
+
+    getCustomProvide(index: number, key: number) {
+        return {
+            reactive_navigation_pop: () => {
+                this.removeAt(index, key);
+            },
+            reactive_navigation_dismiss: () => {
+                console.warn('Avoid calling dismiss in components on the ToastBox, since options are not supported here')
+                this.removeAt(index, key);
+            }
+        };
     }
 
     showToast(toast: Toast) {

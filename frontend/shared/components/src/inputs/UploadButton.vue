@@ -92,7 +92,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
                 owner: this
             })
             .then(response => {
-                this.$emit("input", response.data)
+                this.$emit('update:modelValue', response.data)
             })
             .catch(e => {
                 console.error(e);

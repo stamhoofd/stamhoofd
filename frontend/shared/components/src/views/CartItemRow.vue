@@ -22,7 +22,7 @@
             </p>
             <div @click.stop>
                 <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
-                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length == 0 && (maximumRemaining === null || maximumRemaining > 1)" :value="cartItem.amount" :min="1" :max="maximumRemaining" @input="setAmount($event)" @click.native.stop />
+                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length == 0 && (maximumRemaining === null || maximumRemaining > 1)" v-model="amount" :min="1" :max="maximumRemaining" @click.native.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
             </div>
         </footer>
@@ -46,7 +46,7 @@
 <script lang="ts">
 import { Cart, CartItem, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import StepperInput from '../inputs/StepperInput.vue';
 import STList from '../layout/STList.vue';
@@ -62,23 +62,24 @@ import ImageComponent from './ImageComponent.vue';
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-    }
+    },
+    emits: ['edit', 'amount', 'delete']
 })
-export default class CartItemRow extends Vue {
+export default class CartItemRow extends VueComponent {
     @Prop({required: true })
-        cart: Cart
+        cart!: Cart
 
     @Prop({required: true })
-        webshop: Webshop
+        webshop!: Webshop
 
     @Prop({default: false })
-        admin: boolean
+        admin!: boolean
 
     @Prop({required: true })
-        cartItem: CartItem
+        cartItem!: CartItem
 
     @Prop({required: false, default: false })
-        editable: boolean
+        editable!: boolean
 
     editItem() {
         if (!this.editable) {
@@ -87,7 +88,11 @@ export default class CartItemRow extends Vue {
         this.$emit('edit')
     }
 
-    setAmount(amount: number) {
+    get amount() {
+        return this.cartItem.amount
+    }
+
+    set amount(amount: number) {
         if (!this.editable) {
             return;
         }

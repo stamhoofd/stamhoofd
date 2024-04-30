@@ -4,6 +4,7 @@ import { Request, RequestResult } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
 import { OrganizationManager, Session } from "@stamhoofd/networking";
 import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { toRaw, unref } from "vue";
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -358,7 +359,9 @@ export class WebshopManager {
 
             // Do the actual saving
             const objectStore = transaction.objectStore("settings");
-            objectStore.put(value, key)
+
+            // Unref potential proxies here
+            objectStore.put(toRaw(value), key)
         })
     }
 

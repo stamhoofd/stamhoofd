@@ -145,6 +145,7 @@ import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
+import { markRaw } from "vue";
 
 interface TableListable {
     id: string;
@@ -304,7 +305,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     // If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows, 
     // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
-    markedRows = new Map<string, Value>()
+    markedRows = markRaw(new Map<string, Value>())
 
     /**
      * When true: only the marked rows are selected.
@@ -320,12 +321,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     isColumnDragActive = false
     dragType: "width" | "order" = "width"
 
-    @Watch("allColumns")
-    onUpdateColumns() {
-        console.log('update columns')
-        this.loadColumnConfiguration().catch(console.error)
-        this.updateVisibleRows()
-    }
+    // Not sure why this was required, but it causes an infinite loop
+    // @Watch("allColumns")
+    // onUpdateColumns() {
+    //     console.log('update columns')
+    //     this.loadColumnConfiguration().catch(console.error)
+    //     this.updateVisibleRows()
+    // }
 
     getEventX(event: any) {
         let x = 0;

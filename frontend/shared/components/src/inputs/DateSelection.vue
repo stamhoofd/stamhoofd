@@ -302,7 +302,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
 
     emitDate(value: Date | null) {
         if (!value) {
-            this.$emit("input", null)
+            this.$emit('update:modelValue', null)
             return
         }
         const d = new Date(value.getTime())
@@ -311,7 +311,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         } else {
             d.setHours(12, 0, 0, 0)
         }
-        this.$emit("input", d)
+        this.$emit('update:modelValue', d)
     }
 
     openContextMenu(autoDismiss = true) {

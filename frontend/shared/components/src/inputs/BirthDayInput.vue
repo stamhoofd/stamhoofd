@@ -109,15 +109,15 @@ export default class BirthDayInput extends Vue {
 
     updateDate() {
         if (this.year && this.month && this.day) {
-            this.$emit("input", new Date(this.year, this.month - 1, this.day, 12))
+            this.$emit('update:modelValue', new Date(this.year, this.month - 1, this.day, 12))
         } else {
-            this.$emit("input", null)
+            this.$emit('update:modelValue', null)
         }
     }
 
     validate() {
         if (this.year && this.month && this.day) {
-            this.$emit("input", new Date(this.year, this.month - 1, this.day, 12))
+            this.$emit('update:modelValue', new Date(this.year, this.month - 1, this.day, 12))
             this.errorBox = null
             return true
         }
@@ -126,13 +126,13 @@ export default class BirthDayInput extends Vue {
             this.errorBox = null
 
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return true
         }
 
         if (this.value !== null) {
-            this.$emit("input", null)
+            this.$emit('update:modelValue', null)
         }
         this.errorBox = new ErrorBox(new SimpleError({
             code: "empty_field",

@@ -7,6 +7,7 @@ import { CheckoutManager } from "./classes/CheckoutManager";
 import { WebshopManager } from "./classes/WebshopManager";
 import RequiredLoginView from "./views/RequiredLoginView.vue";
 import WebshopView from "./views/WebshopView.vue";
+import {reactive, computed} from 'vue'
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
@@ -26,19 +27,19 @@ export function getWebshopRootView(session: Session, webshop: Webshop) {
             }))
         });
     }
-
-    const $webshopManager = new WebshopManager(session, webshop);
+    const reactiveSession = reactive(session) as Session
+    const $webshopManager = reactive(new WebshopManager(reactiveSession, webshop)) as WebshopManager;
     return new ComponentWithProperties(ContextProvider, {
         context: {
-            $context: session,
-            $organizationManager: new OrganizationManager(session),
+            $context: reactiveSession,
+            $organizationManager: reactive(new OrganizationManager(reactiveSession)),
             $webshopManager,
-            $checkoutManager: new CheckoutManager($webshopManager),
+            $checkoutManager: reactive(new CheckoutManager($webshopManager)),
         },
         calculatedContext: () => {
             return {
-                $organization: session.organization,
-                $user: session.user,
+                $organization: computed(() => session.organization),
+                $user: computed(() => session.user),
             }
         },
         root

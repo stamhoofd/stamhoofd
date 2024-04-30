@@ -56,16 +56,23 @@
         <STList class="illustration-list">    
             <STListItem :selectable="true" class="left-center" element-name="label">
                 <input type="file" multiple="multiple" style="display: none;" accept=".plan" @change="importSeatingPlan">
-                <template #left><img src="@stamhoofd/assets/images/illustrations/box-upload.svg"></template>
+                
+                <template #left>
+                    <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
+                </template>
+                
                 <h2 class="style-title-list">
                     Importeer zaalplan
                 </h2>
                 <p class="style-description">
                     Importeer een zaalplan dat jij of een andere vereniging eerder uit Stamhoofd hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.
                 </p>
-                <LoadingButton slot="right" :loading="importingSeatingPlan">
-                    <span class="icon download gray" />
-                </LoadingButton>
+
+                <template #right>
+                    <LoadingButton :loading="importingSeatingPlan">
+                        <span class="icon download gray" />
+                    </LoadingButton>
+                </template>
             </STListItem>
         </STList>
     </SaveView>

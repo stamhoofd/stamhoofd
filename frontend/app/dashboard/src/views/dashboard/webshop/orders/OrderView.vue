@@ -81,8 +81,10 @@
                         <span v-else class="icon clock" />
                     </p>
 
-                    <span v-if="order.payments.length > 1" slot="right">{{ formatPrice(payment.price) }}</span>
-                    <template v-if="hasPaymentsWrite" #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right v-if="order.payments.length > 1 || hasPaymentsWrite">
+                        <span v-if="order.payments.length > 1">{{ formatPrice(payment.price) }}</span>
+                        <span v-if="hasPaymentsWrite" class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" @click="tickets.length > 0 ? openTickets($event) : null">
@@ -100,16 +102,16 @@
                         <span v-else-if="hasSingleTickets && tickets.length == 0" class="gray">
                             Geen ticket
                         </span>
-                        <span v-else-if="tickets.length == 0" slot="right" class="gray">
+                        <span v-else-if="tickets.length == 0" class="gray">
                             Geen tickets
                         </span>
-                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 1" slot="right">
+                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 1">
                             Gescand
                         </span>
-                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 0" slot="right">
+                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 0">
                             Niet gescand
                         </span>
-                        <span v-else slot="right">
+                        <span v-else>
                             {{ scannedCount }} / {{ tickets.length }} gescand
                         </span>
                     </p>
@@ -688,7 +690,7 @@ export default class OrderView extends Mixins(NavigationMixin){
             return;
         }
 
-        if (!this.isFocused()) {
+        if (!this.isFocused) {
             return
         }
 

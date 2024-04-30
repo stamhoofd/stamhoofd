@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="loading" save-text="Bestelling bevestigen" :prefer-large-button="true" @save="goNext">
-        <span v-if="checkout.totalPrice > 0" slot="left">Totaal: {{ formatPrice(checkout.totalPrice) }}</span>
+        <template #left v-if="checkout.totalPrice > 0"><span>Totaal: {{ formatPrice(checkout.totalPrice) }}</span></template>
 
         <h1>{{ title }}</h1>
 
@@ -31,7 +31,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import OrderView from '../orders/OrderView.vue';
 import { CheckoutStepType } from './CheckoutStepsManager';
 
@@ -111,7 +110,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             console.error(e)
         })
         
-        if (!this.modalOrPopup || this.modalOrPopup === this.modalNavigationController) {
+        if (!this.popup) {
             // We are not in a popup: on mobile
             // So replace with a force instead of dimissing
             component.present({

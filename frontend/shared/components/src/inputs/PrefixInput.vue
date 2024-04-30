@@ -58,7 +58,7 @@ export default class PrefixInput extends Vue {
     }
 
     set internalValue(val: string) {
-        this.$emit("input", val)
+        this.$emit('update:modelValue', val)
     }
 }
 </script>

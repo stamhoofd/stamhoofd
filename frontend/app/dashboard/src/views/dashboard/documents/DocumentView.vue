@@ -281,7 +281,7 @@ export default class DocumentView extends Mixins(NavigationMixin){
             return;
         }
 
-        if (!this.isFocused()) {
+        if (!this.isFocused) {
             return
         }
 

@@ -1,10 +1,12 @@
 <template>
     <form class="st-view cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name" :pop="canPop" :dismiss="canDismiss">
-            <p v-if="!webshop.isAllFree || pricedItem.getPriceWithDiscounts()" slot="left">
-                <span v-if="formattedPriceWithDiscount" class="style-tag discount">{{ formattedPriceWithDiscount }}</span>
-                <span v-else class="style-tag">{{ formattedPriceWithoutDiscount }}</span>
-            </p>
+            <template #left>
+                <p v-if="!webshop.isAllFree || pricedItem.getPriceWithDiscounts()">
+                    <span v-if="formattedPriceWithDiscount" class="style-tag discount">{{ formattedPriceWithDiscount }}</span>
+                    <span v-else class="style-tag">{{ formattedPriceWithoutDiscount }}</span>
+                </p>
+            </template>
         </STNavigationBar>
         <main>
             <h1>{{ cartItem.product.name }}</h1>
@@ -74,7 +76,9 @@
                 <hr>
                 <STList>
                     <STListItem v-for="price in cartItem.product.filteredPrices({admin})" :key="price.id" class="no-border right-price" :selectable="canSelectPrice(price)" :disabled="!canSelectPrice(price)" element-name="label">
-                        <Radio #left v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
+                        <template #left>
+                            <Radio v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" :disabled="!canSelectPrice(price)" />
+                        </template>
                         <h4 class="style-title-list">
                             {{ price.name || 'Naamloos' }}
                         </h4>
@@ -113,28 +117,30 @@
         </main>
 
         <STToolbar v-if="canOrder">
-            <button v-if="willNeedSeats" slot="right" class="button primary" type="submit">
-                <span>Kies plaatsen</span>
-                <span class="icon arrow-right" />
-            </button>
-            <button v-else-if="oldItem && cartEnabled" slot="right" class="button primary" type="submit">
-                <span class="icon basket" />
-                <span>Opslaan</span>
-            </button>
-            <button v-else slot="right" class="button primary" type="submit">
-                <span v-if="cartEnabled" class="icon basket" />
-                <span v-if="cartEnabled">Toevoegen</span>
-                <span v-else>Doorgaan</span>
-                <span v-if="!cartEnabled" class="icon arrow-right" />
-            </button>
+            <template #right>
+                <button v-if="willNeedSeats" class="button primary" type="submit">
+                    <span>Kies plaatsen</span>
+                    <span class="icon arrow-right" />
+                </button>
+                <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
+                    <span class="icon basket" />
+                    <span>Opslaan</span>
+                </button>
+                <button v-else class="button primary" type="submit">
+                    <span v-if="cartEnabled" class="icon basket" />
+                    <span v-if="cartEnabled">Toevoegen</span>
+                    <span v-else>Doorgaan</span>
+                    <span v-if="!cartEnabled" class="icon arrow-right" />
+                </button>
+            </template>
         </STToolbar>
     </form>
 </template>
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Cart, CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator';
 
@@ -214,6 +220,8 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     mounted() {
         this.onChangeItem()
+
+        console.log('Cartview', this, this.cartItem)
     }
 
     /**

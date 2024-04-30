@@ -82,7 +82,7 @@ export default class PermyriadInput extends Vue {
     }
 
     set internalValue(val: number | null) {
-        this.$emit("input", val)
+        this.$emit('update:modelValue', val)
     }
 
     mounted() {

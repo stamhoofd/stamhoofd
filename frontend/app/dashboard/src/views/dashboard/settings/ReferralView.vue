@@ -84,8 +84,11 @@
 
                 <STList v-if="status.usedCodes.length > 0">
                     <STListItem v-for="used in status.usedCodes" :key="used.id" class="right-description">
-                        <template v-if="used.creditValue !== null" #left><span class="icon success green" /></template>
-                        <template v-else #left><span class="icon clock gray" /></template>
+                        <template #left>
+                            <span  v-if="used.creditValue !== null" class="icon success green" />
+                            <span v-else class="icon clock gray" />
+                        </template>
+
                         <h2 class="style-title-list">
                             {{ used.organizationName }}
                         </h2>
@@ -101,7 +104,10 @@
                         <p v-else class="style-description">
                             Registreerde op {{ formatDate(used.createdAt) }}. Er werd nog niets aangekocht of gefactureerd.
                         </p>
-                        <span v-if="used.creditValue" slot="right" class="style-tag large success">{{ formatPrice(used.creditValue) }}</span>
+                        
+                        <template #right>
+                            <span v-if="used.creditValue" class="style-tag large success">{{ formatPrice(used.creditValue) }}</span>
+                        </template>
                     </STListItem>
                 </STList>
                 

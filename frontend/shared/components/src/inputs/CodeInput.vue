@@ -163,7 +163,7 @@ export default class CodeInput extends Vue {
     }
 
     updateValue() {
-        this.$emit("input", this.getInternalValue())
+        this.$emit('update:modelValue', this.getInternalValue())
     }
 
 }

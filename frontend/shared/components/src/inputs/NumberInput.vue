@@ -30,16 +30,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
 import StepperInput from "./StepperInput.vue"
 
 @Component({
     components: {
         StepperInput
+    },
+    compatConfig: {
+        COMPONENT_V_MODEL: false
     }
 })
-export default class NumberInput extends Vue {
+export default class NumberInput extends VueComponent {
     /** Price in cents */
     @Prop({ default: 0 })
         min!: number | null
@@ -60,7 +63,7 @@ export default class NumberInput extends Vue {
 
     /** Price in cents */
     @Prop({ default: 0 })
-        value!: number | null
+        modelValue!: number | null
 
     @Prop({ default: "" })
         suffix: string;
@@ -80,19 +83,19 @@ export default class NumberInput extends Vue {
     }
 
     get internalValue() {
-        return this.value
+        return this.modelValue
     }
 
     set internalValue(val: number | null) {
-        this.$emit("input", val)
+        this.$emit('update:modelValue', val)
     }
 
     get stepperValue() {
-        return this.value ?? this.min ?? 0
+        return this.modelValue ?? this.min ?? 0
     }
 
     set stepperValue(val: number) {
-        this.$emit("input", val)
+        this.$emit('update:modelValue', val)
         this.$nextTick(() => {
             this.clean();
         })
@@ -146,7 +149,7 @@ export default class NumberInput extends Vue {
             return;
         }
 
-        let value = this.value
+        let value = this.modelValue
         if (value === null) {
             if (!this.required) {
                 this.valueString = ""

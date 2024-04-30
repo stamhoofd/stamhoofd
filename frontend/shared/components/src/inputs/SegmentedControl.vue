@@ -53,7 +53,7 @@ export default class SegmentedControl extends Vue {
     }
 
     selectItem(index) {
-        this.$emit("input", this.items[index]);
+        this.$emit('update:modelValue', this.items[index]);
     }
 }
 </script>

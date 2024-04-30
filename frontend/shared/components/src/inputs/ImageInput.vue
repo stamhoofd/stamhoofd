@@ -84,7 +84,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     onClick(event) {
         if (!this.required && this.value) {
             event.preventDefault();
-            this.$emit("input", null)
+            this.$emit('update:modelValue', null)
         }
     }
 
@@ -131,7 +131,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
                 owner: this
             })
             .then(response => {
-                this.$emit("input", response.data)
+                this.$emit('update:modelValue', response.data)
             })
             .catch(e => {
                 console.error(e);

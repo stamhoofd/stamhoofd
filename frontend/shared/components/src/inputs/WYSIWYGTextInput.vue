@@ -37,17 +37,16 @@
 
 <script lang="ts">
 import { RichText } from "@stamhoofd/structures";
-import Heading from '@tiptap/extension-heading';
 import Link from '@tiptap/extension-link';
 import Typography from "@tiptap/extension-typography";
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
-import { Editor, EditorContent } from '@tiptap/vue-2';
+import { Editor, EditorContent } from '@tiptap/vue-3';
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 import { ColorHelper } from "../ColorHelper";
 import TooltipDirective from "../directives/Tooltip";
-import {WarningBox} from "../editor/EditorWarningBox";
+import { WarningBox } from "../editor/EditorWarningBox";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import STButtonToolbar from "../navigation/STButtonToolbar.vue";
@@ -149,7 +148,7 @@ export default class WYSIWYGTextInput extends Vue {
                 }
             },
             onUpdate: ({ editor }) => {
-                this.$emit("input", RichText.create({ html: editor.getHTML(), text: editor.getText() }))
+                this.$emit('update:modelValue', RichText.create({ html: editor.getHTML(), text: editor.getText() }))
             },
         })
     }

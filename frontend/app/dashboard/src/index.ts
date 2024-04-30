@@ -2,7 +2,6 @@
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
 // Load icon font
-// require('@stamhoofd/assets/images/icons/icons.font');
 import 'virtual:vite-svg-2-webfont.css';
 
 // Continue
@@ -32,8 +31,6 @@ VueGlobalHelper.setup(app)
 const i18n = I18nController.getI18n()
 app.use(i18n)
 
-//(window as any).app = app;
-
 if (!isPrerender) {
     ViewportHelper.setup(true)
 
@@ -55,5 +52,4 @@ if (!isPrerender) {
         }
     }
 }
-console.log('App:', App);
 app.mount("#app")

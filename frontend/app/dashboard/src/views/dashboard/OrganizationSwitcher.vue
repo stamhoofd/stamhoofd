@@ -45,7 +45,7 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
     }
 
     switchOrganization() {
-        this.modalStackComponent!.modalNavigationController!.popToRoot().catch(console.error)
+        this.modalStackComponent!.parentDismiss().catch(console.error)
     }
 
     get fullAccess() {
@@ -143,17 +143,15 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
                                     SessionManager.getPreparedContextForOrganization(o).then((context) => {
                                         const nav = this.modalStackComponent
                                         if (!nav) {
-                                            throw new Error("No navigation controller found")
+                                            throw new Error("No modalStackComponent")
                                         }
-                                        nav.emitParents('present', {
+                                        nav.parentPresent({
                                             components: [
                                                 getScopedDashboardRoot(context)
                                             ],
                                             animated: true,
-                                            modalDisplayStyle: "popup"
+                                            replace: 1
                                         })
-
-
                                     }).catch(console.error)
                                     return true;
                                 }

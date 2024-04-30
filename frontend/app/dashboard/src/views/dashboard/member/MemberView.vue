@@ -176,7 +176,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (!this.isFocused()) {
+        if (!this.isFocused) {
             return
         }
 

@@ -106,7 +106,7 @@ import Link from '@tiptap/extension-link'
 import Typography from "@tiptap/extension-typography";
 import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
-import { Editor, EditorContent } from '@tiptap/vue-2'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import { Component,Prop,Vue, Watch } from "vue-property-decorator";
 
 import { default as TooltipDirective } from "../directives/Tooltip";

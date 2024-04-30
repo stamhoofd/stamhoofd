@@ -106,9 +106,9 @@ export default class ProductSelectDateRangeInput extends Vue {
 
             if (!this.value) {
                 if (this.dateRanges.length > 0) {
-                    this.$emit("input", this.dateRanges[0])
+                    this.$emit('update:modelValue', this.dateRanges[0])
                 } else {
-                    this.$emit("input", ProductDateRange.create({
+                    this.$emit('update:modelValue', ProductDateRange.create({
                         startDate: new Date(),
                         endDate: new Date(),
                     }))
@@ -145,12 +145,12 @@ export default class ProductSelectDateRangeInput extends Vue {
             })
         }
         if (a) {
-            this.$emit("input", a)
+            this.$emit('update:modelValue', a)
         }
     }
 
     doEditDateRange(dateRange: ProductDateRange) {
-        this.$emit("input", dateRange)
+        this.$emit('update:modelValue', dateRange)
         this.editingDateRange = true
         this.selectedDateRange = dateRange
         this.customDateRange = dateRange
@@ -164,10 +164,10 @@ export default class ProductSelectDateRangeInput extends Vue {
         if (this.editingDateRange && this.selectedDateRange && dateRange) {
             this.$emit("modify", { from: this.selectedDateRange, to: dateRange })
             this.selectedDateRange = dateRange
-            this.$emit("input", dateRange)
+            this.$emit('update:modelValue', dateRange)
             this.editingDateRange = true
         } else {
-            this.$emit("input", dateRange)
+            this.$emit('update:modelValue', dateRange)
         }
         this.customDateRange = dateRange
     }
@@ -180,7 +180,7 @@ export default class ProductSelectDateRangeInput extends Vue {
         }
 
         if (this.selectedDateRange) {
-            this.$emit("input", this.selectedDateRange)
+            this.$emit('update:modelValue', this.selectedDateRange)
             this.errorBox = null
             return true
         }
@@ -195,7 +195,7 @@ export default class ProductSelectDateRangeInput extends Vue {
         }
         
         this.errorBox = null
-        this.$emit("input", this.customDateRange)
+        this.$emit('update:modelValue', this.customDateRange)
         return true
     }
 }

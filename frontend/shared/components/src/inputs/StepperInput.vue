@@ -6,51 +6,39 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-
-@Component
-export default class StepperInput extends Vue {
-    /** Price in cents */
-    @Prop({ default: 0 })
-        min!: number | null
-
-    /** Price in cents */
-    @Prop({ default: null })
-        max!: number | null
-
-    valid = true;
-
-    /** Price in cents */
-    @Prop({ default: 0 })
-        value!: number
-
-    get internalValue() {
-        return this.value
+<script setup lang="ts">
+defineOptions({
+    compatConfig: {
+        MODE: 3
     }
+})
 
-    set internalValue(val: number) {
-        this.$emit("input", val)
-    }
-
-    // Limit value to bounds
-    constrain(value: number): number {
-        if (this.min !== null && value < this.min) {
-            value = this.min;
-        } else if (this.max !== null && value > this.max) {
-            value = this.max;
-        }
-        return value
-    }
-
-    step(add: number) {
-        if (!this.valid) {
-            return;
-        }
-        const v = this.constrain(this.internalValue + add);
-        this.internalValue = v
-    }
+export interface Props {
+    min: number | null,
+    max?: number | null
 }
+
+const model = defineModel<number>({default: 1})
+const props = withDefaults(defineProps<Props>(), {
+    min: 0,
+    max: null
+})
+
+const constrain = (value: number): number => {
+    if (props.min !== null && value < props.min) {
+        value = props.min;
+    } else if (props.max !== null && value > props.max) {
+        value = props.max;
+    }
+    return value
+}
+
+const step = (add: number) => {
+    console.log('step', add)
+    const v = constrain(model.value + add)
+    model.value = v
+}
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

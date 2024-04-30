@@ -14,11 +14,13 @@
         </main>
 
         <STToolbar v-if="payment && (payment.status == 'Failed')">
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" type="button" @click="retry">
-                    <span>Opnieuw proberen</span>
-                </button>
-            </LoadingButton>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="button" @click="retry">
+                        <span>Opnieuw proberen</span>
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>

@@ -92,7 +92,7 @@ export default class TimeMinutesInput extends Vue {
             this.errorBox = null
 
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return true
         }
@@ -106,7 +106,7 @@ export default class TimeMinutesInput extends Vue {
                 "field": "time"
             }))
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return false
 
@@ -126,7 +126,7 @@ export default class TimeMinutesInput extends Vue {
             const time = Math.max(0, Math.min(hours*60 + minutes, 24*60 - 1))
 
             if (time !== this.value) {
-                this.$emit("input", time)
+                this.$emit('update:modelValue', time)
             }
             this.errorBox = null
             return true

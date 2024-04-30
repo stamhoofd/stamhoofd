@@ -60,7 +60,7 @@ export function buildConfig(options: {port: number}) {
                         comments: false,
                         compatConfig: {
                             MODE: 2,
-                            GLOBAL_MOUNT: false
+                            COMPONENT_V_MODEL: false
                         } as any
                     }
                 }

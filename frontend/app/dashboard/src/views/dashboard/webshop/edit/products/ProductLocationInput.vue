@@ -51,7 +51,7 @@ export default class ProductLocationInput extends Vue {
 
     set name(name: string) {
         if (this.value) {
-            this.$emit("input", this.value.patch({ name }))
+            this.$emit('update:modelValue', this.value.patch({ name }))
         }
     }
 
@@ -61,7 +61,7 @@ export default class ProductLocationInput extends Vue {
 
     set address(address: Address | null) {
         if (this.value) {
-            this.$emit("input", this.value.patch({ address }))
+            this.$emit('update:modelValue', this.value.patch({ address }))
         }
     }
 

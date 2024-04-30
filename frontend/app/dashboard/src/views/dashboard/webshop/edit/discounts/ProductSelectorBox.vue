@@ -4,15 +4,19 @@
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
                     <STListItem :selectable="true">
-                        <template #left><div v-if="product.images[0]" class="product-selector-image-preview">
-                            <ImageComponent :image="product.images[0]" :autoHeight="true" />
-                        </div></template>
+                        <template #left>
+                            <div v-if="product.images[0]" class="product-selector-image-preview">
+                                <ImageComponent :image="product.images[0]" :autoHeight="true" />
+                            </div>
+                        </template>
                         
                         <h2 class="style-title-list">
                             {{ product.name }}
                         </h2>
 
-                        <span class="icon arrow-down-small gray" slot="right" />
+                        <template #right>
+                            <span class="icon arrow-down-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
                 <div v-else>
@@ -42,10 +46,12 @@
                         {{ option.name || 'Naamloos' }}
                     </h2>
 
-                     <button class="button text" type="button" slot="right" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)" v-if="optionMenu.multipleChoice">
-                        <span>{{getRequirementName(getOptionRequirement(optionMenu, option))}}</span>
-                        <span class="icon arrow-down-small" />
-                    </button>
+                    <template #right>
+                        <button class="button text" type="button" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)" v-if="optionMenu.multipleChoice">
+                            <span>{{getRequirementName(getOptionRequirement(optionMenu, option))}}</span>
+                            <span class="icon arrow-down-small" />
+                        </button>
+                    </template>
                 </STListItem>
             </STList>
         </STInputBox>

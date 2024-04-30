@@ -101,7 +101,7 @@ export default class ColorInput extends Vue {
             this.hasColor = ""
 
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return true
         }
@@ -123,7 +123,7 @@ export default class ColorInput extends Vue {
                 }))
             }
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return false
 
@@ -141,7 +141,7 @@ export default class ColorInput extends Vue {
             }
 
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             
             return false
@@ -150,7 +150,7 @@ export default class ColorInput extends Vue {
         this.hasColor = this.colorRaw
 
         if (this.colorRaw !== this.value) {
-            this.$emit("input", this.colorRaw)
+            this.$emit('update:modelValue', this.colorRaw)
         }
         if (!silent) {
             this.errorBox = null

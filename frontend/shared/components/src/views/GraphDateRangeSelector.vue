@@ -30,7 +30,7 @@ export default class GraphDateRangeSelector extends Mixins(NavigationMixin) {
                     return new ContextMenuItem({
                         name: option.name,
                         action: () => {
-                            this.$emit("input", option);
+                            this.$emit('update:modelValue', option);
                             return true;
                         }
                     })

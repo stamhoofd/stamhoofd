@@ -50,7 +50,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
     uploading = false
 
     deleteMe() {
-        this.$emit("input", null)
+        this.$emit('update:modelValue', null)
     }
 
     onClick(event) {
@@ -115,7 +115,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
                 owner: this
             })
             .then(response => {
-                this.$emit("input", response.data)
+                this.$emit('update:modelValue', response.data)
             })
             .catch(e => {
                 console.error(e);

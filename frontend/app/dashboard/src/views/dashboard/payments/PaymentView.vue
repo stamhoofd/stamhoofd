@@ -415,7 +415,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (!this.isFocused()) {
+        if (!this.isFocused) {
             return
         }
 

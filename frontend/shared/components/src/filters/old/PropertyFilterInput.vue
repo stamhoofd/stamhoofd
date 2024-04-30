@@ -136,7 +136,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     setAlwaysEnabled() {
-        this.$emit("input", 
+        this.$emit('update:modelValue', 
             new PropertyFilter<any>(
                 new FilterGroup(this.definitions).encoded,
                 this.value.requiredWhen
@@ -150,7 +150,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             selectedFilter: this.cachedEnabledFilter,
             organization: this.organization,
             setFilter: (enabledWhen: FilterGroup<any>) => {
-                this.$emit("input", 
+                this.$emit('update:modelValue', 
                     new PropertyFilter<any>(
                         enabledWhen.encoded,
                         this.value.requiredWhen
@@ -162,7 +162,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     setAlwaysRequired() {
-        this.$emit("input", 
+        this.$emit('update:modelValue', 
             new PropertyFilter<any>(
                 this.value.enabledWhen,
                 new FilterGroup(this.definitions).encoded
@@ -171,7 +171,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     setNeverRequired() {
-        this.$emit("input", 
+        this.$emit('update:modelValue', 
             new PropertyFilter<any>(
                 this.value.enabledWhen,
                 null
@@ -181,7 +181,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
 
     setRequiredWhen(useCache = false) {
         if (useCache && this.cachedRequiredFilter) {
-            this.$emit("input", 
+            this.$emit('update:modelValue', 
                 new PropertyFilter<any>(
                     this.value.enabledWhen,
                     this.cachedRequiredFilter.encoded
@@ -194,7 +194,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             selectedFilter: this.cachedRequiredFilter ?? new FilterGroup(this.definitions),
             organization: this.organization,
             setFilter: (requiredWhen: FilterGroup<any>) => {
-                this.$emit("input", 
+                this.$emit('update:modelValue', 
                     new PropertyFilter<any>(
                         this.value.enabledWhen,
                         requiredWhen.encoded

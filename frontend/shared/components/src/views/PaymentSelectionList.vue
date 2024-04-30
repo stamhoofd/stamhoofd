@@ -2,7 +2,10 @@
     <div>
         <STList class="payment-selection-list">
             <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
-                <Radio #left v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
+                <template #left>
+                    <Radio v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
+                </template>
+
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
@@ -22,7 +25,9 @@
                     <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
                 </div>
 
-                <img v-if="getLogo(paymentMethod) && (!$isMobile || paymentMethod !== 'Payconiq')" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
+                <template #right>
+                    <img v-if="getLogo(paymentMethod) && (!$isMobile || paymentMethod !== 'Payconiq')" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
+                </template>
             </STListItem>
         </STList>
     </div>

@@ -35,7 +35,7 @@
                     </template>
                 </p>
 
-                <PriceInput v-if="isItemSelected(item)" slot="right" :value="getItemPrice(item)" placeholder="Geen" :min="null" @input="setItemPrice(item, $event)" />
+                <template #right><PriceInput v-if="isItemSelected(item)" :value="getItemPrice(item)" placeholder="Geen" :min="null" @input="setItemPrice(item, $event)" /></template>
             </STListItem>
         </STList>
 

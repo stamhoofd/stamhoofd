@@ -115,7 +115,7 @@ export default class SelectionAddressInput extends Vue {
             this.customAddress = this.value
 
             if (this.required && !this.value && this.addresses.length > 0) {
-                this.$emit("input", this.addresses[0])
+                this.$emit('update:modelValue', this.addresses[0])
             }
         }
 
@@ -140,16 +140,16 @@ export default class SelectionAddressInput extends Vue {
 
         const a = this.selectedAddress ?? this.customAddress
         if (a) {
-            this.$emit("input", a)
+            this.$emit('update:modelValue', a)
         } else {
             if (!this.required) {
-                this.$emit("input", null) 
+                this.$emit('update:modelValue', null) 
             }
         }
     }
 
     doEditAddress(address: Address) {
-        this.$emit("input", address)
+        this.$emit('update:modelValue', address)
         this.editingAddress = true
         this.selectedAddress = address
         this.customAddress = address
@@ -163,7 +163,7 @@ export default class SelectionAddressInput extends Vue {
         if (this.editingAddress && this.selectedAddress && address) {
             this.$emit("modify", { from: this.selectedAddress, to: address })
             this.selectedAddress = address
-            this.$emit("input", address)
+            this.$emit('update:modelValue', address)
             this.editingAddress = true
         }
         this.customAddress = address
@@ -177,7 +177,7 @@ export default class SelectionAddressInput extends Vue {
         }
 
         if (this.selectedAddress) {
-            this.$emit("input", this.selectedAddress)
+            this.$emit('update:modelValue', this.selectedAddress)
             this.errorBox = null
             return true
         }
@@ -192,7 +192,7 @@ export default class SelectionAddressInput extends Vue {
         }
         
         this.errorBox = null
-        this.$emit("input", this.customAddress)
+        this.$emit('update:modelValue', this.customAddress)
         return true
     }
 }

@@ -60,7 +60,7 @@ export default class ProductDateRangeInput extends Vue {
 
     set startDate(startDate: Date) {
         if (this.value) {
-            this.$emit("input", this.value.patch({ startDate }))
+            this.$emit('update:modelValue', this.value.patch({ startDate }))
         }
     }
 
@@ -70,7 +70,7 @@ export default class ProductDateRangeInput extends Vue {
 
     set endDate(endDate: Date) {
         if (this.value) {
-            this.$emit("input", this.value.patch({ endDate }))
+            this.$emit('update:modelValue', this.value.patch({ endDate }))
         }
     }
 

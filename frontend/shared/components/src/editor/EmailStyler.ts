@@ -1,11 +1,11 @@
 export class EmailStyler {
     static async format(html: string, subject: string): Promise<{ text: string; html: string }> {
-        const imported = ((await import(/* webpackChunkName: "email-css" */ "./email.url.scss")).default)
+        const imported = ((await import(/* webpackChunkName: "email-css" */ "./email.url.scss?inline")).default)
 
         // Force replacement value
         const primaryColor = "{{primaryColor}}";
         const primaryColorContrast = "{{primaryColorContrast}}";
-        const scss = imported[0][1].replaceAll("#0053ff", primaryColor) as string
+        const scss = imported.replaceAll("#0053ff", primaryColor) as string
 
         let styles = scss;
         const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";

@@ -68,7 +68,7 @@ import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LegalFooter, Lo
 import { UrlHelper } from "@stamhoofd/networking";
 import { CartItem, LoginProviderType, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
@@ -400,9 +400,9 @@ export default class WebshopView extends Mixins(NavigationMixin){
                         server: this.$webshopManager.server, 
                         paymentId,
                         cancel,
-                        finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
+                        finishedHandler: function(this: InstanceType<typeof NavigationMixin>, payment: Payment | null) {
                             if (payment && payment.status == PaymentStatus.Succeeded) {
-                                if (!this.modalOrPopup || this.modalOrPopup === this.modalNavigationController) {
+                                if (!this.popup) {
                                     console.log("Presenting order by replacing current view")
 
                                     // We are not in a popup/sheet on mobile

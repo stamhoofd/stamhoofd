@@ -104,8 +104,10 @@
                         <span v-else class="icon clock" />
                     </p>
 
-                    <span v-if="order.payments.length > 1" slot="right">{{ formatPrice(payment.price) }}</span>
-                    <template v-if="hasPaymentsWrite" #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right v-if="order.payments.length > 1 || hasPaymentsWrite" >
+                        <span v-if="order.payments.length > 1">{{ formatPrice(payment.price) }}</span>
+                        <span v-if="hasPaymentsWrite" class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -374,13 +376,15 @@
         </main>
 
         <STToolbar>
-            <button v-if="ticket.scannedAt" slot="right" class="button secundary" type="button" @click="cancelScan">
-                Markering ongedaan maken
-            </button>
-            <template #right><button class="button primary" type="button" @click="markScanned">
-                <span class="icon qr-code" />
-                <span>Markeer als gescand</span>
-            </button></template>
+            <template #right>
+                <button v-if="ticket.scannedAt" class="button secundary" type="button" @click="cancelScan">
+                    Markering ongedaan maken
+                </button>
+                <button class="button primary" type="button" @click="markScanned">
+                    <span class="icon qr-code" />
+                    <span>Markeer als gescand</span>
+                </button>
+            </template>
         </STToolbar>
     </div>
 </template>

@@ -18,8 +18,8 @@
 
 <script lang="ts">
 import { ComponentWithProperties, ModalStackComponent } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Vue } from "vue-property-decorator";
 
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { ViewportHelper } from "../ViewportHelper";
 import ContextMenuItemView from "./ContextMenuItemView.vue";
 
@@ -36,7 +36,7 @@ function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
 @Component({
     inheritAttrs: false
 })
-export default class ContextMenuView extends Vue {
+export default class ContextMenuView extends VueComponent {
     @Prop({
         default: 0,
     })
@@ -628,14 +628,6 @@ export default class ContextMenuView extends Vue {
         document.removeEventListener("keydown", this.onKey);
     }
 
-    get isFocused() {
-        const popups = this.modalStackComponent?.stackComponent?.components ?? []
-        if (popups.length > 0 && !popups[popups.length - 1].componentInstance()?.$el?.contains(this.$el)) {
-            return false
-        }
-        return true
-    }
-
     get modalStackComponent(): ModalStackComponent | null {
         let start: any = this.$parent;
         while (start) {
@@ -650,10 +642,6 @@ export default class ContextMenuView extends Vue {
 
     onKey(event) {
         if (event.defaultPrevented || event.repeat) {
-            return;
-        }
-
-        if (!this.isFocused) {
             return;
         }
 

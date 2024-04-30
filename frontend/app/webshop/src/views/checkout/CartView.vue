@@ -35,12 +35,14 @@
         </main>
 
         <STToolbar v-if="cart.items.length > 0">
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" type="button" @click="goToCheckout">
-                    <span class="icon flag" />
-                    <span>Bestellen</span>
-                </button>
-            </LoadingButton>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="button" @click="goToCheckout">
+                        <span class="icon flag" />
+                        <span>Bestellen</span>
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>
@@ -55,9 +57,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager } from './CheckoutStepsManager';
-
+import {reactive} from 'vue';
 
 @Component({
     components: {

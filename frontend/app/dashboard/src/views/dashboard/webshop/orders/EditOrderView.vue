@@ -63,9 +63,9 @@
                             {{ capitalizeFirstLetter(formatDate(checkoutMethod.timeSlots.timeSlots[0].date)) }} tussen {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].startTime) }} - {{ formatMinutes(checkoutMethod.timeSlots.timeSlots[0].endTime) }}
                         </p>
 
-                        <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1">
-                            <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                            <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                        <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1 && checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" #right>
+                            <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">Volzet</span>
+                            <span v-else class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
                         </template>
                     </STListItem>
                 </STList>
@@ -95,7 +95,10 @@
 
                 <STList>
                     <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio #left v-model="selectedSlot" name="choose-time-slot" :value="slot" />
+                        <template #left>
+                            <Radio v-model="selectedSlot" name="choose-time-slot" :value="slot" />
+                        </template>
+
                         <h2 class="style-title-list">
                             {{ formatDateWithDay(slot.date) }}
                         </h2> 
@@ -103,8 +106,10 @@
                             Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                         </p>
 
-                        <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                        <span v-else-if="slot.listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                        <template #right v-if="slot.listedRemainingStock !== null" >
+                            <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
+                            <span v-else class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                        </template>
                     </STListItem>
                 </STList>
             </template>

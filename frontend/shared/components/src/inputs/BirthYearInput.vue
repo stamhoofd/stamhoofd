@@ -55,7 +55,7 @@ export default class PriceInput extends Vue {
     }
 
     set internalValue(val: number | null) {
-        this.$emit("input", val)
+        this.$emit('update:modelValue', val)
     }
 
     get descriptionText() {

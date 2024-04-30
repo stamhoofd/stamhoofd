@@ -84,7 +84,7 @@ export default class UrlInput extends Vue {
                 }
 
                 if (this.value !== null) {
-                    this.$emit("input", null)
+                    this.$emit('update:modelValue', null)
                 }
                 return true
             }
@@ -95,7 +95,7 @@ export default class UrlInput extends Vue {
                 }
 
                 if (this.nullable && this.value !== null) {
-                    this.$emit("input", null)
+                    this.$emit('update:modelValue', null)
                 }
                 return false
             }
@@ -127,7 +127,7 @@ export default class UrlInput extends Vue {
             this.urlRaw = v
     
             if (this.value !== v) {
-                this.$emit("input", v)
+                this.$emit('update:modelValue', v)
             }
             if (!silent) {
                 this.errorBox = null

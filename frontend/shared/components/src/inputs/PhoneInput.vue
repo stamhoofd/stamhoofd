@@ -87,7 +87,7 @@ export default class PhoneInput extends Vue {
                 }
 
                 if (this.value !== null) {
-                    this.$emit("input", null)
+                    this.$emit('update:modelValue', null)
                 }
                 return true
             }
@@ -98,7 +98,7 @@ export default class PhoneInput extends Vue {
                 }
 
                 if (this.nullable && this.value !== null) {
-                    this.$emit("input", null)
+                    this.$emit('update:modelValue', null)
                 }
                 return false
             }
@@ -136,7 +136,7 @@ export default class PhoneInput extends Vue {
                 this.phoneRaw = v
         
                 if (this.value !== v) {
-                    this.$emit("input", v)
+                    this.$emit('update:modelValue', v)
                 }
                 if (!silent) {
                     this.errorBox = null

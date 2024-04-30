@@ -222,10 +222,6 @@ export class CheckoutStepsManager {
         return steps
     }
 
-    getActiveSteps() {
-        return this.getSteps().filter(s => s.active)
-    }
-
     async getNextStep(stepId: string | undefined, reload = false) {
         if (reload) {
             await this.$webshopManager.reload()

@@ -70,7 +70,7 @@ export default class IBANInput extends Vue {
 
         if (!this.required && this.ibanRaw.length == 0) {
             this.errorBox = null
-            this.$emit("input", null)
+            this.$emit('update:modelValue', null)
             return true
         }
 
@@ -96,7 +96,7 @@ export default class IBANInput extends Vue {
 
         } else {
             this.ibanRaw = ibantools.friendlyFormatIBAN(iban) ?? iban
-            this.$emit("input", this.ibanRaw)
+            this.$emit('update:modelValue', this.ibanRaw)
             this.errorBox = null
             return true
         }

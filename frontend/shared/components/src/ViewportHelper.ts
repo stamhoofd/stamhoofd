@@ -28,7 +28,7 @@ export class ViewportHelper {
         }
     }
 
-    static setup(modern = false) {
+    static setup(modern = true) {
         this.modern = modern
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 

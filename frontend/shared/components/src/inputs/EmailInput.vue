@@ -88,7 +88,7 @@ export default class EmailInput extends Vue {
             }
 
             if (this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             }
             return true
         }
@@ -100,9 +100,9 @@ export default class EmailInput extends Vue {
             }
 
             if (this.nullable && this.value !== null) {
-                this.$emit("input", null)
+                this.$emit('update:modelValue', null)
             } else if (this.value !== "") {
-                this.$emit("input", "")
+                this.$emit('update:modelValue', "")
             }
             return false
         }
@@ -119,7 +119,7 @@ export default class EmailInput extends Vue {
 
         } else {
             if (this.emailRaw !== this.value) {
-                this.$emit("input", this.emailRaw)
+                this.$emit('update:modelValue', this.emailRaw)
             }
             if (!silent) {
                 this.errorBox = null

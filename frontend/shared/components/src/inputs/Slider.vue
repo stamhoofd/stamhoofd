@@ -58,7 +58,7 @@ export default class Slider extends Vue {
     }
 
     set internalValue(val: number) {
-        this.$emit("input", val)
+        this.$emit('update:modelValue', val)
     }
 
     mounted() {

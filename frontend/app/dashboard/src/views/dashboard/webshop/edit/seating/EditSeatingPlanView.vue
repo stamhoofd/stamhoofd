@@ -98,16 +98,22 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="downloadSettings(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/box-download.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
+                    </template>
+                    
                     <h2 class="style-title-list">
                         Exporteer zaalplan
                     </h2>
                     <p class="style-description">
                         Sla een kopie van jouw zaalplan op zodat je het kan delen met andere verenigingen.
                     </p>
-                    <LoadingButton slot="right" :loading="downloadingSettings">
-                        <span class="icon download gray" />
-                    </LoadingButton>
+
+                    <template #right>
+                        <LoadingButton :loading="downloadingSettings">
+                            <span class="icon download gray" />
+                        </LoadingButton>
+                    </template>
                 </STListItem>
             </STList>
         </template>

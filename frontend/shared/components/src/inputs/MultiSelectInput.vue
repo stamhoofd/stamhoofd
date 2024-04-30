@@ -66,7 +66,7 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
         if (arr.length != this.values.length) {
             return;
         }
-        this.$emit('input', arr)
+        this.$emit('update:modelValue', arr)
     }
 
     getValueLabels(value: T) {
@@ -93,17 +93,17 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
             if (index !== -1) {
                 const arr = [...this.values]
                 arr[index] = value;
-                this.$emit('input', arr)
+                this.$emit('update:modelValue', arr)
                 return;
             }
         }
         const arr = [...this.values, value]
-        this.$emit('input', arr)
+        this.$emit('update:modelValue', arr)
     }
 
     deleteValue(value: T) {
         const arr = this.values.filter(v => v !== value)
-        this.$emit('input', arr)
+        this.$emit('update:modelValue', arr)
     }
 
     generateMenu(choices: {value: T, label: string, categories?: string[]}[], replace?: T): ContextMenu {

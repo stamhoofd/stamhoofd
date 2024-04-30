@@ -1,9 +1,9 @@
 <template>
     <form class="st-view" @submit.prevent="$emit('save')">
         <STNavigationBar :title="title">
-            <BackButton v-if="$parent.canPop" slot="left" @click="$parent.pop" />
-            <template v-else-if="$isMobile || $isIOS || $isAndroid" slot="left">
-                <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
+            <template #left v-if="$parent.canPop || ($isMobile || $isIOS || $isAndroid)">
+                <BackButton v-if="$parent.canPop" @click="$parent.pop" />
+                <button v-else-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
                 <button v-else class="button text selected unbold" type="button" @click="$parent.pop">
                     {{ cancelText }}
                 </button>
@@ -11,11 +11,13 @@
 
             <template v-if="!$isMobile && !$isIOS" #right><slot name="buttons" /></template>
 
-            <template v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" #right><LoadingButton :loading="loading">
-                <button class="button navigation highlight" :disabled="disabled" type="submit">
-                    {{ saveText }}
-                </button>
-            </LoadingButton></template>
+            <template v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" #right>
+                <LoadingButton :loading="loading">
+                    <button class="button navigation highlight" :disabled="disabled" type="submit">
+                        {{ saveText }}
+                    </button>
+                </LoadingButton>
+            </template>
             <template v-else-if="$parent.canDismiss && !$isAndroid && !$isMobile && !$isIOS" #right><button class="button navigation icon close" type="button" @click="$parent.dismiss" /></template>
         </STNavigationBar>
         <main>

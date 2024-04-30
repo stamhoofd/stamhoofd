@@ -31,9 +31,11 @@
                 <p class="style-description">
                     Maak een kopie van de instellingen van jouw vereniging.
                 </p>
-                <LoadingButton slot="right" :loading="downloadingSettings">
-                    <span class="icon download gray" />
-                </LoadingButton>
+                <template #right>
+                    <LoadingButton :loading="downloadingSettings">
+                        <span class="icon download gray" />
+                    </LoadingButton>
+                </template>
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="uploadSettings(true)">
@@ -44,9 +46,11 @@
                 <p class="style-description">
                     Overschrijf alle instellingen.
                 </p>
-                <LoadingButton slot="right" :loading="uploadingSettings">
-                    <span class="icon upload gray" />
-                </LoadingButton>
+                <template #right>
+                    <LoadingButton :loading="uploadingSettings">
+                        <span class="icon upload gray" />
+                    </LoadingButton>
+                </template>
             </STListItem>
         </STList>
 
