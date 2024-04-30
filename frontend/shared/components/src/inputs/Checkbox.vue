@@ -23,8 +23,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
-@Component({
-})
+@Component
 export default class Checkbox extends Vue {
     @Prop({ default: "", type: String })
     name!: string;

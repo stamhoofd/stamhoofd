@@ -28,7 +28,7 @@
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox :modelValue="getPaymentMethod(method)" @update:modelValue="setPaymentMethod(method, $event)" />
+                    <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
                 </template>
                 <h3 class="style-title-list">
                     {{ getMethodName(method) }}
@@ -44,7 +44,7 @@
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">
                     <template #left>
-                        <Checkbox :modelValue="getProvider(provider)" @update:modelValue="setProvider(provider, $event)" />
+                        <Checkbox :model-value="getProvider(provider)" @update:model-value="setProvider(provider, $event)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ getProviderName(provider) }}
@@ -87,7 +87,7 @@
             <template v-if="!allWebshopsSelected">
                 <STListItem v-for="webshop in allWebshops" :key="webshop.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :modelValue="getWebshop(webshop.id)" @update:modelValue="setWebshop(webshop.id, $event)" />
+                        <Checkbox :model-value="getWebshop(webshop.id)" @update:model-value="setWebshop(webshop.id, $event)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ webshop.meta.name }}
@@ -112,7 +112,7 @@
             <template v-if="!allGroupsSelected">
                 <STListItem v-for="group in allGroups" :key="group.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :modelValue="getGroup(group.id)" @update:modelValue="setGroup(group.id, $event)" />
+                        <Checkbox :model-value="getGroup(group.id)" @update:model-value="setGroup(group.id, $event)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ group.settings.name }}

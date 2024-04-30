@@ -19,7 +19,7 @@
         <STList>
             <STListItem>
                 <template #left>
-                    <Checkbox :modelValue="getEnableFilterConfiguration('phone')" @update:modelValue="setEnableFilterConfiguration('phone', $event)" />
+                    <Checkbox :model-value="getEnableFilterConfiguration('phone')" @update:model-value="setEnableFilterConfiguration('phone', $event)" />
                 </template>
                 <p class="style-title-list">
                     {{ $t('shared.inputs.mobile.label') }} (van lid zelf)
@@ -31,7 +31,7 @@
             </STListItem>
             <STListItem>
                 <template #left>
-                    <Checkbox :modelValue="getEnableFilterConfiguration('emailAddress')" @update:modelValue="setEnableFilterConfiguration('emailAddress', $event)" />
+                    <Checkbox :model-value="getEnableFilterConfiguration('emailAddress')" @update:model-value="setEnableFilterConfiguration('emailAddress', $event)" />
                 </template>
                 <p class="style-title-list">
                     E-mailadres (van lid zelf)
@@ -43,7 +43,7 @@
             </STListItem>
             <STListItem>
                 <template #left>
-                    <Checkbox :modelValue="getEnableFilterConfiguration('gender')" @update:modelValue="setEnableFilterConfiguration('gender', $event)" />
+                    <Checkbox :model-value="getEnableFilterConfiguration('gender')" @update:model-value="setEnableFilterConfiguration('gender', $event)" />
                 </template>
                 <p class="style-title-list">
                     Geslacht
@@ -55,7 +55,7 @@
             </STListItem>
             <STListItem>
                 <template #left>
-                    <Checkbox :modelValue="getEnableFilterConfiguration('birthDay')" @update:modelValue="setEnableFilterConfiguration('birthDay', $event)" />
+                    <Checkbox :model-value="getEnableFilterConfiguration('birthDay')" @update:model-value="setEnableFilterConfiguration('birthDay', $event)" />
                 </template>
                 <p class="style-title-list">
                     Geboortedatum
@@ -67,7 +67,7 @@
             </STListItem>
             <STListItem>
                 <template #left>
-                    <Checkbox :modelValue="getEnableFilterConfiguration('address')" @update:modelValue="setEnableFilterConfiguration('address', $event)" />
+                    <Checkbox :model-value="getEnableFilterConfiguration('address')" @update:model-value="setEnableFilterConfiguration('address', $event)" />
                 </template>
                 <p class="style-title-list">
                     Adres (van lid zelf)
@@ -79,7 +79,7 @@
             </STListItem>
             <STListItem>
                 <template #left>
-                    <Checkbox :modelValue="getEnableFilterConfiguration('parents')" @update:modelValue="setEnableFilterConfiguration('parents', $event)" />
+                    <Checkbox :model-value="getEnableFilterConfiguration('parents')" @update:model-value="setEnableFilterConfiguration('parents', $event)" />
                 </template>
                 <p class="style-title-list">
                     Ouders
@@ -91,7 +91,7 @@
             </STListItem>
             <STListItem>
                 <template #left>
-                    <Checkbox :modelValue="getEnableFilterConfiguration('emergencyContacts')" @update:modelValue="setEnableFilterConfiguration('emergencyContacts', $event)" />
+                    <Checkbox :model-value="getEnableFilterConfiguration('emergencyContacts')" @update:model-value="setEnableFilterConfiguration('emergencyContacts', $event)" />
                 </template>
                 <p class="style-title-list">
                     Noodcontactpersoon

@@ -36,7 +36,7 @@
                     </div></template>
 
                     <template #left>
-                        <Checkbox :modelValue="getVerified(match)" @update:modelValue="setVerified(match, $event)" />
+                        <Checkbox :model-value="getVerified(match)" @update:model-value="setVerified(match, $event)" />
                     </template>
                 </STListItem>
             </STList>

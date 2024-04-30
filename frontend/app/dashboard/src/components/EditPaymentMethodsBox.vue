@@ -25,7 +25,7 @@
 
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
-                <template #left><Checkbox :modelValue="getPaymentMethod(method)" @update:modelValue="setPaymentMethod(method, $event)" /></template>
+                <template #left><Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" /></template>
                 <h3 class="style-title-list">
                     {{ getName(method) }}
                 </h3>

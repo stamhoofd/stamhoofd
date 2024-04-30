@@ -64,7 +64,7 @@
                 <tbody>
                     <tr v-for="column in columns" :key="column.name">
                         <td>
-                            <Checkbox :modelValue="getColumnSelected(column)" @update:modelValue="setColumnSelected(column, $event)">
+                            <Checkbox :model-value="getColumnSelected(column)" @update:model-value="setColumnSelected(column, $event)">
                                 <h2 class="style-title-list">
                                     {{ column.name }}
                                 </h2>

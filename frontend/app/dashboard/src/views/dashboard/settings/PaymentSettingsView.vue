@@ -267,7 +267,7 @@
                 Gebruik Buckaroo voor online betalingen
             </Checkbox>
 
-            <Checkbox :modelValue="getFeatureFlag('stripe')" @update:modelValue="setFeatureFlag('stripe', !!$event)">
+            <Checkbox :model-value="getFeatureFlag('stripe')" @update:model-value="setFeatureFlag('stripe', !!$event)">
                 Stripe koppeling toestaan
             </Checkbox>
 

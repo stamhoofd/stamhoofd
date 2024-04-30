@@ -163,7 +163,7 @@
         <STList>
             <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
                 <template #left>
-                    <Checkbox :modelValue="hasAdminRole(admin)" @update:modelValue="setAdminRole(admin, $event)" />
+                    <Checkbox :model-value="hasAdminRole(admin)" @update:model-value="setAdminRole(admin, $event)" />
                 </template>
 
                 <h2 class="style-title-list">

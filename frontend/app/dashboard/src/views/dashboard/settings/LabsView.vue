@@ -64,7 +64,7 @@
             Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
         </p>
 
-        <Checkbox :modelValue="getFeatureFlag('webshop-discounts')" @update:modelValue="setFeatureFlag('webshop-discounts', !!$event)">
+        <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)">
             Kortingen en kortingscodes in webshops
         </Checkbox>
         <p class="style-description-small">
@@ -81,19 +81,19 @@
                 Activeer test-modus voor betalingen
             </Checkbox>
 
-            <Checkbox :modelValue="getFeatureFlag('stamhoofd-pay-by-transfer')" @update:modelValue="setFeatureFlag('stamhoofd-pay-by-transfer', !!$event)">
+            <Checkbox :model-value="getFeatureFlag('stamhoofd-pay-by-transfer')" @update:model-value="setFeatureFlag('stamhoofd-pay-by-transfer', !!$event)">
                 Stamhoofd betalen via overschrijving
             </Checkbox>
 
-            <Checkbox :modelValue="getFeatureFlag('stamhoofd-pay-by-saved')" @update:modelValue="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
+            <Checkbox :model-value="getFeatureFlag('stamhoofd-pay-by-saved')" @update:model-value="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
                 Stamhoofd betalen via opgeslagen betaalmethode
             </Checkbox>
 
-            <Checkbox :modelValue="getFeatureFlag('sso')" @update:modelValue="setFeatureFlag('sso', !!$event)">
+            <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
                 Single-Sign-On
             </Checkbox>
 
-            <Checkbox :modelValue="getFeatureFlag('webshop-auth')" @update:modelValue="setFeatureFlag('webshop-auth', !!$event)">
+            <Checkbox :model-value="getFeatureFlag('webshop-auth')" @update:model-value="setFeatureFlag('webshop-auth', !!$event)">
                 Webshop auth
             </Checkbox>
 

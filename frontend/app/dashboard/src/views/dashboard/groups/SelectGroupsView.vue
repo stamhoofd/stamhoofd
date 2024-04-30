@@ -15,7 +15,7 @@
                 <STList>
                     <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
                         <template #left>
-                            <Checkbox :modelValue="getSelectedGroup(group)" @update:modelValue="setSelectedGroup(group, $event)" />
+                            <Checkbox :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)" />
                         </template>
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
@@ -36,7 +36,7 @@
                     <STList>
                         <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
                             <template #left>
-                                <Checkbox :modelValue="getSelectedGroup(group)" @update:modelValue="setSelectedGroup(group, $event)" />
+                                <Checkbox :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)" />
                             </template>
                             <h2 class="style-title-list">
                                 {{ group.settings.name }}
