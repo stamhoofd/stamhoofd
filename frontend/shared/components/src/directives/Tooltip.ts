@@ -2,9 +2,10 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
 import { ModalStackEventBus } from "../..";
 import Tooltip from "../overlays/Tooltip.vue";
+import type {ObjectDirective} from "vue";
 
-export default {
-    bind(el, binding, vnode) {
+const TooltipDirective: ObjectDirective<HTMLElement & {$tooltipDisplayedComponent: null|ComponentWithProperties}, string> = {
+    beforeMount(el, binding) {
         let isMouseHover = false;
         const displayedComponent: ComponentWithProperties | null = el.$tooltipDisplayedComponent ?? null;
         el.$tooltipDisplayedComponent = displayedComponent;
@@ -58,10 +59,13 @@ export default {
 
                 if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
                     try {
-                        el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent?.$emit("pop");
+                        (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({force: true})
                     } catch (e) {
                         // Ignore
+                        console.error(e);
                     }
+                } else {
+                    console.error("Tooltip $tooltipDisplayedComponent.vnode not set", el.$tooltipDisplayedComponent);
                 }
                 el.$tooltipDisplayedComponent = null;
             },
@@ -69,14 +73,17 @@ export default {
         );
     },
 
-    unbind(el, binding, vnode) {
+    unmounted(el, binding, vnode) {
         if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
             try {
-                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent?.$emit("pop");
+                (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({force: true})
             } catch (e) {
                 // Ignore
+                console.error(e);
             }
         }
         el.$tooltipDisplayedComponent = null;
     }
 };
+
+export default TooltipDirective;

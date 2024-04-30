@@ -85,14 +85,11 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadComponent } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
 import { STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 
-import FinancesView from "../FinancesView.vue";
-import BillingSettingsView from "./BillingSettingsView.vue";
 import PackageSettingsView from "./PackageSettingsView.vue";
 
 @Component({
@@ -100,6 +97,7 @@ import PackageSettingsView from "./PackageSettingsView.vue";
         date: Formatter.date.bind(Formatter),
         dateTime: Formatter.dateTime.bind(Formatter)
     },
+    emits: ["billing"]
 })
 export default class BillingWarningBox extends Mixins(NavigationMixin) {
     @Prop({ default: null })
@@ -117,7 +115,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
     }
 
     get hasBillingListener(){
-        return this.$listeners && this.$listeners.billing
+        return !!this.$.vnode.props?.onBilling
     }
 
     get isWebshopsTrial() {

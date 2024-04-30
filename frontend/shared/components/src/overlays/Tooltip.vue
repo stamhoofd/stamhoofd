@@ -13,10 +13,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop } from "vue-property-decorator";
 
 @Component
-export default class Tooltip extends Vue {
+export default class Tooltip extends Mixins(NavigationMixin) {
     @Prop({
         default: "No tooltip text set",
     })

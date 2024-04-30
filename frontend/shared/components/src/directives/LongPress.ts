@@ -1,4 +1,5 @@
 import { AppManager } from "@stamhoofd/networking";
+import type {ObjectDirective} from "vue";
 
 function getScrollElement(element: HTMLElement | null = null): HTMLElement {
     if (!element) {
@@ -27,11 +28,10 @@ function distance(a: { x: number, y: number }, b: { x: number, y: number }) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 }
 
-
-export default {
-    bind(el, binding, vnode) {
+const LongPressDirective: ObjectDirective<HTMLElement & {$longPressTimer: NodeJS.Timeout|null, $didTriggerLongPress: boolean}, () => void> = {
+    beforeMount(el, binding) {
         // If we are on Android or Desktop, we can ignore this listener
-        if (!vnode.context.$isIOS) {
+        if (!(binding.instance as any).$isIOS) {
             return
         }
 
@@ -170,9 +170,10 @@ export default {
         );
     },
 
-    unbind(el, binding, vnode) {
+    unmounted(el, binding, vnode) {
         if (el.$longPressTimer) {
             clearTimeout(el.$longPressTimer)
         }
     }
 };
+export default LongPressDirective;

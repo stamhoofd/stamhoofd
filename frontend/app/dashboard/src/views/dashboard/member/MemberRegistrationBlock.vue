@@ -52,6 +52,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
     filters: {
         dateTime: Formatter.dateTime.bind(Formatter)
     },
+    emits: ["edit"]
 })
 export default class MemberRegistrationBlock extends Mixins(NavigationMixin) {
     @Prop()
@@ -62,7 +63,7 @@ export default class MemberRegistrationBlock extends Mixins(NavigationMixin) {
     }
 
     get isEditable() {
-        return this.$listeners.edit !== undefined
+        return !!this.$.vnode.props?.onEdit
     }
 
     editRegistration(event) {

@@ -57,11 +57,7 @@ export function buildConfig(options: {port: number}) {
             vue({
                 template: {
                     compilerOptions: {
-                        comments: false,
-                        compatConfig: {
-                            MODE: 2,
-                            COMPONENT_V_MODEL: false
-                        } as any
+                        comments: false
                     }
                 }
             }),

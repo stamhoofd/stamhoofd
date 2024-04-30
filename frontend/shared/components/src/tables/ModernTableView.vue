@@ -217,7 +217,8 @@ class ColumnConfiguration extends AutoEncoder {
     directives: {
         tooltip: TooltipDirective,
         longPress: LongPressDirective
-    }
+    },
+    emits: ["click"]
 })
 export default class ModernTableView<Value extends TableListable> extends Mixins(NavigationMixin) {
     @Prop({ required: true})
@@ -377,7 +378,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
     }
 
     get hasClickListener() {
-        return this.$listeners && this.$listeners.click
+        return !!this.$.vnode.props?.onClick
     }
 
     blurFocus() {

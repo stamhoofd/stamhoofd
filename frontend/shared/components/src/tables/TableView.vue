@@ -134,18 +134,18 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar,STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Organization, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
+import { markRaw } from "vue";
 import { Column } from "./Column";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
-import { markRaw } from "vue";
 
 interface TableListable {
     id: string;
@@ -211,7 +211,8 @@ class ColumnConfiguration extends AutoEncoder {
     directives: {
         tooltip: TooltipDirective,
         longPress: LongPressDirective
-    }
+    },
+    emits: ["click", "refresh"],
 })
 export default class TableView<Value extends TableListable> extends Mixins(NavigationMixin) {
     @Prop({ required: true})
@@ -343,7 +344,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     get hasClickListener() {
-        return this.$listeners && this.$listeners.click
+        return !!this.$.vnode.props?.onClick
     }
 
     blurFocus() {
@@ -705,7 +706,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.updateVisibleRows()
     }
 
-    @Watch("columns")
+    @Watch("columns", {deep: true})
     onColumnsChanged() {
         this.updateRowHeight()
         this.updateVisibleRows()
@@ -1048,7 +1049,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         return this.columns.map(col => `${(col.renderWidth ?? 0)}px`).join(" ")
     }
 
-    @Watch("gridTemplateColumns")
+    @Watch("gridTemplateColumns", {deep: true})
     updateGridSize(val: string) {
         if (!this.wrapColumns) {
             (this.$refs["table"] as HTMLElement).style.setProperty("--table-columns", val);
@@ -1104,7 +1105,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get sortedValues() {
         const m = (this.sortDirection === SortDirection.Ascending ? 1 : -1)
-        return this.filteredValues.sort((a, b) => {
+        return this.filteredValues.slice().sort((a, b) => {
             const d = this.sortBy.doCompare(a, b) * m
             if (d === 0) {
                 // Use ID to have a stable sort

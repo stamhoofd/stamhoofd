@@ -9,9 +9,9 @@ import * as Sentry from '@sentry/vue';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
-import Vue from "vue";
-import { createApp } from 'vue'
+import Vue, { createApp, configureCompat } from "vue"
 import App from "./App.vue";
+configureCompat({ WATCH_ARRAY: false })
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
