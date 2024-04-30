@@ -40,7 +40,8 @@ import StepperInput from "./StepperInput.vue"
     },
     compatConfig: {
         COMPONENT_V_MODEL: false
-    }
+    },
+    emits: ["update:modelValue"]
 })
 export default class NumberInput extends VueComponent {
     /** Price in cents */
