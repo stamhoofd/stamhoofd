@@ -113,7 +113,7 @@ import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
-import { Component, Mixins, Vue } from "vue-property-decorator";
+import { Component, Mixins, Vue } from "@simonbackx/vue-app-navigation/classes";
 import XLSX from "xlsx";
 
 import { allMatchers } from "../../../../../classes/import/defaultMatchers";

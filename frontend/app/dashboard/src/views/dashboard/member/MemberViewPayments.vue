@@ -152,7 +152,7 @@ import { ErrorBox, GlobalEventBus, LoadingButton, Spinner, STErrorsDefault, STLi
 import { SessionManager } from '@stamhoofd/networking';
 import { BalanceItemDetailed, FinancialSupportSettings, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 

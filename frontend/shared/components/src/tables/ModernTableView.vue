@@ -148,7 +148,7 @@ import { Storage } from "@stamhoofd/networking";
 import { SortItemDirection, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import UIFilterEditor from "../filters/UIFilterEditor.vue";
 import { Column } from "./Column";

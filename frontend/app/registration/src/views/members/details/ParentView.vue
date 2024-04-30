@@ -46,7 +46,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Dropdown, EmailInput, ErrorBox, PhoneInput, STErrorsDefault, STInputBox, SaveView, SelectionAddressInput, Validator } from "@stamhoofd/components";
 import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 @Component({

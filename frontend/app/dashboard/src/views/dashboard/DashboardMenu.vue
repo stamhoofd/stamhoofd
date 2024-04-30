@@ -194,7 +194,7 @@ import { AsyncComponent, CenteredMessage, GlobalEventBus, GroupAvatar, LoadCompo
 import { Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Group, GroupCategory, GroupCategoryTree, Permissions, PrivateWebshop, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { openNolt } from "../../classes/NoltHelper";
 import { WhatsNewCount } from '../../classes/WhatsNewCount';

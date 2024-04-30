@@ -19,7 +19,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { SessionManager } from '@stamhoofd/networking';
 import { File } from "@stamhoofd/structures";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import {ErrorBox} from "../errors/ErrorBox";
 import {Validator} from "../errors/Validator";

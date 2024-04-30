@@ -23,7 +23,7 @@ import { SaveView, STErrorsDefault, STInputBox } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import EditWebshopMixin from './EditWebshopMixin';

@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({})
 export default class STList extends Vue {

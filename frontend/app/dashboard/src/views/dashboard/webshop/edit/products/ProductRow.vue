@@ -34,7 +34,7 @@ import { Category } from '@stamhoofd/structures';
 import { PrivateWebshop, Product } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditProductView from './EditProductView.vue';
 

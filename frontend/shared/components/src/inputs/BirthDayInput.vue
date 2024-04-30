@@ -41,7 +41,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from "@stamhoofd/utility"
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import {ErrorBox} from "../errors/ErrorBox";
 import {Validator} from "../errors/Validator";

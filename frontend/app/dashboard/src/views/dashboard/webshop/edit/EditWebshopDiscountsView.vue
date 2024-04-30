@@ -88,7 +88,7 @@ import { Checkbox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STLis
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Discount, DiscountCode, PrivateWebshop, Version, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import EditDiscountCodeView from "./discounts/EditDiscountCodeView.vue";
 import EditDiscountView from "./discounts/EditDiscountView.vue";
 

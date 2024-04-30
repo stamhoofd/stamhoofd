@@ -38,7 +38,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { LoadingView, Logo, OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { LoginProviderType } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { WebshopManager } from "../classes/WebshopManager";
 

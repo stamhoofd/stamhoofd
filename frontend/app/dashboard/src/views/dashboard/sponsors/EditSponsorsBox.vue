@@ -32,7 +32,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STErrorsDefault, STInputBox, STList, STListItem, UploadButton, ViewportHelper } from "@stamhoofd/components";
 import { Sponsor, SponsorConfig } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditSponsorView from "./EditSponsorView.vue";
 

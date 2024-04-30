@@ -38,7 +38,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import MemberBox from "../../components/MemberBox.vue";

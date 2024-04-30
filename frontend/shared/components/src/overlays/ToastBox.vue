@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import { Toast } from "./Toast"
 import ToastView from './ToastView.vue';

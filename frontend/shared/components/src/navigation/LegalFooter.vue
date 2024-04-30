@@ -50,7 +50,7 @@
 <script lang="ts">
 import { SessionManager } from "@stamhoofd/networking";
 import { Organization, Webshop, WebshopTicketType } from "@stamhoofd/structures";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import Logo from "../icons/Logo.vue";
 import { CenteredMessage } from "../overlays/CenteredMessage";

@@ -30,7 +30,7 @@
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Sorter } from '@stamhoofd/utility';
 import { Formatter } from "@stamhoofd/utility"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';

@@ -92,7 +92,7 @@ import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,S
 import { UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import { Component, Mixins, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 
 import PackageConfirmView from "./PackageConfirmView.vue";

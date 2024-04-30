@@ -30,7 +30,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { RecordEditorSettings } from '@stamhoofd/structures';
 import { RecordCategory, RecordSettings, RecordType } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditRecordView from './EditRecordView.vue';
 

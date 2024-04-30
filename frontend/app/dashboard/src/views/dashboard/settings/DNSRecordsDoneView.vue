@@ -30,7 +30,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 

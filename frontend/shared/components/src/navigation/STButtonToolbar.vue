@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component
 export default class STButtonToolbar extends Vue {

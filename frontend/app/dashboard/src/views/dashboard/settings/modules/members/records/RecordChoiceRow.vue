@@ -19,7 +19,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/components";
 import { RecordChoice, RecordSettings } from '@stamhoofd/structures';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 

@@ -66,7 +66,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LegalFooter, LoadingButton, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GroupTree from '../../components/GroupTree.vue';

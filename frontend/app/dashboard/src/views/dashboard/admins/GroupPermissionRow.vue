@@ -25,7 +25,7 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from 
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STListItem } from "@stamhoofd/components";
 import { Group, GroupPrivateSettings, Organization, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, PermissionsByRole } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';

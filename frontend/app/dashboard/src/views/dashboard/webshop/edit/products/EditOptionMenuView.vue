@@ -58,7 +58,7 @@ import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
 import { Option, OptionMenu, Product, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditOptionView from './EditOptionView.vue';
 import OptionMenuOptions from "./OptionMenuOptions.vue";

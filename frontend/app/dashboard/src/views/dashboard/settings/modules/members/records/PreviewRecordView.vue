@@ -37,7 +37,7 @@ import { encodeObject } from "@simonbackx/simple-encoding";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { RecordAnswerInput,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { RecordAnswer, RecordSettings, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 @Component({

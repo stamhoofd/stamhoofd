@@ -4,7 +4,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { MemberManagerBase, Session, SessionManager } from '@stamhoofd/networking';
 import { Address, Document, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
-import { Vue } from "vue-property-decorator";
+import { Vue } from "@simonbackx/vue-app-navigation/classes";
 
 
 /**

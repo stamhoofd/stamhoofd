@@ -40,7 +40,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
 import { AppManager, LoginHelper, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
+import { Component, Mixins, Prop, Ref } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

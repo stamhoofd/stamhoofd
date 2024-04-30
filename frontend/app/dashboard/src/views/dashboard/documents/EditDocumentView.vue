@@ -36,7 +36,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Document, DocumentData, DocumentTemplatePrivate, RecordCategory, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

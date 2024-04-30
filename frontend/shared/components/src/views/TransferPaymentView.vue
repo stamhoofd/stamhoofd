@@ -186,7 +186,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, CopyableDirective, LoadingView, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { CenteredMessage } from '../overlays/CenteredMessage';
 

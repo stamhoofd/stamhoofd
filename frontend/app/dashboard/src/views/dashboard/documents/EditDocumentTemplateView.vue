@@ -95,7 +95,7 @@ import { CenteredMessage, Checkbox, Dropdown, ErrorBox, FillRecordCategoryView, 
 import { AppManager, SessionManager } from "@stamhoofd/networking";
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType, Version } from "@stamhoofd/structures";
 import { StringCompare } from "@stamhoofd/utility";
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 
 import ChooseDocumentTemplateGroup from "./ChooseDocumentTemplateGroup.vue";

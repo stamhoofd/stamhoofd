@@ -108,7 +108,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { CenteredMessage, Checkbox,ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { Discount, DiscountCode, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscount, ProductDiscountSettings, ProductSelector, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';

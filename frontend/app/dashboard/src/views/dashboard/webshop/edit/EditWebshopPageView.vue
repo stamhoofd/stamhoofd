@@ -153,7 +153,7 @@ import { Cart, CartReservedSeat, TicketPublic } from "@stamhoofd/structures";
 import { CartItem } from "@stamhoofd/structures";
 import { DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditSponsorsBox from "../../sponsors/EditSponsorsBox.vue"

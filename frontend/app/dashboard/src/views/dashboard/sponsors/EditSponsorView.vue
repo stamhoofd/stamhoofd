@@ -82,7 +82,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, ImageComponent,NumberInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton,UrlInput,Validator } from "@stamhoofd/components";
 import { Image,ResolutionRequest, Sponsor, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

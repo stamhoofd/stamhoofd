@@ -30,7 +30,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Product, ProductPrice } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditProductPriceView from './EditProductPriceView.vue';
 

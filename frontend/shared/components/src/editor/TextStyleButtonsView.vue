@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import { Editor } from '@tiptap/vue-3'
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import { default as TooltipDirective } from '../directives/Tooltip';
 

@@ -13,7 +13,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, DetailedTicketView,LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { TicketPublic } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { WebshopManager } from '../../classes/WebshopManager';
 

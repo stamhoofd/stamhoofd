@@ -30,7 +30,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { RecordAnswer, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { default as CopyableDirective } from "../directives/Copyable";
 

@@ -127,7 +127,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
 import { Country, GroupGenderType, GroupSettings } from '@stamhoofd/structures';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";

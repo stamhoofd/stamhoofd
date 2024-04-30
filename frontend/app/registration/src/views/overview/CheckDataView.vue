@@ -103,7 +103,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { Address, MemberWithRegistrations, Parent } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import AddressView from "../members/details/AddressView.vue";
 import { createMemberComponent } from "../members/details/createMemberComponent";

@@ -80,7 +80,7 @@ import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-nav
 import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { LoginHelper, Session, Storage } from "@stamhoofd/networking"
 import { Organization } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { getScopedDashboardRoot } from '../../getRootViews';
 
 @Component({

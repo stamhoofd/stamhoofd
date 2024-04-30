@@ -16,7 +16,7 @@
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SaveView, STErrorsDefault } from "@stamhoofd/components";
 import { PrivateWebshop, WebshopField, WebshopMetaData } from '@stamhoofd/structures';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import EditWebshopMixin from './EditWebshopMixin';
 import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';

@@ -33,7 +33,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { RecordCategory, RecordEditorSettings } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditRecordCategoryQuestionsView from './EditRecordCategoryQuestionsView.vue';
 

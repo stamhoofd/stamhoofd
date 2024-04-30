@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue, Watch } from "vue-property-decorator";
+import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 @Component
 export default class PriceInput extends Vue {

@@ -71,7 +71,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingView, PasswordStrength, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
 import { NewUser, Token } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({

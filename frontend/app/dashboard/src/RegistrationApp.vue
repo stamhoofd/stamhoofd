@@ -11,7 +11,7 @@ import { PromiseView } from '@stamhoofd/components';
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, Session, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 //import { getRootView } from "@stamhoofd/registration/src/getRootView";
 import OrganizationSelectionView from "./views/login/OrganizationSelectionView.vue";

@@ -134,7 +134,7 @@ import { BackButton, Checkbox, LoadingView, Spinner, STErrorsDefault, STInputBox
 import { AppManager, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import BillingSettingsView from "./packages/BillingSettingsView.vue";

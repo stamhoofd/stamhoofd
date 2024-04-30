@@ -22,7 +22,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { ContextMenu, ContextMenuItem, GroupAvatar,LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Group, GroupCategory, Organization, OrganizationMetaData } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 

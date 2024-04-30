@@ -38,7 +38,7 @@ import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { SessionManager } from '@stamhoofd/networking';
 import { ApiUser, ApiUserWithToken, PermissionLevel, Permissions, User, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import CopyApiTokenView from './CopyApiTokenView.vue';

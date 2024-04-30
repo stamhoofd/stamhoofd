@@ -76,7 +76,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { FilterDefinition, FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 import Radio from "../../inputs/Radio.vue";
 import STList from "../../layout/STList.vue";
 import STListItem from "../../layout/STListItem.vue";

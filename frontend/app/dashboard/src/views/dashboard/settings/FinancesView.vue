@@ -120,7 +120,7 @@ import { BackButton, LoadComponent, LoadingView,STList, STListItem, STNavigation
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STCredit } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';

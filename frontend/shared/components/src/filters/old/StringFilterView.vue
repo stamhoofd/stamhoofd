@@ -63,7 +63,7 @@
 
 <script lang="ts">
 import { StringFilter, StringFilterMode } from "@stamhoofd/structures";
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import Radio from "../../inputs/Radio.vue";
 import STList from "../../layout/STList.vue";

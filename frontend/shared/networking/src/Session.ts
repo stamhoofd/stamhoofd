@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
 import { KeychainedResponseDecoder, LoginProviderType, Organization, Token, User, Version } from '@stamhoofd/structures'
-import { Vue } from "vue-property-decorator"
+import { Vue } from "@simonbackx/vue-app-navigation/classes"
 
 import { AppManager, UrlHelper } from '..'
 import { ManagedToken } from './ManagedToken'

@@ -47,7 +47,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { PrivateWebshop, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditTimeSlotView from './EditTimeSlotView.vue';
 

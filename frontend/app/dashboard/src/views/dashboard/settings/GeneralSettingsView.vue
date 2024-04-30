@@ -79,7 +79,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, UrlInput,Validator, VATNumberInput } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 

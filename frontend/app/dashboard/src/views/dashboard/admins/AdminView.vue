@@ -57,7 +57,7 @@ import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STE
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { PermissionLevel, Permissions, User, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditUserPermissionsBox from './EditUserPermissionsBox.vue';
 

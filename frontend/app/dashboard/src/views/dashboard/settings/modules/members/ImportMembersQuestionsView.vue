@@ -178,7 +178,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, Checkbox, Dropdown, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { Gender, Group, Organization, OrganizationPatch, Parent, ParentTypeHelper, Registration } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { FamilyManager } from '../../../../../classes/FamilyManager';
 import { ImportingMember } from '../../../../../classes/import/ImportingMember';

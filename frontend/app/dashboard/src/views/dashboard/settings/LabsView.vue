@@ -115,7 +115,7 @@ import { CenteredMessage, Checkbox, ErrorBox, InputSheet, LoadingButton, SaveVie
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import ApiUsersView from '../admins/ApiUsersView.vue';

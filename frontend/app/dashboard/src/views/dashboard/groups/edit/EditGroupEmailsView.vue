@@ -35,7 +35,7 @@ import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartV
 import { SessionManager } from "@stamhoofd/networking";
 import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EmailTemplate, EmailTemplateType, Group, Member, MemberDetails, Order, OrderData, Organization, OrganizationMetaData, OrganizationType, Payment, PaymentDetailed, PaymentMethod, Product, ProductPrice, RegistrationWithMember, STPackageType, STPackageTypeHelper, ValidatedAddress, WebshopMetaData, WebshopPreview, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 

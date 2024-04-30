@@ -33,7 +33,7 @@ import { EmailInput, SaveView, STErrorsDefault, STInputBox, TooltipDirective } f
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditWebshopMixin from "./EditWebshopMixin";

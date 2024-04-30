@@ -16,7 +16,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationBar } from "@stamhoofd/components"
-import { Component, Prop,Ref,Vue } from "vue-property-decorator";
+import { Component, Prop,Ref,Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import StepsHeader from "./StepsHeader.vue";
 

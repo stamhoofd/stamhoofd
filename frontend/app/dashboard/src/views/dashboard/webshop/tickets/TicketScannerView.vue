@@ -52,7 +52,7 @@ import { Order, OrderStatus, PrivateOrder, Product, TicketPrivate } from "@stamh
 import { sleep } from "@stamhoofd/utility";
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { WebshopManager } from "../WebshopManager";
 import TicketAlreadyScannedView from "./status/TicketAlreadyScannedView.vue";

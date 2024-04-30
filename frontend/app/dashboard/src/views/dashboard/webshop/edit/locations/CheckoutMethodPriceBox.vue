@@ -23,7 +23,7 @@
 <script lang="ts">
 import { Checkbox, ErrorBox, PriceInput, STInputBox } from "@stamhoofd/components";
 import { CheckoutMethodPrice } from "@stamhoofd/structures";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

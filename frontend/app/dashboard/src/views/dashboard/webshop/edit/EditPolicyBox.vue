@@ -52,7 +52,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, ErrorBox, FileInput,LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator} from "@stamhoofd/components";
 import { File, Policy } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

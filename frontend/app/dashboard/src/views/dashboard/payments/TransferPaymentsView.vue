@@ -17,7 +17,7 @@ import { CenteredMessage, Column, GlobalEventBus, LoadComponent, TableAction, Ta
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import PaymentView from "./PaymentView.vue";

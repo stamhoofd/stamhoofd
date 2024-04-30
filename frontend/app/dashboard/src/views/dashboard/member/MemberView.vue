@@ -29,7 +29,7 @@ import { BackButton, FemaleIcon, LongPressDirective, MaleIcon, SegmentedControl,
 import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Gender, Group, MemberWithRegistrations } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 

@@ -77,7 +77,7 @@ import { Group, Member, MemberWithRegistrations, ParentTypeHelper, RecordCategor
 import { Formatter } from '@stamhoofd/utility';
 // Keep for types only
 import PDFKit from "pdfkit"
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 

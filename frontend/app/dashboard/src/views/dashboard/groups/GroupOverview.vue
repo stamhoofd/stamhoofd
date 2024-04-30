@@ -274,7 +274,7 @@ import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, PromiseView,
 import { UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import CategoryView from './CategoryView.vue';

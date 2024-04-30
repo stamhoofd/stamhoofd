@@ -86,7 +86,7 @@ import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar } 
 import { SessionManager } from "@stamhoofd/networking";
 import { Group, MemberWithRegistrations, RegisterItem, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GroupTag from "../../components/GroupTag.vue";

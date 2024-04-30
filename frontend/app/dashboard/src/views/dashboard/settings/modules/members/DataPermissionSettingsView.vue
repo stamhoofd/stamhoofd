@@ -72,7 +72,7 @@ import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceIn
 import { UrlHelper } from '@stamhoofd/networking';
 import { DataPermissionsSettings } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from "@stamhoofd/structures"
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 

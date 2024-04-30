@@ -27,7 +27,7 @@ import { BackButton, LoadComponent, STErrorsDefault, STInputBox, STList, STListI
 import { UrlHelper } from '@stamhoofd/networking';
 import { WebshopPreview, WebshopStatus } from "@stamhoofd/structures";
 import { Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 

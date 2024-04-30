@@ -327,7 +327,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import AdminsView from '../admins/AdminsView.vue';

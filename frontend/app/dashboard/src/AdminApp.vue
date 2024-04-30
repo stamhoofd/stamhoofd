@@ -8,7 +8,7 @@
 import { ModalStackComponent } from "@simonbackx/vue-app-navigation";
 import { ToastBox } from '@stamhoofd/components';
 import { UrlHelper } from "@stamhoofd/networking";
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 
 @Component({

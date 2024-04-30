@@ -29,7 +29,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { BooleanStatus, FinancialSupportSettings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import { Component, Mixins, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 
 import FreeContributionView from "./FreeContributionView.vue";

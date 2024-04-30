@@ -74,7 +74,7 @@ import { CenteredMessage, ErrorBox, LoadingView, SaveView, STErrorsDefault, STLi
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditRoleView from "./EditRoleView.vue";

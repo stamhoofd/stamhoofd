@@ -47,7 +47,7 @@ import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingBut
 import { NetworkManager } from '@stamhoofd/networking';
 import { Address, Gender } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 

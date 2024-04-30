@@ -50,7 +50,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { Checkbox, LoadComponent, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import ActivatedView from './modules/members/ActivatedView.vue';

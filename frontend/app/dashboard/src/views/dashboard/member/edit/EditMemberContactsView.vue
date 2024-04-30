@@ -86,7 +86,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Checkbox, ErrorBox, LoadingButton,Slider, STErrorsDefault, STInputBox, STList, STListItem, STToolbar, Validator } from "@stamhoofd/components"
 import { EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
 

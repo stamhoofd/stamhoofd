@@ -23,7 +23,7 @@ import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoof
 import { UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, FilterDefinition, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 

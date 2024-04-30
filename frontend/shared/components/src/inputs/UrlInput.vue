@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import {ErrorBox} from "../errors/ErrorBox";
 import {Validator} from "../errors/Validator";

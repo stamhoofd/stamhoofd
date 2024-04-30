@@ -35,7 +35,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, SaveView, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 

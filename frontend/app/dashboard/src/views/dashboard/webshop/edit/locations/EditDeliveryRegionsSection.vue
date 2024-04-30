@@ -47,7 +47,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { LoadingButton,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from "@stamhoofd/structures"
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 const throttle = (func, limit) => {
     let lastFunc;

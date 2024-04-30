@@ -88,7 +88,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version, WebshopPreview, WebshopPrivateMetaData } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 

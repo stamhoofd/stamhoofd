@@ -30,7 +30,7 @@ import { ContextMenu, ContextMenuItem, LongPressDirective, STList, STListItem } 
 import { SessionManager } from "@stamhoofd/networking";
 import { Order, ProductDateRange, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import TicketAlreadyScannedView from "../tickets/status/TicketAlreadyScannedView.vue";

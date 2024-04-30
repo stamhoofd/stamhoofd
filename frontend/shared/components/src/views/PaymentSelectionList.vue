@@ -39,7 +39,7 @@ import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.sv
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg";
 import { LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Country, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

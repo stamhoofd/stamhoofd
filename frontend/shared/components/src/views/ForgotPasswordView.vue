@@ -25,7 +25,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,EmailInput, ErrorBox, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar, Toast, Validator } from "@stamhoofd/components"
 import { Session,SessionManager } from '@stamhoofd/networking';
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

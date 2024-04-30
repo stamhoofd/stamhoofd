@@ -38,7 +38,7 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchC
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { DiscountRequirement, PrivateWebshop, ProductSelector, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import ProductSelectorBox from './ProductSelectorBox.vue';

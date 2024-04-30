@@ -125,7 +125,7 @@ import { I18nController } from "@stamhoofd/frontend-i18n";
 import { SessionManager } from "@stamhoofd/networking";
 import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

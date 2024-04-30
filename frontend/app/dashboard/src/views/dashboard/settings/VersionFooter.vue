@@ -8,7 +8,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent } from "@stamhoofd/components";
 import { AppManager } from '@stamhoofd/networking';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({})
 export default class VersionFooter extends Mixins(NavigationMixin) {

@@ -53,7 +53,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BirthDayInput, CenteredMessage, EmailInput, ErrorBox, PhoneInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, Gender, MemberDetails, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 

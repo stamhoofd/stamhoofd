@@ -29,7 +29,7 @@
 <script lang="ts">
 import { FramedComponent, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { OrganizationLogo, STNavigationBar } from "@stamhoofd/components";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import { TabBarItem } from "../../classes/TabBarItem";

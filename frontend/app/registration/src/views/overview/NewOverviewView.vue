@@ -205,7 +205,7 @@ import { downloadDocument } from "@stamhoofd/document-helper";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Document, DocumentStatus, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { Suggestion, SuggestionBuilder } from "../../classes/SuggestionBuilder";
 import AccountSettingsView from "../account/AccountSettingsView.vue";

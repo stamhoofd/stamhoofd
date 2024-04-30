@@ -46,7 +46,7 @@ import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner,STL
 import { SessionManager } from "@stamhoofd/networking";
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 

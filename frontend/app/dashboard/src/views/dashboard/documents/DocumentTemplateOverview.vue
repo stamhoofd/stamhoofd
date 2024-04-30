@@ -116,7 +116,7 @@ import { CenteredMessage, Checkbox, FillRecordCategoryView, Spinner, STList, STL
 import { SessionManager } from "@stamhoofd/networking";
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, RecordAnswer } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import DocumentsView from "./DocumentsView.vue";
 import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";

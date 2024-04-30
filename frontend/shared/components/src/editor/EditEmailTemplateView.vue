@@ -34,7 +34,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Replacement } from '@stamhoofd/structures';
 import { EmailTemplate, Group, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import TooltipDirective from '../directives/Tooltip';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';

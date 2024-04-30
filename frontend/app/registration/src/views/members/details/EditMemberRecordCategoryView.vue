@@ -6,7 +6,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { FillRecordCategoryView } from '@stamhoofd/components';
 import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 

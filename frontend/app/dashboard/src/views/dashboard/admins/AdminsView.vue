@@ -89,7 +89,7 @@ import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar,
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import AdminRolesView from './AdminRolesView.vue';

@@ -187,7 +187,7 @@ import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Radio, 
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditRoleCategoriesView from './EditRoleCategoriesView.vue';

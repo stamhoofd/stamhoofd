@@ -248,7 +248,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { CenteredMessage, Checkbox, Dropdown,ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { RecordEditorSettings } from '@stamhoofd/structures';
 import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';

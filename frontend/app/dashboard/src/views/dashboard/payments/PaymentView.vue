@@ -260,7 +260,7 @@ import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, 
 import { SessionManager } from "@stamhoofd/networking";
 import { BalanceItemDetailed, calculateVATPercentage, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditBalanceItemView from "../member/balance/EditBalanceItemView.vue";
 

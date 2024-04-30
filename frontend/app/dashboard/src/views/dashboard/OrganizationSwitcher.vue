@@ -20,7 +20,7 @@ import { ComponentWithProperties, ModalStackComponentFinderMixin, NavigationCont
 import { CenteredMessage, ContextMenu, ContextMenuItem, LoadComponent, LongPressDirective, OrganizationAvatar } from '@stamhoofd/components';
 import { Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import { getScopedDashboardRoot } from "../../getRootViews";

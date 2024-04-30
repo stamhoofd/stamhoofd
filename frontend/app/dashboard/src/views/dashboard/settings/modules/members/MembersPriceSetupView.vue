@@ -30,7 +30,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { GroupPrices, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STPackageBundle, Version } from "@stamhoofd/structures"
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditGroupPriceBox from '../../../groups/EditGroupPriceBox.vue';

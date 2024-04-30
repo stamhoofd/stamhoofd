@@ -132,7 +132,7 @@ import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, 
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STCredit, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GeneralSettingsView from "../GeneralSettingsView.vue";

@@ -49,7 +49,7 @@ import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox,STNavigatio
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditSeatingPlanView from "../edit/seating/EditSeatingPlanView.vue";

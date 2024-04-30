@@ -35,7 +35,7 @@ import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-e
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import GroupCategoryPermissionRow from './GroupCategoryPermissionRow.vue';
 

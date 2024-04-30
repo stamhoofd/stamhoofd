@@ -29,7 +29,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { CenteredMessage, Checkbox, ErrorBox, ReplaceRootEventBus, SaveView, STErrorsDefault } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Organization, OrganizationMetaData } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import OrganizationSelectionView from "../login/OrganizationSelectionView.vue";
 
 

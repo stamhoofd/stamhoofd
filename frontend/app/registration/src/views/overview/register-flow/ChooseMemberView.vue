@@ -39,7 +39,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { MemberWithRegistrations } from "@stamhoofd/structures";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { createMemberComponent } from "../../members/details/createMemberComponent";
 import MemberChooseGroupsView from "../../members/MemberChooseGroupsView.vue";

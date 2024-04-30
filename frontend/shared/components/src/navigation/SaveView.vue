@@ -50,7 +50,7 @@
 
 
 <script lang="ts">
-import { Component,Prop,Vue } from "vue-property-decorator";
+import { Component,Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import BackButton from "./BackButton.vue";
 import LoadingButton from "./LoadingButton.vue";

@@ -27,7 +27,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, LongPressDirective, Radio,STListItem } from "@stamhoofd/components";
 import { Option, OptionMenu } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditOptionView from './EditOptionView.vue';
 

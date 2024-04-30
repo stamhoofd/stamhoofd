@@ -48,7 +48,7 @@ import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator} from "@stamhoofd/components";
 import { Organization, OrganizationPatch } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { ImportError } from '../../../../../classes/import/ImportingMember';
 

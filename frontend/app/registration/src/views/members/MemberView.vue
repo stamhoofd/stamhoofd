@@ -219,7 +219,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, Checkbox, RecordCategoryAnswersBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GroupTree from "../../components/GroupTree.vue";

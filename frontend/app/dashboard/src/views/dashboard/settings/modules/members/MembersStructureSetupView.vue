@@ -62,7 +62,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, CenteredMessage, Checkbox, DateSelection, Dropdown,ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
 import { Organization, OrganizationGenderType, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationType,OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper, Version } from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import MembersYearSetupView from './MembersYearSetupView.vue';

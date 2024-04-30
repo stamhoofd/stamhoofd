@@ -117,7 +117,7 @@ import { CopyableDirective, ErrorBox, Spinner, STErrorsDefault, STList, STListIt
 import { SessionManager } from "@stamhoofd/networking";
 import { Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

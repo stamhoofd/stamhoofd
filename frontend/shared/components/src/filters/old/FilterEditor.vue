@@ -25,7 +25,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Filter, FilterDefinition, FilterGroup, Organization } from "@stamhoofd/structures";
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import Checkbox from "../../inputs/Checkbox.vue";
 import STList from "../../layout/STList.vue";

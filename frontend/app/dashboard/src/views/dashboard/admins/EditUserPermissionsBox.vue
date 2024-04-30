@@ -38,7 +38,7 @@ import { PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STList, STListItem } from "@stamhoofd/components";
 import { PermissionLevel, PermissionRole, Permissions, User } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import AdminRolesView from './AdminRolesView.vue';

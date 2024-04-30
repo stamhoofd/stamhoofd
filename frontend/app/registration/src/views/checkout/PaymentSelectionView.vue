@@ -40,7 +40,7 @@ import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionLi
 import { SessionManager } from '@stamhoofd/networking';
 import { KeychainedResponse, Payment, PaymentMethod, PaymentStatus, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import RegistrationSuccessView from './RegistrationSuccessView.vue';

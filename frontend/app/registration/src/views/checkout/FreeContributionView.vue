@@ -56,7 +56,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, ErrorBox, LoadingButton, PriceInput, Radio, RadioGroup, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import { Component, Mixins, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 
 import PaymentSelectionView from './PaymentSelectionView.vue';

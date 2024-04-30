@@ -35,7 +35,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Radio, SaveView, STList, STListItem, Toast, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, Storage } from "@stamhoofd/networking";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

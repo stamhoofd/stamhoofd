@@ -52,7 +52,7 @@ import { Checkout } from "@stamhoofd/structures";
 import { RecordEditorSettings } from "@stamhoofd/structures";
 import { PrivateWebshop, RecordCategory, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import EditRecordCategoryQuestionsView from "../../settings/modules/members/records/EditRecordCategoryQuestionsView.vue";
 import EditRecordCategoryView from "../../settings/modules/members/records/EditRecordCategoryView.vue";

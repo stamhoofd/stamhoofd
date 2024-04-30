@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, GlobalEventBus, Toast, Validator } from "@stamhoofd/components";
 import { PrivateWebshop, Version, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { WebshopManager } from '../WebshopManager';
 
 @Component

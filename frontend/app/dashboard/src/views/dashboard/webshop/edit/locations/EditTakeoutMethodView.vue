@@ -63,7 +63,7 @@ import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } fro
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
 import { Address, CheckoutMethodType, PrivateWebshop, Version, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditTimeSlotsSection from "./EditTimeSlotsSection.vue";
 

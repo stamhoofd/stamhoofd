@@ -77,7 +77,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, CenteredMessage, ErrorBox, PhoneInput, STErrorsDefault, STInputBox, SaveView, Validator } from "@stamhoofd/components";
 import { EmergencyContact, FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RegisterItem, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 

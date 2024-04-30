@@ -157,7 +157,7 @@ import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault,S
 import { SessionManager } from "@stamhoofd/networking";
 import { STPackage } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import PackageConfirmView from "./PackageConfirmView.vue";
 

@@ -33,7 +33,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Logo,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 

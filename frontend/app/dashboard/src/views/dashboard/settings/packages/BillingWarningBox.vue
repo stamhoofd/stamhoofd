@@ -87,7 +87,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { CenteredMessage, LoadComponent } from "@stamhoofd/components";
 import { STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import PackageSettingsView from "./PackageSettingsView.vue";

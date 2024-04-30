@@ -43,7 +43,7 @@ import { GroupAvatar, Spinner,STList, STListItem, STNavigationBar, Toast } from 
 import { UrlHelper } from "@stamhoofd/networking";
 import { Group } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GroupOverview from "./GroupOverview.vue";

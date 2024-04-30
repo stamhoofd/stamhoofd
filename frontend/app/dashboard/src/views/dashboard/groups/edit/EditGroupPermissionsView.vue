@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { Checkbox, SaveView, STErrorsDefault, STInputBox, STList, STListItem } from "@stamhoofd/components";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
 import EditGroupMixin from './EditGroupMixin';

@@ -67,7 +67,7 @@
 <script lang="ts">
 import { SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton } from "@stamhoofd/components";
 import { GroupSettings, Image, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import EditGroupMixin from './EditGroupMixin';
 

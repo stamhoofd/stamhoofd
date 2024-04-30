@@ -11,7 +11,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AddressInput,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Address, ProductLocation} from "@stamhoofd/structures"
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

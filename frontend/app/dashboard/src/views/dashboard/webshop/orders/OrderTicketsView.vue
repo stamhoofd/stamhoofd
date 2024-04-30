@@ -28,7 +28,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import { WebshopManager } from "../WebshopManager";

@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder,
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, Toast, Validator } from "@stamhoofd/components";
 import { FinancialSupportSettings, Group, GroupPrices, GroupPrivateSettings, GroupSettings, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component
 export default class EditGroupMixin extends Mixins(NavigationMixin) {

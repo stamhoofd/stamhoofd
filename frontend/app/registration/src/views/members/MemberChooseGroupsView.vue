@@ -70,7 +70,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { MemberWithRegistrations, Registration } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import MemberBox from "../../components/MemberBox.vue";

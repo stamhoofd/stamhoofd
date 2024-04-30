@@ -61,7 +61,7 @@ import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamho
 import { UrlHelper } from '@stamhoofd/networking';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import CategoryRow from './categories/CategoryRow.vue';
 import EditCategoryView from './categories/EditCategoryView.vue';

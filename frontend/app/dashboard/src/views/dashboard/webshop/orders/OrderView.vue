@@ -317,7 +317,7 @@ import { CheckoutPriceBreakdown, CartItemRow, ErrorBox, GlobalEventBus, LoadingB
 import { SessionManager } from "@stamhoofd/networking";
 import { BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditPaymentView from "../../member/EditPaymentView.vue";

@@ -70,7 +70,7 @@ import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInp
 import { Option, OptionMenu, OptionSelectionRequirementHelper } from "@stamhoofd/structures";
 import { OptionSelectionRequirement } from "@stamhoofd/structures";
 import { PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import ChooseProductView from "./ChooseProductView.vue";
 
 

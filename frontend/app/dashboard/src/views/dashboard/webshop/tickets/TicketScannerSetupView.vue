@@ -61,7 +61,7 @@ import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STT
 import { UrlHelper } from '@stamhoofd/networking';
 import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { WebshopManager } from "../WebshopManager";
 import TicketScannerView from "./TicketScannerView.vue";

@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import BackButton from ".//BackButton.vue";
 
@@ -66,7 +66,6 @@ export default class STNavigationBar extends Vue {
     scrollElement!: HTMLElement | null;
 
     get hasLeft() {
-        console.log('has left', this.$slots)
         return this.pop || (this.dismiss && (this as any).$isAndroid) || !!this.$slots['left']
     }
 

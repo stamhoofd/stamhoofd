@@ -25,7 +25,7 @@
 import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import WebshopPermissionRow from '../../admins/WebshopPermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';

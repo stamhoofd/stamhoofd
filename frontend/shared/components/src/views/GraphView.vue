@@ -30,7 +30,7 @@ import {
     LineController,
     LineElement, PointElement, Tooltip
 } from 'chart.js';
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { DateOption } from "./DateRange";
 import GraphDateRangeSelector from "./GraphDateRangeSelector.vue";

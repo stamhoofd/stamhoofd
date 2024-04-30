@@ -138,7 +138,7 @@ import { BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar
 import { Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Organization, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { markRaw } from "vue";
 import { Column } from "./Column";

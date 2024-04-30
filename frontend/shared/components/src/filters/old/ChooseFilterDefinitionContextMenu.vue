@@ -9,7 +9,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Filter, FilterDefinition } from "@stamhoofd/structures";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import ContextMenuItemView from "../../overlays/ContextMenuItemView.vue";
 import ContextMenuLine from "../../overlays/ContextMenuLine.vue";

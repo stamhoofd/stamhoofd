@@ -85,7 +85,7 @@ import { GraphViewConfiguration } from "@stamhoofd/components/src/views/GraphVie
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { Category, Graph, GraphData, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { WebshopManager } from '../WebshopManager';
 

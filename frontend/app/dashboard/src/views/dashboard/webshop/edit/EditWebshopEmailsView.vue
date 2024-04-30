@@ -42,7 +42,7 @@ import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartV
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferDescriptionType, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import { WebshopManager } from "../WebshopManager";

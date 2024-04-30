@@ -69,7 +69,7 @@ import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar,
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { ApiUser, PermissionLevel, Permissions, User } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import AdminView from './AdminView.vue';

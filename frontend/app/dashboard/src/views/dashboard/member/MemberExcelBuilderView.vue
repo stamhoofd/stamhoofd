@@ -62,7 +62,7 @@ import { BackButton, Checkbox, ErrorBox, LoadingButton, SegmentedControl, STErro
 import { AppManager } from "@stamhoofd/networking";
 import { Address, Gender, Group, MemberWithRegistrations, ParentTypeHelper, RecordAddressAnswer, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import XLSX from "xlsx";
 
 

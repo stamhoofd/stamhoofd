@@ -14,7 +14,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, FetchAllOptions, Toast } from "@stamhoofd/components";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { TableAction } from "./TableAction";
 import TableView from "./TableView.vue";

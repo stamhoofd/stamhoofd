@@ -31,7 +31,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { AddressInput,ErrorBox, Radio,STErrorsDefault, STInputBox, STList,STListItem,Validator } from "@stamhoofd/components"
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Address, Country, ProductLocation } from "@stamhoofd/structures"
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import ProductLocationInput from "./ProductLocationInput.vue"
 

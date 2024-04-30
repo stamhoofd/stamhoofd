@@ -132,7 +132,7 @@ import { I18nController } from "@stamhoofd/frontend-i18n";
 import { SessionManager } from "@stamhoofd/networking";
 import { BalanceItemPaymentDetailed, Country, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, StripeAccount } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import PaymentExportView from "./PaymentExportView.vue";

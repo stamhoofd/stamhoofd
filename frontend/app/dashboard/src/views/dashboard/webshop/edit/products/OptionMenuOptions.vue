@@ -10,7 +10,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STList, STListItem } from "@stamhoofd/components";
 import { Option, OptionMenu } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import OptionRow from "./OptionRow.vue"
 

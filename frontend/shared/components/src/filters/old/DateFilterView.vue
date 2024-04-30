@@ -82,7 +82,7 @@
 
 <script lang="ts">
 import { DateFilter, DateFilterMode } from "@stamhoofd/structures"
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import DateSelection from "../../inputs/DateSelection.vue";
 import Radio from "../../inputs/Radio.vue";

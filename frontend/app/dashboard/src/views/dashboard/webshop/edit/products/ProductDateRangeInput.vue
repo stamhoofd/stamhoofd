@@ -19,7 +19,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { DateSelection, ErrorBox, STInputBox, TimeInput, Validator } from "@stamhoofd/components"
 import { ProductDateRange} from "@stamhoofd/structures"
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

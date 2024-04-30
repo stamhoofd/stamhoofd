@@ -96,7 +96,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { ErrorBox, LongPressDirective,RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective } from "@stamhoofd/components";
 import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { DocumentActionBuilder } from "./DocumentActionBuilder";
 

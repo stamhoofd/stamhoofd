@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { ErrorBox } from "./ErrorBox"
 import STErrorBox from "./STErrorBox.vue"

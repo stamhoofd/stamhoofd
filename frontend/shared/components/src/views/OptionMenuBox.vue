@@ -31,7 +31,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, Radio, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Cart, CartItem, CartItemOption, CartStockHelper,Option, OptionMenu, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

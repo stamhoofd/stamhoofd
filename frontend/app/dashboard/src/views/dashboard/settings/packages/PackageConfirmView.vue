@@ -160,7 +160,7 @@ import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput
 import { SessionManager } from "@stamhoofd/networking";
 import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPricingType, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import PackageSettingsView, { SelectablePackage } from "./PackageSettingsView.vue";

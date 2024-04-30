@@ -15,7 +15,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component
 export default class Tooltip extends Mixins(NavigationMixin) {

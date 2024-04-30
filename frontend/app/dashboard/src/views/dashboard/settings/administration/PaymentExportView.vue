@@ -130,7 +130,7 @@ import { SessionManager } from "@stamhoofd/networking";
 import { BalanceItemPaymentDetailed, calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentProvider, StripeAccount } from "@stamhoofd/structures";
 import { PaymentGeneral } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 export type PaymentFilter = {
     filterBalanceItems?: (payment: BalanceItemPaymentDetailed) => boolean

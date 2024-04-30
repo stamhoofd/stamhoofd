@@ -15,7 +15,7 @@ import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { RecordWarning, RecordWarningType } from "@stamhoofd/structures";
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import { DocumentActionBuilder } from "./DocumentActionBuilder";

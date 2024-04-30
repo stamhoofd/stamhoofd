@@ -127,7 +127,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import SignupAccountView from './SignupAccountView.vue';
 

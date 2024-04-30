@@ -142,7 +142,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentStatusHelper, TransferSettings } from '@stamhoofd/structures';
 import { PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 

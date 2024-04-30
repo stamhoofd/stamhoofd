@@ -53,7 +53,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Formatter } from "@stamhoofd/utility"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import LongPressDirective from "../directives/LongPress";
 import Dropdown from "../inputs/Dropdown.vue";

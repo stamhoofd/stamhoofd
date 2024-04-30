@@ -72,7 +72,7 @@
 
 <script lang="ts">
 import { NumberFilter, NumberFilterMode } from "@stamhoofd/structures";
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import NumberInput from "../../inputs/NumberInput.vue";
 import Radio from "../../inputs/Radio.vue";

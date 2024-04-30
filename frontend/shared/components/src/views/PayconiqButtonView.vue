@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { CenteredMessage,EmailInput, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Component, Prop, Mixins } from "vue-property-decorator";
+import { Component, Prop, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import PayconiqBannerView from "./PayconiqBannerView.vue";
 

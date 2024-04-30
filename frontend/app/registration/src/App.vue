@@ -14,7 +14,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import { getRootView } from './getRootView';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';

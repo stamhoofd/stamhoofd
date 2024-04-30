@@ -66,7 +66,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartReservedSeat, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { Toast } from "../overlays/Toast";
 

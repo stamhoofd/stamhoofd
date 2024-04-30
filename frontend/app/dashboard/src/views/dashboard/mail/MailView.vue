@@ -104,7 +104,7 @@ import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, Edit
 import { AppManager, SessionManager } from '@stamhoofd/networking';
 import { EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { MemberManager } from '../../../classes/MemberManager';
 

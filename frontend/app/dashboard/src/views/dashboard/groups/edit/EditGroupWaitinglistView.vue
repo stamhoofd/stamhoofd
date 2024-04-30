@@ -66,7 +66,7 @@
 <script lang="ts">
 import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
 import { WaitingListType } from '@stamhoofd/structures';
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
 import EditGroupPriceBox from "../EditGroupPriceBox.vue";

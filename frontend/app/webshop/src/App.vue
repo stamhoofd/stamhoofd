@@ -15,7 +15,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { DarkMode, GetWebshopFromDomainResult, WebshopAuthType } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import ChooseWebshopView from './views/ChooseWebshopView.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';

@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { Organization, RegistrationsFilter,RegistrationsFilterChoice, RegistrationsFilterMode } from "@stamhoofd/structures";
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import Checkbox from "../../inputs/Checkbox.vue";
 import Dropdown from "../../inputs/Dropdown.vue";
