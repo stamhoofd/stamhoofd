@@ -234,7 +234,9 @@
                 <STInputBox v-if="mollieProfiles.length > 1" title="Standaardprofiel" error-fields="mollieProfile" :error-box="errorBox" class="max">
                     <STList>
                         <STListItem v-for="profile in mollieProfiles" :key="profile.id" element-name="label" :selectable="true">
-                            <Radio #left v-model="selectedMollieProfile" :value="profile.id" />
+                            <template #left>
+                                <Radio v-model="selectedMollieProfile" :value="profile.id" />
+                            </template>
                             <h3 class="style-title-list">
                                 {{ profile.name }}
                             </h3>

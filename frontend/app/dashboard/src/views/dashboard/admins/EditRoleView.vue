@@ -22,7 +22,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Radio #left v-model="basePermission" value="None" />
+                <template #left>
+                    <Radio v-model="basePermission" value="None" />
+                </template>
                 <h3 class="style-title-list">
                     Geen
                 </h3>
@@ -32,7 +34,9 @@
             </STListItem>
 
             <STListItem :selectable="true" element-name="label">
-                <Radio #left v-model="basePermission" value="Read" />
+                <template #left>
+                    <Radio v-model="basePermission" value="Read" />
+                </template>
                 <h3 class="style-title-list">
                     Lezen
                 </h3>
@@ -42,7 +46,9 @@
             </STListItem>
 
             <STListItem :selectable="true" element-name="label">
-                <Radio #left v-model="basePermission" value="Write" />
+                <template #left>
+                    <Radio v-model="basePermission" value="Write" />
+                </template>
                 <h3 class="style-title-list">
                     Bewerken
                 </h3>

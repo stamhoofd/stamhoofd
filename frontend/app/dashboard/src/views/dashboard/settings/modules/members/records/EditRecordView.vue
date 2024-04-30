@@ -134,21 +134,27 @@
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Radio #left v-model="warningInverted" :value="null" name="warningInverted" />
+                    <template #left>
+                        <Radio v-model="warningInverted" :value="null" name="warningInverted" />
+                    </template>
                     <h3 class="style-title-list">
                         Geen waarschuwing
                     </h3>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
-                    <Radio #left v-model="warningInverted" :value="false" name="warningInverted" />
+                    <template #left>
+                        <Radio v-model="warningInverted" :value="false" name="warningInverted" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ warningNonInvertedText }}
                     </h3>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
-                    <Radio #left v-model="warningInverted" :value="true" name="warningInverted" />
+                    <template #left>
+                        <Radio v-model="warningInverted" :value="true" name="warningInverted" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ warningInvertedText }}
                     </h3>
@@ -168,7 +174,9 @@
             <STInputBox v-if="warningType" class="max" title="Type">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
-                        <Radio #left v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                        <template #left>
+                            <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                        </template>
                         <h3 class="style-title-list">
                             Informatief
                         </h3>
@@ -178,7 +186,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio #left v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                        <template #left>
+                            <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                        </template>
                         <h3 class="style-title-list">
                             Waarschuwing
                         </h3>
@@ -188,7 +198,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio #left v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                        <template #left>
+                            <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                        </template>
                         <h3 class="style-title-list">
                             Foutmelding
                         </h3>

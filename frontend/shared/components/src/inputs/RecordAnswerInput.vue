@@ -24,7 +24,9 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.ChooseOne" class="max" :title="label" error-fields="input" :error-box="errorBox">
             <STList>
                 <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
-                    <Radio #left v-model="answer.selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
+                    <template #left>
+                        <Radio v-model="answer.selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
+                    </template>
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>

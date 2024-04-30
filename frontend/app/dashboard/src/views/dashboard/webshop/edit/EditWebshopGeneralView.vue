@@ -22,7 +22,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="ticketType" :value="WebshopTicketType.None" />
+                <template #left>
+                    <Radio v-model="ticketType" :value="WebshopTicketType.None" />
+                </template>
                 <h3 class="style-title-list">
                     Geen tickets
                 </h3>
@@ -31,7 +33,9 @@
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
+                <template #left>
+                    <Radio v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
+                </template>
                 <h3 class="style-title-list">
                     Ticketverkoop voor groepen
                 </h3>
@@ -40,7 +44,9 @@
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="ticketType" :value="WebshopTicketType.Tickets" />
+                <template #left>
+                    <Radio v-model="ticketType" :value="WebshopTicketType.Tickets" />
+                </template>
                 <h3 class="style-title-list">
                     Ticketverkoop voor personen
                 </h3>
@@ -94,7 +100,9 @@
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio #left v-model="numberingType" :value="WebshopNumberingType.Continuous" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                    <template #left>
+                        <Radio v-model="numberingType" :value="WebshopNumberingType.Continuous" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                    </template>
                     <h3 class="style-title-list">
                         Gebruik opeenvolgende bestelnummers
                     </h3>
@@ -103,7 +111,9 @@
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio #left v-model="numberingType" :value="WebshopNumberingType.Random" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                    <template #left>
+                        <Radio v-model="numberingType" :value="WebshopNumberingType.Random" :disabled="!isNew && originalNumberingType !== WebshopNumberingType.Continuous" />
+                    </template>
                     <h3 class="style-title-list">
                         Gebruik willekeurige bestelnummers
                     </h3>
@@ -155,7 +165,9 @@
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio #left v-model="authType" :value="WebshopAuthType.Disabled" />
+                    <template #left>
+                        <Radio v-model="authType" :value="WebshopAuthType.Disabled" />
+                    </template>
                     <h3 class="style-title-list">
                         Uitgeschakeld
                     </h3>
@@ -164,7 +176,9 @@
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio #left v-model="authType" :value="WebshopAuthType.Required" />
+                    <template #left>
+                        <Radio v-model="authType" :value="WebshopAuthType.Required" />
+                    </template>
                     <h3 class="style-title-list">
                         Verplicht
                     </h3>

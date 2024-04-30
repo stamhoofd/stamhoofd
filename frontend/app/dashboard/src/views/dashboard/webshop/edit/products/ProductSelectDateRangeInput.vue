@@ -2,14 +2,18 @@
     <div>
         <STList v-if="dateRanges.length > 0">
             <STListItem v-for="_dateRange in dateRanges" :key="_dateRange.id" element-name="label" :selectable="true" class="left-center dateRange-selection">
-                <Radio #left v-model="selectedDateRange" :value="_dateRange" @change="changeSelected" />
+                <template #left>
+                    <Radio v-model="selectedDateRange" :value="_dateRange" @change="changeSelected" />
+                </template>
                 <h3>
                     {{ formatDate(_dateRange) }}
                 </h3>
                 <template #right><button type="button" class="button icon gray edit" @click.stop="doEditDateRange(_dateRange)" /></template>
             </STListItem>
             <STListItem element-name="label" :selectable="true" class="left-center">
-                <Radio #left v-model="selectedDateRange" :value="null" @change="changeSelected" />
+                <template #left>
+                    <Radio v-model="selectedDateRange" :value="null" @change="changeSelected" />
+                </template>
                 Een andere datum/tijdstip
             </STListItem>
         </STList>

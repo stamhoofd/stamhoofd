@@ -25,7 +25,7 @@
 
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
-                <Checkbox #left :checked="getPaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
+                <template #left><Checkbox :checked="getPaymentMethod(method)" @change="setPaymentMethod(method, $event)" /></template>
                 <h3 class="style-title-list">
                     {{ getName(method) }}
                 </h3>
@@ -53,7 +53,9 @@
             <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
                 <STList>
                     <STListItem v-for="_type in transferTypes" :key="_type.value" :selectable="true" element-name="label">
-                        <Radio #left v-model="transferType" :value="_type.value" />
+                        <template #left>
+                            <Radio v-model="transferType" :value="_type.value" />
+                        </template>
                         <h3 class="style-title-list">
                             {{ _type.name }}
                         </h3>

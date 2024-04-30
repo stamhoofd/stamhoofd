@@ -6,7 +6,9 @@
 
         <STList>
             <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
-                <Radio #left v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
+                <template #left>
+                    <Radio v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
+                </template>
                 <h2 class="style-title-list">
                     {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
                 </h2>

@@ -1,7 +1,9 @@
 <template>
     <STList>
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="DateFilterMode.Equal" @change="onChange" />
+            <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="DateFilterMode.Equal" @change="onChange" />
+            </template>
             <p class="style-title-list">
                 Gelijk aan...
             </p>
@@ -10,7 +12,9 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="DateFilterMode.NotEqual" @change="onChange" />
+            <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="DateFilterMode.NotEqual" @change="onChange" />
+            </template>
             <p class="style-title-list">
                 Niet gelijk aan...
             </p>
@@ -20,7 +24,9 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="DateFilterMode.GreaterThan" @change="onChange" />
+            <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="DateFilterMode.GreaterThan" @change="onChange" />
+            </template>
             <p class="style-title-list">
                 Na of op...
             </p>
@@ -30,7 +36,9 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="DateFilterMode.LessThan" @change="onChange" />
+            <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="DateFilterMode.LessThan" @change="onChange" />
+            </template>
             <p class="style-title-list">
                 Voor of op...
             </p>
@@ -40,7 +48,9 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="DateFilterMode.Between" @change="onChange" />
+            <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="DateFilterMode.Between" @change="onChange" />
+            </template>
             <p class="style-title-list">
                 Tussen...
             </p>
@@ -53,7 +63,9 @@
         </STListItem>
 
         <STListItem :selectable="true" element-name="label" @click="onChange">
-            <Radio #left v-model="filter.mode" :name="filter.id" :value="DateFilterMode.NotBetween" @change="onChange" />
+            <template #left>
+                <Radio v-model="filter.mode" :name="filter.id" :value="DateFilterMode.NotBetween" @change="onChange" />
+            </template>
             <p class="style-title-list">
                 Niet tussen...
             </p>

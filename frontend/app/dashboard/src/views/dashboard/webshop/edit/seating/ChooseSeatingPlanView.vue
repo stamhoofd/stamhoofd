@@ -11,7 +11,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label">
-                <Radio #left v-model="selectedPlan" :value="null" />
+                <template #left>
+                    <Radio v-model="selectedPlan" :value="null" />
+                </template>
 
                 <h3 class="style-title-list">
                     Geen zetelselectie
@@ -22,7 +24,9 @@
             </STListItem>
 
             <STListItem v-for="plan in allSeatingPlans" :key="plan.id" :selectable="true" element-name="label">
-                <Radio #left v-model="selectedPlan" :value="plan.id" />
+                <template #left>
+                    <Radio v-model="selectedPlan" :value="plan.id" />
+                </template>
 
                 <h3 class="style-title-list">
                     {{ plan.name }}

@@ -2,7 +2,9 @@
     <div>
         <STList v-if="locations.length > 0">
             <STListItem v-for="_location in locations" :key="_location.id" element-name="label" :selectable="true" class="left-center location-selection">
-                <Radio #left v-model="selectedLocation" :value="_location" @change="changeSelected" />
+                <template #left>
+                    <Radio v-model="selectedLocation" :value="_location" @change="changeSelected" />
+                </template>
                 <h3 class="style-title-list">
                     {{ _location.name }}
                 </h3>
@@ -12,7 +14,9 @@
                 <template #right><button type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)" /></template>
             </STListItem>
             <STListItem element-name="label" :selectable="true" class="left-center">
-                <Radio #left v-model="selectedLocation" :value="null" @change="changeSelected" />
+                <template #left>
+                    <Radio v-model="selectedLocation" :value="null" @change="changeSelected" />
+                </template>
                 Een andere locatie
             </STListItem>
         </STList>

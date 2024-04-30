@@ -60,7 +60,9 @@
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="repeatBehaviour" value="Once" />
+                <template #left>
+                    <Radio v-model="repeatBehaviour" value="Once" />
+                </template>
                 <h3 class="style-title-list">
                     Niet herhalen
                 </h3>
@@ -69,7 +71,9 @@
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="repeatBehaviour" value="RepeatLast" />
+                <template #left>
+                    <Radio v-model="repeatBehaviour" value="RepeatLast" />
+                </template>
                 <h3 v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'" class="style-title-list">
                     Laatste korting herhalen
                 </h3>
@@ -82,7 +86,9 @@
             </STListItem>
 
             <STListItem v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'" :selectable="true" element-name="label" class="left-center">
-                <Radio #left v-model="repeatBehaviour" value="RepeatPattern" />
+                <template #left>
+                    <Radio v-model="repeatBehaviour" value="RepeatPattern" />
+                </template>
                 <h3 class="style-title-list">
                     Patroon herhalen
                 </h3>

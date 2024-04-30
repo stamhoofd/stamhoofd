@@ -8,7 +8,9 @@
         <h2>Kanaal</h2>
         <STList>
             <STListItem v-for="r in availableChannels" :key="r.url" :selectable="true" element-name="label">
-                <Radio #left v-model="releaseChannel" :value="r.url" />
+                <template #left>
+                    <Radio v-model="releaseChannel" :value="r.url" />
+                </template>
                 <h3 class="style-title-list">
                     {{ r.name }}
                 </h3>
@@ -17,7 +19,9 @@
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label">
-                <Radio #left v-model="releaseChannel" value="custom" />
+                <template #left>
+                    <Radio v-model="releaseChannel" value="custom" />
+                </template>
                 <h3 class="style-title-list">
                     Custom
                 </h3>
