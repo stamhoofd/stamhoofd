@@ -120,7 +120,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             console.error(e)
         })
 
-        UrlHelper.setUrl("/settings/admins")
+        this.setUrl("/admins")
         document.title = "Stamhoofd - Beheerders"
 
         if (parts.length >= 3 && parts[0] == 'settings' && parts[1] == 'admins' && parts[2] == 'roles') {

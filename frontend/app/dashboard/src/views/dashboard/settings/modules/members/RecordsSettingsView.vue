@@ -378,7 +378,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     }
    
     mounted() {
-        UrlHelper.setUrl("/settings/records");
+        this.setUrl("/records");
     }
 }
 </script>

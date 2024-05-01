@@ -233,7 +233,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
     
     mounted() {
-        UrlHelper.setUrl("/settings/referrals");
+        this.setUrl("/referrals");
     }
 
     openFacebookShare() {

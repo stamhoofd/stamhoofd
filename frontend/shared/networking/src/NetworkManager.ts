@@ -108,8 +108,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
     }
 
     async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
-        console.error("response error", error)
-        console.error(error)
+        console.error("response error")
         console.error(response)
 
         try {

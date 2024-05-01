@@ -158,7 +158,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        UrlHelper.setUrl("/finances/packages");
+        this.setUrl("");
         this.reload().catch(e => {
             console.error(e)
         })

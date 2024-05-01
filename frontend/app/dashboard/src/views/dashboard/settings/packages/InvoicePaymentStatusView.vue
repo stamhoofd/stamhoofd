@@ -59,7 +59,7 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl("/settings/billing/payment?id="+encodeURIComponent(this.paymentId))
+        this.setUrl("/billing/payment?id="+encodeURIComponent(this.paymentId))
         this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
     }
 

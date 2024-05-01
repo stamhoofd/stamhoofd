@@ -99,7 +99,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
             console.error(e)
         })
 
-        UrlHelper.setUrl("/settings/api-keys")
+        this.setUrl("/api-keys")
         document.title = "Stamhoofd - API-keys"
         UrlHelper.shared.clear()
     }

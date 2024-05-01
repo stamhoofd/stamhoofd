@@ -19,14 +19,14 @@ export function getOrganizationSelectionRoot() {
 }
 
 export async function getScopedDashboardRootFromUrl() {
-    UrlHelper.fixedPrefix = "beheerders";
+    // UrlHelper.fixedPrefix = "beheerders";
     const parts = UrlHelper.shared.getParts();
     const ignoreUris = ['login', 'aansluiten'];
 
     let session: Session|null = null;
 
-    if (parts[0] && !ignoreUris.includes(parts[0])) {
-        const uri = parts[0];
+    if (parts[0] === 'beheerders' && parts[1] && !ignoreUris.includes(parts[1])) {
+        const uri = parts[1];
 
         // Load organization
         // todo: use cache
@@ -46,7 +46,7 @@ export async function getScopedDashboardRootFromUrl() {
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
 
-            UrlHelper.fixedPrefix = "beheerders/" + organization.uri;
+            // UrlHelper.fixedPrefix = "beheerders/" + organization.uri;
 
         } catch (e) {
             console.error('Failed to load organization from uri', uri);
@@ -71,11 +71,19 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
     const getManageFinances = () => {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './views/dashboard/settings/FinancesView.vue'), {})
+        }, {
+            provide: {
+                urlPrefix: this.extendPrefix("finances"), // own prefix + /finances
+            }
         })
     }
-    const getManageSettings = () => {
+    const getManageSettings = function(this: any) {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './views/dashboard/settings/SettingsView.vue'), {})
+        }, {
+            provide: {
+                urlPrefix: this.extendPrefix("settings"), // own prefix + /settings
+            }
         })
     }
     const getManageAccount = () => {
@@ -87,7 +95,8 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
         context: {
             $context: reactiveSession,
             $organizationManager: new OrganizationManager(reactiveSession),
-            $memberManager: new MemberManager(reactiveSession)
+            $memberManager: new MemberManager(reactiveSession),
+            urlPrefix: "beheerders/" + session.organization!.uri,
         },
         calculatedContext: () => {
             return {
@@ -99,16 +108,16 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             setFixedPrefix: "beheerders",
             root: wrapWithModalStack(new ComponentWithProperties(SplitViewController, {
                 root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {}),
-                getDefaultDetail(): ComponentWithProperties {
+                getDefaultDetail(this: any): ComponentWithProperties {
                     const fullAccess = reactiveSession.user?.permissions?.hasFullAccess(reactiveSession.organization?.privateMeta?.roles ?? [])
                     const canManagePayments = reactiveSession.user?.permissions?.canManagePayments(reactiveSession.organization?.privateMeta?.roles ?? [])
 
                     if (fullAccess) {
-                        return getManageSettings()
+                        return getManageSettings.call(this)
                     } else if (canManagePayments) {
-                        return getManageFinances()
+                        return getManageFinances.call(this)
                     } else {
-                        return getManageAccount()
+                        return getManageAccount.call(this)
                     }
                 }
             })),

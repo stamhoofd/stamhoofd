@@ -65,7 +65,7 @@
         "vue-facing-decorator": "^3.0.4",
         "vue-i18n": "9",
         "vue-property-decorator": "^9.1.2",
-        "vuedraggable": "^2.24.3",
+        "vuedraggable": "^4.1.0",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     },
     "devDependencies": {

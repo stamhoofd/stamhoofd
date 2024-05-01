@@ -245,9 +245,9 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         })
 
         if (this.isNew) {
-            UrlHelper.setUrl("/settings/admins/roles/new")
+            this.setUrl("/admins/roles/new")
         } else {
-            UrlHelper.setUrl("/settings/admins/roles/" + Formatter.slug(this.role.name))
+            this.setUrl("/admins/roles/" + Formatter.slug(this.role.name))
         }
         document.title = "Stamhoofd - " + this.title
     }

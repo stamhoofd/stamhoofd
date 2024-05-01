@@ -236,7 +236,7 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     }
 
     mounted() {
-        UrlHelper.setUrl("/settings/financial-support");
+        this.setUrl("/financial-support");
     }
 }
 </script>

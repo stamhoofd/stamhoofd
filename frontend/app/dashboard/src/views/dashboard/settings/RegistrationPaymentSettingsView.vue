@@ -150,7 +150,7 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
     mounted() {
         // We can clear now
         UrlHelper.shared.clear()
-        UrlHelper.setUrl("/settings/registration-payments")
+        this.setUrl("/registration-payments")
     }
 }
 </script>

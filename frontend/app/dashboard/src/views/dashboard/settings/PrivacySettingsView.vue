@@ -157,7 +157,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        UrlHelper.setUrl("/settings/privacy");
+        this.setUrl("/privacy");
     }
 }
 </script>

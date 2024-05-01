@@ -170,7 +170,7 @@ export default class SSOSettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        UrlHelper.setUrl("/settings/sso");
+        this.setUrl("/sso");
         this.loadConfiguration().catch(console.error)
     }
 }

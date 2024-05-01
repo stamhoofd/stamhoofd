@@ -275,7 +275,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        UrlHelper.setUrl("/settings/general")
+        this.setUrl("/general")
     }
 }
 </script>

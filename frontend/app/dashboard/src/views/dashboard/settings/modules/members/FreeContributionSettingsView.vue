@@ -227,7 +227,7 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
     }
 
     mounted() {
-        UrlHelper.setUrl("/settings/free-contribution");
+        this.setUrl("/free-contribution");
     }
 }
 </script>

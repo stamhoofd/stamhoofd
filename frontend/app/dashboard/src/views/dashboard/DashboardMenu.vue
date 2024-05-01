@@ -299,21 +299,31 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     mounted() {
         // First set current url already
-        UrlHelper.setUrl("/")
+        this.setUrl("/")
 
         const parts = UrlHelper.shared.getParts()
         const params = UrlHelper.shared.getSearchParams()
 
         let didSet = false
 
-        if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') || (parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
+        if (
+            this.urlMatch('settings')
+            // ||
+            // (parts.length >= 1 && parts[0] == 'settings')
+            // || 
+            //(parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') || 
+            //(parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || 
+            //(parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')
+        ) {
             if (this.fullAccess) {
                 this.manageSettings(false).catch(console.error)
                 didSet = true
             }
         }
 
-        if (parts.length >= 1 && parts[0] == 'finances' || (!this.fullAccess && (parts.length >= 1 && parts[0] == 'settings'))) {
+        if (
+            this.urlMatch('finances') || (!this.fullAccess && this.urlMatch('settings'))
+        ) {
             if (this.canManagePayments) {
                 this.openFinances(false).catch(console.error)
                 didSet = true
@@ -532,6 +542,10 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     getManageFinances() {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './settings/FinancesView.vue'), {})
+        }, {
+            provide: {
+                urlPrefix: this.extendPrefix("finances"), // own prefix + /finances
+            }
         })
     }
 
@@ -549,6 +563,10 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     getManageSettings() {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './settings/SettingsView.vue'), {})
+        }, {
+            provide: {
+                urlPrefix: this.extendPrefix("settings"), // own prefix + /settings
+            }
         })
     }
 
@@ -560,7 +578,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 this.getManageSettings()
-            ],
+            ]
         });
     }
 

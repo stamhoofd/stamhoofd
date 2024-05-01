@@ -569,6 +569,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(PackageSettingsView, {})
+                }, {
+                    provide: {
+                        urlPrefix: this.extendPrefix('packages')
+                    }
                 })
             ]
         })
@@ -740,90 +744,86 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         const parts = UrlHelper.shared.getParts()
 
         // First set current url already, to fix back
-        UrlHelper.setUrl("/settings")
+        this.setUrl("/")
         document.title = "Stamhoofd - Instellingen"
 
-        if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
+        if (this.urlMatch('oauth/mollie')) {
             // Open mollie settings
             this.openPayment(false)
             return
         }
 
-        if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
+        if (this.urlMatch('scouts-en-gidsen-vlaanderen') || this.urlMatch('oauth/sgv')) {
             this.openSyncScoutsEnGidsen(false)
             return; // (don't clear)
         }
 
-
-        if (parts.length >= 2 && parts[0] == 'settings' && parts[1] == 'admins') {
+        if (this.urlMatch('admins')) {
             // Open mollie settings
             this.openAdmins(false)
             return; // (don't clear)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
+        if (this.urlMatch('general')) {
             // Open mollie settings
             this.openGeneral(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'payments') {
+        if (this.urlMatch('payments')) {
             // Open mollie settings
             this.openPayment(false)
-        } else {
-            // We can clear now
-            UrlHelper.shared.clear()
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'labs') {
+        if (this.urlMatch('labs')) {
             // Open mollie settings
             this.openLabs(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'registration-payments') {
+        if (this.urlMatch('registration-payments')) {
             // Open mollie settings
             this.openRegistrationPayment(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'privacy') {
+        if (this.urlMatch('privacy')) {
             // Open mollie settings
             this.openPrivacy(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'personalize') {
+        if (this.urlMatch('personalize')) {
             // Open mollie settings
             this.openPersonalize(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'sso') {
+        if (this.urlMatch('sso')) {
             // Open mollie settings
             this.openSSO(false).catch(console.error)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'records') {
+        if (this.urlMatch('records')) {
             // Open mollie settings
             this.manageRecords(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'packages') {
+        if (this.urlMatch('packages')) {
             this.openPackages(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'referrals') {
+        if (this.urlMatch('referrals')) {
             this.openReferrals(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'free-contribution') {
+        if (this.urlMatch('free-contribution')) {
             this.manageFreeContribution(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'financial-support') {
+        if (this.urlMatch('financial-support')) {
             this.manageFinancialSupport(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'data-permission') {
+        if (this.urlMatch('data-permission')) {
             this.manageDataPermission(false)
         }
-
+        UrlHelper.shared.clear()
         this.loadStripeAccounts(null).catch(console.error);
     }
 

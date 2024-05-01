@@ -245,7 +245,7 @@ export default class DataPermissionSettingsView extends Mixins(NavigationMixin) 
     }
 
     mounted() {
-        UrlHelper.setUrl("/settings/data-permission");
+        this.setUrl("/data-permission");
     }
 }
 </script>

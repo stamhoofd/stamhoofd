@@ -83,8 +83,8 @@ export class I18nController {
 
     updateUrl() {
         // Update url's
-        const current = new UrlHelper()
-        UrlHelper.setUrl(current.getPath({ removeLocale: true }))
+        // const current = new UrlHelper()
+        // UrlHelper.setUrl(current.getPath({ removeLocale: true }))
     }
 
     correctLocale() {
@@ -345,16 +345,17 @@ export class I18nController {
         })
 
         // Update already pushed urls
-        for (const state of HistoryManager.states) {
-            if (state.url) {
-                state.url = UrlHelper.transformUrlForLocale(state.url, def.language, def.country)
-            }
-        }
+        // this can't work: should remove locale first and then add it
+        //for (const state of HistoryManager.states) {
+        //    if (state.url) {
+        //        state.url = UrlHelper.transformUrlForLocale(state.url, def.language, def.country)
+        //    }
+        //}
 
         // If we go back, we might need to update the path of previous urls if the language has changed since then
-        window.addEventListener("popstate", (event) => {
-            I18nController.shared?.updateUrl()
-        })
+        // window.addEventListener("popstate", (event) => {
+        //     I18nController.shared?.updateUrl()
+        // })
 
         if (needsSave) {
             def.saveLocaleToStorage().catch(console.error)

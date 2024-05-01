@@ -695,7 +695,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 this.updateMollie().catch(console.error);
             }
         }
-        UrlHelper.setUrl("/settings/payments")
+        this.setUrl("/payments")
         this.lastAddedStripeAccount = urlParams.get('recheck-stripe-account')
         this.doRefresh()
         this.refreshOnReturn()

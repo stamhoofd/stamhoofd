@@ -102,7 +102,7 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
             console.error(e)
         })
 
-        UrlHelper.setUrl("/settings/admins/roles")
+        this.setUrl("/admins/roles")
         document.title = "Stamhoofd - Beheerdersrollen"
         
         const parts = UrlHelper.shared.getParts()

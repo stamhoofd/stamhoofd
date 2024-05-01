@@ -1,9 +1,10 @@
 import { Request } from "@simonbackx/simple-networking";
-import { AppManager, SessionManager } from "@stamhoofd/networking";
+import { AppManager, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
 import Vue, {type App} from "vue";
 
 import { CopyableDirective, GlobalEventBus, LongPressDirective,TooltipDirective } from "..";
+import { useCurrentComponent, injectHooks } from "@simonbackx/vue-app-navigation";
 
 declare module "vue/types/vue" {
     interface Vue {
@@ -166,11 +167,24 @@ export class VueGlobalHelper {
                         return null;
                     }
                 },
+                urlPrefix: {
+                    from: 'urlPrefix',
+                    default: function () {
+                        return null
+                    }
+                }
             },
             beforeUnmount() {
                 // Clear all pending requests
                 GlobalEventBus.removeListener(this)
                 Request.cancelAll(this)
+            },
+            created() {
+                const directives = {
+                    currentComponent: useCurrentComponent()
+                };
+
+                injectHooks(this, directives)
             },
             methods: {
                 formatPrice: Formatter.price.bind(Formatter),
@@ -181,6 +195,43 @@ export class VueGlobalHelper {
                 capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
                 formatDateWithDay: Formatter.dateWithDay.bind(Formatter),
                 formatTime: Formatter.time.bind(Formatter),
+                setUrl(url: string) {
+                    const component = this.currentComponent;
+                    if (!component) {
+                        console.error("No current component while setting url", url)
+                        return;
+                    }
+
+                    // Local prefix?
+                    const prefix = this.getUrlPrefix()
+                    const transformed = UrlHelper.transformUrl(url, prefix)
+                    console.log('setUrl', url, 'transformed to', transformed, 'with prefix', prefix)
+                    component.setUrl(transformed)
+                },
+                getUrlPrefix(): string | null {
+                    return this.urlPrefix || null
+                },
+                extendPrefix(url: string): string {
+                    const prefix = this.getUrlPrefix()
+                    if (prefix) {
+                        console.log('extendPrefix', url, 'to', prefix + '/' + url)
+                        return prefix + '/' + url
+                    }
+                    return url
+                },
+                urlMatch(template: string) {
+                    const helper = new UrlHelper(UrlHelper.shared.url, this.getUrlPrefix())
+                    const result = helper.match(template)
+
+                    if (result) {
+                        console.log('Matched', template, '@', this.getUrlPrefix(), 'with', helper.getPath({removePrefix: false}), 'result', result)
+                    }
+
+                    return result
+                },
+                clearUrl() {
+                    UrlHelper.shared.clear()
+                }
             }
         })
     }

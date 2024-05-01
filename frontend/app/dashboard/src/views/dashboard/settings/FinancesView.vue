@@ -279,6 +279,10 @@ export default class FinancesView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(PackageSettingsView, {})
+                }, {
+                    provide: {
+                        urlPrefix: this.extendPrefix('packages')
+                    }
                 })
             ]
         })
@@ -289,23 +293,21 @@ export default class FinancesView extends Mixins(NavigationMixin) {
             console.error(e)
         })
 
-        const parts = UrlHelper.shared.getParts()
-
         // First set current url already, to fix back
-        UrlHelper.setUrl("/finances")
+        this.setUrl("")
         document.title = "Stamhoofd - Boekhouding"
 
-        if (parts.length == 2 && parts[0] == 'finances' && parts[1] == 'transfers') {
+        if (this.urlMatch('transfers')) {
             // Open mollie settings
             this.openTransfers(false).catch(console.error)
         }
 
     
-        if (parts.length == 2 && parts[0] == 'finances' && parts[1] == 'billing') {
+        if (this.urlMatch('billing')) {
             this.openBilling(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'finances' && parts[1] == 'packages') {
+        if (this.urlMatch('packages')) {
             this.openPackages(false)
         }
 

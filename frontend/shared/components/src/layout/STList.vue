@@ -1,6 +1,8 @@
 <template>
-    <draggable v-if="draggable" v-model="list" handle=".drag" tag="div" class="st-list" :class="{'is-dragging': dragging}" animation="200" ghost-class="is-dragging" :group="group" :force-fallback="true" @start="onStart" @end="onEnd">
-        <slot />
+    <draggable v-if="draggable && false" v-model="list" item-key="id" handle=".drag" tag="div" class="st-list" :class="{'is-dragging': dragging}" animation="200" ghost-class="is-dragging" :group="group" :force-fallback="true" @start="onStart" @end="onEnd">
+        <template #item="slotProps">
+            <slot name="item" v-bind="slotProps" />
+        </template>
     </draggable>
     <transition-group v-else-if="withAnimation" tag="div" name="list" class="st-list">
         <slot />
@@ -17,11 +19,14 @@ import draggable from 'vuedraggable'
 @Component({
     components: {
         draggable
+    },
+    compatConfig: {
+        MODE: 3,
     }
 })
 export default class STList extends Vue {
     @Prop({ default: null })
-        value!: any[] | null
+        valueModel!: any[] | null
 
     @Prop({ default: false })
         draggable!: boolean;
@@ -35,7 +40,7 @@ export default class STList extends Vue {
     dragging = false;
 
     get list() {
-        return this.value;
+        return this.valueModel;
     }
 
     set list(changed: any[] | null) {

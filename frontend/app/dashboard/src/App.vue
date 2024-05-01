@@ -28,7 +28,6 @@ export class App extends Vue {
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
             try {
-                console.log('promise loaded on app')
                 if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
                     // Load Windows stylesheet
                     try {
@@ -70,8 +69,6 @@ export class App extends Vue {
     })
 
     created() {
-        console.log('created App')
-
         /*if (STAMHOOFD.environment == "development") {
             console.log('Debug mode activated', ComponentWithProperties)
             ComponentWithProperties.debug = true;

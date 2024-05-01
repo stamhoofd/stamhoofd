@@ -266,7 +266,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
     mounted() {
         // We can clear now
         UrlHelper.shared.clear()
-        UrlHelper.setUrl("/settings/labs")
+        this.setUrl("/labs")
     }
 
     beforeUnmount() {

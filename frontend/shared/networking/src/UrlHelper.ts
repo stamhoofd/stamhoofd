@@ -3,28 +3,34 @@ import { I18nController } from "@stamhoofd/frontend-i18n"
 
 export class UrlHelper {
     /** 
+     * Use this for the universal fixed prefix
+     * 
      * Always remove this prefix when getting an url, and add it when doing setUrl.
      * When you want to host an app in a subdirectory
      * Slashes are added automatically on the sides if needed
     */
     static fixedPrefix: string | null = null
 
-    static shared = new UrlHelper()
+    static shared = new UrlHelper(window.location.href)
 
     /**
      * The original values when loading the page. Do not modify this one.
      */
-    static initial = new UrlHelper()
+    static initial = new UrlHelper(window.location.href)
 
     url: URL
 
-    constructor() {
-        this.url = new URL(window.location.href)
-        const state = HistoryManager.states[HistoryManager.states.length-1]
-        if (HistoryManager.active && state && state.url) { 
-            // Make sure we use the actual state (because location might be slower when the historymanager is still updating the url via async handlers)
-            this.url.pathname = state.url
-        }
+    localFixedPrefix: string|null
+
+    constructor(url?: string|URL, localFixedPrefix?: string|null) {
+        this.url = new URL(url ?? window.location.href)
+        this.localFixedPrefix = localFixedPrefix ?? null
+
+        // const state = HistoryManager.states[HistoryManager.states.length-1]
+        // if (HistoryManager.active && state && state.url) { 
+        //     // Make sure we use the actual state (because location might be slower when the historymanager is still updating the url via async handlers)
+        //     this.url.pathname = state.url
+        // }
     }
 
     get path() {
@@ -37,6 +43,19 @@ export class UrlHelper {
 
     get href() {
         return this.url.href
+    }
+
+
+    get fullPrefix() {
+        let prefix = UrlHelper.fixedPrefix ? UrlHelper.fixedPrefix : null
+        if (this.localFixedPrefix) {
+            if (prefix) {
+                prefix += "/" + this.localFixedPrefix
+            } else {
+                prefix = this.localFixedPrefix
+            }
+        }
+        return prefix
     }
 
     setPath(path: string) {
@@ -92,8 +111,8 @@ export class UrlHelper {
             parts.shift()
         }
 
-        if ((options?.removePrefix === undefined || options?.removePrefix === true) && UrlHelper.fixedPrefix) {
-            for (const part of UrlHelper.fixedPrefix.split("/") ?? []) {
+        if ((options?.removePrefix === undefined || options?.removePrefix === true) && this.fullPrefix) {
+            for (const part of this.fullPrefix.split("/") ?? []) {
                 if (parts.length > 0 && parts[0] === part) {
                 // Remove the prefix
                     parts.shift()
@@ -166,8 +185,12 @@ export class UrlHelper {
     /**
      * Return a transformed url (adds locale and fixed prefix to it)
      */
-    static transformUrl(url: string) {
-        const prefix = this.fixedPrefix ? "/"+this.fixedPrefix : ""
+    static transformUrl(url: string, localFixedPrefix?: string) {
+        let prefix = this.fixedPrefix ? "/"+this.fixedPrefix : ""
+        if (localFixedPrefix) {
+            prefix += "/"+localFixedPrefix
+        }
+
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
             if (I18nController.fixedCountry) {
                 return "/"+I18nController.shared.language+prefix+url
@@ -183,7 +206,45 @@ export class UrlHelper {
      * setURL, but add locale
      */
     static setUrl(url: string) {
-        HistoryManager.setUrl(this.transformUrl(url))
-        I18nController.shared?.updateMetaData()
+        console.warn('Used UrlHelper.setUrl', url, 'which should be replaced with this.setUrl()')
+        // HistoryManager.setUrl(this.transformUrl(url))
+        // I18nController.shared?.updateMetaData()
+    }
+
+    match<Keys extends string>(template: string, params: Record<Keys, NumberConstructor | StringConstructor> = {} as Record<Keys, NumberConstructor | StringConstructor>): Record<Keys, number | string> | undefined {
+        const parts = this.getParts()
+        const templateParts = template.split("/");
+
+        if (parts.length < templateParts.length) {
+            // No match
+            return;
+        }
+
+        const resultParams = {} as any;
+
+        for (let index = 0; index < templateParts.length; index++) {
+            const templatePart = templateParts[index];
+            const part = parts[index];
+
+            if (templatePart != part) {
+                const param = templatePart.substr(1);
+                if ((params as any)[param]) {
+                    // Found a param
+                    resultParams[param] = (params as any)[param](part);
+
+                    if (typeof resultParams[param] === "number") {
+                        // Force integers
+                        if (!Number.isInteger(resultParams[param])) {
+                            return;
+                        }
+                    }
+                    continue;
+                }
+                // no match
+                return;
+            }
+        }
+
+        return resultParams;
     }
 }
