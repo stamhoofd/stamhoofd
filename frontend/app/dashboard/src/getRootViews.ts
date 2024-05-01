@@ -73,7 +73,7 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             root: AsyncComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './views/dashboard/settings/FinancesView.vue'), {})
         }, {
             provide: {
-                urlPrefix: this.extendPrefix("finances"), // own prefix + /finances
+                reactive_navigation_url: this.$url.extendUrl("finances"), // own prefix + /finances
             }
         })
     }
@@ -82,13 +82,17 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             root: AsyncComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './views/dashboard/settings/SettingsView.vue'), {})
         }, {
             provide: {
-                urlPrefix: this.extendPrefix("settings"), // own prefix + /settings
+                reactive_navigation_url: computed(() => this.$url.extendUrl("settings")), // own prefix + /settings
             }
         })
     }
     const getManageAccount = () => {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './views/dashboard/account/AccountSettingsView.vue'), {})
+        }, {
+            provide: {
+                reactive_navigation_url: this.$url.extendUrl("account"), // own prefix + /settings
+            }
         })
     }
     return new ComponentWithProperties(ContextProvider, {
@@ -96,7 +100,7 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             $context: reactiveSession,
             $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager: new MemberManager(reactiveSession),
-            urlPrefix: "beheerders/" + session.organization!.uri,
+            reactive_navigation_url: "beheerders/" + session.organization!.uri,
         },
         calculatedContext: () => {
             return {

@@ -158,7 +158,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        this.setUrl("");
+        this.setUrl("/", "Pakketten - " + this.$organization.name);
         this.reload().catch(e => {
             console.error(e)
         })

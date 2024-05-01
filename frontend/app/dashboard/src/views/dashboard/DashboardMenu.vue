@@ -210,6 +210,11 @@ import InvoicePaymentStatusView from "./settings/packages/InvoicePaymentStatusVi
     },
     directives: {
         tooltip: TooltipDirective
+    },
+    navigation: {
+        title() {
+            return "Stamhoofd - "+this.$organization.name
+        }
     }
 })
 export default class DashboardMenu extends Mixins(NavigationMixin) {
@@ -298,101 +303,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        // First set current url already
-        this.setUrl("/")
-
-        const parts = UrlHelper.shared.getParts()
-        const params = UrlHelper.shared.getSearchParams()
-
-        let didSet = false
-
-        if (
-            this.urlMatch('settings')
-            // ||
-            // (parts.length >= 1 && parts[0] == 'settings')
-            // || 
-            //(parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') || 
-            //(parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || 
-            //(parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')
-        ) {
-            if (this.fullAccess) {
-                this.manageSettings(false).catch(console.error)
-                didSet = true
-            }
-        }
-
-        if (
-            this.urlMatch('finances') || (!this.fullAccess && this.urlMatch('settings'))
-        ) {
-            if (this.canManagePayments) {
-                this.openFinances(false).catch(console.error)
-                didSet = true
-            }
-        }
-
-        if (parts.length >= 1 && parts[0] == 'account') {
-            this.manageAccount(false).catch(console.error).finally(() => UrlHelper.shared.clear())
-            didSet = true
-        }
-
-        if ((parts.length >= 1 && parts[0] == 'documents')) {
-            if (this.fullAccess && this.isBelgium && this.enableMemberModule) {
-                this.openDocuments(false).catch(console.error)
-                didSet = true
-            }
-        }        
-
-        if ((parts.length >= 1 && parts[0] == 'archived-groups')) {
-            if (this.fullAccess && this.enableMemberModule) {
-                this.openMemberArchive(false).catch(console.error)
-                didSet = true
-            }
-        }
-
-        if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
-            this.gotoFeedback(true).catch(console.error).finally(() => UrlHelper.shared.clear())
-        }
-
-        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "category") {
-            for (const category of this.$organization.meta.categories) {
-                if (parts[1] == Formatter.slug(category.settings.name)) {
-                    if (parts[2] && parts[2] == "all") {
-                        this.openCategoryMembers(category, false).catch(console.error)
-                    } else {
-                        this.openCategory(category, false).catch(console.error).finally(() => UrlHelper.shared.clear())
-                    }
-                    didSet = true
-                    break;
-                }
-            }
-        }
-
-        if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
-            for (const group of this.$organization.groups) {
-                if (parts[1] == Formatter.slug(group.settings.name)) {
-                    this.openGroup(group, false).catch(console.error)
-                    didSet = true
-                    break;
-                }
-            }
-        }
-
-        if (!didSet && this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
-            for (const webshop of this.$organization.webshops) {
-                if (parts[1] == Formatter.slug(webshop.meta.name)) {
-                    this.openWebshop(webshop, false).catch(console.error)
-                    didSet = true
-                    break;
-                }
-            }
-        }
-
-        if (!didSet) {
-            UrlHelper.shared.clear()
-        }
-        
-        document.title = "Stamhoofd - "+this.$organization.name
-
         const currentCount = localStorage.getItem("what-is-new")
         if (currentCount) {
             const c = parseInt(currentCount)
@@ -401,13 +311,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             }
         } else {
             localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
-        }
-
-        if (!didSet && this.fullAccess) {
-            console.log('openSignupSelection')
-            if (!this.$organization.meta.modules.useMembers && !this.$organization.meta.modules.useWebshops) {
-                this.openSignupSelection(true).catch(console.error);
-            }
         }
 
         GlobalEventBus.addListener(this, "new-webshop", async (webshop: PrivateWebshop) => {
@@ -420,9 +323,15 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
                 this.present(component.setDisplayStyle("popup").setAnimated(false))
             }).catch(console.error)
         }
+    }
+
+    async customRoutes() {
+        // First set current url already
+        const parts = UrlHelper.shared.getParts()
+        const params = UrlHelper.shared.getSearchParams()
 
         if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {
-            this.present({
+            return await this.present({
                 animated: false,
                 adjustHistory: false,
                 modalDisplayStyle: "popup",
@@ -434,6 +343,84 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
                     })
                 ]})
         }
+
+        if (
+            this.$url.match('settings')
+            // ||
+            // (parts.length >= 1 && parts[0] == 'settings')
+            // || 
+            //(parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') || 
+            //(parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || 
+            //(parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')
+        ) {
+            if (this.fullAccess) {
+                return await this.manageSettings(false)
+            }
+        }
+
+        if (
+            this.$url.match('finances') || (!this.fullAccess && this.$url.match('settings'))
+        ) {
+            if (this.canManagePayments) {
+                return await this.openFinances(false)
+            }
+        }
+
+        if (parts.length >= 1 && parts[0] == 'account') {
+            return await this.manageAccount(false)
+        }
+
+        if ((parts.length >= 1 && parts[0] == 'documents')) {
+            if (this.fullAccess && this.isBelgium && this.enableMemberModule) {
+                return await this.openDocuments(false)
+            }
+        }        
+
+        if ((parts.length >= 1 && parts[0] == 'archived-groups')) {
+            if (this.fullAccess && this.enableMemberModule) {
+                return await this.openMemberArchive(false)
+            }
+        }
+
+        if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
+            return await this.gotoFeedback(true)
+        }
+
+        if (this.enableMemberModule && parts.length >= 2 && parts[0] == "category") {
+            for (const category of this.$organization.meta.categories) {
+                if (parts[1] == Formatter.slug(category.settings.name)) {
+                    if (parts[2] && parts[2] == "all") {
+                        return await this.openCategoryMembers(category, false)
+                    } else {
+                        return await this.openCategory(category, false)
+                    }
+                }
+            }
+        }
+
+        if (this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
+            for (const group of this.$organization.groups) {
+                if (parts[1] == Formatter.slug(group.settings.name)) {
+                    return await this.openGroup(group, false)
+                }
+            }
+        }
+
+        if (this.enableWebshopModule && parts.length >= 2 && parts[0] == "webshops") {
+            for (const webshop of this.$organization.webshops) {
+                if (parts[1] == Formatter.slug(webshop.meta.name)) {
+                    return await this.openWebshop(webshop, false)
+                }
+            }
+        }
+
+        if (this.fullAccess) {
+            console.log('openSignupSelection')
+            if (!this.$organization.meta.modules.useMembers && !this.$organization.meta.modules.useWebshops) {
+                this.openSignupSelection(true).catch(console.error);
+            }
+        }
+
     }
 
     get isAppReview() {
@@ -528,7 +515,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     async openMemberArchive(animated = true) {
         this.currentlySelected = "member-archive"
 
-        this.showDetail({
+        await this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
@@ -542,43 +529,37 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     getManageFinances() {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './settings/FinancesView.vue'), {})
-        }, {
-            provide: {
-                urlPrefix: this.extendPrefix("finances"), // own prefix + /finances
-            }
         })
     }
 
     async openFinances(animated = true) {
         this.currentlySelected = "manage-finances"
-        this.showDetail({
+        await this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
                 this.getManageFinances()
-            ]
+            ],
+            url: this.$url.extendUrl("finances")
         });
     }
 
     getManageSettings() {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './settings/SettingsView.vue'), {})
-        }, {
-            provide: {
-                urlPrefix: this.extendPrefix("settings"), // own prefix + /settings
-            }
         })
     }
 
     async manageSettings(animated = true) {
         this.currentlySelected = "manage-settings"
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.showDetail({
+
+        await this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
                 this.getManageSettings()
-            ]
+            ],
+            url: "settings"
         });
     }
 
@@ -588,9 +569,9 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         })
     }
 
-    manageAccount(animated = true) {
+    async manageAccount(animated = true) {
         this.currentlySelected = "manage-account"
-        this.showDetail({
+        await this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
@@ -615,7 +596,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     async openDocuments(animated = true) {
         this.currentlySelected = "documents"
-        this.showDetail({
+        await this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
@@ -627,7 +608,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     async manageGroups(animated = true) {
-        this.present({
+        await this.present({
             animated,
             adjustHistory: animated,
             modalDisplayStyle: "popup",
@@ -640,7 +621,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     async addWebshop() {
-        this.present(
+        await this.present(
             (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopGeneralView" */ './webshop/edit/EditWebshopGeneralView.vue'))).setDisplayStyle("popup")
         )
     }

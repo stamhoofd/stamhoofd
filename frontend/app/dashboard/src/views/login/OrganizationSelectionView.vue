@@ -81,14 +81,15 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STGradientBackground, STNavigationBar, Toast } from '@stamhoofd/components';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, STGradientBackground, STNavigationBar, Spinner, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { getScopedDashboardRoot } from '../../getRootViews';
 import VersionFooter from '../dashboard/settings/VersionFooter.vue';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import SignupGeneralView from '../signup/SignupGeneralView.vue';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -133,6 +134,35 @@ const throttle = (func, limit) => {
                 }
             ]
         }
+    },
+    navigation: {
+        title: "Stamhoofd",
+        routes: [
+            {
+                url: 'aansluiten',
+                component: async () => (await import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue')).default,
+                paramsToProps(_, query) {
+                    let code = query?.get("code")
+                    let organization = query?.get("org")
+
+                    if (code && organization) {
+                        return {
+                            initialRegisterCode: {
+                                code,
+                                organization
+                            },
+                            visitViaUrl: true
+                        }
+                    }
+                    
+                    return {
+                        initialRegisterCode: null,
+                        visitViaUrl: !!query
+                    }
+                },
+                present: 'popup'
+            }
+        ]
     }
 })
 export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
@@ -169,57 +199,25 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
     }
 
     gotoSignup() {
-        this.present(
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
-            }).setDisplayStyle("popup")
-        )
+        //this.present(
+        //    new ComponentWithProperties(NavigationController, {
+        //        root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
+        //    }).setDisplayStyle("popup")
+        //)
+        this.navigateTo({url: 'aansluiten'}).catch(console.error)
         plausible('openSignup');
     }
 
-    mounted() {
+    async customRoutes() {
         const parts =  UrlHelper.shared.getParts()
-        const queryString =  UrlHelper.shared.getSearchParams()
-
-        console.log(parts, queryString)
-
-        if (parts.length >= 1 && parts[0] == 'aansluiten') {
-            try {
-                let code = queryString.get("code")
-                let organization = queryString.get("org")
-                this.present({
-                    url: UrlHelper.transformUrl("/aansluiten"),
-                    adjustHistory: false,
-                    components: [
-                        new ComponentWithProperties(NavigationController, {
-                            root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
-                                initialRegisterCode: code && organization ? {
-                                    code,
-                                    organization
-                                } : null,
-                                visitViaUrl: true
-                            })
-                        }).setDisplayStyle("popup").setAnimated(false)
-                    ]
-                })
-                
-            } catch (e) {
-                console.error(e)
-            }
-        }
 
         if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
             // do not clear url here, so we can pass on the auth to the dashboard menu
             new Toast("Kies een vereniging en log in. Daarna kan je inloggen in het feedback systeem.", "error red").setHide(15*1000).show()
-        } else {
-            UrlHelper.shared.clear()
+        } 
+    }
 
-            // Reset url if we log out
-            console.log('seturl', '/')
-            UrlHelper.setUrl("/")
-        }
-
-
+    mounted() {
         this.updateDefault().catch(console.error)
     }
 

@@ -156,6 +156,9 @@ import SignupAccountView from './SignupAccountView.vue';
                 }
             ]
         }
+    },
+    navigation: {
+        title: "Sluit jouw vereniging aan | Stamhoofd",
     }
 })
 export default class SignupGeneralView extends Mixins(NavigationMixin) {

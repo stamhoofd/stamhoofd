@@ -195,42 +195,8 @@ export class VueGlobalHelper {
                 capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter),
                 formatDateWithDay: Formatter.dateWithDay.bind(Formatter),
                 formatTime: Formatter.time.bind(Formatter),
-                setUrl(url: string) {
-                    const component = this.currentComponent;
-                    if (!component) {
-                        console.error("No current component while setting url", url)
-                        return;
-                    }
-
-                    // Local prefix?
-                    const prefix = this.getUrlPrefix()
-                    const transformed = UrlHelper.transformUrl(url, prefix)
-                    console.log('setUrl', url, 'transformed to', transformed, 'with prefix', prefix)
-                    component.setUrl(transformed)
-                },
-                getUrlPrefix(): string | null {
-                    return this.urlPrefix || null
-                },
-                extendPrefix(url: string): string {
-                    const prefix = this.getUrlPrefix()
-                    if (prefix) {
-                        console.log('extendPrefix', url, 'to', prefix + '/' + url)
-                        return prefix + '/' + url
-                    }
-                    return url
-                },
-                urlMatch(template: string) {
-                    const helper = new UrlHelper(UrlHelper.shared.url, this.getUrlPrefix())
-                    const result = helper.match(template)
-
-                    if (result) {
-                        console.log('Matched', template, '@', this.getUrlPrefix(), 'with', helper.getPath({removePrefix: false}), 'result', result)
-                    }
-
-                    return result
-                },
-                clearUrl() {
-                    UrlHelper.shared.clear()
+                setUrl(url: string, title?: string) {
+                    console.warn('old usage of this.setUrl, change to $url.setTitle and move url definitions to parent components')
                 }
             }
         })

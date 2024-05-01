@@ -303,7 +303,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     }
    
     mounted() {
-        this.setUrl("/personalize");
+        this.setUrl("/personalize", "Personaliseren - " + this.$organization.name);
     }
 }
 </script>

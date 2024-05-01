@@ -324,10 +324,10 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
+import { AppManager, UrlHelper } from '@stamhoofd/networking';
+import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 
 
 import AdminsView from '../admins/AdminsView.vue';
@@ -569,12 +569,9 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(PackageSettingsView, {})
-                }, {
-                    provide: {
-                        urlPrefix: this.extendPrefix('packages')
-                    }
                 })
-            ]
+            ],
+            url: 'packages'
         })
     }
 
@@ -741,86 +738,83 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
 
     mounted() {
-        const parts = UrlHelper.shared.getParts()
-
         // First set current url already, to fix back
-        this.setUrl("/")
-        document.title = "Stamhoofd - Instellingen"
+        this.$url.setTitle("Instellingen")
 
-        if (this.urlMatch('oauth/mollie')) {
+        if (this.$url.match('oauth/mollie')) {
             // Open mollie settings
             this.openPayment(false)
             return
         }
 
-        if (this.urlMatch('scouts-en-gidsen-vlaanderen') || this.urlMatch('oauth/sgv')) {
+        if (this.$url.match('scouts-en-gidsen-vlaanderen') || this.$url.match('oauth/sgv')) {
             this.openSyncScoutsEnGidsen(false)
             return; // (don't clear)
         }
 
-        if (this.urlMatch('admins')) {
+        if (this.$url.match('admins')) {
             // Open mollie settings
             this.openAdmins(false)
             return; // (don't clear)
         }
 
-        if (this.urlMatch('general')) {
+        if (this.$url.match('general')) {
             // Open mollie settings
             this.openGeneral(false)
         }
 
-        if (this.urlMatch('payments')) {
+        if (this.$url.match('payments')) {
             // Open mollie settings
             this.openPayment(false)
         }
 
-        if (this.urlMatch('labs')) {
+        if (this.$url.match('labs')) {
             // Open mollie settings
             this.openLabs(false)
         }
 
-        if (this.urlMatch('registration-payments')) {
+        if (this.$url.match('registration-payments')) {
             // Open mollie settings
             this.openRegistrationPayment(false)
         }
 
-        if (this.urlMatch('privacy')) {
+        if (this.$url.match('privacy')) {
             // Open mollie settings
             this.openPrivacy(false)
         }
 
-        if (this.urlMatch('personalize')) {
+        if (this.$url.match('personalize')) {
             // Open mollie settings
             this.openPersonalize(false)
         }
 
-        if (this.urlMatch('sso')) {
+        if (this.$url.match('sso')) {
             // Open mollie settings
             this.openSSO(false).catch(console.error)
         }
 
-        if (this.urlMatch('records')) {
+        if (this.$url.match('records')) {
             // Open mollie settings
             this.manageRecords(false)
         }
 
-        if (this.urlMatch('packages')) {
+        if (this.$url.match('packages')) {
             this.openPackages(false)
         }
 
-        if (this.urlMatch('referrals')) {
+        if (this.$url.match('referrals')) {
             this.openReferrals(false)
         }
 
-        if (this.urlMatch('free-contribution')) {
+        if (this.$url.match('free-contribution')) {
             this.manageFreeContribution(false)
         }
 
-        if (this.urlMatch('financial-support')) {
+        if (this.$url.match('financial-support')) {
             this.manageFinancialSupport(false)
         }
 
-        if (this.urlMatch('data-permission')) {
+        if (this.$url.match('data-permission')) {
             this.manageDataPermission(false)
         }
         UrlHelper.shared.clear()

@@ -3,11 +3,11 @@ import { AuthenticatedView, ContextProvider } from "@stamhoofd/components";
 import { OrganizationManager, Session } from "@stamhoofd/networking";
 import { Webshop, WebshopAuthType } from "@stamhoofd/structures";
 
+import { computed, reactive } from 'vue';
 import { CheckoutManager } from "./classes/CheckoutManager";
 import { WebshopManager } from "./classes/WebshopManager";
 import RequiredLoginView from "./views/RequiredLoginView.vue";
 import WebshopView from "./views/WebshopView.vue";
-import {reactive, computed} from 'vue'
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})

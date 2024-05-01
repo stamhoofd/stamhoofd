@@ -276,13 +276,10 @@ export default class FinancesView extends Mixins(NavigationMixin) {
             animated,
             adjustHistory: animated,
             modalDisplayStyle: "popup",
+            url: 'packages',
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(PackageSettingsView, {})
-                }, {
-                    provide: {
-                        urlPrefix: this.extendPrefix('packages')
-                    }
                 })
             ]
         })
@@ -294,20 +291,18 @@ export default class FinancesView extends Mixins(NavigationMixin) {
         })
 
         // First set current url already, to fix back
-        this.setUrl("")
-        document.title = "Stamhoofd - Boekhouding"
+        this.setUrl("", "Boekhouding - " + this.$organization.name)
 
-        if (this.urlMatch('transfers')) {
+        if (this.$url.match('transfers')) {
             // Open mollie settings
             this.openTransfers(false).catch(console.error)
         }
-
     
-        if (this.urlMatch('billing')) {
+        if (this.$url.match('billing')) {
             this.openBilling(false)
         }
 
-        if (this.urlMatch('packages')) {
+        if (this.$url.match('packages')) {
             this.openPackages(false)
         }
 
