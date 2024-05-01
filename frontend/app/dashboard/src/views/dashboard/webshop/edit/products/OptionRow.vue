@@ -1,7 +1,9 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editOption()" @contextmenu.prevent="showContextMenu">
-        <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="isFirst" :value="true" :disabled="true" />
-        <Checkbox v-else slot="left" :disabled="true" />
+        <template #left>
+            <Radio v-if="!optionMenu.multipleChoice" v-model="isFirst" :value="true" :disabled="true" />
+            <Checkbox v-else :disabled="true" />
+        </template>
 
         <h3 class="style-title-list">
             {{ option.name || 'Naamloos' }}

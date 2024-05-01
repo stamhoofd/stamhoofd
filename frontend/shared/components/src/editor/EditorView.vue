@@ -1,7 +1,9 @@
 <template>
     <form class="editor-view st-view" @submit.prevent="$emit('save')">
         <STNavigationBar :title="title">
-            <BackButton v-if="$parent.canPop" slot="left" @click="$parent.pop" />
+            <template #left>
+                <BackButton v-if="$parent.canPop" @click="$parent.pop" />
+            </template>
             <template v-else-if="$isMobile || $isIOS || $isAndroid" slot="left">
                 <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
                 <button v-else class="button text selected unbold" type="button" @click="$parent.pop">

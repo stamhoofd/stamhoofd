@@ -6,9 +6,10 @@
         </h2>
         <STList>
             <STListItem v-for="option in optionMenu.options" :key="option.id" class="no-border right-price" :selectable="canSelectOption(option)" :disabled="!canSelectOption(option)" element-name="label">
-                <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" :disabled="!canSelectOption(option)" />
-                <Checkbox v-else slot="left" :model-value="isOptionSelected(option)" :disabled="!canSelectOption(option)" @update:model-value="selectOption(option, $event)" />
-
+                <template #left>
+                    <Radio v-if="!optionMenu.multipleChoice" v-model="selectedOption" :value="option.id" :name="optionMenu.id+'-optionmenu'" :disabled="!canSelectOption(option)" />
+                    <Checkbox v-else :model-value="isOptionSelected(option)" :disabled="!canSelectOption(option)" @update:model-value="selectOption(option, $event)" />
+                </template>
 
                 <h4 class="style-title-list">
                     {{ option.name || 'Naamloos' }}

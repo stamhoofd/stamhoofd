@@ -1,7 +1,9 @@
 <template>
     <div class="st-view detailed-ticket-view">
         <STNavigationBar :title="name" :pop="canPop" :dismiss="canDismiss && allowDismiss" :sticky="false" :large="logo">
-            <OrganizationLogo v-if="logo" slot="left" :organization="organization" />
+            <template #left>
+                <OrganizationLogo v-if="logo" :organization="organization" />
+            </template>
             <template v-if="canShare" #right><button class="button icon share navigation" type="button" @click="share" /></template>
         </STNavigationBar>
         <main>

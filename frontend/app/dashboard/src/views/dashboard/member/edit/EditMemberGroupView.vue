@@ -15,8 +15,10 @@
                 <h2>{{ category.settings.name }}</h2>
                 <STList>
                     <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio v-if="category.settings.maximumRegistrations === 1" slot="left" :name="'choose-group'+category.id" :value="group" :model-value="getSelectedGroupForCategory(category)" @update:model-value="setSelectedGroupForCategory(category, $event)" />
-                        <Checkbox v-else slot="left" :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)" />
+                        <template #left>
+                            <Radio v-if="category.settings.maximumRegistrations === 1" :name="'choose-group'+category.id" :value="group" :model-value="getSelectedGroupForCategory(category)" @update:model-value="setSelectedGroupForCategory(category, $event)" />
+                            <Checkbox v-else :model-value="getSelectedGroup(group)" @update:model-value="setSelectedGroup(group, $event)" />
+                        </template>
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
                         </h2>
@@ -31,11 +33,13 @@
         </main>
 
         <STToolbar>
-            <template v-if="pendingRegistrations.length > 0 && !isNew" slot="left">
-                {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'wijziging' : 'wijzigingen' }}
-            </template>
-            <template v-else-if="pendingRegistrations.length > 0" slot="left">
-                {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'inschrijving' : 'inschrijvingen' }}
+            <template #left v-if="pendingRegistrations.length > 0">
+                <template v-if="!isNew">
+                    {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'wijziging' : 'wijzigingen' }}
+                </template>
+                <template v-else>
+                    {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'inschrijving' : 'inschrijvingen' }}
+                </template>
             </template>
             <template #right><LoadingButton :loading="loading">
                 <button class="button primary" type="button" @click="save">
