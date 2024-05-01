@@ -17,7 +17,7 @@
             <STList v-if="parents.length > 0">
                 <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
                     <template #left>
-                        <Checkbox v-model="parent.selected" @change="onChangedSelection" />
+                        <Checkbox v-model="parent.selected" @update:modelValue="onChangedSelection" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -113,18 +113,14 @@ class SelectableParent {
         STToolbar,
         Checkbox,
         LoadingButton
-    },
-    model: {
-        prop: 'memberDetails',
-        event: 'change'
-    },
+    }
 })
 export default class EditMemberContactsView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     member!: MemberWithRegistrations | null     
 
     @Prop({ required: true })
-    memberDetails!: MemberDetails   
+    modelValue!: MemberDetails   
 
     @Prop({ required: true })
     familyManager: FamilyManager
@@ -150,16 +146,16 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
         this.onChangedSelection()
         const parent = selectable.parent
         this.present(new ComponentWithProperties(EditMemberParentView, {
-            memberDetails: this.memberDetails,
+            modelValue: this.modelValue,
             familyManager: this.familyManager,
             parent,
             handler: (parent: Parent, component: EditMemberParentView) => {
-                if (!this.memberDetails) {
+                if (!this.modelValue) {
                     return;
                 }
 
-                const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
-                this.$emit("change", memberDetails)
+                const modelValue = new ObjectData(this.modelValue.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
+                this.$emit("update:modelValue", modelValue)
                 this.cachedParents = null
                 component.pop({ force: true })
             }
@@ -172,17 +168,17 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
     editEmergencyContact() {
         this.present(new ComponentWithProperties(EditMemberEmergencyContactView, {
-            details: this.memberDetails,
+            details: this.modelValue,
             familyManager: this.familyManager,
-            contact: this.memberDetails?.emergencyContacts[0] ?? null,
+            contact: this.modelValue?.emergencyContacts[0] ?? null,
             handler: (contact: EmergencyContact, component: EditMemberEmergencyContactView) => {
-                if (!this.memberDetails) {
+                if (!this.modelValue) {
                     return;
                 }
 
-                const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
-                memberDetails.emergencyContacts = [contact]
-                this.$emit("change", memberDetails)
+                const modelValue = new ObjectData(this.modelValue.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
+                modelValue.emergencyContacts = [contact]
+                this.$emit("update:modelValue", modelValue)
 
                 component.pop({ force: true })
             }
@@ -191,15 +187,15 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
     addParent() {
         this.present(new ComponentWithProperties(EditMemberParentView, {
-            memberDetails: this.memberDetails,
+            modelValue: this.modelValue,
             familyManager: this.familyManager,
             handler: (parent: Parent, component: EditMemberParentView) => {
-                if (!this.memberDetails) {
+                if (!this.modelValue) {
                     return;
                 }
-                const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
-                memberDetails.parents.push(parent)
-                this.$emit("change", memberDetails)
+                const modelValue = new ObjectData(this.modelValue.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
+                modelValue.parents.push(parent)
+                this.$emit("update:modelValue", modelValue)
                 this.cachedParents = null
                 component.pop({ force: true })
             }
@@ -207,7 +203,7 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
     }
 
     get emergencyContacts(): EmergencyContact[]  {
-        return this.memberDetails?.emergencyContacts ?? []
+        return this.modelValue?.emergencyContacts ?? []
     }
 
     get parents(): SelectableParent[]  {
@@ -216,7 +212,7 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
         }
 
         const parents: SelectableParent[] = []
-        for (const parent of this.memberDetails?.parents ?? []) {
+        for (const parent of this.modelValue?.parents ?? []) {
             parents.push(new SelectableParent(parent, true))
         }
 
@@ -238,18 +234,18 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
     }
 
     onChangedSelection() {
-        if (!this.memberDetails) {
+        if (!this.modelValue) {
             return;
         }
 
-        const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
-        memberDetails.parents = this.parents.flatMap(p => {
+        const modelValue = new ObjectData(this.modelValue.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
+        modelValue.parents = this.parents.flatMap(p => {
             if (p.selected) {
                 return [p.parent]
             }
             return []
         })
-        this.$emit("change", memberDetails)
+        this.$emit("update:modelValue", modelValue)
     }
 
     get selectionCount() {

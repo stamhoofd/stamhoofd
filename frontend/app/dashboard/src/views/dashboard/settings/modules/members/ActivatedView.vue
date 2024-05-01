@@ -144,7 +144,7 @@ export default class ActivatedView extends Mixins(NavigationMixin) {
         this.present(displayedComponent.setDisplayStyle("overlay"));
 
         setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent?.$emit("pop");
+            (displayedComponent.componentInstance() as any)?.hide?.()
         }, 1000);
     }
 }

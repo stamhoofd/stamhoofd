@@ -1,6 +1,6 @@
 <template>
     <transition appear name="show">
-        <div class="context-menu-container" :class="{ hasParent: !!parentMenu, disableDismiss: !autoDismiss }" @click="pop" @contextmenu.prevent>
+        <div v-if="!hide" class="context-menu-container" :class="{ hasParent: !!parentMenu, disableDismiss: !autoDismiss }" @click="pop" @contextmenu.prevent>
             <div
                 ref="context"
                 class="context-menu"
@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ModalStackComponent } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, injectHooks, usePop } from "@simonbackx/vue-app-navigation";
 
 import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { ViewportHelper } from "../ViewportHelper";
@@ -49,6 +49,7 @@ export default class ContextMenuView extends VueComponent {
 
     usedPreferredHeight: number | null = null;
     usedPreferredWidth: number | null = this.preferredWidth;
+    hide = false
 
     @Prop({
         default: 0,
@@ -105,6 +106,16 @@ export default class ContextMenuView extends VueComponent {
     isPopped = false
 
     disableHoverChildMenus = false
+
+    created(this: any) {
+        // we cannot use setup in mixins, but we want to avoid having to duplicate the 'use' hooks logic.
+        // so this is a workaround
+        const definitions: any = {
+            parentPop: usePop()
+        };
+
+        injectHooks(this, definitions);
+    }
 
     mounted() {
         // Calculate position
@@ -485,10 +496,13 @@ export default class ContextMenuView extends VueComponent {
     }
 
     shouldIgnoreHover() {
-        return this.isPopped || (this.childMenu && this.ignoreHover)
+        return this.isPopped || (
+            this.childMenu && (
+                this.ignoreHover
+            )
+        )
     }
     
-
     onMouseMove(event) {
         if (!this.childMenu) {
             // Wait for timer to end
@@ -607,13 +621,18 @@ export default class ContextMenuView extends VueComponent {
     }
 
     pop(popParents = false) {
-        if (this.isPopped) {
+        if (this.isPopped || this.hide) {
             // Ignore
             return
         }
         this.isPopped = true
-        this.popChildMenu()
-        this.$parent?.$parent?.$emit("pop");
+        this.popChildMenu();
+
+        // Trigger hide animation
+        this.hide = true;
+        setTimeout(() => {
+            (this as any).parentPop({force: true})
+        }, 200);
 
         if (popParents && this.parentMenu) {
             this.parentMenu.pop(true)
@@ -626,18 +645,6 @@ export default class ContextMenuView extends VueComponent {
 
     deactivated() {
         document.removeEventListener("keydown", this.onKey);
-    }
-
-    get modalStackComponent(): ModalStackComponent | null {
-        let start: any = this.$parent;
-        while (start) {
-            if (start instanceof ModalStackComponent) {
-                return start;
-            }
-
-            start = start.$parent;
-        }
-        return null;
     }
 
     onKey(event) {

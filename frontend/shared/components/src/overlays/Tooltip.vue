@@ -4,7 +4,7 @@
             class="tooltip" 
             :class="usedXPlacement+' '+usedYPlacement+' '+icon"
             :style="{ transformOrigin, top: top !== null ? top + 'px' : undefined, left: left !== null ? (left + 'px') : undefined, right: right !== null ? (right + 'px') : undefined, bottom: bottom !== null ? (bottom + 'px') : undefined, width: usedPreferredWidth !== null ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight !== null ? (usedPreferredHeight + 'px') : undefined }"  
-            @click="$parent.$emit('pop')"
+            @click="hide"
         >
             <span v-if="icon" :class="'icon '+icon" />
             <span>{{ text }}</span>
@@ -194,7 +194,7 @@ export default class Tooltip extends Mixins(NavigationMixin) {
     }
 
     hide() {
-        this.$parent?.$emit("pop")
+        this.pop({force: true})
     }
 }
 </script>

@@ -95,7 +95,7 @@ export default class STNavigationBar extends Vue {
 
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
         // If we are in modern mode, always choose the main element, which is the next sibling
-        if (!this.sticky && document.body.className.indexOf("modern") > -1) {
+        if (!this.sticky && document.body.className.indexOf("modern") > -1 && this.$el.nextElementSibling) {
             return this.$el.nextElementSibling as HTMLElement;
         }
 

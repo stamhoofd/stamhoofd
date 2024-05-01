@@ -50,11 +50,9 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BirthDayInput, CenteredMessage, EmailInput, ErrorBox, PhoneInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, Gender, MemberDetails, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { AddressInput, BirthDayInput, CenteredMessage, EmailInput, ErrorBox, PhoneInput, Radio, RadioGroup, STErrorsDefault, STInputBox, SaveView, Validator } from "@stamhoofd/components";
+import { Address, Gender, MemberDetails, Version } from "@stamhoofd/structures";
 
 
 @Component({
@@ -83,6 +81,9 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
+    @Prop({ required: true })
+        originalDetails: MemberDetails
+        
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
@@ -164,9 +165,6 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
         }
         this.loading = false
     }
-
-    @Prop({ required: true })
-        originalDetails: MemberDetails
 
     async shouldNavigateAway() {
         if (

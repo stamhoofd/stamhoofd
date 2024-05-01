@@ -64,20 +64,24 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
         EmailInput,
         Checkbox,
         LoadingButton
-    },
-    model: {
-        prop: 'details',
-        event: 'change'
-    },
+    }
 })
 export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    details!: MemberDetails
+    modelValue!: MemberDetails
 
     errorBox: ErrorBox | null = null
 
     @Prop({ required: true })
     validator: Validator
+
+    get details() {
+        return this.modelValue
+    }
+
+    set details(details: MemberDetails) {
+        this.$emit('update:modelValue', details)
+    }
 
     isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address") {
         return this.$organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(MemberDetails.getBaseFilterDefinitions()).doesMatch(this.details) ?? false
