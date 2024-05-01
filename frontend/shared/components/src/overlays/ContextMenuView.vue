@@ -714,7 +714,7 @@ export default class ContextMenuView extends VueComponent {
         transition: opacity 0.2s;
     }
 
-    &.show-enter /* .fade-leave-active below version 2.1.8 */ {
+    &.show-enter-from /* .fade-leave-active below version 2.1.8 */ {
         // Instant appearing context menu! (only leave animation)
         opacity: 0;
 

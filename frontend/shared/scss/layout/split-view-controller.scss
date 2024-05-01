@@ -43,7 +43,7 @@
     padding-top: var(--popup-padding-top-outside, 0px);
 
 
-    &.fade-enter,
+    &.fade-enter-from,
     &.fade-leave-to {
         &>div {
             transform: translate(-50%, 30vh);
@@ -210,7 +210,7 @@
         }
     }
 
-    &.fade-enter,
+    &.fade-enter-from,
     &.fade-leave-to
 
     /* .fade-leave-active below version 2.1.8 */

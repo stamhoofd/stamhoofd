@@ -315,7 +315,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         }
     }
 
-    &.show-enter, &.show-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    &.show-enter-from, &.show-leave-to /* .fade-leave-active below version 2.1.8 */ {
         // Instant appearing context menu! (only leave animation)
         opacity: 0;
 

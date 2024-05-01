@@ -64,7 +64,7 @@ export default class LoadingView extends Vue {
         }
     }
 
-    &.fade-enter /* .fade-leave-active below version 2.1.8 */ {
+    &.fade-enter-from /* .fade-leave-active below version 2.1.8 */ {
         > .spinner-container {
             opacity: 0;
         }

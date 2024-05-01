@@ -146,7 +146,7 @@ export default class ToastBox extends Vue {
         transform: scale(1, 1) translate(0, 0);
     }
 
-    .move-enter, .move-leave-to
+    .move-enter-from, .move-leave-to
         /* .list-complete-leave-active below version 2.1.8 */ {
         opacity: 0;
         transform: scale(0.8, 0.8) translateY(30px);

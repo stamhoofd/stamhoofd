@@ -3,12 +3,12 @@
         <STNavigationBar :title="title">
             <template #left>
                 <BackButton v-if="$parent.canPop" @click="$parent.pop" />
-            </template>
-            <template v-else-if="$isMobile || $isIOS || $isAndroid" slot="left">
-                <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
-                <button v-else class="button text selected unbold" type="button" @click="$parent.pop">
-                    {{ cancelText }}
-                </button>
+                <template v-else-if="$isMobile || $isIOS || $isAndroid" >
+                    <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
+                    <button v-else class="button text selected unbold" type="button" @click="$parent.pop">
+                        {{ cancelText }}
+                    </button>
+                </template>
             </template>
 
             <template v-if="$isMobile || $isIOS || $isAndroid" #right><LoadingButton :loading="loading">

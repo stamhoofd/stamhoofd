@@ -1,7 +1,9 @@
 <template>
     <div class="st-view cart-view">
         <STNavigationBar :pop="canPop" :dismiss="canDismiss">
-            <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ formatPrice(cart.price) }}</span>
+            <template #left>
+                <span v-if="cart.items.length > 0" class="style-tag">{{ formatPrice(cart.price) }}</span>
+            </template>
         </STNavigationBar>
 
         <main class="flex">
@@ -63,22 +65,24 @@
                 <h2>Suggesties</h2>
                 <STList>
                     <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
-                        <img v-if="!suggestion.group" slot="left" src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
-                        <template v-else slot="left">
-                            <figure v-if="suggestion.group.squareImage" class="registration-image">
-                                <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
-                                <div>
-                                    <span v-if="suggestion.waitingList" class="icon gray clock" />
-                                </div>
-                            </figure>
-                            <figure v-else class="registration-image">
-                                <figure>
-                                    <span>{{ suggestion.group.settings.getShortCode(2) }}</span>
+                        <template #left>
+                            <img v-if="!suggestion.group" src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
+                            <template v-else >
+                                <figure v-if="suggestion.group.squareImage" class="registration-image">
+                                    <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
+                                    <div>
+                                        <span v-if="suggestion.waitingList" class="icon gray clock" />
+                                    </div>
                                 </figure>
-                                <div>
-                                    <span v-if="suggestion.waitingList" class="icon gray clock" />
-                                </div>
-                            </figure>
+                                <figure v-else class="registration-image">
+                                    <figure>
+                                        <span>{{ suggestion.group.settings.getShortCode(2) }}</span>
+                                    </figure>
+                                    <div>
+                                        <span v-if="suggestion.waitingList" class="icon gray clock" />
+                                    </div>
+                                </figure>
+                            </template>
                         </template>
                         <h3 class="style-title-list">
                             {{ suggestion.title }}

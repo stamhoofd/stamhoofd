@@ -243,7 +243,7 @@ export default class Tooltip extends Mixins(NavigationMixin) {
     &.show-leave-active {
         transition: opacity 0.2s, transform 0.2s;
     }
-    &.show-enter, &.show-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    &.show-enter-from, &.show-leave-to /* .fade-leave-active below version 2.1.8 */ {
         opacity: 0;
         transform: scale(0.8, 0.8);
     }

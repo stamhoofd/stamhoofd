@@ -19,8 +19,10 @@
 
                 <STList class="illustration-list">
                     <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
-                        <img v-if="member.details.gender === 'Female'" slot="left" src="@stamhoofd/assets/images/illustrations/member-female.svg">
-                        <img v-else slot="left" src="@stamhoofd/assets/images/illustrations/member-male.svg">
+                        <template #left>
+                            <img v-if="member.details.gender === 'Female'" src="@stamhoofd/assets/images/illustrations/member-female.svg">
+                            <img v-else src="@stamhoofd/assets/images/illustrations/member-male.svg">
+                        </template>
 
                         <h2 class="style-title-list">
                             {{ member.firstName }} {{ member.details ? member.details.lastName : "" }}

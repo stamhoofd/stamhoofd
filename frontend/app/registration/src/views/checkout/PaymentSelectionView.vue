@@ -20,7 +20,9 @@
         </main>
 
         <STToolbar>
-            <template #left><span>Totaal: {{ formatPrice(cart.price) }}</span></template>
+            <template #left>
+                <span>Totaal: {{ formatPrice(cart.price) }}</span>
+            </template>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goNext">
                     <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Bevestigen</span>
@@ -36,11 +38,10 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
 import { KeychainedResponse, Payment, PaymentMethod, PaymentStatus, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import RegistrationSuccessView from './RegistrationSuccessView.vue';

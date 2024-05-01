@@ -41,13 +41,18 @@
         </main>
 
         <STToolbar>
-            <template #left><span>Totaal: {{ formatPrice(cart.price) }}</span></template>
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" type="button" @click="goNext">
-                    <span>Doorgaan</span>
-                    <span class="icon arrow-right" />
-                </button>
-            </LoadingButton>
+            <template #left>
+                <span>Totaal: {{ formatPrice(cart.price) }}</span>
+            </template>
+            
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="button" @click="goNext">
+                        <span>Doorgaan</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>

@@ -1,21 +1,23 @@
 <template>
     <STListItem :selectable="true" class="member-box right-stack member-registration-block" @click="onClicked">
-        <template v-if="type == 'member'" #left><span class="icon user" /></template>
-        <template v-else slot="left">
-            <figure v-if="imageSrc" class="registration-image">
-                <img :src="imageSrc">
-                <div>
-                    <span v-if="waitingList" class="icon gray clock small" />
-                </div>
-            </figure>
-            <figure v-else class="registration-image">
-                <figure>
-                    <span>{{ group.settings.getShortCode(2) }}</span>
+        <template #left>
+            <span v-if="type == 'member'" class="icon user" />
+            <template v-else>
+                <figure v-if="imageSrc" class="registration-image">
+                    <img :src="imageSrc">
+                    <div>
+                        <span v-if="waitingList" class="icon gray clock small" />
+                    </div>
                 </figure>
-                <div>
-                    <span v-if="waitingList" class="icon gray clock small" />
-                </div>
-            </figure>
+                <figure v-else class="registration-image">
+                    <figure>
+                        <span>{{ group.settings.getShortCode(2) }}</span>
+                    </figure>
+                    <div>
+                        <span v-if="waitingList" class="icon gray clock small" />
+                    </div>
+                </figure>
+            </template>
         </template>
 
         <h4 class="style-title-list ">

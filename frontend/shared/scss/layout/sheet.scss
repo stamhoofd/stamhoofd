@@ -37,7 +37,7 @@
     --popup-padding-top-full: max(15px, var(--popup-padding-top-raw));
     --popup-padding-bottom-full: max(15px, var(--popup-padding-bottom-raw));
 
-    &.fade-enter,
+    &.fade-enter-from,
     &.fade-leave-to {
         &>div {
             transform: translate(-50%, 30vh);
@@ -70,7 +70,7 @@
     --st-horizontal-padding: 30px;
     --st-vertical-padding: 30px;
 
-    &.fade-enter,
+    &.fade-enter-from,
     &.fade-leave-to {
         &>div {
             transform: translate(0, calc(var(--popup-padding-top-outside, 0px) - 40px));

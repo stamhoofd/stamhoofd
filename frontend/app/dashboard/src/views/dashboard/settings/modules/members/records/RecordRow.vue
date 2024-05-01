@@ -1,14 +1,16 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack left-center" @click="editRecord()" @contextmenu.prevent="showContextMenu">
-        <img v-if="record.type === 'Text'" slot="left" src="@stamhoofd/assets/images/illustrations/text-input.svg" class="style-illustration-img">
-        <img v-else-if="record.type === 'Textarea'" slot="left" src="@stamhoofd/assets/images/illustrations/textarea.svg" class="style-illustration-img">
-        <img v-else-if="record.type === 'Checkbox'" slot="left" src="@stamhoofd/assets/images/illustrations/checkbox.svg" class="style-illustration-img">
-        <img v-else-if="record.type === 'ChooseOne'" slot="left" src="@stamhoofd/assets/images/illustrations/radio-input.svg" class="style-illustration-img">
-        <img v-else-if="record.type === 'MultipleChoice'" slot="left" src="@stamhoofd/assets/images/illustrations/multiple-choice-input.svg" class="style-illustration-img">
-        <img v-else-if="record.type === 'Email'" slot="left" src="@stamhoofd/assets/images/illustrations/email-input.svg" class="style-illustration-img">
-        <img v-else-if="record.type === 'Address'" slot="left" src="@stamhoofd/assets/images/illustrations/address-input.svg" class="style-illustration-img">
-        <img v-else-if="record.type === 'Date'" slot="left" src="@stamhoofd/assets/images/illustrations/date-input.svg" class="style-illustration-img">
-        <img v-else slot="left" src="@stamhoofd/assets/images/illustrations/text-input.svg" class="style-illustration-img">
+        <template #left>
+            <img v-if="record.type === 'Text'" src="@stamhoofd/assets/images/illustrations/text-input.svg" class="style-illustration-img">
+            <img v-else-if="record.type === 'Textarea'" src="@stamhoofd/assets/images/illustrations/textarea.svg" class="style-illustration-img">
+            <img v-else-if="record.type === 'Checkbox'" src="@stamhoofd/assets/images/illustrations/checkbox.svg" class="style-illustration-img">
+            <img v-else-if="record.type === 'ChooseOne'" src="@stamhoofd/assets/images/illustrations/radio-input.svg" class="style-illustration-img">
+            <img v-else-if="record.type === 'MultipleChoice'" src="@stamhoofd/assets/images/illustrations/multiple-choice-input.svg" class="style-illustration-img">
+            <img v-else-if="record.type === 'Email'" src="@stamhoofd/assets/images/illustrations/email-input.svg" class="style-illustration-img">
+            <img v-else-if="record.type === 'Address'" src="@stamhoofd/assets/images/illustrations/address-input.svg" class="style-illustration-img">
+            <img v-else-if="record.type === 'Date'" src="@stamhoofd/assets/images/illustrations/date-input.svg" class="style-illustration-img">
+            <img v-else src="@stamhoofd/assets/images/illustrations/text-input.svg" class="style-illustration-img">
+        </template>
 
         <h3 class="style-title-list">
             {{ record.name }}
