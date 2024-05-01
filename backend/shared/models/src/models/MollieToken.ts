@@ -206,7 +206,9 @@ export class MollieToken extends Model {
                 reject(error);
             });
 
-            req.write(jsonData);
+            if (method !== 'GET') {
+                req.write(jsonData);
+            }
             req.end();
         });
     }
