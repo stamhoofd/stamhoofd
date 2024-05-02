@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="pack.meta.name" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="pack.meta.name" />
 
         <main>
             <h1>

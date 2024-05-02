@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="E-mailadressen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="E-mailadressen" />
 
         <main>
             <h1>

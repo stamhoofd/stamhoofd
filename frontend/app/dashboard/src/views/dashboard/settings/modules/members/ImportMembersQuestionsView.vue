@@ -1,6 +1,6 @@
 <template>
     <div id="import-members-questions-view" class="st-view background">
-        <STNavigationBar title="Leden importeren" :pop="canPop" :dismis="canDismiss" />
+        <STNavigationBar title="Leden importeren" :dismis="canDismiss" />
 
         <main>
             <h1>Importeer instellingen</h1>

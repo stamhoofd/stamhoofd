@@ -1,6 +1,6 @@
 <template>
     <div class="st-view detailed-ticket-view">
-        <STNavigationBar :title="name" :pop="canPop" :dismiss="canDismiss && allowDismiss" :sticky="false" :large="logo">
+        <STNavigationBar :title="name" :disableDismiss="!allowDismiss" :sticky="false" :large="logo">
             <template #left>
                 <OrganizationLogo v-if="logo" :organization="organization" />
             </template>

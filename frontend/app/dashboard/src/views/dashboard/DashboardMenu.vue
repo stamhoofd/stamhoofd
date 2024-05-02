@@ -185,22 +185,20 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { AsyncComponent, CenteredMessage, GlobalEventBus, GroupAvatar, InheritComponent, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
 import { Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Group, GroupCategory, GroupCategoryTree, Permissions, PrivateWebshop, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { openNolt } from "../../classes/NoltHelper";
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
-import OrganizationSwitcher from './OrganizationSwitcher.vue';
 import InvoicePaymentStatusView from "./settings/packages/InvoicePaymentStatusView.vue";
 
 @Component({
     components: {
         Logo,
         STNavigationBar,
-        OrganizationSwitcher,
         GroupAvatar,
         InheritComponent
     },
@@ -561,7 +559,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     getManageAccount() {
         return new ComponentWithProperties(NavigationController, { 
-            root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './account/AccountSettingsView.vue'), {})
+            root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ '@stamhoofd/components/src/views/AccountSettingsView.vue'), {})
         })
     }
 

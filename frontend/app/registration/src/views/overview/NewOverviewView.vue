@@ -202,7 +202,7 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LegalFooter, LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { CenteredMessage, LegalFooter, LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast, AccountSettingsView } from "@stamhoofd/components";
 import { downloadDocument } from "@stamhoofd/document-helper";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Document, DocumentStatus, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
@@ -210,7 +210,6 @@ import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { Suggestion, SuggestionBuilder } from "../../classes/SuggestionBuilder";
-import AccountSettingsView from "../account/AccountSettingsView.vue";
 import PaymentsView from "../account/PaymentsView.vue";
 import CartView from "../checkout/CartView.vue";
 import { createMemberComponent } from "../members/details/createMemberComponent";

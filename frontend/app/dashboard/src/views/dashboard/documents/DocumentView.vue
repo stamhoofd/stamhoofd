@@ -1,6 +1,6 @@
 <template>
     <div class="st-view document-view">
-        <STNavigationBar :title="'Document'" :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar :title="'Document'">
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorig document'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende document'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goNext" />

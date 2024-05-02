@@ -1,6 +1,6 @@
 <template>
     <form class="st-view cart-item-view" @submit.prevent="addToCart">
-        <STNavigationBar :title="cartItem.product.name" :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar :title="cartItem.product.name">
             <template #left>
                 <p v-if="!webshop.isAllFree || pricedItem.getPriceWithDiscounts()">
                     <span v-if="formattedPriceWithDiscount" class="style-tag discount">{{ formattedPriceWithDiscount }}</span>

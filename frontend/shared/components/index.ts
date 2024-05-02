@@ -69,6 +69,7 @@ export { default as OrganizationLogo } from "./src/OrganizationLogo.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
 export { default as OrganizationSwitcher } from "./src/OrganizationSwitcher.vue"
+export { default as AccountSwitcher } from "./src/AccountSwitcher.vue"
 
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"
@@ -135,6 +136,7 @@ export { default as ProductGrid } from "./src/views/ProductGrid.vue"
 export { default as RecordCategoryAnswersBox } from "./src/views/RecordCategoryAnswersBox.vue"
 export { default as SeatSelectionBox } from "./src/views/SeatSelectionBox.vue"
 export { default as ShowSeatsView } from "./src/views/ShowSeatsView.vue"
+export { default as AccountSettingsView } from "./src/views/AccountSettingsView.vue"
 
 // Payment
 export * from "./src/ColorHelper"

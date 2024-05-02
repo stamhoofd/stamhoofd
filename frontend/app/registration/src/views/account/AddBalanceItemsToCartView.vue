@@ -1,6 +1,6 @@
 <template>
     <div class="st-view choose-balance-items-view">
-        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Mijn account" />
+        <STNavigationBar title="Mijn account" />
         <main>
             <h1>Welke openstaande bedragen wil je nu betalen?</h1>
             <p>Betaal bij voorkeur alles in één keer, maar indien niet mogelijk kan je in stukken betalen die je zelf kiest.</p>

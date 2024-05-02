@@ -1,6 +1,6 @@
 <template>
     <div id="free-contribution-view" class="st-view">
-        <STNavigationBar title="Vrije bijdrage" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Vrije bijdrage" />
         <main>
             <h1>Vrije bijdrage <span class="style-tag">Optioneel</span></h1>
             <p v-if="description" class="style-description pre-wrap" v-text="description" />

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Lijken op elkaar" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Lijken op elkaar" />
 
         <main>
             <h1>

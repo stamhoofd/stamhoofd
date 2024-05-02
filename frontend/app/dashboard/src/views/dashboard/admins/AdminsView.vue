@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="loading" />
     <div v-else class="st-view background">
-        <STNavigationBar title="Beheerders" :dismiss="canDismiss" :pop="canPop">
+        <STNavigationBar title="Beheerders">
             <template #right><button class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" type="button" @click="createAdmin">
                 <span class="icon add" />
                 <span>Beheerder</span>

@@ -1,6 +1,6 @@
 <template>
     <div id="financial-support-view" class="st-view">
-        <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar :title="title" />
         <main>
             <h1>{{ title }}</h1>
             <p class="style-description pre-wrap" v-text="description" />

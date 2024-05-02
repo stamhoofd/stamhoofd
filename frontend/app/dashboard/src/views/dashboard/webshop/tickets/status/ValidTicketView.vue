@@ -1,6 +1,6 @@
 <template>
     <div class="st-view valid-ticket-view">
-        <STNavigationBar title="Geldig ticket" :pop="canPop" />
+        <STNavigationBar title="Geldig ticket" />
 
         <main v-if="!publicTicket.isSingle">
             <h1>

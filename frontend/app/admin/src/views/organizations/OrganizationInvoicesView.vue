@@ -1,6 +1,6 @@
 <template>
     <div class="st-view organization-view">
-        <STNavigationBar title="Facturatie" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar title="Facturatie" />
 
         <main>
             <h1>

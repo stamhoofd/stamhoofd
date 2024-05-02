@@ -1,6 +1,6 @@
 <template>
     <form class="st-view choose-seats-view shade" @submit.prevent="save">
-        <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar :title="title" />
         <main v-if="seatingPlan">
             <h1>
                 {{ title }}

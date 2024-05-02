@@ -1,6 +1,6 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Maak jouw account" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Maak jouw account" />
 
         <main>
             <h1>

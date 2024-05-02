@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Gegevens nakijken" />
+        <STNavigationBar title="Gegevens nakijken" />
 
         <main>
             <h1>Gegevens nakijken</h1>

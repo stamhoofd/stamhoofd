@@ -1,6 +1,6 @@
 <template>
     <div id="member-parents-view" class="st-view">
-        <STNavigationBar title="Ouders" :pop="canPop">
+        <STNavigationBar title="Ouders">
             <template #right><button class="button navigation highlight" :disabled="selectionCount === 0" type="button" @click="goNext">
                 {{ nextText }}
             </button></template>

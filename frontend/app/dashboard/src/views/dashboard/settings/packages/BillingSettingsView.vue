@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar title="Facturen en betalingen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Facturen en betalingen" />
 
         <main>
             <h1>

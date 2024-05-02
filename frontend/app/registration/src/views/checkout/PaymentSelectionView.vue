@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'" />
         <main v-if="needsPay">
             <h1>Kies een betaalmethode</h1>
             <p>

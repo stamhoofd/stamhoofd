@@ -1,6 +1,6 @@
 <template>
     <form class=" st-view login-view" data-submit-last-field @submit.prevent="submit">
-        <STNavigationBar title="Inloggen" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar title="Inloggen" />
         <main>
             <h1>Inloggen</h1>
 

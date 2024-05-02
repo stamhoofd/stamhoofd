@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Ouder" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Ouder" />
         
         <main>
             <h1 v-if="!parent">

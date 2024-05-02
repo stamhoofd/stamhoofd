@@ -1,6 +1,6 @@
 <template>
     <div id="import-members-auto-assigned-view" class="st-view background">
-        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="title" />
 
         <main>
             <h1>{{ title }}</h1>

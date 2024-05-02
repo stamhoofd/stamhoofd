@@ -1,6 +1,6 @@
 <template>
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
-        <STNavigationBar :title="filter.name" :dismiss="!canPop" :pop="canPop">
+        <STNavigationBar :title="filter.name" :disableDismiss="canPop">
             <template v-if="canDelete" #right><button class="button icon trash" type="button" @click="deleteFilter" /></template>
         </STNavigationBar>
 

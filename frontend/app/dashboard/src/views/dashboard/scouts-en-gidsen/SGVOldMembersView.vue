@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Schrappen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Schrappen" />
 
         <main>
             <h1>

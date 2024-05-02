@@ -1,6 +1,6 @@
 <template>
     <div class="st-view add-item-view">
-        <STNavigationBar title="Producten" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar title="Producten" />
         <main>
             <h1>
                 Producten

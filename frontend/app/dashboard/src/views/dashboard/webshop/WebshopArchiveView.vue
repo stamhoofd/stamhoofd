@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar title="Webshop archief" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Webshop archief" />
 
         <main>
             <h1>

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="template.settings.name" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="template.settings.name" />
 
         <main>
             <h1 class="style-navigation-title">

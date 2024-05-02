@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="loadingStatus" />
     <div v-else id="finances-view" class="st-view background">
-        <STNavigationBar title="Boekhouding" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Boekhouding" />
 
         <main>
             <h1>

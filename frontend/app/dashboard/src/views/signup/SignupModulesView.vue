@@ -1,6 +1,6 @@
 <template>
     <form class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Functies uitproberen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Functies uitproberen" />
 
         <main>
             <h1>

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Noodcontact" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Noodcontact" />
         
         <main>
             <h1>

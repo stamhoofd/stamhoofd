@@ -1,6 +1,6 @@
 <template>
     <div class="st-view payment-view">
-        <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar :title="title" />
 
         <main>
             <h1 class="style-navigation-title with-icons">

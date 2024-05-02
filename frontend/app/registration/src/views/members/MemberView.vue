@@ -1,6 +1,6 @@
 <template>
     <div class="st-view member-view">
-        <STNavigationBar :title="member.name" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="member.name" />
         
         <main class="member-view-details">
             <h1>

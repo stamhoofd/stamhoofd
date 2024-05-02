@@ -45,6 +45,10 @@ export class User extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 162 })
     hasAccount = false
+
+    get name() {
+        return this.firstName + ' ' + this.lastName;
+    }
 }
 
 export class NewUser extends User {

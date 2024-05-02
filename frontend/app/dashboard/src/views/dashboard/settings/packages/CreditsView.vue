@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Jouw tegoed geschiedenis" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Jouw tegoed geschiedenis" />
         
         <main>
             <h1>

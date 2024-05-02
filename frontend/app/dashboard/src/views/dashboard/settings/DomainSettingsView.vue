@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view">
-        <STNavigationBar title="Domeinnaam kiezen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Domeinnaam kiezen" />
 
         <main>
             <h1>

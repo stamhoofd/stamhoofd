@@ -1,6 +1,6 @@
 <template>
     <div id="members-activated-view" class="st-view background">
-        <STNavigationBar title="Ledenadministratie is actief" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Ledenadministratie is actief" />
 
         <main>
             <h1>Hoera! 🥳 De ledenadministratie is actief</h1>

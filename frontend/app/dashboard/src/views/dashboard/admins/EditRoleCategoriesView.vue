@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Toegang tot categorieën aanpassen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Toegang tot categorieën aanpassen" />
 
         <main>
             <h1>

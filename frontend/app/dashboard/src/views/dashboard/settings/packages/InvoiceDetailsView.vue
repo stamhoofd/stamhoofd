@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background invoice-details-view">
-        <STNavigationBar :title="invoice.number ? 'Factuur '+invoice.number : 'Proforma factuur'" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="invoice.number ? 'Factuur '+invoice.number : 'Proforma factuur'" />
 
         <main>
             <template v-if="!invoice.number">

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="member.name" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar :title="member.name" />
 
         <main>
             <h1>Waarvoor wil je {{ member.firstName }} inschrijven?</h1>

@@ -1,6 +1,6 @@
 <template>
     <div id="sgv-report-view" class="st-view">
-        <STNavigationBar title="Synchronisatie-rapport" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Synchronisatie-rapport" />
 
         <main>
             <h1>

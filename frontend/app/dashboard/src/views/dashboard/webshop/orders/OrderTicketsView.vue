@@ -1,6 +1,6 @@
 <template>
     <div class="st-view order-tickets-view">
-        <STNavigationBar :title="'Tickets'" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar :title="'Tickets'" />
         <main>
             <h1 v-if="tickets.length > 1">
                 Tickets

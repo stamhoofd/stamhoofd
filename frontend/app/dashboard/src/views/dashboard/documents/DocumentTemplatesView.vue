@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="loading" />
     <div v-else id="documents-view" class="st-view background">
-        <STNavigationBar title="Documenten" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Documenten" />
 
         <main>
             <h1 class="style-navigation-title">

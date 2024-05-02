@@ -1,6 +1,6 @@
 <template>
     <div class="st-view member-summary-view">
-        <STNavigationBar title="Exporteren naar PDF" :dismiss="canDismiss" />
+        <STNavigationBar title="Exporteren naar PDF" />
 
         <main>
             <h1>

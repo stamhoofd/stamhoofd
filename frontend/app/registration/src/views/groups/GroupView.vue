@@ -1,6 +1,6 @@
 <template>
     <div class="st-view group-view">
-        <STNavigationBar :title="group.settings.name" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="group.settings.name" />
         
         <main>
             <h1>

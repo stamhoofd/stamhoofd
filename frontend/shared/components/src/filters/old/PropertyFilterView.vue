@@ -1,6 +1,6 @@
 <template>
     <form class="st-view filter-editor" @submit.prevent="applyFilter">
-        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="title" />
 
         <main>
             <h1>

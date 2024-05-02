@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background edit-invoice-view">
-        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="title" />
 
         <main>
             <h1>

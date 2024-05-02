@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="viewTitle" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar :title="viewTitle" />
         <main>
             <h1>{{ viewTitle }}</h1>
             <p>Dit zijn de automatische e-mails die verstuurd worden. Je kan de inhoud hier wijzigen.</p>

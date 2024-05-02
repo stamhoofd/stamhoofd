@@ -1,6 +1,6 @@
 <template>
     <div id="import-members-errors-view" class="st-view background">
-        <STNavigationBar title="Kijk deze fouten na" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Kijk deze fouten na" />
 
         <main>
             <h1>Kijk deze fouten na</h1>

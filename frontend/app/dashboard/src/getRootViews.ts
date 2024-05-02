@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuthenticatedView, ContextProvider, TabBarController, TabBarItem, OrganizationSwitcher } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, ContextProvider, TabBarController, TabBarItem, OrganizationSwitcher, AccountSwitcher } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
@@ -87,7 +87,7 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
     }
     const getManageAccount = () => {
         return new ComponentWithProperties(NavigationController, { 
-            root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './views/dashboard/account/AccountSettingsView.vue'), {})
+            root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ '@stamhoofd/components/src/views/AccountSettingsView.vue'), {})
         }, {
             provide: {
                 reactive_navigation_url:  computed(() => this.$url.extendUrl("account")), // own prefix + /settings
@@ -122,7 +122,8 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             $memberManager: new MemberManager(reactiveSession),
             reactive_navigation_url: "beheerders/" + session.organization!.uri,
             reactive_components: {
-                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {})
+                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
             }
         },
         calculatedContext: () => {

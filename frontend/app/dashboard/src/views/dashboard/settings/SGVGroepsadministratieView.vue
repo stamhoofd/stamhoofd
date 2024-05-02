@@ -1,6 +1,6 @@
 <template>
     <div id="sgv-groepsadministratie-view" class="st-view background">
-        <STNavigationBar title="Groepsadministratie" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Groepsadministratie" />
 
         <main>
             <h1>Groepsadministratie synchroniseren</h1>

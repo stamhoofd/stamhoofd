@@ -1,6 +1,6 @@
 <template>
     <div class="st-view cart-view">
-        <STNavigationBar :title="title" :dismiss="canDismiss" />
+        <STNavigationBar :title="title" />
         <main class="flex">
             <h1 class="style-navigation-title">
                 {{ title }}

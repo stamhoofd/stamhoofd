@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Overschrijven" :pop="false" :dismiss="isPopup && canDismiss" />
+        <STNavigationBar title="Overschrijven" :disablePop="true" :disableDismiss="!isPopup" />
 
         <main>
             <h1 v-if="created && type == 'order'">

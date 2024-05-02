@@ -24,9 +24,19 @@
     </div>
 </template>
 
+<script lang="ts">
+import TabBarController from './TabBarController.vue';
+import {inject, shallowRef} from 'vue';
+
+export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
+    const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController>|Ref<InstanceType<typeof TabBarController>>;
+    return shallowRef(c);
+}
+</script>
+
 <script setup lang="ts">
-import { ComponentWithPropertiesInstance, HistoryManager, useUrl } from '@simonbackx/vue-app-navigation';
-import { Ref, computed, nextTick, onBeforeUnmount, ref } from 'vue';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager, PushOptions, useUrl } from '@simonbackx/vue-app-navigation';
+import { Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, provide, ref } from 'vue';
 import { TabBarItem } from './TabBarItem';
 import InheritComponent from './InheritComponent.vue';
 import { Formatter } from '@stamhoofd/utility';
@@ -35,42 +45,54 @@ const props = defineProps<{
     tabs: TabBarItem[]
 }>()
 
-const selectedItem: Ref<TabBarItem> = ref(props.tabs[0]) as any as Ref<TabBarItem> // TypeScript is unpacking the TabBarItem to {...} for some reason
-const root = computed(() => selectedItem.value.component)
+const selectedItem: Ref<TabBarItem|null> = ref(props.tabs[0]) as any as Ref<TabBarItem> // TypeScript is unpacking the TabBarItem to {...} for some reason
+
+// Root is stored separately because we can also navigate to non-tabs
+const root: Ref<ComponentWithProperties> = ref(props.tabs[0].component) as any as Ref<ComponentWithProperties>
+
 const mainElement = ref<HTMLElement|null>(null)
 const urlHelpers = useUrl()
 
+const instance = getCurrentInstance()
+provide('reactive_tabBarController', instance?.proxy); // Sadly the proxy does not include exposed properties - ComponentWithProperties has a workaround at getExposeProxy
+
 const getInternalScrollElements = () => {
     return (mainElement.value?.querySelectorAll(".st-view > main") ?? []) as NodeListOf<HTMLElement>
+}
+
+const saveCurrentItemState = () => {
+    const old = selectedItem.value;
+    if (old) {
+        // Keep current item alive
+        old.component.keepAlive = true;
+
+        // Save scroll position
+        const scrollElements = getInternalScrollElements();
+        
+        // Clear already saved items
+        old.savedScrollPositions = new WeakMap()
+
+        for (const element of scrollElements) {
+            old.savedScrollPositions.set(element, element.scrollTop)
+        }
+    }
 }
 const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     if (item === selectedItem.value) {
         return
     }
 
+    saveCurrentItemState()
     const old = selectedItem.value;
-
-    // Keep current item alive
-    old.component.keepAlive = true;
-
-    // Save scroll position
-    const scrollElements = getInternalScrollElements();
-    
-    // Clear already saved items
-    old.savedScrollPositions = new WeakMap()
-
-    for (const element of scrollElements) {
-        old.savedScrollPositions.set(element, element.scrollTop)
-    }
 
     // Set url namespace of the tab
     const tabUrl = Formatter.slug(item.name)
     item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl))
 
     if (appendHistory) {
-        HistoryManager.pushState(undefined, async () => {
+        HistoryManager.pushState(undefined, old ? (async () => {
             await selectItem(old, false)
-        }, true);
+        }) : null, true);
 
         item.component.assignHistoryIndex()
     } else {
@@ -79,6 +101,7 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
         
     // Switch
     selectedItem.value = item
+    root.value = item.component
     
     const positions = item.savedScrollPositions
     await nextTick()
@@ -97,6 +120,37 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     }
 }
 
+const show = async (options: PushOptions) => {
+    if (options.components.length > 1) {
+        throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController')
+    }
+    const component = options.components[0];
+
+    if (!component || component === root.value) {
+        return
+    }
+
+    saveCurrentItemState()
+
+    if (options?.adjustHistory ?? true) {
+        const old = selectedItem.value
+        HistoryManager.pushState(undefined, old ? (async () => {
+            await selectItem(old, false)
+        }) : null, true);
+        component.assignHistoryIndex()
+    } else {
+        component.returnToHistoryIndex()
+    }
+        
+    // Switch
+    selectedItem.value = null
+    root.value = component
+    
+    // Wait for mount
+    await nextTick()
+}
+provide('reactive_navigation_show', show)
+
 onBeforeUnmount(() => {
     // Prevent memory issues by removing all references and destroying kept alive components
     for (const {component} of props.tabs) {
@@ -108,11 +162,12 @@ onBeforeUnmount(() => {
 })
 
 const returnToHistoryIndex = () => {
-    return selectedItem.value.component.returnToHistoryIndex();
+    return root.value.returnToHistoryIndex();
 }
 
 defineExpose({
-    returnToHistoryIndex
+    returnToHistoryIndex,
+    show
 })
 
 </script>
@@ -141,6 +196,13 @@ defineExpose({
 
         > .left {
             padding-left: 20px;
+        }
+
+        > .right {
+            padding-right: 20px;
+
+            // Align grid items right
+            justify-self: end;
         }
 
         > .middle {

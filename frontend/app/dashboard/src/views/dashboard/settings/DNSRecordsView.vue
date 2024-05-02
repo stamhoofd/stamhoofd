@@ -1,6 +1,6 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar title="Instellingen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Instellingen" />
 
         <main>
             <h1>

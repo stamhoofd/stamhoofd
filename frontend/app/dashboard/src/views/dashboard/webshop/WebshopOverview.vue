@@ -1,6 +1,6 @@
 <template>
     <div id="webshop-overview" class="st-view background">
-        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="title" />
 
         <main>
             <h1 class="style-navigation-title with-icons">
@@ -870,7 +870,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                 await this.splitViewController!.showDetail({
                     components: [
                         new ComponentWithProperties(NavigationController, { 
-                            root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ '../account/AccountSettingsView.vue'), {}, { instant: false })
+                            root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ '@stamhoofd/components/src/views/AccountSettingsView.vue'), {}, { instant: false })
                         })
                     ],
                     animated: false

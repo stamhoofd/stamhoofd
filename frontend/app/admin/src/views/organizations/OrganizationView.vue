@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="loading || !organization" />
     <div v-else class="st-view organization-view">
-        <STNavigationBar :title="initialOrganization.name" :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar :title="initialOrganization.name">
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige bestelling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende bestelling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goNext" />

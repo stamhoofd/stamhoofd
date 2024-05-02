@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Tickets scannen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Tickets scannen" />
 
         <main>
             <h1>

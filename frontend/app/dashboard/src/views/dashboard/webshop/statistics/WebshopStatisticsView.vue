@@ -1,6 +1,6 @@
 <template>
     <div class="st-view webshop-statistics-view background">
-        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar />
     
         <main>
             <h1>

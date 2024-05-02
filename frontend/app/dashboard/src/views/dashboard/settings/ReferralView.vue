@@ -1,7 +1,7 @@
 <template>
     <LoadingView v-if="loading || !status" />
     <div v-else id="referral-view" class="st-view background">
-        <STNavigationBar title="Verdien tegoed" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Verdien tegoed" />
 
         <main>
             <h1 v-if="!status.invoiceValue">

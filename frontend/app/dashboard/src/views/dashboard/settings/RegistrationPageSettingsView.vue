@@ -1,6 +1,6 @@
 <template>
     <div id="registration-page-settings-view" class="st-view background">
-        <STNavigationBar title="Jullie ledenportaal" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Jullie ledenportaal" />
 
         <main>
             <h1>Jullie ledenportaal</h1>

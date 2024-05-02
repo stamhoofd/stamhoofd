@@ -1,6 +1,6 @@
 <template>
     <div id="personalize-settings-view" class="st-view background">
-        <STNavigationBar title="Werkjaar" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Werkjaar" />
 
         <main>
             <h1>

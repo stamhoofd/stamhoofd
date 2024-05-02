@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar title="Instellingen" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar title="Instellingen" />
         <main>
             <h1>
                 Instellingen

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar title="Wie wil je inschrijven?" :pop="canPop" :dismiss="canDismiss" />
+        <STNavigationBar title="Wie wil je inschrijven?" />
 
         <main>
             <h1>Wie wil je inschrijven?</h1>

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view group-view">
-        <STNavigationBar title="Inschrijven" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Inschrijven" />
         
         <main>
             <h1>Wie wil je inschrijven voor "{{ group.settings.name }}"?</h1>

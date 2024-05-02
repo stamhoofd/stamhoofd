@@ -1,6 +1,6 @@
 <template>
     <div id="parent-view" class="st-view">
-        <STNavigationBar title="Kies inschrijvingsgroepen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Kies inschrijvingsgroepen" />
         
         <main>
             <h1>

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view ticket-already-scanned-view">
-        <STNavigationBar title="Ticket al gescand" :pop="canPop" />
+        <STNavigationBar title="Ticket al gescand" />
 
         <main>
             <h1>

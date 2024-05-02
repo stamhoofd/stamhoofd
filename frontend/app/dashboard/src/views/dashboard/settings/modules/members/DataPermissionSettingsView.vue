@@ -1,6 +1,6 @@
 <template>
     <div id="financial-support-settings-view" class="st-view background">
-        <STNavigationBar title="Financiële ondersteuning" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Financiële ondersteuning" />
 
         <main>
             <h1>

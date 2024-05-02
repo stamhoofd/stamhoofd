@@ -1,18 +1,28 @@
 import { Request } from "@simonbackx/simple-networking";
 import { AppManager } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
-import { type App } from "vue";
+import { Ref, inject, toRef, type App } from "vue";
 
 import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
 import { CopyableDirective, GlobalEventBus, LongPressDirective, TooltipDirective } from "..";
 import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
+import { Organization, User } from "@stamhoofd/structures";
 
 declare module "vue/types/vue" {
     interface Vue {
         readonly $OS: "android" | "iOS" | "web" | "macOS" | "windows" | "unknown";
     }
+}
+
+export function useUser(): Ref<User | null> {
+    const refOrReal = inject('$user', null)
+    return toRef(refOrReal)
+}
+
+export function useOrganization(): Ref<Organization | null> {
+    return toRef(inject('$organization', null))
 }
 
 /**

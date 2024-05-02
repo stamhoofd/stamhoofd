@@ -1,6 +1,6 @@
 <template>
     <div class="st-view payment-view">
-        <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar :title="title">
             <template #right>
                 <button v-if="hasPrevious|| hasNext" v-tooltip="'Ga naar vorige betaling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende betaling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goNext" />

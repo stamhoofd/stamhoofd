@@ -1,6 +1,6 @@
 <template>
     <div class="st-view member-view">
-        <STNavigationBar :title="member.details.firstName" :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar :title="member.details.firstName">
             <template #right>
                 <button v-if="hasPreviousMember || hasNextMember" v-tooltip="'Ga naar vorige lid'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousMember" @click="goBack" />
                 <button v-if="hasNextMember || hasPreviousMember" v-tooltip="'Ga naar volgende lid'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextMember" @click="goNext" />

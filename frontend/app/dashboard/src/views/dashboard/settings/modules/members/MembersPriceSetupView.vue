@@ -1,6 +1,6 @@
 <template>
     <div id="personalize-settings-view" class="st-view background">
-        <STNavigationBar title="Lidgeld" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Lidgeld" />
 
         <main>
             <h1>Standaard inschrijvingsgeld</h1>

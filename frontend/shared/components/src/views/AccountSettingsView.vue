@@ -1,8 +1,8 @@
 <template>
     <div id="account-view" class="st-view">
-        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Mijn account" />
+        <STNavigationBar title="Mijn account" />
 
-        <main>
+        <main class="center">
             <h1>
                 Mijn account
             </h1>
@@ -62,13 +62,10 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { LoginHelper, SessionManager } from '@stamhoofd/networking';
-import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
-
-import PaymentsView from "./PaymentsView.vue";
+import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { LoginHelper } from '@stamhoofd/networking';
+import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures";
 
 
 @Component({
@@ -82,9 +79,11 @@ import PaymentsView from "./PaymentsView.vue";
         RadioGroup,
         BackButton,
         LoadingButton,
-        EmailInput,
-        PaymentsView
+        EmailInput
     },
+    navigation: {
+        title: 'Mijn account'
+    }
 })
 export default class AccountSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
@@ -96,7 +95,6 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     session = this.$context
     
     get user() {
-        console.log("user updated!")
         return User.create(this.$user!)
     }
 

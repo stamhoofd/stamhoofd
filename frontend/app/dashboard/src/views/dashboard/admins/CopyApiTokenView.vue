@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Token" :dismiss="canDismiss" />
+        <STNavigationBar title="Token" />
 
         <main>
             <h1>

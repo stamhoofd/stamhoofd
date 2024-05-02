@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background package-confirm-view">
-        <STNavigationBar title="Betalen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Betalen" />
 
         <main>
             <h1 class="style-navigation-title">

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view cart-view">
-        <STNavigationBar :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar>
             <template #left>
                 <span v-if="cart.items.length > 0" class="style-tag">{{ formatPrice(cart.price) }}</span>
             </template>

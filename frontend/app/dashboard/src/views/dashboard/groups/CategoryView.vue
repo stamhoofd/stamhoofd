@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background category-view">
-        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
+        <STNavigationBar :title="title">
             <template #right>
                 <button v-if="canEdit" class="navigation button icon settings" type="button" @click="editMe" />
             </template>

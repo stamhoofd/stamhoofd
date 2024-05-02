@@ -1,6 +1,6 @@
 <template>
     <div class="st-view payments-view">
-        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Afrekeningen" />
+        <STNavigationBar title="Afrekeningen" />
         <main>
             <h1>Afrekeningen</h1>
             <p>Hier kan je jouw betalingen opvolgen.</p>

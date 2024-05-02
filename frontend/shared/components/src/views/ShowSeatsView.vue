@@ -1,6 +1,6 @@
 <template>
     <div class="st-view show-seats-view shade">
-        <STNavigationBar title="Jouw plaatsen" :pop="canPop" :dismiss="canDismiss && allowDismiss" />
+        <STNavigationBar title="Jouw plaatsen" :disableDismiss="!allowDismiss" />
         <main>
             <h1>Jouw plaatsen</h1>
 

@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Exporteren naar Excel" :dismiss="canDismiss" />
+        <STNavigationBar title="Exporteren naar Excel" />
 
         <main>
             <h1>
