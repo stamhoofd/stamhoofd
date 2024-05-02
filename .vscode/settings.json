@@ -18,10 +18,8 @@
             ".vue"
         ]
     },
-    "vetur.validation.template": false,
-    "vetur.format.enable": false,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "never"
+        "source.fixAll.eslint": "always"
     },
     "editor.formatOnPaste": false,
     "editor.formatOnSave": true,
@@ -39,11 +37,7 @@
         "./devops",
         "./shared/*"
     ],
-    "vetur.format.defaultFormatter.html": "none",
-    "vetur.format.defaultFormatter.js": "none",
-    "vetur.format.defaultFormatter.ts": "none",
     "search.useIgnoreFiles": false,
-    "vetur.trace.server": "messages",
     "i18n-ally.autoDetection": false,
     "i18n-ally.localesPaths": [
         "shared/locales/src"

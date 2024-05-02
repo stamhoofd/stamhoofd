@@ -1,6 +1,7 @@
 import { OrganizationManager, Session } from "@stamhoofd/networking";
 import { Organization, User } from "@stamhoofd/structures";
 import Vue from "vue";
+import { Formatter } from "@stamhoofd/utility";
 
 export {}
 
@@ -17,8 +18,8 @@ declare module "*.vue" {
     export default Vue;
 }
 
-declare module "vue/types/vue" {
-    interface Vue {
+declare module 'vue' {
+    interface ComponentCustomProperties {
         readonly $OS: "android" | "iOS" | "web" | "macOS" | "windows" | "unknown";
         readonly $isNative: boolean;
         readonly $isTouch: boolean;
@@ -30,5 +31,15 @@ declare module "vue/types/vue" {
         readonly $organization: Organization;
         readonly $user: User|null;
         readonly $organizationManager: OrganizationManager;
+
+        // Formatters
+        formatPrice: typeof Formatter.price,
+        formatDate: typeof Formatter.date,
+        formatDateTime: typeof Formatter.dateTime,
+        formatPriceChange: typeof Formatter.priceChange,
+        formatMinutes: typeof Formatter.minutes,
+        capitalizeFirstLetter: typeof Formatter.capitalizeFirstLetter,
+        formatDateWithDay: typeof Formatter.dateWithDay,
+        formatTime: typeof Formatter.time,
     }
 }

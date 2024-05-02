@@ -1,5 +1,5 @@
-module.exports = {
-    root: true,
+export default {
+    //root: true,
     env: {
         browser: true,
         es2021: true
@@ -14,7 +14,7 @@ module.exports = {
         parser: '@typescript-eslint/parser',
         ecmaVersion: 'latest', // Specify the ECMAScript version
         sourceType: 'module',
-        tsconfigRootDir: __dirname,
+        //tsconfigRootDir: __dirname,
         project: ['./tsconfig.json'], // Path to the TypeScript configuration
         extraFileExtensions: ['.vue'], // Additional file extensions
         ignorePatterns: ['.eslintrc.cjs']
