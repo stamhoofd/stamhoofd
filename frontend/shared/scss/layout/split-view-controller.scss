@@ -5,13 +5,62 @@
 .split-view-controller {
     --split-view-width: 280px;
 
+    height: 100vh;
+    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+    overflow: clip;
+
     >.master {
+        flex-shrink: 0;
+        flex-grow: 0;
+        position: sticky;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        height: calc(var(--vh, 1vh) * 100);
+
+        overflow: hidden;
+        overflow: clip;
+        -webkit-overflow-scrolling: touch;
+
+        // do not start scrolling parents if we reached the edge of this view
+        // we'll need to add a polyfill for Safari in JS to disable overscroll (currently not available)
+        overscroll-behavior-y: contain;
+
+        &:last-child {
+            position: relative;
+            overflow: visible;
+            width: 100%;
+            height: auto;
+        }
+
         z-index: 100;
         overscroll-behavior: contain;
     }
 
     >.detail {
         background: var(--color-current-background);
+        overflow: hidden;
+        overflow: clip;
+    }
+
+    &[data-has-detail="true"] {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        grid-template-columns: var(--split-view-width, 320px) 1fr;
+
+        & > .master {
+            min-width: 0;
+        }
+
+        & > .detail {
+            min-width: 0;
+            min-height: 100vh;
+            min-height: calc(var(--vh, 1vh) * 100);
+        }
     }
 
     &[data-has-detail="true"] {

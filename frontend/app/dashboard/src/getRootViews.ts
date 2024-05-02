@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuthenticatedView, ContextProvider } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, ContextProvider, TabBarController, TabBarItem } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
@@ -9,6 +9,7 @@ import { MemberManager } from './classes/MemberManager';
 import LoginView from './views/login/LoginView.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 import { computed, reactive } from 'vue';
+import OrganizationSwitcher from './views/dashboard/OrganizationSwitcher.vue';
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
@@ -95,12 +96,32 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             }
         })
     }
+
+    const splitViewController = new ComponentWithProperties(SplitViewController, {
+        root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {}),
+        getDefaultDetail(this: any): ComponentWithProperties {
+            const fullAccess = reactiveSession.user?.permissions?.hasFullAccess(reactiveSession.organization?.privateMeta?.roles ?? [])
+            const canManagePayments = reactiveSession.user?.permissions?.canManagePayments(reactiveSession.organization?.privateMeta?.roles ?? [])
+
+            if (fullAccess) {
+                return getManageSettings.call(this)
+            } else if (canManagePayments) {
+                return getManageFinances.call(this)
+            } else {
+                return getManageAccount.call(this)
+            }
+        }
+    })
+
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
             $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager: new MemberManager(reactiveSession),
             reactive_navigation_url: "beheerders/" + session.organization!.uri,
+            reactive_components: {
+                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {})
+            }
         },
         calculatedContext: () => {
             return {
@@ -110,21 +131,32 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
         },
         root: new ComponentWithProperties(AuthenticatedView, {
             setFixedPrefix: "beheerders",
-            root: wrapWithModalStack(new ComponentWithProperties(SplitViewController, {
-                root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {}),
-                getDefaultDetail(this: any): ComponentWithProperties {
-                    const fullAccess = reactiveSession.user?.permissions?.hasFullAccess(reactiveSession.organization?.privateMeta?.roles ?? [])
-                    const canManagePayments = reactiveSession.user?.permissions?.canManagePayments(reactiveSession.organization?.privateMeta?.roles ?? [])
-
-                    if (fullAccess) {
-                        return getManageSettings.call(this)
-                    } else if (canManagePayments) {
-                        return getManageFinances.call(this)
-                    } else {
-                        return getManageAccount.call(this)
-                    }
-                }
-            })),
+            root: wrapWithModalStack(
+                new ComponentWithProperties(TabBarController, {
+                    tabs: [
+                        new TabBarItem({
+                            icon: 'home',
+                            name: 'Start',
+                            component: splitViewController
+                        }),
+                        new TabBarItem({
+                            icon: 'group',
+                            name: 'Leden',
+                            component: splitViewController.clone()
+                        }),
+                        new TabBarItem({
+                            icon: 'basket',
+                            name: 'Verkoop',
+                            component: splitViewController.clone()
+                        }),
+                        new TabBarItem({
+                            icon: 'category',
+                            name: 'Meer',
+                            component: splitViewController.clone()
+                        }),
+                    ]
+                })
+            ),
             loginRoot: wrapWithModalStack(
                 new ComponentWithProperties(LoginView, {}), ...(options.loginComponents ?? [])
             ),

@@ -131,14 +131,11 @@ export default class STNavigationBar extends Vue {
         }
     }
 
-    mounted() {
-        this.addListener();
-    }
-
     activated() {
         // fix for element not yet in dom
         window.setTimeout(() => {
             this.addListener();
+            this.onScroll();
         }, 500);
     }
 
@@ -155,6 +152,9 @@ export default class STNavigationBar extends Vue {
     }
 
     onScroll() {
+        if (!this.scrollElement) {
+            return;
+        }
         const scroll = this.scrollElement!.scrollTop;
         if (scroll > 20) {
             this.scrolled = true;

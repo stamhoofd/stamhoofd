@@ -1,15 +1,10 @@
 <template>
     <div class="st-menu st-view dashboard-menu">
         <main ref="main" class="sticky-navigation-bar">
-            <STNavigationBar :title="$organization.name" :sticky="true" class="block-width">
-                <template #middle><OrganizationSwitcher /></template>
+
+            <STNavigationBar >
             </STNavigationBar>
-
-            <form v-if="false" class="input-icon-container icon search grayy">
-                <input class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
-            </form>
-
-            <hr class="first">
+            <InheritComponent name="tabbar-left" />
 
             <button v-if="!enableWebshopModule && !enableMemberModule" type="button" class="menu-button button cta" @click="openSignupSelection()">
                 <span class="icon flag" />
@@ -190,7 +185,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
+import { AsyncComponent, CenteredMessage, GlobalEventBus, GroupAvatar, InheritComponent, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
 import { Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Group, GroupCategory, GroupCategoryTree, Permissions, PrivateWebshop, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
@@ -206,7 +201,8 @@ import InvoicePaymentStatusView from "./settings/packages/InvoicePaymentStatusVi
         Logo,
         STNavigationBar,
         OrganizationSwitcher,
-        GroupAvatar
+        GroupAvatar,
+        InheritComponent
     },
     directives: {
         tooltip: TooltipDirective

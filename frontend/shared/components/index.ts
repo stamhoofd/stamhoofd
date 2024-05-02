@@ -54,6 +54,9 @@ export { default as AuthenticatedView } from "./src/containers/AuthenticatedView
 export { default as ContextProvider } from "./src/containers/ContextProvider.vue"
 export { default as LoadingView } from "./src/containers/LoadingView.vue"
 export { default as PromiseView } from "./src/containers/PromiseView.vue"
+export { default as TabBarController } from "./src/containers/TabBarController.vue"
+export { default as InheritComponent } from "./src/containers/InheritComponent.vue"
+export * from "./src/containers/TabBarItem"
 
 // Layout
 export { default as STList } from "./src/layout/STList.vue"
@@ -170,5 +173,5 @@ export { default as GraphView } from "./src/views/GraphView.vue"
 export * from "./src/views/GraphViewConfiguration"
 
 // Tabbar
-export { default as TabBarController } from "./src/navigation/TabBarController.vue"
-export * from "./src/navigation/TabBarItem"
+// export { default as TabBarController } from "./src/navigation/TabBarController.vue"
+// export * from "./src/navigation/TabBarItem"
