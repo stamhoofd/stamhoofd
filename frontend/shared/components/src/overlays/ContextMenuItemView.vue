@@ -36,7 +36,6 @@ export default class ContextMenuItemView extends Mixins(NavigationMixin) {
     }
 
     onMouseOver() {
-        console.log('hover', this.contextMenuView);
         (this.contextMenuView).onHoverItem(this)
     }
 
