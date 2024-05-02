@@ -1,0 +1,30 @@
+{
+    "name": "@stamhoofd/backend-admin",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "license": "UNLICENCED",
+    "private": true,
+    "scripts": {
+        "dev": "concurrently -r 'rm -rf ./dist && wait-on ./dist/index.js && nodemon --quiet --inspect=5859 --watch dist --delay 200ms --exec node --enable-source-maps ./dist/index.js --signal SIGTERM' 'yarn build --watch --preserveWatchOutput'",
+        "build": "rm -rf ./dist/src/migrations && mkdir -p ./dist/src/migrations && cp ./src/migrations/*.sql ./dist/src/migrations && cp -R ./src/migrations/data ./dist/src/migrations && tsc -b",
+        "build:full": "rm -rf ./dist && yarn build",
+        "start": "yarn build && node ./dist/index.js --enable-source-maps",
+        "migrations": "yarn build:full && node ./dist/migrations.js",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "upgrade:internal": "yarn upgrade --scope simonbackx",
+        "yalc:clear": "yalc remove --all && rm -rf node_modules && yarn install"
+    },
+    "devDependencies": {
+        "@types/node": "^18.11.17",
+        "node-html-parser": "^4.1.4"
+    },
+    "dependencies": {
+        "@mollie/api-client": "3.7.0",
+        "@simonbackx/simple-database": "1.24.0",
+        "@simonbackx/simple-endpoints": "1.13.0",
+        "@types/mysql": "^2.15.9",
+        "mockdate": "^3.0.2",
+        "mysql": "^2.18.1",
+        "@simonbackx/simple-logging": "^1.0.1"
+    }
+}
