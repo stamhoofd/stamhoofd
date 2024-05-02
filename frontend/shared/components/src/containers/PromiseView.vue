@@ -45,6 +45,13 @@ export class PromiseView extends Vue {
         this.run();
     }
 
+    returnToHistoryIndex() {
+        if (this.root) {
+            return this.root.returnToHistoryIndex()
+        }
+        return false;
+    }
+
     async shouldNavigateAway(): Promise<boolean> {
         if (!this.root) {
             return true;

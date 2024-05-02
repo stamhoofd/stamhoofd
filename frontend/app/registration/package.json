@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "type": "module",
+    "main": "src/exports.ts",
     "scripts": {
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
         "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",

@@ -1,11 +1,6 @@
 <template>
     <form class="st-view forgot-password-view" @submit.prevent="submit">
-        <STNavigationBar title="Wachtwoord vergeten">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-            <template #right><button class="button icon gray close" type="button" @click="dismiss" /></template>
-        </STNavigationBar>
+        <STNavigationBar title="Wachtwoord vergeten" />
         <main>
             <h1>Wachtwoord vergeten</h1>
             <p>Vul jouw e-mailadres in, en we sturen jou een e-mail waarmee je een nieuw wachtwoord kan kiezen.</p>

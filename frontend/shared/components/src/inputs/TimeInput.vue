@@ -6,23 +6,11 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Formatter } from '@stamhoofd/utility';
 
-import {ErrorBox} from "../errors/ErrorBox";
-import STErrorsDefault from "../errors/STErrorsDefault.vue";
-import {Validator} from "../errors/Validator";
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
-import AddressInput from "./AddressInput.vue";
-import Checkbox from "./Checkbox.vue";
-import DateSelection from "./DateSelection.vue";
-import EmailInput from "./EmailInput.vue";
-import ImageInput from "./ImageInput.vue";
-import NumberInput from "./NumberInput.vue";
-import PhoneInput from "./PhoneInput.vue";
-import PriceInput from "./PriceInput.vue";
-import Radio from "./Radio.vue";
+import { ErrorBox } from "../errors/ErrorBox";
+import { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
 @Component({
     components: {

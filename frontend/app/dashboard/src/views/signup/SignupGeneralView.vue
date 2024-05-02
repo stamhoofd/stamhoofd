@@ -1,9 +1,7 @@
 <template>
     <LoadingView v-if="loadingRegisterCode" />
     <form v-else id="signup-general-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Nieuwe vereniging">
-            <template #right><button type="button" class="button icon close gray" @click="pop" /></template>
-        </STNavigationBar>
+        <STNavigationBar title="Nieuwe vereniging" />
         
         <main>
             <h1>

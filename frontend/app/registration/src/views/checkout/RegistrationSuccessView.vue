@@ -1,8 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="text">
-            <template v-if="canDismiss" #right><button class="button icon close gray" type="button" @click="dismiss" /></template>
-        </STNavigationBar>
+        <STNavigationBar :title="text" />
         <main>
             <h1>{{ text }}</h1>
             

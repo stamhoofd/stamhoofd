@@ -97,10 +97,9 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, SaveView, STErrorsDefault, Toast, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, STErrorsDefault, SaveView, Toast, Validator } from "@stamhoofd/components";
+import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
 
 
 import DNSRecordsView from './DNSRecordsView.vue';
@@ -114,6 +113,9 @@ import DomainSettingsView from './DomainSettingsView.vue';
         ImageInput,
         ColorInput,
     },
+    navigation: {
+        title: 'Personaliseren',
+    }
 })
 export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
@@ -300,10 +302,6 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-    }
-   
-    mounted() {
-        this.setUrl("/personalize", "Personaliseren - " + this.$organization.name);
     }
 }
 </script>

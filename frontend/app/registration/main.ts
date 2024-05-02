@@ -21,7 +21,7 @@ if (!isPrerender && STAMHOOFD.environment == "production") {
     });
 }
 
-import App from "./App.vue";
+import App from "./src/App.vue";
 
 document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 

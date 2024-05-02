@@ -48,12 +48,7 @@ export default class GeneralContextMenuView extends Mixins(NavigationMixin) {
         if (!item.action || item.disabled) {
             return
         }
-        const result = item.action.call(item, event) as boolean
-        if (result === true) {
-            // Dismiss
-        } else {
-            // Don't dismiss
-        }
+        item.action.call(item, event)
     } 
 
 }

@@ -1,8 +1,6 @@
 <template>
     <form class="signup-view st-view" @submit.prevent="submit">
-        <STNavigationBar title="Inloggen">
-            <template #right><button type="button" class="button icon gray close" @click="dismiss" /></template>
-        </STNavigationBar>
+        <STNavigationBar title="Inloggen" />
 
         <main>
             <h1>Account aanmaken</h1>

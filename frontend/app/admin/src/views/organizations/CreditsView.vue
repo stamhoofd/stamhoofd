@@ -1,14 +1,10 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Tegoed geschiedenis">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
+        <STNavigationBar title="Tegoed geschiedenis" :disableDismiss="canPop">
             <template #right class="button text" @click="createCredit">
                 <span class="icon add" />
                 <span>Nieuw</span>
             </template>
-            <template v-if="!canPop && canDismiss" #right><button class="button icon close gray" @click="dismiss" /></template>
         </STNavigationBar>
         
         <main>

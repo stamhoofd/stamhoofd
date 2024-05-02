@@ -6,7 +6,7 @@
                 {{ organization.name }}
             </h1>
             <h2>
-                <span>{{ userName }}</span>
+                <span>Todo: naam van app</span>
                 <span ref="arrow" class="icon arrow-down-small gray" />
             </h2>
         </div>
@@ -16,30 +16,22 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ComponentWithProperties, ModalStackComponentFinderMixin, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, LoadComponent, LongPressDirective, OrganizationAvatar } from '@stamhoofd/components';
+import { ModalStackComponentFinderMixin, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from "@stamhoofd/structures";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
-
-import { getScopedDashboardRoot } from "../../getRootViews";
+import OrganizationAvatar from "./OrganizationAvatar.vue";
+import { CenteredMessage } from "./overlays/CenteredMessage";
+import { ContextMenu, ContextMenuItem } from "./overlays/ContextMenu";
 
 @Component({
     components: {
         OrganizationAvatar
-    },
-    directives: {
-        LongPress: LongPressDirective
     }
 })
 export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalStackComponentFinderMixin) {
     get organization() {
         return this.$organization
-    }
-
-    get userName() {
-        return this.$user ? (this.$user.firstName + ' ' + this.$user.lastName):  ""
     }
 
     switchOrganization() {
@@ -48,33 +40,6 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
 
     get fullAccess() {
         return this.$user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
-    }
-
-    async manageSettings(animated = true) {
-        //this.currentlySelected = "manage-settings"
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.showDetail({
-            adjustHistory: animated,
-            animated,
-            components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './settings/SettingsView.vue'), {}, { instant: !animated })
-                })
-            ],
-        });
-    }
-
-    async manageAccount(animated = true) {
-        //this.currentlySelected = "manage-account"
-        this.showDetail({
-            adjustHistory: animated,
-            animated,
-            components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './account/AccountSettingsView.vue'), {}, { instant: !animated })
-                })
-            ]
-        });
     }
 
     async logout() {
@@ -97,28 +62,27 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
         this.availableSessions = await SessionManager.availableSessions()
     }
 
-    showContextMenu(event) {
+    showContextMenu() {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: "Mijn account",
-                    icon: "user",
-                    action: () => {
-                        this.manageAccount().catch(console.error)
-                        return true;
+                    name: 'Naar ledenportaal',
+                    action: async () => {
+                        const nav = this.modalStackComponent
+                        if (!nav) {
+                            throw new Error("No modalStackComponent")
+                        }
+                        const registrationApp = await import("@stamhoofd/registration");
+
+                        await nav.parentPresent({
+                            components: [
+                                registrationApp.getRootView(this.$context)
+                            ],
+                            animated: true,
+                            replace: 1
+                        })
                     }
                 }),
-
-                ...(this.fullAccess ? [new ContextMenuItem({
-                    name: "Instellingen",
-                    icon: "settings",
-                    action: () => {
-                        this.manageSettings().catch(console.error)
-                        return true;
-                    }
-                })] : []),
-            ],
-            [
                 new ContextMenuItem({
                     name: "Wissel tussen vereniging",
                     icon: "sync",
@@ -130,34 +94,32 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
                                     icon: "search",
                                     action: () => {
                                         this.switchOrganization()
-                                        return true;
                                     }
                                 })
                             ],
                             this.defaultOrganizations.map(o => new ContextMenuItem({
                                 name: o.name,
                                 description: o.address.city,
-                                action: () => {
-                                    SessionManager.getPreparedContextForOrganization(o).then((context) => {
-                                        const nav = this.modalStackComponent
-                                        if (!nav) {
-                                            throw new Error("No modalStackComponent")
-                                        }
-                                        nav.parentPresent({
-                                            components: [
-                                                getScopedDashboardRoot(context)
-                                            ],
-                                            animated: true,
-                                            replace: 1
-                                        })
-                                    }).catch(console.error)
-                                    return true;
+                                action: async () => {
+                                    const context = await SessionManager.getPreparedContextForOrganization(o)
+                                    const nav = this.modalStackComponent
+                                    if (!nav) {
+                                        throw new Error("No modalStackComponent")
+                                    }
+                                    const dashboardApp = await import("@stamhoofd/dashboard");
+
+                                    await nav.parentPresent({
+                                        components: [
+                                            dashboardApp.getScopedDashboardRoot(context)
+                                        ],
+                                        animated: true,
+                                        replace: 1
+                                    })
                                 }
                             }))
                         ]) : undefined,
                     action: () => {
                         this.switchOrganization()
-                        return true;
                     }
                 }),
                 new ContextMenuItem({

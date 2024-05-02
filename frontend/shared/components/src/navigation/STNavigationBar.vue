@@ -1,8 +1,8 @@
 <template>
     <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
         <div v-if="hasLeft || hasRight" class="left">
-            <BackButton v-if="pop" @click="$parent.pop" />
-            <button v-else-if="dismiss && $isAndroid" class="button navigation icon close" type="button" @click="$parent.dismiss" />
+            <BackButton v-if="canPop && !disablePop" @click="pop()" />
+            <button v-else-if="canDismiss && !disableDismiss && $isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
             <slot name="left" />
         </div>
 
@@ -14,17 +14,18 @@
 
         <div v-if="hasRight || hasRight" class="right">
             <slot name="right" />
-            <button v-if="dismiss && $isIOS" class="button navigation" type="button" @click="$parent.dismiss">
+            <button v-if="canDismiss && !disableDismiss && $isIOS" class="button navigation" type="button" @click="dismiss()">
                 Sluiten
             </button>
-            <button v-else-if="dismiss && !$isAndroid" class="button navigation icon close" type="button" @click="$parent.dismiss" />
+            <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import BackButton from ".//BackButton.vue";
 
 @Component({
@@ -32,7 +33,7 @@ import BackButton from ".//BackButton.vue";
         BackButton
     }
 })
-export default class STNavigationBar extends Vue {
+export default class STNavigationBar extends Mixins(NavigationMixin) {
     @Prop({ default: "", type: String })
         title!: string;
 
@@ -54,23 +55,21 @@ export default class STNavigationBar extends Vue {
     @Prop({ default: false, type: Boolean })
         large!: boolean;
 
-    /// Add dismiss button (location depending on the OS)
     @Prop({ default: false, type: Boolean })
-        dismiss!: boolean;
+        disableDismiss!: boolean;
 
-    /// Add pop button (location depending on the OS)
     @Prop({ default: false, type: Boolean })
-        pop!: boolean;
+        disablePop!: boolean;
 
     scrolled = false;
     scrollElement!: HTMLElement | null;
 
     get hasLeft() {
-        return this.pop || (this.dismiss && (this as any).$isAndroid) || !!this.$slots['left']
+        return (this.canPop  && !this.disablePop) || (this.canDismiss && !this.disableDismiss && (this as any).$isAndroid) || !!this.$slots['left']
     }
 
     get hasRight() {
-        return (this.dismiss && !(this as any).$isAndroid) || !!this.$slots['right']
+        return ((this.canDismiss  && !this.disableDismiss) && !(this as any).$isAndroid) || !!this.$slots['right']
     }
 
     get hasMiddle() {

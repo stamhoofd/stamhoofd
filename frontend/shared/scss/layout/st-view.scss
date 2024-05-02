@@ -81,7 +81,19 @@ body.modern.web-iOS {
     > main {
         // We fixed the safe area, no need to recorrect it again
         --st-safe-area-top: 0px;
-        padding: 0 var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
+
+        &.center {
+            @media (min-width: 1000px) {
+                // Auto center all views on desktop
+                --st-horizontal-padding: 0px;
+                --st-view-center-padding: calc((100vw - var(--st-view-max-width, 900px)) / 2);
+                --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 900px)) / 2));     
+            }
+        }
+
+        padding: 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px)) 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px));
+
+
         flex-shrink: 1;
         flex-grow: 1;
         min-height: 0;
@@ -128,12 +140,15 @@ body.modern.web-iOS {
             overflow-x: clip;
         }
 
+        /**
+            @deprecated
+        */
         &.limit-width {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
 
-
+            --st-view-center-padding: 0px;
             --st-horizontal-padding: calc((100vw - var(--box-width, 900px)) / 2);
             --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--box-width, 900px)) / 2));
 

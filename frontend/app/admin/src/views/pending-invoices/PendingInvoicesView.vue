@@ -1,14 +1,6 @@
 <template>
     <div class="st-view pending-invoices-view background">
-        <STNavigationBar :sticky="false">
-            <template #left>
-                <template #left>
-                    <BackButton v-if="canPop" @click="pop" />
-                </template>
-                <STNavigationTitle v-else>
-                    {{ title }}
-                </STNavigationTitle>
-            </template>
+        <STNavigationBar :sticky="false" :title="title">
             <template #right>
                 <div class="input-icon-container icon search gray">
                     <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">

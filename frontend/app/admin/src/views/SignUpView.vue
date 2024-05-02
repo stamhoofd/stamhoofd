@@ -1,9 +1,7 @@
 <template>
     <div class="view">
         <form class="signup-view st-view" @submit.prevent="submit">
-            <STNavigationBar title="Account aanmaken">
-                <template #right><button type="button" class="button icon gray close" @click="dismiss" /></template>
-            </STNavigationBar>
+            <STNavigationBar title="Account aanmaken" />
 
             <main>
                 <h1>Account aanmaken</h1>

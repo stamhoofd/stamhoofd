@@ -1,15 +1,11 @@
 <template>
     <div class="st-view pack-edit-view">
-        <STNavigationBar :title="isNew ? 'Nieuw pakket toevoegen' : 'Pakket bewerken'">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
+        <STNavigationBar :title="isNew ? 'Nieuw pakket toevoegen' : 'Pakket bewerken'" :disableDismiss="canPop">
             <template #right>
                 <button v-if="!isNew" class="button text" @click="deleteMe">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
-                <button v-if="!canPop" class="button icon close gray" @click="pop" />
             </template>
         </STNavigationBar>
 

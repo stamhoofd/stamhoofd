@@ -1,10 +1,13 @@
 import { Request } from "@simonbackx/simple-networking";
-import { AppManager, SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { AppManager } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
-import Vue, {type App} from "vue";
+import { type App } from "vue";
 
-import { CopyableDirective, GlobalEventBus, LongPressDirective,TooltipDirective } from "..";
-import { useCurrentComponent, injectHooks } from "@simonbackx/vue-app-navigation";
+import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
+import { CopyableDirective, GlobalEventBus, LongPressDirective, TooltipDirective } from "..";
+import STList from "./layout/STListBox.vue";
+import STListItem from "./layout/STListItem.vue";
+import STNavigationBar from "./navigation/STNavigationBar.vue";
 
 declare module "vue/types/vue" {
     interface Vue {
@@ -89,6 +92,11 @@ export class VueGlobalHelper {
         app.config.globalProperties.pluralText = function(num: number, singular: string, plural: string) {
             return Formatter.pluralText(num, singular, plural)
         }
+
+        // Register shared components
+        app.component('STList', STList)
+        app.component('STListItem', STListItem)
+        app.component('STNavigationBar', STNavigationBar)
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;
@@ -181,7 +189,8 @@ export class VueGlobalHelper {
             },
             created() {
                 const directives = {
-                    currentComponent: useCurrentComponent()
+                    currentComponent: useCurrentComponent(),
+                    $url: useUrl()
                 };
 
                 injectHooks(this, directives)

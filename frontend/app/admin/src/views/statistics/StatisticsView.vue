@@ -1,10 +1,6 @@
 <template>
     <div class="st-view statistics-view background">
-        <STNavigationBar title="Statistieken">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Statistieken" />
     
         <main>
             <h1>Statistieken</h1>

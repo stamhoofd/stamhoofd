@@ -1,8 +1,6 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar title="Gelukt!">
-            <template v-if="canDismiss" #right><button class="button icon close gray" @click="dismiss" /></template>
-        </STNavigationBar>
+        <STNavigationBar title="Gelukt!" />
 
         <main>
             <h1>

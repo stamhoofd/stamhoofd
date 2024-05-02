@@ -10,7 +10,7 @@ import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
 import Vue, { createApp, configureCompat } from "vue"
-import App from "./App.vue";
+import App from "./src/App.vue";
 configureCompat({ WATCH_ARRAY: false, COMPONENT_V_MODEL: false })
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;

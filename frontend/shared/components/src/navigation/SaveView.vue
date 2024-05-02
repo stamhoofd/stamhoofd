@@ -1,6 +1,6 @@
 <template>
     <form class="st-view" @submit.prevent="$emit('save')">
-        <STNavigationBar :title="title">
+        <STNavigationBar :title="title" :disablePop="true" :disableDismiss="true">
             <template #left v-if="$parent.canPop || ($isMobile || $isIOS || $isAndroid)">
                 <BackButton v-if="$parent.canPop" @click="$parent.pop" />
                 <button v-else-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />

@@ -25,10 +25,11 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance, HistoryManager, useUrl } from '@simonbackx/vue-app-navigation';
 import { Ref, computed, nextTick, onBeforeUnmount, ref } from 'vue';
 import { TabBarItem } from './TabBarItem';
 import InheritComponent from './InheritComponent.vue';
+import { Formatter } from '@stamhoofd/utility';
 
 const props = defineProps<{
     tabs: TabBarItem[]
@@ -37,12 +38,12 @@ const props = defineProps<{
 const selectedItem: Ref<TabBarItem> = ref(props.tabs[0]) as any as Ref<TabBarItem> // TypeScript is unpacking the TabBarItem to {...} for some reason
 const root = computed(() => selectedItem.value.component)
 const mainElement = ref<HTMLElement|null>(null)
+const urlHelpers = useUrl()
 
 const getInternalScrollElements = () => {
     return (mainElement.value?.querySelectorAll(".st-view > main") ?? []) as NodeListOf<HTMLElement>
 }
-
-const selectItem = async (item: TabBarItem) => {
+const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     if (item === selectedItem.value) {
         return
     }
@@ -61,7 +62,21 @@ const selectItem = async (item: TabBarItem) => {
     for (const element of scrollElements) {
         old.savedScrollPositions.set(element, element.scrollTop)
     }
-    
+
+    // Set url namespace of the tab
+    const tabUrl = Formatter.slug(item.name)
+    item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl))
+
+    if (appendHistory) {
+        HistoryManager.pushState(undefined, async () => {
+            await selectItem(old, false)
+        }, true);
+
+        item.component.assignHistoryIndex()
+    } else {
+        item.component.returnToHistoryIndex()
+    }
+        
     // Switch
     selectedItem.value = item
     
@@ -91,6 +106,15 @@ onBeforeUnmount(() => {
         }
     }
 })
+
+const returnToHistoryIndex = () => {
+    return selectedItem.value.component.returnToHistoryIndex();
+}
+
+defineExpose({
+    returnToHistoryIndex
+})
+
 </script>
 
 <style lang="scss">

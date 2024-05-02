@@ -68,6 +68,7 @@ export { default as OrganizationAvatar } from "./src/OrganizationAvatar.vue"
 export { default as OrganizationLogo } from "./src/OrganizationLogo.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
+export { default as OrganizationSwitcher } from "./src/OrganizationSwitcher.vue"
 
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"

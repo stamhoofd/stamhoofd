@@ -536,7 +536,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             components: [
                 this.getManageFinances()
             ],
-            url: this.$url.extendUrl("finances")
+            url: "finances"
         });
     }
 

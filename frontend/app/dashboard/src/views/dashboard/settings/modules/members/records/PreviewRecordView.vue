@@ -1,10 +1,6 @@
 <template>
     <div class="st-view preview-record-view">
-        <STNavigationBar title="Voorbeeld">
-            <template #right>
-                <button class="button icon close gray" type="button" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Voorbeeld" />
 
         <main>
             <h1>

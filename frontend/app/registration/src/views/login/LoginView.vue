@@ -1,8 +1,6 @@
 <template>
     <form class="login-view st-view auto" data-submit-last-field @submit.prevent="submit">
-        <STNavigationBar title="Inloggen">
-            <template #right><button type="button" class="button icon gray close" @click="dismiss" /></template>
-        </STNavigationBar>
+        <STNavigationBar title="Inloggen" />
         <main>
             <h1>Inloggen</h1>
             <STErrorsDefault :error-box="errorBox" />

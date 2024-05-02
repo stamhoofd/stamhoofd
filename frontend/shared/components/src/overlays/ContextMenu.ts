@@ -22,7 +22,7 @@ export class ContextMenuItem {
     /**
      * Return true when the context menu should get closed.
      */
-    action: ((this: ContextMenuItem) => boolean) | null = null
+    action: ((this: ContextMenuItem) => void|Promise<void>) | null = null
 
     /**
      * Context menu to show when hovered

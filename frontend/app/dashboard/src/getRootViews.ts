@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuthenticatedView, ContextProvider, TabBarController, TabBarItem } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, ContextProvider, TabBarController, TabBarItem, OrganizationSwitcher } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
@@ -9,7 +9,6 @@ import { MemberManager } from './classes/MemberManager';
 import LoginView from './views/login/LoginView.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 import { computed, reactive } from 'vue';
-import OrganizationSwitcher from './views/dashboard/OrganizationSwitcher.vue';
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
@@ -68,13 +67,12 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
     I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
     const reactiveSession = reactive(session) as Session
 
-
     const getManageFinances = () => {
         return new ComponentWithProperties(NavigationController, { 
             root: AsyncComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './views/dashboard/settings/FinancesView.vue'), {})
         }, {
             provide: {
-                reactive_navigation_url: this.$url.extendUrl("finances"), // own prefix + /finances
+                reactive_navigation_url:  computed(() => this.$url.extendUrl("finances")), // own prefix + /settings
             }
         })
     }
@@ -92,7 +90,7 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             root: AsyncComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './views/dashboard/account/AccountSettingsView.vue'), {})
         }, {
             provide: {
-                reactive_navigation_url: this.$url.extendUrl("account"), // own prefix + /settings
+                reactive_navigation_url:  computed(() => this.$url.extendUrl("account")), // own prefix + /settings
             }
         })
     }
@@ -113,6 +111,10 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
         }
     })
 
+    const startView = new ComponentWithProperties(NavigationController, {
+        root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
+    })
+
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
@@ -130,14 +132,13 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             }
         },
         root: new ComponentWithProperties(AuthenticatedView, {
-            setFixedPrefix: "beheerders",
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
                     tabs: [
                         new TabBarItem({
                             icon: 'home',
                             name: 'Start',
-                            component: splitViewController
+                            component: startView
                         }),
                         new TabBarItem({
                             icon: 'group',

@@ -455,7 +455,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(GeneralSettingsView, {})
                 })
-            ]
+            ],
+            url: 'general'
         })
     }
 
@@ -468,7 +469,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(LabsView, {})
                 })
-            ]
+            ],
+            url: 'labs'
         })
     }
 
@@ -481,7 +483,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(PersonalizeSettingsView, {})
                 })
-            ]
+            ],
+            url: 'personalize'
         })
     }
 
@@ -494,7 +497,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(PrivacySettingsView, {})
                 })
-            ]
+            ],
+            url: 'privacy'
         })
     }
 
@@ -736,11 +740,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         return this.organization.meta.modules.useActivities
     }
 
+    activated() {
+        this.$url.setTitle("Instellingen")
+    }
 
     mounted() {
         // First set current url already, to fix back
-        this.$url.setTitle("Instellingen")
-
         if (this.$url.match('oauth/mollie')) {
             // Open mollie settings
             this.openPayment(false)
