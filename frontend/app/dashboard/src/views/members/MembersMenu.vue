@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onActivated } from 'vue';
+import { ComponentOptions, computed, onActivated } from 'vue';
 import { Route, defineRoutes, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, useOrganization, useUser } from '@stamhoofd/components';
 import {Group, GroupCategoryTree, Permissions} from '@stamhoofd/structures'
@@ -85,63 +85,6 @@ const tree = computed(() => {
         permissions: $user.value?.permissions ?? Permissions.create({})
     })
 })
-
-defineRoutes([
-    {
-        url: '@slug',
-        name: 'group',
-        params: {
-            slug: String
-        },
-        show: 'detail',
-        component: async () => (await import( "../dashboard/groups/GroupOverview.vue")).default,
-        paramsToProps: (params: {slug: string}) => {
-            const group = $organization.value?.groups.find(g => Formatter.slug(g.settings.name) === params.slug);
-            if (!group) {
-                throw new Error('Group not found')
-            }
-            return {
-                group
-            }
-        },
-        propsToParams(props) {
-            if (!("group" in props)) {
-                throw new Error('Missing group')
-            }
-            return {
-                params: {
-                    slug: Formatter.slug((props.group as Group).settings.name)
-                }
-            }
-        },
-        isDefault: {
-            properties: {
-                group: tree.value.getAllGroups()[0]
-            }
-        }
-    }
-])
-
-
-/*
-async () => {
-    const routes: Route<any, {}>[] = []
-
-    for (const group of tree.value.getAllGroups()) {
-        routes.push({
-            url: 'group/'+Formatter.slug(group.settings.name),
-            name: 'group-' + group.id,
-            component: AsyncComponent(() => import( "../dashboard/groups/GroupOverview.vue")),
-            show: 'detail',
-            isDefault: {
-                properties: {group}
-            }
-        })
-    }
-
-    return routes;
-}
-*/
 
 onActivated(() => {
     urlHelpers.setTitle('Leden');
@@ -173,5 +116,41 @@ const getCategoryIcon = (category: GroupCategoryTree) => {
 const isCategoryDeactivated = (category: GroupCategoryTree) => {
     return $organization.value!.isCategoryDeactivated(category)
 }
+
+defineRoutes([
+    {
+        url: '@slug',
+        name: 'group',
+        params: {
+            slug: String
+        },
+        show: 'detail',
+        component: async () => ((await import( "../dashboard/groups/GroupOverview.vue")).default) as unknown as ComponentOptions,
+        paramsToProps: (params: {slug: string}) => {
+            const group = $organization.value?.groups.find(g => Formatter.slug(g.settings.name) === params.slug);
+            if (!group) {
+                throw new Error('Group not found')
+            }
+            return {
+                group
+            }
+        },
+        propsToParams(props) {
+            if (!("group" in props)) {
+                throw new Error('Missing group')
+            }
+            return {
+                params: {
+                    slug: Formatter.slug((props.group as Group).settings.name)
+                }
+            }
+        },
+        isDefault: {
+            properties: {
+                group: tree.value.getAllGroups()[0]
+            }
+        }
+    }
+])
 
 </script>
