@@ -19,7 +19,7 @@
             </div>
         </header>
         <main ref="mainElement">
-            <ComponentWithPropertiesInstance :key="root.key" :component="root" />
+            <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
         </main>
     </div>
 </template>
@@ -35,8 +35,8 @@ export function useTabBarController(): Ref<InstanceType<typeof TabBarController>
 </script>
 
 <script setup lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager, PushOptions, useUrl } from '@simonbackx/vue-app-navigation';
-import { Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, provide, ref } from 'vue';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager, PushOptions, defineRoutes, useUrl } from '@simonbackx/vue-app-navigation';
+import { Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { TabBarItem } from './TabBarItem';
 import InheritComponent from './InheritComponent.vue';
 import { Formatter } from '@stamhoofd/utility';
@@ -45,13 +45,33 @@ const props = defineProps<{
     tabs: TabBarItem[]
 }>()
 
-const selectedItem: Ref<TabBarItem|null> = ref(props.tabs[0]) as any as Ref<TabBarItem> // TypeScript is unpacking the TabBarItem to {...} for some reason
+const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
 
 // Root is stored separately because we can also navigate to non-tabs
-const root: Ref<ComponentWithProperties> = ref(props.tabs[0].component) as any as Ref<ComponentWithProperties>
+const root: Ref<ComponentWithProperties|null> = ref(null) as any as Ref<ComponentWithProperties|null>
 
 const mainElement = ref<HTMLElement|null>(null)
 const urlHelpers = useUrl()
+
+defineRoutes(props.tabs.map(tab => {
+    return {
+        name: tab.name,
+        url: Formatter.slug(tab.name),
+        handler: async (options) => {
+            if (options.checkRoutes) {
+                tab.component.setCheckRoutes()
+            }
+            await selectItem(tab, options.adjustHistory)
+        }
+    }
+}))
+
+onMounted(() => {
+    // If no default route was set, select the first
+    if (!root.value && !selectedItem.value) {
+        selectItem(props.tabs[0], false).catch(console.error)
+    }
+})
 
 const instance = getCurrentInstance()
 provide('reactive_tabBarController', instance?.proxy); // Sadly the proxy does not include exposed properties - ComponentWithProperties has a workaround at getExposeProxy
@@ -90,11 +110,15 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl))
 
     if (appendHistory) {
-        HistoryManager.pushState(undefined, old ? (async () => {
-            await selectItem(old, false)
-        }) : null, true);
+        if (item.component.isKeptAlive) {
+            item.component.returnToHistoryIndex()
+        } else {
+            HistoryManager.pushState(undefined, old ? (async () => {
+                await selectItem(old, false)
+            }) : null, true);
 
-        item.component.assignHistoryIndex()
+            item.component.assignHistoryIndex()
+        }
     } else {
         item.component.returnToHistoryIndex()
     }
@@ -125,6 +149,11 @@ const show = async (options: PushOptions) => {
         throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController')
     }
     const component = options.components[0];
+
+    const foundItem = props.tabs.find(tab => tab.component === component);
+    if (foundItem) {
+        return selectItem(foundItem)
+    }
 
     if (!component || component === root.value) {
         return
@@ -162,7 +191,7 @@ onBeforeUnmount(() => {
 })
 
 const returnToHistoryIndex = () => {
-    return root.value.returnToHistoryIndex();
+    return root.value?.returnToHistoryIndex();
 }
 
 defineExpose({

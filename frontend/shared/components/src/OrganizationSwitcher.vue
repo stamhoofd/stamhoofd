@@ -16,13 +16,14 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ModalStackComponentFinderMixin, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, ModalStackComponentFinderMixin, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from "@stamhoofd/structures";
 import OrganizationAvatar from "./OrganizationAvatar.vue";
 import { CenteredMessage } from "./overlays/CenteredMessage";
 import { ContextMenu, ContextMenuItem } from "./overlays/ContextMenu";
+import OrganizationAppSelector from "./OrganizationAppSelector.vue";
 
 @Component({
     components: {
@@ -62,7 +63,34 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
         this.availableSessions = await SessionManager.availableSessions()
     }
 
+    /*
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(UIFilterEditor, {
+                        filter
+                    })
+                })
+            ],
+            modalDisplayStyle: 'popup',
+            modalClass: 'filter-sheet'
+        })
+    */
+
     showContextMenu() {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(OrganizationAppSelector, {})
+                })
+            ],
+            modalDisplayStyle: 'popup',
+            modalClass: 'positionable-sheet',
+            modalCssStyle: '--sheet-position-left: 20px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px;'
+        })
+    }
+
+    oldshowContextMenu() {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({

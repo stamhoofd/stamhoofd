@@ -52,7 +52,7 @@ export class App extends Vue {
                 }
 
                 if (app == 'dashboard') {
-                    return await getScopedDashboardRootFromUrl()
+                    return (await getScopedDashboardRootFromUrl())
                 }
                 
                 if (app == 'admin') {
@@ -66,7 +66,7 @@ export class App extends Vue {
                 throw e
             }
         }
-    })
+    }).setCheckRoutes()
 
     created() {
         /*if (STAMHOOFD.environment == "development") {

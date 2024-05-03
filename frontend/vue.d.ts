@@ -32,6 +32,10 @@ declare module 'vue' {
         readonly $user: User|null;
         readonly $organizationManager: OrganizationManager;
 
+        // Global components
+        readonly STList: typeof import('@stamhoofd/components').STList,
+        readonly STListItem: typeof import('@stamhoofd/components').STListItem,
+
         // Formatters
         formatPrice: typeof Formatter.price,
         formatDate: typeof Formatter.date,

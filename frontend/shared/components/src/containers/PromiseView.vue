@@ -24,15 +24,27 @@ export class PromiseView extends Vue {
     promise: () => Promise<ComponentWithProperties>
 
     root: ComponentWithProperties | null = null
+    passRoutes = false;
 
-    created() {
+    mounted() {
         this.run()
+    }
+
+    customRoutes() {
+        console.info('Promise view customRoutes')
+        this.passRoutes = true;
     }
     
     run() {
         this.promise.call(this).then((value) => {
             // We need to make a copy, or we risk having the same component twice in the DOM
-            this.root = value.clone()
+            const c = value.clone()
+            if (this.passRoutes) {
+                this.passRoutes = false;
+                c.setCheckRoutes()
+                console.log('Passed checkroutes from promise to '+c.component?.name)
+            }
+            this.root = c
         }).catch(e => {
             console.error(e)
             console.error("Promise error not caught, defaulting to dismiss behaviour in PromiseView")

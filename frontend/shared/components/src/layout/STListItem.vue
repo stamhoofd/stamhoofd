@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="st-list-item" :class="{selectable, disabled, button: elementName === 'button'}" :type="elementName === 'button' ? 'button' : undefined" @click="onClick" @contextmenu="$emit('contextmenu', $event)">
+    <component :is="dynamicElementName" class="st-list-item" :class="{selectable, hoverable, disabled, button: dynamicElementName === 'button'}" :type="dynamicElementName === 'button' ? 'button' : undefined" @click="onClick" @contextmenu="$emit('contextmenu', $event)">
         <div class="left">
             <slot name="left" />
         </div>
@@ -20,7 +20,9 @@
 <script lang="ts">
 import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
 
-@Component({})
+@Component({
+    emits: ['click']
+})
 export default class STListItem extends Vue {
     @Prop({ default: 'article', type: String })
         elementName!: string;
@@ -30,6 +32,17 @@ export default class STListItem extends Vue {
 
     @Prop({ default: false, type: Boolean })
         disabled!: boolean;
+
+    get dynamicElementName() {
+        if (this.elementName === 'article' && this.selectable && !this.disabled) {
+            return 'button'
+        }
+        return this.elementName
+    }
+
+    get hoverable() {
+        return this.elementName === 'button'
+    }
 
     onClick(event) {
         const isDragging = this.$parent?.$parent?.$el.className.indexOf('is-dragging') !== -1;
@@ -274,6 +287,14 @@ button.st-list-item {
         > .main {
             > hr {
                 transition: opacity 0.2s 0.1s;
+            }
+        }
+
+        &.hoverable:hover {
+            opacity: 0.6;
+
+            &:has(button:hover) {
+                opacity: 1;
             }
         }
 

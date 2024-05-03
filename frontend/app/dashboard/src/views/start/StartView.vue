@@ -55,8 +55,8 @@
 </template>
 
 <script setup lang="ts">
-import { onActivated, onMounted } from 'vue';
 import { useUrl } from '@simonbackx/vue-app-navigation';
+import { onActivated } from 'vue';
 
 const urlHelpers = useUrl();
 

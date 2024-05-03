@@ -9,12 +9,7 @@ import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
 import { Organization, User } from "@stamhoofd/structures";
-
-declare module "vue/types/vue" {
-    interface Vue {
-        readonly $OS: "android" | "iOS" | "web" | "macOS" | "windows" | "unknown";
-    }
-}
+import PromiseView from "./containers/PromiseView.vue";
 
 export function useUser(): Ref<User | null> {
     const refOrReal = inject('$user', null)
@@ -85,6 +80,7 @@ function focusNextElement () {
 
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
+        (window as any).PromiseComponent = PromiseView
         app.config.globalProperties.$country = "BE" // todo
         app.config.globalProperties.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
         app.config.globalProperties.$focusNext = () => {

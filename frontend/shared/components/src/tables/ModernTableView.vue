@@ -1137,7 +1137,8 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
                 })
             ],
             modalDisplayStyle: 'popup',
-            modalClass: 'filter-sheet'
+            modalClass: 'positionable-sheet',
+            modalCssStyle: '--sheet-position-right: 40px;'
         })
     }
 

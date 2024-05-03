@@ -59,16 +59,22 @@
     }
 }
 
-.filter-sheet {
+.positionable-sheet {
     @extend .modal-dynamic-size;
 
-    --filter-offset-top: 180px; // todo: pass from JS
+    // These are all optional and used to anchor the sheet to a specific position
+    // --sheet-position-top: 0px;
+    // --sheet-position-left: 0px;
+    // --sheet-position-right: 0px;
 
     // We use an intermediate value to allow customisation of the calculation without needing the dependency
-    --popup-padding-top-full: max(var(--popup-padding-top-raw), var(--filter-offset-top, 0px));
+    --popup-padding-top-full: max(
+        var(--popup-padding-top-raw), 
+        var(--sheet-position-top, 0px)
+    );
 
-    --st-horizontal-padding: 30px;
-    --st-vertical-padding: 30px;
+    --st-horizontal-padding: var(--sheet-horizontal-padding, 30px);
+    --st-vertical-padding: var(--sheet-vertical-padding, 30px);
 
     &.fade-enter-from,
     &.fade-leave-to {
@@ -110,7 +116,10 @@
         @extend .style-overlay-shadow;
 
         position: absolute;
-        right: 40px;
+
+        // Do note that we don't use default values because we shouldn't set the values in that case
+        left: var(--sheet-position-left);
+        right: var(--sheet-position-right);
 
         transform: translate(0, var(--popup-padding-top-outside, 0px));
         transform-origin: 100% 0%;
