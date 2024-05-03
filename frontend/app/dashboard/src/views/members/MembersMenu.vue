@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentOptions, computed, onActivated } from 'vue';
+import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
 import { Route, defineRoutes, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, useOrganization, useUser } from '@stamhoofd/components';
 import {Group, GroupCategoryTree, Permissions} from '@stamhoofd/structures'
@@ -76,7 +76,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 const $organization = useOrganization();
 const $user = useUser();
-const currentlySelected: string = ''; // todo
+const currentlySelected = ref(null) as Ref<string|null>
 const urlHelpers = useUrl();
 const $navigate = useNavigate()
 const collapsed = useCollapsed('leden');
@@ -131,6 +131,7 @@ defineRoutes([
             if (!group) {
                 throw new Error('Group not found')
             }
+            currentlySelected.value = 'group-'+group.id
             return {
                 group
             }
@@ -139,6 +140,7 @@ defineRoutes([
             if (!("group" in props)) {
                 throw new Error('Missing group')
             }
+            currentlySelected.value = 'group-'+(props.group as Group).id
             return {
                 params: {
                     slug: Formatter.slug((props.group as Group).settings.name)
