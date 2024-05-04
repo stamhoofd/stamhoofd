@@ -116,11 +116,11 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, LoadComponent, LoadingView,STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, LoadComponent, LoadingView, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STCredit } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';

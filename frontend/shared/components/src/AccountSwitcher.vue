@@ -8,29 +8,29 @@
     </button>
 </template>
 
-<script setup lang="ts">
-import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
+<script setup lang="ts" name="AccountSwitcher">
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useUser } from './VueGlobalHelper';
-import { AsyncComponent } from './containers/AsyncComponent';
 
 const $user = useUser();
-const show = useShow()
+const $navigate = useNavigate();
+
+// todo: this isn't working yet on start
+defineRoutes([
+    {
+        url: 'account',
+        component: async () => (await import('./views/AccountSettingsView.vue')).default as any,
+    }
+])
 
 const letters = computed(() => {
     return $user.value ? Formatter.firstLetters($user.value.name, 1) : ''
 });
 
 const showContextMenu = () => {
-    show({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('./views/AccountSettingsView.vue'))
-            })
-        ],
-        url: 'account'
-    })
+    $navigate('account');
 };
 
 </script>

@@ -1,7 +1,9 @@
 <template>
     <div class="st-menu st-view members-menu">
-        <main ref="main" class="sticky-navigation-bar">
-            <STNavigationBar title="Leden"></STNavigationBar>
+        <STNavigationBar title="Leden"></STNavigationBar>
+
+        <main>
+            <h1>Leden</h1>
 
             <button v-if="!enableMemberModule" type="button" class="menu-button button cta" @click="openSignupSelection()">
                 <span class="icon flag" />
@@ -67,12 +69,12 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
-import { Route, defineRoutes, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, useOrganization, useUser } from '@stamhoofd/components';
-import {Group, GroupCategoryTree, Permissions} from '@stamhoofd/structures'
-import { useCollapsed } from '../../hooks/useCollapsed';
+import { defineRoutes, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
+import { GroupAvatar, useOrganization, useUser } from '@stamhoofd/components';
+import { Group, GroupCategory, GroupCategoryTree, Permissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
+import { useCollapsed } from '../../hooks/useCollapsed';
 
 const $organization = useOrganization();
 const $user = useUser();
@@ -118,6 +120,36 @@ const isCategoryDeactivated = (category: GroupCategoryTree) => {
 }
 
 defineRoutes([
+{
+        url: 'categorie/@slug',
+        name: 'category',
+        params: {
+            slug: String
+        },
+        show: 'detail',
+        component: async () => ((await import( "../dashboard/groups/CategoryView.vue")).default) as unknown as ComponentOptions,
+        paramsToProps: (params: {slug: string}) => {
+            const category = $organization.value?.categoryTree.categories.find(g => Formatter.slug(g.settings.name) === params.slug);
+            if (!category) {
+                throw new Error('Category not found')
+            }
+            currentlySelected.value = 'category-'+category.id
+            return {
+                category
+            }
+        },
+        propsToParams(props) {
+            if (!("category" in props)) {
+                throw new Error('Missing category')
+            }
+            currentlySelected.value = 'category-'+(props.category as GroupCategory).id
+            return {
+                params: {
+                    slug: Formatter.slug((props.category as GroupCategory).settings.name)
+                }
+            }
+        }
+    },
     {
         url: '@slug',
         name: 'group',

@@ -130,12 +130,24 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
         }
     }
 
-    activated() {
+    mounted() {
+        if (this.title) {
+            this.$url.setTitle(this.title);
+        }
+
         // fix for element not yet in dom
-        window.setTimeout(() => {
-            this.addListener();
-            this.onScroll();
-        }, 500);
+        this.addListener();
+        this.onScroll();
+    }
+
+    activated() {
+        if (this.title) {
+            this.$url.setTitle(this.title);
+        }
+
+        // fix for element not yet in dom
+        this.addListener();
+        this.onScroll();
     }
 
     deactivated() {

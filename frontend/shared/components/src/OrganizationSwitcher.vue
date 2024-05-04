@@ -82,11 +82,16 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(OrganizationAppSelector, {})
+                }, {
+                    provide: {
+                        reactive_navigation_disable_url: true
+                    }
                 })
             ],
             modalDisplayStyle: 'popup',
             modalClass: 'positionable-sheet',
-            modalCssStyle: '--sheet-position-left: 20px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px;'
+            modalCssStyle: '--sheet-position-left: 20px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px;',
+            
         })
     }
 

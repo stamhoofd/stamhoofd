@@ -19,7 +19,7 @@
             </div>
         </header>
         <main ref="mainElement">
-            <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
+            <FramedComponent v-if="root" :key="root.key" :root="root" />
         </main>
     </div>
 </template>
@@ -34,8 +34,8 @@ export function useTabBarController(): Ref<InstanceType<typeof TabBarController>
 }
 </script>
 
-<script setup lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance, HistoryManager, PushOptions, defineRoutes, useUrl } from '@simonbackx/vue-app-navigation';
+<script setup lang="ts" name="TabBarController">
+import { ComponentWithProperties, FramedComponent, HistoryManager, PushOptions, defineRoutes, useUrl } from '@simonbackx/vue-app-navigation';
 import { Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { TabBarItem } from './TabBarItem';
 import InheritComponent from './InheritComponent.vue';
@@ -110,15 +110,11 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl))
 
     if (appendHistory) {
-        if (item.component.isKeptAlive) {
-            item.component.returnToHistoryIndex()
-        } else {
-            HistoryManager.pushState(undefined, old ? (async () => {
-                await selectItem(old, false)
-            }) : null, true);
+        HistoryManager.pushState(undefined, old ? (async () => {
+            await selectItem(old, false)
+        }) : null, true);
 
-            item.component.assignHistoryIndex()
-        }
+        item.component.assignHistoryIndex()
     } else {
         item.component.returnToHistoryIndex()
     }
