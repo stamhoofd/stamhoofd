@@ -37,8 +37,12 @@ export class PromiseView extends Vue {
     
     run() {
         this.promise.call(this).then((value) => {
-            // We need to make a copy, or we risk having the same component twice in the DOM
-            const c = value.clone()
+            if(!value) {
+                console.error("Promise view did not return a component.")
+                throw new Error('Missing component in promise')
+            }
+            
+            const c = value
             if (this.passRoutes) {
                 this.passRoutes = false;
                 c.setCheckRoutes()

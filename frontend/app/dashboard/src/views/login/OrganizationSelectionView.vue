@@ -81,7 +81,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin, setTitleSuffix } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, STGradientBackground, STNavigationBar, Spinner, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
@@ -136,7 +136,7 @@ const throttle = (func, limit) => {
         }
     },
     navigation: {
-        title: "Stamhoofd",
+        title: "Stamhoofd webapp | Beheer je vereniging",
         routes: [
             {
                 url: 'aansluiten',
@@ -170,6 +170,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
     loadingSession: string | null = null;
     q = ""
     results: Organization[] = []
+
+    created() {
+        setTitleSuffix('')
+    }
 
     get isNative() {
         return AppManager.shared.isNative

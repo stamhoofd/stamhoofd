@@ -11,10 +11,10 @@ import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptio
 import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
 import { AppManager, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
-import { Component, Vue, toNative } from 'vue-facing-decorator'
+import { Component, Vue, toNative } from 'vue-facing-decorator';
 
+import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import AdminApp from './AdminApp.vue';
-import RegistrationApp from './RegistrationApp.vue';
 import { getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
 
 @Component({
@@ -59,7 +59,7 @@ export class App extends Vue {
                     return new ComponentWithProperties(AdminApp, {})
                 }
 
-                return new ComponentWithProperties(RegistrationApp, {})
+                return (await getScopedRegistrationRootFromUrl())
             } catch (e) {
                 console.error(e)
                 Toast.fromError(e).setHide(null).show()

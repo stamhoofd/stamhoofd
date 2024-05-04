@@ -1,6 +1,6 @@
-import { ComponentWithProperties, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, ContextProvider, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
-import { OrganizationManager, Session } from "@stamhoofd/networking";
+import { NetworkManager, OrganizationManager, Session, SessionManager } from "@stamhoofd/networking";
 
 import { CheckoutManager } from "./classes/CheckoutManager";
 import { MemberManager } from "./classes/MemberManager";
@@ -8,9 +8,61 @@ import HomeView from './views/login/HomeView.vue';
 import NewOverviewView from './views/overview/NewOverviewView.vue';
 import { computed, reactive } from "vue";
 import CartView from "./views/checkout/CartView.vue";
+import { Country, Organization } from "@stamhoofd/structures";
+import { Decoder } from "@simonbackx/simple-encoding";
+import { I18nController } from "@stamhoofd/frontend-i18n";
+import OrganizationSelectionView from "@stamhoofd/dashboard/src/views/login/OrganizationSelectionView.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
+}
+
+export function getOrganizationSelectionRoot() {
+    return new ComponentWithProperties(OrganizationSelectionView, {})
+}
+
+export async function getScopedRegistrationRootFromUrl() {
+    // UrlHelper.fixedPrefix = "beheerders";
+    const parts = UrlHelper.shared.getParts();
+    const ignoreUris = ['login'];
+
+    let session: Session|null = null;
+
+    if (parts[0] === 'leden' && parts[1] && !ignoreUris.includes(parts[1])) {
+        const uri = parts[1];
+
+        // Load organization
+        // todo: use cache
+        try {
+            const response = await NetworkManager.server.request({
+                method: "GET",
+                path: "/organization-from-uri",
+                query: {
+                    uri
+                },
+                decoder: Organization as Decoder<Organization>
+            })
+            const organization = response.data
+
+            session = new Session(organization.id)
+            session.setOrganization(organization)
+            await session.loadFromStorage()
+            await SessionManager.prepareSessionForUsage(session, false);
+
+            // UrlHelper.fixedPrefix = "beheerders/" + organization.uri;
+
+        } catch (e) {
+            console.error('Failed to load organization from uri', uri);
+        }
+    }
+    
+    await I18nController.loadDefault(session, "registration", Country.Belgium, "nl", session?.organization?.address?.country)
+    
+    if (!session || !session.organization) {
+        return getOrganizationSelectionRoot()
+    }
+
+    return getRootView(session)
 }
 
 export function getRootView(session: Session) {
