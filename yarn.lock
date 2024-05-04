@@ -2554,6 +2554,17 @@
     "@vusion/webfonts-generator" "^0.8.0"
     glob "^10.3.10"
 
+"@simonbackx/vue-app-navigation@2.0.0-alpha.2":
+  version "2.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0-alpha.2.tgz#a2bef3570290e31f9318a62eeb89b13566696472"
+  integrity sha512-Wav2yckMjoOKJvFdu6qG5ChAEWjgv4Kabrs7dINFrFFgiAW5ElCCUiF+3/WWfXTL3ELGwf1biDKENE9NLoZHSA==
+  dependencies:
+    "@typescript-eslint/parser" "^7.7.1"
+    "@vitejs/plugin-vue" "^5.0.4"
+    "@vue/eslint-config-typescript" "^13.0.0"
+    "@vue/shared" "^3.4.25"
+    vite-plugin-dts "^3.9.0"
+
 "@sinclair/typebox@^0.27.8":
   version "0.27.8"
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.27.8.tgz#6667fac16c436b5434a387a34dedb013198f6e6e"
