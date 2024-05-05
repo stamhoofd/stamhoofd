@@ -203,6 +203,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             this.loading = false;
 
             const session = new Session(this.organization.id)
+            await prepareSessionForUsage(session, true);
             const dashboardContext = getScopedDashboardRoot(session, {
                 loginComponents: [
                     new ComponentWithProperties(ConfirmEmailView, { token, email: this.email })
