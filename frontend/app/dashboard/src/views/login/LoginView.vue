@@ -1,7 +1,7 @@
 <template>
     <form class=" st-view login-view" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar title="Inloggen" />
-        <main>
+        <main class="center small">
             <h1>Inloggen</h1>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -11,7 +11,7 @@
                 {{ lock }}
             </p>
 
-            <STInputBox title="Wachtwoord">
+            <STInputBox title="Wachtwoord" class="max">
                 <template #right><button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
                     <span>Vergeten</span>
                     <span class="icon help" />

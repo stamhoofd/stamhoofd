@@ -124,7 +124,15 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
                 })
             ),
             loginRoot: wrapWithModalStack(
-                new ComponentWithProperties(LoginView, {}), ...(options.loginComponents ?? [])
+                new ComponentWithProperties(TabBarController, {
+                    tabs: [
+                        new TabBarItem({
+                            icon: 'key',
+                            name: 'Inloggen',
+                            component: new ComponentWithProperties(LoginView, {}), ...(options.loginComponents ?? [])
+                        })
+                    ]
+                })
             ),
             noPermissionsRoot: wrapWithModalStack(AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})),
         })

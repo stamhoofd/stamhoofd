@@ -5,14 +5,15 @@
                 <InheritComponent name="tabbar-left" />
             </div>
             <div class="middle">
-                <button v-for="item in tabs" :key="item.component.key" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="selectItem(item)">
-                    <div class="button text" :class="{ selected: selectedItem === item }">
-                        <span :class="'icon '+item.icon" />
-                        <span>{{ item.name }}</span>
-                        <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
-                    </div>
-                </button>
-
+                <template v-if="tabs.length > 1">
+                    <button v-for="item in tabs" :key="item.component.key" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="selectItem(item)">
+                        <div class="button text" :class="{ selected: selectedItem === item }">
+                            <span :class="'icon '+item.icon" />
+                            <span>{{ item.name }}</span>
+                            <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
+                        </div>
+                    </button>
+                </template>
             </div>
             <div class="right">
                 <InheritComponent name="tabbar-right" />

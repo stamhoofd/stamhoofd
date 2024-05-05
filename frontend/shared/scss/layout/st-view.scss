@@ -83,11 +83,24 @@ body.modern.web-iOS {
         --st-safe-area-top: 0px;
 
         &.center {
-            @media (min-width: 900px) {
-                // Auto center all views on desktop
-                --st-horizontal-padding: 0px;
-                --st-view-center-padding: calc((100vw - var(--st-view-max-width, 800px)) / 2);
-                --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 800px)) / 2));     
+            &:not(.small) {
+                @media (min-width: 900px) {
+                    // Auto center all views on desktop
+                    --st-horizontal-padding: 0px;
+                    --st-view-center-padding: calc((100vw - var(--st-view-max-width, 800px)) / 2);
+                    --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 800px)) / 2));     
+                }
+            }
+
+            &.small {
+                --st-view-max-width: 400px; 
+
+                @media (min-width: 500px) {
+                    // Auto center all views on desktop
+                    --st-horizontal-padding: 0px;
+                    --st-view-center-padding: calc((100vw - var(--st-view-max-width, 800px)) / 2);
+                    --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 800px)) / 2));     
+                }
             }
         }
 
