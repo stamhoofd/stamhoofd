@@ -2,7 +2,7 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar title="Instellingen" />
 
-        <main>
+        <main class="center">
             <h1>
                 Instellingen
             </h1>

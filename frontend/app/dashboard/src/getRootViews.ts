@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
@@ -95,12 +95,32 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
         })
     });
 
-    const settingsTab = new TabBarItem({
+    const settingsTab = new TabBarItemGroup({
         icon: 'category',
         name: 'Meer',
-        component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-        })
+        items: [
+            new TabBarItem({
+                icon: 'settings',
+                name: 'Instellingen',
+                component: new ComponentWithProperties(SplitViewController, {
+                    root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {})
+                })
+            }),
+            new TabBarItem({
+                icon: 'calculator',
+                name: 'Boekhouding',
+                component: new ComponentWithProperties(SplitViewController, {
+                    root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {})
+                })
+            }),
+            new TabBarItem({
+                icon: 'file-filled',
+                name: 'Documenten',
+                component: new ComponentWithProperties(SplitViewController, {
+                    root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
+                })
+            })
+        ]
     });
 
     return new ComponentWithProperties(ContextProvider, {

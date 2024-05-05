@@ -3,7 +3,7 @@
     <div v-else id="documents-view" class="st-view background">
         <STNavigationBar title="Documenten" />
 
-        <main>
+        <main class="center">
             <h1 class="style-navigation-title">
                 Documenten
             </h1>

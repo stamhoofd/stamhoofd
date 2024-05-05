@@ -16,4 +16,35 @@ export class TabBarItem {
         // Not reactive because we need === operator to know what the active tab is
         markRaw(this)
     }
+
+    get isGroup() {
+        return false;
+    }
+
+    /**
+     * Helper to treat groups and items the same
+     */
+    get items() {
+        return [this]
+    }
+}
+
+export class TabBarItemGroup {
+    name = ""
+    icon = ""
+    badge: string | null = ""
+    items: TabBarItem[] = []
+
+    constructor(options: { name: string, icon: string, items: TabBarItem[] }) {
+        this.name = options.name
+        this.icon = options.icon
+        this.items = options.items
+
+        // Not reactive because we need === operator to know what the active tab is
+        markRaw(this)
+    }
+
+    get isGroup() {
+        return true;
+    }
 }

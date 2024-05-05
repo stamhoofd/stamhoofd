@@ -6,11 +6,12 @@
             </div>
             <div class="middle">
                 <template v-if="tabs.length > 1">
-                    <button v-for="item in tabs" :key="item.component.key" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="selectItem(item)">
+                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="(event) => selectTab(event, item)">
                         <div class="button text" :class="{ selected: selectedItem === item }">
                             <span :class="'icon '+item.icon" />
                             <span>{{ item.name }}</span>
                             <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
+                            <span v-if="item.isGroup" class="icon arrow-down-small gray"></span>
                         </div>
                     </button>
                 </template>
@@ -28,6 +29,7 @@
 <script lang="ts">
 import TabBarController from './TabBarController.vue';
 import {inject, shallowRef} from 'vue';
+import TabBarDropdownView from './TabBarDropdownView.vue';
 
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
     const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController>|Ref<InstanceType<typeof TabBarController>>;
@@ -36,15 +38,17 @@ export function useTabBarController(): Ref<InstanceType<typeof TabBarController>
 </script>
 
 <script setup lang="ts" name="TabBarController">
-import { ComponentWithProperties, FramedComponent, HistoryManager, PushOptions, defineRoutes, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, FramedComponent, HistoryManager, NavigationController, PushOptions, defineRoutes, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
-import { TabBarItem } from './TabBarItem';
+import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 import InheritComponent from './InheritComponent.vue';
 import { Formatter } from '@stamhoofd/utility';
 
 const props = defineProps<{
-    tabs: TabBarItem[]
+    tabs: (TabBarItem|TabBarItemGroup)[]
 }>()
+
+const flatTabs = computed(() => props.tabs.flatMap(t => t.items))
 
 const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
 
@@ -53,8 +57,9 @@ const root: Ref<ComponentWithProperties|null> = ref(null) as any as Ref<Componen
 
 const mainElement = ref<HTMLElement|null>(null)
 const urlHelpers = useUrl()
+const present = usePresent()
 
-defineRoutes(props.tabs.map(tab => {
+defineRoutes(flatTabs.value.map(tab => {
     return {
         name: tab.name,
         url: Formatter.slug(tab.name),
@@ -70,7 +75,7 @@ defineRoutes(props.tabs.map(tab => {
 onMounted(() => {
     // If no default route was set, select the first
     if (!root.value && !selectedItem.value) {
-        selectItem(props.tabs[0], false).catch(console.error)
+        selectItem(flatTabs.value[0], false).catch(console.error)
     }
 })
 
@@ -98,6 +103,7 @@ const saveCurrentItemState = () => {
         }
     }
 }
+
 const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     if (item === selectedItem.value) {
         return
@@ -141,13 +147,61 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     }
 }
 
+const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => {
+    if (tab instanceof TabBarItem) {
+        return selectItem(tab);
+    }
+
+    const padding = 15;
+    let width = 400;
+    const button = event.currentTarget as HTMLElement
+    const bounds = button.getBoundingClientRect()
+    const win = window,
+            doc = document,
+            docElem = doc.documentElement,
+            body = doc.getElementsByTagName("body")[0],
+            clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
+
+    let left = bounds.left - padding;
+
+    if (left + width > clientWidth + padding) {
+        left = clientWidth - padding - width;
+
+        if (left < padding) {
+            left = padding;
+            width = clientWidth - padding * 2;
+        }
+    }
+
+    // Open dropdown menu
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(TabBarDropdownView, {
+                    tabs: tab.items,
+                    selectedItem: selectedItem,
+                    selectItem: selectItem
+                })
+            }, {
+                provide: {
+                    reactive_navigation_disable_url: true
+                }
+            })
+        ],
+        modalDisplayStyle: 'popup',
+        modalClass: 'positionable-sheet',
+        modalCssStyle: '--sheet-position-left: '+left.toFixed(1)+'px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px; --st-popup-width: ' + width.toFixed(1) + 'px; ',
+    })
+};
+
+
 const show = async (options: PushOptions) => {
     if (options.components.length > 1) {
         throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController')
     }
     const component = options.components[0];
 
-    const foundItem = props.tabs.find(tab => tab.component === component);
+    const foundItem = flatTabs.value.find(tab => tab.component === component);
     if (foundItem) {
         return selectItem(foundItem)
     }
@@ -158,15 +212,14 @@ const show = async (options: PushOptions) => {
 
     saveCurrentItemState()
 
-    if (options?.adjustHistory ?? true) {
-        const old = selectedItem.value
-        HistoryManager.pushState(undefined, old ? (async () => {
-            await selectItem(old, false)
-        }) : null, true);
-        component.assignHistoryIndex()
-    } else {
-        component.returnToHistoryIndex()
-    }
+    const old = selectedItem.value
+    HistoryManager.pushState(undefined, old ? (async () => {
+        await selectItem(old, false)
+    }) : null, {
+        adjustHistory: options?.adjustHistory ?? true,
+        invalid: options?.invalidHistory ?? false,
+    });
+    component.assignHistoryIndex()
         
     // Switch
     selectedItem.value = null
@@ -179,7 +232,7 @@ provide('reactive_navigation_show', show)
 
 onBeforeUnmount(() => {
     // Prevent memory issues by removing all references and destroying kept alive components
-    for (const {component} of props.tabs) {
+    for (const {component} of flatTabs.value) {
         // Destroy them one by one
         if (component.isKeptAlive && component.vnode) {
             component.destroy(component.vnode);

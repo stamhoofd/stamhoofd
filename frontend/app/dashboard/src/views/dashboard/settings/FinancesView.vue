@@ -3,7 +3,7 @@
     <div v-else id="finances-view" class="st-view background">
         <STNavigationBar title="Boekhouding" />
 
-        <main>
+        <main class="center">
             <h1>
                 Boekhouding
             </h1>

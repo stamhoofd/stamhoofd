@@ -9,7 +9,7 @@
         </STNavigationBar>
 
     
-        <main>
+        <main class="center">
             <h1>Beheerders</h1>
             <p>Voeg hier beheerders toe en regel wat ze kunnen doen in Stamhoofd door rollen toe te kennen. Maak zelf nieuwe rollen aan en stel de rechten in per rol.</p>
 

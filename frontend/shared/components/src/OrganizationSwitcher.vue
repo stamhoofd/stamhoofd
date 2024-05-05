@@ -63,20 +63,6 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
         this.availableSessions = await SessionManager.availableSessions()
     }
 
-    /*
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(UIFilterEditor, {
-                        filter
-                    })
-                })
-            ],
-            modalDisplayStyle: 'popup',
-            modalClass: 'filter-sheet'
-        })
-    */
-
     showContextMenu() {
         this.present({
             components: [
@@ -93,79 +79,6 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
             modalCssStyle: '--sheet-position-left: 20px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px;',
             
         })
-    }
-
-    oldshowContextMenu() {
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Naar ledenportaal',
-                    action: async () => {
-                        const nav = this.modalStackComponent
-                        if (!nav) {
-                            throw new Error("No modalStackComponent")
-                        }
-                        const registrationApp = await import("@stamhoofd/registration");
-
-                        await nav.parentPresent({
-                            components: [
-                                registrationApp.getRootView(this.$context)
-                            ],
-                            animated: true,
-                            replace: 1
-                        })
-                    }
-                }),
-                new ContextMenuItem({
-                    name: "Wissel tussen vereniging",
-                    icon: "sync",
-                    childMenu: this.defaultOrganizations.length > 1 ? 
-                        new ContextMenu([
-                            [
-                                new ContextMenuItem({
-                                    name: "Zoek vereniging",
-                                    icon: "search",
-                                    action: () => {
-                                        this.switchOrganization()
-                                    }
-                                })
-                            ],
-                            this.defaultOrganizations.map(o => new ContextMenuItem({
-                                name: o.name,
-                                description: o.address.city,
-                                action: async () => {
-                                    const context = await SessionManager.getPreparedContextForOrganization(o)
-                                    const nav = this.modalStackComponent
-                                    if (!nav) {
-                                        throw new Error("No modalStackComponent")
-                                    }
-                                    const dashboardApp = await import("@stamhoofd/dashboard");
-                                    await nav.parentPresent({
-                                        components: [
-                                            dashboardApp.getScopedDashboardRoot(context)
-                                        ],
-                                        animated: true,
-                                        replace: 1,
-                                        invalidHistory: true // Going back should now reload the full page
-                                    })
-                                }
-                            }))
-                        ]) : undefined,
-                    action: () => {
-                        this.switchOrganization()
-                    }
-                }),
-                new ContextMenuItem({
-                    name: "Uitloggen",
-                    icon: "logout",
-                    action: () => {
-                        this.logout().catch(console.error)
-                        return true;
-                    }
-                }),
-            ]
-        ])
-        menu.show({ component: this, button: this.$el as HTMLElement, xPlacement: "left", yPlacement: "bottom" }).catch(console.error)
     }
 }
 </script>
