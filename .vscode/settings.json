@@ -10,6 +10,7 @@
         "**/yarn-error.log": true,
         "LICENSE": true,
         ".yarn/releases": true,
+        "**.tsbuildinfo": true
     },
     "eslint.options": {
         "extensions": [
