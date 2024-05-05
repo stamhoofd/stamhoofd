@@ -62,7 +62,7 @@ Using MacOS or Linux is recommended. Setup using WSL can be very difficult given
 
 ```
 brew install mysql
-brew services mysql start
+brew services start mysql
 mysql -u root
 ```
 
