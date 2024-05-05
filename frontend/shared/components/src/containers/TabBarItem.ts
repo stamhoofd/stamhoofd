@@ -1,4 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation"
+import { markRaw } from "vue"
 
 export class TabBarItem {
     name = ""
@@ -11,5 +12,8 @@ export class TabBarItem {
         this.name = options.name
         this.icon = options.icon
         this.component = options.component
+
+        // Not reactive because we need === operator to know what the active tab is
+        markRaw(this)
     }
 }

@@ -5,7 +5,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
 
-import { computed, reactive } from 'vue';
+import { computed, markRaw, reactive } from 'vue';
 import { MemberManager } from './classes/MemberManager';
 import LoginView from './views/login/LoginView.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -71,7 +71,37 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
         root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
     })
 
-    setTitleSuffix(session.organization?.name ?? '')
+    setTitleSuffix(session.organization?.name ?? '');
+
+    const startTab =  new TabBarItem({
+        icon: 'home',
+        name: 'Start',
+        component: startView
+    });
+
+    const membersTab = new TabBarItem({
+        icon: 'group',
+        name: 'Leden',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {})
+        })
+    });
+
+    const webshopsTab = new TabBarItem({
+        icon: 'basket',
+        name: 'Verkoop',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+        })
+    });
+
+    const settingsTab = new TabBarItem({
+        icon: 'category',
+        name: 'Meer',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+        })
+    });
 
     return new ComponentWithProperties(ContextProvider, {
         context: {
@@ -93,34 +123,25 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
         root: new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
-                    tabs: [
-                        new TabBarItem({
-                            icon: 'home',
-                            name: 'Start',
-                            component: startView
-                        }),
-                        new TabBarItem({
-                            icon: 'group',
-                            name: 'Leden',
-                            component: new ComponentWithProperties(SplitViewController, {
-                                root: AsyncComponent(() => import('./views/members/MembersMenu.vue'), {})
-                            })
-                        }),
-                        new TabBarItem({
-                            icon: 'basket',
-                            name: 'Verkoop',
-                            component: new ComponentWithProperties(SplitViewController, {
-                                root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-                            })
-                        }),
-                        new TabBarItem({
-                            icon: 'category',
-                            name: 'Meer',
-                            component: new ComponentWithProperties(SplitViewController, {
-                                root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-                            })
-                        }),
-                    ]
+                    tabs: computed(() => {
+                        const organization = reactiveSession.organization;
+
+                        const tabs = [
+                            startTab
+                        ]
+
+                        if (organization?.meta.packages.useMembers) {
+                            tabs.push(membersTab)
+                        }
+
+                        if (organization?.meta.packages.useWebshops) {
+                            tabs.push(webshopsTab)
+                        }
+
+                        tabs.push(settingsTab);
+
+                        return tabs;
+                    })
                 })
             ),
             loginRoot: wrapWithModalStack(
