@@ -209,7 +209,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 console.error(e)
             }
 
-            const session = new SessionContext(this.organization.id)
+            const session = new SessionContext(this.organization)
             await SessionManager.prepareSessionForUsage(session, true);
             const dashboardContext = getScopedDashboardRoot(session, {
                 initialPresents: [

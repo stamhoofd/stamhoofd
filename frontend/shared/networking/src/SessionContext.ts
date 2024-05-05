@@ -1,10 +1,10 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { SimpleErrors, isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors'
+import { SimpleError, SimpleErrors, isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
 import { KeychainedResponseDecoder, LoginProviderType, Organization, Token, User, Version } from '@stamhoofd/structures'
 
-import { AppManager, UrlHelper } from '..'
+import { AppManager, SessionManager, UrlHelper } from '..'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
@@ -28,7 +28,6 @@ export class SessionContext implements RequestMiddleware {
     /**
      * This will become optional in the future
      */
-    organizationId: string;
     organization: Organization | null = null
     user: User | null = null
 
@@ -49,8 +48,33 @@ export class SessionContext implements RequestMiddleware {
 
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
-    constructor(organizationId: string) {
-        this.organizationId = organizationId
+    constructor(organization: Organization|null) {
+        this.organization = organization
+    }
+
+    /**
+     * @deprecated
+     */
+    get organizationId() {
+        return this.organization?.id ?? null
+    }
+
+    static async createFrom(data: ({organization: Organization} | {organizationId: string})) {
+        let organization: Organization;
+        if ("organizationId" in data) {
+            // If we have the token, we better do an authenticated request
+            const response = await SessionContext.serverForOrganization(data.organizationId).request({
+                method: "GET",
+                path: "/organization",
+                decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>),
+                shouldRetry: false
+            })
+            organization = response.data.data
+        } else {
+            organization = data.organization
+        }
+
+        return new SessionContext(organization)
     }
 
     get preventComplete() {
@@ -307,20 +331,21 @@ export class SessionContext implements RequestMiddleware {
         return !!this.token && !!this.user && !!this.organization && !this.preventComplete && (!this.user.permissions || !!this.organization.privateMeta)
     }
 
-    /**
-     * Doing authenticated requests
-     */
-    get server() {
+    static serverForOrganization(organizationId: string) {
         const server = NetworkManager.server
 
-        if (AppManager.shared.isNative && this.organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
+        if (AppManager.shared.isNative && organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
             // Use demo server for app reviews
-            server.host = "https://" + this.organizationId + "." + STAMHOOFD.domains.demoApi;
+            server.host = "https://" + organizationId + "." + STAMHOOFD.domains.demoApi;
             return server
         }
         
-        server.host = "https://" + this.organizationId + "." + STAMHOOFD.domains.api;
+        server.host = "https://" + organizationId + "." + STAMHOOFD.domains.api;
         return server
+    }
+
+    get server() {
+        return SessionContext.serverForOrganization(this.organizationId)
     }
 
     /**
@@ -516,7 +541,7 @@ export class SessionContext implements RequestMiddleware {
                     method: "DELETE",
                     path: "/oauth/token",
                     shouldRetry: false,
-                    allowErrorRetry: false
+                    allowErrorRetry: true // sometimes we need to refresh a token before we can delete it
                 })
             } catch (e) {
                 if (Request.isNetworkError(e) || Request.isAbortError(e)) {
@@ -559,6 +584,14 @@ export class SessionContext implements RequestMiddleware {
     async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
         if (!this.token) {
             // Euhm? The user is not signed in!
+            return false;
+        }
+
+        if (error.hasCode("invalid_organization") && this.organization) {
+            // Clear from session storage
+            await SessionManager.removeOrganizationFromStorage(this.organization.id)
+            this.temporaryLogout()
+            window.location.reload();
             return false;
         }
 

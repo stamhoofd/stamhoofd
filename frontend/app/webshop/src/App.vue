@@ -106,9 +106,8 @@ export default class App extends Vue {
                 ColorHelper.setDarkMode(response.data.webshop?.meta.darkMode ?? DarkMode.Off)
 
                 // Set session
-                const session = new SessionContext(response.data.organization.id)
+                const session = new SessionContext(response.data.organization)
                 await session.loadFromStorage()       
-                session.setOrganization(response.data.organization)
 
                 await I18nController.loadDefault(session, "webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
 

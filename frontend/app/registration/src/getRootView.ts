@@ -44,8 +44,7 @@ export async function getScopedRegistrationRootFromUrl() {
             })
             const organization = response.data
 
-            session = new SessionContext(organization.id)
-            session.setOrganization(organization)
+            session = new SessionContext(organization)
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
 

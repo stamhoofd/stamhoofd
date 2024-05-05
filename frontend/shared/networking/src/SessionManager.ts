@@ -186,18 +186,20 @@ export class SessionManagerStatic {
         }
     }
 
+    /**
+     * Try to create a session, and support offline mode so we don't need to fetch if network is offline
+     */
     async getContextForOrganization(id: string) {
         const sessionStorage = await this.getSessionStorage(false)
         const organization = sessionStorage.organizations.find(o => o.id === id)
 
         if (organization) {
-            const session = new SessionContext(id)
-            session.setOrganization(organization)
+            const session = new SessionContext(organization)
             await session.loadFromStorage()
             return session
         }
 
-        const session = new SessionContext(id)
+        const session = await SessionContext.createFrom({organizationId: id})
         await session.loadFromStorage()
         return session
     }

@@ -53,9 +53,8 @@ export default class App extends Vue {
             }
 
             // Set organization and session
-            const session = new SessionContext(response.data.id)
+            const session = new SessionContext(response.data)
             await session.loadFromStorage()       
-            session.setOrganization(response.data)        
             await I18nController.loadDefault(session, "registration", response.data.address.country, "nl", response.data.address.country)
             
 

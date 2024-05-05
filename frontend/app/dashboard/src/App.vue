@@ -38,7 +38,7 @@ export class App extends Vue {
                     }
                 }
 
-                this.checkGlobalRoutes()
+                await this.checkGlobalRoutes()
 
                 let app: 'dashboard' | 'admin' | 'registration' = 'dashboard';
 
@@ -86,7 +86,7 @@ export class App extends Vue {
         HistoryManager.activate();
     }
 
-    checkGlobalRoutes() {
+    async checkGlobalRoutes() {
         // Always set initial route
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
         const parts = UrlHelper.shared.getParts();
@@ -98,7 +98,7 @@ export class App extends Vue {
             // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
             const token = queryString.get('token');
-            const session = new SessionContext(parts[1]);
+            const session = await SessionContext.createFrom({organizationId: parts[1]});
 
             (this.$refs.modalStack as any).present({
                 url: UrlHelper.transformUrl(currentPath),
@@ -114,7 +114,7 @@ export class App extends Vue {
             const organizationId = queryString.get("organization_id")!
             const refreshToken = queryString.get("refresh_token")!
             
-            this.loginWithToken(organizationId, refreshToken).catch(console.error)
+            await this.loginWithToken(organizationId, refreshToken)
         }
 
         if (parts.length == 1 && parts[0] == 'unsubscribe') {
@@ -124,7 +124,7 @@ export class App extends Vue {
             const type = queryString.get('type') ?? 'all'
 
             if (id && token && ['all', 'marketing'].includes(type)) {
-                this.unsubscribe(id, token, type as 'all'|'marketing').catch(console.error)
+                await this.unsubscribe(id, token, type as 'all'|'marketing')
             }
         }
 
@@ -135,20 +135,21 @@ export class App extends Vue {
             const code = queryString.get('code')
                 
             if (token && code) {
-                const session = new SessionContext(parts[1]);
                 const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
-                session.loadFromStorage()
-                    .then(() => LoginHelper.verifyEmail(session, code, token))
-                    .then(async () => {
-                        toast.hide()
-                        new Toast("E-mailadres is gevalideerd", "success green").show()
+                
+                try {
+                    const session = await SessionContext.createFrom({organizationId: parts[1]});
+                    await session.loadFromStorage()
+                    await LoginHelper.verifyEmail(session, code, token)
+                    toast.hide()
+                    new Toast("E-mailadres is gevalideerd", "success green").show()
 
-                        const dashboardContext = getScopedDashboardRoot(session)
-                        await ReplaceRootEventBus.sendEvent("replace", dashboardContext);
-                    }).catch(e => {
-                        toast.hide()
-                        CenteredMessage.fromError(e).addCloseButton().show()
-                    })
+                    const dashboardContext = getScopedDashboardRoot(session)
+                    await ReplaceRootEventBus.sendEvent("replace", dashboardContext);
+                } catch (e) {
+                    toast.hide()
+                    CenteredMessage.fromError(e).addCloseButton().show()
+                }
             }
         }
     }
@@ -271,6 +272,7 @@ export class App extends Vue {
                 refreshToken,
                 accessTokenValidUntil: new Date(0)
             }))
+            await SessionManager.prepareSessionForUsage(session, false)
             await ReplaceRootEventBus.sendEvent("replace", getScopedDashboardRoot(session))
         } catch (e) {
             console.error(e)

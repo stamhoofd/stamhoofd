@@ -81,15 +81,14 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { HistoryManager, NavigationMixin, setTitleSuffix } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, STGradientBackground, STNavigationBar, Spinner, Toast } from '@stamhoofd/components';
+import { NavigationMixin, setTitleSuffix } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Logo, OrganizationAvatar, STGradientBackground, STNavigationBar, Spinner, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, SessionContext, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { getScopedDashboardRoot } from '../../getRootViews';
 import VersionFooter from '../dashboard/settings/VersionFooter.vue';
-import SignupGeneralView from '../signup/SignupGeneralView.vue';
 
 const throttle = (func, limit) => {
     let lastFunc;
