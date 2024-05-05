@@ -10,7 +10,7 @@
                         <div class="button text" :class="{ selected: selectedItem === item }">
                             <span :class="'icon '+item.icon" />
                             <span>{{ item.name }}</span>
-                            <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
+                            <span v-if="unref(item.badge)" class="bubble">{{ unref(item.badge) }}</span>
                             <span v-if="item.isGroup" class="icon arrow-down-small gray"></span>
                         </div>
                     </button>
@@ -39,7 +39,7 @@ export function useTabBarController(): Ref<InstanceType<typeof TabBarController>
 
 <script setup lang="ts" name="TabBarController">
 import { ComponentWithProperties, FramedComponent, HistoryManager, NavigationController, PushOptions, defineRoutes, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
-import { Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
+import { ComponentPublicInstance, Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, provide, ref, unref } from 'vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 import InheritComponent from './InheritComponent.vue';
 import { Formatter } from '@stamhoofd/utility';
@@ -48,7 +48,8 @@ const props = defineProps<{
     tabs: (TabBarItem|TabBarItemGroup)[]
 }>()
 
-const flatTabs = computed(() => props.tabs.flatMap(t => t.items))
+type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
+const flatTabs = computed<TabBarItemWithComponent[]>(() => props.tabs.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
 
 const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
 
@@ -88,7 +89,7 @@ const getInternalScrollElements = () => {
 
 const saveCurrentItemState = () => {
     const old = selectedItem.value;
-    if (old) {
+    if (old && old.component) {
         // Keep current item alive
         old.component.keepAlive = true;
 
@@ -108,6 +109,12 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     if (item === selectedItem.value) {
         return
     }
+    if (!item.component) {
+        if (item.action) {
+            await item.action.call(instance!.proxy as ComponentPublicInstance)
+        }
+        return;
+    }
 
     saveCurrentItemState()
     const old = selectedItem.value;
@@ -119,7 +126,7 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     if (appendHistory) {
         HistoryManager.pushState(undefined, old ? (async () => {
             await selectItem(old, false)
-        }) : null, true);
+        }) : null, {adjustHistory: true});
 
         item.component.assignHistoryIndex()
     } else {

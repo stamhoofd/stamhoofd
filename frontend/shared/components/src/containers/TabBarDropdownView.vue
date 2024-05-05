@@ -6,7 +6,7 @@
                     <div class="button text" :class="{ selected: selectedItem === item }">
                         <span :class="'icon '+item.icon" />
                         <span>{{ item.name }}</span>
-                        <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
+                        <span v-if="unref(item.badge)" class="bubble">{{ unref(item.badge) }}</span>
                         <span v-if="item.isGroup" class="icon arrow-down-small gray"></span>
                     </div>
                 </STListItem>
@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { ref } from 'vue';
+import { ref, unref } from 'vue';
 import { TabBarItem } from './TabBarItem';
 
 const props = defineProps<{

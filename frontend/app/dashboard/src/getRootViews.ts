@@ -5,8 +5,9 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
 
-import { computed, markRaw, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { MemberManager } from './classes/MemberManager';
+import { WhatsNewCount } from './classes/WhatsNewCount';
 import LoginView from './views/login/LoginView.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
@@ -95,17 +96,25 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
         })
     });
 
-    const settingsTab = new TabBarItemGroup({
+    const whatsNewBadge = ref('')
+
+    const loadWhatsNew = () => {
+        const currentCount = localStorage.getItem("what-is-new")
+        if (currentCount) {
+            const c = parseInt(currentCount)
+            if (!isNaN(c) && WhatsNewCount - c > 0) {
+                whatsNewBadge.value = (WhatsNewCount - c).toString()
+            }
+        } else {
+            localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
+        }
+    }
+    loadWhatsNew();
+
+    const moreTab = new TabBarItemGroup({
         icon: 'category',
         name: 'Meer',
         items: [
-            new TabBarItem({
-                icon: 'settings',
-                name: 'Instellingen',
-                component: new ComponentWithProperties(SplitViewController, {
-                    root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {})
-                })
-            }),
             new TabBarItem({
                 icon: 'calculator',
                 name: 'Boekhouding',
@@ -119,9 +128,42 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
                 component: new ComponentWithProperties(SplitViewController, {
                     root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
                 })
+            }),
+            new TabBarItem({
+                icon: 'gift',
+                name: 'Wat is er nieuw?',
+                badge: whatsNewBadge,
+                action: async function () {
+                    window.open('https://'+this.$t('shared.domains.marketing')+'/changelog', '_blank')
+                    whatsNewBadge.value = '';
+                    localStorage.setItem("what-is-new", WhatsNewCount.toString());
+                }
+            }),
+            new TabBarItem({
+                icon: 'book',
+                name: 'Documentatie',
+                action: async function () {
+                    window.open('https://'+this.$t('shared.domains.marketing')+'/docs', '_blank')
+                }
+            }),
+            new TabBarItem({
+                icon: 'feedback',
+                name: 'Feedback',
+                action: async function () {
+                    const NoltHelper = (await import('./classes/NoltHelper'))
+                    await NoltHelper.openNolt(reactiveSession, false)
+                }
             })
         ]
     });
+
+    const settingsTab = new TabBarItem({
+        icon: 'settings',
+        name: 'Instellingen',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {})
+        })
+    })
 
     return new ComponentWithProperties(ContextProvider, {
         context: {
@@ -146,7 +188,7 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
                     tabs: computed(() => {
                         const organization = reactiveSession.organization;
 
-                        const tabs = [
+                        const tabs: (TabBarItem|TabBarItemGroup)[] = [
                             startTab
                         ]
 
@@ -159,6 +201,7 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
                         }
 
                         tabs.push(settingsTab);
+                        tabs.push(moreTab);
 
                         return tabs;
                     })

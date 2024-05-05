@@ -1,9 +1,7 @@
 //i18n-setup.js
-import { HistoryManager } from "@simonbackx/vue-app-navigation"
 import { countries, languages } from "@stamhoofd/locales"
-import { Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
+import { Session, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
-import Vue from 'vue'
 import { I18n, createI18n } from 'vue-i18n'
 
 export class I18nController {
