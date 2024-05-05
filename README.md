@@ -56,8 +56,27 @@ This is what you need to know:
 
 #### Dependencies
 
-- Install MySQL8
-- Install Caddy
+Using MacOS or Linux is recommended. Setup using WSL can be very difficult given that Stamhoofd requires you to setup a local DNS server and trust a new local SSL root certificate, which is very hard to setup given that this cannot get automated by the used tools when using WSL.
+
+- Install MySQL8 and create a new local database
+
+```
+brew install mysql
+brew services mysql start
+mysql -u root
+```
+
+```sql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+FLUSH PRIVILEGES;
+CREATE DATABASE `stamhoofd` DEFAULT CHARACTER SET = `utf8mb4` DEFAULT COLLATE = `utf8mb4_0900_ai_ci`;
+```
+
+```
+exit
+```
+
+- Install Caddy (`brew install caddy` - do not start it in the background)
 - Install CoreDNS (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
 - Update your computer's DNS-server to 127.0.0.1 (in case coredns is not running). On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
 
@@ -65,6 +84,7 @@ This is what you need to know:
 
 - Make sure you create all `/backend/app/*/.env.json` based on `/backend/app/*/.env.template.json` (make sure you create the required MySQL8 database and start MySQL)
 - Make sure you create `/frontend/.env.json` based on `/frontend/.env.template.json`
+- Make sure you create `/.development/.env` based on `/.development/.env.template` (this is the DNS record value that will be used for the A records on all domains ending with *.stamhoofd, and should point to your local computer. You can use 127.0.0.1 or your local LAN address if you want to debug on other local devices)
 
 #### VSCode (optional)
 
@@ -78,13 +98,23 @@ To run everything locally, we run everything on a fake TLD domain and host the d
 2. Use `yarn build:shared` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
 3. Run migrations by running `yarn migrations` in the `backend/app/api` folder
 4. Run `yarn dev`. This will start all servers. If something fails, try to run it again and/or fix the error.
-5. Run caddy via `yarn caddy` (this serves the app on the default development domains)
+5. Run caddy via `yarn caddy` (this serves the app on the default development domains). It might prompt for a password to install the root certificate for self-signed certificates the first time.
 6. Start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
 7. Next time you can run `yarn dev`, `yarn caddy` and `yarn dns` in one go by running `yarn dev:server`
 
-Everything should run fine now and you should be able to visit `https://dashboard.stamhoofd` (make sure to enter http(s):// manually because the browser won't recognize the TLD by default and will default to search otherwise) to create your first organization.
+Everything should run fine now and you should be able to visit `https://dashboard.stamhoofd` (make sure to enter http(s):// manually because the browser won't recognize the TLD by default and will default to search otherwise) to create your first organization. You should **not** get a certificate error. Never manually trust an individual certificate, this won't work as Stamhoofd requires multiple certificates and browsers tend to forget you've manually added them as an exception. On top of that browsers won't ask the question for the api domains. Follow the steps in 'Firefox' if you need to trust the certificates on Firefox.
 
 Feel free to contact us via hello@stamhoofd.be if you have questions about development and how to set it up.
+
+#### Firefox
+
+Firefox does not use the root SSL certificates of your system so you have to add it manually. First make sure you have ran `caddy trust` at least once or have run `yarn caddy` succesfully (this makes sure Caddy created the root certificate). Open the Keychain app on MacOS. Search for 'Caddy' in your login keychain. 
+
+![Caddy root certificate](.development/images/caddy-root.png)
+
+Select it. Click File > Export Items and export it as .cer. 
+
+In Firefox, go to Settings > Privacy and security. Scroll down to certificates. Open Certificates. In the Organization tab, click 'Import' and import the root certificate you just exported. Choose to trust it for websites. All Caddy certificates are now trusted in Firefox.
 
 ### E-mails
 
