@@ -37,7 +37,7 @@
                     </p>
 
                     <form class="input-icon-container icon search gray" @submit.prevent>
-                        <input ref="input" v-model="query" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
+                        <input ref="input" v-model="query" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="selectResult(0)">
                     </form>
 
                     <div v-if="showDevelopment" class="version-box">
@@ -233,7 +233,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
         Request.cancelAll(this)
     }
 
-    throttleUpdateResults = throttle(this.updateResults.bind(this), 500);
+    throttleUpdateResults = throttle(this.updateResults, 500);
 
     availableSessions: Session[] = []
     get defaultOrganizations(): Organization[] {
