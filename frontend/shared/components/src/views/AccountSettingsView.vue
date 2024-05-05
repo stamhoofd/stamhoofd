@@ -90,19 +90,12 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
     showDomainSettings = true
-
-    // Needed to make the current session (and user reactive)
-    session = this.$context
     
-    get user() {
-        return User.create(this.$user!)
-    }
-
-    userPatch = User.patch({ id: this.user.id })
+    userPatch = User.patch({ id: this.$user!.id })
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get patchedUser() {
-        return this.user.patch(this.userPatch)
+        return this.$user!.patch(this.userPatch)
     }
 
     get email() {
@@ -110,11 +103,13 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     }
 
     set email(email: string) {
-        this.$set(this.userPatch, "email", email)
+        this.userPatch = this.userPatch.patch({
+            email
+        })
     }
 
     get isAdmin() {
-        return this.user.permissions !== null
+        return !!this.$user?.permissions 
     }
 
     get firstName() {
@@ -122,7 +117,9 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     }
 
     set firstName(firstName: string | null) {
-        this.$set(this.userPatch, "firstName", firstName)
+        this.userPatch = this.userPatch.patch({
+            firstName
+        })
     }
 
     get lastName() {
@@ -130,7 +127,9 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     }
 
     set lastName(lastName: string | null) {
-        this.$set(this.userPatch, "lastName", lastName)
+        this.userPatch = this.userPatch.patch({
+            lastName
+        })
     }
 
     get privacyUrl() {
@@ -178,7 +177,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
             }
 
             // Create a new patch
-            this.userPatch = User.patch({ id: this.user.id })
+            this.userPatch = User.patch({ id: this.$user!.id })
             this.dismiss({force: true});
         } catch (e) {
             this.errorBox = new ErrorBox(e)

@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="emailRaw = $event.target.value; onTyping();">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event) => {emailRaw = event.target.value; onTyping();}">
         <template #right><slot name="right" /></template>
     </STInputBox>
 </template>
@@ -18,6 +18,7 @@ import STInputBox from "./STInputBox.vue";
     components: {
         STInputBox
     },
+    emits: ['update:modelValue'],
 
     // All attributes that we don't recognize should be passed to the input, and not to the root (except style and class)
     inheritAttrs: false
@@ -33,13 +34,13 @@ export default class EmailInput extends Vue {
     valid = true;
 
     @Prop({ default: null })
-        value!: string | null
+        modelValue!: string | null
 
     @Prop({ default: true })
         required!: boolean
 
     /**
-     * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
+     * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
@@ -50,7 +51,7 @@ export default class EmailInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
             return
@@ -59,7 +60,7 @@ export default class EmailInput extends Vue {
     }
 
     onTyping() {
-        // Silently send value to parents, but don't show visible errors yet
+        // Silently send modelValue to parents, but don't show visible errors yet
         this.validate(false, true)
     }
 
@@ -70,7 +71,7 @@ export default class EmailInput extends Vue {
             })
         }
 
-        this.emailRaw = this.value ?? ""
+        this.emailRaw = this.modelValue ?? ""
     }
 
     unmounted() {
@@ -87,7 +88,7 @@ export default class EmailInput extends Vue {
                 this.errorBox = null
             }
 
-            if (this.value !== null) {
+            if (this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
             }
             return true
@@ -99,9 +100,9 @@ export default class EmailInput extends Vue {
                 this.errorBox = null
             }
 
-            if (this.nullable && this.value !== null) {
+            if (this.nullable && this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
-            } else if (this.value !== "") {
+            } else if (this.modelValue !== "") {
                 this.$emit('update:modelValue', "")
             }
             return false
@@ -118,7 +119,7 @@ export default class EmailInput extends Vue {
             return false
 
         } else {
-            if (this.emailRaw !== this.value) {
+            if (this.emailRaw !== this.modelValue) {
                 this.$emit('update:modelValue', this.emailRaw)
             }
             if (!silent) {
