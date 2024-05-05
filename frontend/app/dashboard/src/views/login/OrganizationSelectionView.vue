@@ -81,7 +81,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin, setTitleSuffix } from "@simonbackx/vue-app-navigation";
+import { HistoryManager, NavigationMixin, setTitleSuffix } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, STGradientBackground, STNavigationBar, Spinner, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
@@ -345,7 +345,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
                     getScopedDashboardRoot(session)
                 ],
                 replace: 1,
-                animated: true
+                animated: true,
+                invalidHistory: true // Going back should now reload the full page
             })
         } catch (e) {
             console.error(e)

@@ -75,12 +75,12 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { LoginHelper, Session, Storage } from "@stamhoofd/networking"
-import { Organization } from '@stamhoofd/structures';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { LoginHelper, Session, Storage } from "@stamhoofd/networking";
+import { Organization } from '@stamhoofd/structures';
 import { getScopedDashboardRoot } from '../../getRootViews';
 
 @Component({
@@ -210,7 +210,14 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 ]
             })
             
-            this.show(dashboardContext)
+            this.present({
+                components: [
+                    dashboardContext
+                ],
+                animated: true,
+                replace: 1,
+                invalidHistory: true // Going back should now reload the full page
+            })
 
             try {
                 Storage.keyValue.removeItem("savedRegisterCode").catch(console.error)

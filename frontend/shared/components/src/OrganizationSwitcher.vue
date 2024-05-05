@@ -16,7 +16,7 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ComponentWithProperties, ModalStackComponentFinderMixin, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponentFinderMixin, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from "@stamhoofd/structures";
@@ -140,13 +140,13 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin, ModalS
                                         throw new Error("No modalStackComponent")
                                     }
                                     const dashboardApp = await import("@stamhoofd/dashboard");
-
                                     await nav.parentPresent({
                                         components: [
                                             dashboardApp.getScopedDashboardRoot(context)
                                         ],
                                         animated: true,
-                                        replace: 1
+                                        replace: 1,
+                                        invalidHistory: true // Going back should now reload the full page
                                     })
                                 }
                             }))
