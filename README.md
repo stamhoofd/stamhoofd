@@ -96,7 +96,7 @@ To run everything locally, we run everything on a fake TLD domain and host the d
 
 1. When switching branches, cloning the repo or when pulling changes, run `yarn install && yarn build` first in the project root
 2. Use `yarn build:shared` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
-3. Run migrations by running `yarn migrations` in the `backend/app/api` folder
+3. Run migrations by running `yarn migrate` in the root folder
 4. Run `yarn dev`. This will start all servers. If something fails, try to run it again and/or fix the error.
 5. Run caddy via `yarn caddy` (this serves the app on the default development domains). It might prompt for a password to install the root certificate for self-signed certificates the first time.
 6. Start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
