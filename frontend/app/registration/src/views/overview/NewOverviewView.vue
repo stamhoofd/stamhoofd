@@ -18,7 +18,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="with-legal">
+        <main class="center">
             <div class="box">
                 <main>
                     <h1>Ledenportaal</h1>

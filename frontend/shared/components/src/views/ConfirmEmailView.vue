@@ -1,16 +1,18 @@
 <template>
     <form class="confirm-email-view st-view small" @submit.prevent="submit">
         <STNavigationBar>
-            <LoadingButton slot="right" :loading="retrying">
-                <button class="button text" type="button" @click="retry">
-                    <span class="icon retry" />
-                    <span>Opnieuw</span>
-                </button>
-            </LoadingButton>
+            <template #right>
+                <LoadingButton :loading="retrying">
+                    <button class="button text" type="button" @click="retry">
+                        <span class="icon retry" />
+                        <span>Opnieuw</span>
+                    </button>
+                </LoadingButton>
+            </template>
         </STNavigationBar>
         <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
 
-        <main>
+        <main class="center">
             <h1 v-if="!login">
                 Vul de code in uit de e-mail die we hebben gestuurd
             </h1>
@@ -26,12 +28,14 @@
         </main>
 
         <STToolbar>
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary full" type="button">
-                    <span>Doorgaan</span>
-                    <span class="icon arrow-right" />
-                </button>
-            </LoadingButton>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary full" type="button">
+                        <span>Doorgaan</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </form>
 </template>

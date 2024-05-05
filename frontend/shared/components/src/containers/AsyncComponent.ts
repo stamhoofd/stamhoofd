@@ -53,6 +53,25 @@ export async function LoadComponent(component: () => Promise<any>, properties = 
     
 }
 
+export function PromiseComponent(component: () => Promise<ComponentWithProperties>) {
+    return new ComponentWithProperties(PromiseView, {
+        promise: async function() {
+            try {
+                const c = (await component())
+                return c
+            } catch (e) {
+                if (AppManager.shared.isNative) {
+                    new Toast("Geen internetverbinding. Herlaad de applicatie.", "error red").show()
+                } else {
+                    new Toast("Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.", "error red").show()
+                }
+                throw e
+            }
+        }
+    })
+}
+
+
 export function AsyncComponent(component: () => Promise<any>, properties = {}) {
     return new ComponentWithProperties(PromiseView, {
         promise: async function() {

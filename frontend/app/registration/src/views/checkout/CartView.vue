@@ -6,7 +6,7 @@
             </template>
         </STNavigationBar>
 
-        <main class="flex">
+        <main class="center">
             <h1>{{ title }}</h1>
 
             <p v-if="cart.price">

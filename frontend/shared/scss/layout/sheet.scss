@@ -106,10 +106,10 @@
     }
 
     > div {
-        background: $color-background-shade;
+        background: $color-background;
         
-        --color-current-background: #{$color-background-shade};
-        --color-current-background-shade: #{$color-background-shade-darker};
+        --color-current-background: #{$color-background};
+        --color-current-background-shade: #{$color-background-shade};
 
         border-radius: $border-radius-modals;
         border: $border-width-thin solid $color-border;

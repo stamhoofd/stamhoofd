@@ -139,6 +139,10 @@ export class SessionManagerStatic {
                     // Ignore network errors
                     console.error(e)
                 })
+            } else {
+                if (!session.organization) {
+                    await session.fetchOrganization(shouldRetry)
+                }
             }
         }
 

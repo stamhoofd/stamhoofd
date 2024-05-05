@@ -198,7 +198,11 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: OrganizationModules, version: 48, upgrade: () => OrganizationModules.create({ useMembers: true, useWebshops: true }), field: "modules" })
     modulesOld = OrganizationModules.create({})
 
-    get modules() {
+    /**
+     * @deprecated
+     * Use packages
+     */
+    get modules(): OrganizationPackages {
         return this.packages
     }
 

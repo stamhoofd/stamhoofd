@@ -102,6 +102,11 @@ body.modern.web-iOS {
                     --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 800px)) / 2));     
                 }
             }
+
+            .popup &, .sheet & {
+                --st-view-center-padding: 0px;
+                --st-horizontal-padding: var(--st-view-horizontal-padding);
+            }
         }
 
         padding: 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px)) 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px));
@@ -300,59 +305,9 @@ body.modern.web-iOS {
             --st-safe-area-top: 0px;
             --st-safe-area-bottom: 0px;
         }
-
-        //overflow: hidden;
-
-        /*flex-shrink: 1 !important; // required to shrink!
-        flex-grow: 1;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-
-        --color-current-background: #{$color-background};
-
-        >.st-view {
-            flex-grow: 1;
-            flex-shrink: 1;
-        }
-
-        // the main extend has moved to .box general because CSS stops working (don't know why)
-
-        flex-shrink: 0 !important; // don't shrink
-        flex-grow: 0; // don't take full height
-
-        >.st-view {
-            min-height: 0;
-            height: auto;
-            max-height: none;
-        }
-
-        --st-safe-area-top: 0px;
-        --st-safe-area-bottom: 0px;
-        --keyboard-height: 0px;
-        --bottom-padding: 0px;
-
-        max-width: 800px;
-        max-width: var(--box-width, 800px);
-        background: $color-background;
-        --color-current-background: #{$color-background};
-        --color-current-background-shade: #{$color-background-shade};
-        @include style-side-view-shadow();
-        border-radius: $border-radius;
-        margin: 0px auto;
-        min-height: auto;
-        width: 100%;
-        box-sizing: border-box;
-        overflow: hidden;
-
-        &:first-child {
-            margin-top: var(--st-vertical-padding, 20px);
-        }*/
-
     }
 
-    &.background {
+    &.background{
         background: $color-background;
         --color-current-background: #{$color-background};
         --color-current-background-shade: #{$color-background-shade};

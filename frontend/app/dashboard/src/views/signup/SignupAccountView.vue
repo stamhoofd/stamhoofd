@@ -79,7 +79,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { LoginHelper, Session, Storage } from "@stamhoofd/networking";
+import { LoginHelper, Session, SessionManager, Storage } from "@stamhoofd/networking";
 import { Organization } from '@stamhoofd/structures';
 import { getScopedDashboardRoot } from '../../getRootViews';
 
@@ -203,7 +203,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             this.loading = false;
 
             const session = new Session(this.organization.id)
-            await prepareSessionForUsage(session, true);
+            await SessionManager.prepareSessionForUsage(session, true);
             const dashboardContext = getScopedDashboardRoot(session, {
                 loginComponents: [
                     new ComponentWithProperties(ConfirmEmailView, { token, email: this.email })
