@@ -29,7 +29,7 @@ export class LoginHelper {
             await session.loadFromStorage()
             if (session.canGetCompleted()) {
                 // yay! We are signed in
-                await session.updateData(true)
+                await SessionManager.prepareSessionForUsage(session, false)
                 return true
             }
 
@@ -54,6 +54,7 @@ export class LoginHelper {
         if (!response.data.valid) {
             // Check if we are now logged in (link might have been opened in a new tab)
             await session.loadFromStorage()
+            await SessionManager.prepareSessionForUsage(session, false)
             return true
         }
         return false
@@ -72,24 +73,11 @@ export class LoginHelper {
         
         try {
             session.preventComplete = true
-
-            console.log("Set token")
             session.setToken(response.data)
-
-            // Request additional data
-            console.log("Fetching user")
-            await session.fetchUser()
-
-            // if user / organization got cleared due to an invite
-            if (!session.isComplete()) {
-                await session.updateData()
-                // need to wait on this because it changes the permissions
-            }
+            await SessionManager.prepareSessionForUsage(session, false)
         } finally {
             session.preventComplete = false
         }
-       
-        // await SessionManager.setCurrentSession(session)
     }
 
     static async login(

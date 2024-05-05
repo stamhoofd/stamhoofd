@@ -6,7 +6,7 @@
 import { Organization, Webshop } from "@stamhoofd/structures";
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
-import MetaLogo from "./MetaLogo.vue";
+import MetaLogo from "../MetaLogo.vue";
 
 @Component({
     components: {

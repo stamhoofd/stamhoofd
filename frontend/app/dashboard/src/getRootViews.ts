@@ -1,5 +1,5 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -11,8 +11,8 @@ import { WhatsNewCount } from './classes/WhatsNewCount';
 import LoginView from './views/login/LoginView.vue';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
-export function wrapWithModalStack(...components: ComponentWithProperties[]) {
-    return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
+export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
+    return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
 }
 
 export function getOrganizationSelectionRoot() {
@@ -63,7 +63,7 @@ export async function getScopedDashboardRootFromUrl() {
     return getScopedDashboardRoot(session)
 }
 
-export function getScopedDashboardRoot(session: Session, options: {loginComponents?: ComponentWithProperties[]} = {}) {
+export function getScopedDashboardRoot(session: Session, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
     const reactiveSession = reactive(session) as Session
@@ -174,7 +174,8 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
-            }
+            },
+            stamhoofd_app: 'dashboard'
         },
         calculatedContext: () => {
             return {
@@ -182,43 +183,48 @@ export function getScopedDashboardRoot(session: Session, options: {loginComponen
                 $user: computed(() => reactiveSession.user),
             }
         },
-        root: new ComponentWithProperties(AuthenticatedView, {
-            root: wrapWithModalStack(
-                new ComponentWithProperties(TabBarController, {
-                    tabs: computed(() => {
-                        const organization = reactiveSession.organization;
+        root: wrapWithModalStack(
+            new ComponentWithProperties(AuthenticatedView, {
+                root: wrapWithModalStack(
+                    new ComponentWithProperties(TabBarController, {
+                        tabs: computed(() => {
+                            const organization = reactiveSession.organization;
 
-                        const tabs: (TabBarItem|TabBarItemGroup)[] = [
-                            startTab
-                        ]
+                            const tabs: (TabBarItem|TabBarItemGroup)[] = [
+                                startTab
+                            ]
 
-                        if (organization?.meta.packages.useMembers) {
-                            tabs.push(membersTab)
-                        }
+                            if (organization?.meta.packages.useMembers) {
+                                tabs.push(membersTab)
+                            }
 
-                        if (organization?.meta.packages.useWebshops) {
-                            tabs.push(webshopsTab)
-                        }
+                            if (organization?.meta.packages.useWebshops) {
+                                tabs.push(webshopsTab)
+                            }
 
-                        tabs.push(settingsTab);
-                        tabs.push(moreTab);
+                            tabs.push(settingsTab);
+                            tabs.push(moreTab);
 
-                        return tabs;
-                    })
-                })
-            ),
-            loginRoot: wrapWithModalStack(
-                new ComponentWithProperties(TabBarController, {
-                    tabs: [
-                        new TabBarItem({
-                            icon: 'key',
-                            name: 'Inloggen',
-                            component: new ComponentWithProperties(LoginView, {}), ...(options.loginComponents ?? [])
+                            return tabs;
                         })
-                    ]
-                })
-            ),
-            noPermissionsRoot: wrapWithModalStack(AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})),
-        })
+                    })
+                ),
+                loginRoot: wrapWithModalStack(
+                    new ComponentWithProperties(TabBarController, {
+                        tabs: [
+                            new TabBarItem({
+                                icon: 'key',
+                                name: 'Inloggen',
+                                component: new ComponentWithProperties(NavigationController, {
+                                    root: new ComponentWithProperties(LoginView, {})
+                                })
+                            })
+                        ]
+                    })
+                ),
+                noPermissionsRoot: wrapWithModalStack(AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})),
+            }), 
+            options.initialPresents
+        )
     });
 }

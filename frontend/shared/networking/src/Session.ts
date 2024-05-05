@@ -1,17 +1,15 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
+import { SimpleErrors, isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
 import { KeychainedResponseDecoder, LoginProviderType, Organization, Token, User, Version } from '@stamhoofd/structures'
-import { Vue } from "@simonbackx/vue-app-navigation/classes"
 
 import { AppManager, UrlHelper } from '..'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
-import { reactive } from 'vue'
 
-type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organization" | "token") => void
+type AuthenticationStateListener = (changed: "user" | "organization" | "token" | "preventComplete") => void
 
 // dec2hex :: Integer -> String
 // i.e. 0-255 -> '00'-'ff'
@@ -36,8 +34,9 @@ export class Session implements RequestMiddleware {
 
     /** 
      * Manually mark the session as incomplete by setting this to true
+     * Not using #private syntax because that messes with Vue proxies
     */
-    preventComplete = false
+    _preventComplete = false
 
     protected token: ManagedToken | null = null
 
@@ -52,6 +51,15 @@ export class Session implements RequestMiddleware {
 
     constructor(organizationId: string) {
         this.organizationId = organizationId
+    }
+
+    get preventComplete() {
+        return this._preventComplete
+    }
+
+    set preventComplete(preventComplete: boolean) {
+        this._preventComplete = preventComplete
+        this.callListeners("preventComplete");
     }
 
     async loadTokenFromStorage() {
@@ -85,6 +93,7 @@ export class Session implements RequestMiddleware {
                     try {
                         const parsed = JSON.parse(json)
                         this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(User as Decoder<User>) as Decoder<VersionBox<User>>).data
+                        this.callListeners("user")
                     } catch (e) {
                         console.error(e)
                     }
@@ -279,7 +288,7 @@ export class Session implements RequestMiddleware {
         this.listeners.delete(owner)
     }
 
-    callListeners(changed: "user" | "organization" | "token") {
+    callListeners(changed: "user" | "organization" | "token" | "preventComplete") {
         for (const listener of this.listeners.values()) {
             listener(changed)
         }
@@ -347,6 +356,7 @@ export class Session implements RequestMiddleware {
         this.token = new ManagedToken(token, () => {
             this.onTokenChanged()
         });
+        this.callListeners("token")
     }
 
     async fetchUser(shouldRetry = true): Promise<User> {
@@ -371,6 +381,7 @@ export class Session implements RequestMiddleware {
      */
     setOrganization(organization: Organization) {
         this.organization = organization
+        this.callListeners("organization")
     }
 
     /**
@@ -414,6 +425,7 @@ export class Session implements RequestMiddleware {
             if (oldAdmins && !this.organization.admins) {
                 this.organization.admins = oldAdmins
             }
+            this.callListeners("organization")
         }
     }
 
@@ -494,17 +506,33 @@ export class Session implements RequestMiddleware {
         }
     }
 
-    logout() {
-        console.log('logout');
-
+    async logout() {
         if (this.token) {
+            console.log('Logout');
+
+            // Delete first to prevent loops (could be already invalid so the deletion might fail)
+            try {
+                await this.authenticatedServer.request({
+                    method: "DELETE",
+                    path: "/oauth/token",
+                    shouldRetry: false,
+                    allowErrorRetry: false
+                })
+            } catch (e) {
+                if (Request.isNetworkError(e) || Request.isAbortError(e)) {
+                    // Network access is required for a reliable logout
+                    throw e;
+                }
+                console.error('Failed to delete token. Probably already deleted?', e)
+            }
+
             this.token.onChange = () => {
                 // emtpy
             }
             this.token = null;
             this.user = null; // force refetch in the future
+            await this.saveToStorage()
             this.onTokenChanged();
-            //LoginHelper.clearAwaitingKeys()
         }
     }
 
@@ -553,9 +581,14 @@ export class Session implements RequestMiddleware {
                 if (isSimpleError(e) || isSimpleErrors(e)) { 
                     if (e.hasCode("invalid_refresh_token")) {
                         console.log("Refresh token is invalid, logout")
-                        this.logout();
+                        await this.logout();
+                        Toast.fromError(e).show()
                         return false;
                     }
+                }
+
+                if (Request.isNetworkError(e) || Request.isAbortError(e)) {
+                    return false;
                 }
                 
                 // Something went wrong
@@ -568,8 +601,7 @@ export class Session implements RequestMiddleware {
                 console.log("This request started with an old token that might not be valid anymore. Retry with new token")
                 return true
             } else {
-                console.log("logout by " + request.headers.Authorization)
-                this.logout();
+                await this.logout();
             }
         }
 

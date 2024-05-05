@@ -4,13 +4,12 @@
             <STList>
                 <STListItem v-for="option in options" :key="option.id" :selectable="true" element-name="button" @click="selectOption(option)">
                     <template #left>
-                        <OrganizationAvatar v-if="option.organization" :organization="option.organization" />
-                        <Logo v-else />
+                        <ContextLogo :organization="option.organization" :app="option.app" />
                     </template>
                     <h1 class="style-title-list">
-                        {{ getAppName(option) }}
+                        {{ getAppTitle(option.app, option.organization) }}
                     </h1>
-                    <p class="style-description" v-if="getDescription(option)">{{ getDescription(option) }}</p>
+                    <p class="style-description" v-if="getAppDescription(option.app, option.organization)">{{ getAppDescription(option.app, option.organization) }}</p>
                 </STListItem>
             </STList>
         </main>
@@ -30,12 +29,13 @@ import { Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Ref, shallowRef } from 'vue';
 import OrganizationAvatar from './OrganizationAvatar.vue';
-import { PromiseComponent } from './containers/AsyncComponent';
-import STToolbar from './navigation/STToolbar.vue';
-import { ReplaceRootEventBus } from './overlays/ModalStackEventBus';
-import Logo from './icons/Logo.vue'
+import { PromiseComponent } from '../containers/AsyncComponent';
+import STToolbar from '../navigation/STToolbar.vue';
+import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
+import Logo from '../icons/Logo.vue'
+import { AppType, getAppTitle, getAppDescription } from './appContext';
+import ContextLogo from './ContextLogo.vue';
 
-type AppType = 'registration'|'dashboard'|'admin'
 type Option = {
     id: string,
     app: AppType|'auto',
@@ -44,33 +44,6 @@ type Option = {
 }
 
 const options: Ref<Option[]> = shallowRef([]);
-
-const getAppName = (option: Option) => {
-    if (option.app === 'auto') {
-        if (!option.organization) {
-            return 'Onbekend'
-        }
-        return option.organization.name
-    }
-    switch (option.app) {
-        case 'dashboard': return 'Beheerdersportaal';
-        case 'registration': return 'Ledenportaal';
-        case 'admin': return 'Administratieportaal'
-    }
-}
-const getDescription = (option: Option) => {
-    if (option.app === 'auto') {
-        return null;
-    }
-    if (!option.organization) {
-        switch (option.app) {
-            case 'registration': return 'Mijn inschrijvingen';
-            case 'admin': return 'Portaal voor medewerkers'
-        }
-        return null
-    }
-    return option.organization.name
-}
 
 const getOptions = async () => {
     const availableContexts = await SessionManager.availableSessions()

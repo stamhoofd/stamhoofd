@@ -75,7 +75,7 @@ export default class LegalFooter extends Vue {
         if (!(await CenteredMessage.confirm('Wil je uitloggen?', 'Ja, uitloggen', 'Hiermee zal je worden afgemeld.'))) {
             return
         }
-        this.$context.logout()
+        await this.$context.logout()
     }
 
     get privacyUrl() {

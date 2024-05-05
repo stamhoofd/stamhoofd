@@ -78,7 +78,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, ReplaceRootEventBus, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { LoginHelper, Session, SessionManager, Storage } from "@stamhoofd/networking";
 import { Organization } from '@stamhoofd/structures';
 import { getScopedDashboardRoot } from '../../getRootViews';
@@ -202,29 +202,27 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 
             this.loading = false;
 
-            const session = new Session(this.organization.id)
-            await SessionManager.prepareSessionForUsage(session, true);
-            const dashboardContext = getScopedDashboardRoot(session, {
-                loginComponents: [
-                    new ComponentWithProperties(ConfirmEmailView, { token, email: this.email })
-                ]
-            })
-            
-            this.present({
-                components: [
-                    dashboardContext
-                ],
-                animated: true,
-                replace: 1,
-                invalidHistory: true // Going back should now reload the full page
-            })
-
             try {
                 Storage.keyValue.removeItem("savedRegisterCode").catch(console.error)
                 Storage.keyValue.removeItem("savedRegisterCodeDate").catch(console.error)
             } catch (e) {
                 console.error(e)
             }
+
+            const session = new Session(this.organization.id)
+            await SessionManager.prepareSessionForUsage(session, true);
+            const dashboardContext = getScopedDashboardRoot(session, {
+                initialPresents: [
+                    {
+                        components: [new ComponentWithProperties(ConfirmEmailView, { token, email: this.email })],
+                        modalDisplayStyle: "popup"
+                    }
+                ]
+            })
+            await this.dismiss({force: true})
+            await ReplaceRootEventBus.sendEvent("replace", dashboardContext);
+
+            // Show popup to confirm e-mail
         } catch (e) {
             this.loading = false
             console.error(e)

@@ -130,7 +130,12 @@ export default class LoginView extends Mixins(NavigationMixin){
             const result = await LoginHelper.login(this.$context, this.email, this.password)
 
             if (result.verificationToken) {
-                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, token: result.verificationToken, email: this.email }))
+                this.present({
+                    components: [
+                        new ComponentWithProperties(ConfirmEmailView, { login: true, token: result.verificationToken, email: this.email })
+                    ],
+                    modalDisplayStyle: "popup"
+                })
             } else {
                 this.dismiss({ force: true });
             }

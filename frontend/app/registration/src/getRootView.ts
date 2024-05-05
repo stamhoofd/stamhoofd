@@ -101,7 +101,8 @@ export function getRootView(session: Session) {
             reactive_navigation_url: "leden/" + session.organization!.uri,
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {})
-            }
+            },
+            stamhoofd_app: 'registration'
         },
         calculatedContext: () => {
             return {

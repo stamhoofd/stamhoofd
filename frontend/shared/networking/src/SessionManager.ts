@@ -107,6 +107,8 @@ export class SessionManagerStatic {
             try {
                 await session.updateData(false, shouldRetry, true)
             } catch (e) {
+                console.error('Failed to update data in preparation of session', e);
+
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     if (e.hasCode("invalid_organization")) {
                         // Clear from session storage
@@ -133,6 +135,7 @@ export class SessionManagerStatic {
             }
         } else {
             if (session.canGetCompleted()) {
+                // Already complete
                 // Initiate a slow background update without retry
                 // = we don't need to block the UI for this ;)
                 session.updateData(true, false).catch(e => {
@@ -140,6 +143,7 @@ export class SessionManagerStatic {
                     console.error(e)
                 })
             } else {
+                // Can not get completed
                 if (!session.organization) {
                     await session.fetchOrganization(shouldRetry)
                 }
@@ -156,7 +160,7 @@ export class SessionManagerStatic {
 
         this.callListeners("session")
 
-        session.addListener(this, (changed: "user" | "organization" | "token") => {
+        session.addListener(this, (changed: "user" | "organization" | "token" | "preventComplete") => {
             if (session.organization) {
                 this.addOrganizationToStorage(session.organization).catch(console.error)
             }

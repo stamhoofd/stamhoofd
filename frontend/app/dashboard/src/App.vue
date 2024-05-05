@@ -139,11 +139,12 @@ export class App extends Vue {
                 const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
                 session.loadFromStorage()
                     .then(() => LoginHelper.verifyEmail(session, code, token))
-                    .then(() => {
+                    .then(async () => {
                         toast.hide()
                         new Toast("E-mailadres is gevalideerd", "success green").show()
 
-                        // todo: go to dashboard for this session?
+                        const dashboardContext = getScopedDashboardRoot(session)
+                        await ReplaceRootEventBus.sendEvent("replace", dashboardContext);
                     }).catch(e => {
                         toast.hide()
                         CenteredMessage.fromError(e).addCloseButton().show()

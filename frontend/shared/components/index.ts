@@ -64,12 +64,12 @@ export { default as STListItem } from "./src/layout/STListItem.vue"
 
 // Other
 export { default as GroupAvatar } from "./src/GroupAvatar.vue"
-export { default as OrganizationAvatar } from "./src/OrganizationAvatar.vue"
-export { default as OrganizationLogo } from "./src/OrganizationLogo.vue"
+export { default as OrganizationAvatar } from "./src/context/OrganizationAvatar.vue"
+export { default as OrganizationLogo } from "./src/context/OrganizationLogo.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
-export { default as OrganizationSwitcher } from "./src/OrganizationSwitcher.vue"
-export { default as AccountSwitcher } from "./src/AccountSwitcher.vue"
+export { default as OrganizationSwitcher } from "./src/context/OrganizationSwitcher.vue"
+export { default as AccountSwitcher } from "./src/context/AccountSwitcher.vue"
 
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"

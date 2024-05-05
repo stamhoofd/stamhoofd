@@ -14,7 +14,7 @@ import { Organization } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
-import { ColorHelper } from "./ColorHelper";
+import { ColorHelper } from "../ColorHelper";
 
 @Component
 export default class OrganizationAvatar extends Vue {

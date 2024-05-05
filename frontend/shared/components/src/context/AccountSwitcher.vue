@@ -12,7 +12,7 @@
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useUser } from './VueGlobalHelper';
+import { useUser } from '../VueGlobalHelper';
 
 const $user = useUser();
 const $navigate = useNavigate();
@@ -21,7 +21,7 @@ const $navigate = useNavigate();
 defineRoutes([
     {
         url: 'account',
-        component: async () => (await import('./views/AccountSettingsView.vue')).default as any,
+        component: async () => (await import('../views/AccountSettingsView.vue')).default as any,
     }
 ])
 

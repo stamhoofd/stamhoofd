@@ -6,7 +6,7 @@
             <p>Vul jouw e-mailadres in, en we sturen jou een e-mail waarmee je een nieuw wachtwoord kan kiezen.</p>
             
             <STErrorsDefault :error-box="errorBox" />
-            <EmailInput v-model="email" title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :validator="validator" />
+            <EmailInput v-model="email" title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :validator="validator" class="max" />
         
             <LoadingButton :loading="loading" class="block bottom">
                 <button class="button primary full" type="submit">
@@ -19,10 +19,10 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,EmailInput, ErrorBox, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar, Toast, Validator } from "@stamhoofd/components"
-import { Session,SessionManager } from '@stamhoofd/networking';
-import { ForgotPasswordRequest } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
+import { Session } from '@stamhoofd/networking';
+import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
 @Component({
     components: {
