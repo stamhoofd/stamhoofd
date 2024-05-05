@@ -208,7 +208,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
         //        root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
         //    }).setDisplayStyle("popup")
         //)
-        this.navigateTo({url: 'aansluiten'}).catch(console.error)
+        this.$navigate('aansluiten').catch(console.error)
         plausible('openSignup');
     }
 
