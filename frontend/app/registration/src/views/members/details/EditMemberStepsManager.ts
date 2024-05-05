@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
 
-import { Session } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking';
 import { MemberManager } from '../../../classes/MemberManager';
 
 export enum EditMemberStepType {
@@ -55,9 +55,9 @@ export class RecordCategoryStep implements EditMemberStep {
      * Time in ms for when to force a review because the infomration is outdated
      */
     outdatedTime = 60*1000*60*24*31*3
-    $context: Session
+    $context: SessionContext
 
-    constructor($context: Session, category: RecordCategory, forceReview = false, onlyReviewIfMissing = false) {
+    constructor($context: SessionContext, category: RecordCategory, forceReview = false, onlyReviewIfMissing = false) {
         this.$context = $context;
         this.category = category
         this.forceReview = forceReview
@@ -167,9 +167,9 @@ export class BuiltInEditMemberStep implements EditMemberStep {
      */
     outdatedTime = 60*1000*60*24*31*3
 
-    $context: Session
+    $context: SessionContext
 
-    constructor($context: Session, type: EditMemberStepType, forceReview = false, onlyReviewIfMissing = false) {
+    constructor($context: SessionContext, type: EditMemberStepType, forceReview = false, onlyReviewIfMissing = false) {
         this.$context = $context
         this.type = type
         this.forceReview = forceReview
@@ -347,7 +347,7 @@ export class EditMemberStepsManager {
 
     $memberManager: MemberManager
 
-    static getAllSteps($context: Session, forceReview = false, onlyReviewIfMissing = false): EditMemberStep[] {
+    static getAllSteps($context: SessionContext, forceReview = false, onlyReviewIfMissing = false): EditMemberStep[] {
         const base: EditMemberStep[] = [
             new BuiltInEditMemberStep($context, EditMemberStepType.Details, forceReview, onlyReviewIfMissing),
             new BuiltInEditMemberStep($context, EditMemberStepType.Parents, forceReview, onlyReviewIfMissing),

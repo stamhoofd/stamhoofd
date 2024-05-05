@@ -1,13 +1,13 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, Toast } from "@stamhoofd/components"
-import { Session } from "@stamhoofd/networking"
+import { SessionContext } from "@stamhoofd/networking"
 
 class ResponseBody extends AutoEncoder {
     @field({ decoder: StringDecoder })
         jwt: string
 }
 
-export async function openNolt($context: Session, check = false) {
+export async function openNolt($context: SessionContext, check = false) {
     if (check) {
         let url: URL|null = null
         if (document.referrer) {

@@ -79,7 +79,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, ReplaceRootEventBus, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { LoginHelper, Session, SessionManager, Storage } from "@stamhoofd/networking";
+import { LoginHelper, SessionContext, SessionManager, Storage } from "@stamhoofd/networking";
 import { Organization } from '@stamhoofd/structures';
 import { getScopedDashboardRoot } from '../../getRootViews';
 
@@ -209,7 +209,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 console.error(e)
             }
 
-            const session = new Session(this.organization.id)
+            const session = new SessionContext(this.organization.id)
             await SessionManager.prepareSessionForUsage(session, true);
             const dashboardContext = getScopedDashboardRoot(session, {
                 initialPresents: [

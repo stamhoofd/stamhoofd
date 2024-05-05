@@ -1,7 +1,7 @@
 
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { MemberManagerBase, Session } from '@stamhoofd/networking';
+import { MemberManagerBase, SessionContext } from '@stamhoofd/networking';
 import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
@@ -15,9 +15,9 @@ export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWit
  */
 export class MemberManager extends MemberManagerBase {
     protected listeners: Map<any, MembersChangedListener> = new Map()
-    $context: Session;
+    $context: SessionContext;
 
-    constructor($context: Session) {
+    constructor($context: SessionContext) {
         super();
         this.$context = $context;
     }

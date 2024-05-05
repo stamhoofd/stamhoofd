@@ -11,7 +11,7 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager, Session, Storage, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
 import { RateApp } from 'capacitor-rate-app';
 import Vue from "vue";
 import { createApp } from 'vue'
@@ -166,7 +166,7 @@ AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 }
 
-async function markReviewMoment($context: Session) {
+async function markReviewMoment($context: SessionContext) {
     // 1. Check if we are signed in.
     if (!$context) {
         return
@@ -206,7 +206,7 @@ async function markReviewMoment($context: Session) {
     }
 }
 
-AppManager.shared.markReviewMoment = ($context: Session) => {
+AppManager.shared.markReviewMoment = ($context: SessionContext) => {
     markReviewMoment($context).catch(console.error)
 }
 

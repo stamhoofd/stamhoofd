@@ -39,7 +39,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
-import { AppManager, LoginHelper, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({

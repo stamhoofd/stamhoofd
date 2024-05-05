@@ -21,7 +21,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
-import { Session } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking';
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
 @Component({
@@ -51,7 +51,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
         function ()  {
             return this!.$context
     } })
-    session!: Session
+    session!: SessionContext
 
     async submit() {
         if (this.loading) {

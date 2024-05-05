@@ -19,7 +19,7 @@ async function randomBytes(size: number): Promise<Buffer> {
     });
 }
 
-type Session = {
+type SessionContext = {
     expires: Date,
     code_verifier: string,
     state: string,
@@ -33,7 +33,7 @@ export class OpenIDConnectHelper {
     organization: Organization
     configuration: OpenIDClientConfiguration
 
-    static sessionStorage = new Map<string, Session>()
+    static sessionStorage = new Map<string, SessionContext>()
 
     constructor(organization, configuration: OpenIDClientConfiguration) {
         this.organization = organization
@@ -58,7 +58,7 @@ export class OpenIDConnectHelper {
         return client;
     }
 
-    static async storeSession(response: Response<any>, data: Session) {
+    static async storeSession(response: Response<any>, data: SessionContext) {
         const sessionId = (await randomBytes(192)).toString("base64");
 
         // Delete expired sessions
@@ -78,7 +78,7 @@ export class OpenIDConnectHelper {
         })
     }
 
-    static getSession(request: DecodedRequest<any, any, any>): Session | null {
+    static getSession(request: DecodedRequest<any, any, any>): SessionContext | null {
         const sessionId = CookieHelper.getCookie(request, "oid_session_id")
         if (!sessionId) {
             return null
@@ -103,7 +103,7 @@ export class OpenIDConnectHelper {
         const code_challenge = generators.codeChallenge(code_verifier);
         const expires = new Date(Date.now() + 1000 * 60 * 15);
 
-        const session: Session = {
+        const session: SessionContext = {
             expires,
             code_verifier,
             state,
@@ -268,7 +268,7 @@ export class OpenIDConnectHelper {
         }
     }
 
-    static getErrorRedirectResponse(session: Session, errorMessage: string) {
+    static getErrorRedirectResponse(session: SessionContext, errorMessage: string) {
         const response = new Response(undefined);
 
         // Redirect back to webshop

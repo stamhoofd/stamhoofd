@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArray
 import { isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Request, RequestResult } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
-import { OrganizationManager, Session } from "@stamhoofd/networking";
+import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
 import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 import { toRaw, unref } from "vue";
 
@@ -38,9 +38,9 @@ export class WebshopManager {
     ticketsEventBus = new EventBus<string, TicketPrivate[]>()
     ticketPatchesEventBus = new EventBus<string, AutoEncoderPatchType<TicketPrivate>[]>()
 
-    context: Session
+    context: SessionContext
 
-    constructor(context: Session, preview: WebshopPreview) {
+    constructor(context: SessionContext, preview: WebshopPreview) {
         this.context = context
         this.preview = preview
     }

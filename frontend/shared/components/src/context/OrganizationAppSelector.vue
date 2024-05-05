@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { Session, SessionManager } from '@stamhoofd/networking';
+import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Ref, shallowRef } from 'vue';
 import OrganizationAvatar from './OrganizationAvatar.vue';
@@ -40,7 +40,7 @@ type Option = {
     id: string,
     app: AppType|'auto',
     organization?: Organization,
-    context: Session
+    context: SessionContext
 }
 
 const options: Ref<Option[]> = shallowRef([]);

@@ -9,7 +9,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
-import { AppManager, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue, toNative } from 'vue-facing-decorator';
 
@@ -98,7 +98,7 @@ export class App extends Vue {
             // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
             const token = queryString.get('token');
-            const session = new Session(parts[1]);
+            const session = new SessionContext(parts[1]);
 
             (this.$refs.modalStack as any).present({
                 url: UrlHelper.transformUrl(currentPath),
@@ -135,7 +135,7 @@ export class App extends Vue {
             const code = queryString.get('code')
                 
             if (token && code) {
-                const session = new Session(parts[1]);
+                const session = new SessionContext(parts[1]);
                 const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
                 session.loadFromStorage()
                     .then(() => LoginHelper.verifyEmail(session, code, token))

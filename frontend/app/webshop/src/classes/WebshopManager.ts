@@ -1,5 +1,5 @@
 import { Decoder } from '@simonbackx/simple-encoding'
-import { NetworkManager, Session, SessionManager } from '@stamhoofd/networking'
+import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking'
 import { Organization, Webshop } from '@stamhoofd/structures'
 
 /**
@@ -7,13 +7,13 @@ import { Organization, Webshop } from '@stamhoofd/structures'
  */
 export class WebshopManager {
     webshop!: Webshop
-    $context: Session
+    $context: SessionContext
 
     get organization() {
         return this.$context.organization!
     }
 
-    constructor($context: Session, webshop: Webshop) {
+    constructor($context: SessionContext, webshop: Webshop) {
         this.webshop = webshop
         this.$context = $context
     }

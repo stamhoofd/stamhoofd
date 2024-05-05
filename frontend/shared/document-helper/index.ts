@@ -1,11 +1,11 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors'
 import { Request } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { NetworkManager, Session } from '@stamhoofd/networking'
+import { NetworkManager, SessionContext } from '@stamhoofd/networking'
 import { Document } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 
-export async function getDocumentPdfBuffer($context: Session, document: Document, owner?: any): Promise<Buffer> {
+export async function getDocumentPdfBuffer($context: SessionContext, document: Document, owner?: any): Promise<Buffer> {
     const cacheId = "document-"+document.id
     const timestamp = document.updatedAt.getTime()
 
@@ -74,7 +74,7 @@ export async function getDocumentPdfBuffer($context: Session, document: Document
     return pdfResponse.data as Buffer
 }
 
-export async function downloadDocument($context: Session, document: Document, owner?: any) {
+export async function downloadDocument($context: SessionContext, document: Document, owner?: any) {
     try {
         const buffer = await getDocumentPdfBuffer($context, document, owner)
         const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
@@ -88,7 +88,7 @@ export async function downloadDocument($context: Session, document: Document, ow
     }
 }
 
-export async function downloadDocuments($context: Session, documents: Document[], owner?: any) {
+export async function downloadDocuments($context: SessionContext, documents: Document[], owner?: any) {
     if (documents.length === 1) {
         await downloadDocument($context, documents[0], owner)
         return

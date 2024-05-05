@@ -4,7 +4,7 @@ import { RequestResult } from '@simonbackx/simple-networking';
 import { CreateOrganization, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
-import { Session } from './Session';
+import { SessionContext } from './SessionContext';
 import { SessionManager } from './SessionManager';
 
 export class LoginHelper {
@@ -12,7 +12,7 @@ export class LoginHelper {
      * Resend the email verification email (if it is still valid)
      * @returns stop: close the modal - the token is expired and you need to login again
      */
-    static async retryEmail(session: Session, token: string): Promise<boolean> {
+    static async retryEmail(session: SessionContext, token: string): Promise<boolean> {
         const response = await session.server.request({
             method: "POST",
             path: "/verify-email/retry",
@@ -41,7 +41,7 @@ export class LoginHelper {
     /**
      * Return true when the polling should end + confirmation should stop
      */
-    static async pollEmail(session: Session, token: string): Promise<boolean> {
+    static async pollEmail(session: SessionContext, token: string): Promise<boolean> {
         const response = await session.server.request({
             method: "POST",
             path: "/verify-email/poll",
@@ -60,7 +60,7 @@ export class LoginHelper {
         return false
     }
 
-    static async verifyEmail(session: Session, code: string, token: string) {
+    static async verifyEmail(session: SessionContext, code: string, token: string) {
         const response = await session.server.request({
             method: "POST",
             path: "/verify-email",
@@ -81,7 +81,7 @@ export class LoginHelper {
     }
 
     static async login(
-        session: Session, 
+        session: SessionContext, 
         email: string, 
         password: string
     ): Promise<{ verificationToken?: string }> {
@@ -145,7 +145,7 @@ export class LoginHelper {
         return response.data.token
     }
 
-    static async loadAdmins(session: Session, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
+    static async loadAdmins(session: SessionContext, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/admins",
@@ -157,7 +157,7 @@ export class LoginHelper {
         return response.data
     }
 
-    static async changePassword(session: Session, password: string, email?: string) {
+    static async changePassword(session: SessionContext, password: string, email?: string) {
         console.log("Change password. Start.")
 
         const patch = NewUser.patch({
@@ -169,7 +169,7 @@ export class LoginHelper {
         return await this.patchUser(session, patch)
     }
 
-    static async patchUser(session: Session, patch: AutoEncoderPatchType<NewUser | User>): Promise<{ verificationToken?: string }> {
+    static async patchUser(session: SessionContext, patch: AutoEncoderPatchType<NewUser | User>): Promise<{ verificationToken?: string }> {
         // Do netwowrk request to create organization
         try {
             await session.authenticatedServer.request({
@@ -199,7 +199,7 @@ export class LoginHelper {
         return {}
     }
 
-    static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null): Promise<string> {
+    static async signUp(session: SessionContext, email: string, password: string, firstName: string | null = null, lastName: string | null = null): Promise<string> {
         const user = NewUser.create({
             email,
             firstName,

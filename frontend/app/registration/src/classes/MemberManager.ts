@@ -2,7 +2,7 @@
 
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { MemberManagerBase, Session, SessionManager } from '@stamhoofd/networking';
+import { MemberManagerBase, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Address, Document, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
 import { Vue } from "@simonbackx/vue-app-navigation/classes";
 
@@ -12,11 +12,11 @@ import { Vue } from "@simonbackx/vue-app-navigation/classes";
  */
 export class MemberManager extends MemberManagerBase {
     /// Currently saved members
-    $context: Session
+    $context: SessionContext
     members: MemberWithRegistrations[] | null = null
     documents: Document[] | null = null
 
-    constructor($context: Session) {
+    constructor($context: SessionContext) {
         super()
         this.$context = $context
     }

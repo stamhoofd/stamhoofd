@@ -43,7 +43,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, CodeInput,EmailInput, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
-import { LoginHelper, Session } from '@stamhoofd/networking';
+import { LoginHelper, SessionContext } from '@stamhoofd/networking';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation

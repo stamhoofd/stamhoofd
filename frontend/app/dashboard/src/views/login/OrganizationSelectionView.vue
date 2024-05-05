@@ -83,7 +83,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { HistoryManager, NavigationMixin, setTitleSuffix } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, STGradientBackground, STNavigationBar, Spinner, Toast } from '@stamhoofd/components';
-import { AppManager, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, NetworkManager, SessionContext, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
@@ -235,7 +235,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
 
     throttleUpdateResults = throttle(this.updateResults, 500);
 
-    availableSessions: Session[] = []
+    availableSessions: SessionContext[] = []
     get defaultOrganizations(): Organization[] {
         return this.availableSessions.filter(s => !!s.organization).map(s => s.organization!)
     }

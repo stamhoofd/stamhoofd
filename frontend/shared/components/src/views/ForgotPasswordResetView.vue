@@ -69,7 +69,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingView, PasswordStrength, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
-import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
+import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { NewUser, Token } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -104,7 +104,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     token!: string
 
-    session: Session | null = null
+    session: SessionContext | null = null
 
     acceptPrivacy = false
     acceptTerms = false
@@ -147,7 +147,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                 decoder: Token
             }).then(async (response) => {
                 // Create new session to prevent signing in
-                this.session = new Session(this.$context.organizationId)
+                this.session = new SessionContext(this.$context.organizationId)
                 this.session.setToken(response.data)
                 this.session.organization = this.$context.organization
                 await this.session.updateData(false, false)

@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware, RequestResult, Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
-import { AppManager, Session, sleep, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, SessionContext, sleep, UrlHelper } from '@stamhoofd/networking';
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
@@ -28,10 +28,10 @@ export class SGVGroepsadministratie implements RequestMiddleware {
     group: SGVGroep | null = null
     functies: GroepFunctie[] = []
 
-    $context: Session
+    $context: SessionContext
     $memberManager: MemberManager
 
-    constructor($context: Session, $memberManager: MemberManager) {
+    constructor($context: SessionContext, $memberManager: MemberManager) {
         this.$context = $context;
         this.$memberManager = $memberManager;
     }

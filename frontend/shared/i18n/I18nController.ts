@@ -1,6 +1,6 @@
 //i18n-setup.js
 import { countries, languages } from "@stamhoofd/locales"
-import { Session, Storage, UrlHelper } from '@stamhoofd/networking'
+import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
 import { I18n, createI18n } from 'vue-i18n'
 
@@ -29,13 +29,13 @@ export class I18nController {
     // Allows you to set and remove meta data
     vueMetaApp?: VueMetaApp
     
-    $context: Session|null|undefined
+    $context: SessionContext|null|undefined
 
     get locale() {
         return this.language+"-"+this.country
     }
 
-    constructor($context: Session|undefined|null, language: string, country: Country, namespace: string) {
+    constructor($context: SessionContext|undefined|null, language: string, country: Country, namespace: string) {
         this.$context = $context;
         this.namespace = namespace
         this.language = language
@@ -182,7 +182,7 @@ export class I18nController {
         return countries.includes(country)
     }
 
-    static async loadDefault($context: Session|null|undefined, namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
+    static async loadDefault($context: SessionContext|null|undefined, namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
         let language: string | undefined = undefined
         let needsSave = false
 

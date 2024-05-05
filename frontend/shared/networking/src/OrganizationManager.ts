@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking';
+import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Group, Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures';
 import { reactive } from 'vue';
 
@@ -9,9 +9,9 @@ import { reactive } from 'vue';
  * Convenient access to the organization of the current session
  */
 export class OrganizationManager {
-    $context: Session
+    $context: SessionContext
 
-    constructor($context: Session) {
+    constructor($context: SessionContext) {
         // Make reactive
         this.$context = $context
     }

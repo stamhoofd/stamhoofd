@@ -12,7 +12,7 @@ import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { DarkMode, GetWebshopFromDomainResult, WebshopAuthType } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
@@ -106,7 +106,7 @@ export default class App extends Vue {
                 ColorHelper.setDarkMode(response.data.webshop?.meta.darkMode ?? DarkMode.Off)
 
                 // Set session
-                const session = new Session(response.data.organization.id)
+                const session = new SessionContext(response.data.organization.id)
                 await session.loadFromStorage()       
                 session.setOrganization(response.data.organization)
 

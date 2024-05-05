@@ -1,7 +1,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { downloadDocuments } from "@stamhoofd/document-helper"
-import { Session } from "@stamhoofd/networking"
+import { SessionContext } from "@stamhoofd/networking"
 import { Document, DocumentData, DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid"
 
@@ -9,13 +9,13 @@ export class DocumentActionBuilder {
     component: any
     template: DocumentTemplatePrivate
     addDocument?: (document: Document) => void
-    $context: Session
+    $context: SessionContext
 
     constructor(settings: {
         component: any,
         template: DocumentTemplatePrivate,
         addDocument?: (document: Document) => void,
-        $context: Session
+        $context: SessionContext
     }) {
         this.component = settings.component
         this.template = settings.template

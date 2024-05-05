@@ -154,7 +154,7 @@ export class AdminSession implements RequestMiddleware {
     }
    
     async updateData(force = false) {
-        console.log("Session update data")
+        console.log("SessionContext update data")
         try {
             if (force || !this.user) {
                 await this.fetchUser()

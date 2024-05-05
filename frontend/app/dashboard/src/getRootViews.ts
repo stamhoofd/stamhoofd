@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, OrganizationManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { NetworkManager, OrganizationManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
 
 import { computed, reactive, ref } from 'vue';
@@ -24,7 +24,7 @@ export async function getScopedDashboardRootFromUrl() {
     const parts = UrlHelper.shared.getParts();
     const ignoreUris = ['login', 'aansluiten'];
 
-    let session: Session|null = null;
+    let session: SessionContext|null = null;
 
     if (parts[0] === 'beheerders' && parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
@@ -42,7 +42,7 @@ export async function getScopedDashboardRootFromUrl() {
             })
             const organization = response.data
 
-            session = new Session(organization.id)
+            session = new SessionContext(organization.id)
             session.setOrganization(organization)
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
@@ -63,10 +63,10 @@ export async function getScopedDashboardRootFromUrl() {
     return getScopedDashboardRoot(session)
 }
 
-export function getScopedDashboardRoot(session: Session, options: {initialPresents?: PushOptions[]} = {}) {
+export function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
-    const reactiveSession = reactive(session) as Session
+    const reactiveSession = reactive(session) as SessionContext
 
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})

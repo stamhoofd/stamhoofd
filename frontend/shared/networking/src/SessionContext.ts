@@ -24,7 +24,7 @@ function generateId (len) {
     return Array.from(arr, dec2hex).join('')
 }
 
-export class Session implements RequestMiddleware {
+export class SessionContext implements RequestMiddleware {
     /**
      * This will become optional in the future
      */
@@ -460,9 +460,9 @@ export class Session implements RequestMiddleware {
      */
     async updateData(force = false, shouldRetry = true, background = false) {
         if (force) {
-            console.log("Session force update data")
+            console.log("SessionContext force update data")
         } else {
-            console.log("Session update data")
+            console.log("SessionContext update data")
         }
         try {
             let fetchedUser = false

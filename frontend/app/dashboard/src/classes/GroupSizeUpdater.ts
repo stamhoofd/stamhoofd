@@ -1,4 +1,4 @@
-import { Session } from "@stamhoofd/networking"
+import { SessionContext } from "@stamhoofd/networking"
 
 /**
  * Update group sizes in memory so we don't need to refresh anything from the server
@@ -33,7 +33,7 @@ export class GroupSizeUpdater {
         this.set({groupId, waitingList, cycle}, this.get({groupId, waitingList, cycle}) + difference)
     }
 
-    save(session: Session) {
+    save(session: SessionContext) {
         let updateOrganization = false
         for (const [groupId, cycleMap] of this.groupMap) {
             const group = session.organization?.groups.find(g => g.id === groupId)

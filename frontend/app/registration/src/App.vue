@@ -11,7 +11,7 @@ import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
@@ -53,7 +53,7 @@ export default class App extends Vue {
             }
 
             // Set organization and session
-            const session = new Session(response.data.id)
+            const session = new SessionContext(response.data.id)
             await session.loadFromStorage()       
             session.setOrganization(response.data)        
             await I18nController.loadDefault(session, "registration", response.data.address.country, "nl", response.data.address.country)

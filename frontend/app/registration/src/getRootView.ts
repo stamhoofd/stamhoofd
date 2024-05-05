@@ -1,6 +1,6 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, ContextProvider, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
-import { NetworkManager, OrganizationManager, Session, SessionManager } from "@stamhoofd/networking";
+import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 
 import { CheckoutManager } from "./classes/CheckoutManager";
 import { MemberManager } from "./classes/MemberManager";
@@ -26,7 +26,7 @@ export async function getScopedRegistrationRootFromUrl() {
     const parts = UrlHelper.shared.getParts();
     const ignoreUris = ['login'];
 
-    let session: Session|null = null;
+    let session: SessionContext|null = null;
 
     if (parts[0] === 'leden' && parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
@@ -44,7 +44,7 @@ export async function getScopedRegistrationRootFromUrl() {
             })
             const organization = response.data
 
-            session = new Session(organization.id)
+            session = new SessionContext(organization.id)
             session.setOrganization(organization)
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
@@ -65,8 +65,8 @@ export async function getScopedRegistrationRootFromUrl() {
     return getRootView(session)
 }
 
-export function getRootView(session: Session) {
-    const reactiveSession = reactive(session) as Session
+export function getRootView(session: SessionContext) {
+    const reactiveSession = reactive(session) as SessionContext
     const $memberManager = new MemberManager(reactiveSession);
 
     const loggedInRoot = new ComponentWithProperties(PromiseView, {

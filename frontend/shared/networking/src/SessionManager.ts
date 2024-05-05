@@ -4,7 +4,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { Request } from '@simonbackx/simple-networking';
 import { Organization, Version } from '@stamhoofd/structures';
 
-import { Session } from './Session';
+import { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
 
 class SessionStorage extends AutoEncoder {
@@ -23,7 +23,7 @@ type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organi
  * You can also request the available sessions, so you can hint the user in which organizations he is already signed in.
  */
 export class SessionManagerStatic {
-    // currentSession: Session | null = null
+    // currentSession: SessionContext | null = null
 
     protected cachedStorage?: SessionStorage
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
@@ -85,7 +85,7 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
-    async prepareSessionForUsage(session: Session, shouldRetry = true) {        
+    async prepareSessionForUsage(session: SessionContext, shouldRetry = true) {        
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
             // session.user = null
@@ -177,7 +177,7 @@ export class SessionManagerStatic {
         return session
     }
 
-    setUserId(session: Session) {
+    setUserId(session: SessionContext) {
         if (session.user) {
             const id = session.user.id;
             Sentry.configureScope(function(scope) {
@@ -191,13 +191,13 @@ export class SessionManagerStatic {
         const organization = sessionStorage.organizations.find(o => o.id === id)
 
         if (organization) {
-            const session = new Session(id)
+            const session = new SessionContext(id)
             session.setOrganization(organization)
             await session.loadFromStorage()
             return session
         }
 
-        const session = new Session(id)
+        const session = new SessionContext(id)
         await session.loadFromStorage()
         return session
     }
@@ -244,12 +244,12 @@ export class SessionManagerStatic {
         return cache
     }
 
-    async availableSessions(): Promise<Session[]> {
+    async availableSessions(): Promise<SessionContext[]> {
         const sessionStorage = await this.getSessionStorage(false)
-        const sessions: Session[] = []
+        const sessions: SessionContext[] = []
 
         for (const o of sessionStorage.organizations) {
-            const session = new Session(o.id)
+            const session = new SessionContext(o.id)
             session.setOrganization(o)
             await session.loadFromStorage()
             sessions.push(session)
