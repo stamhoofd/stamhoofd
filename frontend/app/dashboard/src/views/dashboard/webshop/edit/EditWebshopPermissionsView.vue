@@ -12,7 +12,7 @@
         <STList>
             <STListItem>
                 <template #left>
-                    <Checkbox :checked="true" :disabled="true" />
+                    <Checkbox :modelValue="true" :disabled="true" />
                 </template>
                 Hoofdbeheerders
             </STListItem>

@@ -1,7 +1,7 @@
 <template>
     <ContextMenuView v-bind="$attrs" ref="contextMenuView">
         <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" :contextMenuView="$refs.contextMenuView" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
-            <template #left><Checkbox :checked="column.enabled" :only-line="true" /></template>
+            <template #left><Checkbox :modelValue="column.enabled" :only-line="true" /></template>
             {{ column.name }}
         </ContextMenuItemView>
     </ContextMenuView>

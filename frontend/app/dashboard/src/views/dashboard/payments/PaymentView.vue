@@ -258,7 +258,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { BalanceItemDetailed, calculateVATPercentage, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
+import { BalanceItemDetailed, calculateVATPercentage, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -308,39 +308,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
     }
 
     get canWrite() {
-        const user = this.$context.user
-        if (!user || !user.permissions) {
-            return false
-        }
-        const organization = this.$context.organization
-        if (!organization) {
-            return false
-        }
-
-        if (user.permissions.canManagePayments(organization.privateMeta?.roles ?? []) || user.permissions.hasFullAccess(organization.privateMeta?.roles ?? [])) {
-            return true;
-        }
-
-        if (!this.payment) {
-            return false
-        }
-
-        for (const order of this.payment.orders) {
-            const webshop = organization?.webshops.find(w => w.id === order.webshopId)
-            if (webshop && webshop.privateMeta.permissions.hasWriteAccess(user.permissions, organization.privateMeta?.roles ?? [])) {
-                return true
-            }
-        }
-
-        for (const registration of this.payment.registrations) {
-            const group = organization?.groups.find(w => w.id === registration.groupId)
-
-            if (group && group.privateSettings?.permissions.hasWriteAccess(user.permissions, organization.privateMeta?.roles ?? [])) {
-                return true
-            }
-        }
-
-        return false;
+        return this.$context.organizationAuth.canAccessPayment(this.payment, PermissionLevel.Write)
     }
 
     @Prop({ default: null })
@@ -441,14 +409,6 @@ export default class PaymentView extends Mixins(NavigationMixin) {
 
     beforeUnmount() {
         Request.cancelAll(this)
-    }
-
-    formatDate(date: Date) {
-        return Formatter.date(date, true)
-    }
-
-    formatPrice(price: number) {
-        return Formatter.price(price)
     }
 
     async reload() {

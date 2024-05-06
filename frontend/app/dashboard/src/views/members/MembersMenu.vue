@@ -70,21 +70,22 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
-import { GroupAvatar, useOrganization, useUser } from '@stamhoofd/components';
-import { Group, GroupCategory, GroupCategoryTree, Permissions } from '@stamhoofd/structures';
+import { GroupAvatar, useContext, useOrganization, useUser } from '@stamhoofd/components';
+import { Group, GroupCategory, GroupCategoryTree, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 
 const $organization = useOrganization();
 const $user = useUser();
+const $context = useContext();
 const currentlySelected = ref(null) as Ref<string|null>
 const urlHelpers = useUrl();
 const $navigate = useNavigate()
 const collapsed = useCollapsed('leden');
 const tree = computed(() => {
     return $organization.value!.getCategoryTree({
-        permissions: $user.value?.permissions ?? Permissions.create({})
+        permissions: $user.value?.permissions ?? UserPermissions.create({})
     })
 })
 
@@ -93,7 +94,7 @@ onActivated(() => {
 });
 
 const enableMemberModule = computed(() => $organization.value?.meta.modules.useMembers ?? false)
-const fullAccess = computed(() => $user.value?.permissions?.hasFullAccess($organization.value?.privateMeta?.roles ?? []) ?? false)
+const fullAccess = computed(() => $context.value?.organizationAuth.hasFullAccess() ?? false)
 
 const getCategoryIcon = (category: GroupCategoryTree) => {
     if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {

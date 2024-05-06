@@ -67,7 +67,7 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
     }
 
     get isMe() {
-        return !!this.$organizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
+        return !!this.$context.organizationPermissions?.roles.find(r => r.id === this.role.id)
     }
 
     set selectGroup(selected: boolean) {

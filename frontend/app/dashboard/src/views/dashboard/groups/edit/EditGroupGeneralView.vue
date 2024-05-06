@@ -80,7 +80,7 @@
             <STList>
                 <STListItem>
                     <template #left>
-                        <Checkbox :checked="true" :disabled="true" />
+                        <Checkbox :modelValue="true" :disabled="true" />
                     </template>
                     Hoofdbeheerders
                 </STListItem>
@@ -130,13 +130,13 @@ export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
 
     mounted() {
         // Auto assign roles
-        if (this.isNew && this.$organizationManager.user.permissions && !this.group.privateSettings!.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.patchedOrganization.privateMeta?.roles ?? [])) {
+        if (this.isNew && this.$organizationManager.user.permissions && !this.group.privateSettings!.permissions.hasFullAccess(this.$context.organizationPermissions)) {
             const categories = this.patchedOrganization.meta.categories.filter(c => c.groupIds.includes(this.group.id))
             for (const cat of categories) {
                 // Get all roles that have create permissions in the categories that this group will get added into
                 const roles = cat.settings.permissions.create.flatMap(r => {
                     const role = this.$organization.privateMeta?.roles.find(i => i.id === r.id)
-                    const has = this.$organizationManager.user.permissions?.roles.find(i => i.id === r.id)
+                    const has = this.$organizationManager.user.permissions?.organizationPermissions.get(this.organization.id)?.roles.find(i => i.id === r.id)
                     if (role && has) {
                         return [PermissionRole.create(role)]
                     }

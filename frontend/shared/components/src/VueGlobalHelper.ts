@@ -1,5 +1,5 @@
 import { Request } from "@simonbackx/simple-networking";
-import { AppManager } from "@stamhoofd/networking";
+import { AppManager, SessionContext } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
 import { Ref, inject, toRef, type App } from "vue";
 
@@ -13,6 +13,10 @@ import PromiseView from "./containers/PromiseView.vue";
 
 export function useUser(): Ref<User | null> {
     const refOrReal = inject('$user', null)
+    return toRef(refOrReal)
+}
+export function useContext(): Ref<SessionContext | null> {
+    const refOrReal = inject('$context', null)
     return toRef(refOrReal)
 }
 

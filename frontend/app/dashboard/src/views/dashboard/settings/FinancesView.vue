@@ -119,7 +119,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, LoadComponent, LoadingView, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { STBillingStatus, STCredit } from '@stamhoofd/structures';
+import { AccessRight, STBillingStatus, STCredit } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 
@@ -190,7 +190,7 @@ export default class FinancesView extends Mixins(NavigationMixin) {
     }
 
     get hasFinanceAccess() {
-        return this.$user!.permissions!.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])
+        return this.$context.organizationAuth.hasAccessRight(AccessRight.OrganizationFinanceDirector)
     }
 
     get balance() {

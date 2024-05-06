@@ -67,7 +67,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { ApiUser, PermissionLevel, Permissions, User } from '@stamhoofd/structures';
+import { ApiUser, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
@@ -126,17 +126,14 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         return this.$organization
     }
 
-    formatDate(date: Date) {
-        return Formatter.date(date, true)
-    }
-
     permissionList(user: User) {
         const list: string[] = []
-        if (user.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [])) {
+        const o = user.permissions?.forOrganization(this.organization);
+        if (o?.hasFullAccess()) {
             list.push("Hoofdbeheerders")
         }
 
-        for (const role of user.permissions?.roles ?? []) {
+        for (const role of o?.roles ?? []) {
             list.push(role.name)
         }
         return list.join(", ")
@@ -147,11 +144,13 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
     }
 
     createUser() {
+        const p = UserPermissions.create({});
+        p.organizationPermissions.set(this.organization.id, Permissions.create({ level: PermissionLevel.Full }))
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(ApiUserView, {
                 user: ApiUser.create({
                     organizationId: this.organization.id,
-                    permissions: Permissions.create({ level: PermissionLevel.Full })
+                    permissions: p
                 }),
                 isNew: true,
                 callback: () => {

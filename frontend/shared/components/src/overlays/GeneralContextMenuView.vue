@@ -5,17 +5,23 @@
             <ContextMenuLine v-if="groupIndex > 0" />
 
             <ContextMenuItemView v-for="(item, index) of items" :contextMenuView="$refs.contextMenuView" :key="index" v-tooltip="item.disabled" :class="{'disabled': !!item.disabled, 'with-description': !!item.description}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item, $event)">
-                <template v-if="item.selected !== null" #left ><Checkbox :checked="item.selected" :only-line="true" /></template>
-                <template v-else-if="item.leftIcon !== null" #left><span :class="'icon '+item.leftIcon" /></template>
+                <template #left v-if="item.selected !== null || item.leftIcon !== null">
+                    <Checkbox v-if="item.selected !== null" :modelValue="item.selected" :only-line="true" />
+                    <span v-else :class="'icon '+item.leftIcon" />
+                </template>
+
                 <p>{{ item.name }}</p>
                 <p v-if="item.description" class="description">
                     {{ item.description }}
                 </p>
-                <template v-if="item.childMenu" #right><span class="icon arrow-right-small" /></template>
-                <template v-else-if="item.icon !== null" #right><span :class="'icon '+item.icon" /></template>
-                <template v-else-if="item.rightText !== null" #right><span class="style-context-menu-item-description">
-                    {{ item.rightText }}
-                </span></template>
+
+                <template #right  v-if="item.childMenu || item.icon !== null || item.rightText !== null">
+                    <span v-if="item.childMenu"  class="icon arrow-right-small" />
+                    <span v-else-if="item.icon !== null" :class="'icon '+item.icon" />
+                    <span v-else class="style-context-menu-item-description">
+                        {{ item.rightText }}
+                    </span>
+                </template>
             </ContextMenuItemView>
         </template>
     </ContextMenuView>

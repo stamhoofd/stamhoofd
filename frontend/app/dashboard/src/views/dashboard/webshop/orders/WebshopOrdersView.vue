@@ -694,13 +694,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return this.preview.getUrl(this.$organization)
     }
 
-    formatDateTime(date: Date) {
-        console.log(date)
-        return Formatter.dateTime(date)
-    }
-
     get hasFullPermissions() {
-        return this.preview.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)
     }
 
     reload() {

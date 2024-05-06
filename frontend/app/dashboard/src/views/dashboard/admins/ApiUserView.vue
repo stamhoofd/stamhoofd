@@ -106,8 +106,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        const user = this.patchedUser
-        return !!user.permissions && user.permissions.hasFullAccess(this.organization.privateMeta?.roles ?? [])
+        return !!this.patchUser.permissions?.forOrganization(this.organization)?.hasFullAccess()
     }
 
     async save() {

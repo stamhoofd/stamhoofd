@@ -83,7 +83,7 @@
                     </STListItem>
                     
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                        <GroupAvatar #left :group="group" />
+                        <template #left><GroupAvatar :group="group" /></template>
                         <h3 class="style-title-list">
                             {{ group.settings.name }}
                         </h3>
@@ -314,11 +314,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get canEdit() {
-        return this.$organizationManager.user.permissions ? this.category.canEdit(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? []) : false
+        return this.$organizationManager.user.permissions ? this.category.canEdit(this.$context.organizationPermissions) : false
     }
 
     get canCreate() {
-        return this.$organizationManager.user.permissions ? this.category.canCreate(this.$organizationManager.user.permissions, this.organization.meta.categories, this.organization.privateMeta?.roles ?? []) : false
+        return this.$organizationManager.user.permissions ? this.category.canCreate(this.$context.organizationPermissions, this.organization.meta.categories) : false
     }
 
     get groups() {

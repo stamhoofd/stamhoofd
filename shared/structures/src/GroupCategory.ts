@@ -116,8 +116,8 @@ export class GroupCategory extends AutoEncoder {
         return true;
     }
 
-    canEdit(permissions: LoadedPermissions): boolean {
-        if (permissions.hasFullAccess()) {
+    canEdit(permissions: LoadedPermissions|null): boolean {
+        if (permissions?.hasFullAccess()) {
             return true
         }
         return false

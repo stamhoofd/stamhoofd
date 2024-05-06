@@ -398,7 +398,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
 
 
     get hasFullPermissions() {
-        return this.preview.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)
     }
 
     reload() {

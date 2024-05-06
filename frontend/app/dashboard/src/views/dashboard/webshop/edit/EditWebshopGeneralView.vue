@@ -149,7 +149,7 @@
             <STList>
                 <STListItem>
                     <template #left>
-                        <Checkbox :checked="true" :disabled="true" />
+                        <Checkbox :modelValue="true" :disabled="true" />
                     </template>
                     Hoofdbeheerders
                 </STListItem>
@@ -198,7 +198,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
@@ -227,11 +227,11 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/general")
         
         // Auto assign roles
-        if (this.isNew && this.$organizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])) {
+        if (this.isNew && this.$organizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)) {
             // By default, add full permissions for all the roles this user has, that also have create webshop permissions
             const roles = this.$organization.privateMeta?.roles.flatMap(r => {
-                const has = this.$organizationManager.user.permissions?.roles.find(i => i.id === r.id)
-                if (r.createWebshops && has) {
+                const has = this.$organizationManager.user.permissions?.organizationPermissions.get(this.organization.id)?.roles.find(i => i.id === r.id)
+                if (r.hasAccessRight(AccessRight.OrganizationCreateWebshops) && has) {
                     return [PermissionRole.create(r)]
                 }
                 return []

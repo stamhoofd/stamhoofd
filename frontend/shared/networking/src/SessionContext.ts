@@ -70,7 +70,7 @@ export class SessionContext implements RequestMiddleware {
     }
 
     get organizationAuth() {
-        return new FrontendOrganizationPermissionChecker(this.organizationPermissions)
+        return new FrontendOrganizationPermissionChecker(this.organizationPermissions, this.organization)
     }
 
     static async createFrom(data: ({organization: Organization} | {organizationId: string})) {

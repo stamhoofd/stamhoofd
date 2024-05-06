@@ -64,7 +64,7 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
     }
 
     get isMe() {
-        return !!this.$organizationManager.user.permissions?.roles.find(r => r.id === this.role.id)
+        return !!this.$context.organizationPermissions?.roles.find(r => r.id === this.role.id)
     }
 
     get selected() {

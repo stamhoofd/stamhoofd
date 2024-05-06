@@ -85,7 +85,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadComponent } from "@stamhoofd/components";
-import { STPackageType } from "@stamhoofd/structures";
+import { AccessRight, STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -250,7 +250,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
     }
 
     openPackages() {
-        if (!this.$user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
+        if (!this.$context.organizationAuth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
             new CenteredMessage("Enkel voor hoofdbeheerders", "Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.").addCloseButton().show()
             return
         }
@@ -265,7 +265,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
             return
         }
 
-        if (!this.$user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
+        if (!this.$context.organizationAuth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
             new CenteredMessage("Enkel voor hoofdbeheerders", "Betalingen zijn enkel beschikbaar voor hoofdbeheerders. Vraag hen om de betaling in orde te brengen.").addCloseButton().show()
             return
         }
