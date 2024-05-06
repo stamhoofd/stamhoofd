@@ -8,7 +8,7 @@
             </h1>
             
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
-            <p v-else-if="shouldFilter && !isLoading && ticketProducts.length > 1">
+            <p v-else-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
                 Vink hieronder de tickets aan die je wilt scannen en klik op "starten". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).
             </p>
             <p v-else>
@@ -23,7 +23,7 @@
                 Download de checklist voor het scannen van tickets
             </a>
 
-            <template v-if="shouldFilter && !isLoading && ticketProducts.length > 1">
+            <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
                 <div v-for="category of categories" :key="category.id" class="container">
                     <hr v-if="categories.length > 1">
                     <h2 v-if="categories.length > 1">
