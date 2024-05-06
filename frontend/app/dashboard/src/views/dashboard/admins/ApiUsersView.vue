@@ -150,6 +150,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(ApiUserView, {
                 user: ApiUser.create({
+                    organizationId: this.organization.id,
                     permissions: Permissions.create({ level: PermissionLevel.Full })
                 }),
                 isNew: true,

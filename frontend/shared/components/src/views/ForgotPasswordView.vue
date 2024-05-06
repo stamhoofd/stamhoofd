@@ -47,12 +47,6 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
-    @Prop({ default: 
-        function ()  {
-            return this!.$context
-    } })
-    session!: SessionContext
-
     async submit() {
         if (this.loading) {
             return;
@@ -66,7 +60,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
         }
 
         try {
-            const response = await this.session.server.request({
+            await this.$context.server.request({
                 method: "POST",
                 path: "/forgot-password",
                 body: ForgotPasswordRequest.create({ email: this.email }),

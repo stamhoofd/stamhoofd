@@ -105,7 +105,7 @@ export class SessionManagerStatic {
             }
 
             try {
-                await session.updateData(false, shouldRetry, true)
+                await session.updateData(true, shouldRetry, true)
             } catch (e) {
                 console.error('Failed to update data in preparation of session', e);
 
@@ -251,8 +251,7 @@ export class SessionManagerStatic {
         const sessions: SessionContext[] = []
 
         for (const o of sessionStorage.organizations) {
-            const session = new SessionContext(o.id)
-            session.setOrganization(o)
+            const session = new SessionContext(o)
             await session.loadFromStorage()
             sessions.push(session)
         }

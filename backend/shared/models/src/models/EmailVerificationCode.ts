@@ -47,8 +47,8 @@ export class EmailVerificationCode extends Model {
     })
     id!: string;
 
-    @column({ type: "string" })
-    organizationId: string;
+    @column({ type: "string", nullable: true })
+    organizationId: string|null = null;
 
     @column({ type: "string" })
     userId: string;
@@ -99,24 +99,6 @@ export class EmailVerificationCode extends Model {
     static CODE_LENGTH = 6
     static MAX_TRIES = 9 // minus 0..MAX_TRIES_VARY
 
-    // static user = new ManyToOneRelation(require('./User').default, "user");
-
-    static async getFor(organizationId: string, email: string): Promise<EmailVerificationCode | undefined> {
-        // TODO: make this constant time to avoid complex timing attacks (especially when under load)
-        // Do we already have a verificationCode for this email?
-        const verificationCodes = await this.where({ email, organizationId }, { limit: 1 })
-
-       if (verificationCodes.length == 1) {
-           const verificationCode = verificationCodes[0]
-           if (verificationCode.expiresAt < new Date()) {
-               return
-           }
-           return verificationCode
-       }
-
-        return
-    }
-
     async generateCode() {
         this.code = ((await randomInt(Math.pow(10, EmailVerificationCode.CODE_LENGTH)))+"").padStart(EmailVerificationCode.CODE_LENGTH, "0")
         this.token = bs58.encode(await randomBytes(100)).toLowerCase();
@@ -130,13 +112,13 @@ export class EmailVerificationCode extends Model {
         // Reset the real tries
         this.tries = 0
 
-        // Expire in 3 hours
-        this.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3)
+        // Expire in 12 hours
+        this.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 12)
     }
 
-    getEmailVerificationUrl(user: import('./User').User, organization: import('./Organization').Organization, i18n: I18n) {
+    getEmailVerificationUrl(user: import('./User').User, organization: import('./Organization').Organization|null, i18n: I18n) {
         let host: string;
-        if (user.permissions) {
+        if (user.permissions || !organization) {
             host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
         } else {
             // Add language if different than default
@@ -147,14 +129,20 @@ export class EmailVerificationCode extends Model {
             }
         }
 
-        return host+"/verify-email"+(user.permissions ? "/"+encodeURIComponent(organization.id) : "")+"?code="+encodeURIComponent(this.code)+"&token="+encodeURIComponent(this.token);
+        return host+"/verify-email"+(user.permissions && this.organizationId ? "/"+encodeURIComponent(this.organizationId) : "")+"?code="+encodeURIComponent(this.code)+"&token="+encodeURIComponent(this.token);
     }
 
     /**
      * Return true if this token is still valid (used for automatic polling in code view)
      */
-    static async poll(organizationId: string, token: string): Promise<boolean> {
-        const verificationCodes = await this.where({ token, organizationId }, { limit: 1 })
+    static async poll(organizationId: string|null, token: string): Promise<boolean> {
+        const verificationCodes = await this.where({ 
+            token, 
+            organizationId: {
+                sign: 'IN',
+                value: [organizationId, null]
+            } 
+        }, { limit: 1 })
 
         if (verificationCodes.length == 0) {
             return false // = expired or invalid
@@ -189,12 +177,18 @@ export class EmailVerificationCode extends Model {
      * Error => token okay, but too many attempts checking the code
      * 
      */
-    static async verify(organizationId: string, token: string, code: string): Promise<EmailVerificationCode | undefined> {
+    static async verify(organizationId: string|null, token: string, code: string): Promise<EmailVerificationCode | undefined> {
         if (code.length != EmailVerificationCode.CODE_LENGTH) {
             return
         }
         
-        const verificationCodes = await this.where({ token, organizationId }, { limit: 1 })
+        const verificationCodes = await this.where({ 
+            token, 
+            organizationId: {
+                sign: 'IN',
+                value: [organizationId, null]
+            }
+        }, { limit: 1 })
 
         if (verificationCodes.length == 0) {
             return // = expired or invalid
@@ -247,16 +241,18 @@ export class EmailVerificationCode extends Model {
         }
     }
 
-    send(user: import('./User').User, organization: import('./Organization').Organization, i18n: I18n, withCode = true) {
+    send(user: import('./User').User, organization: import('./Organization').Organization|null, i18n: I18n, withCode = true) {
         const { from, replyTo } = {
-            from: (user.permissions ? Email.getInternalEmailFor(i18n) : organization.getStrongEmail(i18n)),
+            from: (user.permissions || !organization ? Email.getInternalEmailFor(i18n) : organization.getStrongEmail(i18n)),
             replyTo: undefined // Don't use replyTo because it affects deliverability rates due to spam filters
         }
 
         const url = this.getEmailVerificationUrl(user, organization, i18n)
 
-        const footer = (!user.permissions ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
-        const footerHTML = (!user.permissions ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
+        const footer = (!user.permissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
+        const footerHTML = (!user.permissions && organization ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
+
+        const name = organization?.name ?? 'Stamhoofd'
 
         if (withCode) {
             const formattedCode = this.code.substr(0, 3)+" "+this.code.substr(3)
@@ -264,10 +260,10 @@ export class EmailVerificationCode extends Model {
                 from,
                 replyTo,
                 to: this.email,
-                subject: `[${user.permissions ? "Stamhoofd" : organization.name}] Verifieer jouw e-mailadres`,
+                subject: `[${user.permissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
                 type: "transactional",
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${organization.name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : organization.name}`+footer,
-                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>Dit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.<br><br>${user.permissions ? "Stamhoofd" : organization.name}`+footerHTML
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : name}`+footer,
+                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>Dit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.<br><br>${user.permissions ? "Stamhoofd" : name}`+footerHTML
             })
         } else {
             Email.send({
@@ -275,14 +271,20 @@ export class EmailVerificationCode extends Model {
                 replyTo,
                 to: this.email,
                 type: "transactional",
-                subject: `[${user.permissions ? "Stamhoofd" : organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : organization.name}`+footer
+                subject: `[${user.permissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : name}`+footer
             })
         }
     }
 
-    static async resend(organization: import('./Organization').Organization, token: string, i18n: I18n) {
-        const verificationCodes = await this.where({ token, organizationId: organization.id }, { limit: 1 })
+    static async resend(organization: import('./Organization').Organization|null, token: string, i18n: I18n) {
+        const verificationCodes = await this.where({ 
+            token, 
+            organizationId: organization ? {
+                sign: 'IN',
+                value: [organization.id, null]
+            } : null
+        }, { limit: 1 })
 
         if (verificationCodes.length == 0) {
             console.log("Can't resend code, no coded found for token", token)
@@ -344,10 +346,7 @@ export class EmailVerificationCode extends Model {
         verificationCode.email = email
         verificationCode.userId = user.id
 
-
-
         await verificationCode.save()
-        
         return verificationCode
     }
 }

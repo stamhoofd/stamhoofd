@@ -5,7 +5,7 @@ import { Email } from '@stamhoofd/email';
 import { EmailVerificationCode, PasswordToken, User } from '@stamhoofd/models';
 import { NewUser, SignupResponse } from "@stamhoofd/structures";
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -29,9 +29,9 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope()
+        const organization = await Context.setUserOrganizationScope()
 
-        const u = await User.getForRegister(organization, request.body.email)
+        const u = await User.getForRegister(organization?.id ?? null, request.body.email)
 
         // Don't optimize. Always run two queries atm.
         let user = await User.register(
@@ -60,20 +60,21 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 // Send an e-mail to say you already have an account + follow password forgot flow
                 const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, organization, request.i18n)
                 const { from, replyTo } = {
-                    from: (user.permissions ? Email.getInternalEmailFor(request.i18n) : organization.getStrongEmail(request.i18n)),
+                    from: (user.permissions || !organization ? Email.getInternalEmailFor(request.i18n) : organization.getStrongEmail(request.i18n)),
                     replyTo: undefined
                 }
                 
-                const footer = (!user.permissions ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+request.i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
+                const footer = (!user.permissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+request.i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
 
+                const name = organization ? organization.name : 'Stamhoofd'
                 // Send email
                 Email.send({
                     from,
                     replyTo,
                     to: user.email,
-                    subject: `[${organization.name}] Je hebt al een account`,
+                    subject: `[${name}] Je hebt al een account`,
                     type: "transactional",
-                    text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe probeerde een account aan te maken, maar je hebt eigenlijk al een account met e-mailadres "+user.email+". Als je jouw wachtwoord niet meer weet, kan je een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de adresbalk van jouw browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet proberen te registreren? Dan mag je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? "Stamhoofd" : organization.name)+footer
+                    text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe probeerde een account aan te maken, maar je hebt eigenlijk al een account met e-mailadres "+user.email+". Als je jouw wachtwoord niet meer weet, kan je een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de adresbalk van jouw browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet proberen te registreren? Dan mag je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? "Stamhoofd" : name)+footer
                 });
 
                 // Don't send the code

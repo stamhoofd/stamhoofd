@@ -38,13 +38,22 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         // First check if a user exists with this email?
-        const existing = await User.getForRegister(organization, request.body.email)
+        const existing = await User.getForRegister(organization.id, request.body.email)
 
-        const admin = existing ?? new User();
-        admin.organizationId = organization.id;
-        admin.firstName = request.body.firstName;
-        admin.lastName = request.body.lastName;
-        admin.email = request.body.email;
+        const admin = existing ?? (await User.createInvited(organization, {
+            firstName: request.body.firstName,
+            lastName: request.body.lastName,
+            email: request.body.email
+        }))
+
+        if (!admin) {
+            throw new SimpleError({
+                code: 'internal_error',
+                message: 'Something went wrong while creating the admin',
+                human: 'Er ging iets mis bij het aanmaken van dit account',
+                statusCode: 500
+            })
+        }
 
         // Merge permissions
         if (!request.body.permissions) {

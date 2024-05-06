@@ -190,6 +190,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(AdminView, {
                 user: User.create({
                     email: '',
+                    organizationId: this.organization.id,
                     permissions: Permissions.create({ level: PermissionLevel.None })
                 }),
                 isNew: true

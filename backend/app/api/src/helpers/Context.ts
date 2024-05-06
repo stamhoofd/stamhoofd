@@ -102,6 +102,16 @@ export class ContextInstance {
         }
     }
 
+    /**
+     * Require organization scope if userMode is not platform
+     */
+    async setUserOrganizationScope() {
+        if (STAMHOOFD.userMode === 'platform') {
+            return null;
+        }
+        return await this.setOrganizationScope()
+    }
+
     async setOrganizationScope() {
         const organization = await Organization.fromApiHost(this.request.host);
 
@@ -141,7 +151,7 @@ export class ContextInstance {
 
         const token = await Token.getByAccessToken(accessToken, true)
         
-        if (!token || (this.organization && token.user.organizationId != this.organization.id) || (!this.organization && token.user.organizationId)) {
+        if (!token || (this.organization && token.user.organizationId !== null && token.user.organizationId !== this.organization.id) || (!this.organization && token.user.organizationId)) {
             throw new SimpleError({
                 code: "invalid_access_token",
                 message: "The access token is invalid",

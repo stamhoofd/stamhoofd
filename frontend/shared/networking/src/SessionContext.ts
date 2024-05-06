@@ -38,6 +38,7 @@ export class SessionContext implements RequestMiddleware {
     _preventComplete = false
 
     protected token: ManagedToken | null = null
+    protected usedPlatformStorage = false
 
     // Stored: encryption key to obtain the private keys (valid token needed in order to have any meaning => revokable in case of leakage, lost device, theft)
     // Storage is required since otherwise you would have to enter your password again every time you reload the page
@@ -89,14 +90,31 @@ export class SessionContext implements RequestMiddleware {
     async loadTokenFromStorage() {
         // Check localstorage
         try {
-            const json = await Storage.secure.getItem('token-' + this.organizationId)
+            let usePlatformStorage = !this.organization || STAMHOOFD.userMode === 'platform'
+            const json = await Storage.secure.getItem('token-' + (!usePlatformStorage ? this.organization!.id : 'platform'))
             if (json) {
                 try {
                     const parsed = JSON.parse(json)
                     const token = Token.decode(new ObjectData(parsed, { version: Version }))
-                    this.setToken(token)
+                    this.setToken(token, usePlatformStorage)
+                    return;
                 } catch (e) {
                     console.error(e)
+                }
+            }
+
+            if (!usePlatformStorage) {
+                usePlatformStorage = true;
+                // Also try platform token
+                const json2 = await Storage.secure.getItem('token-' + 'platform')
+                if (json2) {
+                    try {
+                        const parsed = JSON.parse(json2)
+                        const token = Token.decode(new ObjectData(parsed, { version: Version }))
+                        this.setToken(token, usePlatformStorage)
+                    } catch (e) {
+                        console.error(e)
+                    }
                 }
             }
         } catch (e) {
@@ -112,12 +130,13 @@ export class SessionContext implements RequestMiddleware {
 
             if (this.token) {
                 // Also check if we have the user (optional)
-                const json = await Storage.secure.getItem('user-' + this.organizationId)
+                const json = await Storage.secure.getItem('user-' + (!this.usedPlatformStorage ? this.organization!.id : 'platform'))
                 if (json) {
                     try {
                         const parsed = JSON.parse(json)
                         this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(User as Decoder<User>) as Decoder<VersionBox<User>>).data
                         this.callListeners("user")
+                        return;
                     } catch (e) {
                         console.error(e)
                     }
@@ -132,24 +151,34 @@ export class SessionContext implements RequestMiddleware {
     saveToStorage() {
         try {
             // Save token to localStorage
+           
+
             if (this.token) {
-                void Storage.secure.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
-                
-                // Delete old deprecated stored keys
-                void Storage.secure.removeItem('key-' + this.organizationId)
+                const suffix = (this.user ? (this.user.organizationId ? this.user.organizationId : 'platform') : (
+                    this.usedPlatformStorage ? 'platform' : (this.organization!.id)
+                ));
+
+                if (suffix == 'platform' && this.organization) {
+                    void Storage.secure.removeItem('token-' + this.organization.id)
+                    void Storage.secure.removeItem('user-' + this.organization.id)
+                }
+
+                void Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version })))
 
                 if (this.user) {
-                    void Storage.secure.setItem('user-' + this.organizationId, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
+                    void Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
                 } else {
-                    void Storage.secure.removeItem('user-' + this.organizationId)
+                    void Storage.secure.removeItem('user-' + suffix)
                 }
             } else {
-                void Storage.secure.removeItem('token-' + this.organizationId)
-
-                // Deprecated: but best to delete it for now
-                void Storage.secure.removeItem('key-' + this.organizationId)
-
-                void Storage.secure.removeItem('user-' + this.organizationId)
+                if (this.organization) {
+                    void Storage.secure.removeItem('token-' + this.organization.id)
+                    void Storage.secure.removeItem('user-' + this.organization.id)
+                }
+                if (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform') {
+                    void Storage.secure.removeItem('token-platform')
+                    void Storage.secure.removeItem('user-platform')
+                }
             }
         } catch (e) {
             console.error("Storage error when saving session")
@@ -371,7 +400,7 @@ export class SessionContext implements RequestMiddleware {
         this.callListeners("token")
     }
 
-    setToken(token: Token) {
+    setToken(token: Token, usedPlatformStorage: boolean) {
         if (this.token) {
             // Disable listener before clearing the token
             this.token.onChange = () => {
@@ -381,6 +410,7 @@ export class SessionContext implements RequestMiddleware {
         this.token = new ManagedToken(token, () => {
             this.onTokenChanged()
         });
+        this.usedPlatformStorage = usedPlatformStorage
         this.callListeners("token")
     }
 
@@ -531,8 +561,16 @@ export class SessionContext implements RequestMiddleware {
         }
     }
 
+    isLoggingOut = false
+
     async logout() {
+        if (this.isLoggingOut) {
+            // Prevents loops when refreshing inside the logout endpoint
+            return;
+        }
+
         if (this.token) {
+            this.isLoggingOut = true;
             console.log('Logout');
 
             // Delete first to prevent loops (could be already invalid so the deletion might fail)
@@ -546,11 +584,13 @@ export class SessionContext implements RequestMiddleware {
             } catch (e) {
                 if (Request.isNetworkError(e) || Request.isAbortError(e)) {
                     // Network access is required for a reliable logout
+                    this.isLoggingOut = false;
                     throw e;
                 }
                 console.error('Failed to delete token. Probably already deleted?', e)
             }
 
+            this.isLoggingOut = false;
             this.token.onChange = () => {
                 // emtpy
             }
@@ -614,7 +654,7 @@ export class SessionContext implements RequestMiddleware {
                 if (isSimpleError(e) || isSimpleErrors(e)) { 
                     if (e.hasCode("invalid_refresh_token")) {
                         console.log("Refresh token is invalid, logout")
-                        await this.logout();
+                        this.temporaryLogout();
                         Toast.fromError(e).show()
                         return false;
                     }
@@ -634,7 +674,7 @@ export class SessionContext implements RequestMiddleware {
                 console.log("This request started with an old token that might not be valid anymore. Retry with new token")
                 return true
             } else {
-                await this.logout();
+                await this.temporaryLogout();
             }
         }
 

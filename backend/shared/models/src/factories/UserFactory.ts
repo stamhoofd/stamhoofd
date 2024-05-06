@@ -34,6 +34,7 @@ export class UserFactory extends Factory<Options, User> {
 
         const user = await User.register(organization, NewUser.create({
             email,
+            organizationId: organization.id,
             password
         }));
         if (!user) {

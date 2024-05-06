@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
 import { ChallengeGrantStruct, CreateTokenStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -34,12 +34,21 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - check if not multiple attempts for the same username are started in parallel
         // - Limit the amount of failed attemps by IP (will only make it a bit harder)
         // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
-        const organization = await Context.setOrganizationScope()
+        const organization = await Context.setUserOrganizationScope()
         
         switch (request.body.grantType) {
         case "refresh_token": {
             const oldToken = await Token.getByRefreshToken(request.body.refreshToken)
             if (!oldToken) {
+                throw new SimpleError({
+                    code: "invalid_refresh_token",
+                    message: "Invalid refresh token",
+                    statusCode: 400
+                });
+            }
+
+            if (oldToken.user.organizationId !== (organization?.id ?? null)) {
+                // Invalid scope
                 throw new SimpleError({
                     code: "invalid_refresh_token",
                     message: "Invalid refresh token",
@@ -74,7 +83,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         case "password": {
             // Increase timout for legacy
             request.request.request?.setTimeout(30 * 1000);
-            const user = await User.login(organization.id, request.body.username, request.body.password)
+            const user = await User.login(organization?.id ?? null, request.body.username, request.body.password)
 
             const errBody = {
                 code: "invalid_username_or_password",

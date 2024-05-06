@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, Token, User } from '@stamhoofd/models';
 import { Token as TokenStruct, VerifyEmailRequest } from "@stamhoofd/structures";
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -28,9 +28,9 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope()
+        const organization = await Context.setUserOrganizationScope()
 
-        const code = await EmailVerificationCode.verify(organization.id, request.body.token, request.body.code)
+        const code = await EmailVerificationCode.verify(organization?.id ?? null, request.body.token, request.body.code)
 
         if (!code) {
             throw new SimpleError({
@@ -43,7 +43,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const user = await User.getByID(code.userId)
 
-        if (!user) {
+        if (!user || (user.organizationId !== null && user.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
                 code: "invalid_code",
                 message: "This code is invalid",
@@ -53,7 +53,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (user.email != code.email) {
-            const other = await User.getForRegister(organization, code.email)
+            const other = await User.getForAuthentication(user.organizationId, code.email, {allowWithoutAccount: true})
 
             if (other) {
                 // Delete the other user, but merge data

@@ -40,7 +40,7 @@ export class CreateOrganizationAdminEndpoint extends Endpoint<Params, Query, Bod
         }
 
         // Don't optimize. Always run two queries atm.
-        const u = await User.getForRegister(organization, request.body.email)
+        const u = await User.getForRegister(organization.id, request.body.email)
         let user = await User.register(
             organization,
             request.body

@@ -19,6 +19,9 @@ export class User extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    @field({ decoder: StringDecoder, nullable: true, version: 245 })
+    organizationId: string|null = null;
+
     @field({ decoder: StringDecoder, nullable: true, version: 14 })
     firstName: string | null = null;
 
@@ -68,6 +71,9 @@ export class MyUser extends NewUser {
 export class ApiUser extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 245 })
+    organizationId: string|null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 14 })
     name: string | null = null;

@@ -109,12 +109,15 @@ export class PasswordToken extends Model {
         return token;
     }
 
-    static async getPasswordRecoveryUrl(user: User, organization: Organization, i18n: I18n, validUntil?: Date) {
+    static async getPasswordRecoveryUrl(user: User, organization: Organization|null, i18n: I18n, validUntil?: Date) {
+        if ((user.organizationId ?? null) !== (organization?.id ?? null)) {
+            throw new Error('Unexpected mismatch in organization id for PasswordToken')
+        }
         // Send an e-mail to say you already have an account + follow password forgot flow
         const token = await PasswordToken.createToken(user, validUntil)
 
         let host: string;
-        if (user.permissions) {
+        if (user.permissions || !organization) {
             host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
         } else {
             host = "https://"+organization.getHost()
@@ -124,7 +127,7 @@ export class PasswordToken extends Model {
             }
         }
 
-        return host+"/reset-password"+(user.permissions ? "/"+encodeURIComponent(organization.id) : "")+"?token="+encodeURIComponent(token.token);
+        return host+"/reset-password"+(user.permissions && user.organizationId ? "/"+encodeURIComponent(user.organizationId) : "")+"?token="+encodeURIComponent(token.token);
     }
 
     static async getMagicSignInUrl(user: User, organization: Organization) {

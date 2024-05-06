@@ -502,10 +502,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
     static async linkUser(user: UserStruct, member: MemberWithRegistrations) {
         const email = user.email
-        const existing = await User.where({ organizationId: member.organizationId, email }, { limit: 1 })
-        let u: User
-        if (existing.length == 1) {
-            u = existing[0]
+        let u = await User.getForAuthentication(member.organizationId, email, {allowWithoutAccount: true});
+        if (u) {
             console.log("Giving an existing user access to a member: "+u.id)
         } else {
             u = new User()

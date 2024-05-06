@@ -2,7 +2,7 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { OrganizationFactory, Token, UserFactory } from "@stamhoofd/models";
 import { Token as TokenStruct } from "@stamhoofd/structures";
 
-import { testServer } from "../../../../../tests/helpers/TestServer";
+import { testServer } from "../../../tests/helpers/TestServer";
 import { CreateTokenEndpoint } from './CreateTokenEndpoint';
 
 describe("Endpoint.CreateToken", () => {

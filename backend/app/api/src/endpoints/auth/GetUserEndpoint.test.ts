@@ -2,7 +2,7 @@ import { Request } from "@simonbackx/simple-endpoints";
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { NewUser } from '@stamhoofd/structures';
 
-import { testServer } from "../../../../../tests/helpers/TestServer";
+import { testServer } from "../../../tests/helpers/TestServer";
 import { GetUserEndpoint } from './GetUserEndpoint';
 
 

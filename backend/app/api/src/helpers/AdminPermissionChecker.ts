@@ -334,15 +334,16 @@ export class AdminPermissionChecker {
 
         return false;
     }
-    canAccessUser(user: User, level: PermissionLevel = PermissionLevel.Read) {
-        if (!this.checkScope(user.organizationId)) {
-            return false;
-        }
 
+    canAccessUser(user: User, level: PermissionLevel = PermissionLevel.Read) {
         // Write = edit email, name
         // full = edit permissions
         if (user.id === this.user.id && (level === PermissionLevel.Read || level === PermissionLevel.Write)) {
             return true;
+        }
+
+        if (!this.checkScope(user.organizationId)) {
+            return false;
         }
 
         return this.canManageAdmins();

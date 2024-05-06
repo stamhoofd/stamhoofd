@@ -7,6 +7,10 @@
                 Mijn account
             </h1>
             <p>Met een account kan je één of meerdere leden beheren.</p>
+
+            <p class="error-box icon privacy" v-if="isUserModeOrganization && patchedUser.organizationId === null">
+                Dit is een platform account
+            </p>
         
             <STErrorsDefault :error-box="errorBox" />
 
@@ -96,6 +100,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
     get patchedUser() {
         return this.$user!.patch(this.userPatch)
+    }
+
+    get isUserModeOrganization() {
+        return STAMHOOFD.userMode === 'organization'
     }
 
     get email() {

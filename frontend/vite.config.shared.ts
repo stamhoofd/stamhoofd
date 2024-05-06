@@ -18,6 +18,10 @@ if (process.env.LOAD_ENV) {
     // Load this in the environment
     const decode = JSON.parse(process.env.LOAD_ENV);
 
+    if (!decode.userMode || !decode.platformName) {
+        throw new Error('Invalid env file: missing some variables')
+    }
+
     // We restringify to make sure encoding is minified
     use_env["STAMHOOFD"] = JSON.stringify(decode);
     use_env["process.env.NODE_ENV"] = JSON.stringify(decode.environment === "production" ? "production" : "development")
@@ -29,6 +33,10 @@ if (process.env.LOAD_ENV) {
     const contents = fs.readFileSync(file)
     const decode = JSON.parse(contents);
     const node_env = JSON.stringify(decode.environment === "production" ? "production" : "development")
+
+    if (!decode.userMode || !decode.platformName) {
+        throw new Error('Invalid env file: missing some variables')
+    }
 
     console.log("Using environment file: "+file)
 

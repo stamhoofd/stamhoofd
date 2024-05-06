@@ -103,6 +103,7 @@ export class Token extends Model {
 
         return ApiUser.create({
             id: user.id,
+            organizationId: user.organizationId,
             name: user.name,
             permissions: user.permissions,
             expiresAt: lastToken?.accessTokenValidUntil ?? null,

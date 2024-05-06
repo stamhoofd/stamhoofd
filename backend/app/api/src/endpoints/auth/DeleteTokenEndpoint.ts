@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -22,7 +22,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope()
+        await Context.setUserOrganizationScope()
         const {token} = await Context.authenticate({allowWithoutAccount: true})
         await token.delete()
         

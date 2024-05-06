@@ -19,6 +19,14 @@ export function load(settings?: { path?: string, service?: "redirecter" | "api" 
         throw new Error("Expected environment variable domains.registration")
     }
 
+    if (!STAMHOOFD.userMode || !['platform', 'organization'].includes(STAMHOOFD.userMode)) {
+        throw new Error("Expected environment variable userMode")
+    }
+
+    if (!STAMHOOFD.platformName) {
+        throw new Error("Expected environment variable platformName")
+    }
+
     // Database
     process.env.DB_DATABASE = STAMHOOFD.DB_DATABASE+""
     process.env.DB_HOST = STAMHOOFD.DB_HOST+""

@@ -85,6 +85,7 @@ export default class OrganizationAdminsView extends Mixins(NavigationMixin){
     addUser() {
         const user = User.create({
             email: "",
+            organizationId: this.organization.id,
             permissions: Permissions.create({ level: PermissionLevel.Full })
         })
         this.present(new ComponentWithProperties(EditUserView, { 

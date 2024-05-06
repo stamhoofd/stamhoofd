@@ -49,6 +49,13 @@ declare global {
          */
         readonly environment: "production" | "development" | "staging" | "test"
         readonly domains: StamhoofdDomains
+
+        /**
+         * organization = users are specific to one organization
+         * platform = users are shared between organizations
+         */
+        readonly userMode: 'organization'|'platform'
+        readonly platformName: string
     }
 
     /** 

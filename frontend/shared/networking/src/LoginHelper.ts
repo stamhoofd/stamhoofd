@@ -125,6 +125,7 @@ export class LoginHelper {
     static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null): Promise<string> {
         const user = NewUser.create({
             email,
+            organizationId: organization.id,
             firstName,
             lastName,
             password
@@ -202,6 +203,7 @@ export class LoginHelper {
     static async signUp(session: SessionContext, email: string, password: string, firstName: string | null = null, lastName: string | null = null): Promise<string> {
         const user = NewUser.create({
             email,
+            organizationId: session.organization?.id ?? null,
             firstName,
             lastName,
             password

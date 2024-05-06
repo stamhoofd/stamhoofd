@@ -105,7 +105,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
             return
         }
 
-        if (new Date().getTime() - this.startTime.getTime() < 5 * 60 * 1000) {
+        if (new Date().getTime() - this.startTime.getTime() < 5 * 60 * 1000 && STAMHOOFD.environment !== 'development') {
             new Toast("Je moet minimaal 5 minuten wachten voor je een nieuwe e-mail kan versturen. Kijk jouw inbox goed na!", "error red").show()
             return
         }

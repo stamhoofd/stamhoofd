@@ -18,8 +18,8 @@ export class User extends Model {
     })
     id!: string;
 
-    @column({ foreignKey: User.organization, type: "string" })
-    organizationId: string;
+    @column({ foreignKey: User.organization, type: "string", nullable: true })
+    organizationId: string|null;
 
     @column({ type: "string", nullable: true })
     firstName: string | null = null;
@@ -155,7 +155,7 @@ export class User extends Model {
         await other.delete()
     }
 
-    static async login(organizationId: string, email: string, password: string): Promise<User | undefined> {
+    static async login(organizationId: string|null, email: string, password: string): Promise<User | undefined> {
         const user = await User.getForAuthentication(organizationId, email)
         if (!user || !user.hasKeys() || user.isApiUser) {
             return undefined
@@ -222,24 +222,22 @@ export class User extends Model {
         return false;
     }
 
-    static async getForRegister(organization: Organization, email: string): Promise<User | undefined> {
-        const user = await this.getForRegisterWithoutOrg(organization.id, email)
-
-        if (!user) {
-            return undefined
+    static async getForRegister(organizationId: string|null, email: string): Promise<User | undefined> {
+        if (STAMHOOFD.userMode !== 'platform' && !organizationId) {
+            throw new Error('Expected organizationId in getForRegister')
         }
 
-        // Read member + address from first row
-        return user
-    }
+        const users = await User.where({
+            email,
+            organizationId: STAMHOOFD.userMode === 'platform' ? null : organizationId
+        }, {
+            limit: 1
+        })
 
-    static async getForRegisterWithoutOrg(organizationId: string, email: string): Promise<User | undefined> {
-        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organizationId]);
-
-        if (rows.length == 0) {
+        if (users.length == 0) {
             return undefined;
         }
-        const user = this.fromRow(rows[0][this.table])
+        const user = users[0]
 
         if (!user) {
             return undefined
@@ -248,15 +246,26 @@ export class User extends Model {
         return user;
     }
 
-    static async getForAuthentication(organizationId: string, email: string): Promise<User | undefined> {
-        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organizationId]);
+    static async getForAuthentication(organizationId: string|null, email: string, {allowWithoutAccount = false}: {allowWithoutAccount?: boolean} = {}): Promise<User | undefined> {
+        const users = await User.where({
+            email,
+            organizationId: STAMHOOFD.userMode === 'platform' ? null : organizationId
+        }, {
+            limit: 1
+        })
 
-        if (rows.length == 0) {
+        if (users.length == 0) {
+            if (organizationId && STAMHOOFD.userMode === 'organization') {
+                return this.getForAuthentication(null, email, {allowWithoutAccount})
+            }
             return undefined;
         }
-        const user = this.fromRow(rows[0][this.table])
+        const user = users[0]
 
-        if (!user || !user.hasKeys()) {
+        if (!user || (!user.hasKeys() && !allowWithoutAccount)) {
+            if (organizationId && STAMHOOFD.userMode === 'organization') {
+                return this.getForAuthentication(null, email, {allowWithoutAccount})
+            }
             return undefined
         }
 
@@ -269,8 +278,43 @@ export class User extends Model {
         return hash
     }
 
+    static async createInvited(
+        organization: Organization|null,
+        data: {firstName: string|null, lastName: string|null, email: string}
+    ): Promise<User | undefined> {
+        const {
+            email,
+            firstName,
+            lastName
+        } = data;
+
+        if (!organization && STAMHOOFD.userMode !== 'platform') {
+            throw new Error("Missing organization")
+        }
+
+        const user = new User();
+        user.organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null)
+        user.id = uuidv4()
+        user.email = email;
+        user.verified = false;
+        user.firstName = firstName
+        user.lastName = lastName
+
+        try {
+            await user.save();
+        } catch (e) {
+            // Duplicate key probably
+            if (e.code && e.code == "ER_DUP_ENTRY") {
+                return;
+            }
+            throw e;
+        }
+
+        return user;
+    }
+
     static async register(
-        organization: Organization,
+        organization: Organization|null,
         data: NewUser
     ): Promise<User | undefined> {
         const {
@@ -285,8 +329,12 @@ export class User extends Model {
             throw new Error("A password is required for new users")
         }
 
+        if (!organization && STAMHOOFD.userMode !== 'platform') {
+            throw new Error("Missing organization")
+        }
+
         const user = new User();
-        user.organizationId = organization.id
+        user.organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null)
         user.id = id ?? uuidv4()
         user.email = email;
         user.password = await this.hash(password)
@@ -315,7 +363,7 @@ export class User extends Model {
     }
 
     static async registerSSO(
-        organization: Organization,
+        organization: Organization|null,
         data: {email, id, firstName, lastName, type: LoginProviderType, sub: string}
     ): Promise<User | undefined> {
         const {
@@ -324,6 +372,14 @@ export class User extends Model {
             firstName,
             lastName
         } = data;
+
+        if (STAMHOOFD.userMode === 'platform') {
+            throw new Error('SSO is disabled on platforms for now')
+        }
+
+        if (!organization) {
+            throw new Error("Missing organization")
+        }
 
         const user = new User();
         user.organizationId = organization.id
