@@ -31,12 +31,12 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canManageDocuments()) {
+        if (!await Context.auth.canManageDocuments(organization.id)) {
             throw Context.auth.error()
         }
 
         const template = await DocumentTemplate.getByID(request.params.id)
-        if (!template || !Context.auth.canAccessDocumentTemplate(template)) {
+        if (!template || !await Context.auth.canAccessDocumentTemplate(template)) {
             throw Context.auth.notFoundOrNoAccess("Onbekend document")
         }
 

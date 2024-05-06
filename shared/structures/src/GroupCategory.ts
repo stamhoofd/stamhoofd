@@ -5,7 +5,7 @@ import { Group, GroupStatus } from './Group';
 import { Organization } from './Organization';
 // Eslint wants to remove Permissions, but it is needed for types!
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsByRole } from './Permissions';
+import { LoadedPermissions, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsByRole, UserPermissions } from './Permissions';
 
 /**
  * Give access to a given resouce based by the roles of a user
@@ -26,8 +26,8 @@ export class GroupCategoryPermissions extends AutoEncoder {
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    getCreatePermissionLevel(permissions: Permissions, allRoles: PermissionRoleDetailed[]): PermissionLevel.None | "Create" {
-        if (permissions.hasFullAccess(allRoles)) {
+    getCreatePermissionLevel(permissions: LoadedPermissions): PermissionLevel.None | "Create" {
+        if (permissions.hasFullAccess()) {
             return "Create"
         }
 
@@ -116,30 +116,21 @@ export class GroupCategory extends AutoEncoder {
         return true;
     }
 
-    canEdit(permissions: Permissions, allRoles: PermissionRoleDetailed[]): boolean {
-        if (permissions.hasFullAccess(allRoles)) {
+    canEdit(permissions: LoadedPermissions): boolean {
+        if (permissions.hasFullAccess()) {
             return true
         }
         return false
     }
 
-    canCreate(permissions: Permissions, categories: GroupCategory[] = [], allRoles: PermissionRoleDetailed[]): boolean {
-        if (permissions.hasFullAccess(allRoles)) {
-            return true
-        }
-        for (const role of this.settings.permissions.create) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                // Check role exists
-                if (!allRoles.find(r => r.id === role.id)) {
-                    continue
-                }
-                return true
-            }
+    canCreate(permissions: LoadedPermissions, categories: GroupCategory[] = []): boolean {
+        if (this.settings.permissions.getCreatePermissionLevel(permissions) === 'Create') {
+            return true;
         }
 
         const parents = this.getParentCategories(categories)
         for (const parent of parents) {
-            if (parent.canCreate(permissions, [], allRoles)) {
+            if (parent.canCreate(permissions, [])) {
                 return true
             }
         }
@@ -193,13 +184,14 @@ export class GroupCategoryTree extends GroupCategory {
         return count
     }
 
-    static build(root: GroupCategory, organization: Organization, options: {permissions?: Permissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
+    static build(root: GroupCategory, organization: Organization, options: {permissions?: UserPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
         const categories = organization.meta.categories
         const groups = options?.groups ?? organization.groups
 
         const permissions = options.permissions ?? null
         const maxDepth = options.maxDepth ?? null
         const smartCombine = options.smartCombine ?? false
+        const loaded = permissions ? permissions.forOrganization(organization) : null
 
         return GroupCategoryTree.create({ 
             ...root,
@@ -211,7 +203,7 @@ export class GroupCategoryTree extends GroupCategory {
                         maxDepth: maxDepth !== null ? maxDepth - 1 : null
                     })
 
-                    if (t.categories.length == 0 && t.groups.length == 0 && (smartCombine || (permissions !== null && !f.canCreate(permissions, categories, organization?.privateMeta?.roles ?? [])))) {
+                    if (t.categories.length == 0 && t.groups.length == 0 && (smartCombine || (loaded !== null && !f.canCreate(loaded, categories)))) {
                         // Hide empty categories where we cannot create new groups or when smart combine is enabled
                         return []
                     }

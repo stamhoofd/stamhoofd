@@ -49,8 +49,8 @@ export class AuthenticatedStructures {
         }, includeSettlements)
     }
 
-    static group(group: Group) {
-        if (!Context.optionalAuth?.canAccessGroup(group)) {
+    static async group(group: Group) {
+        if (!await Context.optionalAuth?.canAccessGroup(group)) {
             return group.getStructure()
         }
         return group.getPrivateStructure()
@@ -67,7 +67,20 @@ export class AuthenticatedStructures {
         if (Context.optionalAuth?.canAccessPrivateOrganizationData(organization)) {
             const groups = await Group.getAll(organization.id)
             const webshops = await Webshop.where({ organizationId: organization.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
-            
+            const webshopStructures: WebshopPreview[] = [] 
+            const groupStructures: GroupStruct[] = []
+
+            for (const w of webshops) {
+                if (!await Context.auth.canAccessWebshop(w)) {
+                    continue
+                }
+                webshopStructures.push(WebshopPreview.create(w))
+            }
+
+            for (const g of groups) {
+                groupStructures.push(await this.group(g))
+            }
+
             return OrganizationStruct.create({
                 id: organization.id,
                 name: organization.name,
@@ -76,14 +89,9 @@ export class AuthenticatedStructures {
                 registerDomain: organization.registerDomain,
                 uri: organization.uri,
                 website: organization.website,
-                groups: groups.map(g => this.group(g)).sort(GroupStruct.defaultSort),
+                groups: groupStructures.sort(GroupStruct.defaultSort),
                 privateMeta: organization.privateMeta,
-                webshops: webshops.flatMap(w => {
-                    if (!Context.auth.canAccessWebshop(w)) {
-                        return []
-                    }
-                    return [WebshopPreview.create(w)]
-                })
+                webshops: webshopStructures
             })
         }
         

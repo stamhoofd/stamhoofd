@@ -68,7 +68,7 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingView, PasswordStrength, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
+import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingView, PasswordStrength, ReplaceRootEventBus, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { NewUser, Token } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
@@ -157,7 +157,6 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                     this.firstName = session.user?.firstName ?? ''
                     this.lastName = session.user?.lastName ?? ''
                     this.hasAccount = session.user?.hasAccount ?? false
-                    localStorage.setItem("email", this.email)
                     this.loadingToken = false;
                 }).catch(e => {
                     new Toast("Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.", "error red").show()
@@ -287,6 +286,11 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                 const toast = new Toast('Jouw account is aangemaakt', "success green")
                 toast.show()
             }
+
+            const dashboard = await import('@stamhoofd/dashboard')
+            const root = await dashboard.getScopedAutoRoot(this.session)
+            await ReplaceRootEventBus.sendEvent('replace', root)
+
             this.dismiss({ force: true })
             this.loading = false;
         } catch (e) {

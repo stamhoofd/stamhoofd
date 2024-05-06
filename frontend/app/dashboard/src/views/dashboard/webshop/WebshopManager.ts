@@ -46,19 +46,11 @@ export class WebshopManager {
     }
 
     get hasWrite() {
-        const p = this.context.user?.permissions
-        if (!p) {
-            return false
-        }
-        return this.preview.privateMeta.permissions.hasWriteAccess(p, this.context.organization?.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasWriteAccess(this.context.organizationPermissions)
     }
 
     get hasRead() {
-        const p = this.context.user?.permissions
-        if (!p) {
-            return false
-        }
-        return this.preview.privateMeta.permissions.hasReadAccess(p, this.context.organization?.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasReadAccess(this.context.organizationPermissions)
     }
 
     /**

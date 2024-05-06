@@ -119,15 +119,16 @@ export class PasswordToken extends Model {
         let host: string;
         if (user.permissions || !organization) {
             host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
-        } else {
-            host = "https://"+organization.getHost()
-
-            if (i18n.language != organization.i18n.language) {
-                host += "/"+i18n.language
-            }
+            return host+"/reset-password"+((user.organizationId || organization) ? ("/"+encodeURIComponent(user.organizationId ?? organization!.id)) : "")+"?token="+encodeURIComponent(token.token);
         }
 
-        return host+"/reset-password"+(user.permissions && user.organizationId ? "/"+encodeURIComponent(user.organizationId) : "")+"?token="+encodeURIComponent(token.token);
+        host = "https://"+organization.getHost()
+
+        if (i18n.language != organization.i18n.language) {
+            host += "/"+i18n.language
+        }
+
+        return host+"/reset-password?token="+encodeURIComponent(token.token);
     }
 
     static async getMagicSignInUrl(user: User, organization: Organization) {

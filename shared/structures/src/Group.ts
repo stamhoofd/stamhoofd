@@ -7,7 +7,7 @@ import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { CycleInformation, GroupSettings, WaitingListType } from './GroupSettings';
 import { Organization } from './Organization';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { PermissionLevel, PermissionRoleDetailed, Permissions } from './Permissions';
+import { PermissionLevel, PermissionRoleDetailed, Permissions, UserPermissions } from './Permissions';
 
 export enum GroupStatus {
     "Open" = "Open",
@@ -177,19 +177,20 @@ export class Group extends AutoEncoder {
         return [...map.values()]
     }
 
-    hasAccess(permissions: Permissions|null, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    hasAccess(permissions: UserPermissions|null, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!permissions) {
             return false
         }
 
-        if (this.privateSettings?.permissions.hasAccess(permissions, organization.privateMeta?.roles ?? [], permissionLevel)) {
+        const loaded = permissions.forOrganization(organization)
+        if (this.privateSettings?.permissions.hasAccess(loaded, permissionLevel)) {
             return true;
         }
 
         // Check parent categories
         const parentCategories = this.getParentCategories(organization.meta.categories)
         for (const category of parentCategories) {
-            if (category.settings.permissions.groupPermissions.hasAccess(permissions, organization.privateMeta?.roles ?? [], permissionLevel)) {
+            if (category.settings.permissions.groupPermissions.hasAccess(loaded, permissionLevel)) {
                 return true
             }
         }
@@ -209,7 +210,7 @@ export class Group extends AutoEncoder {
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    hasReadAccess(permissions: Permissions|null, organization: Organization): boolean {
+    hasReadAccess(permissions: UserPermissions|null, organization: Organization): boolean {
         return this.hasAccess(permissions, organization, PermissionLevel.Read)
 
     }
@@ -217,14 +218,14 @@ export class Group extends AutoEncoder {
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    hasWriteAccess(permissions: Permissions|null, organization: Organization): boolean {
+    hasWriteAccess(permissions: UserPermissions|null, organization: Organization): boolean {
         return this.hasAccess(permissions, organization, PermissionLevel.Write)
     }
 
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    hasFullAccess(permissions: Permissions|null, organization: Organization): boolean {
+    hasFullAccess(permissions: UserPermissions|null, organization: Organization): boolean {
         return this.hasAccess(permissions, organization, PermissionLevel.Full)
     }
 

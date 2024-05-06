@@ -28,7 +28,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canManageAdmins()) {
+        if (!await Context.auth.canManageAdmins(organization.id)) {
             throw Context.auth.error()
         }
 

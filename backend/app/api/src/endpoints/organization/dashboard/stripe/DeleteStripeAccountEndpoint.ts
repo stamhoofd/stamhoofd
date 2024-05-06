@@ -31,7 +31,7 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Full)) {
+        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full)) {
             throw Context.auth.error()
         }
 

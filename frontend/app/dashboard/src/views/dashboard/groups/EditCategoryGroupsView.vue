@@ -184,7 +184,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return this.$user!.permissions!.hasFullAccess(this.patchedOrganization.privateMeta?.roles ?? [])
+        return this.$context.organizationAuth.hasFullAccess()
     }
 
     get roles() {

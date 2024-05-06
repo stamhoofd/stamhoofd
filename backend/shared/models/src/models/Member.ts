@@ -344,7 +344,10 @@ export class Member extends Model {
             ...this,
             registrations: this.registrations.map(r => r.getStructure()),
             details: this.details,
-            users: this.users.map(u => UserStruct.create({...u, hasAccount: u.hasAccount()})),
+            users: this.users.map(u => UserStruct.create({
+                ...u, 
+                hasAccount: u.hasAccount()
+            })),
         })
     }
 

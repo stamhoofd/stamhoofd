@@ -2519,10 +2519,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@2.9.2":
-  version "2.9.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.9.2.tgz#8ca375ef9c51cbc84841416f95f34aa406f609e4"
-  integrity sha512-rioBTlXY9KHQpxkfopsoiSIFhBmYpJ26AWx2USxZPD8n7uOzbrNGH1NzTr1hjhlyDLfycg0U1/in1/Aqc71KgQ==
+"@simonbackx/simple-encoding@2.10.0":
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.10.0.tgz#9e4571f62102e0901730ed897fdf968bd22bc101"
+  integrity sha512-WH6REB7P8xegusaKhMnV3IjHmkndXBhE9J9QWNh3yBXNXyRPBtt6zr3w2VY4sTEJrRK8/bDZT0HwjI2OozMgbA==
 
 "@simonbackx/simple-endpoints@1.13.0":
   version "1.13.0"

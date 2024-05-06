@@ -30,11 +30,11 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         const {user} = await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canManageAdmins()) {
+        if (!await Context.auth.canManageAdmins(organization.id)) {
             throw Context.auth.error()
         }
 

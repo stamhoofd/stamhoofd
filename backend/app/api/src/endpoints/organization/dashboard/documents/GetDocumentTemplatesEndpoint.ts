@@ -28,7 +28,7 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canManageDocuments()) {
+        if (!await Context.auth.canManageDocuments(organization.id)) {
             throw Context.auth.error()
         }
 

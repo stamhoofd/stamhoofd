@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from '@stamhoofd/email';
 import { PasswordToken, User } from '@stamhoofd/models';
-import { User as UserStruct } from "@stamhoofd/structures";
+import { User as UserStruct,UserPermissions } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
@@ -33,7 +33,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const {user} = await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canManageAdmins()) {
+        if (!await Context.auth.canManageAdmins(organization.id)) {
             throw Context.auth.error()
         }
 
@@ -64,11 +64,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             })
         }
 
-        if (existing && existing.permissions) {
-            existing.permissions.add(request.body.permissions);
-        } else {
-            admin.permissions = request.body.permissions;
-        }
+        admin.permissions = UserPermissions.limitedAdd(admin.permissions, request.body.permissions, organization.id)
 
         await admin.save();
 

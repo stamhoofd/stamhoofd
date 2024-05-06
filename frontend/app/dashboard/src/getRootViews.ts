@@ -62,6 +62,10 @@ export async function getScopedDashboardRootFromUrl() {
     return getScopedDashboardRoot(session)
 }
 
+export function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+    return getScopedDashboardRoot(session, options)
+}
+
 export function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)

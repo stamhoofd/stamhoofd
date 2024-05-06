@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
-import { NewUser, PermissionLevel, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
+import { NewUser, PermissionLevel, Permissions, SignupResponse, User as UserStruct,UserPermissions } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
 
@@ -41,7 +41,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id)
         
-        if (!editUser || !Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {
+        if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {
             throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang om deze gebruiker te wijzigen")
         }
 
@@ -49,20 +49,16 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         editUser.lastName = request.body.lastName ?? editUser.lastName
 
         if (request.body.permissions !== undefined) {
-            if (!Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
+            if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je hebt geen rechten om de rechten van deze gebruiker te wijzigen"
                 })
             }
 
-            if (request.body.permissions && request.body.permissions.isPatch()) {
-                editUser.permissions = editUser.permissions ? editUser.permissions.patch(request.body.permissions) : Permissions.create({}).patch(request.body.permissions)
-            } else {
-                editUser.permissions = request.body.permissions
-            }
+            editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id)
 
-            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess(Context.auth.getAllRoles()))) {
+            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess())) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je kan jezelf niet verwijderen als hoofdbeheerder"

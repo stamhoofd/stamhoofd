@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Token, User } from '@stamhoofd/models';
-import { ApiUser, ApiUserWithToken } from "@stamhoofd/structures";
+import { ApiUser, ApiUserWithToken, UserPermissions } from "@stamhoofd/structures";
 
 import { Context } from '../../../../helpers/Context';
 type Params = Record<string, never>;
@@ -31,7 +31,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canManageAdmins()) {
+        if (!await Context.auth.canManageAdmins(organization.id)) {
             throw Context.auth.error()
         }
 
@@ -55,7 +55,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             })
         }
 
-        admin.permissions = request.body.permissions;
+        admin.permissions = UserPermissions.limitedAdd(null, request.body.permissions, organization.id)
         await admin.save();
 
         // Set id

@@ -839,7 +839,7 @@ export class Organization extends Model {
         const admins = await User.getAdmins([this.id], {verified: true})
 
         // Only full access
-        return admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
+        return admins.filter(a => a.organizationPermissions && a.organizationPermissions.hasFullAccess(this.privateMeta.roles))
     }
 
     /**
@@ -908,7 +908,7 @@ export class Organization extends Model {
         // Circular reference fix
         const User = (await import('./User')).User;
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
-        const filtered = admins.filter(a => a.permissions && (a.permissions.hasFullAccess(this.privateMeta.roles) || a.permissions.hasFinanceAccess(this.privateMeta.roles)))
+        const filtered = admins.filter(a => a.organizationPermissions && (a.organizationPermissions.hasFullAccess(this.privateMeta.roles) || a.organizationPermissions.hasFinanceAccess(this.privateMeta.roles)))
 
         if (filtered.length > 0) {
             return filtered.map(f => f.getEmailTo() ).join(", ")

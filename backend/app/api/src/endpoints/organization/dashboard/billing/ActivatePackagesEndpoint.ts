@@ -57,7 +57,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         const {user} = await Context.authenticate()
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!Context.auth.canActivatePackages()) {
+        if (!await Context.auth.canActivatePackages(organization.id)) {
             throw Context.auth.error()
         }        
 

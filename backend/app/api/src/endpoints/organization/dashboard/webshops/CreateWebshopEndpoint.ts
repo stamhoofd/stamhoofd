@@ -37,7 +37,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const {user} = await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canCreateWebshops()) {
+        if (!await Context.auth.canCreateWebshops(organization.id)) {
             throw Context.auth.error("Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.")
         }
 
@@ -147,7 +147,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         // Verify if we have full access
-        if (!Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
             throw new SimpleError({
                 code: "missing_permissions",
                 message: "You cannot create a webshop without having full permissions on the created webshop",

@@ -36,7 +36,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canManageOrganizationDomain()) {
+        if (!await Context.auth.canManageOrganizationDomain(organization.id)) {
             throw Context.auth.error()
         }
 

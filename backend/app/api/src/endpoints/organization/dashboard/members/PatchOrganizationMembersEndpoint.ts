@@ -38,12 +38,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         } 
 
         const members: MemberWithRegistrations[] = []
-        const groups = await Group.getAll(organization.id)
+        const groups = await Context.auth.getOrganizationGroups(organization.id) // allows to reuse it when checking permissions
         const updateGroups = new Map<string, Group>()
 
         const balanceItemMemberIds: string[] = []
@@ -79,7 +79,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             for (const registrationStruct of struct.registrations) {
                 const group = groups.find(g => g.id === registrationStruct.groupId)
-                if (!group || !Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                     throw Context.auth.notFoundOrNoAccess("Je hebt niet voldoende rechten om leden toe te voegen in deze groep")
                 }
 
@@ -150,7 +150,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const patch of request.body.getPatches()) {
             const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id)
-            if (!member || !Context.auth.canAccessMember(member, groups, PermissionLevel.Write)) {
+            if (!member || !await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
                 throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot dit lid of het bestaat niet")
             }
             
@@ -200,7 +200,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                if (!Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                if (!await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om leden te verplaatsen naar deze groep")
                 }
 
@@ -284,7 +284,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                if (!Context.auth.canAccessRegistration(registration, groups, PermissionLevel.Write)) {
+                if (!await Context.auth.canAccessRegistration(registration, PermissionLevel.Write)) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om deze inschrijving te verwijderen")
                 }
 
@@ -305,7 +305,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const struct = registrationStruct.put
                 const group = groups.find(g => g.id === struct.groupId)
 
-                if (!group || !Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om inschrijvingen in deze groep te maken")
                 }
 
@@ -335,7 +335,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const id of request.body.getDeletes()) {
             const member = await Member.getWithRegistrations(id)
-            if (!member || !Context.auth.canDeleteMember(member)) {
+            if (!member || !await Context.auth.canDeleteMember(member)) {
                 throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
             }
 

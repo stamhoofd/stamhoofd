@@ -118,7 +118,7 @@ export class EmailVerificationCode extends Model {
 
     getEmailVerificationUrl(user: import('./User').User, organization: import('./Organization').Organization|null, i18n: I18n) {
         let host: string;
-        if (user.permissions || !organization) {
+        if (user.organizationPermissions || !organization) {
             host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
         } else {
             // Add language if different than default
@@ -129,7 +129,7 @@ export class EmailVerificationCode extends Model {
             }
         }
 
-        return host+"/verify-email"+(user.permissions && this.organizationId ? "/"+encodeURIComponent(this.organizationId) : "")+"?code="+encodeURIComponent(this.code)+"&token="+encodeURIComponent(this.token);
+        return host+"/verify-email"+(user.organizationPermissions && this.organizationId ? "/"+encodeURIComponent(this.organizationId) : "")+"?code="+encodeURIComponent(this.code)+"&token="+encodeURIComponent(this.token);
     }
 
     /**
@@ -243,14 +243,14 @@ export class EmailVerificationCode extends Model {
 
     send(user: import('./User').User, organization: import('./Organization').Organization|null, i18n: I18n, withCode = true) {
         const { from, replyTo } = {
-            from: (user.permissions || !organization ? Email.getInternalEmailFor(i18n) : organization.getStrongEmail(i18n)),
+            from: (user.organizationPermissions || !organization ? Email.getInternalEmailFor(i18n) : organization.getStrongEmail(i18n)),
             replyTo: undefined // Don't use replyTo because it affects deliverability rates due to spam filters
         }
 
         const url = this.getEmailVerificationUrl(user, organization, i18n)
 
-        const footer = (!user.permissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
-        const footerHTML = (!user.permissions && organization ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
+        const footer = (!user.organizationPermissions && organization ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
+        const footerHTML = (!user.organizationPermissions && organization ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
 
         const name = organization?.name ?? 'Stamhoofd'
 
@@ -260,10 +260,10 @@ export class EmailVerificationCode extends Model {
                 from,
                 replyTo,
                 to: this.email,
-                subject: `[${user.permissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
+                subject: `[${user.organizationPermissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
                 type: "transactional",
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : name}`+footer,
-                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>Dit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.<br><br>${user.permissions ? "Stamhoofd" : name}`+footerHTML
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.organizationPermissions ? "Stamhoofd" : name}`+footer,
+                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>Dit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.<br><br>${user.organizationPermissions ? "Stamhoofd" : name}`+footerHTML
             })
         } else {
             Email.send({
@@ -271,8 +271,8 @@ export class EmailVerificationCode extends Model {
                 replyTo,
                 to: this.email,
                 type: "transactional",
-                subject: `[${user.permissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : name}`+footer
+                subject: `[${user.organizationPermissions ? "Stamhoofd" : name}] Verifieer jouw e-mailadres`,
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.organizationPermissions ? "Stamhoofd" : name}`+footer
             })
         }
     }

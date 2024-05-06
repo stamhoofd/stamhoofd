@@ -27,16 +27,16 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
 
         const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
+        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
             throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot de bestellingen van deze webshop")
         }
 

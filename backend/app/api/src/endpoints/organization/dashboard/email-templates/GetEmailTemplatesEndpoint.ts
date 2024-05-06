@@ -39,7 +39,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canReadEmailTemplates()) {
+        if (!await Context.auth.canReadEmailTemplates(organization.id)) {
             throw Context.auth.error()
         }  
 

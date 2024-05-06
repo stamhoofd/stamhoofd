@@ -41,7 +41,7 @@ export class UserFactory extends Factory<Options, User> {
             throw new Error("Unexpected failure when creating user in factory");
         }
 
-        user.permissions = this.options.permissions ?? null
+        user.organizationPermissions = this.options.permissions ?? null
         user.firstName = this.options.firstName ?? null;
         user.lastName = this.options.lastName ?? null;
         

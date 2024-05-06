@@ -90,11 +90,11 @@ export default class TicketRow extends Mixins(NavigationMixin){
     }
 
     get hasWrite() {
-        const p = this.$context.user?.permissions
+        const p = this.$context.organizationPermissions
         if (!p) {
             return false
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
     }
 
     openTicket() {

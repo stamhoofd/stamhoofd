@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group } from "@stamhoofd/models";
+import { Group, MemberWithRegistrations } from "@stamhoofd/models";
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
@@ -34,24 +34,30 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }  
 
-        const groups = await Group.getAll(organization.id)
         const members = (await Member.getFamilyWithRegistrations(request.params.id))
 
         let foundMember = false
+
+        const validatedMembers: MemberWithRegistrations[] = []
 
         for (const member of members) {
             if (member.id === request.params.id) {
                 foundMember = true;
 
                 // Check access to this member (this will automatically give access to the family)
-                if (!Context.auth.canAccessMember(member, groups)) {
+                if (!await Context.auth.canAccessMember(member)) {
                     throw Context.auth.error("Je hebt geen toegang tot dit lid")
                 }
+                validatedMembers.push(member)
                 break;
+            }
+            if (await Context.auth.canAccessMember(member)) {
+                // Remove from result
+                validatedMembers.push(member)
             }
         }
 
@@ -59,6 +65,6 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw Context.auth.error("Je hebt geen toegang tot dit lid")
         }
 
-        return new Response(members.filter(member => Context.auth.canAccessMember(member, groups)).map(m => m.getStructureWithRegistrations(true)));
+        return new Response(validatedMembers.map(m => m.getStructureWithRegistrations(true)));
     }
 }

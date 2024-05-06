@@ -32,7 +32,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canReadEmailTemplates()) {
+        if (!await Context.auth.canReadEmailTemplates(organization.id)) {
             throw Context.auth.error()
         }  
 

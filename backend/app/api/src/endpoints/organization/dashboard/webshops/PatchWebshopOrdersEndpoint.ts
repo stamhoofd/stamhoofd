@@ -62,7 +62,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
 
@@ -84,7 +84,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         // Need to happen in the queue because we are updating the webshop stock
         const orders = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id)
-            if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Write)) {
+            if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Write)) {
                 throw Context.auth.notFoundOrNoAccess()
             }
 

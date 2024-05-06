@@ -37,7 +37,7 @@
 import { PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STList, STListItem } from "@stamhoofd/components";
-import { PermissionLevel, PermissionRole, Permissions, User } from "@stamhoofd/structures";
+import { PermissionLevel, PermissionRole, Permissions, User, UserPermissions } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
@@ -62,12 +62,16 @@ export default class EditUserPermissionsBox extends Mixins(NavigationMixin) {
         return this.user
     }
 
+    get organizationPermissions() {
+        return this.patchedUser.permissions?.forOrganization(this.organization!) ?? null
+    }
+
     get roles() {
         return this.organization.privateMeta?.roles ?? []
     }
 
     getRole(role: PermissionRole) {
-        return !!this.patchedUser.permissions?.roles.find(r => r.id === role.id)
+        return !!this.organizationPermissions?.roles.find(r => r.id === role.id)
     }
 
     setRole(role: PermissionRole, enable: boolean) {
@@ -105,12 +109,13 @@ export default class EditUserPermissionsBox extends Mixins(NavigationMixin) {
     }
 
     addPermissionsPatch(patch: PartialWithoutMethods<PatchType<Permissions>>) {
-        this.addPatch({ permissions: Permissions.patch(patch) })
+        const p = UserPermissions.patch(patch)
+        p.organizationPermissions.set(this.organization.id, Permissions.patch(patch))
+        this.addPatch({ permissions: p })
     }
 
     get fullAccess() {
-        const user = this.patchedUser
-        return !!user.permissions && user.permissions.hasFullAccess(this.organization.privateMeta?.roles ?? [])
+        return !!this.organizationPermissions?.hasFullAccess()
     }
 
     set fullAccess(fullAccess: boolean) {

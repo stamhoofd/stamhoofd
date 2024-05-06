@@ -1,7 +1,7 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder,EnumDecoder,field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { Permissions } from './Permissions';
+import { Permissions, UserPermissions } from './Permissions';
 
 export enum LoginProviderType {
     SSO = "SSO",
@@ -32,7 +32,24 @@ export class User extends AutoEncoder {
     email: string;
 
     @field({ decoder: Permissions, nullable: true, version: 2, upgrade: () => null })
-    permissions: Permissions | null = null
+    @field({ 
+        decoder: UserPermissions, 
+        nullable: true, 
+        version: 247, 
+        upgrade: function (this: User, oldValue: Permissions|null): UserPermissions|null {
+            if (!oldValue || !this.organizationId) {
+                return null;
+            }
+            const m = new Map<string, Permissions>();
+            m.set(this.organizationId, oldValue)
+            
+            return UserPermissions.create({
+                globalPermissions: null,
+                organizationPermissions: m
+            })
+        } 
+    })
+    permissions: UserPermissions | null = null
 
     /**
      * Readonly
@@ -79,7 +96,24 @@ export class ApiUser extends AutoEncoder {
     name: string | null = null;
 
     @field({ decoder: Permissions, nullable: true, version: 2, upgrade: () => null })
-    permissions: Permissions | null = null
+    @field({ 
+        decoder: UserPermissions, 
+        nullable: true, 
+        version: 247, 
+        upgrade: function (this: User, oldValue: Permissions|null): UserPermissions|null {
+            if (!oldValue || !this.organizationId) {
+                return null;
+            }
+            const m = new Map<string, Permissions>();
+            m.set(this.organizationId, oldValue)
+            
+            return UserPermissions.create({
+                globalPermissions: null,
+                organizationPermissions: m
+            })
+        } 
+    })
+    permissions: UserPermissions | null = null
 
     @field({ decoder: DateDecoder })
     createdAt = new Date();

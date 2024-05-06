@@ -150,7 +150,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, GlobalEventBus, LoadingButton, Spinner, STErrorsDefault, STList, STListItem, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { BalanceItemDetailed, FinancialSupportSettings, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemDetailed, FinancialSupportSettings, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -218,13 +218,16 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     }
 
     get hasWrite(): boolean {
-        if (!this.$organizationManager.user.permissions) {
-            return false
+        if (this.$context.organizationAuth.hasFullAccess()) {
+            return true;
         }
 
-        if (this.$organizationManager.user.permissions.hasFullAccess(this.$organization.privateMeta?.roles ?? []) || this.$organizationManager.user.permissions.canManagePayments(this.organization.privateMeta?.roles ?? []) ) {
-            // Can edit members without groups
-            return true
+        if (this.$context.organizationAuth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+            return true;
+        }
+
+        if (this.$context.organizationAuth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+            return true;
         }
 
         for (const group of this.member.groups) {

@@ -50,10 +50,10 @@
                     </p>
 
                     <template #right>
-                        <span v-if="getAdminsForRole(role).length > 1" class="style-tag">
-                            {{ getAdminsForRole(role).length }}
+                        <span v-if="getAdminsForRole(role) > 1" class="style-tag">
+                            {{ getAdminsForRole(role) }}
                         </span>
-                        <span v-else-if="getAdminsForRole(role).length == 1" class="style-tag">
+                        <span v-else-if="getAdminsForRole(role) == 1" class="style-tag">
                             1
                         </span>
                         <span v-else class="style-tag warn">
@@ -147,12 +147,21 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
     }
 
     getAdminsForRole(role: PermissionRole) {
-        return this.admins.filter(a => !!a.permissions?.roles.find(r => r.id === role.id))
+        return this.admins.reduce((c, a) => {
+            const op = a.permissions?.forOrganization(this.patchedOrganization)
+            if (!!op?.roles.find(r => r.id === role.id)) {
+                return c + 1
+            }
+            return c
+        }, 0)
     }
 
     getAdmins() {
         // We still do a check on ID because users might have a role that is deleted
-        return this.admins.filter(a => !!a.permissions?.hasFullAccess(this.patchedOrganization.privateMeta?.roles ?? []))
+        return this.admins.filter(a => {
+            const op = a.permissions?.forOrganization(this.patchedOrganization)
+            return !!op?.hasFullAccess()
+        })
     }
 
     get draggableRoles() {

@@ -315,7 +315,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CheckoutPriceBreakdown, CartItemRow, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
@@ -463,23 +463,27 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get hasPaymentsWrite() {
-        const p = this.$context.user?.permissions
+        const p = this.$context.organizationPermissions
         if (!p) {
             return false
         }
-        if (p.canManagePayments(this.$organization.privateMeta?.roles ?? [])) {
+        if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
             return true
         }
 
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
+        if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+            return true
+        }
+
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
     }
 
     get hasWrite() {
-        const p = this.$context.user?.permissions
+        const p = this.$context.organizationPermissions
         if (!p) {
             return false
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
     }
 
     get hasSingleTickets() {

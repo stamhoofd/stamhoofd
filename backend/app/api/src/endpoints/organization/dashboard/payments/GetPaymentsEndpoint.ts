@@ -97,7 +97,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canManagePayments()) {
+        if (!await Context.auth.canManagePayments(organization.id)) {
             throw Context.auth.error()
         } 
 

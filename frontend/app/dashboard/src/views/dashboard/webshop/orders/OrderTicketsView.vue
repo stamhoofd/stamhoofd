@@ -64,7 +64,7 @@ export default class OrderTicketsView extends Mixins(NavigationMixin){
     }
 
     get hasWrite() {
-        return this.webshop.privateMeta.permissions.hasWriteAccess(this.$context.user?.permissions, this.$organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(this.$context.organizationPermissions)
     }
 
     async downloadAllTickets() {

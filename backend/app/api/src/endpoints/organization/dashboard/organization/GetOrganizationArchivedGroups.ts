@@ -28,12 +28,16 @@ export class GetOrganizationArchivedEndpoint extends Endpoint<Params, Query, Bod
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canAccessArchivedGroups()) {
+        if (!await Context.auth.canAccessArchivedGroups(organization.id)) {
             throw Context.auth.error()
         }
 
         // Get all admins
         const groups = await Group.where({ organizationId: organization.id, status: GroupStatus.Archived, deletedAt: null })
-        return new Response(groups.map(g => AuthenticatedStructures.group(g)));
+        const structures: GroupStruct[] = []
+        for (const g of groups) {
+            structures.push(await AuthenticatedStructures.group(g))
+        }
+        return new Response(structures);
     }
 }

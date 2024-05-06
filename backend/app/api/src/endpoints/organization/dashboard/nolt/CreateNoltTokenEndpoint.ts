@@ -36,7 +36,7 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
         const {user} = await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
 

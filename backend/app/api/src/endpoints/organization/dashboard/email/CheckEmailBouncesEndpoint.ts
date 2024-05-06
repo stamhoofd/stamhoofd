@@ -31,7 +31,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canAccessEmailBounces()) {
+        if (!await Context.auth.canAccessEmailBounces(organization.id)) {
             throw Context.auth.error()
         }  
 

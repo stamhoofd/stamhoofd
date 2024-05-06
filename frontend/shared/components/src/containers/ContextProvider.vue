@@ -16,7 +16,7 @@ import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
     provide() {
         return {
             ...this.context,
-            ...this.calculatedContext()
+            ...(this.calculatedContext ? this.calculatedContext() : {})
         }
     }
 })
@@ -24,10 +24,12 @@ export default class ContextProvider extends Vue {
     @Prop()
         root!: ComponentWithProperties
 
-    @Prop()
+    @Prop({default: () => {
+        return {}
+    }})
         context!: Record<string, unknown>
 
-    @Prop()
+    @Prop({default: null})
         calculatedContext!: () => Record<string, unknown>
 }
 </script>

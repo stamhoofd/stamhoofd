@@ -675,7 +675,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return this.$user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
+        return this.$context.organizationAuth.hasFullAccess()
     }
 
     getDefaultEmailId() {

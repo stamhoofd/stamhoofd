@@ -488,13 +488,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get hasWrite(): boolean {
-        if (!this.$organizationManager.user.permissions) {
-            return false
-        }
-
-        if (this.$organizationManager.user.permissions.hasWriteAccess(this.$organization.privateMeta?.roles ?? [])) {
-            // Can edit members without groups
-            return true
+        if (this.$context.organizationAuth.hasFullAccess()) {
+            return true;
         }
 
         for (const group of this.member.groups) {

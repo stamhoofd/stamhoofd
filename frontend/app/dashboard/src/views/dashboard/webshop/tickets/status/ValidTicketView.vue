@@ -393,7 +393,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemRow, ColorHelper, GlobalEventBus, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
-import { BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
+import { AccessRight, BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -511,22 +511,26 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
     }
 
     get hasWrite() {
-        const p = this.$context.user?.permissions
+        const p = this.$context.organizationPermissions
         if (!p) {
             return false
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
     }
 
     get hasPaymentsWrite() {
-        const p = this.$context.user?.permissions
+        const p = this.$context.organizationPermissions
         if (!p) {
             return false
         }
-        if (p.canManagePayments(this.$organization.privateMeta?.roles ?? [])) {
+        if (p.hasAccessRight(AccessRight.OrganizationManagePayments)) {
             return true
         }
-        return this.webshop.privateMeta.permissions.hasWriteAccess(p, this.$organization.privateMeta?.roles ?? [])
+
+        if (p.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+            return true
+        }
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p)
     }
 
     openPayment(payment: Payment) {

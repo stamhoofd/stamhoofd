@@ -38,14 +38,14 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
 
         // Halt all order placement and validation + pause stock updates
         return await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id)
-            if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
                 throw Context.auth.notFoundOrNoAccess()
             }
 
@@ -175,7 +175,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             // Verify if we still have full access
-            if (!Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "missing_permissions",
                     message: "You cannot restrict your own permissions",

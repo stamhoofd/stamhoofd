@@ -37,16 +37,16 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }  
         
         const group = await Group.getByID(request.params.id)
-        if (!group || !Context.auth.canAccessGroup(group)) {
+        if (!group || !await Context.auth.canAccessGroup(group)) {
             throw Context.auth.notFoundOrNoAccess("De groep die je opvraagt bestaat niet (meer)")
         }
 

@@ -1,11 +1,14 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, EnumDecoder, field, MapDecoder, PatchType, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from './Group';
+import { Organization } from './Organization';
 import { WebshopPreview } from './webshops/Webshop';
 
-
+/**
+ * PermissionLevels are used to grant permissions to specific resources or system wide
+ */
 export enum PermissionLevel {
     /** No access */
     None = "None",
@@ -18,6 +21,33 @@ export enum PermissionLevel {
     
     /** Full access */
     Full = "Full",
+}
+
+/**
+ * More granular access rights to specific things in the system
+ */
+export enum AccessRight {
+    // Platform level permissions
+    /**
+     * Allows the user to log in as a full-access admin to a specific organization
+     */
+    PlatformLoginAs = "PlatformLoginAs",
+
+    // Organization level permissions
+    OrganizationCreateWebshops = "OrganizationCreateWebshops",
+    OrganizationManagePayments = "OrganizationManagePayments",
+    OrganizationFinanceDirector = "OrganizationFinanceDirector",
+}
+
+export class AccessRightHelper {
+    static getDescription(right: AccessRight) {
+        switch (right) {
+            case AccessRight.PlatformLoginAs: return 'inloggen als hoofdbeheerder'
+            case AccessRight.OrganizationCreateWebshops: return 'volledige boekhouding'
+            case AccessRight.OrganizationManagePayments: return 'overschrijvingen'
+            case AccessRight.OrganizationFinanceDirector: return 'webshops maken'
+        }
+    }
 }
 
 export function getPermissionLevelNumber(level: PermissionLevel): number {
@@ -48,28 +78,35 @@ export class PermissionRoleDetailed extends PermissionRole {
     @field({ decoder: new EnumDecoder(PermissionLevel), version: 201 })
     level: PermissionLevel = PermissionLevel.None
 
+    @field({ 
+        decoder: new ArrayDecoder(new EnumDecoder(AccessRight)), 
+        version: 246,
+        upgrade: function() {
+            const base: AccessRight[] = []
+            if (this.legacyManagePayments) {
+                base.push(AccessRight.OrganizationManagePayments);
+            }
 
-    // Todo: all these flag based permissions should move to a flag list
-    // so it is easier to add more permission levels in the future.
-    // also, permission flags should be prefixed with either organization or platform (e.g. managing invoices of the platform vs managing finances of all organizations)
+            if (this.legacyFinanceDirector) {
+                base.push(AccessRight.OrganizationFinanceDirector);
+            }
 
-    /**
-     * Access to open transfers
-     */
-    @field({ decoder: BooleanDecoder })
-    managePayments = false
+            if (this.legacyCreateWebshops) {
+                base.push(AccessRight.OrganizationCreateWebshops);
+            }
+            return base;
+        }
+    })
+    accessRights: AccessRight[] = []
 
-    /**
-     * Full payments access
-     */
-    @field({ decoder: BooleanDecoder, version: 199 })
-    financeDirector = false
+    @field({ decoder: BooleanDecoder, field: 'managePayments', optional: true })
+    legacyManagePayments = false
 
-    /**
-     * Can create new webshops = write
-     */
-    @field({ decoder: BooleanDecoder })
-    createWebshops = false
+    @field({ decoder: BooleanDecoder, version: 199, field: 'financeDirector', optional: true })
+    legacyFinanceDirector = false
+    
+    @field({ decoder: BooleanDecoder, field: 'createWebsops', optional: true })
+    legacyCreateWebshops = false
 
     getDescription(webshops: WebshopPreview[], groups: Group[]) {
         const stack: string[] = []
@@ -83,14 +120,8 @@ export class PermissionRoleDetailed extends PermissionRole {
             stack.push("alles")
         }
 
-        if (this.financeDirector) {
-            stack.push("volledige boekhouding")
-        } else if (this.managePayments) {
-            stack.push("overschrijvingen")
-        }
-
-        if (this.createWebshops) {
-            stack.push("webshops maken")
+        for (const right of this.accessRights) {
+            stack.push(AccessRightHelper.getDescription(right))
         }
 
         let webshopCount = 0
@@ -127,6 +158,10 @@ export class PermissionRoleDetailed extends PermissionRole {
 
         return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' en '))
     }
+
+    hasAccessRight(right: AccessRight): boolean {
+        return this.level === PermissionLevel.Full || this.accessRights.includes(right)
+    }
 }
 
 /**
@@ -142,11 +177,8 @@ export class PermissionsByRole extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     full: PermissionRole[] = []
 
-    /**
-     * Whetever a given user has access to the members in this group. 
-     */
-    getPermissionLevel(permissions: Permissions, allRoles: PermissionRoleDetailed[]): PermissionLevel {
-        if (permissions.hasFullAccess(allRoles)) {
+    getPermissionLevel(permissions: LoadedPermissions): PermissionLevel {
+        if (permissions.hasFullAccess()) {
             return PermissionLevel.Full
         }
 
@@ -156,7 +188,7 @@ export class PermissionsByRole extends AutoEncoder {
             }
         }
 
-        if (permissions.hasWriteAccess(allRoles)) {
+        if (permissions.hasWriteAccess()) {
             return PermissionLevel.Write
         }
 
@@ -166,7 +198,7 @@ export class PermissionsByRole extends AutoEncoder {
             }
         }
 
-        if (permissions.hasReadAccess(allRoles)) {
+        if (permissions.hasReadAccess()) {
             return PermissionLevel.Read
         }
 
@@ -203,27 +235,27 @@ export class PermissionsByRole extends AutoEncoder {
         return PermissionLevel.None
     }
 
-    hasAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[], level: PermissionLevel): boolean {
+    hasAccess(permissions: LoadedPermissions|undefined|null, level: PermissionLevel): boolean {
         if (!permissions) {
             return false
         }
-        return getPermissionLevelNumber(this.getPermissionLevel(permissions, allRoles)) >= getPermissionLevelNumber(level)
+        return getPermissionLevelNumber(this.getPermissionLevel(permissions)) >= getPermissionLevelNumber(level)
     }
 
     roleHasAccess(role: PermissionRole, level: PermissionLevel = PermissionLevel.Read): boolean {
         return getPermissionLevelNumber(this.getRolePermissionLevel(role)) >= getPermissionLevelNumber(level)
     }
 
-    hasFullAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccess(permissions, allRoles, PermissionLevel.Full)
+    hasFullAccess(permissions: LoadedPermissions|undefined|null): boolean {
+        return this.hasAccess(permissions, PermissionLevel.Full)
     }
 
-    hasWriteAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccess(permissions, allRoles, PermissionLevel.Write)
+    hasWriteAccess(permissions: LoadedPermissions|undefined|null): boolean {
+        return this.hasAccess(permissions, PermissionLevel.Write)
     }
 
-    hasReadAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccess(permissions, allRoles, PermissionLevel.Read)
+    hasReadAccess(permissions: LoadedPermissions|undefined|null): boolean {
+        return this.hasAccess(permissions, PermissionLevel.Read)
     }
 }
 
@@ -276,69 +308,45 @@ export class Permissions extends AutoEncoder {
         return this.hasAccess(allRoles, PermissionLevel.Full);
     }
 
+    hasAccessRight(right: AccessRight, allRoles: PermissionRoleDetailed[]): boolean {
+        if (this.hasFullAccess(allRoles)) {
+            return true
+        }
+        for (const r of this.roles) {
+            const f = allRoles.find(rr => r.id === rr.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (f.hasAccessRight(right)) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     /**
+     * @deprecated
      * @param roles All available roles of the organizatino (to query)
      */
     canCreateWebshops(allRoles: PermissionRoleDetailed[]): boolean {
-        if (this.hasFullAccess(allRoles)) {
-            return true
-        }
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (f.createWebshops) {
-                return true
-            }
-        }
-
-        return false
+        return this.hasAccessRight(AccessRight.OrganizationCreateWebshops, allRoles)
     }
 
     /**
+     * @deprecated
      * @param roles All available roles of the organizatino (to query)
      */
     canManagePayments(allRoles: PermissionRoleDetailed[]): boolean {
-        if (this.hasFullAccess(allRoles)) {
-            return true
-        }
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (f.financeDirector) {
-                return true
-            }
-            if (f.managePayments) {
-                return true
-            }
-        }
-
-        return false
+        return this.hasAccessRight(AccessRight.OrganizationManagePayments, allRoles) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector, allRoles)
     }
 
     /**
+     * @deprecated
      */
     hasFinanceAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        if (this.hasFullAccess(allRoles)) {
-            return true
-        }
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (f.financeDirector) {
-                return true
-            }
-        }
-
-        return false
+        return this.hasAccessRight(AccessRight.OrganizationFinanceDirector, allRoles)
     }
 
     add(other: Permissions) {
@@ -354,22 +362,160 @@ export class Permissions extends AutoEncoder {
     }
 }
 
-export class UserPermissions extends AutoEncoder {
-    @field({ decoder: Permissions })
-    globalPermissions = Permissions.create({})
-
-    @field({ decoder: new MapDecoder(StringDecoder, Permissions) })
-    organizationPermissions: Map<string, Permissions> = new Map()
-}
-
 /**
- * Convenience class to combine both roles of an organization, platform and the permissions of a user.
- * This helps with checking permissions.
+ * Identical to Permissions but with detailed roles, loaded from the organization or platform
  */
-export class FilledUserPermissions {
-    constructor(userPermissions: UserPermissions, allRoles: PermissionRoleDetailed[]) {
-        // todo
+export class LoadedPermissions {
+    level: PermissionLevel = PermissionLevel.None
+    roles: PermissionRoleDetailed[] = []
+
+    constructor(data: Partial<LoadedPermissions>) {
+        Object.assign(this, data)
+    }
+
+    static create(data: Partial<LoadedPermissions>) {
+        return new LoadedPermissions(data)
+    }
+
+    static from(permissions: Permissions, allRoles: PermissionRoleDetailed[]) {
+        return this.create({
+            level: permissions.level,
+            roles: permissions.roles.flatMap(role => {
+                const d = allRoles.find(a => a.id === role.id);
+                if (d) {
+                    return [d]
+                }
+                return []
+            })
+        })
+    }
+
+    hasAccess(level: PermissionLevel): boolean {
+        if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
+            // Someone with read / write access for the whole organization, also the same access for each group
+            return true;
+        }
+
+        for (const f of this.roles) {
+            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(level)) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    hasReadAccess(): boolean {
+        return this.hasAccess(PermissionLevel.Read)
+    }
+
+    hasWriteAccess(): boolean {
+        return this.hasAccess(PermissionLevel.Write)
+    }
+
+    hasFullAccess(): boolean {
+        return this.hasAccess(PermissionLevel.Full);
     }
 
 
+    hasAccessRight(right: AccessRight): boolean {
+        if (this.hasFullAccess()) {
+            return true
+        }
+        for (const f of this.roles) {
+            if (f.hasAccessRight(right)) {
+                return true
+            }
+        }
+
+        return false
+    }
+}
+
+export class PlatformPrivateConfig extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
+    roles: PermissionRoleDetailed[] = []
+}
+
+
+export class Platform extends AutoEncoder {
+    @field({ decoder: PlatformPrivateConfig, nullable: true })
+    privateConfig: PlatformPrivateConfig|null = null;
+
+    /**
+     * If you don't have permissions, privateConfig will be null, so there won't be any roles either
+     */
+    getRoles() {
+        return this.privateConfig?.roles ?? []
+    }
+}
+
+export class UserPermissions extends AutoEncoder {
+    @field({ decoder: Permissions, nullable: true })
+    globalPermissions: Permissions | null = null
+
+    @field({ decoder: new MapDecoder(StringDecoder, Permissions) })
+    organizationPermissions: Map<string, Permissions> = new Map()
+
+    forOrganization(organization: {id: string, privateMeta?: {roles: PermissionRoleDetailed[]}|null}): LoadedPermissions|null {
+        return this.for(organization.id, [], organization?.privateMeta?.roles ?? [])
+    }
+
+    for(organizationId: string, platformRoles: PermissionRoleDetailed[], organizationRoles: PermissionRoleDetailed[]): LoadedPermissions|null {
+        if (this.globalPermissions && this.globalPermissions.hasAccessRight(AccessRight.PlatformLoginAs, platformRoles)) {
+            return LoadedPermissions.create({
+                level: PermissionLevel.Full,
+            })
+        }
+
+        const permissions = this.organizationPermissions.get(organizationId) ?? null
+        if (!permissions) {
+            return null;
+        }
+        return LoadedPermissions.from(permissions, organizationRoles)
+    }
+
+    static convertPatch(patch: AutoEncoderPatchType<Permissions>, organizationId: string): AutoEncoderPatchType<UserPermissions> {
+        const clonedPatch = UserPermissions.patch({})
+        clonedPatch.organizationPermissions.set(organizationId, patch)
+        return clonedPatch
+    }
+
+    static limitedPatch(old: UserPermissions|null, patch: UserPermissions|AutoEncoderPatchType<UserPermissions>|null, organizationId: string): UserPermissions|null {
+        if (patch === null) {
+            return old;
+        }
+        
+        if (patch.isPatch()) {
+            // Only allow to set the permissions for the organization in scope
+            if (patch.organizationPermissions.get(organizationId)) {
+                const clonedPatch = UserPermissions.patch({})
+                clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId))
+                return old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch)
+            }
+        } else {
+            // Only allow to set the permissions for the organization in scope
+            if (patch.organizationPermissions.get(organizationId)) {
+                const clonedPatch = UserPermissions.patch({})
+                clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId))
+                return old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch)
+            }
+        }
+        return old
+    }
+
+    static limitedAdd(old: UserPermissions|null, add: UserPermissions, organizationId: string): UserPermissions|null {
+        if (add.organizationPermissions.get(organizationId)) {
+            const realAdd = add.organizationPermissions.get(organizationId) as Permissions
+            const realOld = old ? old.organizationPermissions.get(organizationId) : null
+            if (!realOld) {
+                const n = old ?? UserPermissions.create({});
+                n.organizationPermissions.set(organizationId, realAdd)
+                return n;
+            }
+            realOld.add(realAdd)
+            return old
+        }
+        return null
+    }
 }

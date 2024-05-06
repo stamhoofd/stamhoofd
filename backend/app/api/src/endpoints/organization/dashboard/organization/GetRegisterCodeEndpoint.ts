@@ -28,7 +28,7 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
 

@@ -620,22 +620,11 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         )
     }
 
-    get canCreateWebshops() {
-        const result = this.$user!.permissions!.canCreateWebshops(this.$organization.privateMeta?.roles ?? [])
-        return result
-    }
-
-    get canManagePayments() {
-        return this.$user!.permissions!.canManagePayments(this.$organization.privateMeta?.roles ?? [])
-    }
 
     get fullAccess() {
-        return this.$user!.permissions!.hasFullAccess(this.$organization.privateMeta?.roles ?? [])
+        return this.$context.organizationAuth.hasFullAccess()
     }
 
-    get fullReadAccess() {
-        return this.$user!.permissions!.hasReadAccess(this.$organization.privateMeta?.roles ?? [])
-    }
 
     get enableMemberModule() {
         return this.$organization.meta.modules.useMembers

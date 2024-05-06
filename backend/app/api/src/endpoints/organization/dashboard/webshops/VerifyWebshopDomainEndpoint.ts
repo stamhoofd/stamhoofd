@@ -31,17 +31,17 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
 
         return await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id)
-            if (!webshop || !Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
                 throw Context.auth.notFoundOrNoAccess()
             }
         

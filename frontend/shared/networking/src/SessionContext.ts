@@ -8,6 +8,7 @@ import { AppManager, SessionManager, UrlHelper } from '..'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
+import { FrontendOrganizationPermissionChecker } from './FrontendOrganizationPermissionChecker'
 
 type AuthenticationStateListener = (changed: "user" | "organization" | "token" | "preventComplete") => void
 
@@ -51,6 +52,7 @@ export class SessionContext implements RequestMiddleware {
 
     constructor(organization: Organization|null) {
         this.organization = organization
+        this.usedPlatformStorage = this.organization === null
     }
 
     /**
@@ -58,6 +60,17 @@ export class SessionContext implements RequestMiddleware {
      */
     get organizationId() {
         return this.organization?.id ?? null
+    }
+
+    get organizationPermissions() {
+        if (!this.organization) {
+            return null
+        }
+        return this.user?.permissions?.forOrganization(this.organization) ?? null
+    }
+
+    get organizationAuth() {
+        return new FrontendOrganizationPermissionChecker(this.organizationPermissions)
     }
 
     static async createFrom(data: ({organization: Organization} | {organizationId: string})) {
@@ -360,8 +373,11 @@ export class SessionContext implements RequestMiddleware {
         return !!this.token && !!this.user && !!this.organization && !this.preventComplete && (!this.user.permissions || !!this.organization.privateMeta)
     }
 
-    static serverForOrganization(organizationId: string) {
+    static serverForOrganization(organizationId: string|null|undefined) {
         const server = NetworkManager.server
+        if (!organizationId) {
+            return server
+        }
 
         if (AppManager.shared.isNative && organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
             // Use demo server for app reviews
@@ -374,7 +390,7 @@ export class SessionContext implements RequestMiddleware {
     }
 
     get server() {
-        return SessionContext.serverForOrganization(this.organizationId)
+        return SessionContext.serverForOrganization(this.organization?.id)
     }
 
     /**
@@ -400,7 +416,7 @@ export class SessionContext implements RequestMiddleware {
         this.callListeners("token")
     }
 
-    setToken(token: Token, usedPlatformStorage: boolean) {
+    setToken(token: Token, usedPlatformStorage?: boolean) {
         if (this.token) {
             // Disable listener before clearing the token
             this.token.onChange = () => {
@@ -410,7 +426,10 @@ export class SessionContext implements RequestMiddleware {
         this.token = new ManagedToken(token, () => {
             this.onTokenChanged()
         });
-        this.usedPlatformStorage = usedPlatformStorage
+
+        if (usedPlatformStorage !== undefined) {
+            this.usedPlatformStorage = usedPlatformStorage
+        }
         this.callListeners("token")
     }
 

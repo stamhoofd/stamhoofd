@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
 import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue, toNative } from 'vue-facing-decorator';
@@ -16,6 +16,7 @@ import { Component, Vue, toNative } from 'vue-facing-decorator';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import AdminApp from './AdminApp.vue';
 import { getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
+import { reactive } from 'vue';
 
 @Component({
     components: {
@@ -92,20 +93,26 @@ export class App extends Vue {
         const parts = UrlHelper.shared.getParts();
         const queryString = UrlHelper.shared.getSearchParams()
 
-        if (parts.length == 2 && parts[0] == 'reset-password') {
+        if (parts.length > 0 && parts[0] == 'reset-password') {
             UrlHelper.shared.clear()
 
             // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
             const token = queryString.get('token');
-            const session = await SessionContext.createFrom({organizationId: parts[1]});
+            const session = parts[1] ? (await SessionContext.createFrom({organizationId: parts[1]})) : new SessionContext(null);
 
-            (this.$refs.modalStack as any).present({
+            (this.$refs.modalStack as InstanceType<typeof ModalStackComponent>).present({
                 url: UrlHelper.transformUrl(currentPath),
                 adjustHistory: false,
                 components: [
-                    new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false)
-                ]
+                    new ComponentWithProperties(ContextProvider, {
+                        context: {
+                            $context: reactive(session),
+                        },
+                        root: new ComponentWithProperties(ForgotPasswordResetView, { token }).setDisplayStyle("popup").setAnimated(false)
+                    })
+                ],
+                modalDisplayStyle: "popup",
             });
         }
 

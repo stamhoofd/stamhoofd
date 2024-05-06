@@ -35,7 +35,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canManageDocuments(PermissionLevel.Write)) {
+        if (!await Context.auth.canManageDocuments(PermissionLevel.Write)) {
             throw Context.auth.error()
         }
 
@@ -61,7 +61,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
 
         for (const patch of request.body.getPatches()) {
             const template = await DocumentTemplate.getByID(patch.id)
-            if (!template || !Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
+            if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
                 throw Context.auth.notFoundOrNoAccess("Onbekende template")
             }
 
@@ -96,7 +96,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
 
         for (const id of request.body.getDeletes()) {
             const template = await DocumentTemplate.getByID(id)
-            if (!template || !Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
+            if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Template not found",

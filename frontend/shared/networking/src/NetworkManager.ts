@@ -109,7 +109,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
     async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
         console.error("response error")
-        console.error(response)
+        console.error(error)
 
         try {
             if (error.hasCode("client_update_required")) {

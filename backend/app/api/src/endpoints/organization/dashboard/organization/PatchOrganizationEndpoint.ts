@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonba
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Group, Organization,PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions, UserPermissions } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -36,9 +36,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-       const {user} = await Context.authenticate()
+        const {user} = await Context.authenticate()
 
-        if (!Context.auth.hasSomeAccess()) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error()
         }
         
@@ -56,7 +56,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         const errors = new SimpleErrors()
         const allowedIds: string[] = []
 
-        if (Context.auth.hasFullAccess()) {
+        if (await Context.auth.hasFullAccess(organization.id)) {
             organization.name = request.body.name ?? organization.name
             if (request.body.website !== undefined) {
                 organization.website = request.body.website;
@@ -187,7 +187,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 for (const patch of request.body.admins.getPatches()) {
                     if (patch.permissions) {
                         const admin = await User.getByID(patch.id)
-                        if (!admin || !Context.auth.canAccessUser(admin, PermissionLevel.Full)) {
+                        if (!admin || !await Context.auth.canAccessUser(admin, PermissionLevel.Full)) {
                             throw new SimpleError({
                                 code: "invalid_field",
                                 message: "De beheerder die je wilt wijzigen bestaat niet (meer)",
@@ -195,13 +195,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             })
                         }
 
-                        if (patch.permissions.isPatch()) {
-                            admin.permissions = admin.permissions ? admin.permissions.patch(patch.permissions) : Permissions.create({}).patch(patch.permissions)
-                        } else {
-                            admin.permissions = patch.permissions
-                        }
+                        admin.permissions = UserPermissions.limitedPatch(admin.permissions, patch.permissions, organization.id)
 
-                        if (admin.id === user.id && !admin.permissions.hasFullAccess(Context.auth.getAllRoles())) {
+                        if (admin.id === user.id && (!admin.permissions || !admin.permissions.forOrganization(organization)?.hasFullAccess())) {
                             throw new SimpleError({
                                 code: "permission_denied",
                                 message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
@@ -276,7 +272,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             continue
                         }
 
-                        if (!Context.auth.canCreateGroupInCategory(category)) {
+                        if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
                             throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie')
                         }
                             
@@ -307,7 +303,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         if (deleteGroups.length > 0) {
             for (const id of deleteGroups) {
                 const model = await Group.getByID(id)
-                if (!model || !Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+                if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                     errors.addError(
                         Context.auth.error('Je hebt geen toegangsrechten om deze groep te verwijderen')
                     )
@@ -321,7 +317,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         for (const groupPut of request.body.groups.getPuts()) {
-            if (!Context.auth.hasFullAccess() && !allowedIds.includes(groupPut.put.id)) {
+            if (!await Context.auth.hasFullAccess(organization.id) && !allowedIds.includes(groupPut.put.id)) {
                 errors.addError(
                     Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen')
                 )
@@ -337,7 +333,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             model.status = struct.status
 
             // Check if current user has permissions to this new group -> else fail with error
-            if (!Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+            if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                 errors.addError(
                     new SimpleError({
                         code: "missing_permissions",
@@ -355,7 +351,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         for (const struct of request.body.groups.getPatches()) {
             const model = await Group.getByID(struct.id)
 
-            if (!model || !Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+            if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                 errors.addError(
                     Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen')
                 )
@@ -373,7 +369,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (struct.privateSettings) {
                 model.privateSettings.patchOrPut(struct.privateSettings)
 
-                if (!Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+                if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                     errors.addError(
                         new SimpleError({
                             code: "missing_permissions",
@@ -401,7 +397,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         for (const struct of request.body.webshops.getPatches()) {
             const model = await Webshop.getByID(struct.id)
 
-            if (!model || !Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
+            if (!model || !await Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
                 errors.addError(
                     Context.auth.error('Je hebt geen toegangsrechten om deze webshop te wijzigen')
                 )

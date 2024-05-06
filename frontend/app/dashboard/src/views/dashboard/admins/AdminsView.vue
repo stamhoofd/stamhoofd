@@ -53,7 +53,7 @@
                         </span>
                         <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
                             <span class="icon user-blocked-layer-1" />
-                            <span class="icon user-blocked-layer-2 error" />
+                            <span class="icon user-blocked-layer-2 red" />
                         </span>
                         <span v-else class="icon user" />
                     </template>
@@ -87,7 +87,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User } from '@stamhoofd/structures';
+import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
@@ -159,12 +159,21 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     permissionList(user: User) {
         const list: string[] = []
-        if (user.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [])) {
+        const organizationPermissions = user.permissions?.forOrganization(this.organization)
+        if (!organizationPermissions) {
+            return 'Geen toegangsrechten'
+        }
+
+        if (organizationPermissions.hasFullAccess()) {
             list.push("Hoofdbeheerders")
         }
 
-        for (const role of user.permissions?.roles ?? []) {
+        for (const role of organizationPermissions.roles) {
             list.push(role.name)
+        }
+
+        if (list.length === 0) {
+            return 'Geen toegangsrechten'
         }
         return list.join(", ")
     }
@@ -174,24 +183,26 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     get sortedAdmins() {
-        return this.admins.slice().sort((a, b) => Sorter.stack(Sorter.byBooleanValue(a.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) ?? false, b.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) ?? false), Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)))
+        return this.admins.slice().sort((a, b) => Sorter.stack(Sorter.byBooleanValue(a.permissions?.forOrganization(this.organization)?.hasFullAccess() ?? false, b.permissions?.forOrganization(this.organization)?.hasFullAccess() ?? false), Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)))
     }
 
     hasFullAccess(user: User) {
-        return user.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) ?? false
+        return user.permissions?.forOrganization(this.organization)?.hasFullAccess() ?? false
     }
 
     hasNoRoles(user: User) {
-        return !user.permissions?.hasReadAccess(this.organization.privateMeta?.roles ?? []) && user.permissions?.roles.length == 0
+        return !user.permissions?.forOrganization(this.organization)?.hasReadAccess() && user.permissions?.forOrganization(this.organization)?.roles.length == 0
     }
 
     createAdmin() {
+        const p = UserPermissions.create({})
+        p.organizationPermissions.set(this.organization.id, Permissions.create({level: PermissionLevel.None}))
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(AdminView, {
                 user: User.create({
                     email: '',
                     organizationId: this.organization.id,
-                    permissions: Permissions.create({ level: PermissionLevel.None })
+                    permissions: p
                 }),
                 isNew: true
             }) 
@@ -233,21 +244,6 @@ export default class AdminsView extends Mixins(NavigationMixin) {
                 isNew: false
             })
         }).setDisplayStyle("popup"))
-    }
-
-    getAdminsForRole(role: PermissionRole) {
-        return this.sortedAdmins.filter(a => !!a.permissions?.roles.find(r => r.id === role.id))
-    }
-
-    getAdminsWithoutRole() {
-        // We still do a check on ID because users might have a role that is deleted
-        const ids = this.roles.map(r => r.id)
-        return this.sortedAdmins.filter(a => !a.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) && !a.permissions?.roles.find(r => ids.includes(r.id)))
-    }
-
-    getAdmins() {
-        // We still do a check on ID because users might have a role that is deleted
-        return this.sortedAdmins.filter(a => !!a.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []))
     }
 
     editRoles(animated = true) {

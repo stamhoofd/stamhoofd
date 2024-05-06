@@ -30,7 +30,7 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!Context.auth.canManagePaymentAccounts(PermissionLevel.Read)) {
+        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Read)) {
             throw Context.auth.error()
         }
 

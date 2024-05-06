@@ -339,7 +339,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -450,31 +450,19 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     get hasFullPermissions() {
-        if (!this.$organizationManager.user.permissions) {
-            return false
-        }
-        return this.preview.privateMeta.permissions.hasFullAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)
     }
 
     get hasWritePermissions() {
-        if (!this.$organizationManager.user.permissions) {
-            return false
-        }
-        return this.preview.privateMeta.permissions.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasWriteAccess(this.$context.organizationPermissions)
     }
 
     get hasReadPermissions() {
-        if (!this.$organizationManager.user.permissions) {
-            return false
-        }
-        return this.preview.privateMeta.permissions.hasReadAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
+        return this.preview.privateMeta.permissions.hasReadAccess(this.$context.organizationPermissions)
     }
 
     get hasScanPermissions() {
-        if (!this.$organizationManager.user.permissions) {
-            return false
-        }
-        return this.hasWritePermissions || this.preview.privateMeta.scanPermissions.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization.privateMeta?.roles ?? [])
+        return this.hasWritePermissions || this.preview.privateMeta.scanPermissions.hasWriteAccess(this.$context.organizationPermissions)
     }
 
     get isTicketsOnly() {
@@ -691,12 +679,12 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     get canCreateWebshops() {
-        const result = this.$user!.permissions!.canCreateWebshops(this.organization.privateMeta?.roles ?? [])
-        return result
+        return this.$context.organizationAuth.hasAccessRight(AccessRight.OrganizationCreateWebshops)
     }
 
     duplicateWebshop() {
         if (!this.canCreateWebshops) {
+            new Toast('Je hebt geen toegang om nieuwe webshops te maken. Vraag toegang aan een hoofdbeheerder van je vereniging.').show()
             return;
         }
 

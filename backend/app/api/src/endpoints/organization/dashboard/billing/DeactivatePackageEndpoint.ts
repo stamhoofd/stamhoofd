@@ -28,7 +28,7 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
         await Context.authenticate()
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!Context.auth.canDeactivatePackages()) {
+        if (!await Context.auth.canDeactivatePackages(organization.id)) {
             throw Context.auth.error()
         }        
 

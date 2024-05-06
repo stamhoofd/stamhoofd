@@ -1,7 +1,7 @@
 
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { EmailInterfaceRecipient } from "@stamhoofd/email";
-import { LoginProviderType, NewUser, Permissions, User as UserStruct,UserMeta } from "@stamhoofd/structures";
+import { LoginProviderType, NewUser, Permissions, User as UserStruct,UserMeta, UserPermissions } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,12 +36,15 @@ export class User extends Model {
     @column({ type: "boolean" })
     verified = false
 
+    @column({ type: "json", decoder: UserPermissions, nullable: true })
+    permissions: UserPermissions | null = null
+
     /**
-     * This field is cached and recalculated when permissions are changed. This avoids database joins on every request.
-     * It is a combination of all user_permissions rows for this user and globalPermissions
+     * @deprecated
+     * use permissions
      */
     @column({ type: "json", decoder: Permissions, nullable: true })
-    permissions: Permissions | null = null
+    organizationPermissions: Permissions | null = null
 
     @column({ type: "json", decoder: UserMeta, nullable: true })
     meta: UserMeta | null = null
@@ -112,11 +115,11 @@ export class User extends Model {
     async merge(other: User) {
         if (other.hasAccount()) {
             // We are going to merge accounts!
-            if (this.permissions && other.permissions) {
-                this.permissions.add(other.permissions);
+            if (this.organizationPermissions && other.organizationPermissions) {
+                this.organizationPermissions.add(other.organizationPermissions);
             } else {
-                if (!this.permissions && other.permissions) {
-                    this.permissions = other.permissions;
+                if (!this.organizationPermissions && other.organizationPermissions) {
+                    this.organizationPermissions = other.organizationPermissions;
                 }
             }
             await this.save();

@@ -30,7 +30,7 @@ export class GetBillingStatusEndpoint extends Endpoint<Params, Query, Body, Resp
         await Context.authenticate()
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!Context.auth.canManageFinances()) {
+        if (!await Context.auth.canManageFinances(organization.id)) {
             throw Context.auth.error()
         }  
 

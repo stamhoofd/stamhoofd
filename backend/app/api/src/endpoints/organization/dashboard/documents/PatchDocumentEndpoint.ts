@@ -31,7 +31,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canManageDocuments(PermissionLevel.Write)) {
+        if (!await Context.auth.canManageDocuments(PermissionLevel.Write)) {
             throw Context.auth.error()
         }
 
@@ -74,7 +74,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const {put} of request.body.getPuts()) {
             // Create a new document
             const template = await DocumentTemplate.getByID(put.templateId)
-            if (!template || !Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Write)) {
+            if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Document template not found",
@@ -105,7 +105,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
             }
             if (put.memberId) {
                 const member = await Member.getWithRegistrations(put.memberId)
-                if (!member || !Context.auth.canAccessMember(member, await Group.getAll(organization.id), PermissionLevel.Read)) {
+                if (!member || !await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
                     throw new SimpleError({
                         code: "not_found",
                         message: "Member not found",

@@ -30,7 +30,7 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!Context.auth.canManageSSOSettings()) {
+        if (!await Context.auth.canManageSSOSettings(organization.id)) {
             throw Context.auth.error()
         }
         

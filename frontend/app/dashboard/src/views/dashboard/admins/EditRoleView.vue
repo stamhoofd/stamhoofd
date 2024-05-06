@@ -183,12 +183,11 @@ import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-e
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Radio, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
-import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, Spinner, Validator } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { AccessRight, Group, GroupCategory, Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, UserPermissions, Version, WebshopPreview } from '@stamhoofd/structures';
+import { Formatter, Sorter } from "@stamhoofd/utility";
 
 import EditRoleCategoriesView from './EditRoleCategoriesView.vue';
 import EditRoleGroupsView from './EditRoleGroupsView.vue';
@@ -220,13 +219,13 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-        role: PermissionRoleDetailed
+        role!: PermissionRoleDetailed
 
     @Prop({ required: true })
-        isNew: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-        organization: Organization
+        organization!: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
@@ -234,7 +233,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler!: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
     SessionManager = SessionManager // needed to make session reactive
     loading = true
@@ -292,41 +291,49 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         )
     }
 
+    getAccessRight(right: AccessRight) {
+        return this.patchedRole.hasAccessRight(right)
+    }
+
+    setAccessRight(right: AccessRight, enabled: boolean) {
+        if (this.getAccessRight(right) === enabled) {
+            return
+        }
+        const patch = PermissionRoleDetailed.patch({ })
+
+        if (enabled) {
+            patch.accessRights.addDelete(right)
+            patch.accessRights.addPut(right)
+        } else {
+            patch.accessRights.addDelete(right)
+        }
+
+        this.addRolePatch(patch)
+    }
+
     get createWebshops() {
-        return this.patchedRole.createWebshops
+        return this.getAccessRight(AccessRight.OrganizationCreateWebshops)
     }
 
     set createWebshops(createWebshops: boolean) {
-        this.addRolePatch(
-            PermissionRoleDetailed.patch({ 
-                createWebshops
-            })
-        )
+        this.setAccessRight(AccessRight.OrganizationCreateWebshops, createWebshops)
     }
 
 
     get managePayments() {
-        return this.patchedRole.managePayments
+        return this.getAccessRight(AccessRight.OrganizationManagePayments)
     }
 
     set managePayments(managePayments: boolean) {
-        this.addRolePatch(
-            PermissionRoleDetailed.patch({ 
-                managePayments
-            })
-        )
+        this.setAccessRight(AccessRight.OrganizationManagePayments, managePayments)
     }
 
     get financeDirector() {
-        return this.patchedRole.financeDirector
+        return this.getAccessRight(AccessRight.OrganizationFinanceDirector)
     }
 
     set financeDirector(financeDirector: boolean) {
-        this.addRolePatch(
-            PermissionRoleDetailed.patch({ 
-                financeDirector
-            })
-        )
+        this.setAccessRight(AccessRight.OrganizationFinanceDirector, financeDirector)
     }
 
     editGroups() {
@@ -520,7 +527,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     hasAdminRole(admin: User) {
-        return admin.permissions?.roles.find(f => f.id === this.role.id) ?? false
+        return admin.permissions?.organizationPermissions?.get(this.organization.id)?.roles.find(f => f.id === this.role.id) ?? false
     }
 
     setAdminRole(admin: User, enable: boolean) {
@@ -536,7 +543,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         }
         const userPatch = User.patch({
             id: admin.id,
-            permissions: permissionPatch
+            permissions: UserPermissions.convertPatch(permissionPatch, this.organization.id)
         })
         const p = Organization.patch({})
         p.admins!.addPatch(userPatch)
