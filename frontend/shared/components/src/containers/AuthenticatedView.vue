@@ -10,8 +10,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
+import { SessionContext } from "@stamhoofd/networking";
 import LoadingView from "./LoadingView.vue";
 
 @Component({
@@ -20,7 +21,7 @@ import LoadingView from "./LoadingView.vue";
         LoadingView
     }
 })
-export default class AuthenticatedView extends Vue {
+export default class AuthenticatedView extends VueComponent {
     @Prop()
         root!: ComponentWithProperties
 
@@ -53,7 +54,11 @@ export default class AuthenticatedView extends Vue {
 
     changed() {
         if (this.noPermissionsRoot) {
-            this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && this.$context.user.permissions != null
+            if (this.$context.organization) {
+                this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && this.$context.user.permissions != null && !!(this.$context as SessionContext).user.permissions?.forOrganization(this.$context.organization.id)
+            } else {
+                this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && (this.$context as SessionContext).user!.permissions?.globalPermissions != null
+            }
             this.hasToken = this.$context.hasToken() ?? false
             this.showPermissionsRoot = this.$context.isComplete() ?? false
             this.userId = this.$context.user?.id ?? null

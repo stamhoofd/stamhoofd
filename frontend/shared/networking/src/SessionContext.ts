@@ -2,13 +2,13 @@ import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/
 import { SimpleError, SimpleErrors, isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { KeychainedResponseDecoder, LoginProviderType, Organization, Token, User, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder, LoginProviderType, Organization, Platform, Token, User, Version } from '@stamhoofd/structures'
 
 import { AppManager, SessionManager, UrlHelper } from '..'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
-import { FrontendOrganizationPermissionChecker } from './FrontendOrganizationPermissionChecker'
+import { ContextPermissions } from './ContextPermissions'
 
 type AuthenticationStateListener = (changed: "user" | "organization" | "token" | "preventComplete") => void
 
@@ -70,7 +70,7 @@ export class SessionContext implements RequestMiddleware {
     }
 
     get organizationAuth() {
-        return new FrontendOrganizationPermissionChecker(this.organizationPermissions, this.organization)
+        return new ContextPermissions(this.user, this.organization, Platform.shared)
     }
 
     static async createFrom(data: ({organization: Organization} | {organizationId: string})) {

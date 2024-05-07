@@ -81,52 +81,17 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { LoadingView, Toast, useContext, useOrganization, useUser } from '@stamhoofd/components';
-import { OrganizationManager, usePlatformManager } from '@stamhoofd/networking';
-import { User } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, getCurrentInstance, onMounted } from 'vue';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { LoadingView, useOrganization, usePlatform, useUser } from '@stamhoofd/components';
+import { PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
+import { ComponentOptions } from 'vue';
+import EditAdminView from './EditAdminView.vue';
 import RolesView from './RolesView.vue';
+import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();
 const organization = useOrganization()
-const platformManager = usePlatformManager()
-const $context = useContext()
-const instance = getCurrentInstance()
-const pop = usePop()
-
-const admins = computed(() => {
-    if (organization.value) {
-        return organization.value?.admins ?? []
-    }
-
-    // Platform scope
-    return platformManager.value.$platform.admins ?? []
-})
-const loading = computed(() => {
-    if (organization.value) {
-        return organization.value?.admins === undefined
-    }
-
-    // Platform scope
-    return platformManager.value.$platform.admins === undefined
-})
-
-onMounted(() => {
-    if (organization.value) {
-        const manager = new OrganizationManager($context.value!)
-        manager.loadAdmins(true, true, instance?.proxy).catch((e) => {
-            Toast.fromError(e).show()
-            pop({force: true})
-        })
-    } else {
-        platformManager.value.loadAdmins(true, true, instance?.proxy).catch((e) => {
-            Toast.fromError(e).show()
-            pop({force: true})
-        })
-    }
-})
+const {sortedAdmins, loading, promise: loadPromise, getPermissions} = useAdmins()
 
 defineRoutes([
     {
@@ -134,33 +99,77 @@ defineRoutes([
         name: 'roles',
         component: RolesView as ComponentOptions,
         present: 'popup'
+    },
+    {
+        url: 'nieuw',
+        name: 'createAdmin',
+        component: EditAdminView as ComponentOptions,
+        present: 'popup',
+        paramsToProps: () => {
+            const p = UserPermissions.create({})
+            if (!organization.value) {
+                p.globalPermissions = Permissions.create({level: PermissionLevel.None})
+            } else {
+                p.organizationPermissions.set(organization.value.id, Permissions.create({level: PermissionLevel.None}))
+            }
+            
+            const user = User.create({
+                email: '',
+                organizationId: organization.value?.id ?? null,
+                permissions: p
+            })
+
+            return {
+                user,
+                isNew: true
+            }
+        }
+    },
+    {
+        url: '@userId',
+        name: 'editAdmin',
+        component: EditAdminView as ComponentOptions,
+        present: 'popup',
+        params: {
+            userId: String
+        },
+        paramsToProps: async (params: {userId: string}) => {
+            await loadPromise;
+            const user = sortedAdmins.value.find(u => u.id === params.userId)
+            if (!user) {
+                throw new Error('User not found')
+            }
+            return {
+                user,
+                isNew: false
+            }
+        },
+        propsToParams(props) {
+            if (!("user" in props)) {
+                throw new Error('Missing user')
+            }
+            return {
+                params: {
+                    userId: (props.user as User).id
+                }
+            }
+        }
     }
 ]);
 
 const $navigate = useNavigate();
 
-const getPermissions = (user: User) => {
-    return user.permissions?.platform
+const createAdmin = async () => {
+    await $navigate('createAdmin')
 }
 
-const createAdmin = () => {
-    // todo
-}
-
-const editAdmin = (user: User) => {
-    // todo
+const editAdmin = async (user: User) => {
+    await $navigate('editAdmin', { properties: {user} })
 }
 
 const editRoles = () => {
     $navigate('roles')
 }
-
-const sortedAdmins = computed(() => {
-    return admins.value.slice().sort((a, b) => Sorter.stack(
-        Sorter.byBooleanValue(getPermissions(a)?.hasFullAccess() ?? false, getPermissions(b)?.hasFullAccess() ?? false), 
-        Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)
-    ))
-})
 
 const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false
 const hasNoRoles = (user: User) => (getPermissions(user)?.roles.length ?? 0) === 0

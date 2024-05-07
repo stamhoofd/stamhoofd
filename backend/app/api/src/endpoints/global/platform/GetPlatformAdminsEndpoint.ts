@@ -35,6 +35,7 @@ export class GetPlatformAdminsEndpoint extends Endpoint<Params, Query, Body, Res
 
         // Hide api accounts
         admins = admins.filter(a => !a.isApiUser)
+        admins = admins.filter(a => !!a.permissions?.globalPermissions)
 
         return new Response(
             admins.map(a => UserStruct.create({...a, hasAccount: a.hasAccount()}))

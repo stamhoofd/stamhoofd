@@ -66,7 +66,28 @@
 import { patchContainsChanges, type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SaveView, useOrganization, usePlatform, useErrors } from '@stamhoofd/components';
 import { Organization, PermissionRoleDetailed, Platform, Version } from '@stamhoofd/structures';
-import { Ref, computed, ref } from 'vue';
+import { ComponentOptions, Ref, computed, ref } from 'vue';
+import EditRoleView from './EditRoleView.vue';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+
+defineRoutes([
+    {
+        url: 'nieuw',
+        name: 'createRole',
+        component: EditRoleView as ComponentOptions,
+        present: 'popup',
+        paramsToProps: () => {
+            const role = PermissionRoleDetailed.create({})
+
+            return {
+                role,
+                isNew: true
+            }
+        }
+    }
+]);
+
+const $navigate = useNavigate();
 
 const errors = useErrors();
 const loading = ref(false);
@@ -110,7 +131,7 @@ const roleDescription = (role: PermissionRoleDetailed): string => {
 }
 
 const addRole = () => {
-    // todo
+    $navigate('createRole')
 }
 
 const editRole = (role: PermissionRoleDetailed) => {

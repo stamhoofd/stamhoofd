@@ -225,8 +225,8 @@ export class User extends Model {
         return false;
     }
 
-    static async getForRegister(organizationId: string|null, email: string): Promise<User | undefined> {
-        if (STAMHOOFD.userMode !== 'platform' && !organizationId) {
+    static async getForRegister(organizationId: string|null, email: string, allowPlatform = false): Promise<User | undefined> {
+        if (STAMHOOFD.userMode !== 'platform' && !organizationId && !allowPlatform) {
             throw new Error('Expected organizationId in getForRegister')
         }
 
@@ -283,7 +283,7 @@ export class User extends Model {
 
     static async createInvited(
         organization: Organization|null,
-        data: {firstName: string|null, lastName: string|null, email: string}
+        data: {firstName: string|null, lastName: string|null, email: string, allowPlatform?: boolean}
     ): Promise<User | undefined> {
         const {
             email,
@@ -291,7 +291,7 @@ export class User extends Model {
             lastName
         } = data;
 
-        if (!organization && STAMHOOFD.userMode !== 'platform') {
+        if (!organization && STAMHOOFD.userMode !== 'platform' && !data.allowPlatform) {
             throw new Error("Missing organization")
         }
 

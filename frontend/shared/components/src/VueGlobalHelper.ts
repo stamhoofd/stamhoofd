@@ -1,24 +1,27 @@
 import { Request } from "@simonbackx/simple-networking";
-import { AppManager, SessionContext } from "@stamhoofd/networking";
+import { AppManager, SessionContext, ContextPermissions } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
-import { Ref, inject, toRef, type App } from "vue";
+import { Ref, computed, inject, toRef, type App, ref } from "vue";
 
 import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
-import { Organization, Platform, User } from "@stamhoofd/structures";
-import { CopyableDirective, GlobalEventBus, LongPressDirective, TooltipDirective } from "..";
+import { Organization, Platform, User, Version } from "@stamhoofd/structures";
+import { Checkbox, CopyableDirective, GlobalEventBus, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
+import STInputBox from "./inputs/STInputBox.vue";
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
+import STErrorsDefault from "./errors/STErrorsDefault.vue";
 
 export function useUser(): Ref<User | null> {
     const refOrReal = inject('$user', null)
     return toRef(refOrReal)
 }
 
-export function useContext(): Ref<SessionContext | null> {
-    const refOrReal = inject('$context', null)
-    return toRef(refOrReal)
+export function useContext(): Ref<SessionContext> {
+    const refOrReal = inject('$context') as SessionContext;
+    return toRef(refOrReal) as Ref<SessionContext>
 }
 
 export function useOrganization(): Ref<Organization | null> {
@@ -27,6 +30,48 @@ export function useOrganization(): Ref<Organization | null> {
 
 export function usePlatform(): Ref<Platform> {
     return toRef(inject('$platform') as Platform)
+}
+
+export function usePatch<T extends AutoEncoder>(obj: T): {
+    patched: Ref<T>, 
+    patch: Ref<AutoEncoderPatchType<T>>,
+    addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void,
+    hasChanges: Ref<boolean>
+} {
+    if (!obj) {
+        throw new Error('Expected a reference with an initial value at usePatch')
+    }
+    const patch = ref("id" in obj ? obj.static.patch({id: obj.id}) : obj.static.patch({})) as Ref<AutoEncoderPatchType<T>>;
+
+    return {
+        patch,
+        patched: computed(() => {
+            return obj.patch(patch.value)
+        }),
+        addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
+            patch.value = patch.value.patch(obj.static.patch(newPatch))
+        },
+        hasChanges: computed(() => {
+            return patchContainsChanges(patch.value as PatchType<T>, obj, { version: Version })
+        })
+    }
+}
+
+export function useEmitPatch<T extends AutoEncoder>(props: any, emit: any, propName: string): { patched: T, addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void } {
+    return {
+        patched: computed(() => props[propName]) as Ref<T>,
+        addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
+            emit('patch:' + propName, props[propName].static.patch(newPatch))
+        }
+    } as any
+}
+
+export function usePermissions(overrides?: {patchedUser?: User|Ref<User>, patchedOrganization?: Organization|Ref<Organization>, patchedPlatform?: Platform|Ref<Platform>}): ContextPermissions {
+    const user = overrides?.patchedUser ?? useUser()
+    const organization = overrides?.patchedOrganization ?? useOrganization()
+    const platform = overrides?.patchedPlatform ?? usePlatform()
+
+    return new ContextPermissions(user, organization, platform)
 }
 
 /**
@@ -112,6 +157,11 @@ export class VueGlobalHelper {
         app.component('STList', STList)
         app.component('STListItem', STListItem)
         app.component('STNavigationBar', STNavigationBar)
+        app.component('STInputBox', STInputBox)
+        app.component('STErrorsDefault', STErrorsDefault)
+        app.component('SaveView', SaveView)
+        app.component('Checkbox', Checkbox)
+        app.component('Radio', Radio)
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

@@ -12,9 +12,14 @@ export class UserPermissions extends AutoEncoder {
     organizationPermissions: Map<string, Permissions> = new Map()
 
     get platform(): LoadedPermissions|null {
+        return this.forPlatform(Platform.shared)
+    }
+
+    forPlatform(platform: Platform): LoadedPermissions|null {
         if (!this.globalPermissions) {
             return null;
         }
+
         const platformRoles = Platform.shared.getRoles()
         return LoadedPermissions.from(this.globalPermissions, platformRoles)
     }
@@ -38,7 +43,13 @@ export class UserPermissions extends AutoEncoder {
         return LoadedPermissions.from(permissions, organizationRoles)
     }
 
-    static convertPatch(patch: AutoEncoderPatchType<Permissions>, organizationId: string): AutoEncoderPatchType<UserPermissions> {
+    static convertPlatformPatch(patch: AutoEncoderPatchType<Permissions>|null): AutoEncoderPatchType<UserPermissions> {
+        return UserPermissions.patch({
+            globalPermissions: patch
+        })
+    }
+
+    static convertPatch(patch: AutoEncoderPatchType<Permissions>|null, organizationId: string): AutoEncoderPatchType<UserPermissions> {
         const clonedPatch = UserPermissions.patch({})
         clonedPatch.organizationPermissions.set(organizationId, patch)
         return clonedPatch
@@ -51,7 +62,7 @@ export class UserPermissions extends AutoEncoder {
         
         if (patch.isPatch()) {
             // Only allow to set the permissions for the organization in scope
-            if (patch.organizationPermissions.get(organizationId)) {
+            if (patch.organizationPermissions.get(organizationId) !== undefined) {
                 const clonedPatch = UserPermissions.patch({})
                 clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId))
                 return old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch)

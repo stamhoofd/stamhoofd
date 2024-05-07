@@ -35,6 +35,12 @@ declare module 'vue' {
         // Global components
         readonly STList: typeof import('@stamhoofd/components').STList,
         readonly STListItem: typeof import('@stamhoofd/components').STListItem,
+        readonly STNavigationBar: typeof import('@stamhoofd/components').STNavigationBar,
+        readonly STInputBox: typeof import('@stamhoofd/components').STInputBox,
+        readonly STErrorsDefault: typeof import('@stamhoofd/components').STErrorsDefault,
+        readonly SaveView: typeof import('@stamhoofd/components').SaveView,
+        readonly Checkbox: typeof import('@stamhoofd/components').Checkbox,
+        readonly Radio: typeof import('@stamhoofd/components').Radio,
 
         // Formatters
         formatPrice: typeof Formatter.price,

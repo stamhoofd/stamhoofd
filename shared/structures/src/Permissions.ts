@@ -275,6 +275,10 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
     roles: PermissionRole[] = []
 
+    hasRole(role: PermissionRole): boolean {
+        return this.roles.find(r => r.id === role.id) !== undefined
+    }
+
     hasAccess(allRoles: PermissionRoleDetailed[], level: PermissionLevel): boolean {
         if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
             // Someone with read / write access for the whole organization, also the same access for each group
@@ -387,6 +391,10 @@ export class LoadedPermissions {
                 return []
             })
         })
+    }
+
+    hasRole(role: PermissionRole): boolean {
+        return this.roles.find(r => r.id === role.id) !== undefined
     }
 
     hasAccess(level: PermissionLevel): boolean {

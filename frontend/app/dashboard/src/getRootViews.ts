@@ -61,7 +61,14 @@ export async function getScopedDashboardRootFromUrl() {
     return getScopedDashboardRoot(session)
 }
 
-export function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+    if (!session.organization && !!session.user?.permissions?.globalPermissions) {
+        const admin = await import('@stamhoofd/admin-frontend');
+        return await admin.getScopedAdminRoot(session, options);
+    }
+    if (!session.organization) {
+        return getOrganizationSelectionRoot()
+    }
     return getScopedDashboardRoot(session, options)
 }
 

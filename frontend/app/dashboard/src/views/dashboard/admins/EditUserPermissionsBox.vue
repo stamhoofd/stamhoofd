@@ -115,7 +115,7 @@ export default class EditUserPermissionsBox extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return !!this.organizationPermissions?.hasFullAccess()
+        return false
     }
 
     set fullAccess(fullAccess: boolean) {

@@ -22,7 +22,7 @@ import STErrorBox from "./STErrorBox.vue"
 })
 export default class STErrorsDefault extends Vue {
     @Prop() 
-        errorBox: ErrorBox | null;
+        errorBox!: ErrorBox | null;
     
     errors: SimpleError[] = [];
 
