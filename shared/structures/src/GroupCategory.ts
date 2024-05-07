@@ -1,12 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field,IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { Group, GroupStatus } from './Group';
+import { Group } from './Group';
 import { Organization } from './Organization';
 // Eslint wants to remove Permissions, but it is needed for types!
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { LoadedPermissions, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsByRole, UserPermissions } from './Permissions';
-
+import { LoadedPermissions, PermissionLevel, PermissionRole, PermissionsByRole } from './Permissions';
+import { UserPermissions } from './UserPermissions';
 /**
  * Give access to a given resouce based by the roles of a user
  */

@@ -72,12 +72,21 @@ export default class ToastBox extends Vue {
         }
     }
 
-    removeAt(index, key) {
-        if (this.components[index].key === key) {
+    removeAt(index: number, key: number) {
+        if (this.components[index] && this.components[index].key === key) {
             this.components.splice(index, 1);
-        } else {
-            console.warn("Expected component with key " + key + " at index" + index);
+            return;
         }
+
+        // Search
+        for (let i = 0; i < this.components.length; i++) {
+            if (this.components[i].key === key) {
+                this.components.splice(i, 1);
+                return;
+            }
+        }
+
+        console.warn("Expected component with key " + key + " at index" + index);
     }
 
     beforeUnmount() {

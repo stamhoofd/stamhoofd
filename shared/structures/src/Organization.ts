@@ -6,8 +6,8 @@ import { Group } from './Group';
 import { GroupCategorySettings, GroupCategoryTree } from './GroupCategory';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
-import { Permissions, UserPermissions } from './Permissions';
 import { User } from './User';
+import { UserPermissions } from './UserPermissions';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
 
 export class Organization extends AutoEncoder {

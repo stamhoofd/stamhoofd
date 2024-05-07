@@ -4,17 +4,18 @@ import { Formatter } from "@stamhoofd/utility";
 import { Ref, inject, toRef, type App } from "vue";
 
 import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
+import { Organization, Platform, User } from "@stamhoofd/structures";
 import { CopyableDirective, GlobalEventBus, LongPressDirective, TooltipDirective } from "..";
+import PromiseView from "./containers/PromiseView.vue";
 import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
-import { Organization, User } from "@stamhoofd/structures";
-import PromiseView from "./containers/PromiseView.vue";
 
 export function useUser(): Ref<User | null> {
     const refOrReal = inject('$user', null)
     return toRef(refOrReal)
 }
+
 export function useContext(): Ref<SessionContext | null> {
     const refOrReal = inject('$context', null)
     return toRef(refOrReal)
@@ -22,6 +23,10 @@ export function useContext(): Ref<SessionContext | null> {
 
 export function useOrganization(): Ref<Organization | null> {
     return toRef(inject('$organization', null))
+}
+
+export function usePlatform(): Ref<Platform> {
+    return toRef(inject('$platform') as Platform)
 }
 
 /**

@@ -1,8 +1,9 @@
+import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup, LoginView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Country } from '@stamhoofd/structures';
+import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
+import { Country, Platform } from '@stamhoofd/structures';
 
 import { computed, reactive } from 'vue';
 
@@ -17,16 +18,22 @@ export async function getScopedAdminRootFromUrl() {
 
     await I18nController.loadDefault(session, "admin", Country.Belgium, "nl")
 
-    return getScopedAdminRoot(session)
+    return await getScopedAdminRoot(session)
 }
 
-export function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export async function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl").catch(console.error)
     const reactiveSession = reactive(session) as SessionContext
 
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
+
     const startView = new ComponentWithProperties(NavigationController, {
-        root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
+        root: AsyncComponent(() => import('./views/start/StartView.vue'), {})
+    })
+
+    const settingsView = new ComponentWithProperties(NavigationController, {
+        root: AsyncComponent(() => import('./views/settings/SettingsView.vue'), {})
     })
 
     setTitleSuffix('Administratie');
@@ -35,6 +42,12 @@ export function getScopedAdminRoot(session: SessionContext, options: {initialPre
         icon: 'home',
         name: 'Start',
         component: startView
+    });
+
+    const settingsTab =  new TabBarItem({
+        icon: 'settings',
+        name: 'Instellingen',
+        component: settingsView
     });
 
     const moreTab = new TabBarItemGroup({
@@ -46,6 +59,9 @@ export function getScopedAdminRoot(session: SessionContext, options: {initialPre
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
+            $platform: computed(() => platformManager.$platform),
+            $user: computed(() => reactiveSession.user),
+            $platformManager: platformManager,
             reactive_navigation_url: "administratie",
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
@@ -53,18 +69,14 @@ export function getScopedAdminRoot(session: SessionContext, options: {initialPre
             },
             stamhoofd_app: 'admin'
         },
-        calculatedContext: () => {
-            return {
-                $user: computed(() => reactiveSession.user),
-            }
-        },
         root: wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {
                 root: wrapWithModalStack(
                     new ComponentWithProperties(TabBarController, {
                         tabs: computed(() => {
                             const tabs: (TabBarItem|TabBarItemGroup)[] = [
-                                startTab
+                                startTab,
+                                settingsTab
                             ]
 
                             tabs.push(moreTab);

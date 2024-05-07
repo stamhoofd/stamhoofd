@@ -656,4 +656,11 @@ export class AdminPermissionChecker {
         return !!this.user.permissions && !!this.user.permissions.globalPermissions && this.user.permissions.globalPermissions.hasFullAccess(this.getPlatformRoles())
     }
 
+    hasSomePlatformAccess(): boolean {
+        return !!this.user.permissions && !!this.user.permissions.globalPermissions
+    }
+
+    canManagePlatformAdmins() {
+        return this.hasPlatformFullAccess()
+    }
 }

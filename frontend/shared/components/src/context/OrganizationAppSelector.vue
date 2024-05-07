@@ -134,17 +134,17 @@ const buildRootForOption = async (option: Option) => {
 
     if (option.app === 'admin' || (option.app === 'auto' && !option.organization && !!option.context.user?.permissions?.globalPermissions)) {
         const admin = await import('@stamhoofd/admin-frontend')
-        return admin.getScopedAdminRoot(option.context)
+        return await admin.getScopedAdminRoot(option.context)
     }
 
     if (option.app === 'dashboard' || (option.app === 'auto' && !!option.context.organizationPermissions)) {
         const dashboard = await import('@stamhoofd/dashboard')
-        return dashboard.getScopedDashboardRoot(option.context)
+        return await dashboard.getScopedDashboardRoot(option.context)
     }
 
     if (option.app === 'registration' || (option.app === 'auto')) {
         const registration = await import('@stamhoofd/registration')
-        return registration.getRootView(option.context)
+        return await registration.getRootView(option.context)
     }
     throw new Error('This app is not yet supported')
 }

@@ -4,6 +4,7 @@ export { default as STErrorBox } from "./src/errors/STErrorBox.vue"
 export { default as STErrorsDefault } from "./src/errors/STErrorsDefault.vue"
 export { default as STErrorsInput } from "./src/errors/STErrorsInput.vue"
 export * from "./src/errors/Validator"
+export * from "./src/errors/useErrors"
 
 // Classes
 export * from "./src/EventBus"

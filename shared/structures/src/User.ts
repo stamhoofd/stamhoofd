@@ -1,7 +1,8 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder,EnumDecoder,field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { Permissions, UserPermissions } from './Permissions';
+import { Permissions } from './Permissions';
+import { UserPermissions } from './UserPermissions';
 
 export enum LoginProviderType {
     SSO = "SSO",

@@ -41,3 +41,5 @@ export * from "./Document"
 export * from "./DocumentTemplate"
 
 export * from "./WebshopDiscountCode"
+
+export * from "./Platform"
