@@ -101,6 +101,8 @@ export class SessionContext implements RequestMiddleware {
     }
 
     async loadTokenFromStorage() {
+        console.log('[SessionContext] Loading Token from Storage')
+
         // Check localstorage
         try {
             let usePlatformStorage = !this.organization || STAMHOOFD.userMode === 'platform'
@@ -164,8 +166,6 @@ export class SessionContext implements RequestMiddleware {
     saveToStorage() {
         try {
             // Save token to localStorage
-           
-
             if (this.token) {
                 const suffix = (this.user ? (this.user.organizationId ? this.user.organizationId : 'platform') : (
                     this.usedPlatformStorage ? 'platform' : (this.organization!.id)
@@ -183,22 +183,33 @@ export class SessionContext implements RequestMiddleware {
                 } else {
                     void Storage.secure.removeItem('user-' + suffix)
                 }
-            } else {
-                if (this.organization) {
-                    void Storage.secure.removeItem('token-' + this.organization.id)
-                    void Storage.secure.removeItem('user-' + this.organization.id)
-                }
-                if (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform') {
-                    void Storage.secure.removeItem('token-platform')
-                    void Storage.secure.removeItem('user-platform')
-                }
+
+                console.log('[SessionContext] Saved token to storage, suffix: ' + suffix)
+            }
+            
+        } catch (e) {
+            console.error("Storage error when saving session")
+            console.error(e)
+        }
+        
+    }
+
+    deleteFromStorage() {
+        try {
+            if (this.organization) {
+                void Storage.secure.removeItem('token-' + this.organization.id)
+                void Storage.secure.removeItem('user-' + this.organization.id)
+            }
+            if (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform') {
+                void Storage.secure.removeItem('token-platform')
+                void Storage.secure.removeItem('user-platform')
             }
         } catch (e) {
             console.error("Storage error when saving session")
             console.error(e)
         }
         
-        console.log('Saved token to storage')
+        console.log('Deleted token to storage')
     }
 
     removeFromStorage() {
@@ -370,7 +381,7 @@ export class SessionContext implements RequestMiddleware {
     }
 
     isComplete(): boolean {
-        return !!this.token && !!this.user && !!this.organization && !this.preventComplete && (!this.user.permissions || !!this.organization.privateMeta)
+        return !!this.token && !!this.user && !this.preventComplete && (!this.organization || !this.organizationPermissions || !!this.organization.privateMeta)
     }
 
     static serverForOrganization(organizationId: string|null|undefined) {
@@ -417,6 +428,8 @@ export class SessionContext implements RequestMiddleware {
     }
 
     setToken(token: Token, usedPlatformStorage?: boolean) {
+        console.log('[SessionContext] Setting Token. Platform: ' + usedPlatformStorage)
+
         if (this.token) {
             // Disable listener before clearing the token
             this.token.onChange = () => {
@@ -504,6 +517,9 @@ export class SessionContext implements RequestMiddleware {
     }
 
     async fetchOrganization(shouldRetry = true): Promise<Organization> {
+        if (!this.organization) {
+            throw new Error('Cannot fetch organization in a context with no organization')
+        }
         console.log("Fetching session organization...")
 
         const response = await (this.hasToken() ? this.authenticatedServer : this.server).request({
@@ -513,7 +529,7 @@ export class SessionContext implements RequestMiddleware {
             shouldRetry
         })
 
-        if (this.hasToken() && this.user?.permissions && !response.data.data.privateMeta) {
+        if (this.hasToken() && this.organizationPermissions && !response.data.data.privateMeta) {
             console.error('Missing privateMeta in authenticated organization response');
 
             // Critical issue: log out
@@ -546,12 +562,12 @@ export class SessionContext implements RequestMiddleware {
             }
 
             let fetchedOrganization = false
-            if (force || !this.organization || (fetchedUser && this.user?.permissions) || (this.user?.permissions && !this.organization.privateMeta)) { 
+            if (this.organization && (force || (fetchedUser && this.organizationPermissions) || (this.organizationPermissions && !this.organization.privateMeta))) { 
                 fetchedOrganization = true
                 await this.fetchOrganization(shouldRetry)
             }
 
-            if ((!fetchedOrganization) && background) {
+            if (((!fetchedOrganization && this.organization) || (!fetchedUser)) && background) {
                 // Initiate a slow background update without retry
                 // = we don't need to block the UI for this ;)
                 this.updateData(true, false, false).catch(e => {
@@ -615,7 +631,7 @@ export class SessionContext implements RequestMiddleware {
             }
             this.token = null;
             this.user = null; // force refetch in the future
-            await this.saveToStorage()
+            await this.deleteFromStorage()
             this.onTokenChanged();
         }
     }

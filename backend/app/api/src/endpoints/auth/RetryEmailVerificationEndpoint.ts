@@ -27,7 +27,7 @@ export class PollEmailVerificationEndpoint extends Endpoint<Params, Query, Body,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setUserOrganizationScope()
+        const organization = await Context.setOptionalOrganizationScope()
         const valid = await EmailVerificationCode.poll(organization?.id ?? null, request.body.token);
 
         if (valid) {

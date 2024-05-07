@@ -51,7 +51,7 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Cart, CartItem, CartReservedSeat, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from 'vue-property-decorator';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';

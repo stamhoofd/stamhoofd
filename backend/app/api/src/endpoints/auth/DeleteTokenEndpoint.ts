@@ -22,7 +22,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        await Context.setUserOrganizationScope()
+        await Context.setOptionalOrganizationScope()
         const {token} = await Context.authenticate({allowWithoutAccount: true})
         await token.delete()
         

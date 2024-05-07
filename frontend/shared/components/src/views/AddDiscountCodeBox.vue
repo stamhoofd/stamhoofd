@@ -36,7 +36,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, LoadingButton, STInputBox, STList, STListItem } from '@stamhoofd/components';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from '@simonbackx/vue-app-navigation/classes';
 
 @Component({
     components: {

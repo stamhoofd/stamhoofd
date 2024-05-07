@@ -13,10 +13,10 @@ import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue, toNative } from 'vue-facing-decorator';
 
+import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import AdminApp from './AdminApp.vue';
-import { getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
 import { reactive } from 'vue';
+import { getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
 
 @Component({
     components: {
@@ -44,7 +44,7 @@ export class App extends Vue {
                 let app: 'dashboard' | 'admin' | 'registration' = 'dashboard';
 
                 const parts = UrlHelper.shared.getParts();
-                if (parts.length >= 1 && parts[0] == 'admin') {
+                if (parts.length >= 1 && parts[0] == 'administratie') {
                     app = 'admin';
                 } else if (parts.length >= 1 && parts[0] == 'beheerders') {
                     app = 'dashboard';
@@ -57,7 +57,7 @@ export class App extends Vue {
                 }
                 
                 if (app == 'admin') {
-                    return new ComponentWithProperties(AdminApp, {})
+                    return (await getScopedAdminRootFromUrl())
                 }
 
                 return (await getScopedRegistrationRootFromUrl())

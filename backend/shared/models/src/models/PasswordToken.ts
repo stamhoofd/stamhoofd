@@ -110,7 +110,7 @@ export class PasswordToken extends Model {
     }
 
     static async getPasswordRecoveryUrl(user: User, organization: Organization|null, i18n: I18n, validUntil?: Date) {
-        if ((user.organizationId ?? null) !== (organization?.id ?? null)) {
+        if (user.organizationId !== null && ((user.organizationId ?? null) !== (organization?.id ?? null))) {
             throw new Error('Unexpected mismatch in organization id for PasswordToken')
         }
         // Send an e-mail to say you already have an account + follow password forgot flow

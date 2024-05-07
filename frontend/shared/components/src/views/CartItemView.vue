@@ -142,7 +142,7 @@
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator';
+import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
 
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import NumberInput from '../inputs/NumberInput.vue';

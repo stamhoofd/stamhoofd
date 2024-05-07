@@ -38,14 +38,22 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
-import { AppManager, LoginHelper, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "@simonbackx/vue-app-navigation/classes";
+import { AppManager, LoginHelper, UrlHelper } from '@stamhoofd/networking';
+import STNavigationBar from "../navigation/STNavigationBar.vue";
+import STErrorsDefault from "../errors/STErrorsDefault.vue";
+import STInputBox from "../inputs/STInputBox.vue";
+import LoadingButton from "../navigation/LoadingButton.vue";
+import EmailInput from "../inputs/EmailInput.vue";
+import { ErrorBox } from "../errors/ErrorBox";
+import { Validator } from "../errors/Validator";
+import { CenteredMessage } from "../overlays/CenteredMessage";
+import ForgotPasswordView from "./ForgotPasswordView.vue";
+import ConfirmEmailView from "./ConfirmEmailView.vue";
 
 @Component({
     components: {
         STNavigationBar,
-        STFloatingFooter,
         STErrorsDefault,
         STInputBox,
         LoadingButton,
@@ -121,6 +129,11 @@ export default class LoginView extends Mixins(NavigationMixin){
         const valid = await this.validator.validate()
 
         if (!valid) {
+            return
+        }
+        
+        if (this.email.length < 3 || this.password.length < 5) {
+            new CenteredMessage("Vul eerst iets in", "Je hebt geen correcte gegevens ingevuld", "error").addCloseButton().show()   
             return
         }
 

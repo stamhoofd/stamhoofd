@@ -2,7 +2,7 @@
     <nav class="st-view">
         <main>
             <STList>
-                <STListItem v-for="option in options" :key="option.id" :selectable="true" element-name="button" @click="selectOption(option)">
+                <STListItem v-for="option in options" :key="option.id" :selectable="true" element-name="button" @click="selectOption(option)" class="left-center">
                     <template #left>
                         <ContextLogo :organization="option.organization" :app="option.app" />
                     </template>
@@ -42,7 +42,7 @@ import { useOrganization, useUser } from '../VueGlobalHelper';
 type Option = {
     id: string,
     app: AppType|'auto',
-    organization?: Organization,
+    organization: Organization|null,
     context: SessionContext,
     userDescription?: string
 }
@@ -54,6 +54,20 @@ const $organization = useOrganization();
 const getOptions = async () => {
     const availableContexts = await SessionManager.availableSessions()
     const opts: Option[] = [];
+
+    if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
+        const context = new SessionContext(null)
+        await context.loadFromStorage();
+
+        if (context.canGetCompleted()) {
+            opts.push({
+                id: 'admin',
+                organization: null,
+                app: 'admin',
+                context
+            })
+        }
+    }
 
     for (const context of availableContexts) {
         if (!context.canGetCompleted()) {
@@ -118,16 +132,20 @@ getOptions().then((opts) => {
 const buildRootForOption = async (option: Option) => {
     await SessionManager.prepareSessionForUsage(option.context)
 
-    if (option.app === 'registration') {
-        const registration = await import('@stamhoofd/registration')
-        return registration.getRootView(option.context)
+    if (option.app === 'admin' || (option.app === 'auto' && !option.organization && !!option.context.user?.permissions?.globalPermissions)) {
+        const admin = await import('@stamhoofd/admin-frontend')
+        return admin.getScopedAdminRoot(option.context)
     }
 
-    if (option.app === 'dashboard' || option.app == 'auto') {
+    if (option.app === 'dashboard' || (option.app === 'auto' && !!option.context.organizationPermissions)) {
         const dashboard = await import('@stamhoofd/dashboard')
         return dashboard.getScopedDashboardRoot(option.context)
     }
 
+    if (option.app === 'registration' || (option.app === 'auto')) {
+        const registration = await import('@stamhoofd/registration')
+        return registration.getRootView(option.context)
+    }
     throw new Error('This app is not yet supported')
 }
 

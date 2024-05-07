@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html translate="no" class="modern">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
+    <title>Stamhoofd Administratie</title>
+    <meta name="description" data-vmid="description"
+        content="Via de Stamhoofd webapp kan je jouw vereniging beheren in je browser.">
+</head>
+
+<body class="modern">
+    <div id="app"></div>
+    <!-- Browser detection script to redirect -->
+    <script lang="text/javascript">
+        // The browsers that we support in the dashboard match the ones that support flatMap
+        var testArray = []
+        if (!(typeof testArray.flatMap === "function")) {
+            window.location = "/out-of-date.html?back=" + encodeURIComponent(window.location.pathname + window.location.search);
+            throw new Error("Browser not supported");
+        }
+    </script>
+    <script type="module" src="/main.ts"></script>
+</body>
+
+</html>

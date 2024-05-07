@@ -3,11 +3,12 @@
     "version": "1.0.0",
     "private": true,
     "type": "module",
+    "main": "./src/exports.ts",
     "scripts": {
-        "dev": "yarn serve",
-        "serve": "NODE_ENV=development ENV_FILE=../../.env.json webpack serve --hot",
-        "build": "NODE_ENV=development ENV_FILE=../../.env.json webpack --progress ",
-        "build:production": "NODE_ENV=production webpack --performance-hints warning",
+        "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
+        "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build",
+        "test": "jest",
         "lint": "eslint --ext .js,.jsx,.ts,.tsx,.vue"
     },
     "files": [
@@ -16,7 +17,6 @@
     "dependencies": {
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
-        "@stamhoofd/scss": "1.0.0",
-        "mockdate": "^3.0.5"
+        "@stamhoofd/scss": "1.0.0"
     }
 }

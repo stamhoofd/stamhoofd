@@ -63,13 +63,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures";
+import { User, Version } from "@stamhoofd/structures";
 
 
 @Component({
@@ -96,7 +96,6 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     showDomainSettings = true
     
     userPatch = User.patch({ id: this.$user!.id })
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
 
     get patchedUser() {
         return this.$user!.patch(this.userPatch)
@@ -141,9 +140,14 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     }
 
     get privacyUrl() {
+        if (!this.$organization) {
+            return null;
+        }
+
         if (this.$organization.meta.privacyPolicyUrl) {
             return this.$organization.meta.privacyPolicyUrl
         }
+        
         if (this.$organization.meta.privacyPolicyFile) {
             return this.$organization.meta.privacyPolicyFile.getPublicPath()
         }

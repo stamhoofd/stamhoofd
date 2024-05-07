@@ -15,7 +15,7 @@ class SessionStorage extends AutoEncoder {
         lastOrganizationId: string | null = null
 }
 
-type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organization" | "token" | "session") => void
+type AuthenticationStateListener = (changed: "precentComplete" | "user" | "organization" | "token" | "session") => void
 
 /**
  * The SessionManager manages the storage of Sessions for different organizations. You can request the session for a given organization.
@@ -53,7 +53,7 @@ export class SessionManagerStatic {
         this.listeners.delete(owner)
     }
 
-    protected callListeners(changed: "userPrivateKey" | "user" | "organization" | "token" | "session") {
+    protected callListeners(changed: "user" | "organization" | "token" | "session" | "preventComplete") {
         for (const listener of this.listeners.values()) {
             listener(changed)
         }
@@ -89,9 +89,6 @@ export class SessionManagerStatic {
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
             // session.user = null
-            if (!session.organization) {
-                console.log("Doing a sync session update because organization is missing")
-            }
             if (!session.user) {
                 console.log("Doing a sync session update because user is missing")
             }
@@ -100,7 +97,7 @@ export class SessionManagerStatic {
                 console.log("Doing a sync session update because preventComplete")
             }
 
-            if (session.organization && session.user && !session.preventComplete) {
+            if (session.user && !session.preventComplete) {
                 console.log("Doing a sync session update other")
             }
 
@@ -143,15 +140,15 @@ export class SessionManagerStatic {
                     console.error(e)
                 })
             } else {
-                // Can not get completed
-                if (!session.organization) {
+                // Update organization
+                if (session.organization) {
                     await session.fetchOrganization(shouldRetry)
                 }
             }
         }
 
         const storage = await this.getSessionStorage(false)
-        storage.lastOrganizationId = session.organizationId
+        storage.lastOrganizationId = session.organization?.id ?? null
         this.saveSessionStorage(storage)
 
         if (session.organization) {

@@ -5,7 +5,7 @@ import { countries, languages } from "./dist/index.js";
 const files = await fs.readdir("./src");
 
 
-const namespaces = ['dashboard', "webshop", "registration", "backend"]
+const namespaces = ['dashboard', "webshop", "registration", "backend", "admin"]
 
 for (const namespace of namespaces) {
     await fs.rm("./dist/"+namespace, { recursive: true, force: true })

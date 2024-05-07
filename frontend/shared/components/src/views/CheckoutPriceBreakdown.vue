@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Checkout } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from '@simonbackx/vue-app-navigation/classes';
 
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";

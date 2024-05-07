@@ -57,8 +57,7 @@ export function buildConfig(options: {port: number}) {
     return {
         resolve: {
             alias: {
-                vue: '@vue/compat',
-                'vue-property-decorator': '@simonbackx/vue-app-navigation/classes'
+                vue: '@vue/compat'
             }
         },
         plugins: [

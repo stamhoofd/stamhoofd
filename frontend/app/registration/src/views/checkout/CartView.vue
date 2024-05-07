@@ -163,7 +163,7 @@ import { ErrorBox, LoadingButton, StepperInput, Steps,STErrorsDefault, STList, S
 import { UrlHelper } from '@stamhoofd/networking';
 import { BalanceItemCartItem, Group, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Watch } from 'vue-property-decorator';
+import { Component, Mixins, Watch } from '@simonbackx/vue-app-navigation/classes';
 
 import { Suggestion, SuggestionBuilder } from '../../classes/SuggestionBuilder';
 import GroupView from '../groups/GroupView.vue';

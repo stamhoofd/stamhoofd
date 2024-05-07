@@ -24,7 +24,7 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setUserOrganizationScope()
+        await Context.setOptionalOrganizationScope()
         const {user} = await Context.authenticate({allowWithoutAccount: true})
 
         if (request.request.getVersion() < 243) {

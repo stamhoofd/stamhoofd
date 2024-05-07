@@ -30,7 +30,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // for now we care more about UX, so we show a mesage if the user doesn't exist
-        const organization = await Context.setUserOrganizationScope()
+        const organization = await Context.setOptionalOrganizationScope()
         const user = await User.getForAuthentication(organization?.id ?? null, request.body.email, {allowWithoutAccount: true});
         
         const { from, replyTo } = {

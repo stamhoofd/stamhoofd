@@ -79,6 +79,15 @@
 .stamhoofd-logo-container {
     display: inline-block;  
 
+    &.small {
+        svg:first-child {
+            display: none;
+        }
+        svg:last-child {
+            display: inline-block;
+        }
+    }
+
     &.responsive {
         @media (max-width: 450px) {
             svg:first-child {
