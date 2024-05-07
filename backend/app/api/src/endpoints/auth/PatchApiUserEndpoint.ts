@@ -4,7 +4,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Token, User } from '@stamhoofd/models';
 import { ApiUser, PermissionLevel, UserPermissions } from "@stamhoofd/structures";
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
@@ -56,13 +56,30 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 })
             }
 
-            editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id)
+            if (request.body.permissions) {
+                if (organization) {
+                    editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id)
 
-            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess())) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
-                })
+                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess())) {
+                        throw new SimpleError({
+                            code: "permission_denied",
+                            message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
+                        })
+                    }
+                } else {
+                    if (editUser.permissions) {
+                        editUser.permissions.patchOrPut(request.body.permissions)
+                    } else {
+                        editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null
+                    }
+
+                    if (editUser.id === user.id && !editUser.permissions?.platform?.hasFullAccess()) {
+                        throw new SimpleError({
+                            code: "permission_denied",
+                            message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
+                        })
+                    }
+                }
             }
         }
 

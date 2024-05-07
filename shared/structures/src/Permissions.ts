@@ -457,6 +457,14 @@ export class UserPermissions extends AutoEncoder {
     @field({ decoder: new MapDecoder(StringDecoder, Permissions) })
     organizationPermissions: Map<string, Permissions> = new Map()
 
+    get platform(): LoadedPermissions|null {
+        if (!this.globalPermissions) {
+            return null;
+        }
+        const platformRoles = [] // todo
+        return LoadedPermissions.from(this.globalPermissions, platformRoles)
+    }
+
     forOrganization(organization: {id: string, privateMeta?: {roles: PermissionRoleDetailed[]}|null}): LoadedPermissions|null {
         return this.for(organization.id, [], organization?.privateMeta?.roles ?? [])
     }

@@ -2,9 +2,9 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
-import { NewUser, PermissionLevel, Permissions, SignupResponse, User as UserStruct,UserPermissions } from "@stamhoofd/structures";
+import { NewUser, PermissionLevel, SignupResponse, User as UserStruct,UserPermissions } from "@stamhoofd/structures";
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../helpers/Context';
 
 type Params = { id: string };
 type Query = undefined;
@@ -28,7 +28,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         const {user, token} = await Context.authenticate({allowWithoutAccount: true})
 
         if (request.body.id !== request.params.id) {
@@ -56,13 +56,30 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 })
             }
 
-            editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id)
+            if (request.body.permissions) {
+                if (organization) {
+                    editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id)
 
-            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess())) {
-                throw new SimpleError({
-                    code: "permission_denied",
-                    message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
-                })
+                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization)?.hasFullAccess())) {
+                        throw new SimpleError({
+                            code: "permission_denied",
+                            message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
+                        })
+                    }
+                } else {
+                    if (editUser.permissions) {
+                        editUser.permissions.patchOrPut(request.body.permissions)
+                    } else {
+                        editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null
+                    }
+
+                    if (editUser.id === user.id && !editUser.permissions?.platform?.hasFullAccess()) {
+                        throw new SimpleError({
+                            code: "permission_denied",
+                            message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
+                        })
+                    }
+                }
             }
         }
 
