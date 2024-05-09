@@ -424,12 +424,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get hasWrite() {
-        if (!this.$organizationManager.user.permissions) {
-            return false
-        }
-
         for (const group of this.groups) {
-            if (!group.privateSettings || !group.hasWriteAccess(this.$organizationManager.user.permissions, this.organization)) {
+            if (!group.privateSettings || !group.hasWriteAccess(this.$context.organizationPermissions, this.organization)) {
                 return false
             }
         }
@@ -438,12 +434,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get hasFull() {
-        if (!this.$organizationManager.user.permissions) {
-            return false
-        }
-        
         for (const group of this.groups) {
-            if (!group.privateSettings || !group.hasFullAccess(this.$organizationManager.user.permissions, this.organization)) {
+            if (!group.privateSettings || !group.hasFullAccess(this.$context.organizationPermissions, this.organization)) {
                 return false
             }
         }

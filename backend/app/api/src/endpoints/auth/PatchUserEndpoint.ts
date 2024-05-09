@@ -45,8 +45,10 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang om deze gebruiker te wijzigen")
         }
 
-        editUser.firstName = request.body.firstName ?? editUser.firstName
-        editUser.lastName = request.body.lastName ?? editUser.lastName
+        if (await Context.auth.canEditUserName(editUser)) {
+            editUser.firstName = request.body.firstName ?? editUser.firstName
+            editUser.lastName = request.body.lastName ?? editUser.lastName
+        }
 
         if (request.body.permissions !== undefined) {
             if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
@@ -73,6 +75,10 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null
                     }
 
+                    if (editUser.permissions && editUser.permissions.isEmpty) {
+                        editUser.permissions = null
+                    }
+
                     if (editUser.id === user.id && !editUser.permissions?.platform?.hasFullAccess()) {
                         throw new SimpleError({
                             code: "permission_denied",
@@ -92,21 +98,23 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         await editUser.save();
 
-        if (request.body.email && request.body.email !== editUser.email) {
-            // Create an validation code
-            // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
-            const code = await EmailVerificationCode.createFor(editUser, request.body.email)
-            code.send(editUser, organization, request.i18n, editUser.id === user.id)
+        if (await Context.auth.canEditUserEmail(editUser)) {
+            if (request.body.email && request.body.email !== editUser.email) {
+                // Create an validation code
+                // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
+                const code = await EmailVerificationCode.createFor(editUser, request.body.email)
+                code.send(editUser, organization, request.i18n, editUser.id === user.id)
 
-            throw new SimpleError({
-                code: "verify_email",
-                message: "Your email address needs verification",
-                human: editUser.id === user.id ? "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan." : "Er is een verificatie e-mail verstuurd naar "+request.body.email+" om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.",
-                meta: SignupResponse.create({
-                    token: code.token,
-                }).encode({ version: request.request.getVersion() }),
-                statusCode: 403
-            });
+                throw new SimpleError({
+                    code: "verify_email",
+                    message: "Your email address needs verification",
+                    human: editUser.id === user.id ? "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan." : "Er is een verificatie e-mail verstuurd naar "+request.body.email+" om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.",
+                    meta: SignupResponse.create({
+                        token: code.token,
+                    }).encode({ version: request.request.getVersion() }),
+                    statusCode: 403
+                });
+            }
         }
 
         return new Response(UserStruct.create({...editUser, hasAccount: editUser.hasAccount()}));      

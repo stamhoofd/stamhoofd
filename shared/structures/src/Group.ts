@@ -7,7 +7,7 @@ import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { GroupSettings, WaitingListType } from './GroupSettings';
 import { Organization } from './Organization';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { PermissionLevel } from './Permissions';
+import { LoadedPermissions, PermissionLevel, PermissionsResourceType } from './Permissions';
 import { UserPermissions } from './UserPermissions';
 
 export enum GroupStatus {
@@ -178,20 +178,19 @@ export class Group extends AutoEncoder {
         return [...map.values()]
     }
 
-    hasAccess(permissions: UserPermissions|null, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    hasAccess(permissions: LoadedPermissions|null, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!permissions) {
             return false
         }
 
-        const loaded = permissions.forOrganization(organization)
-        if (this.privateSettings?.permissions.hasAccess(loaded, permissionLevel)) {
+        if (permissions.hasResourceAccess(PermissionsResourceType.Groups, this.id, permissionLevel)) {
             return true;
         }
 
         // Check parent categories
         const parentCategories = this.getParentCategories(organization.meta.categories)
         for (const category of parentCategories) {
-            if (category.settings.permissions.groupPermissions.hasAccess(loaded, permissionLevel)) {
+            if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                 return true
             }
         }
@@ -208,25 +207,15 @@ export class Group extends AutoEncoder {
         return true;
     }
 
-    /**
-     * Whetever a given user has access to the members in this group. 
-     */
-    hasReadAccess(permissions: UserPermissions|null, organization: Organization): boolean {
+    hasReadAccess(permissions: LoadedPermissions|null, organization: Organization): boolean {
         return this.hasAccess(permissions, organization, PermissionLevel.Read)
-
     }
 
-    /**
-     * Whetever a given user has access to the members in this group. 
-     */
-    hasWriteAccess(permissions: UserPermissions|null, organization: Organization): boolean {
+    hasWriteAccess(permissions: LoadedPermissions|null, organization: Organization): boolean {
         return this.hasAccess(permissions, organization, PermissionLevel.Write)
     }
 
-    /**
-     * Whetever a given user has access to the members in this group. 
-     */
-    hasFullAccess(permissions: UserPermissions|null, organization: Organization): boolean {
+    hasFullAccess(permissions: LoadedPermissions|null, organization: Organization): boolean {
         return this.hasAccess(permissions, organization, PermissionLevel.Full)
     }
 

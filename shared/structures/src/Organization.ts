@@ -6,6 +6,7 @@ import { Group } from './Group';
 import { GroupCategorySettings, GroupCategoryTree } from './GroupCategory';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
+import { LoadedPermissions } from './Permissions';
 import { User } from './User';
 import { UserPermissions } from './UserPermissions';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
@@ -49,7 +50,7 @@ export class Organization extends AutoEncoder {
         return this.categoryTree.getAllGroups()
     }
 
-    getGroupsForPermissions(permissions?: UserPermissions | null) {
+    getGroupsForPermissions(permissions?: LoadedPermissions | null) {
         return this.getCategoryTree({permissions}).getAllGroups()
     }
 
@@ -117,20 +118,12 @@ export class Organization extends AutoEncoder {
     }
 
     /**
-     * @deprecated
-     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
-     */
-    categoryTreeForPermissions(permissions: UserPermissions): GroupCategoryTree {
-        return this.getCategoryTree({permissions})
-    }
-
-    /**
      * Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      * 
      * For registration members perspective, try to use options.admin instead of options.permissions. 
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
-    getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: UserPermissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
+    getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: LoadedPermissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
             let tree = GroupCategoryTree.build(root, this, {

@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
-import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
+import { PermissionLevel, PermissionsResourceType, PrivateWebshop, ResourcePermissions, Version, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
@@ -144,6 +144,22 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                     statusCode: 500
                 })
             }
+        }
+
+        if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            // Create a temporary permission role for this user
+            const organizationPermissions = user.permissions?.organizationPermissions?.get(organization.id)
+            if (!organizationPermissions) {
+                throw new Error('Unexpected missing permissions')
+            }
+            const resourcePermissions = ResourcePermissions.create({
+                resourceName: webshop.meta.name,
+                level: PermissionLevel.Full
+            })
+            const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Webshops, webshop.id, organizationPermissions)
+            user.permissions!.organizationPermissions.set(organization.id, organizationPermissions.patch(patch))
+            console.log('Automatically granted author full permissions to resource', 'webshop', webshop.id, 'user', user.id, 'patch', patch.encode({version: Version}))
+            await user.save()
         }
 
         // Verify if we have full access

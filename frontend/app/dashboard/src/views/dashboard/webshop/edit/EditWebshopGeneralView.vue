@@ -141,23 +141,6 @@
             />
         </template>
 
-        <template v-if="isNew && roles.length > 0">
-            <hr>
-            <h2>Toegangsbeheer</h2>
-            <p>Kies welke beheerdersrollen toegang hebben tot deze webshop (hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders)</p>
-
-            <STList>
-                <STListItem>
-                    <template #left>
-                        <Checkbox :modelValue="true" :disabled="true" />
-                    </template>
-                    Hoofdbeheerders
-                </STListItem>
-
-                <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
-            </STList>
-        </template>
-
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
             <hr>
             <h2>Inloggen</h2>

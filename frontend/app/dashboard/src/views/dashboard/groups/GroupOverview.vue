@@ -360,11 +360,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get hasFullPermissions() {
-        return this.group.hasFullAccess(this.$organizationManager.user.permissions, this.organization)
+        return this.group.hasFullAccess(this.$context.organizationPermissions, this.organization)
     }
 
     get hasWritePermissions() {
-        return this.group.hasWriteAccess(this.$organizationManager.user.permissions, this.organization)
+        return this.group.hasWriteAccess(this.$context.organizationPermissions, this.organization)
     }
    
     openMembers(animated = true, cycleOffset = 0) {
@@ -651,7 +651,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get allCategories() {
-        return this.organization.getCategoryTree({admin: true, permissions: this.$organizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
+        return this.organization.getCategoryTree({admin: true, permissions: this.$context.organizationPermissions}).getAllCategories().filter(c => c.categories.length == 0)
     }
 
     async restoreGroup(event) {

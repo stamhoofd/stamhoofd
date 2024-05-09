@@ -131,7 +131,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
     get suggestedTree() {
         return this.$organization.getCategoryTree({
             maxDepth: 1, 
-            permissions: this.$user!.permissions, 
+            permissions: this.$context.organizationPermissions,
             smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
             filterGroups: g => {
                 const member: UnknownMemberWithRegistrations = this.member ?? {
@@ -139,14 +139,14 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                     registrations: [],
                     details: this.memberDetails
                 }
-                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, this.$organization.getGroupsForPermissions(this.$organizationManager.user?.permissions), this.$organization.availableCategories, [])
+                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, this.$organization.getGroupsForPermissions(this.$context.organizationPermissions), this.$organization.availableCategories, [])
                 return !canRegister.closed || canRegister.waitingList
             }
         })
     }
 
     get categoryTree() {
-        return this.$organization.getCategoryTree({maxDepth: 1, smartCombine: true, permissions: this.$context.user?.permissions})
+        return this.$organization.getCategoryTree({maxDepth: 1, smartCombine: true, permissions: this.$context.organizationPermissions})
     }
 
     getSelectedGroupForCategory(category: GroupCategoryTree): Group | null {

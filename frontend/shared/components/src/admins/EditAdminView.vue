@@ -19,15 +19,15 @@
         <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name" :disabled="!canEditDetails">
                 </div>
                 <div>
-                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" placeholder="Achternaam" autocomplete="family-name" :disabled="!canEditDetails">
                 </div>
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres" :required="true" />
+        <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails"/>
 
         <div class="container">
             <hr>
@@ -37,27 +37,50 @@
             <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
         </div>
 
-        <hr v-if="!isNew">
-        <h2 v-if="!isNew">
-            Verwijderen
-        </h2>
+        <div class="container" v-if="resources.length">
+            <hr>
+            <h2>Individuele toegang</h2>
+            <p>Beheerders kunnen automatisch toegang krijgen tot een onderdeel als ze het zelf hebben aangemaakt maar anders niet automatisch toegang zouden hebben (bv. aanmaken van nieuwe webshops). Sowieso is het aan te raden om dit om te zetten in beheerdersrollen, aangezien die eenvoudiger te beheren zijn.</p>
 
-        <button v-if="!isNew" class="button secundary danger" type="button" @click="doDelete()">
-            <span class="icon trash" />
-            <span>Verwijderen</span>
-        </button>
+            <STList>
+                <ResourcePermissionRow 
+                    v-for="resource in resources" 
+                    :key="resource.id" 
+                    :role="permissions.unloadedPermissions" 
+                    :resource="resource" 
+                    :configurableAccessRights="[]"
+                    type="resource" 
+                    @patch:role="addPermissionPatch" 
+                />
+            </STList>
+        </div>
+
+        <template v-if="!isNew">
+
+        <hr v-if="!isNew">
+            <h2>
+                Verwijderen
+            </h2>
+            <p>Je kan een beheerder verwijderen. Het account blijft dan behouden maar de beheerder verliest alle toegangsrechten.</p>
+
+            <button class="button secundary danger" type="button" @click="doDelete()">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </template>
     </SaveView>
 </template>
 
 <script setup lang="ts">
-import { useErrors, usePatch, EmailInput, SaveView, CenteredMessage, ErrorBox, useContext, Toast, usePermissions } from '@stamhoofd/components';
-import { User, UserPermissions } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
-import EditUserPermissionsBox from './components/EditUserPermissionsBox.vue'
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Decoder } from '@simonbackx/simple-encoding';
-import { useAdmins } from './hooks/useAdmins';
 import { usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, usePermissions } from '@stamhoofd/components';
+import { Permissions, PermissionsResourceType, User } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
+import EditUserPermissionsBox from './components/EditUserPermissionsBox.vue';
+import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
+import { useAdmins } from './hooks/useAdmins';
 
 const {errorBox, validator} = useErrors();
 const saving = ref(false);
@@ -72,8 +95,31 @@ const props = defineProps<{
 }>();
 
 const {patch, patched, addPatch, hasChanges} = usePatch(props.user)
-const {pushInMemory} = useAdmins()
+const {pushInMemory, dropFromMemory, getPermissionsPatch} = useAdmins()
 const permissions = usePermissions({patchedUser: patched})
+const resources = computed(() => {
+    const raw = permissions.unloadedPermissions;
+    if (!raw) {
+        return [];
+    }
+    const list: {id: string, name: string, type: PermissionsResourceType}[] = [];
+    for (const [type, p] of raw.resources.entries()) {
+        for (const [id, resource] of p.entries()) {
+            list.push({id, name: resource.resourceName, type})
+        }
+    }
+    return list;
+})
+
+const canEditDetails = computed(() => {
+    return !patched.value?.permissions?.globalPermissions || $context.value.auth.hasFullPlatformAccess() || (patched.value.id === $context.value?.user?.id)
+});
+
+const addPermissionPatch = (patch: AutoEncoderPatchType<Permissions>) => {
+    addPatch(User.patch({
+        permissions: getPermissionsPatch(patched.value, patch)
+    }))
+}
 
 const save = async () => {
     if (deleting.value || saving.value) {
@@ -170,15 +216,19 @@ const doDelete = async () => {
 
     try {
         // Patch the user
-        await $context.value.authenticatedServer.request({
+        const response = await $context.value.authenticatedServer.request({
             method: "PATCH",
             path: "/user/"+props.user.id,
             body: User.patch({
                 id: props.user.id,
-                permissions: permissions.createPatch(null)
+                permissions: getPermissionsPatch(props.user, null)
             }),
             decoder: User as Decoder<User>
         })
+
+        // Copy all data
+        props.user.set(response.data);
+        dropFromMemory(props.user)
 
         pop({ force: true })
 

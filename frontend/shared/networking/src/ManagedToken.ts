@@ -9,9 +9,9 @@ import { NetworkManager } from './NetworkManager';
 export class ManagedToken {
     token: Token;
     private refreshPromise?: Promise<void>;
-    onChange: () => void
+    onChange: () => Promise<void>|void
 
-    constructor(token: Token, onChange: () => void) {
+    constructor(token: Token, onChange: () => Promise<void>|void) {
         this.token = token;
         this.onChange = onChange
     }
@@ -32,7 +32,7 @@ export class ManagedToken {
         })
 
         this.token = result.data
-        this.onChange()
+        await this.onChange()
     }
 
     needsRefresh(): boolean {

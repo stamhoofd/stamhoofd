@@ -1,9 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
-import { PaymentMethod, PaymentStatus } from "@stamhoofd/structures";
 
 import { Group } from "../models/Group";
 import { Member } from '../models/Member';
-import { Payment } from '../models/Payment';
 import { Registration } from '../models/Registration';
 
 class Options {
@@ -17,6 +15,7 @@ export class RegistrationFactory extends Factory<Options, Registration> {
         const registration = new Registration()
         registration.memberId = this.options.member.id
         registration.groupId = this.options.group.id
+        registration.organizationId = this.options.group.organizationId
         registration.cycle = this.options.group.cycle
 
         if (this.options.waitingList !== true) {

@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { ComponentOptions } from 'vue';
-import AdminsView from './admins/AdminsView.vue';
+import {AdminsView} from '@stamhoofd/components';
 
 defineRoutes([
     {

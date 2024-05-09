@@ -1,8 +1,8 @@
 import { Migration } from '@simonbackx/simple-database';
+import { Country } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
 import fs from "fs";
 import readline from "readline";
-import { Country } from '@stamhoofd/structures';
 
 import { City } from '../models/addresses/City';
 import { PostalCode } from '../models/addresses/PostalCode';

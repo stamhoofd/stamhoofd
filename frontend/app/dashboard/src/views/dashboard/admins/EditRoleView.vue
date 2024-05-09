@@ -531,24 +531,24 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     setAdminRole(admin: User, enable: boolean) {
-        const permissionPatch = Permissions.patch({})
-
-        if (enable) {
-            if (this.hasAdminRole(admin)) {
-                return
-            }
-            permissionPatch.roles.addPut(PermissionRole.create(this.role))
-        } else {
-            permissionPatch.roles.addDelete(this.role.id)
-        }
-        const userPatch = User.patch({
-            id: admin.id,
-            permissions: UserPermissions.convertPatch(permissionPatch, this.organization.id)
-        })
-        const p = Organization.patch({})
-        p.admins!.addPatch(userPatch)
-        this.addPatch(p)
-        console.log(p)
+        // const permissionPatch = Permissions.patch({})
+// 
+        // if (enable) {
+        //     if (this.hasAdminRole(admin)) {
+        //         return
+        //     }
+        //     permissionPatch.roles.addPut(PermissionRole.create(this.role))
+        // } else {
+        //     permissionPatch.roles.addDelete(this.role.id)
+        // }
+        // const userPatch = User.patch({
+        //     id: admin.id,
+        //     permissions: UserPermissions.convertPatch(permissionPatch, this.organization.id)
+        // })
+        // const p = Organization.patch({})
+        // p.admins!.addPatch(userPatch)
+        // this.addPatch(p)
+        // console.log(p)
     }
 
     async save() {

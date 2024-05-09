@@ -5,7 +5,7 @@ import { Ref, computed, inject, toRef, type App, ref } from "vue";
 
 import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
 import { Organization, Platform, User, Version } from "@stamhoofd/structures";
-import { Checkbox, CopyableDirective, GlobalEventBus, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingView, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
@@ -33,6 +33,7 @@ export function usePlatform(): Ref<Platform> {
 }
 
 export function usePatch<T extends AutoEncoder>(obj: T): {
+    createPatch: () => AutoEncoderPatchType<T>,
     patched: Ref<T>, 
     patch: Ref<AutoEncoderPatchType<T>>,
     addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void,
@@ -44,8 +45,12 @@ export function usePatch<T extends AutoEncoder>(obj: T): {
     const patch = ref("id" in obj ? obj.static.patch({id: obj.id}) : obj.static.patch({})) as Ref<AutoEncoderPatchType<T>>;
 
     return {
+        createPatch: () => {
+            return ("id" in obj ? obj.static.patch({id: obj.id}) : obj.static.patch({})) as AutoEncoderPatchType<T>;
+        },
         patch,
         patched: computed(() => {
+            console.log('PAtching', obj, 'with', patch.value, 'gives', obj.patch(patch.value))
             return obj.patch(patch.value)
         }),
         addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
@@ -57,8 +62,15 @@ export function usePatch<T extends AutoEncoder>(obj: T): {
     }
 }
 
-export function useEmitPatch<T extends AutoEncoder>(props: any, emit: any, propName: string): { patched: T, addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void } {
+export function useEmitPatch<T extends AutoEncoder>(props: any, emit: any, propName: string): { 
+    createPatch: () => AutoEncoderPatchType<T>,
+    patched: Ref<T>, 
+    addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void 
+} {
     return {
+        createPatch: () => {
+            return ("id" in props[propName] ? props[propName].static.patch({id: props[propName].id}) : props[propName].static.patch({})) as AutoEncoderPatchType<T>;
+        },
         patched: computed(() => props[propName]) as Ref<T>,
         addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
             emit('patch:' + propName, props[propName].static.patch(newPatch))
@@ -71,7 +83,7 @@ export function usePermissions(overrides?: {patchedUser?: User|Ref<User>, patche
     const organization = overrides?.patchedOrganization ?? useOrganization()
     const platform = overrides?.patchedPlatform ?? usePlatform()
 
-    return new ContextPermissions(user, organization, platform)
+    return new ContextPermissions(user, organization, platform, {allowInheritingPermissions: false})
 }
 
 /**
@@ -162,6 +174,7 @@ export class VueGlobalHelper {
         app.component('SaveView', SaveView)
         app.component('Checkbox', Checkbox)
         app.component('Radio', Radio)
+        app.component('LoadingView', LoadingView)
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

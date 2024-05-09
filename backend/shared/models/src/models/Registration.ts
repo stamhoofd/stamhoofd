@@ -21,7 +21,7 @@ export class Registration extends Model {
     memberId: string;
 
     @column({ type: "string" })
-    organizationId: string;
+    organizationId: string
 
     @column({ type: "string" })
     groupId: string;

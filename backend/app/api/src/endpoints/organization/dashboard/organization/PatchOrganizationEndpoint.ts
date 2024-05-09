@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonba
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Group, Organization,PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions, UserPermissions } from "@stamhoofd/structures";
+import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions, PermissionsResourceType,ResourcePermissions, UserPermissions, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -332,13 +332,29 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
             model.status = struct.status
 
+            if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+                // Create a temporary permission role for this user
+                const organizationPermissions = user.permissions?.organizationPermissions?.get(organization.id)
+                if (!organizationPermissions) {
+                    throw new Error('Unexpected missing permissions')
+                }
+                const resourcePermissions = ResourcePermissions.create({
+                    resourceName: model.settings.name,
+                    level: PermissionLevel.Full
+                })
+                const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Groups, model.id, organizationPermissions)
+                user.permissions!.organizationPermissions.set(organization.id, organizationPermissions.patch(patch))
+                console.log('Automatically granted author full permissions to resource', 'group', model.id, 'user', user.id, 'patch', patch.encode({version: Version}))
+                await user.save()
+            }
+
             // Check if current user has permissions to this new group -> else fail with error
             if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
                 errors.addError(
                     new SimpleError({
                         code: "missing_permissions",
                         message: "You cannot restrict your own permissions",
-                        human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep (stel dit in via het tabblad toegang)"
+                        human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep"
                     })
                 )
                 continue;

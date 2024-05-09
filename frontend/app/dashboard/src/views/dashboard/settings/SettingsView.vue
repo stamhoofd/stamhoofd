@@ -325,12 +325,10 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
+import { AdminsView, AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 
-
-import AdminsView from '../admins/AdminsView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';

@@ -1,0 +1,6 @@
+export {default as AdminsView} from './AdminsView.vue'
+export {default as EditAdminView} from './EditAdminView.vue'
+export {default as EditRoleView} from './EditRoleView.vue'
+export {default as RolesView} from './RolesView.vue'
+export {default as ResourcePermissionRow} from './components/ResourcePermissionRow.vue'
+export {default as EditResourceRolesView} from './EditResourceRolesView.vue'

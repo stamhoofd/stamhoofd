@@ -208,7 +208,7 @@ export class OpenIDConnectHelper {
             }
 
             // Get user from database
-            let user = await User.getForRegister(this.organization.id, claims.email)
+            let user = await User.getOrganizationLevelUser(this.organization.id, claims.email)
             if (!user) {
                 // Create a new user
                 user = await User.registerSSO(this.organization, {

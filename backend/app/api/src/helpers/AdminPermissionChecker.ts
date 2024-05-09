@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
-import { AccessRight, GroupCategory, GroupStatus, PermissionLevel, Platform } from "@stamhoofd/structures"
+import { AccessRight, GroupCategory, GroupStatus, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, Platform } from "@stamhoofd/structures"
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -84,7 +84,7 @@ export class AdminPermissionChecker {
         })
     }
 
-    async getOrganizationRoles(organization: string|Organization) {
+    async getOrganizationRoles(organization: string|Organization): Promise<PermissionRoleDetailed[]> {
         if (typeof organization === 'string') {
             const loadedOrg = await this.getOrganization(organization)
             return this.getOrganizationRoles(loadedOrg)
@@ -97,13 +97,17 @@ export class AdminPermissionChecker {
         return Platform.create({}).getRoles()
     }
 
+    get platformPermissions() {
+        return this.user.permissions?.forPlatform(Platform.shared)
+    }
+    
     async getOrganizationPermissions(organization: string|Organization) {
         if (!this.user.permissions) {
             return null;
         }
         return this.user.permissions.for(
             typeof organization === 'string' ? organization : organization.id, 
-            this.getPlatformRoles(), 
+            Platform.shared, 
             await this.getOrganizationRoles(organization)
         )
     }
@@ -162,17 +166,16 @@ export class AdminPermissionChecker {
         }
 
         // Check global level permissions for this user
-        if (group.privateSettings.permissions.hasAccess(organizationPermissions, permissionLevel)) {
+        if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Groups, group.id, permissionLevel)) {
             return true;
         }
 
         // Check parent categories
-        if (this.organization && this.organization.id === group.organizationId) {
-            const parentCategories = group.getParentCategories(this.organization.meta.categories)
-            for (const category of parentCategories) {
-                if (category.settings.permissions.groupPermissions.hasAccess(organizationPermissions, permissionLevel)) {
-                    return true
-                }
+        const organization = await this.getOrganization(group.organizationId)
+        const parentCategories = group.getParentCategories(organization.meta.categories)
+        for (const category of parentCategories) {
+            if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
+                return true
             }
         }
 
@@ -245,11 +248,11 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (webshop.privateMeta.permissions.hasAccess(organizationPermissions, permissionLevel)) {
+        if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Webshops, webshop.id, permissionLevel)) {
             return true;
         }
 
-        if (permissionLevel === PermissionLevel.Read && webshop.privateMeta.scanPermissions.hasAccess(organizationPermissions, PermissionLevel.Write)) {
+        if (permissionLevel === PermissionLevel.Read && organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
             return true;
         }
 
@@ -267,11 +270,11 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (webshop.privateMeta.permissions.hasAccess(organizationPermissions, permissionLevel)) {
+        if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Webshops, webshop.id, permissionLevel)) {
             return true;
         }
 
-        if ((permissionLevel === PermissionLevel.Read || permissionLevel === PermissionLevel.Write) && webshop.privateMeta.scanPermissions.hasAccess(organizationPermissions, PermissionLevel.Write)) {
+        if ((permissionLevel === PermissionLevel.Read || permissionLevel === PermissionLevel.Write) && organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
             return true;
         }
 
@@ -444,6 +447,28 @@ export class AdminPermissionChecker {
         return await this.canManageAdmins(user.organizationId);
     }
 
+    async canEditUserName(user: User) {
+        if (user.id === this.user.id) {
+            return true;
+        }
+
+        if (user.organizationId) {
+            // normal behaviour
+            return this.canAccessUser(user, PermissionLevel.Write)
+        }
+
+        // platform user: only allowed to change names if not platform admins
+        if (user.permissions?.globalPermissions) {
+            return this.hasPlatformFullAccess()
+        }
+
+        return this.canAccessUser(user, PermissionLevel.Write)
+    }
+
+    async canEditUserEmail(user: User) {
+        return this.canEditUserName(user)
+    }
+
     async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read) {
         if (level === PermissionLevel.Read) {
             if (template.organizationId === null) {
@@ -607,8 +632,8 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (category.settings.permissions.getCreatePermissionLevel(organizationPermissions) !== "Create") {
-            throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to add new groups", statusCode: 403 })
+        if (!organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, category.id, AccessRight.OrganizationCreateGroups)) {
+            return false;
         }
 
         return true;
@@ -653,11 +678,11 @@ export class AdminPermissionChecker {
     }
 
     hasPlatformFullAccess(): boolean {
-        return !!this.user.permissions && !!this.user.permissions.globalPermissions && this.user.permissions.globalPermissions.hasFullAccess(this.getPlatformRoles())
+        return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess()
     }
 
     hasSomePlatformAccess(): boolean {
-        return !!this.user.permissions && !!this.user.permissions.globalPermissions
+        return !!this.platformPermissions
     }
 
     canManagePlatformAdmins() {

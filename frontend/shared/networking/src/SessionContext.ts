@@ -69,7 +69,15 @@ export class SessionContext implements RequestMiddleware {
         return this.user?.permissions?.forOrganization(this.organization) ?? null
     }
 
+    /**
+     * @deprecated
+     * Use auth
+     */
     get organizationAuth() {
+        return new ContextPermissions(this.user, this.organization, Platform.shared)
+    }
+
+    get auth() {
         return new ContextPermissions(this.user, this.organization, Platform.shared)
     }
 
@@ -111,7 +119,7 @@ export class SessionContext implements RequestMiddleware {
                 try {
                     const parsed = JSON.parse(json)
                     const token = Token.decode(new ObjectData(parsed, { version: Version }))
-                    this.setToken(token, usePlatformStorage)
+                    this.setTokenWithoutSaving(token, usePlatformStorage)
                     return;
                 } catch (e) {
                     console.error(e)
@@ -126,7 +134,7 @@ export class SessionContext implements RequestMiddleware {
                     try {
                         const parsed = JSON.parse(json2)
                         const token = Token.decode(new ObjectData(parsed, { version: Version }))
-                        this.setToken(token, usePlatformStorage)
+                        this.setTokenWithoutSaving(token, usePlatformStorage)
                     } catch (e) {
                         console.error(e)
                     }
@@ -163,7 +171,7 @@ export class SessionContext implements RequestMiddleware {
         }
     }
 
-    saveToStorage() {
+    async saveToStorage() {
         try {
             // Save token to localStorage
             if (this.token) {
@@ -172,16 +180,21 @@ export class SessionContext implements RequestMiddleware {
                 ));
 
                 if (suffix == 'platform' && this.organization) {
-                    void Storage.secure.removeItem('token-' + this.organization.id)
-                    void Storage.secure.removeItem('user-' + this.organization.id)
+                    await Storage.secure.removeItem('token-' + this.organization.id)
+                    await Storage.secure.removeItem('user-' + this.organization.id)
                 }
 
-                void Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version })))
+                if (suffix != 'platform') {
+                    await Storage.secure.removeItem('token-platform')
+                    await Storage.secure.removeItem('user-platform')
+                }
+
+                await Storage.secure.setItem('token-' + suffix, JSON.stringify(this.token.token.encode({ version: Version })))
 
                 if (this.user) {
-                    void Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
+                    await Storage.secure.setItem('user-' + suffix, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
                 } else {
-                    void Storage.secure.removeItem('user-' + suffix)
+                    await Storage.secure.removeItem('user-' + suffix)
                 }
 
                 console.log('[SessionContext] Saved token to storage, suffix: ' + suffix)
@@ -254,7 +267,7 @@ export class SessionContext implements RequestMiddleware {
                 return;
             }
 
-            this.setToken(new Token({
+            await this.setToken(new Token({
                 accessToken: '',
                 refreshToken: oid_rt,
                 accessTokenValidUntil: new Date(0)
@@ -423,11 +436,12 @@ export class SessionContext implements RequestMiddleware {
         return this.server
     }
 
-    protected onTokenChanged() {
+    protected async onTokenChanged() {
+        await this.saveToStorage()
         this.callListeners("token")
     }
 
-    setToken(token: Token, usedPlatformStorage?: boolean) {
+    setTokenWithoutSaving(token: Token, usedPlatformStorage?: boolean) {
         console.log('[SessionContext] Setting Token. Platform: ' + usedPlatformStorage)
 
         if (this.token) {
@@ -436,14 +450,19 @@ export class SessionContext implements RequestMiddleware {
                 // emtpy
             }
         }
-        this.token = new ManagedToken(token, () => {
-            this.onTokenChanged()
+        this.token = new ManagedToken(token, async () => {
+            await this.onTokenChanged()
         });
 
         if (usedPlatformStorage !== undefined) {
             this.usedPlatformStorage = usedPlatformStorage
         }
         this.callListeners("token")
+    }
+
+    async setToken(token: Token, usedPlatformStorage?: boolean) {
+        this.setTokenWithoutSaving(token, usedPlatformStorage)
+        await this.onTokenChanged()
     }
 
     async fetchUser(shouldRetry = true): Promise<User> {
@@ -459,6 +478,7 @@ export class SessionContext implements RequestMiddleware {
         } else {
             this.user = response.data
         }
+        await this.saveToStorage()
         this.callListeners("user")
         return response.data
     }
@@ -632,7 +652,7 @@ export class SessionContext implements RequestMiddleware {
             this.token = null;
             this.user = null; // force refetch in the future
             await this.deleteFromStorage()
-            this.onTokenChanged();
+            await this.onTokenChanged();
         }
     }
 

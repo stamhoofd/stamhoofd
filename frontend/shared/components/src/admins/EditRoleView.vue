@@ -66,7 +66,15 @@
             <p>Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.</p>
            
             <STList>
-                <GroupCategoryPermissionRow v-for="category in categories" :key="category.id" type="category" :role="patched" :organization="patchedOrganization" :category="category" @patch="addPatch" />
+                <ResourcePermissionRow 
+                    v-for="category in categories" 
+                    :key="category.id" 
+                    :role="patched" 
+                    :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" 
+                    :configurableAccessRights="[AccessRight.OrganizationCreateGroups]"
+                    type="resource" 
+                    @patch:role="addPatch" 
+                />
 
                 <STListItem :selectable="true" @click="editCategories()">
                     <span class="button text">
@@ -84,7 +92,16 @@
             </h2>
 
             <STList>
-                <GroupPermissionRow v-for="group in groups" :key="group.id" :role="patched" :organization="patchedOrganization" :group="group" @patch="addPatch" />
+                <ResourcePermissionRow 
+                    v-for="group in groups" 
+                    :key="group.id" 
+                    :role="patched" 
+                    :resource="{id: group.id, name: group.settings.name, type: PermissionsResourceType.Groups }" 
+                    :configurableAccessRights="[]"
+                    type="resource" 
+                    @patch:role="addPatch" 
+                />
+
                 <STListItem :selectable="true" @click="editGroups()">
                     <span class="button text">
                         <span class="icon add" />
@@ -106,7 +123,15 @@
                     </template>
                     Kan nieuwe webshops maken
                 </STListItem>
-                <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patched" :organization="patchedOrganization" :webshop="webshop" type="webshop" @patch="addPatch" />
+                <ResourcePermissionRow 
+                    v-for="webshop in webshops" 
+                    :key="webshop.id" 
+                    :role="patched" 
+                    :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" 
+                    :configurableAccessRights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []"
+                    type="resource" 
+                    @patch:role="addPatch" 
+                />
 
                 <STListItem :selectable="true" @click="editWebshops()">
                     <span class="button text">
@@ -117,35 +142,37 @@
             </STList>
         </div>
 
-        <hr>
-        <h2>Boekhouding</h2>
+        <template v-if="organization">
+            <hr>
+            <h2>Boekhouding</h2>
 
-        <STList>
-            <STListItem :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox v-model="financeDirector" />
-                </template>
-                <h3 class="style-title-list">
-                    Volledige toegang
-                </h3>
-                <p class="style-description-small">
-                    Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
-                </p>
-            </STListItem>
-            <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox v-model="managePayments" />
-                </template>
-                <h3 class="style-title-list">
-                    Overschrijvingen beheren
-                </h3>
-                <p class="style-description-small">
-                    Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
-                </p>
-            </STListItem>
-        </STList>
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox v-model="financeDirector" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Volledige toegang
+                    </h3>
+                    <p class="style-description-small">
+                        Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
+                    </p>
+                </STListItem>
+                <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox v-model="managePayments" />
+                    </template>
+                    <h3 class="style-title-list">
+                        Overschrijvingen beheren
+                    </h3>
+                    <p class="style-description-small">
+                        Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
+                    </p>
+                </STListItem>
+            </STList>
+        </template>
 
-        <div v-if="!isNew" class="container">
+        <div v-if="!isNew && deleteHandler" class="container">
             <hr>
             <h2>
                 Verwijder deze rol
@@ -176,10 +203,14 @@
 
 
 <script setup lang="ts">
-import { SaveView, useErrors, usePatch, Spinner, useOrganization } from '@stamhoofd/components';
-import { AccessRight, Group, PermissionRoleDetailed, User, Permissions, Webshop, GroupCategory } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { CenteredMessage, ErrorBox, SaveView, Spinner, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { AccessRight, Group, GroupCategory, PermissionRoleDetailed, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
+import { Ref, computed, ref } from 'vue';
+import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { usePop } from '@simonbackx/vue-app-navigation';
 
 const {errorBox} = useErrors();
 const saving = ref(false);
@@ -188,26 +219,64 @@ const deleting = ref(false);
 const props = defineProps<{
     role: PermissionRoleDetailed;
     isNew: boolean;
+    saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed>) => Promise<void>,
+    deleteHandler: (() => Promise<void>)|null
 }>();
 const title = computed(() => props.isNew ? 'Nieuwe rol' : props.role.name);
-const {patched, addPatch, hasChanges} = usePatch(props.role)
-const enableWebshopModule = false;
-const enableMemberModule = false;
-const enableActivities = false;
-const groups: Group[] = [];
-const webshops: Webshop[] = [];
-const categories: GroupCategory[] = [];
+const enableWebshopModule = computed(() => organization.value?.meta?.packages.useWebshops ?? false);
+const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
+const enableActivities = computed(() => organization.value?.meta?.packages.useActivities ?? false);
+const pop = usePop();
+
 const {sortedAdmins, loading, getPermissions} = useAdmins()
-const patchedOrganization = useOrganization()
+const organization = useOrganization()
+const {patched, addPatch, hasChanges, patch} = usePatch(props.role);
+const groups: Ref<Group[]> = computed(() => organization.value?.adminAvailableGroups ?? [])
+const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? [])
+const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree().categories ?? [])
 
 const save = async () => {
+    if (saving.value || deleting.value) {
+        return;
+    }
     saving.value = true;
-    // todo
+    try {
+        if (name.value.length === 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Gelieve een titel in te vullen",
+                field: "name"
+            })
+        }
+        await props.saveHandler(patch.value)
+        pop({ force: true }) 
+    } catch (e) {
+        errorBox.value = new ErrorBox(e)
+    }
     saving.value = false;
 };
+
 const doDelete = async () => {
+    if (saving.value || deleting.value) {
+        return;
+    }
+
+    if (!props.deleteHandler) {
+        return;
+    }
+
+    if (!await CenteredMessage.confirm("Ben je zeker dat je deze rol wilt verwijderen?", "Verwijderen")) {
+        return
+    }
+        
     deleting.value = true;
-    // todo
+    try {
+        await props.deleteHandler()
+        pop({ force: true }) 
+    } catch (e) {
+        errorBox.value = new ErrorBox(e)
+    }
+
     deleting.value = false;
 };
 

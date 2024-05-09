@@ -225,14 +225,14 @@ export class User extends Model {
         return false;
     }
 
-    static async getForRegister(organizationId: string|null, email: string, allowPlatform = false): Promise<User | undefined> {
-        if (STAMHOOFD.userMode !== 'platform' && !organizationId && !allowPlatform) {
-            throw new Error('Expected organizationId in getForRegister')
-        }
+    static async getForRegister(organizationId: string|null, email: string): Promise<User | undefined> {
+        return await this.getForAuthentication(organizationId, email, {allowWithoutAccount: true})
+    }
 
+    static async getOrganizationLevelUser(organizationId: string, email: string): Promise<User | undefined> {
         const users = await User.where({
             email,
-            organizationId: STAMHOOFD.userMode === 'platform' ? null : organizationId
+            organizationId: organizationId
         }, {
             limit: 1
         })

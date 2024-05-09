@@ -74,7 +74,7 @@ export class MemberManager extends MemberManagerBase {
         if (groupIds.length === 0) {
             const members: MemberWithRegistrations[] = []
             for (const group of session.organization!.groups) {
-                if (group.privateSettings && group.hasReadAccess(session.user!.permissions, session.organization!)) {
+                if (group.privateSettings && group.hasReadAccess(session.organizationPermissions, session.organization!)) {
                     members.push(...(await this.loadMembers([group.id], waitingList, cycleOffset, owner)))
                 }
             }

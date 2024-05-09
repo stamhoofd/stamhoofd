@@ -2,10 +2,10 @@
     <form class="editor-view st-view" @submit.prevent="$emit('save')">
         <STNavigationBar :title="title">
             <template #left>
-                <BackButton v-if="$parent.canPop" @click="$parent.pop" />
+                <BackButton v-if="canPop" @click="pop" />
                 <template v-else-if="$isMobile || $isIOS || $isAndroid" >
-                    <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
-                    <button v-else class="button text selected unbold" type="button" @click="$parent.pop">
+                    <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="pop" />
+                    <button v-else class="button text selected unbold" type="button" @click="pop">
                         {{ cancelText }}
                     </button>
                 </template>
@@ -16,7 +16,7 @@
                     {{ saveText }}
                 </button>
             </LoadingButton></template>
-            <template v-else-if="$parent.canDismiss" #right><button class="button navigation icon close" type="button" @click="$parent.dismiss" /></template>
+            <template v-else-if="canDismiss" #right><button class="button navigation icon close" type="button" @click="dismiss" /></template>
         </STNavigationBar>
         <main ref="main" class="flex">
             <slot />
@@ -109,7 +109,7 @@ import Typography from "@tiptap/extension-typography";
 import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
 import { Editor, EditorContent } from '@tiptap/vue-3'
-import { Component,Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Component,Mixins,Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { default as TooltipDirective } from "../directives/Tooltip";
 import UploadButton from "../inputs/UploadButton.vue"
@@ -126,6 +126,7 @@ import { DescriptiveText } from "./EditorDescriptiveText";
 import { EditorSmartButton, SmartButtonInlineNode,SmartButtonNode } from './EditorSmartButton';
 import { EditorSmartVariable, SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -170,7 +171,7 @@ const CustomImage = ImageExtension.extend({
         Tooltip: TooltipDirective
     }
 })
-export default class EditorView extends Vue {
+export default class EditorView extends Mixins(NavigationMixin) {
     @Prop({ default: false })
         loading!: boolean;
 

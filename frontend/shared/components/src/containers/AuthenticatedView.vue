@@ -55,7 +55,7 @@ export default class AuthenticatedView extends VueComponent {
     changed() {
         if (this.noPermissionsRoot) {
             if (this.$context.organization) {
-                this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && this.$context.user.permissions != null && !!(this.$context as SessionContext).user.permissions?.forOrganization(this.$context.organization.id)
+                this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && this.$context.user.permissions != null && !!(this.$context as SessionContext).user.permissions?.forOrganization(this.$context.organization)
             } else {
                 this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && (this.$context as SessionContext).user!.permissions?.globalPermissions != null
             }

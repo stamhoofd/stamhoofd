@@ -73,7 +73,7 @@ export class LoginHelper {
         
         try {
             session.preventComplete = true
-            session.setToken(response.data)
+            await session.setToken(response.data)
             await SessionManager.prepareSessionForUsage(session, false)
         } finally {
             session.preventComplete = false
@@ -109,7 +109,7 @@ export class LoginHelper {
             throw e
         }
 
-        session.setToken(tokenResponse.data)
+        await session.setToken(tokenResponse.data)
         await session.fetchUser()
 
         // if user / orgaznization got cleared due to an invite

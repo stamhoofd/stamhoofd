@@ -163,14 +163,10 @@ export class SessionManagerStatic {
             }
             this.setUserId(session);
             this.callListeners(changed)
-
-            if (changed === 'token' || changed === 'user') {
-                session.saveToStorage()
-            }
         })
 
         this.setUserId(session);
-        session.saveToStorage();
+        await session.saveToStorage();
         return session
     }
 

@@ -231,7 +231,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && group.hasWriteAccess(this.$organizationManager.user.permissions, this.$organization)) {
+            if(group.privateSettings && group.hasWriteAccess(this.$context.organizationPermissions, this.$organization)) {
                 return true
             }
         }

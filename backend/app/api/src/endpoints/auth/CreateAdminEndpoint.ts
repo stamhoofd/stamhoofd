@@ -45,7 +45,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         // First check if a user exists with this email?
-        const existing = await User.getForRegister(organization?.id ?? null, request.body.email, true)
+        const existing = await User.getForRegister(organization?.id ?? null, request.body.email)
 
         const admin = existing ?? (await User.createInvited(organization, {
             firstName: request.body.firstName,
@@ -80,6 +80,16 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             } else {
                 admin.permissions = request.body.permissions.isPut() ? request.body.permissions : null
             }
+        }
+
+        if (!admin.firstName && request.body.firstName) {
+            // Allow setting the name if the user didn't had a name yet
+            admin.firstName = request.body.firstName
+        }
+
+        if (!admin.lastName && request.body.lastName) {
+            // Allow setting the name if the user didn't had a name yet
+            admin.lastName = request.body.lastName
         }
 
         await admin.save();

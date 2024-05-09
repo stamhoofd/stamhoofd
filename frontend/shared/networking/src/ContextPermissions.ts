@@ -1,20 +1,30 @@
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchType } from "@simonbackx/simple-encoding";
-import { AccessRight, Organization, PaymentGeneral, PermissionLevel, Platform, User, UserPermissions, Permissions } from "@stamhoofd/structures";
+import { AutoEncoderPatchType, PartialWithoutMethods } from "@simonbackx/simple-encoding";
+import { AccessRight, Group, LoadedPermissions, Organization, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, User, UserPermissions } from "@stamhoofd/structures";
 import { Ref, unref } from "vue";
 
 export class ContextPermissions {
     reactiveUser: User|null|Ref<User|null>
     reactiveOrganization: Organization|null|Ref<Organization|null>
     reactivePlatform: Platform|Ref<Platform>
+
+    /**
+     * Whether to allow inheriting platoform permissions
+     * (mosty disabled when editing permissions)
+     */
+    allowInheritingPermissions = true
     
     constructor(
         user: User|null|undefined|Ref<User|null>, 
         organization: Organization|null|undefined|Ref<Organization|null>,
-        platform: Platform|Ref<Platform>
+        platform: Platform|Ref<Platform>,
+        options?: {allowInheritingPermissions?: boolean}
     ) {
         this.reactiveUser = user ?? null
         this.reactiveOrganization = organization ?? null
         this.reactivePlatform = platform
+        if (options?.allowInheritingPermissions !== undefined) {
+            this.allowInheritingPermissions = options.allowInheritingPermissions
+        }
     }
 
     get user() {
@@ -33,22 +43,30 @@ export class ContextPermissions {
         return unref(this.reactivePlatform)
     }
 
-    get permissions() {
-        if (!this.organization) {
-            return unref(this.userPermissions)?.forPlatform(this.platform) ?? null
-        }
-        return unref(this.userPermissions)?.forOrganization(this.organization) ?? null
+    get platformPermissions() {
+        return unref(this.userPermissions)?.forPlatform(this.platform) ?? null
     }
 
-    createPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Permissions>>|null): AutoEncoderPatchType<UserPermissions> {
-        if (this.organization) {
-            return UserPermissions.convertPatch(patch === null ? null : Permissions.patch(patch), this.organization.id)
+    get permissions() {
+        if (!this.organization) {
+            return this.platformPermissions
         }
-        return UserPermissions.convertPlatformPatch(patch === null ? null : Permissions.patch(patch))
+        return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions) ?? null
+    }
+
+    get unloadedPermissions(): Permissions|null {
+        if (!this.organization) {
+            return unref(this.userPermissions)?.globalPermissions ?? null
+        }
+        return unref(this.userPermissions)?.organizationPermissions.get(this.organization.id) ?? null
     }
 
     hasFullAccess() {
         return this.permissions?.hasFullAccess() ?? false
+    }
+
+    hasFullPlatformAccess() {
+        return this.platformPermissions?.hasFullAccess() ?? false
     }
 
     hasAccessRight(right: AccessRight) {
@@ -59,7 +77,15 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.OrganizationManagePayments) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector)
     }
 
-    canAccessPayment(payment?: PaymentGeneral|null, level: PermissionLevel) {
+    canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (!this.organization) {
+            return false
+        }
+
+        return group.hasAccess(this.permissions, this.organization, permissionLevel)
+    }
+
+    canAccessPayment(payment: PaymentGeneral|null|undefined, level: PermissionLevel) {
         if (this.canManagePayments() || this.hasFullAccess()) {
             return true;
         }

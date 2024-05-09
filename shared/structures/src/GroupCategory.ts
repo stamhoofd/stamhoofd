@@ -5,40 +5,25 @@ import { Group } from './Group';
 import { Organization } from './Organization';
 // Eslint wants to remove Permissions, but it is needed for types!
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { LoadedPermissions, PermissionLevel, PermissionRole, PermissionsByRole } from './Permissions';
+import { AccessRight, LoadedPermissions, PermissionLevel, PermissionRole, PermissionsByRole, PermissionsResourceType } from './Permissions';
 import { UserPermissions } from './UserPermissions';
 /**
  * Give access to a given resouce based by the roles of a user
  */
 export class GroupCategoryPermissions extends AutoEncoder {
     /**
+     * @deprecated
      * Can create new groups in this category or subcategories
      */
     @field({ decoder: new ArrayDecoder(PermissionRole) })
     create: PermissionRole[] = []
 
     /**
+     * @deprecated
      * Permissions automatically for all groups in this category
      */
     @field({decoder: PermissionsByRole, version: 203, optional: true})
     groupPermissions = PermissionsByRole.create({})
-
-    /**
-     * Whetever a given user has access to the members in this group. 
-     */
-    getCreatePermissionLevel(permissions: LoadedPermissions): PermissionLevel.None | "Create" {
-        if (permissions.hasFullAccess()) {
-            return "Create"
-        }
-
-        for (const role of this.create) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                return "Create"
-            }
-        }
-
-        return PermissionLevel.None
-    }
 }
 
 export class GroupCategorySettings extends AutoEncoder {
@@ -57,7 +42,9 @@ export class GroupCategorySettings extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true, version: 59 })
     maximumRegistrations: number | null = null
 
-    /// Might move these to private settings, but is not an issue atm
+    /**
+     * @deprecated
+     */
     @field({ decoder: GroupCategoryPermissions, version: 61 })
     permissions = GroupCategoryPermissions.create({})
 }
@@ -123,14 +110,18 @@ export class GroupCategory extends AutoEncoder {
         return false
     }
 
-    canCreate(permissions: LoadedPermissions, categories: GroupCategory[] = []): boolean {
-        if (this.settings.permissions.getCreatePermissionLevel(permissions) === 'Create') {
-            return true;
+    canCreate(permissions: LoadedPermissions|null, categories: GroupCategory[] = []): boolean {
+        if (!permissions) {
+            return false
         }
 
+        if (permissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, this.id, AccessRight.OrganizationCreateGroups)) {
+            return true;
+        }
+        
         const parents = this.getParentCategories(categories)
         for (const parent of parents) {
-            if (parent.canCreate(permissions, [])) {
+            if (permissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parent.id, AccessRight.OrganizationCreateGroups)) {
                 return true
             }
         }
@@ -184,14 +175,13 @@ export class GroupCategoryTree extends GroupCategory {
         return count
     }
 
-    static build(root: GroupCategory, organization: Organization, options: {permissions?: UserPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
+    static build(root: GroupCategory, organization: Organization, options: {permissions?: LoadedPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
         const categories = organization.meta.categories
         const groups = options?.groups ?? organization.groups
 
         const permissions = options.permissions ?? null
         const maxDepth = options.maxDepth ?? null
         const smartCombine = options.smartCombine ?? false
-        const loaded = permissions ? permissions.forOrganization(organization) : null
 
         return GroupCategoryTree.create({ 
             ...root,
@@ -203,7 +193,7 @@ export class GroupCategoryTree extends GroupCategory {
                         maxDepth: maxDepth !== null ? maxDepth - 1 : null
                     })
 
-                    if (t.categories.length == 0 && t.groups.length == 0 && (smartCombine || (loaded !== null && !f.canCreate(loaded, categories)))) {
+                    if (t.categories.length == 0 && t.groups.length == 0 && (smartCombine || (permissions !== null && !permissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, t.id, AccessRight.OrganizationCreateGroups)))) {
                         // Hide empty categories where we cannot create new groups or when smart combine is enabled
                         return []
                     }

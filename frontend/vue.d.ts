@@ -41,6 +41,7 @@ declare module 'vue' {
         readonly SaveView: typeof import('@stamhoofd/components').SaveView,
         readonly Checkbox: typeof import('@stamhoofd/components').Checkbox,
         readonly Radio: typeof import('@stamhoofd/components').Radio,
+        readonly LoadingView: typeof import('@stamhoofd/components').LoadingView,
 
         // Formatters
         formatPrice: typeof Formatter.price,

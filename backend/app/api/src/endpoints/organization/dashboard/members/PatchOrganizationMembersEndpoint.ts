@@ -420,6 +420,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         
         const registration = new Registration()
         registration.groupId = registrationStruct.groupId
+        registration.organizationId = member.organizationId
         registration.cycle = registrationStruct.cycle
         registration.memberId = member.id
         registration.registeredAt = registrationStruct.registeredAt
@@ -490,6 +491,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Create a registration for this member for thisg roup
             const registration = new Registration()
+            registration.organizationId = organization.id
             registration.memberId = member.id
             registration.groupId = group.id
             registration.cycle = group.cycle

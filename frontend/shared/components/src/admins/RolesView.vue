@@ -63,12 +63,15 @@
 </template>
 
 <script lang="ts" setup>
-import { patchContainsChanges, type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SaveView, useOrganization, usePlatform, useErrors } from '@stamhoofd/components';
-import { Organization, PermissionRoleDetailed, Platform, Version } from '@stamhoofd/structures';
-import { ComponentOptions, Ref, computed, ref } from 'vue';
+import { PatchableArray, PatchableArrayAutoEncoder, type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
+import { SaveView, Toast, useErrors, useOrganization } from '@stamhoofd/components';
+import { useOrganizationManager, usePlatformManager } from '@stamhoofd/networking';
+import { PermissionRoleDetailed } from '@stamhoofd/structures';
+import { ComponentOptions, unref } from 'vue';
 import EditRoleView from './EditRoleView.vue';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { useAdmins } from './hooks/useAdmins';
+import { usePatchRoles } from './hooks/useRoles';
 
 defineRoutes([
     {
@@ -81,7 +84,55 @@ defineRoutes([
 
             return {
                 role,
-                isNew: true
+                isNew: true,
+                saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
+                    const patched = role.patch(patch);
+                    const arr = createRolePatchArray();
+                    arr.addPut(patched)
+                    patchRoles(arr);
+                },
+                deleteHandler: null
+            }
+        }
+    },
+    {
+        url: '@roleId',
+        name: 'editRole',
+        component: EditRoleView as ComponentOptions,
+        present: 'popup',
+        params: {
+            roleId: String
+        },
+        paramsToProps: async (params: {roleId: string}) => {
+            const role = roles.value.find(u => u.id === params.roleId)
+            if (!role) {
+                throw new Error('Role not found')
+            }
+
+            return {
+                role,
+                isNew: false,
+                saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
+                    patch.id = role.id
+                    const arr = createRolePatchArray();
+                    arr.addPatch(patch)
+                    patchRoles(arr);
+                },
+                deleteHandler: () => {
+                    const arr = createRolePatchArray();
+                    arr.addDelete(role.id)
+                    patchRoles(arr);
+                },
+            }
+        },
+        propsToParams(props) {
+            if (!("role" in props)) {
+                throw new Error('Missing role')
+            }
+            return {
+                params: {
+                    roleId: (props.role as PermissionRoleDetailed).id
+                }
             }
         }
     }
@@ -89,45 +140,27 @@ defineRoutes([
 
 const $navigate = useNavigate();
 
-const errors = useErrors();
-const loading = ref(false);
-const saving = ref(false);
-const organization = useOrganization()
-const platform = usePlatform()
-const organizationPatch = ref(Organization.patch({})) as Ref<AutoEncoderPatchType<Organization>>
-const platformPatch = ref(Platform.patch({})) as Ref<AutoEncoderPatchType<Platform>>
-const patchedOrganization = computed(() => organization.value?.patch(organizationPatch.value))
-const patchedPlatform = computed(() => platform.value.patch(platformPatch.value))
-const hasChanges = computed(() => {
-    if (organization.value) {
-        return patchContainsChanges(organizationPatch.value, organization.value, {version: Version})
-    }
-    return patchContainsChanges(platformPatch.value, platform.value, {version: Version})
-})
+const {getPermissions, loading, admins} = useAdmins()
+const {errors, hasChanges, patchRoles, roles, saving, save: rawSave} = usePatchRoles()
 
-const roles = computed(() => {
-    if (patchedOrganization.value) {
-        return patchedOrganization.value.privateMeta?.roles ?? []
-    }
-    return patchedPlatform.value.privateConfig?.roles ?? []
-})
+const pop = usePop()
+
+const createRolePatchArray = () => {
+    return new PatchableArray() as PatchableArrayAutoEncoder<PermissionRoleDetailed>
+}
+
 const draggableRoles = roles;
 
 const getAdminsForRole = (role: PermissionRoleDetailed): number => {
-    // todo
-    return 0
+    return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.roles.find(r => r.id === role.id) ? 1 : 0), 0)
 }
 
 const getMainAdmins = (): number => {
-    // todo
-    return 0
+    return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.hasFullAccess() ? 1 : 0), 0)
 }
 
 const roleDescription = (role: PermissionRoleDetailed): string => {
-    if (patchedOrganization.value) {
-        return role.getDescription(patchedOrganization.value.webshops, patchedOrganization.value.groups)
-    }
-    return role.getDescription([], [])
+    return role.getDescription()
 }
 
 const addRole = () => {
@@ -135,10 +168,13 @@ const addRole = () => {
 }
 
 const editRole = (role: PermissionRoleDetailed) => {
-    // todo
+    $navigate('editRole', {params: {roleId: role.id}}) // not using properties because the saveHandler is set in the route
 }
 
 const save = async () => {
-    // todo
+    await rawSave(() => {
+        new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+        pop({ force: true })
+    });
 }
 </script>

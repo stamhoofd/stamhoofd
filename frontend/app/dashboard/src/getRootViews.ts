@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup, LoginView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, OrganizationManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
 
 import { computed, reactive, ref } from 'vue';
@@ -58,7 +58,7 @@ export async function getScopedDashboardRootFromUrl() {
         return getOrganizationSelectionRoot()
     }
 
-    return getScopedDashboardRoot(session)
+    return await getScopedDashboardRoot(session)
 }
 
 export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
@@ -69,13 +69,14 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
     if (!session.organization) {
         return getOrganizationSelectionRoot()
     }
-    return getScopedDashboardRoot(session, options)
+    return await getScopedDashboardRoot(session, options)
 }
 
-export function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
+export async function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
     const reactiveSession = reactive(session) as SessionContext
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
 
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import(/* webpackChunkName: "StartView", webpackPrefetch: true */ './views/start/StartView.vue'), {})
@@ -177,6 +178,7 @@ export function getScopedDashboardRoot(session: SessionContext, options: {initia
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
+            $platformManager: platformManager,
             $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager: new MemberManager(reactiveSession),
             reactive_navigation_url: "beheerders/" + session.organization!.uri,

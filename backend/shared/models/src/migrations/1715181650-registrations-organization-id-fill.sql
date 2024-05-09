@@ -1,0 +1,1 @@
+UPDATE registrations JOIN `groups` ON registrations.groupId = `groups`.id SET registrations.organizationId = `groups`.organizationId;

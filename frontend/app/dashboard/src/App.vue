@@ -9,7 +9,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
-import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue, toNative } from 'vue-facing-decorator';
 
@@ -151,7 +151,7 @@ export class App extends Vue {
                     toast.hide()
                     new Toast("E-mailadres is gevalideerd", "success green").show()
 
-                    const dashboardContext = getScopedDashboardRoot(session)
+                    const dashboardContext = await getScopedDashboardRoot(session)
                     await ReplaceRootEventBus.sendEvent("replace", dashboardContext);
                 } catch (e) {
                     toast.hide()
@@ -274,7 +274,7 @@ export class App extends Vue {
                 session.user = null;
             }
 
-            session.setToken(new Token({
+            await session.setToken(new Token({
                 accessToken: "",
                 refreshToken,
                 accessTokenValidUntil: new Date(0)

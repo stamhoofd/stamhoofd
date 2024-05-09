@@ -49,7 +49,7 @@ export default class GroupsView extends Mixins(NavigationMixin){
     }
 
     get fullTree() {
-        return this.$organization.getCategoryTree({maxDepth: 1, admin: !!this.$user!.permissions, smartCombine: true})
+        return this.$organization.getCategoryTree({maxDepth: 1, admin: !!this.$context.organizationPermissions, smartCombine: true})
     }
 
     get categories() {

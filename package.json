@@ -39,7 +39,7 @@
         "@babel/runtime": "^7.15.4",
         "@sentry/tracing": "^6.13.3",
         "@sentry/vue": "^6.13.3",
-        "@simonbackx/simple-encoding": "2.10.0",
+        "@simonbackx/simple-encoding": "2.10.2",
         "@simonbackx/simple-errors": "^1.4.0",
         "@simonbackx/simple-networking": "1.16.0",
         "@simonbackx/vue-app-navigation": "2.0.0-alpha.6",

@@ -42,6 +42,14 @@ export class PlatformManager {
     }
 
     static async fetchPlatform($context: SessionContext) {
+        if ($context.organization) {
+            const pResponse = await $context.server.request({
+                method: 'GET',
+                path: '/platform',
+                decoder: Platform as Decoder<Platform>
+            })
+            return pResponse.data
+        }
         const pResponse = await $context.optionalAuthenticatedServer.request({
             method: 'GET',
             path: '/platform',

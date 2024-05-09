@@ -14,6 +14,7 @@ import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/clas
 
 import { ErrorBox } from "./ErrorBox"
 import STErrorBox from "./STErrorBox.vue"
+import { Ref, unref } from 'vue';
 
 @Component({
     components: {
@@ -22,12 +23,12 @@ import STErrorBox from "./STErrorBox.vue"
 })
 export default class STErrorsDefault extends Vue {
     @Prop() 
-        errorBox!: ErrorBox | null;
+        errorBox!: ErrorBox | Ref<ErrorBox> | null;
     
     errors: SimpleError[] = [];
 
     mounted() {
-        this.onNewErrors(this.errorBox)
+        this.onNewErrors(unref(this.errorBox))
     }
 
     getErrorMessage(error: SimpleError) {
@@ -38,18 +39,17 @@ export default class STErrorsDefault extends Vue {
     }
 
     @Watch('errorBox')
-    onNewErrors(val: ErrorBox | null ) {
+    onNewErrors(val: ErrorBox | Ref<ErrorBox> | null ) {
         if (!val) {
             this.errors = [];
             return;
         }
         // Wait for next tick, to prevent a useless rerender of errors that will get removed by other inputs
         this.$nextTick(() => {
-            const errors = val.remaining
-            console.log("Picked new default errors", errors);
+            const errors = unref(val).remaining
             this.errors = errors.errors
 
-            val.scrollTo(this.errors, this.$refs.errors as HTMLElement)
+            unref(val).scrollTo(this.errors, this.$refs.errors as HTMLElement)
         });
         
     }

@@ -337,7 +337,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective, EditResourceRolesView } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -353,7 +353,6 @@ import EditWebshopLinkView from './edit/EditWebshopLinkView.vue';
 import EditWebshopNotificationsView from './edit/EditWebshopNotificationsView.vue';
 import EditWebshopPageView from './edit/EditWebshopPageView.vue';
 import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
-import EditWebshopPermissionsView from './edit/EditWebshopPermissionsView.vue';
 import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
 import EditWebshopRecordSettings from './edit/EditWebshopRecordSettings.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
@@ -562,7 +561,22 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     editPermissions(animated = true) {
-        this.displayEditComponent(EditWebshopPermissionsView, animated)
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(EditResourceRolesView, {
+                    description: 'Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.',
+                    resource: {
+                        id: this.preview.id,
+                        name: this.preview.meta.name,
+                        type: 'webshop'
+                    },
+                    configurableAccessRights: this.preview.hasTickets ? [AccessRight.WebshopScanTickets] : []
+                })
+            ]
+        });
     }
 
     editEmails(animated = true) {

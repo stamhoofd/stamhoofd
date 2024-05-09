@@ -207,6 +207,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registration = new Registration()
                     .setRelation(registrationMemberRelation, member as Member)
                     .setRelation(registrationGroupRelation, group)
+                registration.organizationId = organization.id
             }
 
             registration.memberId = member.id

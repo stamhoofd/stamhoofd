@@ -341,7 +341,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin) {
             const session = await SessionManager.getPreparedContextForOrganization(organization);
             this.present({
                 components: [
-                    getScopedDashboardRoot(session)
+                    await getScopedDashboardRoot(session)
                 ],
                 replace: 1,
                 animated: true,

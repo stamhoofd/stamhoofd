@@ -116,7 +116,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     get tree() {
         return this.$organization.getCategoryTree({
             maxDepth: 1, 
-            admin: !!this.$user!.permissions, 
+            admin: !!this.$context.organizationPermissions, 
             smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
             filterGroups: g => {
                 const canRegister = this.member.canRegister(g, this.$memberManager.members ?? [], this.$organization.meta.categories, this.$checkoutManager.cart.items);
@@ -126,7 +126,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     }
 
     get fullTree() {
-        return this.$organization.getCategoryTree({maxDepth: 1, admin: !!this.$user!.permissions, smartCombine: true})
+        return this.$organization.getCategoryTree({maxDepth: 1, admin: !!this.$context.organizationPermissions, smartCombine: true})
     }
 
     get categories() {
@@ -145,7 +145,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     }
 
     get hasMore() {
-        return !this.showMore && this.tree.getAllGroups().length !== this.$organization.getGroupsForPermissions(this.$context.user?.permissions).length
+        return !this.showMore && this.tree.getAllGroups().length !== this.$organization.getGroupsForPermissions(this.$context.organizationPermissions).length
     }
 
     get hasLess() {

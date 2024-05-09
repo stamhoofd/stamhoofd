@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, EnumDecoder, field, MapDecoder, PatchMap, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,16 +36,68 @@ export enum AccessRight {
     OrganizationCreateWebshops = "OrganizationCreateWebshops",
     OrganizationManagePayments = "OrganizationManagePayments",
     OrganizationFinanceDirector = "OrganizationFinanceDirector",
+    OrganizationCreateGroups = "OrganizationCreateGroups",
+
+    // Webshop level permissions
+    WebshopScanTickets = "WebshopScanTickets",
 }
 
 export class AccessRightHelper {
-    static getDescription(right: AccessRight) {
+    static getName(right: AccessRight): string {
+        switch (right) {
+            case AccessRight.PlatformLoginAs: return 'Inloggen als hoofdbeheerder'
+            case AccessRight.OrganizationFinanceDirector: return 'Toegang tot volledige boekhouding'
+            case AccessRight.OrganizationManagePayments: return 'Overschrijvingen beheren'
+            case AccessRight.OrganizationCreateWebshops: return 'Webshops maken'
+            case AccessRight.OrganizationCreateGroups: return 'Groepen maken'
+            case AccessRight.WebshopScanTickets: return 'Tickets scannen'
+        }
+    }
+
+    static getNameShort(right: AccessRight): string {
+        switch (right) {
+            case AccessRight.PlatformLoginAs: return 'Inloggen'
+            case AccessRight.OrganizationFinanceDirector: return 'Boekhouding'
+            case AccessRight.OrganizationManagePayments: return 'Overschrijvingen'
+            case AccessRight.OrganizationCreateWebshops: return 'Maken'
+            case AccessRight.OrganizationCreateGroups: return 'Maken'
+            case AccessRight.WebshopScanTickets: return 'Scannen'
+        }
+    }
+
+    static getDescription(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return 'inloggen als hoofdbeheerder'
-            case AccessRight.OrganizationCreateWebshops: return 'volledige boekhouding'
+            case AccessRight.OrganizationFinanceDirector: return 'volledige boekhouding'
             case AccessRight.OrganizationManagePayments: return 'overschrijvingen'
-            case AccessRight.OrganizationFinanceDirector: return 'webshops maken'
+            case AccessRight.OrganizationCreateWebshops: return 'webshops maken'
+            case AccessRight.OrganizationCreateGroups: return 'groepen maken'
+            case AccessRight.WebshopScanTickets: return 'scannen van tickets'
         }
+    }
+
+    /**
+     * If a user has a certain permission level, automatically grant the specific access right
+     * By default only full permissions gives all access rights, but you can tweak it:
+     * E.g., give webshop scan rights if you also have write access to that webshop
+     */
+    static autoGrantRightForLevel(right: AccessRight): PermissionLevel|null {
+        switch (right) {
+            case AccessRight.WebshopScanTickets: return PermissionLevel.Write
+            case AccessRight.OrganizationCreateGroups: return null; // Not included in full access
+        }
+        return PermissionLevel.Full
+    }
+
+    /**
+     * Automatically grant a user access rights if they have a certain right
+     */
+    static autoInheritFrom(right: AccessRight): AccessRight[] {
+        switch (right) {
+            // Finance director also has manage payments permissions automatically
+            case AccessRight.OrganizationManagePayments: return [AccessRight.OrganizationFinanceDirector]
+        }
+        return []
     }
 }
 
@@ -62,12 +114,101 @@ export function getPermissionLevelNumber(level: PermissionLevel): number {
     }
 }
 
+export function getPermissionLevelName(level: PermissionLevel): string {
+    switch (level) {
+        case PermissionLevel.None: return 'Geen basistoegang';
+        case PermissionLevel.Read: return 'Lezen';
+        case PermissionLevel.Write: return 'Bewerken';
+        case PermissionLevel.Full: return 'Volledige toegang';
+        default: {
+            const l: never = level; // will throw compile error if new levels are added without editing this method
+            throw new Error("Unknown permission level "+l);
+        }
+    }
+}
+
 export class PermissionRole extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
     @field({ decoder: StringDecoder })
     name = "";
+}
+
+
+/**
+ * More granular access rights to specific things in the system
+ */
+export enum PermissionsResourceType {
+    Webshops = "Webshops",
+    Groups = "Groups",
+    GroupCategories = "GroupCategories",
+    Organizations = "Organizations"
+}
+
+
+export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {
+    switch (type) {
+        case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
+        case PermissionsResourceType.Groups: return plural ? 'inschrijvingsgroepen' : 'inschrijvingsgroep';
+        case PermissionsResourceType.GroupCategories: return plural ? 'categorieën' : 'categorie';
+        case PermissionsResourceType.Organizations: return plural ? 'verenigingen' : 'vereniging';
+    }
+}
+
+/**
+ * More granular access rights to specific things in the system
+ */
+export class ResourcePermissions extends AutoEncoder {
+    /**
+     * This is a cache so we can display the role description without fetching all resources
+     */
+    @field({ decoder: StringDecoder, field: 'n' })
+    resourceName = ""
+
+    /**
+     * Setting it to full gives all possible permissions for the resource
+     * Read/Write depends on resource
+     */
+    @field({ decoder: new EnumDecoder(PermissionLevel), field: "l" })
+    level: PermissionLevel = PermissionLevel.None
+
+    /**
+     * More granular permissions related to this resource
+     */
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(AccessRight)), field: "r"})
+    accessRights: AccessRight[] = []
+
+    hasAccess(level: PermissionLevel): boolean {
+        return getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)
+    }
+
+    hasAccessRight(right: AccessRight): boolean {
+        const gl = AccessRightHelper.autoGrantRightForLevel(right)
+        return (gl && this.hasAccess(gl)) || this.accessRights.includes(right)
+    }
+
+    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed):  AutoEncoderPatchType<PermissionRoleDetailed>
+    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: Permissions): AutoEncoderPatchType<Permissions>
+    createInsertPatch(type: PermissionsResourceType, resourceId: string, roleOrPermissions: PermissionRoleDetailed|Permissions): AutoEncoderPatchType<PermissionRoleDetailed>|AutoEncoderPatchType<Permissions> {
+        const patch = roleOrPermissions.static.patch({}) as AutoEncoderPatchType<PermissionRoleDetailed>|AutoEncoderPatchType<Permissions>
+
+        // First check if we need to insert the type
+        if (roleOrPermissions.resources.get(type)) {
+            // We need to patch
+            const p = new PatchMap<string, ResourcePermissions|AutoEncoderPatchType<ResourcePermissions>|null>()
+            p.set(resourceId, this)
+            patch.resources.set(type, p)
+        } else {
+            // No resources with this type yet
+            const p = new Map<string, ResourcePermissions>()
+            p.set(resourceId, this)
+            patch.resources.set(type, p)
+        }
+       
+        return patch
+
+    }
 }
 
 export class PermissionRoleDetailed extends PermissionRole {
@@ -98,16 +239,29 @@ export class PermissionRoleDetailed extends PermissionRole {
     })
     accessRights: AccessRight[] = []
 
+    @field({ 
+        decoder: new MapDecoder(
+            new EnumDecoder(PermissionsResourceType), 
+            new MapDecoder(
+                // ID
+                StringDecoder, 
+                ResourcePermissions
+            )
+        ), 
+        version: 248 
+    })
+    resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map()
+
     @field({ decoder: BooleanDecoder, field: 'managePayments', optional: true })
     legacyManagePayments = false
 
     @field({ decoder: BooleanDecoder, version: 199, field: 'financeDirector', optional: true })
     legacyFinanceDirector = false
     
-    @field({ decoder: BooleanDecoder, field: 'createWebsops', optional: true })
+    @field({ decoder: BooleanDecoder, field: 'createWebshops', optional: true })
     legacyCreateWebshops = false
 
-    getDescription(webshops: WebshopPreview[], groups: Group[]) {
+    getDescription() {
         const stack: string[] = []
         if (this.level === PermissionLevel.Read) {
             stack.push("alles lezen")
@@ -123,32 +277,17 @@ export class PermissionRoleDetailed extends PermissionRole {
             stack.push(AccessRightHelper.getDescription(right))
         }
 
-        let webshopCount = 0
-        for (const webshop of webshops) {
-            if (webshop.privateMeta.permissions.roleHasAccess(this)) {
-                webshopCount++
-                continue;
+        for (const [type, resources] of this.resources) {
+            let count = 0
+            for (const resource of resources.values()) {
+                if (resource.hasAccess(PermissionLevel.Read) || resource.accessRights.length > 0) {
+                    count += 1
+                }
             }
-            if (webshop.privateMeta.scanPermissions.roleHasAccess(this)) {
-                webshopCount++
-                continue;
+
+            if (count > 0) {
+                stack.push(count+" "+getPermissionResourceTypeName(type, count > 1))
             }
-        }
-
-        if (webshopCount > 0) {
-            stack.push(webshopCount+" webshop"+(webshopCount > 1 ? "s" : ""))
-        }
-
-        let groupCount = 0
-        for (const group of groups) {
-            if (group.privateSettings?.permissions.roleHasAccess(this)) {
-                groupCount++
-                continue;
-            }
-        }
-
-        if (groupCount > 0) {
-            stack.push(groupCount+" groep"+(groupCount > 1 ? "en" : ""))
         }
 
         if (stack.length === 0) {
@@ -158,12 +297,47 @@ export class PermissionRoleDetailed extends PermissionRole {
         return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' en '))
     }
 
+    hasAccess(level: PermissionLevel): boolean {
+        return getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)
+    }
+
     hasAccessRight(right: AccessRight): boolean {
-        return this.level === PermissionLevel.Full || this.accessRights.includes(right)
+        const gl = AccessRightHelper.autoGrantRightForLevel(right)
+        return (gl && this.hasAccess(gl)) || this.accessRights.includes(right)
+    }
+
+    getResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions|null {
+        const resource = this.resources.get(type)
+        if (!resource) {
+            return null
+        }
+        const rInstance = resource.get(id)
+        if (!rInstance) {
+            return null
+        }
+        return rInstance
+    }
+
+    hasResourceAccess(type: PermissionsResourceType, id: string, level: PermissionLevel): boolean {
+        if (this.hasAccess(level)) {
+            return true;
+        }
+
+        return this.getResourcePermissions(type, id)?.hasAccess(level) ?? false
+    }
+
+    hasResourceAccessRight(type: PermissionsResourceType, id: string, right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true
+        }
+
+        return  this.getResourcePermissions(type, id)?.hasAccessRight(right) ?? false
     }
 }
 
 /**
+ * @deprecated
+ * Use resource types
  * Give access to a given resouce based by the roles of a user
  */
 export class PermissionsByRole extends AutoEncoder {
@@ -275,10 +449,30 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
     roles: PermissionRole[] = []
 
+    /**
+     * Mostly for temporary access
+     */
+    @field({ 
+        decoder: new MapDecoder(
+            new EnumDecoder(PermissionsResourceType), 
+            new MapDecoder(
+                // ID
+                StringDecoder, 
+                ResourcePermissions
+            )
+        ), 
+        version: 249
+    })
+    resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map()
+
     hasRole(role: PermissionRole): boolean {
         return this.roles.find(r => r.id === role.id) !== undefined
     }
 
+    /**
+     * @deprecated
+     * Use LoadedPermissions
+     */
     hasAccess(allRoles: PermissionRoleDetailed[], level: PermissionLevel): boolean {
         if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
             // Someone with read / write access for the whole organization, also the same access for each group
@@ -299,18 +493,34 @@ export class Permissions extends AutoEncoder {
         return false
     }
 
+    /**
+     * @deprecated
+     * Use LoadedPermissions
+     */
     hasReadAccess(allRoles: PermissionRoleDetailed[]): boolean {
         return this.hasAccess(allRoles, PermissionLevel.Read)
     }
 
+    /**
+     * @deprecated
+     * Use LoadedPermissions
+     */
     hasWriteAccess(allRoles: PermissionRoleDetailed[]): boolean {
         return this.hasAccess(allRoles, PermissionLevel.Write)
     }
 
+    /**
+     * @deprecated
+     * Use LoadedPermissions
+     */
     hasFullAccess(allRoles: PermissionRoleDetailed[]): boolean {
         return this.hasAccess(allRoles, PermissionLevel.Full);
     }
 
+    /**
+     * @deprecated
+     * Use LoadedPermissions
+     */
     hasAccessRight(right: AccessRight, allRoles: PermissionRoleDetailed[]): boolean {
         if (this.hasFullAccess(allRoles)) {
             return true
@@ -371,6 +581,7 @@ export class Permissions extends AutoEncoder {
 export class LoadedPermissions {
     level: PermissionLevel = PermissionLevel.None
     roles: PermissionRoleDetailed[] = []
+    resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = new Map()
 
     constructor(data: Partial<LoadedPermissions>) {
         Object.assign(this, data)
@@ -389,8 +600,21 @@ export class LoadedPermissions {
                     return [d]
                 }
                 return []
-            })
+            }),
+            resources: permissions.resources
         })
+    }
+
+    getResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions|null {
+        const resource = this.resources.get(type)
+        if (!resource) {
+            return null
+        }
+        const rInstance = resource.get(id)
+        if (!rInstance) {
+            return null
+        }
+        return rInstance
     }
 
     hasRole(role: PermissionRole): boolean {
@@ -404,11 +628,53 @@ export class LoadedPermissions {
         }
 
         for (const f of this.roles) {
-            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(level)) {
+            if (f.hasAccess(level)) {
                 return true
             }
         }
 
+        return false
+    }
+
+    hasResourceAccess(type: PermissionsResourceType, id: string, level: PermissionLevel): boolean {
+        if (this.hasAccess(level)) {
+            return true
+        }
+
+        if (this.getResourcePermissions(type, id)?.hasAccess(level) ?? false) {
+            return true
+        }
+
+        for (const r of this.roles) {
+            if (r.hasResourceAccess(type, id, level)) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    hasResourceAccessRight(type: PermissionsResourceType, id: string, right: AccessRight): boolean {
+        if (this.hasAccessRight(right)) {
+            return true
+        }
+
+        if (this.getResourcePermissions(type, id)?.hasAccessRight(right) ?? false) {
+            return true
+        }
+        
+        for (const r of this.roles) {
+            if (r.hasResourceAccessRight(type, id, right)) {
+                return true
+            }
+        }
+
+        const autoInherit = AccessRightHelper.autoInheritFrom(right)
+        for (const r of autoInherit) {
+            if (this.hasResourceAccessRight(type, id, r)) {
+                return true
+            }
+        }
         return false
     }
 
@@ -424,13 +690,20 @@ export class LoadedPermissions {
         return this.hasAccess(PermissionLevel.Full);
     }
 
-
     hasAccessRight(right: AccessRight): boolean {
-        if (this.hasFullAccess()) {
+        const gl = AccessRightHelper.autoGrantRightForLevel(right);
+        if (gl && this.hasAccess(gl)) {
             return true
         }
         for (const f of this.roles) {
             if (f.hasAccessRight(right)) {
+                return true
+            }
+        }
+
+        const autoInherit = AccessRightHelper.autoInheritFrom(right)
+        for (const r of autoInherit) {
+            if (this.hasAccessRight(r)) {
                 return true
             }
         }

@@ -2,8 +2,11 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Group, Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures';
-import { reactive } from 'vue';
+import { Ref, inject, toRef } from 'vue';
 
+export function useOrganizationManager(): Ref<OrganizationManager> {
+    return toRef(inject<OrganizationManager>('$organizationManager') as OrganizationManager) as Ref<OrganizationManager>
+}
 
 /**
  * Convenient access to the organization of the current session

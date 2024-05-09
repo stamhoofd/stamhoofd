@@ -34,35 +34,36 @@
 </template>
 
 <script setup lang="ts">
-import { useEmitPatch, usePermissions } from '@stamhoofd/components';
-import { PermissionLevel, PermissionRole, User, Permissions } from '@stamhoofd/structures';
-import { useRoles } from '../hooks/useRoles';
-import { computed } from 'vue';
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { useEmitPatch } from '@stamhoofd/components';
+import { PermissionLevel, PermissionRole, Permissions, User } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import RolesView from '../RolesView.vue';
+import { useAdmins } from '../hooks/useAdmins';
+import { useRoles } from '../hooks/useRoles';
 
 const props = defineProps(['user'])
 const emit = defineEmits(['patch:user'])
 const {patched, addPatch} = useEmitPatch<User>(props, emit, 'user')
 
 const roles = useRoles();
-const permissions = usePermissions({patchedUser: patched})
 const present = usePresent();
+const {getPermissionsPatch, getPermissions} = useAdmins()
 
 const addPermissionsPatch = (patch: PartialWithoutMethods<AutoEncoderPatchType<Permissions>>) => {
     addPatch({
-        permissions: permissions.createPatch(patch)
+        permissions: getPermissionsPatch(props.user, Permissions.patch(patch))
     })
 }
 
 const fullAccess = computed({
-    get: () => permissions.hasFullAccess(),
+    get: () => getPermissions(patched.value)?.hasFullAccess() ?? false,
     set: (value: boolean) => addPermissionsPatch({level: value ? PermissionLevel.Full : PermissionLevel.None})
 })
 
 const getRole = (role: PermissionRole) => {
-    return !!permissions.permissions?.roles.find(r => r.id === role.id)
+    return !!getPermissions(patched.value)?.roles.find(r => r.id === role.id)
 }
 
 const setRole = (role: PermissionRole, enable: boolean) => {

@@ -294,7 +294,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get tree() {
-        return GroupCategoryTree.build(this.reactiveCategory, this.organization, {permissions: this.$organizationManager.user.permissions})
+        return GroupCategoryTree.build(this.reactiveCategory, this.organization, {permissions: this.$context.organizationPermissions})
     }
 
     get organization() {

@@ -97,6 +97,11 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     
     userPatch = User.patch({ id: this.$user!.id })
 
+    mounted() {
+        // Refresh
+        this.$context.fetchUser(false).catch(console.error)
+    }
+
     get patchedUser() {
         return this.$user!.patch(this.userPatch)
     }
