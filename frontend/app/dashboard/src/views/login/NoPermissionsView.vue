@@ -1,39 +1,16 @@
 <template>
-    <div class="st-view box-shade">
-        <STNavigationBar :large="true">
-            <template #left>
-                <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
-                    <Logo class="responsive" />
-                </a>
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <div class="box">
-                <main>
-                    <h1>Deze pagina is voor beheerders</h1>
-                    <p>Oeps, deze website is enkel voor beheerders van {{ organization.name }}. Ga naar het ledenportaal als je je wilt inschrijven als lid.</p> 
-                </main>
-                
-                <STToolbar>
-                    <template #right><button type="button" class="primary button" @click="gotoRegistration">
-                        <span>Naar ledenportaal</span>
-                    </button>
-
-                    <button type="button" class="button secundary" @click="logout">
-                        <span class="icon logout" /><span>Uitloggen</span>
-                    </button></template>
-                </STToolbar>
-            </div>
+    <div class="st-view">
+        <main class="center">
+            <h1>Deze pagina is voor beheerders</h1>
+            <p>Oeps, deze website is enkel voor beheerders van {{ organization.name }}. Ga naar het ledenportaal als je je wilt inschrijven als lid.</p> 
         </main>
     </div>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Logo,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { SessionManager } from "@stamhoofd/networking";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { Logo, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 
 
 

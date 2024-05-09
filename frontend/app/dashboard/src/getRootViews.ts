@@ -19,7 +19,17 @@ export function getOrganizationSelectionRoot() {
 }
 
 export function getNoPermissionsView() {
-    return wrapWithModalStack(AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {}))
+    return  wrapWithModalStack(new ComponentWithProperties(TabBarController, {
+        tabs: [
+            new TabBarItem({
+                icon: 'key',
+                name: 'Inloggen',
+                component: new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
+                })
+            })
+        ]
+    }))
 }
 
 export async function getScopedDashboardRootFromUrl() {

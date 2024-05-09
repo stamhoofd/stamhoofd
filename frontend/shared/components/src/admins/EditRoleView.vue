@@ -58,7 +58,7 @@
             </STListItem>
         </STList>
 
-        <template v-if="enableActivities">
+        <template v-if="enableActivities && categories.length">
             <hr>
             <h2>
                 Inschrijvingscategorieën
@@ -75,17 +75,10 @@
                     type="resource" 
                     @patch:role="addPatch" 
                 />
-
-                <STListItem :selectable="true" @click="editCategories()">
-                    <span class="button text">
-                        <span class="icon add" />
-                        <span>Categorie toevoegen</span>
-                    </span>
-                </STListItem>
             </STList>
         </template>
 
-        <div v-if="enableMemberModule" class="container">
+        <div v-if="enableMemberModule && groups.length" class="container">
             <hr>
             <h2>
                 Individuele inschrijvingsgroepen
@@ -101,13 +94,6 @@
                     type="resource" 
                     @patch:role="addPatch" 
                 />
-
-                <STListItem :selectable="true" @click="editGroups()">
-                    <span class="button text">
-                        <span class="icon add" />
-                        <span>Groep toevoegen</span>
-                    </span>
-                </STListItem>
             </STList>
         </div>
 
@@ -132,13 +118,6 @@
                     type="resource" 
                     @patch:role="addPatch" 
                 />
-
-                <STListItem :selectable="true" @click="editWebshops()">
-                    <span class="button text">
-                        <span class="icon add" />
-                        <span>Webshop toevoegen</span>
-                    </span>
-                </STListItem>
             </STList>
         </div>
 
@@ -324,18 +303,6 @@ const useAccessRightSetter = (accessRight: AccessRight) => {
 const createWebshops = useAccessRightSetter(AccessRight.OrganizationCreateWebshops);
 const financeDirector = useAccessRightSetter(AccessRight.OrganizationFinanceDirector);
 const managePayments = useAccessRightSetter(AccessRight.OrganizationManagePayments);
-
-const editGroups = () => {
-    // todo
-};
-
-const editWebshops = () => {
-    // todo
-};
-
-const editCategories = () => {
-    // todo
-};  
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
