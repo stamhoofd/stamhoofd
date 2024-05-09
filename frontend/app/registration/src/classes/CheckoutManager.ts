@@ -1,11 +1,10 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { IDRegisterCheckout, MemberBalanceItem, RegisterCheckout, RegisterItem, Version } from '@stamhoofd/structures';
 
+import { reactive } from 'vue';
 import { EditMemberStepsManager } from '../views/members/details/EditMemberStepsManager';
 import { MemberManager } from './MemberManager';
-import { TabBarItem } from './TabBarItem';
 
 /**
  * Convenient access to the organization of the current session
@@ -13,7 +12,6 @@ import { TabBarItem } from './TabBarItem';
 export class CheckoutManager {
     private _checkout: RegisterCheckout | null = null
 
-    watchTabBar: TabBarItem | null = null
     balanceItems: MemberBalanceItem[] | null = null
     $memberManager: MemberManager
 
@@ -35,7 +33,7 @@ export class CheckoutManager {
 
     get checkout(): RegisterCheckout {
         if (!this._checkout) {
-            this._checkout = this.loadCheckout()
+            this._checkout = reactive(this.loadCheckout()) as RegisterCheckout
         }
         return this._checkout
     }
@@ -67,10 +65,6 @@ export class CheckoutManager {
         } catch (e) {
             console.error("Failed to load cart")
             console.error(e)
-        }
-
-        if (this.watchTabBar) {
-            this.watchTabBar.badge = this.cart.count === 0 ? "" : this.cart.count+""
         }
     }
 

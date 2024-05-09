@@ -91,12 +91,14 @@ export function getRootView(session: SessionContext) {
         root: new ComponentWithProperties(HomeView, {}) 
     });
 
+    const $checkoutManager = new CheckoutManager($memberManager)
+
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
             $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager,
-            $checkoutManager: new CheckoutManager($memberManager),
+            $checkoutManager,
             reactive_navigation_url: "leden/" + session.organization!.uri,
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
@@ -122,7 +124,8 @@ export function getRootView(session: SessionContext) {
                         new TabBarItem({
                             icon: 'basket',
                             name: 'Mandje',
-                            component: cartRoot
+                            component: cartRoot,
+                            badge: computed(() => $checkoutManager.cart.count == 0 ? '' :$checkoutManager.cart.count.toFixed(0))
                         })
                     ],
                 })
