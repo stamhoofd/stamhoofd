@@ -39,14 +39,6 @@ export class PlatformManager {
         }
 
         const platform = reactive(await PlatformManager.fetchPlatform($context))
-
-        if (!platform.privateConfig && requirePrivateConfig) {
-            throw new SimpleError({
-                code: 'missing_field',
-                message: 'Could not fetch platform privateConfig',
-                human: 'Er ging iets mis met de toegangsrechten. Herlaad de pagina indien nodig.'
-            })
-        }
         return new PlatformManager($context, platform)
     }
 

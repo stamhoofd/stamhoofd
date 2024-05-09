@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup, LoginView } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup, LoginView, NoPermissionsView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
@@ -23,9 +23,9 @@ export function getNoPermissionsView() {
         tabs: [
             new TabBarItem({
                 icon: 'key',
-                name: 'Inloggen',
+                name: 'Geen toegang',
                 component: new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
+                    root: new ComponentWithProperties(NoPermissionsView, {})
                 })
             })
         ]

@@ -178,6 +178,7 @@ export { default as ForgotPasswordResetView } from "./src/auth/ForgotPasswordRes
 export { default as ForgotPasswordView } from "./src/auth/ForgotPasswordView.vue"
 export { default as LoginView } from "./src/auth/LoginView.vue"
 export { default as ConfirmEmailView } from "./src/auth/ConfirmEmailView.vue"
+export { default as NoPermissionsView } from "./src/auth/NoPermissionsView.vue"
 
 // Admin views
 export * from './src/admins'

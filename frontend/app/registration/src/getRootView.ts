@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, ContextProvider, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { AccountSwitcher, AuthenticatedView, ContextProvider, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
 import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 
 import { CheckoutManager } from "./classes/CheckoutManager";
@@ -99,7 +99,8 @@ export function getRootView(session: SessionContext) {
             $checkoutManager: new CheckoutManager($memberManager),
             reactive_navigation_url: "leden/" + session.organization!.uri,
             reactive_components: {
-                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {})
+                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
             },
             stamhoofd_app: 'registration'
         },

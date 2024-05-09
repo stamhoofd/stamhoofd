@@ -29,6 +29,13 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        if (STAMHOOFD.userMode === 'platform') {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Not allowed",
+                human: "Je kan geen vereniging aanmaken"
+            })
+        }
 
         if (request.body.organization.name.length < 4) {
             if (request.body.organization.name.length == 0) {

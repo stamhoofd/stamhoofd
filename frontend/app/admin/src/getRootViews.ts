@@ -1,9 +1,8 @@
-import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup, LoginView } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, LoginView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Country, Platform } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/structures';
 
 import { computed, reactive } from 'vue';
 
@@ -19,6 +18,20 @@ export async function getScopedAdminRootFromUrl() {
     await I18nController.loadDefault(session, "admin", Country.Belgium, "nl")
 
     return await getScopedAdminRoot(session)
+}
+
+export function getNoPermissionsView() {
+    return  wrapWithModalStack(new ComponentWithProperties(TabBarController, {
+        tabs: [
+            new TabBarItem({
+                icon: 'key',
+                name: 'Geen toegang',
+                component: new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(NoPermissionsView, {})
+                })
+            })
+        ]
+    }))
 }
 
 export async function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
@@ -97,7 +110,8 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                             })
                         ]
                     })
-                )
+                ),
+                noPermissionsRoot: getNoPermissionsView()
             }), 
             options.initialPresents
         )
