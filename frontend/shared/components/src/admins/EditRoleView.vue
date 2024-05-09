@@ -184,20 +184,27 @@
             </button>
         </div>
 
-        <hr>
-        <h2>Beheerders met deze rol</h2>
+        <template v-if="!isNew">
+            <hr>
+            <h2>Beheerders met deze rol</h2>
 
-        <Spinner v-if="loading" />
-        <STList v-else>
-            <STListItem v-for="admin in filteredAdmins" :key="admin.id">
-                <h2 class="style-title-list">
-                    {{ admin.firstName }} {{ admin.lastName }}
-                </h2>
-                <p class="style-description-small">
-                    {{ admin.email }}
+            <Spinner v-if="loading" />
+            <template v-else>
+                <p class="info-box" v-if="filteredAdmins.length === 0">
+                    Er zijn geen beheerders met deze rol.
                 </p>
-            </STListItem>
-        </STList>
+                <STList v-else>
+                    <STListItem v-for="admin in filteredAdmins" :key="admin.id">
+                        <h2 class="style-title-list">
+                            {{ admin.firstName }} {{ admin.lastName }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ admin.email }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
+        </template>
     </SaveView>
 </template>
 
@@ -329,4 +336,15 @@ const editWebshops = () => {
 const editCategories = () => {
     // todo
 };  
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+}
+
+defineExpose({
+    shouldNavigateAway
+})
 </script>

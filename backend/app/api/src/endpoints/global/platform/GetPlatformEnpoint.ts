@@ -27,6 +27,7 @@ export class GetPlatformEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await Context.optionalAuthenticate({allowWithoutAccount: false})
 
         if (Context.optionalAuth?.hasSomePlatformAccess()) {
+            console.log('showing private config')
             const platform = await Platform.getSharedPrivateStruct()
             return new Response(platform);
         }

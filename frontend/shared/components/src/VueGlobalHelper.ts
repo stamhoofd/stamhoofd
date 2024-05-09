@@ -50,7 +50,6 @@ export function usePatch<T extends AutoEncoder>(obj: T): {
         },
         patch,
         patched: computed(() => {
-            console.log('PAtching', obj, 'with', patch.value, 'gives', obj.patch(patch.value))
             return obj.patch(patch.value)
         }),
         addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {

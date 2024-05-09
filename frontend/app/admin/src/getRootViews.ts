@@ -26,7 +26,7 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
     I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl").catch(console.error)
     const reactiveSession = reactive(session) as SessionContext
 
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, true, true)
 
     const startView = new ComponentWithProperties(NavigationController, {
         root: AsyncComponent(() => import('./views/start/StartView.vue'), {})

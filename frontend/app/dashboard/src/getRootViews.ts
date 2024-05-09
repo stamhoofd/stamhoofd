@@ -18,6 +18,10 @@ export function getOrganizationSelectionRoot() {
     return new ComponentWithProperties(OrganizationSelectionView, {})
 }
 
+export function getNoPermissionsView() {
+    return wrapWithModalStack(AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {}))
+}
+
 export async function getScopedDashboardRootFromUrl() {
     // UrlHelper.fixedPrefix = "beheerders";
     const parts = UrlHelper.shared.getParts();
@@ -233,7 +237,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                         ]
                     })
                 ),
-                noPermissionsRoot: wrapWithModalStack(AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})),
+                noPermissionsRoot: getNoPermissionsView(),
             }), 
             options.initialPresents
         )

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 
 import { PermissionRoleDetailed } from "./Permissions";
 import { User } from "./User";
@@ -9,7 +9,8 @@ export class PlatformPrivateConfig extends AutoEncoder {
 }
 
 export class PlatformConfig extends AutoEncoder {
-    
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    placeholder: string|null = null
 }
 
 

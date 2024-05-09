@@ -65,10 +65,9 @@
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder, type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { SaveView, Toast, useErrors, useOrganization } from '@stamhoofd/components';
-import { useOrganizationManager, usePlatformManager } from '@stamhoofd/networking';
+import { CenteredMessage, SaveView, Toast } from '@stamhoofd/components';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
-import { ComponentOptions, unref } from 'vue';
+import { ComponentOptions } from 'vue';
 import EditRoleView from './EditRoleView.vue';
 import { useAdmins } from './hooks/useAdmins';
 import { usePatchRoles } from './hooks/useRoles';
@@ -177,4 +176,15 @@ const save = async () => {
         pop({ force: true })
     });
 }
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+}
+
+defineExpose({
+    shouldNavigateAway
+})
 </script>

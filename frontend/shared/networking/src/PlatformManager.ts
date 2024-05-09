@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { SessionContext, Storage } from '@stamhoofd/networking';
 import { Platform, User, Version } from '@stamhoofd/structures';
 import { Ref, inject, reactive, toRef } from 'vue';
@@ -24,10 +25,10 @@ export class PlatformManager {
     /**
      * Create one from cache, otherwise load it using the network
      */
-    static async createFromCache($context: SessionContext, backgroundFetch = true): Promise<PlatformManager> {
+    static async createFromCache($context: SessionContext, backgroundFetch = true, requirePrivateConfig = false): Promise<PlatformManager> {
         const fromStorage = await PlatformManager.loadPlatform()
 
-        if (fromStorage) {
+        if (fromStorage && (fromStorage.privateConfig || !requirePrivateConfig)) {
             const manager = new PlatformManager($context, reactive(fromStorage))
 
             if (backgroundFetch) {
@@ -38,6 +39,14 @@ export class PlatformManager {
         }
 
         const platform = reactive(await PlatformManager.fetchPlatform($context))
+
+        if (!platform.privateConfig && requirePrivateConfig) {
+            throw new SimpleError({
+                code: 'missing_field',
+                message: 'Could not fetch platform privateConfig',
+                human: 'Er ging iets mis met de toegangsrechten. Herlaad de pagina indien nodig.'
+            })
+        }
         return new PlatformManager($context, platform)
     }
 

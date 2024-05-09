@@ -10,8 +10,8 @@ type Query = undefined;
 type Body = AutoEncoderPatchType<PlatformStruct>;
 type ResponseBody = PlatformStruct;
 
-export class GetPlatformEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = PlatformStruct as Decoder<AutoEncoderPatchType<PlatformStruct>>
+export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    bodyDecoder = PlatformStruct.patchType() as Decoder<AutoEncoderPatchType<PlatformStruct>>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
