@@ -89,5 +89,18 @@ export default class AuthenticatedView extends VueComponent {
             }
         }
     }
+
+    async shouldNavigateAway() {
+        if (this.loggedIn) {
+            return await this.root.shouldNavigateAway()
+        }
+        if (this.noPermissionsRoot && this.showPermissionsRoot) {
+            return await this.noPermissionsRoot.shouldNavigateAway()
+        }
+        if (!this.hasToken) {
+            return await this.loginRoot.shouldNavigateAway()
+        }
+        return true
+    }
 }
 </script>

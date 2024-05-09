@@ -204,7 +204,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.userPatch, this.user, { version: Version })) {
+        if (!patchContainsChanges(this.userPatch, this.$user!, { version: Version })) {
             return true;
         }
         if (await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Sluiten zonder opslaan")) {

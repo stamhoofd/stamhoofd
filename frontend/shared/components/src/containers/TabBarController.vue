@@ -105,10 +105,23 @@ const saveCurrentItemState = () => {
     }
 }
 
+const shouldNavigateAway = async () => {
+    const old = root.value
+    if (old) {
+        return await old.shouldNavigateAway()
+    }
+    return true;
+}
+
 const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
     if (item === selectedItem.value) {
         return
     }
+
+    if (!await shouldNavigateAway()) {
+        return
+    }
+
     if (!item.component) {
         if (item.action) {
             await item.action.call(instance!.proxy as ComponentPublicInstance)
@@ -206,6 +219,9 @@ const show = async (options: PushOptions) => {
     if (options.components.length > 1) {
         throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController')
     }
+    if (!await shouldNavigateAway()) {
+        return
+    }
     const component = options.components[0];
 
     const foundItem = flatTabs.value.find(tab => tab.component === component);
@@ -253,7 +269,8 @@ const returnToHistoryIndex = () => {
 
 defineExpose({
     returnToHistoryIndex,
-    show
+    show,
+    shouldNavigateAway
 })
 
 </script>

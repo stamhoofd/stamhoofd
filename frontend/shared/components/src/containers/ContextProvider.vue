@@ -31,5 +31,9 @@ export default class ContextProvider extends Vue {
 
     @Prop({default: null})
         calculatedContext!: () => Record<string, unknown>
+
+    async shouldNavigateAway() {
+        return await this.root.shouldNavigateAway()
+    }
 }
 </script>
