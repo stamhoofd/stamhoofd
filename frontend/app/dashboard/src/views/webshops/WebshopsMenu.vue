@@ -4,65 +4,62 @@
     <main>
       <h1>Webshops</h1>
 
-      <!-- add first webshop -->
-      <button
+      <STList class="">
+        <!-- webshops -->
+        <template v-if="enableWebshopModule && visibleWebshops.length > 0">
+          <STListItem
+            element-name="button"
+            :selectable="true"
+            v-for="webshop in visibleWebshops"
+            :key="webshop.id"
+            :class="{
+              selected: isSelected('webshop-' + webshop.id),
+            }"
+            @click="openWebshop(webshop)"
+          >
+            <h2 class="style-title-list">{{ webshop.meta.name }}</h2>
+            <template #right>
+              <span
+                v-if="isWebshopOpen(webshop)"
+                class="icon dot green right-icon small"
+              ></span
+            ></template>
+          </STListItem>
+        </template>
+      </STList>
+
+      <!-- other -->
+      <template
         v-if="
           enableWebshopModule &&
-          canCreateWebshops &&
-          visibleWebshops.length === 0
+          ((fullAccess && hasWebshopArchive) || canCreateWebshops)
         "
-        type="button"
-        class="menu-button button cta"
-        @click="addWebshop()"
       >
-        <span class="icon add"></span>
-        <span>Maak nieuwe webshop</span>
-      </button>
-
-      <!-- webshops -->
-      <template v-if="enableWebshopModule && visibleWebshops.length > 0">
-        <button
-          v-for="webshop in visibleWebshops"
-          :key="webshop.id"
-          type="button"
-          class="menu-button button sub-button"
-          :class="{
-            selected: isSelected('webshop-' + webshop.id),
-          }"
-          @click="openWebshop(webshop)"
-        >
-          <span class="icon"></span>
-          <span>{{ webshop.meta.name }}</span>
-          <span
-            v-if="isWebshopOpen(webshop)"
-            class="icon dot green right-icon small"
-          ></span>
-        </button>
-
-        <button
-          v-if="canCreateWebshops"
-          type="button"
-          class="menu-button button sub-button cta"
-          @click="addWebshop()"
-        >
-          <span class="icon"></span>
-          <span class="icon add-line small correct-offset"></span>
-          <span>Webshop</span>
-        </button>
-      </template>
-
-      <!-- archive -->
-      <template v-if="enableWebshopModule && fullAccess && hasWebshopArchive">
         <hr />
-        <button
-          type="button"
-          class="menu-button button"
-          :class="{ selected: isSelected(Button.Archive) }"
-          @click="$navigate(Routes.Archive)"
-        >
-          <span class="icon archive"></span>
-          <span>Archief</span>
-        </button>
+        <STList>
+          <!-- archive -->
+          <STListItem
+            v-if="fullAccess && hasWebshopArchive"
+            element-name="button"
+            :selectable="true"
+            :class="{ selected: isSelected(Button.Archive) }"
+            @click="$navigate(Routes.Archive)"
+          >
+            <template #left><span class="icon archive"></span></template>
+            <h2 class="style-title-list">Archief</h2>
+          </STListItem>
+
+          <!-- add webshop -->
+          <STListItem
+            v-if="canCreateWebshops"
+            element-name="button"
+            :selectable="true"
+            @click="addWebshop()"
+          >
+            <template #left><span class="icon add"></span></template>
+            <h2 class="style-title-list">Webshop</h2>
+          </STListItem>
+        </STList>
       </template>
     </main>
   </div>
@@ -82,11 +79,6 @@ import {
 } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { ComponentOptions, computed, onActivated, ref } from "vue";
-
-/**
- * todo:
- * - should be checked if $organization.value is null? Or use '$organization.value!'?
- */
 
 //#region composables
 const $organization = useOrganization();
@@ -146,7 +138,6 @@ const hasWebshopArchive = computed(() =>
 
 //#region lifecycle
 onActivated(() => {
-  // todo: translate
   urlHelpers.setTitle("Verkoop");
 });
 //#endregion
