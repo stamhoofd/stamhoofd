@@ -29,9 +29,6 @@ export class SessionManagerStatic {
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
     async getLastSession() {
-        // Restore keychain before setting the current session
-        // to prevent fetching the organization to refetch the missing keychain items
-
         const storage = await this.getSessionStorage(false)
         const id = storage.lastOrganizationId
         if (id) {
@@ -43,6 +40,10 @@ export class SessionManagerStatic {
                 console.log(session)
             }
         }
+
+        const session = new SessionContext(null)
+        await session.loadFromStorage()
+        return session
     }
 
     addListener(owner: any, listener: AuthenticationStateListener) {

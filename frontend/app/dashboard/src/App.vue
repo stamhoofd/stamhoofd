@@ -16,7 +16,7 @@ import { Component, Vue, toNative } from 'vue-facing-decorator';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { reactive } from 'vue';
-import { getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
+import { getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
 
 @Component({
     components: {
@@ -41,7 +41,7 @@ export class App extends Vue {
 
                 await this.checkGlobalRoutes()
 
-                let app: 'dashboard' | 'admin' | 'registration' = 'dashboard';
+                let app: 'dashboard' | 'admin' | 'registration' | 'auto' = 'auto';
 
                 const parts = UrlHelper.shared.getParts();
                 if (parts.length >= 1 && parts[0] == 'administratie') {
@@ -50,6 +50,10 @@ export class App extends Vue {
                     app = 'dashboard';
                 } else if (parts.length >= 1 && parts[0] == 'leden') {
                     app = 'registration';
+                }
+
+                if (app === 'auto') {
+                    return (await getScopedAutoRootFromUrl())
                 }
 
                 if (app == 'dashboard') {

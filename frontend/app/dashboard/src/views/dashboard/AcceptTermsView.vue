@@ -25,15 +25,11 @@
 
 <script lang="ts">
 import { SimpleError } from "@simonbackx/simple-errors";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, ReplaceRootEventBus, SaveView, STErrorsDefault } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { Organization, OrganizationMetaData } from "@stamhoofd/structures";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import OrganizationSelectionView from "../login/OrganizationSelectionView.vue";
-
-
-
+import { Checkbox, ErrorBox, ReplaceRootEventBus, STErrorsDefault, SaveView } from "@stamhoofd/components";
+import { Organization, OrganizationMetaData } from "@stamhoofd/structures";
+import { getOrganizationSelectionRoot } from "../../getRootViews";
 
 @Component({
     components: {
@@ -101,7 +97,7 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
 
     async shouldNavigateAway() {
         // Force session logout
-        await ReplaceRootEventBus.sendEvent('replace', new ComponentWithProperties(OrganizationSelectionView, {}))
+        await ReplaceRootEventBus.sendEvent('replace', getOrganizationSelectionRoot())
         return true;
     }
 }

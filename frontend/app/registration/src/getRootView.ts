@@ -11,14 +11,9 @@ import CartView from "./views/checkout/CartView.vue";
 import { Country, Organization } from "@stamhoofd/structures";
 import { Decoder } from "@simonbackx/simple-encoding";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import OrganizationSelectionView from "@stamhoofd/dashboard/src/views/login/OrganizationSelectionView.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
-}
-
-export function getOrganizationSelectionRoot() {
-    return new ComponentWithProperties(OrganizationSelectionView, {})
 }
 
 export async function getScopedRegistrationRootFromUrl() {
@@ -58,7 +53,8 @@ export async function getScopedRegistrationRootFromUrl() {
     await I18nController.loadDefault(session, "registration", Country.Belgium, "nl", session?.organization?.address?.country)
     
     if (!session || !session.organization) {
-        return getOrganizationSelectionRoot()
+        const dashboard = await import('@stamhoofd/dashboard')
+        return dashboard.getOrganizationSelectionRoot()
     }
 
     return getRootView(session)

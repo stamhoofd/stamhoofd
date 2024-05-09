@@ -75,6 +75,13 @@ export async function getScopedDashboardRootFromUrl() {
     return await getScopedDashboardRoot(session)
 }
 
+export async function getScopedAutoRootFromUrl() {
+    const session = await SessionManager.getLastSession()
+    await SessionManager.prepareSessionForUsage(session, false);
+
+    return getScopedAutoRoot(session)
+}
+
 export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     if (!session.organization && !!session.user?.permissions?.globalPermissions) {
         const admin = await import('@stamhoofd/admin-frontend');
@@ -188,6 +195,14 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
             root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {})
         })
     })
+
+    // todo: accept terms view
+    // if (this.fullAccess && !this.$organization.meta.didAcceptLatestTerms) {
+    //     // Show new terms view if needed
+    //     LoadComponent(() => import(/* webpackChunkName: "AcceptTermsView" */ "./AcceptTermsView.vue"), {}, { instant: true }).then((component) => {
+    //         this.present(component.setDisplayStyle("popup").setAnimated(false))
+    //     }).catch(console.error)
+    // }
 
     return new ComponentWithProperties(ContextProvider, {
         context: {
