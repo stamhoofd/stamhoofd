@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SessionContext, Storage } from '@stamhoofd/networking';
 import { Platform, User, Version } from '@stamhoofd/structures';
@@ -39,7 +39,9 @@ export class PlatformManager {
         }
 
         const platform = reactive(await PlatformManager.fetchPlatform($context))
-        return new PlatformManager($context, platform)
+        const platformManager = new PlatformManager($context, platform)
+        await platformManager.savePlatform()
+        return platformManager;
     }
 
     static async fetchPlatform($context: SessionContext) {
@@ -117,7 +119,7 @@ export class PlatformManager {
                 return null;
             }
             const decoder = new VersionBoxDecoder(Platform as Decoder<Platform>)
-            const result = decoder.decode(JSON.parse(value))
+            const result = decoder.decode(new ObjectData(JSON.parse(value), {version: 0}))
             return result.data
         } catch (e) {
             console.error(e);
