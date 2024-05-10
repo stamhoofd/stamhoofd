@@ -1,11 +1,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup, LoginView, NoPermissionsView } from '@stamhoofd/components';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix,SplitViewController } from '@simonbackx/vue-app-navigation';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, LoginView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { PromiseView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
-
 import { computed, reactive, ref } from 'vue';
+
 import { MemberManager } from './classes/MemberManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -14,6 +15,40 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
 }
 
+export async function loadSessionFromUrl() {
+    const parts = UrlHelper.shared.getParts();
+    const ignoreUris = ['login', 'aansluiten'];
+
+    let session: SessionContext|null = null;
+
+    console.log('load session', parts)
+
+    if (parts[1] && !ignoreUris.includes(parts[1])) {
+        const uri = parts[1];
+
+        // Load organization
+        // todo: use cache
+        try {
+            const response = await NetworkManager.server.request({
+                method: "GET",
+                path: "/organization-from-uri",
+                query: {
+                    uri
+                },
+                decoder: Organization as Decoder<Organization>
+            })
+            const organization = response.data
+
+            session = reactive(new SessionContext(organization)) as SessionContext;
+            await session.loadFromStorage()
+            await SessionManager.prepareSessionForUsage(session, false);
+        } catch (e) {
+            console.error('Failed to load organization from uri', uri);
+        }
+    }
+
+    return session;
+}
 export function getLoginRoot() {
     if (STAMHOOFD.userMode === 'platform') {
         return new ComponentWithProperties(NavigationController, {
@@ -84,40 +119,8 @@ export function getNoPermissionsView() {
 
 export async function getScopedDashboardRootFromUrl() {
     // UrlHelper.fixedPrefix = "beheerders";
-    const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login', 'aansluiten'];
-
-    let session: SessionContext|null = null;
-
-    if (parts[0] === 'beheerders' && parts[1] && !ignoreUris.includes(parts[1])) {
-        const uri = parts[1];
-
-        // Load organization
-        // todo: use cache
-        try {
-            const response = await NetworkManager.server.request({
-                method: "GET",
-                path: "/organization-from-uri",
-                query: {
-                    uri
-                },
-                decoder: Organization as Decoder<Organization>
-            })
-            const organization = response.data
-
-            session = reactive(new SessionContext(organization)) as SessionContext;
-            await session.loadFromStorage()
-            await SessionManager.prepareSessionForUsage(session, false);
-
-            // UrlHelper.fixedPrefix = "beheerders/" + organization.uri;
-
-        } catch (e) {
-            console.error('Failed to load organization from uri', uri);
-        }
-    }
-    
-    await I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country)
-    
+    const session = await loadSessionFromUrl()
+        
     if (!session || !session.organization) {
         return getOrganizationSelectionRoot()
     }
@@ -126,16 +129,51 @@ export async function getScopedDashboardRootFromUrl() {
 }
 
 export async function getScopedAutoRootFromUrl() {
-    const session = reactive(await SessionManager.getLastSession()) as SessionContext;
+    const fromUrl = await loadSessionFromUrl()
+    const session = reactive(fromUrl ?? (await SessionManager.getLastSession())) as SessionContext;
     await SessionManager.prepareSessionForUsage(session, false);
 
     return await getScopedAutoRoot(session)
 }
 
 export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
-    if (!session.organization && !!session.user?.permissions?.globalPermissions) {
+    if (!session.organization && !!session.auth.platformPermissions) {
         const admin = await import('@stamhoofd/admin-frontend');
         return await admin.getScopedAdminRoot(session, options);
+    }
+
+    if ((!session.user || !session.canGetCompleted()) && session.organization) {
+        // We can't really determine the automatic root view because we are not signed in
+        // So return the login view, that will call getScopedAutoRoot again after login
+        const reactiveSession = reactive(session) as SessionContext
+        const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
+        I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
+
+        return new ComponentWithProperties(ContextProvider, {
+            context: {
+                $context: reactiveSession,
+                $platformManager: platformManager,
+                reactive_navigation_url: "auto/" + session.organization!.uri,
+                reactive_components: {
+                    "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
+                    "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
+                },
+                stamhoofd_app: 'auto',
+            },
+            root: wrapWithModalStack(
+                new ComponentWithProperties(AuthenticatedView, {
+                    root: new ComponentWithProperties(PromiseView, {
+                        promise: async () => {
+                            // Replace itself again after a successful login
+                            const root = await getScopedAutoRoot(reactiveSession, options)
+                            await ReplaceRootEventBus.sendEvent('replace', root);
+                            return new ComponentWithProperties({}, {});
+                        }
+                    }),
+                    loginRoot: wrapWithModalStack(getLoginRoot()),
+                })
+            )
+        });
     }
     
     if (!session.organization || !session.user) {
@@ -144,7 +182,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
 
     if (STAMHOOFD.userMode === 'organization') {
         // Organization specific registration root
-        if (!session.user.permissions?.forOrganization(session.organization) && session.organization.meta.packages.useMembers) {
+        if (!session.auth.permissions && session.organization.meta.packages.useMembers) {
             const registration = await import('@stamhoofd/registration');
             return await registration.getRootView(session)
         }

@@ -1,5 +1,4 @@
-import { AutoEncoderPatchType, PartialWithoutMethods } from "@simonbackx/simple-encoding";
-import { AccessRight, Group, LoadedPermissions, Organization, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, User, UserPermissions } from "@stamhoofd/structures";
+import { AccessRight, Group, Organization, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, User } from "@stamhoofd/structures";
 import { Ref, unref } from "vue";
 
 export class ContextPermissions {

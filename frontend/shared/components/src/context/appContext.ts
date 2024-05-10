@@ -4,8 +4,8 @@ import { inject } from "vue"
 
 export type AppType = 'registration'|'dashboard'|'admin'
 
-export function useAppContext(): AppType {
-    return inject('stamhoofd_app', 'dashboard') as AppType
+export function useAppContext(): AppType|'auto' {
+    return inject('stamhoofd_app', 'dashboard') as AppType|'auto'
 }
 
 export const getAppName = (app: AppType) => {

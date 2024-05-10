@@ -12,7 +12,6 @@
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
-import { SessionContext } from "@stamhoofd/networking";
 import LoadingView from "./LoadingView.vue";
 
 @Component({
@@ -54,11 +53,7 @@ export default class AuthenticatedView extends VueComponent {
 
     changed() {
         if (this.noPermissionsRoot) {
-            if (this.$context.organization) {
-                this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && this.$context.user.permissions != null && !!(this.$context as SessionContext).user.permissions?.forOrganization(this.$context.organization)
-            } else {
-                this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && (this.$context as SessionContext).user!.permissions?.globalPermissions != null
-            }
+            this.loggedIn = (this.$context.isComplete() ?? false) && !!this.$context.user && !!this.$context.auth.permissions
             this.hasToken = this.$context.hasToken() ?? false
             this.showPermissionsRoot = this.$context.isComplete() ?? false
             this.userId = this.$context.user?.id ?? null
@@ -68,7 +63,6 @@ export default class AuthenticatedView extends VueComponent {
             this.showPermissionsRoot = false
             this.userId = this.$context.user?.id ?? null
         }
-        console.log('changed', this.loggedIn, this.userId, this.hasToken, this.showPermissionsRoot);
     }
 
     onVisibilityChange() {

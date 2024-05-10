@@ -7,21 +7,20 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Prop, Vue, toNative } from 'vue-facing-decorator'
+import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import LoadingView from "./LoadingView.vue"
+import LoadingView from "./LoadingView.vue";
 
 @Component({
     components: {
         ComponentWithPropertiesInstance,
         LoadingView
-    },
-    mixins: [NavigationMixin]
+    }
 })
-export class PromiseView extends Vue {
+export default class PromiseView extends Mixins(NavigationMixin) {
     @Prop({required: true})
-    promise: () => Promise<ComponentWithProperties>
+        promise!: () => Promise<ComponentWithProperties>
 
     root: ComponentWithProperties | null = null
     passRoutes = false;
@@ -31,7 +30,6 @@ export class PromiseView extends Vue {
     }
 
     customRoutes() {
-        console.info('Promise view customRoutes')
         this.passRoutes = true;
     }
     
@@ -46,7 +44,6 @@ export class PromiseView extends Vue {
             if (this.passRoutes) {
                 this.passRoutes = false;
                 c.setCheckRoutes()
-                console.log('Passed checkroutes from promise to '+c.component?.name)
             }
             this.root = c
         }).catch(e => {
@@ -75,6 +72,4 @@ export class PromiseView extends Vue {
         return await (this.root.shouldNavigateAway());
     }
 }
-
-export default toNative(PromiseView)
 </script>

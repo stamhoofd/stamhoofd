@@ -751,7 +751,11 @@ export class SessionContext implements RequestMiddleware {
                 console.log("This request started with an old token that might not be valid anymore. Retry with new token")
                 return true
             } else {
-                await this.temporaryLogout();
+                if (error.hasCode("invalid_access_token")) {
+                    await this.logout();
+                } else {
+                    await this.temporaryLogout();
+                }
             }
         }
 
