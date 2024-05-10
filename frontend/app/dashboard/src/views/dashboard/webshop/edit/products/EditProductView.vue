@@ -84,7 +84,9 @@
         <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
 
         <STList v-else v-model="draggablePrices" :draggable="true">
-            <ProductPriceRow v-for="price in patchedProduct.prices" :key="price.id" :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
+            <template #item="{item: price}">
+                <ProductPriceRow :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
+            </template>            
         </STList>
 
         <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addPatch" />
@@ -107,7 +109,9 @@
 
         <STList>
             <STListItem v-if="seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
-                <template #left><span class="icon seat gray" /></template>
+                <template #left>
+                    <span class="icon seat gray" />
+                </template>
                 <h3 class="style-title-list">
                     Zaalplan
                 </h3>
@@ -116,12 +120,16 @@
                     {{ seatingPlan.name }}
                 </p>
 
-                <template #right><span class="icon success primary" />
-                <span class="icon arrow-right-small gray" /></template>
+                <template #right>
+                    <span class="icon success primary" />
+                    <span class="icon arrow-right-small gray" />
+                </template>
             </STListItem>
 
             <STListItem :selectable="true" element-name="button" @click="addOptionMenu">
-                <template #left><span class="icon add gray" /></template>
+                <template #left>
+                    <span class="icon add gray" />
+                </template>
 
                 <h3 class="style-title-list">
                     Keuzemenu
@@ -132,7 +140,9 @@
             </STListItem>
 
             <STListItem :selectable="true" element-name="button" @click="addField">
-                <template #left><span class="icon add gray" /></template>
+                <template #left>
+                    <span class="icon add gray" />
+                </template>
 
                 <h3 class="style-title-list">
                     Tekstveld (open vraag)
@@ -143,7 +153,9 @@
             </STListItem>
 
             <STListItem v-if="isTicket && !seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
-                <template #left><span class="icon seat gray" /></template>
+                <template #left>
+                    <span class="icon seat gray" />
+                </template>
                 <h3 class="style-title-list">
                     Zetelselectie instellen
                 </h3>
@@ -153,7 +165,9 @@
             </STListItem>
 
             <STListItem v-if="!image" :selectable="true" element-name="label" class="button">
-                <template #left><span class="icon camera gray" /></template>
+                <template #left>
+                    <span class="icon camera gray" />
+                </template>
 
                 <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
@@ -353,10 +367,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, SeatSelectionBox, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
 import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue";

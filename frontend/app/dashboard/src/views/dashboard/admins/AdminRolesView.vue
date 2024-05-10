@@ -37,32 +37,34 @@
             </STListItem>
 
             <STList v-if="roles.length" v-model="draggableRoles" :draggable="true">
-                <STListItem v-for="role in roles" :key="role.id" :selectable="true" class="right-stack" @click="editRole(role)">
-                    <template #left>
-                        <span class="icon user" />
-                    </template>
+                <template #item="{item: role}">
+                    <STListItem :selectable="true" class="right-stack" @click="editRole(role)">
+                        <template #left>
+                            <span class="icon user" />
+                        </template>
 
-                    <h2 class="style-title-list">
-                        {{ role.name }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ roleDescription(role) }}
-                    </p>
+                        <h2 class="style-title-list">
+                            {{ role.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ roleDescription(role) }}
+                        </p>
 
-                    <template #right>
-                        <span v-if="getAdminsForRole(role) > 1" class="style-tag">
-                            {{ getAdminsForRole(role) }}
-                        </span>
-                        <span v-else-if="getAdminsForRole(role) == 1" class="style-tag">
-                            1
-                        </span>
-                        <span v-else class="style-tag warn">
-                            Ongebruikt
-                        </span>
-                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                        <template #right>
+                            <span v-if="getAdminsForRole(role) > 1" class="style-tag">
+                                {{ getAdminsForRole(role) }}
+                            </span>
+                            <span v-else-if="getAdminsForRole(role) == 1" class="style-tag">
+                                1
+                            </span>
+                            <span v-else class="style-tag warn">
+                                Ongebruikt
+                            </span>
+                            <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </template>
             </STList>
         </STList>
     </SaveView>
@@ -72,12 +74,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, ErrorBox, LoadingView, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditRoleView from "./EditRoleView.vue";
 
@@ -149,7 +150,7 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
     getAdminsForRole(role: PermissionRole) {
         return this.admins.reduce((c, a) => {
             const op = a.permissions?.forOrganization(this.patchedOrganization)
-            if (!!op?.roles.find(r => r.id === role.id)) {
+            if (op?.roles.find(r => r.id === role.id)) {
                 return c + 1
             }
             return c

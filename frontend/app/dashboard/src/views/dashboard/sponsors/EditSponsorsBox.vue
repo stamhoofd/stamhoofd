@@ -10,19 +10,21 @@
         <p>Het is mogelijk om het logo van sponsors op je tickets te plaatsen.</p>
 
         <STList v-model="draggableSponsors" :draggable="true">
-            <STListItem v-for="sponsor in sponsors" :key="sponsor.id" :selectable="true" @click="editSponsor(sponsor)">
-                <h3 class="style-title-list">
-                    {{ sponsor.name || 'Naamloos' }}
-                </h3>
-                <p v-if="sponsor.onTickets" class="style-description-small">
-                    Op tickets
-                </p>
+            <template #item="{item: sponsor}">
+                <STListItem :selectable="true" @click="editSponsor(sponsor)">
+                    <h3 class="style-title-list">
+                        {{ sponsor.name || 'Naamloos' }}
+                    </h3>
+                    <p v-if="sponsor.onTickets" class="style-description-small">
+                        Op tickets
+                    </p>
 
-                <template #right>
-                    <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
+                    <template #right>
+                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </template>
         </STList>
     </div>
 </template>
@@ -30,9 +32,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { STErrorsDefault, STInputBox, STList, STListItem, UploadButton, ViewportHelper } from "@stamhoofd/components";
 import { Sponsor, SponsorConfig } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditSponsorView from "./EditSponsorView.vue";
 

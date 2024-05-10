@@ -23,7 +23,9 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <STList :draggable="true" :value="getDraggableRecords(patchedCategory)" group="records" @input="setDraggableRecords(patchedCategory, $event)">
-            <RecordRow v-for="record in records" :key="record.id" :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" />
+            <template #item="{item: record}">
+                <RecordRow :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" />
+            </template>
         </STList>
 
         <p class="style-button-bar">
@@ -60,7 +62,9 @@
             </p>
                 
             <STList :draggable="true" :value="getDraggableRecords(c)" group="records" @input="setDraggableRecords(c, $event)">
-                <RecordRow v-for="record in c.records" :key="record.id" :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" />
+                <template #item="{item: record}">
+                    <RecordRow :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" />
+                </template>
             </STList>
         </div>
 
@@ -86,10 +90,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
 import { MemberDetailsWithGroups, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, RecordSettings } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import EditRecordView from "./EditRecordView.vue";

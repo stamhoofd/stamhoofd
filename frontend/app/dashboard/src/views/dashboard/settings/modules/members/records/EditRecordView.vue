@@ -57,7 +57,9 @@
             </h2>
             
             <STList v-if="patchedRecord.choices.length > 0" v-model="choices" :draggable="true">
-                <RecordChoiceRow v-for="choice in patchedRecord.choices" :key="choice.id" :choice="choice" :parent-record="patchedRecord" :selectable="true" @patch="addChoicesPatch" />
+                <template #item="{item: choice}">
+                    <RecordChoiceRow :choice="choice" :parent-record="patchedRecord" :selectable="true" @patch="addChoicesPatch" />
+                </template>
             </STList>
                 
             <p v-else class="info-box">
@@ -245,11 +247,10 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, Dropdown,ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { RecordEditorSettings } from '@stamhoofd/structures';
 import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
 
 import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';

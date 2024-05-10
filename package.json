@@ -43,6 +43,7 @@
         "@simonbackx/simple-errors": "^1.4.0",
         "@simonbackx/simple-networking": "1.16.0",
         "@simonbackx/vue-app-navigation": "2.0.0-alpha.11",
+        "@types/sortablejs": "^1.15.8",
         "@vue/compat": "^3.4.26",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",
@@ -59,11 +60,11 @@
         "pdfkit": "0.15.0",
         "qrcode": "1.5.3",
         "sharp": "^0.32",
+        "sortablejs-vue3": "^1.2.11",
         "tslib": "^2.3.1",
         "uuid": "^9.0.0",
         "vue": "3.4.25",
         "vue-i18n": "9",
-        "vuedraggable": "^4.1.0",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     },
     "devDependencies": {

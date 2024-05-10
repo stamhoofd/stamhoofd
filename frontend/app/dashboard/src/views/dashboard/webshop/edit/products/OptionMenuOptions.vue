@@ -1,16 +1,18 @@
 <template>
     <STList v-model="draggableOptions" :draggable="true">
-        <OptionRow v-for="option in optionMenu.options" :key="option.id" :option-menu="optionMenu" :option="option" @patch="addPatch" @move-up="moveOptionUp(option)" @move-down="moveOptionDown(option)" />
+        <template #item="{item: option}">
+            <OptionRow :option-menu="optionMenu" :option="option" @patch="addPatch" @move-up="moveOptionUp(option)" @move-down="moveOptionDown(option)" />
+        </template>
     </STList>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 import { STList, STListItem } from "@stamhoofd/components";
 import { Option, OptionMenu } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import OptionRow from "./OptionRow.vue"
 

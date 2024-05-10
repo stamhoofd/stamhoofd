@@ -34,40 +34,43 @@
             </STListItem>
 
             <STList v-if="roles.length" v-model="draggableRoles" :draggable="true">
-                <STListItem v-for="role in roles" :key="role.id" :selectable="true" class="right-stack" @click="editRole(role)">
-                    <template #left>
-                        <span class="icon user" />
-                    </template>
+                <template #item="{item: role}">
+                    <STListItem :selectable="true" class="right-stack" @click="editRole(role)">
+                        <template #left>
+                            <span class="icon user" />
+                        </template>
 
-                    <h2 class="style-title-list">
-                        {{ role.name }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ roleDescription(role) }}
-                    </p>
+                        <h2 class="style-title-list">
+                            {{ role.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ roleDescription(role) }}
+                        </p>
 
-                    <template #right>
-                        <span v-if="getAdminsForRole(role)" class="style-tag">
-                            {{ getAdminsForRole(role) }}
-                        </span>
-                        <span v-else class="style-tag warn">
-                            Ongebruikt
-                        </span>
-                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                        <template #right>
+                            <span v-if="getAdminsForRole(role)" class="style-tag">
+                                {{ getAdminsForRole(role) }}
+                            </span>
+                            <span v-else class="style-tag warn">
+                                Ongebruikt
+                            </span>
+                            <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </template>
             </STList>
         </STList>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { PatchableArray, PatchableArrayAutoEncoder, type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { type AutoEncoderPatchType,PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, SaveView, Toast } from '@stamhoofd/components';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
+
 import EditRoleView from './EditRoleView.vue';
 import { useAdmins } from './hooks/useAdmins';
 import { usePatchRoles } from './hooks/useRoles';
