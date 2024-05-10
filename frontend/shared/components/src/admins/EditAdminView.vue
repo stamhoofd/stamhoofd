@@ -75,7 +75,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, usePermissions } from '@stamhoofd/components';
+import { CenteredMessage, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions } from '@stamhoofd/components';
 import { Permissions, PermissionsResourceType, User } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditUserPermissionsBox from './components/EditUserPermissionsBox.vue';
@@ -96,7 +96,7 @@ const props = defineProps<{
 
 const {patch, patched, addPatch, hasChanges} = usePatch(props.user)
 const {pushInMemory, dropFromMemory, getPermissionsPatch} = useAdmins()
-const permissions = usePermissions({patchedUser: patched})
+const permissions = useUninheritedPermissions({patchedUser: patched})
 const resources = computed(() => {
     const raw = permissions.unloadedPermissions;
     if (!raw) {

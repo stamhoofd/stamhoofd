@@ -63,6 +63,10 @@ export class SessionContext implements RequestMiddleware {
         return this.organization?.id ?? null
     }
 
+    /**
+     * @deprecated
+     * Use auth.permissions
+     */
     get organizationPermissions() {
         if (!this.organization) {
             return null

@@ -32,8 +32,8 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
-import { ContextMenu, ContextMenuItem, useEmitPatch, usePermissions } from '@stamhoofd/components';
-import { getPermissionResourceTypeName, AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getPermissionLevelName, getPermissionLevelNumber } from '@stamhoofd/structures';
+import { ContextMenu, ContextMenuItem, useAuth, useEmitPatch } from '@stamhoofd/components';
+import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName } from '@stamhoofd/structures';
 import { Ref, computed } from 'vue';
 
 const props = defineProps<{
@@ -46,7 +46,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['patch:role'])
 const {patched: role, addPatch, createPatch} = useEmitPatch<PermissionRoleDetailed|Permissions>(props, emit, 'role');
-const permissions = usePermissions()
+const auth = useAuth()
 const isEditingUserPermissions = (role.value instanceof Permissions);
 
 const isMe = computed(() => {
@@ -54,7 +54,7 @@ const isMe = computed(() => {
         return false
     }
     const realRole = role.value
-    return !!permissions.permissions?.roles.find(r => r.id === realRole.id)
+    return !!auth.permissions?.roles.find(r => r.id === realRole.id)
 })
 
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id))
