@@ -100,13 +100,7 @@ export function getRootView(session: SessionContext) {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
             },
-            stamhoofd_app: 'registration'
-        },
-        calculatedContext: () => {
-            return {
-                $organization: computed(() => reactiveSession.organization),
-                $user: computed(() => reactiveSession.user),
-            }
+            stamhoofd_app: 'registration',
         },
         root: new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(

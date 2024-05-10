@@ -27,8 +27,8 @@
 </template>
 
 <script lang="ts">
+import { inject, shallowRef } from 'vue';
 import TabBarController from './TabBarController.vue';
-import {inject, shallowRef} from 'vue';
 import TabBarDropdownView from './TabBarDropdownView.vue';
 
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
@@ -37,19 +37,24 @@ export function useTabBarController(): Ref<InstanceType<typeof TabBarController>
 }
 </script>
 
-<script setup lang="ts" name="TabBarController">
+<script setup lang="ts">
 import { ComponentWithProperties, FramedComponent, HistoryManager, NavigationController, PushOptions, defineRoutes, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
-import { ComponentPublicInstance, Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, provide, ref, unref } from 'vue';
-import { TabBarItem, TabBarItemGroup } from './TabBarItem';
-import InheritComponent from './InheritComponent.vue';
 import { Formatter } from '@stamhoofd/utility';
+import { ComponentPublicInstance, Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, provide, ref, unref } from 'vue';
+import InheritComponent from './InheritComponent.vue';
+import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
 const props = defineProps<{
-    tabs: (TabBarItem|TabBarItemGroup)[]
+    tabs: ((TabBarItem|TabBarItemGroup)[])|Ref<(TabBarItem|TabBarItemGroup)[]>
 }>()
 
+defineOptions({
+    name: 'TabBarController'
+})
+
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
-const flatTabs = computed<TabBarItemWithComponent[]>(() => props.tabs.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
+const tabs = computed(() => unref(props.tabs))
+const flatTabs = computed<TabBarItemWithComponent[]>(() => tabs.value.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
 
 const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
 
@@ -64,6 +69,9 @@ defineRoutes(flatTabs.value.map(tab => {
     return {
         name: tab.name,
         url: Formatter.slug(tab.name),
+        isDefault: {
+            properties: {}
+        },
         handler: async (options) => {
             if (options.checkRoutes) {
                 tab.component.setCheckRoutes()
@@ -72,13 +80,6 @@ defineRoutes(flatTabs.value.map(tab => {
         }
     }
 }))
-
-onMounted(() => {
-    // If no default route was set, select the first
-    if (!root.value && !selectedItem.value) {
-        selectItem(flatTabs.value[0], false).catch(console.error)
-    }
-})
 
 const instance = getCurrentInstance()
 provide('reactive_tabBarController', instance?.proxy); // Sadly the proxy does not include exposed properties - ComponentWithProperties has a workaround at getExposeProxy

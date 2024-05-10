@@ -1,8 +1,8 @@
 <template>
-    <div class="context-logo">
+    <figure class="context-logo">
         <OrganizationAvatar v-if="organization" :organization="organization" />
         <Logo v-else class="small" />
-    </div>
+    </figure>
 </template>
 
 <script setup lang="ts">

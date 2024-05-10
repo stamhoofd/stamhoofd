@@ -1,3 +1,4 @@
+import { I18nController } from "@stamhoofd/frontend-i18n"
 import { Organization } from "@stamhoofd/structures"
 import { inject } from "vue"
 
@@ -27,12 +28,15 @@ export const getAppTitle = (app: AppType|'auto', organization: Organization|unde
 
 export const getAppDescription = (app: AppType|'auto', organization: Organization|undefined|null) => {
     if (app === 'auto') {
+        if (organization) {
+            return organization.address.anonymousString(I18nController.shared.country)
+        }
         return null;
     }
     if (!organization) {
         switch (app) {
-            case 'registration': return 'Mijn inschrijvingen';
-            case 'admin': return 'Portaal voor medewerkers'
+            case 'registration': return 'Schrijf je in bij een lokale groep';
+            case 'admin': return 'Portaal voor beroepskrachten'
         }
         return null
     }

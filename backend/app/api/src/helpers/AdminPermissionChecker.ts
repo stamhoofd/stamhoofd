@@ -135,11 +135,6 @@ export class AdminPermissionChecker {
                 return false
             }
         } else {
-            // Global objects are only accessible in the platform context
-            if (this.organization) {
-                return false
-            }
-
             // User is limited to a scope
             if (this.user.organizationId) {
                 return false

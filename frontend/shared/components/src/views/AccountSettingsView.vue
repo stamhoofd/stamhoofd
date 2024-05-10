@@ -95,7 +95,11 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     saving = false
     showDomainSettings = true
     
-    userPatch = User.patch({ id: this.$user!.id })
+    userPatch = User.patch({})
+
+    created() {
+        this.userPatch.id = this.$user!.id
+    }
 
     mounted() {
         // Refresh
@@ -220,6 +224,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     async logout() {
         if (await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
             await this.$context.logout()
+            await this.pop({force: true})
         }
     }
 }

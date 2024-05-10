@@ -9,6 +9,7 @@ import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
 import { ContextPermissions } from './ContextPermissions'
+import { isReactive } from 'vue'
 
 type AuthenticationStateListener = (changed: "user" | "organization" | "token" | "preventComplete") => void
 
@@ -62,6 +63,10 @@ export class SessionContext implements RequestMiddleware {
         return this.organization?.id ?? null
     }
 
+    /**
+     * @deprecated
+     * Use auth.permissions
+     */
     get organizationPermissions() {
         if (!this.organization) {
             return null
@@ -393,6 +398,11 @@ export class SessionContext implements RequestMiddleware {
         return !!this.token
     }
 
+    hasPermissions(): boolean {
+        //console.log("canGetCompleted", this.token, this.user, this.organization, this.preventComplete, this.user?.permissions, this.organization?.privateMeta)
+        return !!this.auth?.permissions
+    }
+
     isComplete(): boolean {
         return !!this.token && !!this.user && !this.preventComplete && (!this.organization || !this.organizationPermissions || !!this.organization.privateMeta)
     }
@@ -467,6 +477,11 @@ export class SessionContext implements RequestMiddleware {
 
     async fetchUser(shouldRetry = true): Promise<User> {
         console.log("Fetching session user...")
+
+        if (!isReactive(this)) {
+            console.error("SessionContext is not reactive while fetching user!")
+        }
+
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
@@ -478,9 +493,14 @@ export class SessionContext implements RequestMiddleware {
         } else {
             this.user = response.data
         }
+
+        if (!isReactive(this.user)) {
+            console.error("SessionContext.user is not reactive after fetching user!")
+        }
+
         await this.saveToStorage()
         this.callListeners("user")
-        return response.data
+        return this.user
     }
 
     /**
@@ -614,6 +634,8 @@ export class SessionContext implements RequestMiddleware {
             this.token = null;
             this.callListeners("token")
         }
+        this.user = null;
+        this.callListeners("user")
     }
 
     isLoggingOut = false

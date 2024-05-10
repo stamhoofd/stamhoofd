@@ -330,6 +330,9 @@ export class Formatter {
     }
 
     static firstLetters(str: string, maxLength: number) {
+        if (!str) {
+            return ""
+        }
         if (maxLength === 1) {
             return str.substr(0, 1).toLocaleUpperCase()
         }
