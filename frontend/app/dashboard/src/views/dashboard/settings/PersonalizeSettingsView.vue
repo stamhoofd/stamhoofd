@@ -98,9 +98,8 @@ import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonb
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, STErrorsDefault, SaveView, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, SaveView, STErrorsDefault, Toast, Validator } from "@stamhoofd/components";
 import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
-
 
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
@@ -124,7 +123,11 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     temp_organization = this.$organization
     showDomainSettings = true
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+    
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

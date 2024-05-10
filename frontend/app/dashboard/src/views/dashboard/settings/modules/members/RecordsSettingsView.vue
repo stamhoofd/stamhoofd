@@ -27,7 +27,9 @@
                 <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.phone.getString(getFilterDefinitionsForProperty('phone')) }}
                 </p>
-                <template v-if="getEnableFilterConfiguration('phone')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" /></template>
+                <template v-if="getEnableFilterConfiguration('phone')" #right>
+                    <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" />
+                </template>
             </STListItem>
             <STListItem>
                 <template #left>
@@ -39,7 +41,9 @@
                 <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.emailAddress.getString(getFilterDefinitionsForProperty('emailAddress')) }}
                 </p>
-                <template v-if="getEnableFilterConfiguration('emailAddress')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" /></template>
+                <template v-if="getEnableFilterConfiguration('emailAddress')" #right>
+                    <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" />
+                </template>
             </STListItem>
             <STListItem>
                 <template #left>
@@ -51,7 +55,9 @@
                 <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.gender.getString(getFilterDefinitionsForProperty('gender')) }}
                 </p>
-                <template v-if="getEnableFilterConfiguration('gender')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" /></template>
+                <template v-if="getEnableFilterConfiguration('gender')" #right>
+                    <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" />
+                </template>
             </STListItem>
             <STListItem>
                 <template #left>
@@ -63,7 +69,9 @@
                 <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.birthDay.getString(getFilterDefinitionsForProperty('birthDay')) }}
                 </p>
-                <template v-if="getEnableFilterConfiguration('birthDay')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" /></template>
+                <template v-if="getEnableFilterConfiguration('birthDay')" #right>
+                    <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" />
+                </template>
             </STListItem>
             <STListItem>
                 <template #left>
@@ -75,7 +83,9 @@
                 <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.address.getString(getFilterDefinitionsForProperty('address')) }}
                 </p>
-                <template v-if="getEnableFilterConfiguration('address')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" /></template>
+                <template v-if="getEnableFilterConfiguration('address')" #right>
+                    <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" />
+                </template>
             </STListItem>
             <STListItem>
                 <template #left>
@@ -87,7 +97,9 @@
                 <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.parents.getString(getFilterDefinitionsForProperty('parents')) }}
                 </p>
-                <template v-if="getEnableFilterConfiguration('parents')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" /></template>
+                <template v-if="getEnableFilterConfiguration('parents')" #right>
+                    <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" />
+                </template>
             </STListItem>
             <STListItem>
                 <template #left>
@@ -99,7 +111,9 @@
                 <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
                     {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts.getString(getFilterDefinitionsForProperty('emergencyContacts')) }}
                 </p>
-                <template v-if="getEnableFilterConfiguration('emergencyContacts')" #right><button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')" /></template>
+                <template v-if="getEnableFilterConfiguration('emergencyContacts')" #right>
+                    <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')" />
+                </template>
             </STListItem>
         </STList>
 
@@ -143,11 +157,10 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, PropertyFilterView, SaveView, STErrorsDefault, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, Version } from "@stamhoofd/structures";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditRecordCategoryQuestionsView from './records/EditRecordCategoryQuestionsView.vue';
 import EditRecordCategoryView from './records/EditRecordCategoryView.vue';
@@ -170,7 +183,11 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     // Make it reactive
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get AskRequirement() {
         return AskRequirement

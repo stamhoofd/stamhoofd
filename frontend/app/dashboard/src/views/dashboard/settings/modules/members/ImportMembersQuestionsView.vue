@@ -95,10 +95,12 @@
                             </Radio>
                         </RadioGroup>
 
-                        <template #right><button class="button text" type="button" @click.stop="openAssignment">
-                            <span class="icon help" />
-                            <span>Toon resultaat</span>
-                        </button></template>
+                        <template #right>
+                            <button class="button text" type="button" @click.stop="openAssignment">
+                                <span class="icon help" />
+                                <span>Toon resultaat</span>
+                            </button>
+                        </template>
                     </STInputBox>
 
                     <template v-if="autoAssign">
@@ -119,10 +121,12 @@
                                 </STListItem>
                             </STList>
 
-                            <template #right><button type="button" class="button text" @click.stop="openMultipleGroups">
-                                <span class="icon help" />
-                                <span>Toon leden</span>
-                            </button></template>
+                            <template #right>
+                                <button type="button" class="button text" @click.stop="openMultipleGroups">
+                                    <span class="icon help" />
+                                    <span>Toon leden</span>
+                                </button>
+                            </template>
                         </STInputBox>
 
 
@@ -137,10 +141,12 @@
                                 </option>
                             </Dropdown>
 
-                            <template #right><button type="button" class="button text" @click.stop="openWithoutMatchingGroups">
-                                <span class="icon help" />
-                                <span>Toon leden</span>
-                            </button></template>
+                            <template #right>
+                                <button type="button" class="button text" @click.stop="openWithoutMatchingGroups">
+                                    <span class="icon help" />
+                                    <span>Toon leden</span>
+                                </button>
+                            </template>
                         </STInputBox>
                     </template>
                     <template v-else>
@@ -175,14 +181,13 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, Dropdown, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { Gender, Group, Organization, OrganizationPatch, Parent, ParentTypeHelper, Registration } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { FamilyManager } from '../../../../../classes/FamilyManager';
 import { ImportingMember } from '../../../../../classes/import/ImportingMember';
-
 import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
 
 @Component({
@@ -205,11 +210,14 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
 
     @Prop({ required: true })
         members: ImportingMember[]
 
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     paid: boolean | null = true
     waitingList = false
@@ -434,7 +442,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
     getParentDescription(parent: Parent) {
         const description: string[] = []
-        let type = ParentTypeHelper.getName(parent.type)
+        const type = ParentTypeHelper.getName(parent.type)
         if (parent.name.trim()) {
             description.push(type + ': ' + parent.name)
         }
@@ -455,7 +463,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             title: "Wijzigingen",
             description: "Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.",
             members: this.members.map(member => {
-                let description: string[] = []
+                const description: string[] = []
                 const registration = this.buildRegistration(member)
 
                 if (registration !== null) {
@@ -649,7 +657,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             return [];
         }
 
-        let list: Registration[] = []
+        const list: Registration[] = []
 
         // TODO: delete more conflicting registrations (based on categories too!)
         const group = this.organization.groups.find(g => g.id === registration.groupId)

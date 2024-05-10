@@ -46,9 +46,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator} from "@stamhoofd/components";
 import { Organization, OrganizationPatch } from "@stamhoofd/structures"
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { ImportError } from '../../../../../classes/import/ImportingMember';
 
@@ -70,7 +70,11 @@ export default class ImportMembersErrorsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     @Prop({ required: true })
         errors: ImportError[]

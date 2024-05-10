@@ -60,10 +60,10 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { FinancialSupportSettings, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 
@@ -82,7 +82,11 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     saving = false
     temp_organization = this.$organization
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+    
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

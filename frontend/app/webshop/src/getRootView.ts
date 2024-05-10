@@ -2,8 +2,8 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController } fr
 import { AuthenticatedView, ContextProvider } from "@stamhoofd/components";
 import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
 import { Webshop, WebshopAuthType } from "@stamhoofd/structures";
+import { reactive } from 'vue';
 
-import { computed, reactive } from 'vue';
 import { CheckoutManager } from "./classes/CheckoutManager";
 import { WebshopManager } from "./classes/WebshopManager";
 import RequiredLoginView from "./views/RequiredLoginView.vue";

@@ -27,11 +27,10 @@
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { GroupPrices, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STPackageBundle, Version } from "@stamhoofd/structures"
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditGroupPriceBox from '../../../groups/EditGroupPriceBox.vue';
 import ActivatedView from './ActivatedView.vue';
@@ -52,7 +51,11 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
     saving = false
     temp_organization = this.$organization
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

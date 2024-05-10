@@ -111,9 +111,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Vue } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
-import { Component, Mixins, Vue } from "@simonbackx/vue-app-navigation/classes";
 import XLSX from "xlsx";
 
 import { allMatchers } from "../../../../../classes/import/defaultMatchers";
@@ -121,7 +121,6 @@ import { ImportingMember } from "../../../../../classes/import/ImportingMember";
 import { MatchedColumn } from "../../../../../classes/import/MatchedColumn";
 import { MatcherCategory } from '../../../../../classes/import/MatcherCategory';
 import { AddressColumnMatcher, DateColumnMatcher,TextColumnMatcher } from "../../../../../classes/import/matchers";
-
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
@@ -143,7 +142,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
     file: null | string = null
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
 
     rowCount = 0
     columnCount = 0
@@ -153,6 +152,10 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
 
     matchers = allMatchers.slice()
     columns: MatchedColumn[] = []
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     mounted() {
         this.matchers = allMatchers.slice()

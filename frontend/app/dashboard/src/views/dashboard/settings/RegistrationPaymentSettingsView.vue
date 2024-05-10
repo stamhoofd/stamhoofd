@@ -16,7 +16,7 @@
             :private-config="privateConfig" 
             :validator="validator"
             @patch:config="patchConfig($event)" 
-            @patch:privateConfig="patchPrivateConfig($event)" 
+            @patch:private-config="patchPrivateConfig($event)" 
         />
     </SaveView>
 </template>
@@ -25,11 +25,10 @@
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
@@ -55,7 +54,11 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
     temp_organization = this.$organization
     loadingMollie = false
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

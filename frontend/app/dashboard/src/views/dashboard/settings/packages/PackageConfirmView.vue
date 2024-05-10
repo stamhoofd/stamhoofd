@@ -156,12 +156,11 @@
 import { AutoEncoder,AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPricingType, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
 
 import PackageSettingsView, { SelectablePackage } from "./PackageSettingsView.vue";
 
@@ -228,7 +227,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
 
     selectedPaymentMethod: PaymentMethod = PaymentMethod.Unknown
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
     userPatch = User.patch({ id: this.user.id })
 
     throttledReload = throttle(this.loadProForma, 1000)
@@ -248,6 +247,10 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
 
     get hasPerMember() {
         return !!this.selectedPackages.find(p => p.package.meta.pricingType === STPricingType.PerMember) || !!this.renewPackages.find(p => p.meta.pricingType === STPricingType.PerMember)
+    }
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
     }
 
     mounted() {

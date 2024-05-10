@@ -13,18 +13,24 @@
 
         <STList class="illustration-list">    
             <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
-                <template #left><img src="@stamhoofd/assets/images/illustrations/laptop.svg"></template>
+                <template #left>
+                    <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
+                </template>
                 <h2 class="style-title-list">
                     API-keys
                 </h2>
                 <p class="style-description">
                     Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.
                 </p>
-                <template #right><span class="icon arrow-right-small gray" /></template>
+                <template #right>
+                    <span class="icon arrow-right-small gray" />
+                </template>
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="downloadSettings(true)">
-                <template #left><img src="@stamhoofd/assets/images/illustrations/box-download.svg"></template>
+                <template #left>
+                    <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
+                </template>
                 <h2 class="style-title-list">
                     Exporteer instellingen
                 </h2>
@@ -39,7 +45,9 @@
             </STListItem>
 
             <STListItem v-if="isStamhoofd" :selectable="true" class="left-center" @click="uploadSettings(true)">
-                <template #left><img src="@stamhoofd/assets/images/illustrations/box-upload.svg"></template>
+                <template #left>
+                    <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
+                </template>
                 <h2 class="style-title-list">
                     Importeer instellingen
                 </h2>
@@ -111,12 +119,11 @@ import { AutoEncoder, AutoEncoderPatchType, Decoder, ObjectData, patchContainsCh
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, InputSheet, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
 
 import ApiUsersView from '../admins/ApiUsersView.vue';
 
@@ -137,7 +144,11 @@ export default class LabsView extends Mixins(NavigationMixin) {
     saving = false
     downloadingSettings = false
     uploadingSettings = false
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+    
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

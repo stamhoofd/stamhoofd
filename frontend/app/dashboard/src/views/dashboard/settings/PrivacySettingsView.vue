@@ -40,10 +40,10 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, ErrorBox, FileInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 
@@ -69,7 +69,11 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     defaultSelectedType = this.$organization.meta.privacyPolicyUrl ? "website" : (this.$organization.meta.privacyPolicyFile ? "file" : "none")
     selectedPrivacyType = this.defaultSelectedType
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+    
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

@@ -25,7 +25,9 @@
             <STInputBox v-for="n in amountCount" :key="n" :title="'Voorgesteld bedrag '+n">
                 <PriceInput :value="getFreeContributionAmounts(n - 1)" :placeholder="'Optie '+n" @input="setFreeContributionAmounts(n - 1, $event)" />
 
-                <template #right><button class="button icon trash gray" type="button" @click="deleteOption(n - 1)" /></template>
+                <template #right>
+                    <button class="button icon trash gray" type="button" @click="deleteOption(n - 1)" />
+                </template>
             </STInputBox>
 
             <p v-if="amountCount == 0" class="info-box">
@@ -48,10 +50,10 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 
@@ -70,7 +72,11 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
     saving = false
     temp_organization = this.$organization
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

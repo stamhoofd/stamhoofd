@@ -244,9 +244,15 @@
                                 {{ profile.website }}
                             </p>
 
-                            <template v-if="profile.status === 'verified'" #right><span v-tooltip="'Geverifieerd'" class="icon success green" /></template>
-                            <template v-else-if="profile.status === 'unverified'" #right><span v-tooltip="'Wacht op verificatie'" class="icon clock gray" /></template>
-                            <template v-else #right><span v-tooltip="'Geblokkeerd'" class="icon canceled red" /></template>
+                            <template v-if="profile.status === 'verified'" #right>
+                                <span v-tooltip="'Geverifieerd'" class="icon success green" />
+                            </template>
+                            <template v-else-if="profile.status === 'unverified'" #right>
+                                <span v-tooltip="'Wacht op verificatie'" class="icon clock gray" />
+                            </template>
+                            <template v-else #right>
+                                <span v-tooltip="'Geblokkeerd'" class="icon canceled red" />
+                            </template>
                         </STListItem>
                     </STList>
                 </STInputBox>
@@ -316,12 +322,11 @@ import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, Patcha
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, LoadingButton, LoadingView, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPatch, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
@@ -356,7 +361,11 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     stripeAccounts: StripeAccount[] = []
     mollieProfiles: MollieProfile[] = []
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: this.$organization.id })
+    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+
+    created() {
+        this.organizationPatch.id = this.$organization.id
+    }
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)

@@ -224,6 +224,11 @@ export class VueGlobalHelper {
                 dateTime: Formatter.dateTime.bind(Formatter)
             },
             inject: {
+                $context: {
+                    default: function () {
+                        return null;
+                    }
+                },
                 $organizationManager: {
                     default: function () {
                         return null;
