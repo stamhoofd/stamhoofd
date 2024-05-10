@@ -222,7 +222,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
         icon: 'basket',
         name: 'Verkoop',
         component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+            root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {})
         })
     });
 
