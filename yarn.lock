@@ -2554,10 +2554,10 @@
     "@vusion/webfonts-generator" "^0.8.0"
     glob "^10.3.10"
 
-"@simonbackx/vue-app-navigation@2.0.0-alpha.7":
-  version "2.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0-alpha.7.tgz#756f562cffd18f76979acda6281880ea67254770"
-  integrity sha512-5RfR3RCLqsfmpd56ivtWAFHqVZPzjaQQZNB3yphWwjaesJsgC2yFHiePuUHQcQWJ7x2hJNQy7uWxp1jqRSRopA==
+"@simonbackx/vue-app-navigation@2.0.0-alpha.8":
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0-alpha.8.tgz#64d4dd3a2429f22903883ca516f735a6e8503e7f"
+  integrity sha512-cypwadsrOSAXP2ntc7m2UnB2LmQ1LLxuR2OEY6eXsjvOtXNOXuFi/r0w+THSZIqfkSYvAGL5e1AbFQdeX6iw2g==
   dependencies:
     "@typescript-eslint/parser" "^7.7.1"
     "@vitejs/plugin-vue" "^5.0.4"

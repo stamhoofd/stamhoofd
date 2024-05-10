@@ -1,7 +1,7 @@
 import { Request } from "@simonbackx/simple-networking";
 import { AppManager, SessionContext, ContextPermissions } from "@stamhoofd/networking";
 import { Formatter } from "@stamhoofd/utility";
-import { Ref, computed, inject, toRef, type App, ref } from "vue";
+import { Ref, computed, inject, toRef, type App, ref, isRef, isReactive, unref } from "vue";
 
 import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
 import { Organization, Platform, User, Version } from "@stamhoofd/structures";
@@ -14,18 +14,19 @@ import STInputBox from "./inputs/STInputBox.vue";
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
 
-export function useUser(): Ref<User | null> {
-    const refOrReal = inject('$user', null)
-    return toRef(refOrReal)
-}
-
 export function useContext(): Ref<SessionContext> {
     const refOrReal = inject('$context') as SessionContext;
     return toRef(refOrReal) as Ref<SessionContext>
 }
 
+export function useUser(): Ref<User | null> {
+    const context = useContext()
+    return computed(() => context.value.user);
+}
+
 export function useOrganization(): Ref<Organization | null> {
-    return toRef(inject('$organization', null))
+    const context = useContext()
+    return computed(() => context.value.organization);
 }
 
 export function usePlatform(): Ref<Platform> {
@@ -211,27 +212,6 @@ export class VueGlobalHelper {
                 dateTime: Formatter.dateTime.bind(Formatter)
             },
             inject: {
-                $context: {
-                    default: function () {
-                        // console.warn('No session provided to component', this)
-                        // if (!SessionManager.currentSession) {
-                        //     console.error('No session available')
-                        //     //throw new Error('No session available')
-                        // }
-
-                        return null; // SessionManager.currentSession
-                    }
-                },
-                $organization: {
-                    default: function () {
-                        return null;
-                    }
-                },
-                $user: {
-                    default: function () {
-                        return null;
-                    }
-                },
                 $organizationManager: {
                     default: function () {
                         return null;
@@ -267,7 +247,10 @@ export class VueGlobalHelper {
             created() {
                 const directives = {
                     currentComponent: useCurrentComponent(),
-                    $url: useUrl()
+                    $url: useUrl(),
+                    $user: useUser(),
+                    $organization: useOrganization(),
+                    $context: useContext(),
                 };
 
                 injectHooks(this, directives)

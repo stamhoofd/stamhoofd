@@ -71,6 +71,9 @@ export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
 export { default as OrganizationSwitcher } from "./src/context/OrganizationSwitcher.vue"
 export { default as AccountSwitcher } from "./src/context/AccountSwitcher.vue"
+export { default as ContextLogo } from "./src/context/ContextLogo.vue"
+export * from "./src/context/appContext.ts"
+export * from "./src/context/hooks/useContextOptions.ts"
 
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"

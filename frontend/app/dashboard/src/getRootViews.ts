@@ -14,8 +14,58 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
 }
 
-export function getOrganizationSelectionRoot() {
-    return new ComponentWithProperties(OrganizationSelectionView, {})
+export function getLoginRoot() {
+    if (STAMHOOFD.userMode === 'platform') {
+        return new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(LoginView, {})
+        })
+    }
+
+    return new ComponentWithProperties(TabBarController, {
+        tabs: [
+            new TabBarItem({
+                icon: 'key',
+                name: 'Inloggen',
+                component: new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(LoginView, {})
+                })
+            })
+        ]
+    })
+}
+
+export async function getOrganizationSelectionRoot() {
+    const session = reactive(new SessionContext(null)) as SessionContext;
+    const reactiveSession = session
+    await session.loadFromStorage()
+    await SessionManager.prepareSessionForUsage(session, false);
+    await I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl")
+
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
+
+    let baseRoot = new ComponentWithProperties(OrganizationSelectionView, {});
+
+    if (STAMHOOFD.userMode === 'platform') {
+        // In platform mode, we need authentication
+        baseRoot = new ComponentWithProperties(AuthenticatedView, {
+            root: wrapWithModalStack(baseRoot),
+            loginRoot: wrapWithModalStack(getLoginRoot()),
+        });
+    }
+
+    return new ComponentWithProperties(ContextProvider, {
+        context: {
+            $context: reactiveSession,
+            $platformManager: platformManager,
+            reactive_navigation_url: "/",
+            reactive_components: {
+                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
+            },
+            stamhoofd_app: 'dashboard',
+        },
+        root: wrapWithModalStack(baseRoot)
+    });
 }
 
 export function getNoPermissionsView() {
@@ -55,7 +105,7 @@ export async function getScopedDashboardRootFromUrl() {
             })
             const organization = response.data
 
-            session = new SessionContext(organization)
+            session = reactive(new SessionContext(organization)) as SessionContext;
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
 
@@ -76,10 +126,10 @@ export async function getScopedDashboardRootFromUrl() {
 }
 
 export async function getScopedAutoRootFromUrl() {
-    const session = await SessionManager.getLastSession()
+    const session = reactive(await SessionManager.getLastSession()) as SessionContext;
     await SessionManager.prepareSessionForUsage(session, false);
 
-    return getScopedAutoRoot(session)
+    return await getScopedAutoRoot(session)
 }
 
 export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
@@ -87,16 +137,27 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
         const admin = await import('@stamhoofd/admin-frontend');
         return await admin.getScopedAdminRoot(session, options);
     }
-    if (!session.organization) {
+    
+    if (!session.organization || !session.user) {
         return getOrganizationSelectionRoot()
     }
+
+    if (STAMHOOFD.userMode === 'organization') {
+        // Organization specific registration root
+        if (!session.user.permissions?.forOrganization(session.organization) && session.organization.meta.packages.useMembers) {
+            const registration = await import('@stamhoofd/registration');
+            return await registration.getRootView(session)
+        }
+    }
+
     return await getScopedDashboardRoot(session, options)
 }
 
 export async function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
     const reactiveSession = reactive(session) as SessionContext
+    I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
+
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
 
     const startView = new ComponentWithProperties(NavigationController, {
@@ -215,13 +276,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
             },
-            stamhoofd_app: 'dashboard'
-        },
-        calculatedContext: () => {
-            return {
-                $organization: computed(() => reactiveSession.organization),
-                $user: computed(() => reactiveSession.user),
-            }
+            stamhoofd_app: 'dashboard',
         },
         root: wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {
@@ -249,19 +304,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                         })
                     })
                 ),
-                loginRoot: wrapWithModalStack(
-                    new ComponentWithProperties(TabBarController, {
-                        tabs: [
-                            new TabBarItem({
-                                icon: 'key',
-                                name: 'Inloggen',
-                                component: new ComponentWithProperties(NavigationController, {
-                                    root: new ComponentWithProperties(LoginView, {})
-                                })
-                            })
-                        ]
-                    })
-                ),
+                loginRoot: wrapWithModalStack(getLoginRoot()),
                 noPermissionsRoot: getNoPermissionsView(),
             }), 
             options.initialPresents

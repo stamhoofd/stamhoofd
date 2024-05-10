@@ -45,11 +45,13 @@ import InheritComponent from './InheritComponent.vue';
 import { Formatter } from '@stamhoofd/utility';
 
 const props = defineProps<{
-    tabs: (TabBarItem|TabBarItemGroup)[]
+    tabs: ((TabBarItem|TabBarItemGroup)[])|Ref<(TabBarItem|TabBarItemGroup)[]>
 }>()
 
+
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
-const flatTabs = computed<TabBarItemWithComponent[]>(() => props.tabs.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
+const tabs = computed(() => unref(props.tabs))
+const flatTabs = computed<TabBarItemWithComponent[]>(() => tabs.value.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
 
 const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
 

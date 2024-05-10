@@ -95,7 +95,11 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     saving = false
     showDomainSettings = true
     
-    userPatch = User.patch({ id: this.$user!.id })
+    userPatch = User.patch({})
+
+    created() {
+        this.userPatch.id = this.$user!.id
+    }
 
     mounted() {
         // Refresh

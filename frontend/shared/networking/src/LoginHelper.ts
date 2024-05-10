@@ -109,16 +109,24 @@ export class LoginHelper {
             throw e
         }
 
-        await session.setToken(tokenResponse.data)
-        await session.fetchUser()
-
-        // if user / orgaznization got cleared due to an invite
-        if (!session.isComplete()) {
-            await session.updateData(false, false)
-            // need to wait on this because it changes the permissions
+        session.preventComplete = true
+        try {
+            await session.setToken(tokenResponse.data)
+            await session.fetchUser()
+    
+            // if user / orgaznization got cleared due to an invite
+            if (!session.isComplete()) {
+                await session.updateData(false, false)
+                // need to wait on this because it changes the permissions
+            }
+    
+            await SessionManager.prepareSessionForUsage(session)
+            session.preventComplete = false
+        } catch (e) {
+            session.preventComplete = false
+            throw e
         }
-
-        // await SessionManager.setCurrentSession(session)
+        
         return {}
     }
 

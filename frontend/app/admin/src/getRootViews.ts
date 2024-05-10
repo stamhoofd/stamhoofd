@@ -11,7 +11,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 }
 
 export async function getScopedAdminRootFromUrl() {
-    const session = new SessionContext(null)
+    const session = reactive(new SessionContext(null)) as SessionContext
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
 
@@ -36,8 +36,8 @@ export function getNoPermissionsView() {
 
 export async function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    I18nController.loadDefault(session, "dashboard", Country.Belgium, "nl").catch(console.error)
     const reactiveSession = reactive(session) as SessionContext
+    I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl").catch(console.error)
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true, true)
 

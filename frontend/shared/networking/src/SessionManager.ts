@@ -6,6 +6,7 @@ import { Organization, Version } from '@stamhoofd/structures';
 
 import { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
+import { isReactive } from 'vue';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -86,7 +87,10 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
-    async prepareSessionForUsage(session: SessionContext, shouldRetry = true) {        
+    async prepareSessionForUsage(session: SessionContext, shouldRetry = true) {       
+        if (!isReactive(session)) {
+            console.error('Passing around a non-reactive session can cause issues. Prevent using a session that is not reactive.')
+        }
         if (session.canGetCompleted() && !session.isComplete()) {
             // Always request a new user (the organization is not needed)
             // session.user = null
@@ -110,7 +114,9 @@ export class SessionManagerStatic {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     if (e.hasCode("invalid_organization")) {
                         // Clear from session storage
-                        await this.removeOrganizationFromStorage(session.organizationId)
+                        if (session.organization) {
+                            await this.removeOrganizationFromStorage(session.organization.id)
+                        }
                         throw new SimpleError({
                             code: "invalid_organization",
                             message: e.message,

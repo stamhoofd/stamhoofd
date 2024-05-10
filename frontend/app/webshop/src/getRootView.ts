@@ -36,12 +36,6 @@ export function getWebshopRootView(session: SessionContext, webshop: Webshop) {
             $webshopManager,
             $checkoutManager: reactive(new CheckoutManager($webshopManager)),
         },
-        calculatedContext: () => {
-            return {
-                $organization: computed(() => session.organization),
-                $user: computed(() => session.user),
-            }
-        },
         root
     });
 }
