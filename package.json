@@ -42,7 +42,7 @@
         "@simonbackx/simple-encoding": "2.10.2",
         "@simonbackx/simple-errors": "^1.4.0",
         "@simonbackx/simple-networking": "1.16.0",
-        "@simonbackx/vue-app-navigation": "2.0.0-alpha.9",
+        "@simonbackx/vue-app-navigation": "2.0.0-alpha.10",
         "@vue/compat": "^3.4.26",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",

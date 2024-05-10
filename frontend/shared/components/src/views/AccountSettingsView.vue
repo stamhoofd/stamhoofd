@@ -224,6 +224,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     async logout() {
         if (await CenteredMessage.confirm("Ben je zeker dat je wilt uitloggen?", "Uitloggen")) {
             await this.$context.logout()
+            await this.pop({force: true})
         }
     }
 }
