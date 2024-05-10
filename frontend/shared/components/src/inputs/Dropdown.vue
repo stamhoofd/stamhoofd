@@ -11,9 +11,6 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
-    compatConfig: {
-        COMPONENT_V_MODEL: false
-    },
     emits: ["update:modelValue"]
 })
 export default class Dropdown extends Mixins(NavigationMixin) {

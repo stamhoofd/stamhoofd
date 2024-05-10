@@ -1,14 +1,16 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
         <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event) => {emailRaw = event.target.value; onTyping();}">
-        <template #right><slot name="right" /></template>
+        <template #right>
+            <slot name="right" />
+        </template>
     </STInputBox>
 </template>
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { DataValidator } from "@stamhoofd/utility";
 import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { DataValidator } from "@stamhoofd/utility";
 
 import {ErrorBox} from "../errors/ErrorBox";
 import {Validator} from "../errors/Validator";

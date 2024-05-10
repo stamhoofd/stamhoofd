@@ -17,8 +17,8 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
 
 import { ErrorBox } from "../errors/ErrorBox";
 import { Validator } from "../errors/Validator";
@@ -29,9 +29,6 @@ import STInputBox from "./STInputBox.vue";
     components: {
         Spinner,
         STInputBox
-    },
-    compatConfig: {
-        COMPONENT_V_MODEL: false
     },
     emits: ["update:modelValue"]
 })

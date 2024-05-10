@@ -38,9 +38,6 @@ import StepperInput from "./StepperInput.vue"
     components: {
         StepperInput
     },
-    compatConfig: {
-        COMPONENT_V_MODEL: false
-    },
     emits: ["update:modelValue"]
 })
 export default class NumberInput extends VueComponent {

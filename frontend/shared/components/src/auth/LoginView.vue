@@ -12,10 +12,12 @@
             </p>
 
             <STInputBox title="Wachtwoord" class="max">
-                <template #right><button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
-                    <span>Vergeten</span>
-                    <span class="icon help" />
-                </button></template>
+                <template #right>
+                    <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
+                        <span>Vergeten</span>
+                        <span class="icon help" />
+                    </button>
+                </template>
                 <input v-model="password" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
 
@@ -40,16 +42,17 @@ import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Ref } from "@simonbackx/vue-app-navigation/classes";
 import { AppManager, LoginHelper, UrlHelper } from '@stamhoofd/networking';
-import STNavigationBar from "../navigation/STNavigationBar.vue";
+
+import { ErrorBox } from "../errors/ErrorBox";
 import STErrorsDefault from "../errors/STErrorsDefault.vue";
+import { Validator } from "../errors/Validator";
+import EmailInput from "../inputs/EmailInput.vue";
 import STInputBox from "../inputs/STInputBox.vue";
 import LoadingButton from "../navigation/LoadingButton.vue";
-import EmailInput from "../inputs/EmailInput.vue";
-import { ErrorBox } from "../errors/ErrorBox";
-import { Validator } from "../errors/Validator";
+import STNavigationBar from "../navigation/STNavigationBar.vue";
 import { CenteredMessage } from "../overlays/CenteredMessage";
-import ForgotPasswordView from "./ForgotPasswordView.vue";
 import ConfirmEmailView from "./ConfirmEmailView.vue";
+import ForgotPasswordView from "./ForgotPasswordView.vue";
 
 @Component({
     components: {
@@ -83,7 +86,7 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     @Ref("emailInput")
-        emailInput: EmailInput
+        emailInput!: EmailInput
 
     mounted() {
         this.email = this.initialEmail ? this.initialEmail : (this.$context.user?.email ?? "");

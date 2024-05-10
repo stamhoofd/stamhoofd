@@ -1,16 +1,17 @@
+import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
-import { AccountSwitcher, AuthenticatedView, ContextProvider, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextProvider, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { OrganizationLogo } from "@stamhoofd/components";
+import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
+import { Country, Organization } from "@stamhoofd/structures";
+import { computed, reactive } from "vue";
 
 import { CheckoutManager } from "./classes/CheckoutManager";
 import { MemberManager } from "./classes/MemberManager";
+import CartView from "./views/checkout/CartView.vue";
 import HomeView from './views/login/HomeView.vue';
 import NewOverviewView from './views/overview/NewOverviewView.vue';
-import { computed, reactive } from "vue";
-import CartView from "./views/checkout/CartView.vue";
-import { Country, Organization } from "@stamhoofd/structures";
-import { Decoder } from "@simonbackx/simple-encoding";
-import { I18nController } from "@stamhoofd/frontend-i18n";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
@@ -49,20 +50,24 @@ export async function getScopedRegistrationRootFromUrl() {
             console.error('Failed to load organization from uri', uri);
         }
     }
-    
-    await I18nController.loadDefault(session, "registration", Country.Belgium, "nl", session?.organization?.address?.country)
-    
+        
     if (!session || !session.organization) {
         const dashboard = await import('@stamhoofd/dashboard')
         return dashboard.getOrganizationSelectionRoot()
     }
 
-    return getRootView(session)
+    return await getRootView(session)
 }
 
-export function getRootView(session: SessionContext) {
+export async function getRootView(session: SessionContext, ownDomain = false) {
     const reactiveSession = reactive(session) as SessionContext
     const $memberManager = new MemberManager(reactiveSession);
+    await I18nController.loadDefault(reactiveSession, "registration", Country.Belgium, "nl", session?.organization?.address?.country)
+    
+    // Set color
+    if (session.organization?.meta.color) {
+        ColorHelper.setColor(session.organization?.meta.color)
+    }
 
     const loggedInRoot = new ComponentWithProperties(PromiseView, {
         promise: async () => {
@@ -95,9 +100,13 @@ export function getRootView(session: SessionContext) {
             $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager,
             $checkoutManager,
-            reactive_navigation_url: "leden/" + session.organization!.uri,
+            reactive_navigation_url: ownDomain ? "" : "leden/" + session.organization!.uri,
             reactive_components: {
-                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
+                "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
+                    organization: reactiveSession.organization
+                }) : new ComponentWithProperties(OrganizationSwitcher, {
+                    disabled: ownDomain
+                }),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
             },
             stamhoofd_app: 'registration',

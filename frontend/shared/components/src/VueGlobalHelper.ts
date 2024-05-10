@@ -1,18 +1,19 @@
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges,PatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
-import { AppManager, SessionContext, ContextPermissions } from "@stamhoofd/networking";
-import { Formatter } from "@stamhoofd/utility";
-import { Ref, computed, inject, toRef, type App, ref, isRef, isReactive, unref } from "vue";
-
 import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
+import { AppManager, ContextPermissions, SessionContext } from "@stamhoofd/networking";
 import { Organization, Platform, User, Version } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
+import { type App,computed, inject, Ref, ref, toRef } from "vue";
+import { configureCompat } from "vue";
+
 import { Checkbox, CopyableDirective, GlobalEventBus, LoadingView, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
 import PromiseView from "./containers/PromiseView.vue";
+import STErrorsDefault from "./errors/STErrorsDefault.vue";
+import STInputBox from "./inputs/STInputBox.vue";
 import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
-import STInputBox from "./inputs/STInputBox.vue";
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
-import STErrorsDefault from "./errors/STErrorsDefault.vue";
 
 export function useContext(): Ref<SessionContext> {
     const refOrReal = inject('$context', null) as SessionContext|null;
@@ -155,6 +156,8 @@ function focusNextElement () {
 
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
+        configureCompat({ WATCH_ARRAY: false, COMPONENT_V_MODEL: false });
+
         (window as any).PromiseComponent = PromiseView
         app.config.globalProperties.$country = "BE" // todo
         app.config.globalProperties.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;

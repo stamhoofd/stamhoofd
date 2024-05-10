@@ -9,12 +9,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import { getRootView } from './getRootView';
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
@@ -54,12 +54,7 @@ export default class App extends Vue {
 
             // Set organization and session
             const session = new SessionContext(response.data)
-            await session.loadFromStorage()       
-            await I18nController.loadDefault(session, "registration", response.data.address.country, "nl", response.data.address.country)
-            
-
-
-            document.title = "Schrijf je in bij "+response.data.name
+            await session.loadFromStorage()                   
 
             // Set color
             if (response.data.meta.color) {
@@ -89,7 +84,7 @@ export default class App extends Vue {
                 }
             }
 
-            return getRootView(session)
+            return getRootView(session, true)
         } catch (e) {
             if (!I18nController.shared) {
                 try {

@@ -3,18 +3,22 @@
         <main>
             <template v-if="currentOptions.length">
                 <STList>
-                    <STListItem v-for="option in currentOptions" :key="option.id" :selectable="true" element-name="button" @click="selectOption(option)" class="left-center">
+                    <STListItem v-for="option in currentOptions" :key="option.id" :selectable="true" element-name="button" class="left-center" @click="selectOption(option)">
                         <template #left>
                             <ContextLogo :organization="option.organization" :app="option.app" />
                         </template>
                         <h1 class="style-title-list">
                             {{ getAppTitle(option.app, option.organization) }}
                         </h1>
-                        <p class="style-description" v-if="getAppDescription(option.app, option.organization)">{{ getAppDescription(option.app, option.organization) }}</p>
-                        <p class="style-description-small style-em" v-if="option.userDescription">Ingelogd als {{ option.userDescription }}</p>
+                        <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
+                            {{ getAppDescription(option.app, option.organization) }}
+                        </p>
+                        <p v-if="option.userDescription" class="style-description-small style-em">
+                            Ingelogd als {{ option.userDescription }}
+                        </p>
                         
                         
-                        <template #right v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')">
+                        <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
                             <span v-if="isCurrent(option)" class="icon success primary floating" />
                             <span v-else-if="option.userDescription" class="icon gray sync" />
                             <span v-else-if="option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
@@ -26,17 +30,21 @@
             </template>
 
             <STList v-if="otherOptions.length">
-                <STListItem v-for="option in otherOptions" :key="option.id" :selectable="true" element-name="button" @click="selectOption(option)" class="left-center">
+                <STListItem v-for="option in otherOptions" :key="option.id" :selectable="true" element-name="button" class="left-center" @click="selectOption(option)">
                     <template #left>
                         <ContextLogo :organization="option.organization" :app="option.app" />
                     </template>
                     <h1 class="style-title-list">
                         {{ getAppTitle(option.app, option.organization) }}
                     </h1>
-                    <p class="style-description" v-if="getAppDescription(option.app, option.organization)">{{ getAppDescription(option.app, option.organization) }}</p>
-                    <p class="style-description-small style-em" v-if="option.userDescription">Ingelogd als {{ option.userDescription }}</p>
+                    <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
+                        {{ getAppDescription(option.app, option.organization) }}
+                    </p>
+                    <p v-if="option.userDescription" class="style-description-small style-em">
+                        Ingelogd als {{ option.userDescription }}
+                    </p>
                     
-                    <template #right v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')">
+                    <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
                         <span v-if="isCurrent(option)" class="icon success primary floating" />
                         <span v-else-if="option.userDescription" class="icon gray sync" />
                         <span v-else-if="option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
@@ -55,11 +63,12 @@
 </template>
 
 <script setup lang="ts">
-import { Ref, computed, shallowRef } from 'vue';
+import { computed, Ref, shallowRef } from 'vue';
+
 import { PromiseComponent } from '../containers/AsyncComponent';
 import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
-import ContextLogo from './ContextLogo.vue';
 import { getAppDescription, getAppTitle } from './appContext';
+import ContextLogo from './ContextLogo.vue';
 import { Option, useContextOptions } from './hooks/useContextOptions';
 
 const options: Ref<Option[]> = shallowRef([]);
@@ -79,8 +88,8 @@ getDefaultOptions().then((opts) => {
     options.value = opts;
 }).catch(console.error);
 
-const searchOrganizations = () => {
-    ReplaceRootEventBus.sendEvent("replace", PromiseComponent(async () => {
+const searchOrganizations = async () => {
+    await ReplaceRootEventBus.sendEvent("replace", PromiseComponent(async () => {
         const dashboard = await import('@stamhoofd/dashboard')
         return dashboard.getOrganizationSelectionRoot();
     }))

@@ -64,10 +64,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
-import { LoginView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LegalFooter, LoadingButton, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LegalFooter, LoadingButton, LoginView, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 
 import GroupTree from '../../components/GroupTree.vue';
 import SignupView from './SignupView.vue';
@@ -218,12 +217,19 @@ export default class HomeView extends Mixins(NavigationMixin){
     }
 
     login(animated = true, email = "", lock: null | string) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(LoginView, {
-                initialEmail: email,
-                lock
-            })
-        }).setAnimated(animated).setDisplayStyle("sheet")) 
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(LoginView, {
+                        initialEmail: email,
+                        lock
+                    })
+                })
+            ],
+            animated,
+            modalDisplayStyle: "sheet",
+            url: "login"
+        })
     }
 
     createAccount(animated = true, email = "", lock: null | string) {
