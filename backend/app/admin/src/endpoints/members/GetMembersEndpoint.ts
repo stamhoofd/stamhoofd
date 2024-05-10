@@ -1,11 +1,11 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { CountFilteredRequest, GroupStatus, LimitedFilteredRequest, MemberSummary, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
-
 import { Decoder } from '@simonbackx/simple-encoding';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, Organization } from '@stamhoofd/models';
-import { SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, SQLWhereSign, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler,SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions } from "@stamhoofd/sql";
+import { CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MemberSummary, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 import { DataValidator, Formatter, Sorter } from '@stamhoofd/utility';
+
 import { AdminToken } from '../../models/AdminToken';
 
 type Params = Record<string, never>;
@@ -225,12 +225,12 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     '$or': [
                         {
                             email: {
-                                [(isCompleteAddress ? '$eq' : '$contains') as '$eq' | '$contains']: q.search
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
                             }
                         },
                         {
                             parentEmail: {
-                                [(isCompleteAddress ? '$eq' : '$contains') as '$eq' | '$contains']: q.search
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
                             }
                         }
                     ]

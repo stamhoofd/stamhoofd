@@ -5,7 +5,6 @@ import { FilterDefinition } from "../filters/FilterDefinition"
 import { NumberFilterDefinition } from "../filters/NumberFilter"
 import { PropertyFilter } from "../filters/PropertyFilter"
 import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from "../filters/RegistrationsFilter"
-import { StringFilterDefinition } from "../filters/StringFilter"
 import { Group } from "../Group"
 import { Organization } from "../Organization"
 import { RegisterItem } from "./checkout/RegisterItem"
@@ -13,9 +12,7 @@ import { Gender } from "./Gender"
 import { MemberDetails } from "./MemberDetails"
 import { MemberWithRegistrations } from "./MemberWithRegistrations"
 import { LegacyRecordType } from "./records/LegacyRecordType"
-import { RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordTextAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
-import { RecordSettings, RecordType } from "./records/RecordSettings"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",

@@ -9,9 +9,9 @@ class StaticSQL {
         return new SQLWildcardSelectExpression(namespace)
     }
 
-    column(namespace: string, column: string);
-    column(column: string);
-    column(namespaceOrColumn: string, column?: string) {
+    column(namespace: string, column: string): SQLColumnExpression;
+    column(column: string): SQLColumnExpression;
+    column(namespaceOrColumn: string, column?: string): SQLColumnExpression {
         if (column === undefined) {
             return new SQLColumnExpression(namespaceOrColumn)
         }

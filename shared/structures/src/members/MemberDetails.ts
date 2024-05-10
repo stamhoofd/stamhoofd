@@ -85,51 +85,8 @@ export class MemberDetails extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: new ArrayDecoder(OldRecord) })
     @field({ 
-        decoder: new ArrayDecoder(LegacyRecord), version: 54, upgrade: (old: OldRecord[]): LegacyRecord[] => {
-            const addIfNotFound = new Map<LegacyRecordType, boolean>()
-            addIfNotFound.set(LegacyRecordType.DataPermissions, true)
-            addIfNotFound.set(LegacyRecordType.PicturePermissions, true)
-            addIfNotFound.set(LegacyRecordType.GroupPicturePermissions, false)
-            addIfNotFound.set(LegacyRecordType.MedicinePermissions, true)
-            
-            const result = old.flatMap((o) => {
-                // Does this type exist in LegacyRecordType?
-                if (Object.values(LegacyRecordType).includes(o.type as any)) {
-                    return [LegacyRecord.create(o as any)] // compatible
-                }
-
-                if (o.type === OldRecordType.NoPictures) {
-                    // Do not add picture permissions
-                    addIfNotFound.set(LegacyRecordType.PicturePermissions, false)
-                }
-                if (o.type === OldRecordType.OnlyGroupPictures) {
-                    // Yay
-                    addIfNotFound.set(LegacyRecordType.PicturePermissions, false)
-                    addIfNotFound.set(LegacyRecordType.GroupPicturePermissions, true)
-                }
-                if (o.type === OldRecordType.NoData) {
-                    // Yay
-                    addIfNotFound.set(LegacyRecordType.DataPermissions, false)
-                }
-                if (o.type === OldRecordType.NoPermissionForMedicines) {
-                    // Yay
-                    addIfNotFound.set(LegacyRecordType.MedicinePermissions, false)
-                }
-                return []
-            })
-
-            for (const [key, add] of addIfNotFound.entries()) {
-                if (add) {
-                    result.push(LegacyRecord.create({
-                        type: key
-                    }))
-                }
-            }
-
-            return result
-        } 
+        decoder: new ArrayDecoder(LegacyRecord), version: 54, optional: true
     })
     records: LegacyRecord[] = [];    
 
@@ -145,7 +102,7 @@ export class MemberDetails extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: EmergencyContact, nullable: true })
+    @field({ decoder: EmergencyContact, nullable: true, optional: true })
     doctor: EmergencyContact | null = null;
 
     /**
@@ -170,7 +127,7 @@ export class MemberDetails extends AutoEncoder {
      * - The data is entered manually again (by member / parents)
      * - Warning message is dismissed / removed in the dashboard by organization
      */
-    @field({ decoder: BooleanDecoder, version: 69 })
+    @field({ decoder: BooleanDecoder, version: 69, optional: true})
     isRecovered = false
 
     /**
