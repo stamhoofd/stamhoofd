@@ -15,7 +15,7 @@ import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType, pa
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
 
 export function useContext(): Ref<SessionContext> {
-    const refOrReal = inject('$context') as SessionContext;
+    const refOrReal = inject('$context', null) as SessionContext|null;
     return toRef(refOrReal) as Ref<SessionContext>
 }
 
