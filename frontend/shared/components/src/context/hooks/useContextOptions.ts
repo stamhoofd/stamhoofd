@@ -1,9 +1,10 @@
 import { SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Organization } from "@stamhoofd/structures";
+
+import { PromiseComponent } from "../../containers/AsyncComponent";
+import { ReplaceRootEventBus } from "../../overlays/ModalStackEventBus";
 import { useOrganization, useUser } from "../../VueGlobalHelper";
 import { AppType, useAppContext } from "../appContext";
-import { ReplaceRootEventBus } from "../../overlays/ModalStackEventBus";
-import { PromiseComponent } from "../../containers/AsyncComponent";
 
 export type Option = {
     id: string,
@@ -69,24 +70,23 @@ export function useContextOptions() {
                     app: 'dashboard',
                     context
                 })
-            }
 
-            const membersEnabled = organization.meta.packages.useMembers
-            if (membersEnabled) {
-                opts.push({
-                    id: 'registration-'+organization.id,
-                    organization,
-                    app: 'registration',
-                    context
-                })
-            } else if (!hasAccess) {
+                const membersEnabled = organization.meta.packages.useMembers
+                if (membersEnabled) {
+                    opts.push({
+                        id: 'registration-'+organization.id,
+                        organization,
+                        app: 'registration',
+                        context
+                    })
+                }
+            } else {
                 opts.push({
                     id: 'org-'+organization.id,
                     organization,
                     app: 'auto',
                     context
                 })
-                continue;
             }
         }
 
@@ -108,18 +108,23 @@ export function useContextOptions() {
 
     const buildRootForOption = async (option: Option) => {
         await SessionManager.prepareSessionForUsage(option.context)
+
+        if (option.app === 'auto') {
+            const admin = await import('@stamhoofd/dashboard')
+            return await admin.getScopedAutoRoot(option.context)
+        }
     
-        if (option.app === 'admin' || (option.app === 'auto' && !option.organization && !!option.context.user?.permissions?.globalPermissions)) {
+        if (option.app === 'admin') {
             const admin = await import('@stamhoofd/admin-frontend')
             return await admin.getScopedAdminRoot(option.context)
         }
     
-        if (option.app === 'dashboard' || (option.app === 'auto' && !!option.context.organizationPermissions)) {
+        if (option.app === 'dashboard') {
             const dashboard = await import('@stamhoofd/dashboard')
             return await dashboard.getScopedDashboardRoot(option.context)
         }
     
-        if (option.app === 'registration' || (option.app === 'auto')) {
+        if (option.app === 'registration') {
             const registration = await import('@stamhoofd/registration')
             return await registration.getRootView(option.context)
         }

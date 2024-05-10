@@ -2554,10 +2554,10 @@
     "@vusion/webfonts-generator" "^0.8.0"
     glob "^10.3.10"
 
-"@simonbackx/vue-app-navigation@2.0.0-alpha.10":
-  version "2.0.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0-alpha.10.tgz#947d481ac3dd7c9073a0c346398ffa4514cb86a8"
-  integrity sha512-zZ6/5hwf/wrJt/1vIBM17mdeF8/RTM4M4GKeSKNKOuPYl4/qKPapYVtecayc5zN+F4Goj1rWxTP1ruTVJ3aofQ==
+"@simonbackx/vue-app-navigation@2.0.0-alpha.11":
+  version "2.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0-alpha.11.tgz#4370bab7c8b819b450e9a358918637a6ed68fe90"
+  integrity sha512-33uqFVfawuEwDcxVxDmYO1DK0oM4Fy58DufarXxQ/XJ0TMv+OoW0VW9Ni1e+z8x0DLyptB3kj1UzqJ+Mqid7+A==
   dependencies:
     "@typescript-eslint/parser" "^7.7.1"
     "@vitejs/plugin-vue" "^5.0.4"
@@ -13181,11 +13181,6 @@ vite@^5.2.10:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vue-class-component@^7.2.6:
-  version "7.2.6"
-  resolved "https://registry.yarnpkg.com/vue-class-component/-/vue-class-component-7.2.6.tgz#8471e037b8e4762f5a464686e19e5afc708502e4"
-  integrity sha512-+eaQXVrAm/LldalI272PpDe3+i4mPis0ORiMYxF6Ae4hyuCh15W8Idet7wPUEs4N4YptgFHGys4UrgNQOMyO6w==
-
 vue-eslint-parser@^9.3.1, vue-eslint-parser@^9.4.2:
   version "9.4.2"
   resolved "https://registry.yarnpkg.com/vue-eslint-parser/-/vue-eslint-parser-9.4.2.tgz#02ffcce82042b082292f2d1672514615f0d95b6d"
@@ -13199,11 +13194,6 @@ vue-eslint-parser@^9.3.1, vue-eslint-parser@^9.4.2:
     lodash "^4.17.21"
     semver "^7.3.6"
 
-vue-facing-decorator@^3.0.4:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/vue-facing-decorator/-/vue-facing-decorator-3.0.4.tgz#e005a8371aa4e3b4241fc20e7d8e8706dda209f6"
-  integrity sha512-Lk90PevJllB6qRRdLvLFjATZrv00nof1Ob6afavKL7Pc7V3eEin3vhdvEDRORdWKVvNoXhJbHejngWVuT0Pt0g==
-
 vue-i18n@9:
   version "9.13.1"
   resolved "https://registry.yarnpkg.com/vue-i18n/-/vue-i18n-9.13.1.tgz#a292c8021b7be604ebfca5609ae1f8fafe5c36d7"
@@ -13212,11 +13202,6 @@ vue-i18n@9:
     "@intlify/core-base" "9.13.1"
     "@intlify/shared" "9.13.1"
     "@vue/devtools-api" "^6.5.0"
-
-vue-property-decorator@^9.1.2:
-  version "9.1.2"
-  resolved "https://registry.yarnpkg.com/vue-property-decorator/-/vue-property-decorator-9.1.2.tgz#266a2eac61ba6527e2e68a6933cfb98fddab5457"
-  integrity sha512-xYA8MkZynPBGd/w5QFJ2d/NM0z/YeegMqYTphy7NJQXbZcuU6FC6AOdUAcy4SXP+YnkerC6AfH+ldg7PDk9ESQ==
 
 vue-template-compiler@^2.7.14:
   version "2.7.16"

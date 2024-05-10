@@ -8,14 +8,14 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
-import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { EmailAddressSettings, Token } from '@stamhoofd/structures';
-import { Component, Vue, toNative } from 'vue-facing-decorator';
-
+import { Component, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
+import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
+import { EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { reactive } from 'vue';
+
 import { getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from './getRootViews';
 
 @Component({
@@ -24,7 +24,7 @@ import { getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRoo
         ToastBox
     },
 })
-export class App extends Vue {
+export default class App extends VueComponent {
 
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
@@ -291,9 +291,6 @@ export class App extends Vue {
         }
     }
 }
-
-//Transform class component to vue native component
-export default toNative(App)
 </script>
 
 <style lang="scss">
