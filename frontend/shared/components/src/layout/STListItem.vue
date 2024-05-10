@@ -1,70 +1,70 @@
 <template>
-  <component
-    :is="dynamicElementName"
-    class="st-list-item"
-    :class="{
-      selectable,
-      hoverable,
-      disabled,
-      button: dynamicElementName === 'button',
-    }"
-    :type="dynamicElementName === 'button' ? 'button' : undefined"
-    @click="onClick"
-    @contextmenu="$emit('contextmenu', $event)"
-  >
-    <div class="left">
-      <slot name="left" />
-    </div>
-    <div class="main">
-      <div>
-        <div class="middle">
-          <slot />
+    <component
+        :is="dynamicElementName"
+        class="st-list-item"
+        :class="{
+            selectable,
+            hoverable,
+            disabled,
+            button: dynamicElementName === 'button',
+        }"
+        :type="dynamicElementName === 'button' ? 'button' : undefined"
+        @click="onClick"
+        @contextmenu="$emit('contextmenu', $event)"
+    >
+        <div class="left">
+            <slot name="left" />
         </div>
-        <div class="right">
-          <slot name="right" />
+        <div class="main">
+            <div>
+                <div class="middle">
+                    <slot />
+                </div>
+                <div class="right">
+                    <slot name="right" />
+                </div>
+            </div>
+            <hr>
         </div>
-      </div>
-      <hr />
-    </div>
-  </component>
+    </component>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
-  emits: ["click"],
+    emits: ["click"],
 })
 export default class STListItem extends Vue {
-  @Prop({ default: "article", type: String })
-  elementName!: string;
+    @Prop({ default: "article", type: String })
+        elementName!: string;
 
-  @Prop({ default: false, type: Boolean })
-  selectable!: boolean;
+    @Prop({ default: false, type: Boolean })
+        selectable!: boolean;
 
-  @Prop({ default: false, type: Boolean })
-  disabled!: boolean;
+    @Prop({ default: false, type: Boolean })
+        disabled!: boolean;
 
-  get dynamicElementName() {
-    if (this.elementName === "article" && this.selectable && !this.disabled) {
-      return "button";
+    get dynamicElementName() {
+        if (this.elementName === "article" && this.selectable && !this.disabled) {
+            return "button";
+        }
+        return this.elementName;
     }
-    return this.elementName;
-  }
 
-  get hoverable() {
-    return this.elementName === "button";
-  }
+    get hoverable() {
+        return this.elementName === "button";
+    }
 
-  onClick(event) {
-    const isDragging =
+    onClick(event) {
+        const isDragging =
       this.$parent?.$parent?.$el.className.indexOf("is-dragging") !== -1;
-    if (isDragging) {
-      console.log("canceled list item click because of drag");
-      return;
+        if (isDragging) {
+            console.log("canceled list item click because of drag");
+            return;
+        }
+        this.$emit("click", event);
     }
-    this.$emit("click", event);
-  }
 }
 </script>
 
