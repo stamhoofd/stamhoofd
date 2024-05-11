@@ -6,11 +6,11 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { Country } from '@stamhoofd/structures';
-import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
+import { ErrorBox } from "../errors/ErrorBox";
+import { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
 
 @Component({
@@ -42,7 +42,7 @@ export default class CompanyNumberInput extends Vue {
     valid = true;
 
     @Prop({ default: null })
-        value!: string | null
+        modelValue!: string | null
 
     @Prop({ default: true })
         required!: boolean
@@ -55,7 +55,7 @@ export default class CompanyNumberInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
             return
@@ -70,7 +70,7 @@ export default class CompanyNumberInput extends Vue {
             })
         }
 
-        this.companyNumberRaw = this.value ?? ""
+        this.companyNumberRaw = this.modelValue ?? ""
     }
 
     unmounted() {

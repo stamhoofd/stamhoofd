@@ -77,8 +77,7 @@ import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonb
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, UrlInput,Validator, VATNumberInput } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
+import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, UrlInput, Validator,VATNumberInput } from "@stamhoofd/components";
 import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
 
 
@@ -106,15 +105,15 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
-    temp_organization = this.$organization
     showDomainSettings = true
     loadingMollie = false
-    selectedPrivacyType = this.temp_organization.meta.privacyPolicyUrl ? "website" : (this.temp_organization.meta.privacyPolicyFile ? "file" : "none")
+    selectedPrivacyType = "none"
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
     
     created() {
         this.organizationPatch.id = this.$organization.id
+        this.selectedPrivacyType = this.$organization.meta.privacyPolicyUrl ? "website" : (this.$organization.meta.privacyPolicyFile ? "file" : "none")
     }
 
     get organization() {
@@ -126,7 +125,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     set name(name: string) {
-        this.$set(this.organizationPatch, "name", name)
+        this.organizationPatch = this.organizationPatch.patch({ name })
     }
 
     get website() {
@@ -134,7 +133,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     set website(website: string|null) {
-        this.$set(this.organizationPatch, "website", website)
+        this.organizationPatch = this.organizationPatch.patch({ website })
     }
 
     get address() {
@@ -142,7 +141,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     set address(address: Address) {
-        this.$set(this.organizationPatch, "address", address)
+        this.organizationPatch = this.organizationPatch.patch({ address })
     }
 
     get companyAddress() {
