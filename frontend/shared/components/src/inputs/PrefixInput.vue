@@ -11,7 +11,6 @@
             autocorrect="off"
             autocomplete="off"
             autocapitalize="none"
-            @input="internalValue = $event.target.value"
             @focus="onFocus"
             @blur="onBlur"
         >
@@ -27,19 +26,19 @@ export default class PrefixInput extends Vue {
 
     /** Price in cents */
     @Prop({ default: "" })
-    value!: string
+        value!: string
 
     @Prop({ default: "" })
-    prefix!: string
+        prefix!: string
 
     @Prop({ default: "" })
-    placeholder!: string
+        placeholder!: string
 
     @Prop({ default: true })
-    fadePrefix!: boolean
+        fadePrefix!: boolean
 
     @Prop({ default: null })
-    focusPrefix!: string | null
+        focusPrefix!: string | null
 
     focussed = false
 

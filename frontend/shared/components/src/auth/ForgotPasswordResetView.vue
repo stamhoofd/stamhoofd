@@ -24,11 +24,11 @@
                 <div class="split-inputs">
                     <div>
                         <STInputBox title="Kies een nieuw wachtwoord">
-                            <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
+                            <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                         </STInputBox>
 
                         <STInputBox title="Herhaal wachtwoord">
-                            <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
+                            <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
                         </STInputBox>
                     </div>
                     <div>
@@ -66,10 +66,10 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingView, PasswordStrength, ReplaceRootEventBus, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { NewUser, Token } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -100,7 +100,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
     validator = new Validator()
 
     @Prop({ required: true })
-    token!: string
+        token!: string
 
     session: SessionContext | null = null
 
