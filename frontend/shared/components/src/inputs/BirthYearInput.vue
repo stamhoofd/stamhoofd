@@ -29,26 +29,28 @@
 <script lang="ts">
 import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
-@Component
+@Component({
+    emits: ['update:modelValue']
+})
 export default class PriceInput extends Vue {
     @Prop({ default: 1910 })
-    min!: number
+        min!: number
 
     @Prop({ default: false })
-    nullable!: boolean
+        nullable!: boolean
 
     @Prop({ default: new Date().getFullYear() })
-    max!: number | null
+        max!: number | null
 
     valueString = "";
     valid = true;
 
     /** Price in cents */
     @Prop({ default: null })
-    value!: number | null
+        value!: number | null
 
     @Prop({ default: "" })
-    placeholder!: string
+        placeholder!: string
 
     get internalValue() {
         return this.value

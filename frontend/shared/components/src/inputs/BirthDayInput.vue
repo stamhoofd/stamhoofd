@@ -40,8 +40,8 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from "@stamhoofd/utility"
 import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Formatter } from "@stamhoofd/utility"
 
 import {ErrorBox} from "../errors/ErrorBox";
 import {Validator} from "../errors/Validator";
@@ -50,7 +50,8 @@ import STInputBox from "./STInputBox.vue";
 @Component({
     components: {
         STInputBox
-    }
+    },
+    emits: ['update:modelValue']
 })
 export default class BirthDayInput extends Vue {
     @Prop({ default: "" }) 
@@ -60,7 +61,7 @@ export default class BirthDayInput extends Vue {
         required!: boolean
 
     @Prop({ default: null})
-        value!: Date | null
+        modelValue!: Date | null
 
     /**
      * Assign a validator if you want to offload the validation to components
@@ -70,9 +71,9 @@ export default class BirthDayInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    day: number | null = this.value?.getDate() ?? null
-    month: number | null  = this.value ? this.value.getMonth() + 1 : null
-    year: number | null  = this.value?.getFullYear() ?? null
+    day: number | null = this.modelValue?.getDate() ?? null
+    month: number | null  = this.modelValue ? this.modelValue.getMonth() + 1 : null
+    year: number | null  = this.modelValue?.getFullYear() ?? null
 
     currentYear = new Date().getFullYear()
 
@@ -94,7 +95,7 @@ export default class BirthDayInput extends Vue {
         return Formatter.month(month)
     }
 
-    @Watch('value', { deep: true })
+    @Watch('modelValue', { deep: true })
     onValueChanged(val: Date | null) {
         if (val) {
             this.day = val.getDate()
@@ -125,13 +126,13 @@ export default class BirthDayInput extends Vue {
         if (!this.required) {
             this.errorBox = null
 
-            if (this.value !== null) {
+            if (this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
             }
             return true
         }
 
-        if (this.value !== null) {
+        if (this.modelValue !== null) {
             this.$emit('update:modelValue', null)
         }
         this.errorBox = new ErrorBox(new SimpleError({

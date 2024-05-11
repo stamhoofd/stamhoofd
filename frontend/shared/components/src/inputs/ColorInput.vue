@@ -20,7 +20,8 @@ import STInputBox from "./STInputBox.vue";
 @Component({
     components: {
         STInputBox
-    }
+    },
+    emits: ['update:modelValue']
 })
 export default class ColorInput extends Vue {
     @Prop({ default: "" }) 
