@@ -20,6 +20,9 @@ export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    @field({ decoder: StringDecoder, version: 250 })
+    organizationId: string;
+
     @field({ decoder: IntegerDecoder })
     cycle = 0
 

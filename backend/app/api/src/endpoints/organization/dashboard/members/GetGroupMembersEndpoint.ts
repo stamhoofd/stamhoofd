@@ -1,7 +1,7 @@
 import { AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Group } from "@stamhoofd/models";
-import { EncryptedMemberWithRegistrations, KeychainedResponse } from "@stamhoofd/structures";
+import { KeychainedResponse,MemberWithRegistrationsBlob } from "@stamhoofd/structures";
 
 import { Context } from '../../../../helpers/Context';
 
@@ -14,7 +14,7 @@ class Query extends AutoEncoder {
     cycleOffset = 0
 }
 type Body = undefined
-type ResponseBody = KeychainedResponse<EncryptedMemberWithRegistrations[]>;
+type ResponseBody = KeychainedResponse<MemberWithRegistrationsBlob[]>;
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once

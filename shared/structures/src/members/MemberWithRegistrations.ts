@@ -11,13 +11,13 @@ import { Organization } from '../Organization';
 import { UmbrellaOrganization } from '../UmbrellaOrganization';
 import { CanRegisterResponse, RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
-import { EncryptedMemberWithRegistrations } from './EncryptedMemberWithRegistrations';
 import { Gender } from './Gender';
+import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob';
 import { MemberDetailsWithGroups } from './OrganizationRecordsConfiguration';
 import { RecordType } from './records/RecordSettings';
 import { Registration } from './Registration';
 
-export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
+export class MemberWithRegistrations extends MemberWithRegistrationsBlob {
     // Calculated properties for convenience
     @field({ decoder: new ArrayDecoder(Registration), optional: true })
     activeRegistrations: Registration[] = []
@@ -61,7 +61,7 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
         return RegisterCartValidator.isExistingMember(this, this.allGroups)
     }
 
-    static fromMember(member: EncryptedMemberWithRegistrations, groups: Group[]) {
+    static fromMember(member: MemberWithRegistrationsBlob, groups: Group[]) {
         const m = MemberWithRegistrations.create(member)
         m.fillGroups(groups)
         return m

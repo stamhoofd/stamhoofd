@@ -321,7 +321,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, MemberWithRegistrationsBlob, FinancialSupportSettings, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -582,13 +582,13 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
         try {
             // Update the users that are connected to these members
-            const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.$memberManager.getMembersAccessPatch([this.member])
+            const encryptedMembers: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = this.$memberManager.getMembersAccessPatch([this.member])
 
             // Add delete user
             const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
             missing.addDelete(user.id)
             encryptedMembers.addPatch(
-                EncryptedMemberWithRegistrations.patch({
+                MemberWithRegistrationsBlob.patch({
                     id: this.member.id,
                     users: missing
                 })

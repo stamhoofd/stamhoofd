@@ -9,6 +9,9 @@ export class Registration extends AutoEncoder {
     @field({ decoder: StringDecoder })
     groupId: string
 
+    @field({ decoder: StringDecoder, version: 250 })
+    organizationId: string
+
     @field({ decoder: IntegerDecoder })
     cycle: number
 

@@ -3,13 +3,13 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Group, MemberWithRegistrations } from "@stamhoofd/models";
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
+import { MemberWithRegistrationsBlob } from "@stamhoofd/structures";
 
 import { Context } from "../../../../helpers/Context";
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
-type ResponseBody = EncryptedMemberWithRegistrations[];
+type ResponseBody = MemberWithRegistrationsBlob[];
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once

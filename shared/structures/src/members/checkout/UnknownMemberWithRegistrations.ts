@@ -13,7 +13,7 @@ interface Registration {
     canRegister: boolean
 }
 /**
- * Represents both EncryptedMemberWithRegistrations and MemberWithRegistrations
+ * Represents both MemberWithRegistrationsBlob and MemberWithRegistrations
  */
 export interface UnknownMemberWithRegistrations {
     id: string

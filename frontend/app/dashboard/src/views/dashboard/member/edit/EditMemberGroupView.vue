@@ -350,6 +350,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
 
 
                     const registration = Registration.create({
+                        organizationId: this.$organization.id,
                         groupId: change.group.id,
                         cycle: change.cycle,
                         waitingList: change.waitingList,
@@ -377,6 +378,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                     }
 
                     const registration = Registration.create({
+                        organizationId: this.$organization.id,
                         groupId: change.group.id,
                         cycle: change.cycle,
                         waitingList: change.waitingList,

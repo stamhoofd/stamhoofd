@@ -96,7 +96,7 @@ export class RecordFactory {
                     description: "Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.",
                     
                     // Only ask if <18y
-                    filter: new PropertyFilter(
+                    legacyFilter: new PropertyFilter(
                         new FilterGroup(definitions, [
                             ageFilter
                         ]).encoded, 
@@ -646,7 +646,7 @@ export class RecordFactory {
                 this.createDoctorPhone()
             ],
             // Allow to skip this step?
-            filter: required ? 
+            legacyFilter: required ? 
                 undefined
                 // Optional
                 : new PropertyFilter(

@@ -1,7 +1,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Toast } from '@stamhoofd/components';
-import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDetails, MemberWithRegistrations, Parent, Registration, User } from '@stamhoofd/structures';
+import { Address, EmergencyContact, MemberDetails, MemberWithRegistrations, MemberWithRegistrationsBlob, Parent, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 import { MemberManager } from './MemberManager';
@@ -33,7 +33,7 @@ export class FamilyManager {
         const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/organization/members/"+id+"/family",
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
             shouldRetry: false
         })
         this.setMembers(this.$memberManager.decryptMembersWithRegistrations(response.data))
@@ -63,14 +63,14 @@ export class FamilyManager {
         }
 
         // Create member
-        const encryptedMember = EncryptedMemberWithRegistrations.create({
+        const encryptedMember = MemberWithRegistrationsBlob.create({
             details: memberDetails,
             registrations,
             users
         })
 
         // Prepare patch
-        const patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patch: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
         patch.addPut(encryptedMember)
 
         // Patch other members
@@ -82,7 +82,7 @@ export class FamilyManager {
             method: "PATCH",
             path: "/organization/members",
             body: patch,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
             shouldRetry: false
         })
 
@@ -120,7 +120,7 @@ export class FamilyManager {
             method: "PATCH",
             path: "/organization/members",
             body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
             shouldRetry: false
         })
         const m = (this.$memberManager.decryptMembersWithRegistrations(response.data))[0]
@@ -172,7 +172,7 @@ export class FamilyManager {
             method: "PATCH",
             path: "/organization/members",
             body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
             shouldRetry: false
         })
 

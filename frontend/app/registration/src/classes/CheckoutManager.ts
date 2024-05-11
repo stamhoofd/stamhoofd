@@ -1,8 +1,8 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Toast } from '@stamhoofd/components';
 import { IDRegisterCheckout, MemberBalanceItem, RegisterCheckout, RegisterItem, Version } from '@stamhoofd/structures';
-
 import { reactive } from 'vue';
+
 import { EditMemberStepsManager } from '../views/members/details/EditMemberStepsManager';
 import { MemberManager } from './MemberManager';
 

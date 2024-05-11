@@ -8,9 +8,9 @@ import { GroupCategory } from "../../GroupCategory"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from "../../Organization"
 import { PaymentConfiguration } from "../../PaymentConfiguration"
-import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistrations"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from "../MemberWithRegistrations"
+import { MemberWithRegistrationsBlob } from "../MemberWithRegistrationsBlob"
 import { RegisterCartPriceCalculator } from "./RegisterCartPriceCalculator"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BalanceItemCartItem, IDRegisterItem, RegisterItem } from "./RegisterItem"

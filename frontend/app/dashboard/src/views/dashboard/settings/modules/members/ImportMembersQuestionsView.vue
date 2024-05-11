@@ -642,6 +642,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         })*/
 
         return Registration.create({
+            organizationId: this.organization.id,
             groupId: group.id,
             cycle,
             waitingList: this.waitingList,

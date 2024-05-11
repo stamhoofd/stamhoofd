@@ -1,12 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Member } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations, KeychainedResponse } from "@stamhoofd/structures";
+import { KeychainedResponse,MemberWithRegistrationsBlob } from "@stamhoofd/structures";
 
 import { Context } from "../../../helpers/Context";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
-type ResponseBody = KeychainedResponse<EncryptedMemberWithRegistrations[]>;
+type ResponseBody = KeychainedResponse<MemberWithRegistrationsBlob[]>;
 
 /**
  * Get the members of the user

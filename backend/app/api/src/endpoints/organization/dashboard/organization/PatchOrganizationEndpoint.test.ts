@@ -212,6 +212,7 @@ describe("Endpoint.PatchOrganization", () => {
             const changes = new PatchableArray<string, Group, AutoEncoderPatchType<Group>>()
             const put = Group.create({
                 cycle: 0,
+                organizationId: organization.id,
                 settings: GroupSettings.create({
                     name: "My crazy group name",
                     startDate: new Date(),
@@ -251,6 +252,7 @@ describe("Endpoint.PatchOrganization", () => {
             const changes = new PatchableArray<string, Group, AutoEncoderPatchType<Group>>()
             const put = Group.create({
                 cycle: 0,
+                organizationId: organization.id,
                 settings: GroupSettings.create({
                     name: "My crazy group name",
                     startDate: new Date(),

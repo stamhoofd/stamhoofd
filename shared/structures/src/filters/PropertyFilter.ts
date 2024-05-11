@@ -1,7 +1,7 @@
 
 import { Data, Encodeable, EncodeContext, PlainObject } from "@simonbackx/simple-encoding"
 
-import { Filter, FilterDefinition } from "./FilterDefinition"
+import { FilterDefinition } from "./FilterDefinition"
 import { FilterGroup, FilterGroupEncoded } from "./FilterGroup"
 
 export class PropertyFilter<T> implements Encodeable {

@@ -2,14 +2,14 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, User as UserStruct } from "@stamhoofd/structures";
+import { KeychainedMembers, KeychainedResponse, MemberWithRegistrationsBlob, User as UserStruct } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
 import { PatchOrganizationMembersEndpoint } from '../dashboard/members/PatchOrganizationMembersEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = AutoEncoderPatchType<KeychainedMembers>
-type ResponseBody = KeychainedResponse<EncryptedMemberWithRegistrations[]>
+type ResponseBody = KeychainedResponse<MemberWithRegistrationsBlob[]>
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)

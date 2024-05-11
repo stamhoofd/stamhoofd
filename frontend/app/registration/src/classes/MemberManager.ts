@@ -2,9 +2,8 @@
 
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { MemberManagerBase, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Address, Document, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
-import { Vue } from "@simonbackx/vue-app-navigation/classes";
+import { MemberManagerBase, SessionContext } from '@stamhoofd/networking';
+import { Address, Document, EmergencyContact, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, MemberWithRegistrationsBlob, Parent } from '@stamhoofd/structures';
 
 
 /**
@@ -24,7 +23,7 @@ export class MemberManager extends MemberManagerBase {
     /**
      * Set the members, but keep all the existing member references
      */
-    setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
+    setMembers(data: KeychainedResponse<MemberWithRegistrationsBlob[]>) {
         // Save keychain items
         const s: MemberWithRegistrations[] = []
         const groups = this.$context.organization!.groups
@@ -55,7 +54,7 @@ export class MemberManager extends MemberManagerBase {
         const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/members",
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
+            decoder: new KeychainedResponseDecoder(new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>))
         })
         this.setMembers(response.data)
     }
@@ -99,7 +98,7 @@ export class MemberManager extends MemberManagerBase {
             method: "PATCH",
             path: "/members",
             body: patch,
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
+            decoder: new KeychainedResponseDecoder(new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>))
         })
 
         this.setMembers(response.data)
@@ -135,7 +134,7 @@ export class MemberManager extends MemberManagerBase {
             method: "PATCH",
             path: "/members",
             body: patch,
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
+            decoder: new KeychainedResponseDecoder(new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>))
         })
         this.setMembers(response.data)
         this.loadDocuments().catch(console.error)
