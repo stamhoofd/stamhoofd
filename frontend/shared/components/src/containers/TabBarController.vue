@@ -199,17 +199,7 @@ const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
                         behavior: 'smooth'
                     })
                 } else {
-                    // Try to pop
-                    const component = item.component;
-                    if (component) {
-                        const instance = component.componentInstance() as any;
-                        while (instance) {
-                            const children = instance.$children;
-                        }
-                        if (instance && instance.pop) {
-                            await instance.pop();
-                        }
-                    }
+                    // todo: try to pop
                 }
             }
         }
