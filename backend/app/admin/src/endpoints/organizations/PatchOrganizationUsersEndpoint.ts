@@ -64,12 +64,12 @@ export class PatchOrganizationUsersEndpoint extends Endpoint<Params, Query, Body
             editUser.firstName = patch.firstName ?? editUser.firstName
             editUser.lastName = patch.lastName ?? editUser.lastName
 
-            if (patch.permissions) {
-                if (!editUser.permissions) {
-                    editUser.permissions = Permissions.create({})
-                }
-                editUser.permissions?.patchOrPut(patch.permissions)
-            }
+            //if (patch.permissions) {
+            //    if (!editUser.permissions) {
+            //        editUser.permissions = Permissions.create({})
+            //    }
+            //    editUser.permissions?.patchOrPut(patch.permissions)
+            //}
 
             if (patch.password) {
                 // password changes
