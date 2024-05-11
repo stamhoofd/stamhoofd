@@ -28,9 +28,9 @@ export default class CodeInput extends Vue {
     valid = true;
 
     @Prop({ default: "" })
-    value!: string
+        modelValue!: string
 
-    @Watch("value")
+    @Watch("modelValue")
     onValueChanged(value: string, _oldValue: string) {
         if (value == _oldValue) {
             return
