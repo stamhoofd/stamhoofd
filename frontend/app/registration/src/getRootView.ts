@@ -1,17 +1,14 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
-import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextProvider, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
-import { OrganizationLogo } from "@stamhoofd/components";
+import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextProvider, OrganizationLogo, OrganizationSwitcher, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
-import { computed, reactive } from "vue";
+import { reactive } from "vue";
 
-import { CheckoutManager } from "./classes/CheckoutManager";
-import { MemberManager } from "./classes/MemberManager";
-import CartView from "./views/checkout/CartView.vue";
-import HomeView from './views/login/HomeView.vue';
-import NewOverviewView from './views/overview/NewOverviewView.vue';
+import CartView from "./views/cart/CartView.vue";
+import StartView from "./views/start/StartView.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
@@ -61,7 +58,6 @@ export async function getScopedRegistrationRootFromUrl() {
 
 export async function getRootView(session: SessionContext, ownDomain = false) {
     const reactiveSession = reactive(session) as SessionContext
-    const $memberManager = new MemberManager(reactiveSession);
     await I18nController.loadDefault(reactiveSession, "registration", Country.Belgium, "nl", session?.organization?.address?.country)
     
     // Set color
@@ -69,37 +65,22 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         ColorHelper.setColor(session.organization?.meta.color)
     }
 
-    const loggedInRoot = new ComponentWithProperties(PromiseView, {
-        promise: async () => {
-            await $memberManager.loadMembers();
-            try {
-                await $memberManager.loadDocuments();
-            } catch (e) {
-                console.error(e)
-            }
-
-            return new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(NewOverviewView, {})
-            })
-        }
+    const startView = new ComponentWithProperties(NavigationController, { 
+        root: new ComponentWithProperties(StartView, {})
     })
 
     const cartRoot = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(CartView, {})
     })
 
-    const loggedOutRoot = new ComponentWithProperties(ModalStackComponent, {
-        root: new ComponentWithProperties(HomeView, {}) 
-    });
-
-    const $checkoutManager = new CheckoutManager($memberManager)
+    //const $checkoutManager = new CheckoutManager($memberManager)
 
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
             $organizationManager: new OrganizationManager(reactiveSession),
-            $memberManager,
-            $checkoutManager,
+            //$memberManager,
+            //$checkoutManager,
             reactive_navigation_url: ownDomain ? "" : "leden/" + session.organization!.uri,
             reactive_components: {
                 "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
@@ -118,19 +99,19 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                         new TabBarItem({
                             icon: 'home',
                             name: 'Start',
-                            component: loggedInRoot
+                            component: startView
                         }),
                         new TabBarItem({
                             icon: 'basket',
                             name: 'Mandje',
                             component: cartRoot,
-                            badge: computed(() => $checkoutManager.cart.count == 0 ? '' :$checkoutManager.cart.count.toFixed(0))
+                            badge: '' //computed(() => $checkoutManager.cart.count == 0 ? '' :$checkoutManager.cart.count.toFixed(0))
                         })
                     ],
                 })
             ),
             loginRoot: wrapWithModalStack(
-                loggedOutRoot
+                getLoginRoot()
             )
         })
     });

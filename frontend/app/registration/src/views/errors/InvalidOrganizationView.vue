@@ -11,8 +11,6 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-
-
             <div class="legal-footer">
                 <hr class="style-hr">
                 <div>
@@ -30,19 +28,10 @@
     </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, Logo, STErrorsDefault } from "@stamhoofd/components"
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { ErrorBox } from '@stamhoofd/components';
 
-@Component({
-    components: {
-        Logo,
-        STErrorsDefault
-    }
-})
-export default class InvalidOrganizationView extends Mixins(NavigationMixin){
-    @Prop({ default: null })
-        errorBox: ErrorBox | null
-}
+defineProps<{
+    errorBox: ErrorBox | null
+}>()
 </script>

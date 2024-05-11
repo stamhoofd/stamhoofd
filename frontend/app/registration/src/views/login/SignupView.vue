@@ -48,9 +48,9 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength,STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { LoginHelper, SessionContext } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { LoginHelper } from '@stamhoofd/networking';
 
 
 
