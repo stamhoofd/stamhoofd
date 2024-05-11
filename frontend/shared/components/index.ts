@@ -86,7 +86,6 @@ export { default as STGradientBackground } from "./src/icons/STGradientBackgroun
 export { default as AddressInput } from "./src/inputs/AddressInput.vue"
 export { default as AgeInput } from "./src/inputs/AgeInput.vue"
 export { default as BirthDayInput } from "./src/inputs/BirthDayInput.vue"
-export { default as BirthYearInput } from "./src/inputs/BirthYearInput.vue"
 export { default as Checkbox } from "./src/inputs/Checkbox.vue"
 export { default as CodeInput } from "./src/inputs/CodeInput.vue"
 export { default as ColorInput } from "./src/inputs/ColorInput.vue"
