@@ -243,10 +243,19 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
     }
     loadWhatsNew();
 
+    const settingsTab = new TabBarItem({
+        icon: 'settings',
+        name: 'Instellingen',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {})
+        })
+    })
+
     const moreTab = new TabBarItemGroup({
         icon: 'category',
         name: 'Meer',
         items: [
+            settingsTab,
             new TabBarItem({
                 icon: 'calculator',
                 name: 'Boekhouding',
@@ -289,14 +298,6 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
         ]
     });
 
-    const settingsTab = new TabBarItem({
-        icon: 'settings',
-        name: 'Instellingen',
-        component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {})
-        })
-    })
-
     // todo: accept terms view
     // if (this.fullAccess && !this.$organization.meta.didAcceptLatestTerms) {
     //     // Show new terms view if needed
@@ -338,7 +339,10 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                                 tabs.push(webshopsTab)
                             }
 
-                            tabs.push(settingsTab);
+                            if (tabs.length < 3) {
+                                tabs.push(settingsTab)
+                            }
+
                             tabs.push(moreTab);
 
                             return tabs;
