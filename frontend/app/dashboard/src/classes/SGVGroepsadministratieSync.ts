@@ -16,7 +16,7 @@ export type LidFunctie = {
     groep: string;
 }
 
-function deepEqual(x, y) {
+function deepEqual(x: any, y: any) {
     if (x === y) {
         return true;
     }
@@ -258,7 +258,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         patch.contacten = newContacts
     }
 
-    const patchSections = lid.links && Array.isArray(lid.links) ? (lid?.links?.find(l => l.method === "PATCH")?.sections ?? []) : []
+    const patchSections = lid.links && Array.isArray(lid.links) ? (lid?.links?.find((l: any) => l.method === "PATCH")?.sections ?? []) : []
 
     if (patchSections.includes("email") && lid.email != details.email) {
         // Not possible to edit email if the user has a username set
@@ -420,9 +420,6 @@ export function splitStreetNumber(huisnummer: string): {number: string; bus: str
     const parts = cleaned.split(' ')
     let str = ""
 
-    // Was vorige letter een getal?
-    let prev_ends_digit = false;
-
     for (let part of parts) {
         part = part.replace(/BUS/g, '')
 
@@ -437,7 +434,6 @@ export function splitStreetNumber(huisnummer: string): {number: string; bus: str
         }
 
         const starts_digit = /\d+/.test(part.substr(0, 1));
-        const ends_digit = /\d+/.test(part.substr(part.length - 1, 1));
 
         if (str == '' || (!starts_digit)) {
             // Als A 3 of 3 A
@@ -449,7 +445,6 @@ export function splitStreetNumber(huisnummer: string): {number: string; bus: str
         }
 
         str += part;
-        prev_ends_digit = ends_digit;
     }
 
     // remove bus
@@ -509,7 +504,7 @@ function isSameParent(parent: Parent, sgv: any) {
 }
 
 function createOrUpdateAddress(address: Address, adressen: any, index: number): any {
-    const existingAddress = adressen.find(a => isSameAddress(address, a))
+    const existingAddress = adressen.find((a: any) => isSameAddress(address, a))
     const updated = addressToSGV(address)
 
     if (existingAddress) {
@@ -558,7 +553,7 @@ function parentToSGV(parent: Parent, adressen: Map<string, string>): any {
 }
 
 function createOrUpdateParent(parent: Parent, contacten: any, adressen: Map<string, string>): any {
-    const existingContact = contacten.find(c => isSameParent(parent, c))
+    const existingContact = contacten.find((c: any) => isSameParent(parent, c))
     const updated = parentToSGV(parent, adressen)
 
     if (existingContact) {

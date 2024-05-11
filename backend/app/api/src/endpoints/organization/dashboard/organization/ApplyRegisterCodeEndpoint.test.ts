@@ -38,7 +38,7 @@ describe("Endpoint.ApplyRegisterCodeEndpoint", () => {
         const organization =  await new OrganizationFactory({}).create();
         const user = await new UserFactory({ 
             organization,
-            permissions: Permissions.create({ level: PermissionLevel.Full }),
+            globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             email: 'admin@stamhoofd.be'
         }).create()
         const token = await Token.createToken(user)

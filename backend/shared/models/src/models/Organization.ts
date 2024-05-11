@@ -839,7 +839,7 @@ export class Organization extends Model {
         const admins = await User.getAdmins([this.id], {verified: true})
 
         // Only full access
-        return admins.filter(a => a.organizationPermissions && a.organizationPermissions.hasFullAccess(this.privateMeta.roles))
+        return admins.filter(a => a.permissions && a.permissions.forOrganization(this)?.hasFullAccess())
     }
 
     /**

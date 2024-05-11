@@ -9,7 +9,7 @@ module.exports = {
         './src/'
     ],
     transform: {
-        '\\.[jt]s?$': [
+        '\\.[t]s?$': [
             'ts-jest',
             {
                 useESM: true

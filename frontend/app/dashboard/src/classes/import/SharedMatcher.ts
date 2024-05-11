@@ -20,7 +20,7 @@ export class SharedMatcher {
         }
     }
 
-    doesMatch(columnName: string, examples: string[]): boolean {
+    doesMatch(columnName: string, _examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
 
         for (const word of this.negativeMatch) {

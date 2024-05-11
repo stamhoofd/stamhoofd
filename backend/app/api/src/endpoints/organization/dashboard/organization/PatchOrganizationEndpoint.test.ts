@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from "@simonbackx/simple-endpoints";
 import { GroupFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { Group, GroupGenderType, GroupPatch, GroupPrivateSettings, GroupSettings, GroupSettingsPatch, Organization, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions } from '@stamhoofd/structures';
+import { Group, GroupGenderType, GroupPatch, GroupPrivateSettings, GroupSettings, GroupSettingsPatch, Organization, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 
 import { testServer } from '../../../../../tests/helpers/TestServer';
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
@@ -69,11 +69,14 @@ describe("Endpoint.PatchOrganization", () => {
         organization.privateMeta.roles.push(
             role
         )
-        await organization.save()
         const groups = await new GroupFactory({ organization }).createMultiple(2)
 
-        groups[0].privateSettings.permissions.full.push(PermissionRole.create(role))
-        await groups[0].save()
+        role.resources.set(PermissionsResourceType.Groups, new Map())
+        role.resources.get(PermissionsResourceType.Groups)!.set(groups[0].id, ResourcePermissions.create({
+            level: PermissionLevel.Full
+        }))
+
+        await organization.save()
 
         const validPermissions = [
             Permissions.create({

@@ -456,6 +456,7 @@ describe("Test register cart price calculations", () => {
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group1.organizationId,
                     groupId: group1.id,
                     cycle: group1.cycle,
                     registeredAt: new Date()
@@ -605,6 +606,7 @@ describe("Test register cart price calculations", () => {
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group1.organizationId,
                     groupId: group1.id,
                     cycle: group1.cycle,
                     registeredAt: new Date()
@@ -616,6 +618,7 @@ describe("Test register cart price calculations", () => {
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group1.organizationId,
                     groupId: group1.id,
                     cycle: group1.cycle,
                     registeredAt: new Date()
@@ -827,6 +830,7 @@ describe("Test register cart price calculations", () => {
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group2.organizationId,
                     groupId: group2.id,
                     cycle: group2.cycle,
                     registeredAt: new Date()
@@ -957,6 +961,7 @@ describe("Test register cart price calculations", () => {
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group2.organizationId,
                     groupId: group2.id,
                     cycle: group2.cycle,
                     registeredAt: new Date()
@@ -1087,6 +1092,7 @@ describe("Test register cart price calculations", () => {
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group2.organizationId,
                     groupId: group2.id,
                     cycle: group2.cycle,
                     registeredAt: new Date()
