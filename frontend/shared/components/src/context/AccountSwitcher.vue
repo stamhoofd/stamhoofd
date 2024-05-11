@@ -23,6 +23,7 @@ defineRoutes([
     {
         url: 'account',
         component: async () => (await import('../views/AccountSettingsView.vue')).default as any,
+        present: "popup"
     }
 ])
 
