@@ -2,7 +2,7 @@
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberManagerBase, SessionContext } from '@stamhoofd/networking';
-import { Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, MemberWithRegistrationsBlob, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
+import { Gender, Group, MemberWithRegistrations, MemberWithRegistrationsBlob, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 
@@ -94,12 +94,12 @@ export class MemberManager extends MemberManagerBase {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/group/" + groupIds[0] + "/members",
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>)),
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
             query: { waitingList, cycleOffset },
             owner
         })
 
-        return this.decryptMembersWithRegistrations(response.data.data)
+        return this.decryptMembersWithRegistrations(response.data)
     }
 
     getRegistrationsPatchArray(): ConvertArrayToPatchableArray<Registration[]> {
@@ -174,8 +174,8 @@ export class MemberManager extends MemberManagerBase {
         const encryptedMembers: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = this.getMembersAccessPatch(members)
 
         // Aldo include encryption blobs
-        const p = this.getEncryptedMembers(members)
-        encryptedMembers.merge(p.members as any) // we can merge since it's a subtype
+        const p = this.getDetailsOverridePatch(members)
+        encryptedMembers.merge(p)
         return encryptedMembers
     }
     

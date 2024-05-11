@@ -1,21 +1,21 @@
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member } from '@stamhoofd/models';
-import { KeychainedMembers, KeychainedResponse, MemberWithRegistrationsBlob, User as UserStruct } from "@stamhoofd/structures";
+import { MemberWithRegistrationsBlob, User as UserStruct } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
 import { PatchOrganizationMembersEndpoint } from '../dashboard/members/PatchOrganizationMembersEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = AutoEncoderPatchType<KeychainedMembers>
-type ResponseBody = KeychainedResponse<MemberWithRegistrationsBlob[]>
+type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
+type ResponseBody = MemberWithRegistrationsBlob[]
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
  */
 export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = KeychainedMembers.patchType() as Decoder<AutoEncoderPatchType<KeychainedMembers>>
+    bodyDecoder = new PatchableArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>, MemberWithRegistrationsBlob.patchType() as Decoder<AutoEncoderPatchType<MemberWithRegistrationsBlob>>, StringDecoder)
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
@@ -36,7 +36,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
         // Process changes
         const addedMembers: Member[] = []
-        for (const put of request.body.members.getPuts()) {
+        for (const put of request.body.getPuts()) {
             const struct = put.put
 
             const member = new Member()
@@ -76,7 +76,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
         // Modify members
         const members = await Member.getMembersWithRegistrationForUser(user)
-        for (const struct of request.body.members.getPatches()) {
+        for (const struct of request.body.getPatches()) {
             const member = members.find((m) => m.id == struct.id)
             if (!member) {
                 throw new SimpleError({
@@ -131,8 +131,8 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             await Document.updateForMember(member.id)
         }
 
-        return new Response(new KeychainedResponse({
-            data: members.map(m => m.getStructureWithRegistrations()),
-        }));
+        return new Response(
+            members.map(m => m.getStructureWithRegistrations()),
+        );
     }
 }

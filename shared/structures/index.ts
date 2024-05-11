@@ -61,8 +61,6 @@ export * from "./src/endpoints/VerifyEmailRequest"
 export * from "./src/endpoints/WebshopUriAvailabilityResponse"
 
 // Grouping
-export * from "./src/grouping/KeychainedMembers"
-export * from "./src/grouping/KeychainedResponse"
 export * from "./src/grouping/PaginatedResponse"
 
 // Members

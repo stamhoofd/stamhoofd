@@ -23,14 +23,16 @@
             <template #left>
                 <span>Totaal: {{ formatPrice(cart.price) }}</span>
             </template>
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" type="button" @click="goNext">
-                    <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Bevestigen</span>
-                    <span v-else-if="needsPay">Betalen</span>
-                    <span v-else>Bevestigen</span>
-                    <span class="icon arrow-right" />
-                </button>
-            </LoadingButton>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="button" @click="goNext">
+                        <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Bevestigen</span>
+                        <span v-else-if="needsPay">Betalen</span>
+                        <span v-else>Bevestigen</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>
@@ -40,9 +42,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { KeychainedResponse, Payment, PaymentMethod, PaymentStatus, RegisterResponse } from '@stamhoofd/structures';
+import { Payment, PaymentMethod, PaymentStatus, RegisterResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-
 
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
 
@@ -63,9 +64,6 @@ import RegistrationSuccessView from './RegistrationSuccessView.vue';
     }
 })
 export default class PaymentSelectionView extends Mixins(NavigationMixin){
-    
-    
-
     loading = false
     errorBox: ErrorBox | null = null
 
@@ -110,8 +108,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             })
 
             const payment = response.data.payment
-            const registrations = this.$memberManager.decryptRegistrationsWithMember(response.data.registrations, this.$organization.groups)
-            this.$memberManager.setMembers(new KeychainedResponse({ data: response.data.members }))
+            const registrations = response.data.registrations
+            this.$memberManager.setMembers(response.data.members)
 
             if (payment && payment.status !== PaymentStatus.Succeeded) {
                 PaymentHandler.handlePayment({

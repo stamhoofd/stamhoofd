@@ -1,10 +1,9 @@
 
 
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { MemberManagerBase, SessionContext } from '@stamhoofd/networking';
-import { Address, Document, EmergencyContact, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, MemberWithRegistrationsBlob, Parent } from '@stamhoofd/structures';
-
+import { Address, Document, EmergencyContact, Member, MemberDetails, MemberWithRegistrations, MemberWithRegistrationsBlob, Parent } from '@stamhoofd/structures';
 
 /**
  * Controls the fetching and decrypting of members
@@ -23,12 +22,12 @@ export class MemberManager extends MemberManagerBase {
     /**
      * Set the members, but keep all the existing member references
      */
-    setMembers(data: KeychainedResponse<MemberWithRegistrationsBlob[]>) {
+    setMembers(data: MemberWithRegistrationsBlob[]) {
         // Save keychain items
         const s: MemberWithRegistrations[] = []
         const groups = this.$context.organization!.groups
 
-        for (const member of data.data) {
+        for (const member of data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
                 member,
                 groups
@@ -54,7 +53,7 @@ export class MemberManager extends MemberManagerBase {
         const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/members",
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>))
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>)
         })
         this.setMembers(response.data)
     }
@@ -85,20 +84,20 @@ export class MemberManager extends MemberManagerBase {
         })
 
         // Prepare patch
-        const patch = KeychainedMembers.patch({})
+        const patch = new PatchableArray() as PatchableArrayAutoEncoder<Member>
 
-        patch.members.addPut(member)
+        patch.addPut(member)
 
         // Also update other members that might have been changed (e.g. when a shared address have been changed)
         const members = this.members ?? []
-        patch.patch(this.getEncryptedMembers(members))
+        patch.merge(this.getDetailsOverridePatch(members))
 
         // Send the request
         const response = await this.$context.authenticatedServer.request({
             method: "PATCH",
             path: "/members",
             body: patch,
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>))
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>)
         })
 
         this.setMembers(response.data)
@@ -127,14 +126,14 @@ export class MemberManager extends MemberManagerBase {
     }
 
     async patchMembers(members: MemberWithRegistrations[]) {
-        const patch = this.getEncryptedMembers(members)
+        const patch = this.getDetailsOverridePatch(members)
 
         // Send the request
         const response = await this.$context.authenticatedServer.request({
             method: "PATCH",
             path: "/members",
             body: patch,
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>))
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>)
         })
         this.setMembers(response.data)
         this.loadDocuments().catch(console.error)

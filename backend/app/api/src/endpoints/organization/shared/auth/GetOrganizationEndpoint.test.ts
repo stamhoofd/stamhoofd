@@ -1,6 +1,6 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { GroupFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { KeychainedResponse, Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
+import { Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
 
 import { testServer } from "../../../../../tests/helpers/TestServer";
 import { GetOrganizationEndpoint } from './GetOrganizationEndpoint';
@@ -21,17 +21,13 @@ describe("Endpoint.GetOrganization", () => {
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
-        if (!(response.body instanceof KeychainedResponse)) {
-            throw new Error("Expected KeychainedResponse")
-        }
-
-        if (!(response.body.data instanceof Organization)) {
+        if (!(response.body instanceof Organization)) {
             throw new Error("Expected Organization")
         }
 
-        expect(response.body.data.id).toEqual(organization.id)
-        expect(response.body.data.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
-        expect(response.body.data.privateMeta).toEqual(null)
+        expect(response.body.id).toEqual(organization.id)
+        expect(response.body.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
+        expect(response.body.privateMeta).toEqual(null)
     });
 
     test("Get organization as admin", async () => {
@@ -52,17 +48,13 @@ describe("Endpoint.GetOrganization", () => {
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
-        if (!(response.body instanceof KeychainedResponse)) {
-            throw new Error("Expected KeychainedResponse")
-        }
-
-        if (!(response.body.data instanceof Organization)) {
+        if (!(response.body instanceof Organization)) {
             throw new Error("Expected Organization")
         }
 
-        expect(response.body.data.id).toEqual(organization.id)
-        expect(response.body.data.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
-        expect(response.body.data.privateMeta).not.toEqual(null)
+        expect(response.body.id).toEqual(organization.id)
+        expect(response.body.groups.map(g => g.id).sort()).toEqual(groups.map(g => g.id).sort())
+        expect(response.body.privateMeta).not.toEqual(null)
     });
 
      test("Get organization as admin of a different organization", async () => {

@@ -78,7 +78,7 @@ describe("Endpoint.GetGroupMembersEndpoint", () => {
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await testServer.test(endpoint, r);
-        expect(response.body.data).toHaveLength(members.length);
+        expect(response.body).toHaveLength(members.length);
     });
 
     test("Organizations are properly scoped even if a user from a different organization has the required role", async () => {
