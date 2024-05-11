@@ -31,7 +31,9 @@
 
                 <STList>
                     <STListItem v-if="cart.count" class="left-center right-stack" :selectable="true" @click="openCart(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
+                        </template>
                         <h3 class="style-title-list">
                             Mandje afrekenen
                         </h3>
@@ -42,12 +44,16 @@
                             Bevestig je inschrijvingen.
                         </p>
 
-                        <span v-if="cart.price" slot="right" class="style-tag">{{ formatPrice(cart.price) }}</span>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span v-if="cart.price" class="style-tag">{{ formatPrice(cart.price) }}</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-for="member of membersWithMissingData" :key="'missing'+member.id" class="left-center" :selectable="true" @click="fillInMemberMissingData(member)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/health-data.svg" class="style-illustration-img"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/health-data.svg" class="style-illustration-img">
+                        </template>
                         <h3 class="style-title-list">
                             Vul ontbrekende gegevens aan van {{ member.details.firstName }}
                         </h3>
@@ -55,11 +61,15 @@
                             Enkele gegevens van {{ member.details.firstName }} ontbreken. Vul ze hier in.
                         </p>
 
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="notYetPaidBalance > 0" class="left-center" :selectable="true" @click="managePayments(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img">
+                        </template>
                         <h3 class="style-title-list">
                             Betaal jouw openstaand bedrag
                         </h3>
@@ -67,13 +77,15 @@
                             Je hebt een openstaand bedrag van {{ formatPrice(notYetPaidBalance) }}.
                         </p>
 
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
-                        <img v-if="!suggestion.group" slot="left" src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
-                        <template v-else slot="left">
-                            <figure v-if="suggestion.group.squareImage" class="registration-image">
+                        <template #left>
+                            <img v-if="!suggestion.group" src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
+                            <figure v-else-if="suggestion.group.squareImage" class="registration-image">
                                 <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
                                 <div>
                                     <span v-if="suggestion.waitingList" class="icon gray clock" />
@@ -95,7 +107,9 @@
                             {{ suggestion.description }}
                         </p>
 
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
             </template>
@@ -105,47 +119,63 @@
 
             <STList class="illustration-list">    
                 <STListItem v-if="members.length || isAcceptingNewMembers" :selectable="true" class="left-center" @click="registerMember">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/edit-data.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Lid inschrijven
                     </h2>
                     <p class="style-description">
                         Schrijf een lid in.
                     </p>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="members.length" :selectable="true" class="left-center" @click="checkData">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/magnifier.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/magnifier.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Gegevens en inschrijvingen nakijken
                     </h2>
                     <p class="style-description">
                         Pas gegevens aan en bekijk alle inschrijvingen.
                     </p>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="members.length" :selectable="true" class="left-center" @click="managePayments(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/creditcards.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Afrekeningen en openstaande rekening
                     </h2>
                     <p class="style-description">
                         Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.
                     </p>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="manageAccount">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/admin.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/admin.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Account wijzigen
                     </h2>
                     <p class="style-description">
                         Wijzig het wachtwoord of e-mailadres van het account waarmee je inlogt.
                     </p>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -156,7 +186,9 @@
                 </h2>
                 <STList>
                     <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="downloadDocument(document)">
-                        <template #left><span class="icon file-pdf red" /></template>
+                        <template #left>
+                            <span class="icon file-pdf red" />
+                        </template>
                         <h3 class="style-title-list">
                             {{ document.data.name }}
                         </h3>
@@ -179,12 +211,11 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LegalFooter, LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast, AccountSettingsView } from "@stamhoofd/components";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { AccountSettingsView, CenteredMessage, LegalFooter, LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { downloadDocument } from "@stamhoofd/document-helper";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Document, DocumentStatus, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { Suggestion, SuggestionBuilder } from "../../classes/SuggestionBuilder";
 import PaymentsView from "../account/PaymentsView.vue";
@@ -387,10 +418,6 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
             modalDisplayStyle: "popup",
             animated
         })
-    }
-
-    formatPrice(price: number) {
-        return Formatter.price(price)
     }
 
     async registerMember() {

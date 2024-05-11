@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
 import { MemberManager } from "../../../classes/MemberManager";
 import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "./EditMemberStepsManager";
