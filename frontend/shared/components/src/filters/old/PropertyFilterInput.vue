@@ -21,10 +21,12 @@
                     <p class="style-description-small">
                         {{ enabledText }}
                     </p>
-                    <button v-if="!isAlwaysEnabled()" slot="right" class="button text" type="button" @click="setEnabledWhen(false)">
-                        <span class="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
+                    <template #right>
+                        <button v-if="!isAlwaysEnabled()" class="button text" type="button" @click="setEnabledWhen(false)">
+                            <span class="icon edit" />
+                            <span class="hide-small">Wijzig</span>
+                        </button>
+                    </template>
                 </STListItem>
             </STList>
         </STInputBox>
@@ -59,10 +61,12 @@
                     <p class="style-description-small">
                         {{ requiredText }}
                     </p>
-                    <button v-if="!isAlwaysRequired() && !isNeverRequired()" slot="right" class="button text" type="button" @click="setRequiredWhen(false)">
-                        <span class="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
+                    <template #right>
+                        <button v-if="!isAlwaysRequired() && !isNeverRequired()" class="button text" type="button" @click="setRequiredWhen(false)">
+                            <span class="icon edit" />
+                            <span class="hide-small">Wijzig</span>
+                        </button>
+                    </template>
                 </STListItem>
             </STList>
         </STInputBox>
@@ -75,13 +79,14 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { FilterDefinition, FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { FilterDefinition, FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
+
 import Radio from "../../inputs/Radio.vue";
+import STInputBox from "../../inputs/STInputBox.vue";
 import STList from "../../layout/STList.vue";
 import STListItem from "../../layout/STListItem.vue";
 import FilterEditor from './FilterEditor.vue';
-import STInputBox from "../../inputs/STInputBox.vue";
 
 @Component({
     components: {
@@ -93,7 +98,7 @@ import STInputBox from "../../inputs/STInputBox.vue";
 })
 export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        value: PropertyFilter<any>
+        modelValue: PropertyFilter<any>
 
     @Prop({ default: true })
         allowOptional: boolean
@@ -113,9 +118,9 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
 
     @Watch('value')
     onConfigurationChange() {
-        if (this.value.requiredWhen) {
+        if (this.modelValue.requiredWhen) {
             try {
-                this.cachedRequiredFilter = this.value.requiredWhen.decode(this.definitions)
+                this.cachedRequiredFilter = this.modelValue.requiredWhen.decode(this.definitions)
             } catch (e) {
                 console.error('Error decoding required filter', e)
                 this.cachedRequiredFilter = null
@@ -125,12 +130,12 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         }
 
         try {
-            this.cachedEnabledFilter = this.value.enabledWhen.decode(this.definitions)
+            this.cachedEnabledFilter = this.modelValue.enabledWhen.decode(this.definitions)
         } catch (e) {
             console.error('Error decoding required filter', e)
             this.cachedEnabledFilter = new FilterGroup(this.definitions)
         }
-        console.log('onConfigurationChange', this.value, this.cachedEnabledFilter, this.cachedRequiredFilter)
+        console.log('onConfigurationChange', this.modelValue, this.cachedEnabledFilter, this.cachedRequiredFilter)
     }
 
     isAlwaysEnabled() {
@@ -142,14 +147,14 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     isNeverRequired() {
-        return this.value.requiredWhen === null
+        return this.modelValue.requiredWhen === null
     }
 
     setAlwaysEnabled() {
         this.$emit('update:modelValue', 
             new PropertyFilter<any>(
                 new FilterGroup(this.definitions).encoded,
-                this.value.requiredWhen
+                this.modelValue.requiredWhen
             )
         )
     }
@@ -163,7 +168,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
                 this.$emit('update:modelValue', 
                     new PropertyFilter<any>(
                         enabledWhen.encoded,
-                        this.value.requiredWhen
+                        this.modelValue.requiredWhen
                     )
                 )
             },
@@ -174,7 +179,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     setAlwaysRequired() {
         this.$emit('update:modelValue', 
             new PropertyFilter<any>(
-                this.value.enabledWhen,
+                this.modelValue.enabledWhen,
                 new FilterGroup(this.definitions).encoded
             )
         )
@@ -183,7 +188,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     setNeverRequired() {
         this.$emit('update:modelValue', 
             new PropertyFilter<any>(
-                this.value.enabledWhen,
+                this.modelValue.enabledWhen,
                 null
             )
         )
@@ -193,7 +198,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         if (useCache && this.cachedRequiredFilter) {
             this.$emit('update:modelValue', 
                 new PropertyFilter<any>(
-                    this.value.enabledWhen,
+                    this.modelValue.enabledWhen,
                     this.cachedRequiredFilter.encoded
                 )
             )
@@ -206,7 +211,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             setFilter: (requiredWhen: FilterGroup<any>) => {
                 this.$emit('update:modelValue', 
                     new PropertyFilter<any>(
-                        this.value.enabledWhen,
+                        this.modelValue.enabledWhen,
                         requiredWhen.encoded
                     )
                 )
