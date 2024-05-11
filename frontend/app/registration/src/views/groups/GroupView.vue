@@ -40,10 +40,10 @@
                 <STListItem class="right-description">
                     Wanneer?
 
-                    <template v-if="group.settings.displayStartEndTime" slot="right">
+                    <template v-if="group.settings.displayStartEndTime" #right>
                         {{ formatDateTime(group.settings.startDate) }} - {{ formatDateTime(group.settings.endDate) }}
                     </template>
-                    <template v-else slot="right">
+                    <template v-else #right>
                         {{ formatDate(group.settings.startDate) }} - {{ formatDate(group.settings.endDate) }}
                     </template>
                 </STListItem>
@@ -57,7 +57,9 @@
                 <STListItem class="right-description wrap">
                     Wie?
 
-                    <template #right><div v-text="who" /></template>
+                    <template #right>
+                        <div v-text="who" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-for="(price, index) of priceList" :key="index">
@@ -66,31 +68,33 @@
                         {{ price.description }}
                     </p>
 
-                    <template #right><div class="style-description" v-text="price.price" /></template>
+                    <template #right>
+                        <div class="style-description" v-text="price.price" />
+                    </template>
                 </STListItem>
             </STList>
         </main>
 
         <STToolbar v-if="isSignedIn && registerButton && canRegister && member">
-            <template #right><button class="primary button" type="button" @click="registerMember">
-                <span>{{ member.firstName }} inschrijven</span>
-                <span class="icon arrow-right" />
-            </button></template>
+            <template #right>
+                <button class="primary button" type="button" @click="registerMember">
+                    <span>{{ member.firstName }} inschrijven</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Group, MemberWithRegistrations, RegisterItem, WaitingListType } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrations, OldRegisterItem, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
 
 import GroupTag from "../../components/GroupTag.vue";
-import MemberBox from "../../components/MemberBox.vue";
 import CartView from "../checkout/CartView.vue";
 
 @Component({
@@ -101,7 +105,6 @@ import CartView from "../checkout/CartView.vue";
         STListItem,
         Checkbox,
         BackButton,
-        MemberBox,
         GroupTag
     },
     filters: {
@@ -158,7 +161,7 @@ export default class GroupView extends Mixins(NavigationMixin){
         if (!this.member) {
             return
         }
-        const item = new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.itemCanRegister.waitingList })
+        const item = new OldRegisterItem(this.member, this.group, { reduced: false, waitingList: this.itemCanRegister.waitingList })
         this.$checkoutManager.startAddToCartFlow(this, item, (c: NavigationMixin) => {
             // If the cart is already visible, dismiss
             if (c.navigationController?.$attrs['fromCart']) {

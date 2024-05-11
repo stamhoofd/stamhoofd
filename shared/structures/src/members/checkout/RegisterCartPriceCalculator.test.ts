@@ -6,8 +6,8 @@ import { PaymentConfiguration } from "../../PaymentConfiguration"
 import { MemberDetails } from "../MemberDetails"
 import { MemberWithRegistrationsBlob } from "../MemberWithRegistrationsBlob"
 import { Registration } from "../Registration"
-import { IDRegisterCart } from "./RegisterCart"
-import { IDRegisterItem } from "./RegisterItem"
+import { OldIDRegisterCart } from "./OldRegisterCart"
+import { OldIDRegisterItem } from "./OldRegisterItem"
 
 const defaultPaymentConfiguration = PaymentConfiguration.create({})
 
@@ -121,22 +121,22 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
@@ -300,29 +300,29 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group4.id,
             memberId: linda.id,
             reduced: false,
@@ -474,16 +474,16 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
+        const cart = OldIDRegisterCart.create({})
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
@@ -631,16 +631,16 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
+        const cart = OldIDRegisterCart.create({})
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
@@ -711,22 +711,22 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: alice.id,
             reduced: true,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: tom.id,
             reduced: false,
@@ -848,22 +848,22 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: tom.id,
             reduced: false,
@@ -974,22 +974,22 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: alice.id,
             reduced: false,
@@ -1105,22 +1105,22 @@ describe("Test register cart price calculations", () => {
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: alice.id,
             reduced: false,

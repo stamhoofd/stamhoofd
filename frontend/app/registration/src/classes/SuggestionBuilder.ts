@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { Group, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
+import { Group, MemberWithRegistrations, OldRegisterItem } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import GroupView from "../views/groups/GroupView.vue";
@@ -80,7 +80,7 @@ export class SuggestionBuilder {
                 const canRegister = member.canRegister(group, $memberManager.members ?? [], $context.organization!.meta.categories, $checkoutManager.cart.items);
                 
                 // Check in cart
-                const item = new RegisterItem(member, group, { reduced: false, waitingList: canRegister.waitingList })
+                const item = new OldRegisterItem(member, group, { reduced: false, waitingList: canRegister.waitingList })
                 if ($checkoutManager.cart.hasItem(item)) {
                     continue;
                 }

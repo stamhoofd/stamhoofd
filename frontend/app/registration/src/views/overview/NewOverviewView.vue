@@ -220,8 +220,6 @@ import { Document, DocumentStatus, MemberBalanceItem, MemberWithRegistrations, P
 import { Suggestion, SuggestionBuilder } from "../../classes/SuggestionBuilder";
 import PaymentsView from "../account/PaymentsView.vue";
 import CartView from "../checkout/CartView.vue";
-import { createMemberComponent } from "../members/details/createMemberComponent";
-import { EditMemberStepsManager } from "../members/details/EditMemberStepsManager";
 import CheckDataView from "./CheckDataView.vue";
 import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
 
@@ -422,18 +420,18 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
 
     async registerMember() {
         if (this.members.length == 0) {
-            const component = await createMemberComponent(this.$memberManager)
-            this.present({
-                components: [
-                    new ComponentWithProperties(
-                        NavigationController,
-                        {
-                            root: component
-                        }
-                    )
-                ],
-                modalDisplayStyle: "popup"
-            })
+            // const component = await createMemberComponent(this.$memberManager)
+            // this.present({
+            //     components: [
+            //         new ComponentWithProperties(
+            //             NavigationController,
+            //             {
+            //                 root: component
+            //             }
+            //         )
+            //     ],
+            //     modalDisplayStyle: "popup"
+            // })
             return;
         }
         this.present({

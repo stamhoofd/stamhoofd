@@ -2,7 +2,7 @@
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberManagerBase, SessionContext } from '@stamhoofd/networking';
-import { Gender, Group, MemberWithRegistrations, MemberWithRegistrationsBlob, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
+import { Gender, Group, MemberWithRegistrations, MemberWithRegistrationsBlob, OldRegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 
@@ -354,7 +354,7 @@ export class MemberManager extends MemberManagerBase {
                 const group = member.allGroups.find(g => g.id === registration.groupId)
                 let price: number | undefined = undefined
                 if (group) {
-                    price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
+                    price = OldRegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
                 }
 
                 patchMember.registrations.addPatch(Registration.patch({
@@ -395,7 +395,7 @@ export class MemberManager extends MemberManagerBase {
                     sizeUpdater.add({groupId: group.id, waitingList: true, cycle: registration.cycle}, -1);
                     sizeUpdater.add({groupId: group.id, waitingList: false, cycle: registration.cycle}, 1);
 
-                    const price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
+                    const price = OldRegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
                     
                     // Do a patch to move this member from the waiting list
                     patchMember.registrations.addPatch(Registration.patch({
@@ -421,7 +421,7 @@ export class MemberManager extends MemberManagerBase {
                 registeredAt: new Date()
             })
 
-            reg.price = RegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
+            reg.price = OldRegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
             patchMember.registrations.addPut(reg)
 
             sizeUpdater.add({groupId: group.id, waitingList, cycle}, 1)

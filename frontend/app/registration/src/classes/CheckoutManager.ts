@@ -1,16 +1,15 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Toast } from '@stamhoofd/components';
-import { IDRegisterCheckout, MemberBalanceItem, RegisterCheckout, RegisterItem, Version } from '@stamhoofd/structures';
+import { MemberBalanceItem, OldIDRegisterCheckout, OldRegisterCheckout, OldRegisterItem, Version } from '@stamhoofd/structures';
 import { reactive } from 'vue';
 
-import { EditMemberStepsManager } from '../views/members/details/EditMemberStepsManager';
 import { MemberManager } from './MemberManager';
 
 /**
  * Convenient access to the organization of the current session
  */
 export class CheckoutManager {
-    private _checkout: RegisterCheckout | null = null
+    private _checkout: OldRegisterCheckout | null = null
 
     balanceItems: MemberBalanceItem[] | null = null
     $memberManager: MemberManager
@@ -31,9 +30,9 @@ export class CheckoutManager {
         this.saveCheckout()
     }
 
-    get checkout(): RegisterCheckout {
+    get checkout(): OldRegisterCheckout {
         if (!this._checkout) {
-            this._checkout = reactive(this.loadCheckout()) as RegisterCheckout
+            this._checkout = reactive(this.loadCheckout()) as OldRegisterCheckout
         }
         return this._checkout
     }
@@ -42,19 +41,19 @@ export class CheckoutManager {
         return this.checkout.cart
     }
 
-    loadCheckout(): RegisterCheckout {
+    loadCheckout(): OldRegisterCheckout {
         try {
             const json = localStorage.getItem("checkout")
             if (json) {
                 const obj = JSON.parse(json)
-                const versionBox = new VersionBoxDecoder(IDRegisterCheckout as Decoder<IDRegisterCheckout>).decode(new ObjectData(obj, { version: Version }))
+                const versionBox = new VersionBoxDecoder(OldIDRegisterCheckout as Decoder<OldIDRegisterCheckout>).decode(new ObjectData(obj, { version: Version }))
                 return versionBox.data.convert(this.$organization, this.$memberManager.members ?? [])
             }
         } catch (e) {
             console.error("Failed to load cart")
             console.error(e)
         }
-        return new RegisterCheckout()
+        return new OldRegisterCheckout()
     }
 
     saveCheckout() {
@@ -68,7 +67,7 @@ export class CheckoutManager {
         }
     }
 
-    doSelect(item: RegisterItem) {
+    doSelect(item: OldRegisterItem) {
         const toast = new Toast("De inschrijving is toegevoegd aan jouw inschrijvingsmandje.", "success green").setHide(10000)
         toast.show()
 
@@ -76,7 +75,7 @@ export class CheckoutManager {
         this.saveCart()
     }
 
-    async startAddToCartFlow(component: NavigationMixin, item: RegisterItem, callback: (component) => void) {
+    async startAddToCartFlow(component: NavigationMixin, item: OldRegisterItem, callback: (component) => void) {
         if (this.cart.hasItem(item)) {
             // Already in cart
             // In the future: might give possibilty to adjust answers to questions
@@ -87,26 +86,26 @@ export class CheckoutManager {
 
         const items = [...this.cart.items.filter(i => i.memberId === item.member.id), item]
 
-        const stepManager = new EditMemberStepsManager(
-            this.$memberManager,
-            EditMemberStepsManager.getAllSteps(this.$memberManager.$context, false, false), 
-            items,
-            item.member,
-            (c: NavigationMixin) => {
-                this.doSelect(item)
-                callback(c)
-                return Promise.resolve()
-            }
-        )
-        const c = await stepManager.getFirstComponent()
-
-        if (!c) {
-            // Everything skipped
-            this.doSelect(item)
-            callback(component)
-        } else {
-            component.show(c)
-        }
+        // const stepManager = new EditMemberStepsManager(
+        //     this.$memberManager,
+        //     EditMemberStepsManager.getAllSteps(this.$memberManager.$context, false, false), 
+        //     items,
+        //     item.member,
+        //     (c: NavigationMixin) => {
+        //         this.doSelect(item)
+        //         callback(c)
+        //         return Promise.resolve()
+        //     }
+        // )
+        // const c = await stepManager.getFirstComponent()
+        // 
+        // if (!c) {
+        //     // Everything skipped
+        //     this.doSelect(item)
+        //     callback(component)
+        // } else {
+        //     component.show(c)
+        // }
     }
 
     fetchBalancePromise: Promise<void>|null = null

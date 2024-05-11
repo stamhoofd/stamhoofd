@@ -12,7 +12,7 @@
                     <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock" />
                 </h2>
                 <STList class="illustration-list">
-                    <MemberBox v-for="group in category.groups" :key="group.id" :group="group" :member="member" type="group" />
+                    <GroupRegisterMemberRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" />
                 </STList>
             </div>
         </main>
@@ -21,12 +21,11 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { MemberWithRegistrations } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
-
-import MemberBox from "../../components/MemberBox.vue";
+import GroupRegisterMemberRow from "../../components/GroupRegisterMemberRow.vue";
 
 @Component({
     components: {
@@ -35,7 +34,7 @@ import MemberBox from "../../components/MemberBox.vue";
         STList,
         STListItem,
         BackButton,
-        MemberBox
+        GroupRegisterMemberRow
     }
 })
 export default class GroupsView extends Mixins(NavigationMixin){

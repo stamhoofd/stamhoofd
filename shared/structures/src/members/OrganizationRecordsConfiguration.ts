@@ -7,7 +7,7 @@ import { PropertyFilter } from "../filters/PropertyFilter"
 import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from "../filters/RegistrationsFilter"
 import { Group } from "../Group"
 import { Organization } from "../Organization"
-import { RegisterItem } from "./checkout/RegisterItem"
+import { OldRegisterItem } from "./checkout/OldRegisterItem"
 import { Gender } from "./Gender"
 import { MemberDetails } from "./MemberDetails"
 import { MemberWithRegistrations } from "./MemberWithRegistrations"
@@ -119,9 +119,9 @@ export class DataPermissionsSettings extends AutoEncoder {
 export class MemberDetailsWithGroups {
     details: MemberDetails
     member?: MemberWithRegistrations
-    registerItems: RegisterItem[] = []
+    registerItems: OldRegisterItem[] = []
 
-    constructor(details: MemberDetails, member?: MemberWithRegistrations, registerItems: RegisterItem[] = []) {
+    constructor(details: MemberDetails, member?: MemberWithRegistrations, registerItems: OldRegisterItem[] = []) {
         this.details = details
         this.member = member
         this.registerItems = registerItems
@@ -228,7 +228,7 @@ export class MemberDetailsWithGroups {
         ]
     }
 
-    static getFilterDefinitions(organization: Organization, options: {groups?: Group[], member?: MemberWithRegistrations, registerItems?: RegisterItem[]}): FilterDefinition<MemberDetailsWithGroups>[] {
+    static getFilterDefinitions(organization: Organization, options: {groups?: Group[], member?: MemberWithRegistrations, registerItems?: OldRegisterItem[]}): FilterDefinition<MemberDetailsWithGroups>[] {
         // Make a list of all the groups
         const groups = options.groups ?? []
         groups.push(...options.member?.groups ?? [])

@@ -30,14 +30,16 @@
                         {{ item.waitingList ? "Wachtlijst van " : "Inschrijven voor " }}{{ item.group.settings.name }}
                     </p>
 
-                    <template #right><footer>
-                        <p v-if="item.calculatedPrice" class="price">
-                            {{ formatPrice(item.calculatedPrice) }}
-                        </p>
-                        <div @click.stop>
-                            <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
-                        </div>
-                    </footer></template>
+                    <template #right>
+                        <footer>
+                            <p v-if="item.calculatedPrice" class="price">
+                                {{ formatPrice(item.calculatedPrice) }}
+                            </p>
+                            <div @click.stop>
+                                <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
+                            </div>
+                        </footer>
+                    </template>
                 </STListItem>
 
                 <STListItem v-for="item in cart.balanceItems" :key="item.id" class="cart-item-row">
@@ -48,14 +50,16 @@
                         Openstaand bedrag van {{ formatDate(item.item.createdAt) }}
                     </p>
 
-                    <template #right><footer>
-                        <p class="price">
-                            {{ formatPrice(item.price) }}
-                        </p>
-                        <div @click.stop>
-                            <button class="button icon trash gray" type="button" @click="deleteBalanceItem(item)" />
-                        </div>
-                    </footer></template>
+                    <template #right>
+                        <footer>
+                            <p class="price">
+                                {{ formatPrice(item.price) }}
+                            </p>
+                            <div @click.stop>
+                                <button class="button icon trash gray" type="button" @click="deleteBalanceItem(item)" />
+                            </div>
+                        </footer>
+                    </template>
                 </STListItem>
             </STList>
 
@@ -67,7 +71,7 @@
                     <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
                         <template #left>
                             <img v-if="!suggestion.group" src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
-                            <template v-else >
+                            <template v-else>
                                 <figure v-if="suggestion.group.squareImage" class="registration-image">
                                     <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
                                     <div>
@@ -91,7 +95,9 @@
                             {{ suggestion.description }}
                         </p>
 
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
             </template>
@@ -159,11 +165,11 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { ErrorBox, LoadingButton, StepperInput, Steps,STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
-import { BalanceItemCartItem, Group, RegisterItem } from '@stamhoofd/structures';
+import { BalanceItemCartItem, Group, OldRegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Watch } from '@simonbackx/vue-app-navigation/classes';
 
 import { Suggestion, SuggestionBuilder } from '../../classes/SuggestionBuilder';
 import GroupView from '../groups/GroupView.vue';
@@ -260,7 +266,7 @@ export default class CartView extends Mixins(NavigationMixin){
         this.loading = false
     }
 
-    imageSrc(item: RegisterItem): string | null {
+    imageSrc(item: OldRegisterItem): string | null {
         return (item.group.settings.squarePhoto ?? item.group.settings.coverPhoto)?.getPathForSize(100, 100) ?? null
     }
 
@@ -275,7 +281,7 @@ export default class CartView extends Mixins(NavigationMixin){
         }).setDisplayStyle("popup"))
     }
 
-    deleteItem(item: RegisterItem) {
+    deleteItem(item: OldRegisterItem) {
         this.$checkoutManager.cart.removeItem(item)
         this.$checkoutManager.saveCart()
     }

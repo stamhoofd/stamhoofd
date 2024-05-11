@@ -17,22 +17,24 @@
 
                 <STList>
                     <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" class="left-center">
-                        <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
-                            <img :src="imageSrc(registration)">
-                            <div>
-                                <span v-if="!registration.waitingList" class="icon green success" />
-                                <span v-else class="icon gray clock" />
-                            </div>
-                        </figure>
-                        <figure v-else slot="left" class="registration-image">
-                            <figure>
-                                <span>{{ getGroup(registration.groupId).settings.getShortCode(2) }}</span>
+                        <template #left>
+                            <figure v-if="imageSrc(registration)" class="registration-image">
+                                <img :src="imageSrc(registration)">
+                                <div>
+                                    <span v-if="!registration.waitingList" class="icon green success" />
+                                    <span v-else class="icon gray clock" />
+                                </div>
                             </figure>
-                            <div>
-                                <span v-if="!registration.waitingList" class="icon green success" />
-                                <span v-else class="icon gray clock" />
-                            </div>
-                        </figure>
+                            <figure v-else class="registration-image">
+                                <figure>
+                                    <span>{{ getGroup(registration.groupId).settings.getShortCode(2) }}</span>
+                                </figure>
+                                <div>
+                                    <span v-if="!registration.waitingList" class="icon green success" />
+                                    <span v-else class="icon gray clock" />
+                                </div>
+                            </figure>
+                        </template>
                         <h3 class="style-title-list">
                             {{ getGroup(registration.groupId).settings.name }}
                         </h3>
@@ -53,7 +55,7 @@
                     <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock" />
                 </h2>
                 <STList class="illustration-list">
-                    <MemberBox v-for="group in category.groups" :key="group.id" :group="group" :member="member" type="group" />
+                    <GroupRegisterMemberRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" />
                 </STList>
             </div>
 
@@ -68,12 +70,11 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { MemberWithRegistrations, Registration } from '@stamhoofd/structures';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
-
-import MemberBox from "../../components/MemberBox.vue";
+import GroupRegisterMemberRow from "../../components/GroupRegisterMemberRow.vue";
 import GroupsView from "./GroupsView.vue";
 
 @Component({
@@ -84,7 +85,7 @@ import GroupsView from "./GroupsView.vue";
         STListItem,
         Checkbox,
         BackButton,
-        MemberBox
+        GroupRegisterMemberRow
     }
 })
 export default class MemberChooseGroupsView extends Mixins(NavigationMixin){

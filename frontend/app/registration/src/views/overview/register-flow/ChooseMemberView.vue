@@ -37,11 +37,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { MemberWithRegistrations } from "@stamhoofd/structures";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
-import { createMemberComponent } from "../../members/details/createMemberComponent";
 import MemberChooseGroupsView from "../../members/MemberChooseGroupsView.vue";
 
 @Component({
@@ -78,10 +77,10 @@ export default class ChooseMemberView extends Mixins(NavigationMixin){
     }
 
     async addNewMember() {
-        const component = await createMemberComponent(this.$memberManager)
-        if (component) {
-            this.show(component)
-        }
+        // const component = await createMemberComponent(this.$memberManager)
+        // if (component) {
+        //     this.show(component)
+        // }
     }
 }
 </script>

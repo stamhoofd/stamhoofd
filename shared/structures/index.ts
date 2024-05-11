@@ -96,11 +96,11 @@ export * from "./src/members/RegistrationWithMember"
 export * from "./src/members/ReviewTime"
 
 // Register checkout
-export * from "./src/members/checkout/RegisterCart"
-export * from "./src/members/checkout/RegisterCartPriceCalculator"
-export * from './src/members/checkout/RegisterCartValidator'
-export * from "./src/members/checkout/RegisterCheckout"
-export * from "./src/members/checkout/RegisterItem"
+export * from "./src/members/checkout/OldRegisterCart"
+export * from "./src/members/checkout/OldRegisterCartPriceCalculator"
+export * from './src/members/checkout/OldRegisterCartValidator'
+export * from "./src/members/checkout/OldRegisterCheckout"
+export * from "./src/members/checkout/OldRegisterItem"
 export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop

@@ -1,27 +1,24 @@
 <template>
     <STListItem :selectable="true" class="member-box right-stack member-registration-block" @click="onClicked">
         <template #left>
-            <span v-if="type == 'member'" class="icon user" />
-            <template v-else>
-                <figure v-if="imageSrc" class="registration-image">
-                    <img :src="imageSrc">
-                    <div>
-                        <span v-if="waitingList" class="icon gray clock small" />
-                    </div>
+            <figure v-if="imageSrc" class="registration-image">
+                <img :src="imageSrc">
+                <div>
+                    <span v-if="waitingList" class="icon gray clock small" />
+                </div>
+            </figure>
+            <figure v-else class="registration-image">
+                <figure>
+                    <span>{{ group.settings.getShortCode(2) }}</span>
                 </figure>
-                <figure v-else class="registration-image">
-                    <figure>
-                        <span>{{ group.settings.getShortCode(2) }}</span>
-                    </figure>
-                    <div>
-                        <span v-if="waitingList" class="icon gray clock small" />
-                    </div>
-                </figure>
-            </template>
+                <div>
+                    <span v-if="waitingList" class="icon gray clock small" />
+                </div>
+            </figure>
         </template>
 
         <h4 class="style-title-list ">
-            {{ type == "member" ? member.name : group.settings.name }}
+            {{ group.settings.name }}
         </h4>
 
         <template #right>
@@ -35,11 +32,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { Group, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-
+import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Group, MemberWithRegistrations, OldRegisterItem } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 import GroupView from "../views/groups/GroupView.vue";
 
@@ -56,16 +52,12 @@ import GroupView from "../views/groups/GroupView.vue";
         price: Formatter.price
     }
 })
-export default class MemberBox extends Mixins(NavigationMixin){
+export default class GroupRegisterMemberRow extends Mixins(NavigationMixin){
     @Prop({ required: true })
         group: Group
 
     @Prop({ required: true })
         member: MemberWithRegistrations
-
-    @Prop({ default: "member" })
-        type: "group" | "member"
-
     
     Cart = this.$checkoutManager.cart
 
@@ -79,7 +71,7 @@ export default class MemberBox extends Mixins(NavigationMixin){
 
     get item() {
         // Waiting list or not?
-        return new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.canRegister.waitingList })
+        return new OldRegisterItem(this.member, this.group, { reduced: false, waitingList: this.canRegister.waitingList })
     }
 
     get waitingList() {
@@ -98,14 +90,8 @@ export default class MemberBox extends Mixins(NavigationMixin){
     }
 
     onClicked() {
-        if (this.type === "group") {
-            return this.openGroup()
-        }
-        
-        throw new Error('Member type is deprecated. Always show group!')
+        return this.openGroup()
     }
-
-
 }
 </script>
 
