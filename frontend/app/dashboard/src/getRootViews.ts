@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix,SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, LoginView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { PromiseView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -95,7 +95,8 @@ export async function getOrganizationSelectionRoot() {
             reactive_navigation_url: "/",
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
+                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'dashboard',
         },
@@ -156,7 +157,8 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
                 reactive_navigation_url: "auto/" + session.organization!.uri,
                 reactive_components: {
                     "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                    "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
+                    "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
+                    "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
                 },
                 stamhoofd_app: 'auto',
             },
@@ -312,7 +314,8 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
             reactive_navigation_url: "beheerders/" + session.organization!.uri,
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
+                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'dashboard',
         },

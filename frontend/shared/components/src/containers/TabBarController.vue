@@ -1,6 +1,6 @@
 <template>
     <div class="tab-bar-controller">
-        <header>
+        <header v-if="showTopBar">
             <div class="left">
                 <InheritComponent name="tabbar-left" />
             </div>
@@ -11,7 +11,7 @@
                             <span :class="'icon '+item.icon" />
                             <span>{{ item.name }}</span>
                             <span v-if="unref(item.badge)" class="bubble">{{ unref(item.badge) }}</span>
-                            <span v-if="item.isGroup" class="icon arrow-down-small gray"></span>
+                            <span v-if="item.isGroup" class="icon arrow-down-small gray" />
                         </div>
                     </button>
                 </template>
@@ -20,14 +20,28 @@
                 <InheritComponent name="tabbar-right" />
             </div>
         </header>
-        <main ref="mainElement">
+        <main ref="mainElement" :class="{hasBar: showTopBar || tabs.length > 1}">
             <FramedComponent v-if="root" :key="root.key" :root="root" />
         </main>
+
+        <footer v-if="!showTopBar && tabs.length > 1">
+            <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="(event) => selectTab(event, item)">
+                <div class="button text small column" :class="{ selected: selectedItem === item }">
+                    <span :class="'icon '+item.icon" />
+                    <span>
+                        {{ item.name }}
+                    </span>
+                    <span v-if="unref(item.badge)" class="bubble">{{ unref(item.badge) }}</span>
+                </div>
+            </button>
+        </footer>
     </div>
 </template>
 
 <script lang="ts">
 import { inject, shallowRef } from 'vue';
+
+import { useDeviceWidth } from '../VueGlobalHelper';
 import TabBarController from './TabBarController.vue';
 import TabBarDropdownView from './TabBarDropdownView.vue';
 
@@ -38,9 +52,10 @@ export function useTabBarController(): Ref<InstanceType<typeof TabBarController>
 </script>
 
 <script setup lang="ts">
-import { ComponentWithProperties, FramedComponent, HistoryManager, NavigationController, PushOptions, defineRoutes, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, PushOptions, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentPublicInstance, Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, provide, ref, unref } from 'vue';
+import { ComponentPublicInstance, computed, getCurrentInstance, nextTick, onBeforeUnmount, provide, Ref, ref, unref } from 'vue';
+
 import InheritComponent from './InheritComponent.vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
@@ -55,6 +70,21 @@ defineOptions({
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
 const tabs = computed(() => unref(props.tabs))
 const flatTabs = computed<TabBarItemWithComponent[]>(() => tabs.value.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
+const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties>|undefined> | undefined;
+const deviceWidth = useDeviceWidth()
+const showTopBar = computed(() => deviceWidth.value > 1100)
+
+provide('reactive_components', computed(() => {
+    if (!showTopBar.value) {
+        return unref(injectedComponents) ?? {};
+    }
+    // All displayed
+    return {
+        ...(unref(injectedComponents) ?? {}),
+        'tabbar-replacement': null
+    };
+}));
+
 
 const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
 
@@ -173,15 +203,34 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
         return selectItem(tab);
     }
 
+    if (!showTopBar.value) {
+        // Treat as a normal tab
+        return show({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(TabBarDropdownView, {
+                        tabs: tab.items,
+                        selectedItem: selectedItem,
+                        selectItem: selectItem
+                    })
+                }, {
+                    provide: {
+                        reactive_navigation_disable_url: true
+                    }
+                })
+            ]
+        })
+    }
+
     const padding = 15;
     let width = 400;
     const button = event.currentTarget as HTMLElement
     const bounds = button.getBoundingClientRect()
     const win = window,
-            doc = document,
-            docElem = doc.documentElement,
-            body = doc.getElementsByTagName("body")[0],
-            clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
+        doc = document,
+        docElem = doc.documentElement,
+        body = doc.getElementsByTagName("body")[0],
+        clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
 
     let left = bounds.left - padding;
 
@@ -331,10 +380,29 @@ defineExpose({
         }
     }
 
+    > footer {
+        height: var(--tab-bar-header-height);
+        border-top: $border-width-thin solid $color-border;
+        background: $color-background-shade;
+
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        grid-auto-flow: dense;
+            
+        > button {
+            min-width: 0;
+            overflow: hidden;
+        }
+    }
+
     > main {
         // Pass an update to the --vh because we removed some
         background: var(--color-current-background);
-        --vh: calc(var(--saved-vh, 1vh) - var(--tab-bar-header-height) / 100);
+
+        &.hasBar {
+            --vh: calc(var(--saved-vh, 1vh) - var(--tab-bar-header-height) / 100);
+        }
+        
         height: calc(var(--vh, 1vh) * 100);
 
         // No scrolling here allowed. Child components should manage this

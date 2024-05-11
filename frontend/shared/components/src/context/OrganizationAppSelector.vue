@@ -1,6 +1,12 @@
 <template>
     <nav class="st-view organization-app-switcher">
+        <STNavigationBar v-if="!popup" title="Kiezen" />
+
         <main>
+            <h1 v-if="!popup">
+                Kies een lokale groep
+            </h1>
+
             <template v-if="currentOptions.length">
                 <STList>
                     <STListItem v-for="option in currentOptions" :key="option.id" :selectable="true" element-name="button" class="left-center" @click="selectOption(option)">
@@ -52,7 +58,7 @@
                 </STListItem>
             </STList>
 
-            <hr>
+            <hr v-if="currentOptions.length || otherOptions.length">
 
             <button class="button text" type="button" @click="searchOrganizations">
                 <span class="icon search" />
@@ -63,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { usePopup } from '@simonbackx/vue-app-navigation';
 import { computed, Ref, shallowRef } from 'vue';
 
 import { PromiseComponent } from '../containers/AsyncComponent';
@@ -72,6 +79,7 @@ import ContextLogo from './ContextLogo.vue';
 import { Option, useContextOptions } from './hooks/useContextOptions';
 
 const options: Ref<Option[]> = shallowRef([]);
+const popup = usePopup();
 
 const {getDefaultOptions, selectOption, isCurrent} = useContextOptions()
 
