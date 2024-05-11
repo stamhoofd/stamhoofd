@@ -162,6 +162,12 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
 
 .st-navigation-bar-container {
     position: relative;
+
+    &.transparent {
+        > .st-navigation-bar {
+            background: transparent;
+        }
+    }
 }
 
 .st-navigation-bar-background {
@@ -233,10 +239,6 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
     background: var(--color-current-background, white);
     transition: background-color 0.3s, border-color 0.3s;
     z-index: 200;
-
-    &.transparent {
-        background: transparent;
-    }
 
     > div {
         display: flex;

@@ -60,8 +60,6 @@
 
 .stamhoofd-logo {
     display: block;
-    width: calc(var(--block-width, 40px) - 5px);
-    height: calc(var(--block-width, 40px) - 5px);
 
     .text {
         fill: $color-dark;
@@ -77,6 +75,8 @@
 
     &:last-child {
         display: none;
+        width: calc(var(--block-width, 40px) - 10px);
+        height: calc(var(--block-width, 40px) - 10px);
     }
 }
 
