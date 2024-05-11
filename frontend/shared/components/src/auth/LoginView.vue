@@ -6,7 +6,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" :autofocus="true" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" :autofocus="true" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
