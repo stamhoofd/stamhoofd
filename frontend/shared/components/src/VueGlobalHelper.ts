@@ -7,7 +7,7 @@ import { Formatter } from "@stamhoofd/utility";
 import { type App,computed, inject, Ref, ref, toRef } from "vue";
 import { configureCompat } from "vue";
 
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingView, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
 import STInputBox from "./inputs/STInputBox.vue";
@@ -187,6 +187,7 @@ export class VueGlobalHelper {
         app.component('Checkbox', Checkbox)
         app.component('Radio', Radio)
         app.component('LoadingView', LoadingView)
+        app.component('LoadingButton', LoadingButton)
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

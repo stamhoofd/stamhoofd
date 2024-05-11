@@ -99,7 +99,7 @@ export class DateColumnMatcher extends GeneralMatcher<Date> {
         return this.parse(text, current)
     }
     
-    parse(str: string, current?: Date|undefined) {
+    parse(str: string, _current?: Date|undefined) {
         const usa = false;
         const sep = this.getDateSeparator(str)
         const parts = str.split(sep)

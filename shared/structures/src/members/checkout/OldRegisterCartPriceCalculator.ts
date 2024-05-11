@@ -6,7 +6,7 @@ import { Registration } from "../Registration"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 /**
- * Represents both RegisterItem's
+ * Represents both OldRegisterItem's
  */
 interface RegisterItemWithPrice {
     memberId: string
@@ -26,7 +26,7 @@ interface RegisterItemWithPriceAndGroupPrices extends RegisterItemWithPrice {
     _category: GroupCategory
 }
 
-export class RegisterCartPriceCalculator {
+export class OldRegisterCartPriceCalculator {
     /**
      * Return an unique ID that is the same for all groups that should have equal family pricing (2nd, 3rd discount)
      */

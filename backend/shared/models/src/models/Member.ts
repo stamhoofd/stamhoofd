@@ -1,5 +1,5 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMemberWithRegistrations, Member as MemberStruct, MemberDetails, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
+import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -340,7 +340,7 @@ export class Member extends Model {
     }
 
     getStructureWithRegistrations(this: MemberWithRegistrations, forOrganization: null | boolean = null) {
-        return EncryptedMemberWithRegistrations.create({
+        return MemberWithRegistrationsBlob.create({
             ...this,
             registrations: this.registrations.map(r => r.getStructure()),
             details: this.details,

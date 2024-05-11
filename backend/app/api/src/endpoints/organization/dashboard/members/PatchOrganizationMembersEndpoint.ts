@@ -3,22 +3,22 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
-import { BalanceItemStatus, EncryptedMemberWithRegistrations, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItemStatus, MemberWithRegistrationsBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
-type ResponseBody = EncryptedMemberWithRegistrations[]
+type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
+type ResponseBody = MemberWithRegistrationsBlob[]
 
 /**
  * One endpoint to create, patch and delete members and their registrations and payments
  */
 
 export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(EncryptedMemberWithRegistrations as any, EncryptedMemberWithRegistrations.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]>>
+    bodyDecoder = new PatchableArrayDecoder(MemberWithRegistrationsBlob as any, MemberWithRegistrationsBlob.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<MemberWithRegistrationsBlob[]>>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {

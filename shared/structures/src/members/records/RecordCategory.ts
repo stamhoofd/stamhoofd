@@ -41,8 +41,8 @@ export class RecordCategory extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordSettings) })
     records: RecordSettings[] = []
 
-    @field({ decoder: PropertyFilter, version: 126, nullable: true })
-    filter: PropertyFilter<any> | null = null
+    @field({ decoder: PropertyFilter, version: 126, nullable: true, optional: true, field: 'filter' })
+    legacyFilter: PropertyFilter<any> | null = null
 
     getAllRecords(): RecordSettings[] {
         if (this.childCategories.length > 0) {
@@ -69,7 +69,7 @@ export class RecordCategory extends AutoEncoder {
     }
 
     isEnabled<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean) {
-        if (this.filter && !this.filter.enabledWhen.decode(filterDefinitions).doesMatch(filterValue)) {
+        if (this.legacyFilter && !this.legacyFilter.enabledWhen.decode(filterDefinitions).doesMatch(filterValue)) {
             return false
         }
 

@@ -21,7 +21,7 @@ describe("DateColumnMatcher", () => {
         const matcher = new DateColumnMatcher({
             name: 'Test',
             category: MatcherCategory.Member,
-            save(value, member) {
+            save() {
                 // todo
             },
         })
@@ -61,7 +61,7 @@ describe("DateColumnMatcher", () => {
         const matcher = new DateColumnMatcher({
             name: 'Test',
             category: MatcherCategory.Member,
-            save(value, member) {
+            save() {
                 // todo
             },
         })

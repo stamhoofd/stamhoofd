@@ -403,6 +403,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const jin = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Jin",
                 startDate: new Date(),
@@ -446,6 +447,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const akabe = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Akabe",
                 startDate: new Date(),
@@ -485,6 +487,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const leiding = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Leiding",
                 startDate: new Date(),
@@ -531,6 +534,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const leiding = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Leiding",
                 startDate: new Date(),
@@ -573,6 +577,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const akabe = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Akabe",
                 startDate: new Date(),
@@ -614,6 +619,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const interneGroep = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Interne benaming",
                 startDate: new Date(),
@@ -655,6 +661,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const kapoenen = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Kapoenen",
                 startDate: new Date(),
@@ -696,6 +703,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const kapoenen = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Kapoenen",
                 startDate: new Date(),
@@ -706,6 +714,7 @@ describe("Groepsadministratie Sync", () => {
         });
 
         const jin = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Jin",
                 startDate: new Date(),
@@ -752,6 +761,7 @@ describe("Groepsadministratie Sync", () => {
         };
 
         const interneGroep = Group.create({
+            organizationId: "test",
             settings: GroupSettings.create({
                 name: "Interne benaming",
                 startDate: new Date(),

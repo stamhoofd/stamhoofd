@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchC
 import { ErrorBox, useErrors, useOrganization, usePlatform } from "@stamhoofd/components"
 import { useOrganizationManager, usePlatformManager } from "@stamhoofd/networking"
 import { Organization, OrganizationPrivateMetaData, PermissionRoleDetailed, Platform, PlatformPrivateConfig, Version } from "@stamhoofd/structures"
-import { Ref, computed, ref } from "vue"
+import { computed, Ref, ref } from "vue"
 
 export function useRoles() {
     const organization = useOrganization()
@@ -73,7 +73,7 @@ export function usePatchRoles() {
             return
         }
         saving.value = true
-        errors.errorBox.value = null
+        errors.errorBox = null
     
         if (organization.value) {
             try {
@@ -81,14 +81,14 @@ export function usePatchRoles() {
                 await organizationManager.value.patch(organizationPatch.value)
                 succeededHandler()
             } catch (e) {
-                errors.errorBox.value = new ErrorBox(e)
+                errors.errorBox = new ErrorBox(e)
             }
         } else {
             try {
                 await platformManager.value.patch(platformPatch.value)
                 succeededHandler()
             } catch (e) {
-                errors.errorBox.value = new ErrorBox(e)
+                errors.errorBox = new ErrorBox(e)
             }
         }
     

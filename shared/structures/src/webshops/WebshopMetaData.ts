@@ -570,9 +570,17 @@ export class WebshopPrivateMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 59 })
     authorId = ""
 
+    /**
+     * @deprecated
+     * Use role resources instead
+     */
     @field({ decoder: PermissionsByRole, version: 60, optional: true })
     permissions = PermissionsByRole.create({})
 
+    /**
+     * @deprecated
+     * Use role resources instead
+     */
     @field({ decoder: PermissionsByRole, version: 202, optional: true })
     scanPermissions = PermissionsByRole.create({})
 

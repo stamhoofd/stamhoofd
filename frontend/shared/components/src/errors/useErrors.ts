@@ -1,10 +1,11 @@
-import { Ref, ref } from "vue";
+import { reactive } from "vue";
+
 import { ErrorBox } from "./ErrorBox";
 import { Validator } from "./Validator";
 
 export function useErrors() {
-    return {
-        errorBox: ref(null) as Ref<ErrorBox | null>,
+    return reactive({
+        errorBox: null as ErrorBox | null,
         validator: new Validator()
-    }
+    })
 }

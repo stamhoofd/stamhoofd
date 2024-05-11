@@ -1,12 +1,12 @@
 <template>
-    <form class=" st-view login-view" data-submit-last-field @submit.prevent="submit">
+    <form class="st-view login-view" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar title="Inloggen" />
         <main class="center small">
             <h1>Inloggen</h1>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" :autofocus="true" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
@@ -18,14 +18,8 @@
                         <span class="icon help" />
                     </button>
                 </template>
-                <input v-model="password" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
+                <input v-model="password" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
             </STInputBox>
-
-
-            <button class="button text" type="button" tabindex="-1" @click="help">
-                <span class="help icon" />
-                <span>Ik heb geen account</span>
-            </button>
 
             <LoadingButton :loading="loading" class="block bottom">
                 <button class="button primary full" type="submit">
@@ -33,139 +27,151 @@
                     <span>Inloggen</span>
                 </button>
             </LoadingButton>
+
+            <hr>
+            <p class="style-description-small">
+                Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
+            </p>
+
+            <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
+                <span>Account aanmaken</span>
+                <span class="icon arrow-right-small" />
+            </button>
         </main>
     </form>
 </template>
 
-<script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop, Ref } from "@simonbackx/vue-app-navigation/classes";
-import { AppManager, LoginHelper, UrlHelper } from '@stamhoofd/networking';
+<script lang="ts" setup>
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, defineRoutes, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { LoginHelper } from '@stamhoofd/networking';
+import { onMounted, ref } from 'vue';
 
-import { ErrorBox } from "../errors/ErrorBox";
-import STErrorsDefault from "../errors/STErrorsDefault.vue";
-import { Validator } from "../errors/Validator";
-import EmailInput from "../inputs/EmailInput.vue";
-import STInputBox from "../inputs/STInputBox.vue";
-import LoadingButton from "../navigation/LoadingButton.vue";
-import STNavigationBar from "../navigation/STNavigationBar.vue";
-import { CenteredMessage } from "../overlays/CenteredMessage";
-import ConfirmEmailView from "./ConfirmEmailView.vue";
-import ForgotPasswordView from "./ForgotPasswordView.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import { useErrors } from '../errors/useErrors';
+import EmailInput from '../inputs/EmailInput.vue';
+import { useContext } from '../VueGlobalHelper';
+import ConfirmEmailView from './ConfirmEmailView.vue';
+import ForgotPasswordView from './ForgotPasswordView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STErrorsDefault,
-        STInputBox,
-        LoadingButton,
-        EmailInput
-    },
-})
-export default class LoginView extends Mixins(NavigationMixin){
-    loading = false
-
-    @Prop({ default: ""})
-        initialEmail!: string
-
-    @Prop({ default: null})
-        lock!: string | null
-
-    email = this.initialEmail
-    password = ""
-
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-
-    // Prevent browsers from already autofocusing the input on animation
-    animating = true
-
-    get isNative() {
-        return AppManager.shared.isNative
+const props = withDefaults(
+    defineProps<{
+        initialEmail?: string
+        lock?: string | null
+    }>(), {
+        initialEmail: "",
+        lock: null
     }
+)
 
-    @Ref("emailInput")
-        emailInput!: EmailInput
-
-    mounted() {
-        this.email = this.initialEmail ? this.initialEmail : (this.$context.user?.email ?? "");
-
-        if (this.email.length == 0) {
-            setTimeout(() => {
-                this.animating = false;
-                // Needed the any here because typescript is getting mad only in production mode
-                if (this.emailInput) {
-                    (this.emailInput as any).focus()
-                }
-            }, 300);
-        } else {
-            setTimeout(() => {
-                // Needed the any here because typescript is getting mad only in production mode
-                this.animating = false;
-            }, 300);
-        }
-
-        UrlHelper.shared.clear()
-
-        // Reset url if we log out
-        console.log('seturl', '/login')
-        UrlHelper.setUrl("/login")
-    }
-
-    help() {
-        new CenteredMessage("Geen account", "Deze site is enkel voor beheerders van verenigingen. Ben je zelf een beheerder? Vraag aan een beheerder om jou een uitnodiging te sturen. Alleen zo kan je een account aanmaken. Ben je een ouder/lid? Dan moet je inloggen via het ledenportaal van jouw vereniging, vraag die link na bij jouw vereniging of kijk op hun website.").addCloseButton("Sluiten").show()
-    }
-
-    gotoPasswordForgot() {
-        this.show(new ComponentWithProperties(ForgotPasswordView, {
-            initialEmail: this.email,
-            isAdmin: true
-        }))
-    }
-
-    async submit() {
-        if (this.loading) {
-            return
-        }
-
-        const valid = await this.validator.validate()
-
-        if (!valid) {
-            return
-        }
-        
-        if (this.email.length < 3 || this.password.length < 5) {
-            new CenteredMessage("Vul eerst iets in", "Je hebt geen correcte gegevens ingevuld", "error").addCloseButton().show()   
-            return
-        }
-
-        this.loading = true
-        
-        try {
-            const result = await LoginHelper.login(this.$context, this.email, this.password)
-
-            if (result.verificationToken) {
-                this.present({
-                    components: [
-                        new ComponentWithProperties(ConfirmEmailView, { login: true, token: result.verificationToken, email: this.email })
-                    ],
-                    modalDisplayStyle: "popup"
-                })
-            } else {
-                this.dismiss({ force: true });
-            }
-        } catch (e) {
-            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: "invalid_signature",
-                    message: "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven."
-                }))
-            } else {
-                this.errorBox = new ErrorBox(e)
-            }  
-        }
-        this.loading = false;
-    }
+enum Routes {
+    ForgotPassword = "forgotPassword",
+    Signup = "signup"
 }
+
+defineRoutes([
+    {
+        name: Routes.ForgotPassword,
+        url: 'wachtwoord-vergeten',
+        component: ForgotPasswordView as any,
+        paramsToProps() {
+            return {
+                initialEmail: email.value
+            }
+        },
+    },
+    {
+        name: Routes.Signup,
+        url: 'account-aanmaken',
+        component: async () => (await import('./SignupView.vue')).default,
+        paramsToProps() {
+            return {
+                initialEmail: email.value
+            }
+        },
+    }
+])
+
+const errors = useErrors()
+const $context = useContext();
+const present = usePresent()
+const dismiss = useDismiss()
+const $navigate = useNavigate();
+
+const loading = ref(false)
+const email = ref(props.initialEmail)
+const password = ref("");
+const animating = ref(true)
+const emailInput = ref<EmailInput | null>(null)
+
+async function submit() {
+    if (loading.value) {
+        return
+    }
+ 
+    const valid = await errors.validator.validate()
+ 
+    if (!valid) {
+        return
+    }
+         
+    if (email.value.length < 3 || password.value.length < 5) {
+        errors.errorBox = new ErrorBox(
+            new SimpleError({
+                code: "empty_fields",
+                message: "Je hebt geen correcte gegevens ingevuld"
+            })
+        )
+        return;
+    }
+ 
+    loading.value = true
+         
+    try {
+        const result = await LoginHelper.login($context.value, email.value, password.value)
+ 
+        if (result.verificationToken) {
+            await present({
+                components: [
+                    new ComponentWithProperties(ConfirmEmailView, { 
+                        login: true, 
+                        token: result.verificationToken, 
+                        email: email.value
+                    })
+                ],
+                modalDisplayStyle: "sheet"
+            })
+        } else {
+            await dismiss({ force: true });
+        }
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    loading.value = false;
+}
+
+async function gotoPasswordForgot() {
+    await $navigate(Routes.ForgotPassword)
+}
+
+async function openSignup() {
+    await $navigate(Routes.Signup)
+}
+
+onMounted(() => {
+    if (props.initialEmail.length == 0) {
+        setTimeout(() => {
+            animating.value = false;
+            // Needed the any here because typescript is getting mad only in production mode
+            if (emailInput.value) {
+                emailInput.value.focus()
+            }
+        }, 300);
+    } else {
+        setTimeout(() => {
+            // Needed the any here because typescript is getting mad only in production mode
+            animating.value = false;
+        }, 300);
+    }
+});
 </script>

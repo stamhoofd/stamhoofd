@@ -1,6 +1,6 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { Group, GroupFactory, Member, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsByRole } from "@stamhoofd/structures";
+import { PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsByRole, PermissionsResourceType, ResourcePermissions } from "@stamhoofd/structures";
 
 import { testServer } from "../../../../../tests/helpers/TestServer";
 import { GetGroupMembersEndpoint } from './GetGroupMembersEndpoint';
@@ -25,12 +25,20 @@ describe("Endpoint.GetGroupMembersEndpoint", () => {
         organization = await new OrganizationFactory({roles: [role, role2]}).create()
         group = await new GroupFactory({ 
             organization, 
-            permissions: PermissionsByRole.create({read: [role]}) 
         }).create()
-        await new GroupFactory({ 
+        
+        const group2 = await new GroupFactory({ 
             organization, 
-            permissions: PermissionsByRole.create({full: [role2]}) 
          }).create()
+
+        role.resources.set(PermissionsResourceType.Groups, new Map())
+        role.resources.get(PermissionsResourceType.Groups)!.set(group.id, ResourcePermissions.create({level: PermissionLevel.Read}))
+
+        role2.resources.set(PermissionsResourceType.Groups, new Map())
+        role2.resources.get(PermissionsResourceType.Groups)!.set(group2.id, ResourcePermissions.create({level: PermissionLevel.Full}))
+
+        await organization.save()
+ 
         members = await new MemberFactory({ organization }).createMultiple(5)
 
         // Create role
@@ -78,7 +86,7 @@ describe("Endpoint.GetGroupMembersEndpoint", () => {
         r.headers.authorization = "Bearer " + token.accessToken
 
         const response = await testServer.test(endpoint, r);
-        expect(response.body.data).toHaveLength(members.length);
+        expect(response.body).toHaveLength(members.length);
     });
 
     test("Organizations are properly scoped even if a user from a different organization has the required role", async () => {

@@ -3,17 +3,18 @@ import { GroupCategory, GroupCategorySettings } from "../../GroupCategory"
 import { GroupPrice, GroupPrices } from "../../GroupPrices"
 import { GroupSettings } from "../../GroupSettings"
 import { PaymentConfiguration } from "../../PaymentConfiguration"
-import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistrations"
 import { MemberDetails } from "../MemberDetails"
+import { MemberWithRegistrationsBlob } from "../MemberWithRegistrationsBlob"
 import { Registration } from "../Registration"
-import { IDRegisterCart } from "./RegisterCart"
-import { IDRegisterItem } from "./RegisterItem"
+import { OldIDRegisterCart } from "./OldRegisterCart"
+import { OldIDRegisterItem } from "./OldRegisterItem"
 
 const defaultPaymentConfiguration = PaymentConfiguration.create({})
 
 describe("Test register cart price calculations", () => {
     test("Family discount best combination", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -42,6 +43,7 @@ describe("Test register cart price calculations", () => {
 
         // 
         const group2 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -69,6 +71,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const group3 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -102,38 +105,38 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const tom = EncryptedMemberWithRegistrations.create({
+        const tom = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
@@ -167,6 +170,7 @@ describe("Test register cart price calculations", () => {
 
     test("Family discount 4 members", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -195,6 +199,7 @@ describe("Test register cart price calculations", () => {
 
         // 
         const group2 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -221,6 +226,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const group3 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -248,6 +254,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const group4 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -272,50 +279,50 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const tom = EncryptedMemberWithRegistrations.create({
+        const tom = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const linda = EncryptedMemberWithRegistrations.create({
+        const linda = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group4.id,
             memberId: linda.id,
             reduced: false,
@@ -354,6 +361,7 @@ describe("Test register cart price calculations", () => {
 
     test("With existing registration", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -382,6 +390,7 @@ describe("Test register cart price calculations", () => {
 
         // 
         const group2 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -408,6 +417,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const group3 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -441,38 +451,39 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group1.organizationId,
                     groupId: group1.id,
                     cycle: group1.cycle,
                     registeredAt: new Date()
                 })
             ]
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const tom = EncryptedMemberWithRegistrations.create({
+        const tom = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
+        const cart = OldIDRegisterCart.create({})
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
@@ -500,6 +511,7 @@ describe("Test register cart price calculations", () => {
 
     test("With two existing registration", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -528,6 +540,7 @@ describe("Test register cart price calculations", () => {
 
         // 
         const group2 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -554,6 +567,7 @@ describe("Test register cart price calculations", () => {
         })
 
         const group3 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -587,44 +601,46 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group1.organizationId,
                     groupId: group1.id,
                     cycle: group1.cycle,
                     registeredAt: new Date()
                 })
             ]
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group1.organizationId,
                     groupId: group1.id,
                     cycle: group1.cycle,
                     registeredAt: new Date()
                 })
             ]
         })
-        const tom = EncryptedMemberWithRegistrations.create({
+        const tom = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
+        const cart = OldIDRegisterCart.create({})
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group3.id,
             memberId: tom.id,
             reduced: false,
@@ -647,6 +663,7 @@ describe("Test register cart price calculations", () => {
 
     test("With reduced price", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -678,38 +695,38 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const tom = EncryptedMemberWithRegistrations.create({
+        const tom = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: alice.id,
             reduced: true,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: tom.id,
             reduced: false,
@@ -744,6 +761,7 @@ describe("Test register cart price calculations", () => {
 
     test("Group only discounts", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -773,6 +791,7 @@ describe("Test register cart price calculations", () => {
 
         // 
         const group2 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -806,44 +825,45 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group2.organizationId,
                     groupId: group2.id,
                     cycle: group2.cycle,
                     registeredAt: new Date()
                 })
             ]
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
-        const tom = EncryptedMemberWithRegistrations.create({
+        const tom = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: tom.id,
             reduced: false,
@@ -877,6 +897,7 @@ describe("Test register cart price calculations", () => {
 
     test("Discount if same member registers for multiple groups", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -906,6 +927,7 @@ describe("Test register cart price calculations", () => {
 
         // 
         const group2 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -934,39 +956,40 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group2.organizationId,
                     groupId: group2.id,
                     cycle: group2.cycle,
                     registeredAt: new Date()
                 })
             ]
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: alice.id,
             reduced: false,
@@ -1000,6 +1023,7 @@ describe("Test register cart price calculations", () => {
 
     test("Combination of group and category based discounts", () => {
         const group1 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -1030,6 +1054,7 @@ describe("Test register cart price calculations", () => {
 
         // 
         const group2 = Group.create({
+            organizationId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -1062,39 +1087,40 @@ describe("Test register cart price calculations", () => {
             })
         })
 
-        const bart = EncryptedMemberWithRegistrations.create({
+        const bart = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: [
                 Registration.create({
+                    organizationId: group2.organizationId,
                     groupId: group2.id,
                     cycle: group2.cycle,
                     registeredAt: new Date()
                 })
             ]
         })
-        const alice = EncryptedMemberWithRegistrations.create({
+        const alice = MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({}),
             users: [],
             registrations: []
         })
 
-        const cart = IDRegisterCart.create({})
-        cart.items.push(IDRegisterItem.create({
+        const cart = OldIDRegisterCart.create({})
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: bart.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group2.id,
             memberId: alice.id,
             reduced: false,
             waitingList: false
         }))
 
-        cart.items.push(IDRegisterItem.create({
+        cart.items.push(OldIDRegisterItem.create({
             groupId: group1.id,
             memberId: alice.id,
             reduced: false,

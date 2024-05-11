@@ -44,7 +44,7 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
         
         return new Response(
-            AuthenticatedStructures.webshop(webshop)
+            await AuthenticatedStructures.webshop(webshop)
         );
     }
 }

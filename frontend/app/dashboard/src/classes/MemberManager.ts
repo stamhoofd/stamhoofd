@@ -2,7 +2,7 @@
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberManagerBase, SessionContext } from '@stamhoofd/networking';
-import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
+import { Gender, Group, MemberWithRegistrations, MemberWithRegistrationsBlob, OldRegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 
@@ -36,7 +36,7 @@ export class MemberManager extends MemberManagerBase {
         }
     }
 
-    decryptMembersWithRegistrations(data: EncryptedMemberWithRegistrations[]): MemberWithRegistrations[] {
+    decryptMembersWithRegistrations(data: MemberWithRegistrationsBlob[]): MemberWithRegistrations[] {
         const members: MemberWithRegistrations[] = []
         const groups = this.$context.organization!.groups
 
@@ -94,19 +94,19 @@ export class MemberManager extends MemberManagerBase {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/group/" + groupIds[0] + "/members",
-            decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)),
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
             query: { waitingList, cycleOffset },
             owner
         })
 
-        return this.decryptMembersWithRegistrations(response.data.data)
+        return this.decryptMembersWithRegistrations(response.data)
     }
 
     getRegistrationsPatchArray(): ConvertArrayToPatchableArray<Registration[]> {
         return new PatchableArray()
     }
 
-    getPatchArray(): ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]> {
+    getPatchArray(): ConvertArrayToPatchableArray<MemberWithRegistrationsBlob[]> {
         return new PatchableArray()
     }
 
@@ -114,8 +114,8 @@ export class MemberManager extends MemberManagerBase {
      * Return a list of patches that is needed to create users that provide all parents and members access to the given members
      * OR that removes access in some situations
      */
-    getMembersAccessPatch(members: MemberWithRegistrations[]): PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> {
-        const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+    getMembersAccessPatch(members: MemberWithRegistrations[]): PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> {
+        const encryptedMembers: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
         for (const member of members) {
 
             // Check if this user has missing users
@@ -146,7 +146,7 @@ export class MemberManager extends MemberManagerBase {
 
             if (missing.changes.length > 0) {
                 encryptedMembers.addPatch(
-                    EncryptedMemberWithRegistrations.patch({
+                    MemberWithRegistrationsBlob.patch({
                         id: member.id,
                         users: missing
                     })
@@ -162,20 +162,20 @@ export class MemberManager extends MemberManagerBase {
      */
     async updateMembersAccess(members: MemberWithRegistrations[]) {
         // Update the users that are connected to these members
-        const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
+        const encryptedMembers: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = this.getMembersAccessPatch(members)
 
         if (encryptedMembers.changes.length > 0) {
             await this.patchMembersAndSync(members, encryptedMembers)
         }
     }   
 
-    getEncryptedMembersPatch(members: MemberWithRegistrations[]): PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> {
+    getEncryptedMembersPatch(members: MemberWithRegistrations[]): PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> {
         // Update the users that are connected to these members
-        const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
+        const encryptedMembers: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = this.getMembersAccessPatch(members)
 
         // Aldo include encryption blobs
-        const p = this.getEncryptedMembers(members)
-        encryptedMembers.merge(p.members as any) // we can merge since it's a subtype
+        const p = this.getDetailsOverridePatch(members)
+        encryptedMembers.merge(p)
         return encryptedMembers
     }
     
@@ -198,12 +198,12 @@ export class MemberManager extends MemberManagerBase {
         }
     }
 
-    async patchMembers(patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {
+    async patchMembers(patch: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>, shouldRetry = true) {
         const session = this.$context
         const response = await session.authenticatedServer.request({
             method: "PATCH",
             path: "/organization/members",
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
+            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
             body: patch,
             shouldRetry
         })
@@ -228,7 +228,7 @@ export class MemberManager extends MemberManagerBase {
     /**
      * Patch members and update the data of members instead of creating new instances
      */
-    async patchMembersAndSync(members: MemberWithRegistrations[], patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {
+    async patchMembersAndSync(members: MemberWithRegistrations[], patch: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>, shouldRetry = true) {
         const updated = await this.patchMembers(patch, shouldRetry)
         return this.sync(members, updated)
     }
@@ -286,7 +286,7 @@ export class MemberManager extends MemberManagerBase {
     }
 
     async deleteMembers(members: MemberWithRegistrations[]) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
         const sizeUpdater = new GroupSizeUpdater();
 
         for (const member of members) {
@@ -311,11 +311,11 @@ export class MemberManager extends MemberManagerBase {
     }
 
     async unregisterMembers(members: MemberWithRegistrations[], groups: Group[] | null = null, cycleOffset = 0, waitingList = false) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
         const sizeUpdater = new GroupSizeUpdater();
 
         for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+            const patchMember = MemberWithRegistrationsBlob.patch({ id: member.id })
 
             for (const registration of member.filterRegistrations({groups, waitingList, cycleOffset})) {
                 patchMember.registrations.addDelete(registration.id)
@@ -343,18 +343,18 @@ export class MemberManager extends MemberManagerBase {
     }
 
     async acceptFromWaitingList(members: MemberWithRegistrations[], groups: Group[] | null = null, cycleOffset = 0) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
 
         const sizeUpdater = new GroupSizeUpdater();
 
         for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+            const patchMember = MemberWithRegistrationsBlob.patch({ id: member.id })
 
             for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: true})) {
                 const group = member.allGroups.find(g => g.id === registration.groupId)
                 let price: number | undefined = undefined
                 if (group) {
-                    price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
+                    price = OldRegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
                 }
 
                 patchMember.registrations.addPatch(Registration.patch({
@@ -381,12 +381,12 @@ export class MemberManager extends MemberManagerBase {
     }
 
     async registerMembers(members: MemberWithRegistrations[], group: Group, cycle: number, waitingList: boolean) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
 
         const sizeUpdater = new GroupSizeUpdater()
 
         for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+            const patchMember = MemberWithRegistrationsBlob.patch({ id: member.id })
         
             // Check if we already have a registration for this group and cycle combination
             const registration = member.registrations.find(r => r.groupId === group.id && r.cycle === cycle);
@@ -395,7 +395,7 @@ export class MemberManager extends MemberManagerBase {
                     sizeUpdater.add({groupId: group.id, waitingList: true, cycle: registration.cycle}, -1);
                     sizeUpdater.add({groupId: group.id, waitingList: false, cycle: registration.cycle}, 1);
 
-                    const price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
+                    const price = OldRegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
                     
                     // Do a patch to move this member from the waiting list
                     patchMember.registrations.addPatch(Registration.patch({
@@ -414,13 +414,14 @@ export class MemberManager extends MemberManagerBase {
             }
 
             const reg = Registration.create({
+                organizationId: this.$context.organization!.id,
                 groupId: group.id,
                 cycle: cycle,
                 waitingList,
                 registeredAt: new Date()
             })
 
-            reg.price = RegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
+            reg.price = OldRegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], this.$context.organization!.groups, this.$context.organization!.meta.categories)
             patchMember.registrations.addPut(reg)
 
             sizeUpdater.add({groupId: group.id, waitingList, cycle}, 1)
@@ -441,12 +442,12 @@ export class MemberManager extends MemberManagerBase {
         if (newCycleOffset === cycleOffset) {
             return;
         }
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
 
         const sizeUpdater = new GroupSizeUpdater()
 
         for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+            const patchMember = MemberWithRegistrationsBlob.patch({ id: member.id })
 
             for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList})) {
                 // Check if already has a registratino with these details, skip otherwise
@@ -485,11 +486,11 @@ export class MemberManager extends MemberManagerBase {
     }
 
     async moveRegistrations(members: MemberWithRegistrations[], groups: Group[] | null, cycleOffset: number, waitingList: boolean, newGroup: Group) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
         const sizeUpdater = new GroupSizeUpdater()
 
         for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+            const patchMember = MemberWithRegistrationsBlob.patch({ id: member.id })
 
             for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList})) {
                 // Check if already has a registratino with these details, skip otherwise
@@ -529,11 +530,11 @@ export class MemberManager extends MemberManagerBase {
     }
 
     async moveToWaitingList(members: MemberWithRegistrations[], groups: Group[] | null = null, cycleOffset = 0) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray()
         const sizeUpdater = new GroupSizeUpdater()
 
         for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+            const patchMember = MemberWithRegistrationsBlob.patch({ id: member.id })
 
             for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: false})) {
                 const group = member.allGroups.find(g => g.id === registration.groupId)

@@ -37,10 +37,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
     loading = false
 
     @Prop({ default: ""})
-    initialEmail!: string
-
-    @Prop({ default: false})
-    isAdmin!: boolean
+        initialEmail!: string
 
     email = this.initialEmail
     validator = new Validator()

@@ -6,18 +6,18 @@ import { Organization } from '../../Organization';
 import { PaymentMethod } from '../../PaymentMethod';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from '../MemberWithRegistrations';
-import { IDRegisterCart, RegisterCart } from './RegisterCart';
+import { OldIDRegisterCart, OldRegisterCart } from './OldRegisterCart';
 
 
 /**
  * Contains all information about a given checkout
  */
-export class RegisterCheckout {
-    cart = new RegisterCart()
+export class OldRegisterCheckout {
+    cart = new OldRegisterCart()
     paymentMethod = PaymentMethod.Unknown
 
-    convert(): IDRegisterCheckout {
-        return IDRegisterCheckout.create(Object.assign({}, this, {
+    convert(): OldIDRegisterCheckout {
+        return OldIDRegisterCheckout.create(Object.assign({}, this, {
             cart: this.cart.convert(),
         }))
     }
@@ -27,15 +27,15 @@ export class RegisterCheckout {
 /**
  * Contains all information about a given checkout
  */
-export class IDRegisterCheckout extends AutoEncoder {
-    @field({ decoder: IDRegisterCart })
-    cart = IDRegisterCart.create({})
+export class OldIDRegisterCheckout extends AutoEncoder {
+    @field({ decoder: OldIDRegisterCart })
+    cart = OldIDRegisterCart.create({})
 
     @field({ decoder: new EnumDecoder(PaymentMethod) })
     paymentMethod = PaymentMethod.Unknown
 
-    convert(organization: Organization, members: MemberWithRegistrations[]): RegisterCheckout {
-        const checkout = new RegisterCheckout()
+    convert(organization: Organization, members: MemberWithRegistrations[]): OldRegisterCheckout {
+        const checkout = new OldRegisterCheckout()
         checkout.cart = this.cart.convert(organization, members)
         checkout.paymentMethod = this.paymentMethod
         return checkout

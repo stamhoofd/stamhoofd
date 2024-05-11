@@ -6,13 +6,13 @@ import { Group } from '../../Group';
 import { GroupCategory } from '../../GroupCategory';
 import { Organization } from '../../Organization';
 import { MemberWithRegistrations } from '../MemberWithRegistrations';
-import { RegisterCartValidator } from './RegisterCartValidator';
+import { OldRegisterCartValidator } from './OldRegisterCartValidator';
 import { UnknownMemberWithRegistrations } from './UnknownMemberWithRegistrations';
 
 /**
  * Version destined for the server and client side storage
  */
-export class IDRegisterItem extends AutoEncoder {
+export class OldIDRegisterItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
     memberId: string
 
@@ -31,7 +31,7 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder})
     calculatedPrice = 0
 
-    convert(organization: Organization, members: MemberWithRegistrations[]): RegisterItem | null {
+    convert(organization: Organization, members: MemberWithRegistrations[]): OldRegisterItem | null {
         const group = organization.groups.find(g => g.id === this.groupId)
         if (!group) {
             return null
@@ -40,20 +40,20 @@ export class IDRegisterItem extends AutoEncoder {
         if (!member) {
             return null
         }
-        return new RegisterItem(member, group, this)
+        return new OldRegisterItem(member, group, this)
     }
 
-    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (IDRegisterItem | RegisterItem)[]) {
-        RegisterCartValidator.validateItem(this, family, groups, categories, previousItems)
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (OldIDRegisterItem | OldRegisterItem)[]) {
+        OldRegisterCartValidator.validateItem(this, family, groups, categories, previousItems)
     }
 }
 
 /**
  * Used in memory in the client
- * Do not extend IDRegisterItem to prevent leaking information when encoding a RegisterItem as IDRegisterItem.
+ * Do not extend OldIDRegisterItem to prevent leaking information when encoding a OldRegisterItem as OldIDRegisterItem.
  * This version is not encodeable
  */
-export class RegisterItem {
+export class OldRegisterItem {
     member: MemberWithRegistrations
     group: Group
     reduced = false
@@ -85,16 +85,16 @@ export class RegisterItem {
         this.waitingList = settings.waitingList
     }
 
-    convert(): IDRegisterItem {
-        return IDRegisterItem.create(Object.assign({
+    convert(): OldIDRegisterItem {
+        return OldIDRegisterItem.create(Object.assign({
             memberId: this.member.id,
             groupId: this.group.id,
             calculatedPrice: this.calculatedPrice
         }, this))
     }
 
-    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (IDRegisterItem | RegisterItem)[]) {
-        RegisterCartValidator.validateItem(this, family, groups, categories, previousItems)
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (OldIDRegisterItem | OldRegisterItem)[]) {
+        OldRegisterCartValidator.validateItem(this, family, groups, categories, previousItems)
     }
 }
 

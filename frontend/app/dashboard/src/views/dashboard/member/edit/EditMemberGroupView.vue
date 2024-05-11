@@ -23,17 +23,19 @@
                             {{ group.settings.name }}
                         </h2>
 
-                        <template #right><button v-if="category.settings.maximumRegistrations === 1 && getSelectedGroupForCategory(category) && getSelectedGroupForCategory(category).id === group.id" type="button" class="button text gray" @click.stop.prevent="setSelectedGroupForCategory(category, null)">
-                            <span class="icon trash" />
-                            <span>Verwijderen</span>
-                        </button></template>
+                        <template #right>
+                            <button v-if="category.settings.maximumRegistrations === 1 && getSelectedGroupForCategory(category) && getSelectedGroupForCategory(category).id === group.id" type="button" class="button text gray" @click.stop.prevent="setSelectedGroupForCategory(category, null)">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                        </template>
                     </STListItem>
                 </STList>
             </div>
         </main>
 
         <STToolbar>
-            <template #left v-if="pendingRegistrations.length > 0">
+            <template v-if="pendingRegistrations.length > 0" #left>
                 <template v-if="!isNew">
                     {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'wijziging' : 'wijzigingen' }}
                 </template>
@@ -41,11 +43,13 @@
                     {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'inschrijving' : 'inschrijvingen' }}
                 </template>
             </template>
-            <template #right><LoadingButton :loading="loading">
-                <button class="button primary" type="button" @click="save">
-                    Opslaan
-                </button>
-            </LoadingButton></template>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary" type="button" @click="save">
+                        Opslaan
+                    </button>
+                </LoadingButton>
+            </template>
         </STToolbar>
     </div>
 </template>
@@ -54,10 +58,10 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton, PhoneInput, Radio, SegmentedControl, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategoryTree, MemberDetails, MemberWithRegistrations, RegisterCartPriceCalculator, RegisterCartValidator, Registration, UnknownMemberWithRegistrations } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Group, GroupCategoryTree, MemberDetails, MemberWithRegistrations, OldRegisterCartPriceCalculator, OldRegisterCartValidator, Registration, UnknownMemberWithRegistrations } from "@stamhoofd/structures";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
 
@@ -139,7 +143,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                     registrations: [],
                     details: this.memberDetails
                 }
-                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, this.$organization.getGroupsForPermissions(this.$context.organizationPermissions), this.$organization.availableCategories, [])
+                const canRegister = OldRegisterCartValidator.canRegister(member, g, this.familyManager.members, this.$organization.getGroupsForPermissions(this.$context.organizationPermissions), this.$organization.availableCategories, [])
                 return !canRegister.closed || canRegister.waitingList
             }
         })
@@ -350,13 +354,14 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
 
 
                     const registration = Registration.create({
+                        organizationId: this.$organization.id,
                         groupId: change.group.id,
                         cycle: change.cycle,
                         waitingList: change.waitingList,
                         registeredAt: new Date()
                     })
 
-                    registration.price = RegisterCartPriceCalculator.calculateSinglePrice(this.member, registration, this.familyManager.members, this.$organization.groups, this.$organization.meta.categories)
+                    registration.price = OldRegisterCartPriceCalculator.calculateSinglePrice(this.member, registration, this.familyManager.members, this.$organization.groups, this.$organization.meta.categories)
                     patchRegistrations.addPut(
                         registration
                     )
@@ -377,6 +382,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                     }
 
                     const registration = Registration.create({
+                        organizationId: this.$organization.id,
                         groupId: change.group.id,
                         cycle: change.cycle,
                         waitingList: change.waitingList,
@@ -384,7 +390,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                         registeredAt: new Date()
                     });
 
-                    registration.price = RegisterCartPriceCalculator.calculateSinglePriceForNewMember(this.memberDetails, registration, this.familyManager.members, this.$organization.groups, this.$organization.meta.categories)
+                    registration.price = OldRegisterCartPriceCalculator.calculateSinglePriceForNewMember(this.memberDetails, registration, this.familyManager.members, this.$organization.groups, this.$organization.meta.categories)
                     registrations.push(
                         registration
                     )

@@ -9,15 +9,15 @@ import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
 import { Organization } from '../Organization';
 import { UmbrellaOrganization } from '../UmbrellaOrganization';
-import { CanRegisterResponse, RegisterCartValidator } from './checkout/RegisterCartValidator';
-import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
-import { EncryptedMemberWithRegistrations } from './EncryptedMemberWithRegistrations';
+import { CanRegisterResponse, OldRegisterCartValidator } from './checkout/OldRegisterCartValidator';
+import { OldIDRegisterItem, OldRegisterItem } from './checkout/OldRegisterItem';
 import { Gender } from './Gender';
+import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob';
 import { MemberDetailsWithGroups } from './OrganizationRecordsConfiguration';
 import { RecordType } from './records/RecordSettings';
 import { Registration } from './Registration';
 
-export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
+export class MemberWithRegistrations extends MemberWithRegistrationsBlob {
     // Calculated properties for convenience
     @field({ decoder: new ArrayDecoder(Registration), optional: true })
     activeRegistrations: Registration[] = []
@@ -58,10 +58,10 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
      * Return true if this member was registered in the previous year (current doesn't count)
      */
     get isExistingMember(): boolean {
-        return RegisterCartValidator.isExistingMember(this, this.allGroups)
+        return OldRegisterCartValidator.isExistingMember(this, this.allGroups)
     }
 
-    static fromMember(member: EncryptedMemberWithRegistrations, groups: Group[]) {
+    static fromMember(member: MemberWithRegistrationsBlob, groups: Group[]) {
         const m = MemberWithRegistrations.create(member)
         m.fillGroups(groups)
         return m
@@ -142,8 +142,8 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
         return [...emails]
     }
 
-    canRegister(group: Group, family: MemberWithRegistrations[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): CanRegisterResponse {
-        return RegisterCartValidator.canRegister(this, group, family, this.allGroups, categories, cart)
+    canRegister(group: Group, family: MemberWithRegistrations[], categories: GroupCategory[], cart: (OldIDRegisterItem | OldRegisterItem)[]): CanRegisterResponse {
+        return OldRegisterCartValidator.canRegister(this, group, family, this.allGroups, categories, cart)
     }
 
     /**

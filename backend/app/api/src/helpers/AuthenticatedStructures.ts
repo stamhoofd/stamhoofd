@@ -56,15 +56,15 @@ export class AuthenticatedStructures {
         return group.getPrivateStructure()
     }
 
-    static webshop(webshop: Webshop) {
-        if (Context.optionalAuth?.canAccessWebshop(webshop)) {
+    static async webshop(webshop: Webshop) {
+        if (await Context.optionalAuth?.canAccessWebshop(webshop)) {
             return PrivateWebshop.create(webshop)
         }
         return WebshopStruct.create(webshop)
     }
 
     static async organization(organization: Organization): Promise<OrganizationStruct> {
-        if (Context.optionalAuth?.canAccessPrivateOrganizationData(organization)) {
+        if (await Context.optionalAuth?.canAccessPrivateOrganizationData(organization)) {
             const groups = await Group.getAll(organization.id)
             const webshops = await Webshop.where({ organizationId: organization.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
             const webshopStructures: WebshopPreview[] = [] 

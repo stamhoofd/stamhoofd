@@ -5,7 +5,7 @@ import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
 import { WaitingListType } from "../../GroupSettings"
 import { MemberWithRegistrations } from "../MemberWithRegistrations"
-import { IDRegisterItem, RegisterItem } from "./RegisterItem"
+import { OldIDRegisterItem, OldRegisterItem } from "./OldRegisterItem"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 export type CanRegisterResponse = { closed: boolean; waitingList: boolean; message?: string; description?: string, invited: boolean};
@@ -14,11 +14,11 @@ export type CanRegisterResponse = { closed: boolean; waitingList: boolean; messa
  * Class that can validate a Cart and registrations.
  * This is usefull to share the validation between backend and frontend (for both the encrypted and non-encrypted versions)
  */
-export class RegisterCartValidator {
+export class OldRegisterCartValidator {
     static isAlreadyRegistered(member: UnknownMemberWithRegistrations, group: Group, waitingList: boolean) {
         return !!member.registrations.find(r => r.groupId === group.id && (waitingList || r.registeredAt !== null) && r.deactivatedAt === null && r.waitingList === waitingList && r.cycle === group.cycle)
     }
-    static canRegister(member: UnknownMemberWithRegistrations, group: Group, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): CanRegisterResponse {
+    static canRegister(member: UnknownMemberWithRegistrations, group: Group, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], cart: (OldIDRegisterItem | OldRegisterItem)[]): CanRegisterResponse {
         // Already registered
         if (this.isAlreadyRegistered(member, group, false)) {
             return {
@@ -259,7 +259,7 @@ export class RegisterCartValidator {
         }
     }
 
-    static getAlreadyInCartDescription({member, group, waitingList, cart}: {member: UnknownMemberWithRegistrations, group: Group, waitingList: boolean, cart: (IDRegisterItem | RegisterItem)[]}) {
+    static getAlreadyInCartDescription({member, group, waitingList, cart}: {member: UnknownMemberWithRegistrations, group: Group, waitingList: boolean, cart: (OldIDRegisterItem | OldRegisterItem)[]}) {
         const item = cart.find(item => item.memberId === member.id && item.groupId === group.id)
         if (!item) {
             return
@@ -306,7 +306,7 @@ export class RegisterCartValidator {
     /**
      * True if you cannot register because you reached the maximum of a group category
      */
-    static hasReachedCategoryMaximum(member: UnknownMemberWithRegistrations, group: Group, groups: Group[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[] = []): boolean {
+    static hasReachedCategoryMaximum(member: UnknownMemberWithRegistrations, group: Group, groups: Group[], categories: GroupCategory[], cart: (OldIDRegisterItem | OldRegisterItem)[] = []): boolean {
         const parents = group.getParentCategories(categories, false)
 
         for (const parent of parents) {
@@ -332,7 +332,7 @@ export class RegisterCartValidator {
     }
 
 
-    static validateItem(item: IDRegisterItem | RegisterItem, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (IDRegisterItem | RegisterItem)[]) {
+    static validateItem(item: OldIDRegisterItem | OldRegisterItem, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], previousItems: (OldIDRegisterItem | OldRegisterItem)[]) {
         const member = family.find(m => m.id === item.memberId)
         const group = groups.find(g => g.id === item.groupId)
 

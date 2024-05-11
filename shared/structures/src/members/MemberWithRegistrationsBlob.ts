@@ -4,7 +4,7 @@ import { User } from '../User';
 import { Member } from './Member';
 import { Registration } from './Registration';
 
-export class EncryptedMemberWithRegistrations extends Member {
+export class MemberWithRegistrationsBlob extends Member {
     @field({ decoder: new ArrayDecoder(Registration) })
     registrations: Registration[]
 

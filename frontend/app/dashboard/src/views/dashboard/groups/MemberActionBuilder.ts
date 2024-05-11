@@ -1,13 +1,13 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageButton, LoadComponent, TableAction, Toast } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrations, Group, GroupCategoryTree, MemberWithRegistrations, Registration } from "@stamhoofd/structures";
+import { OrganizationManager } from "@stamhoofd/networking";
+import { Group, GroupCategoryTree, MemberWithRegistrations, MemberWithRegistrationsBlob, Registration } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import { MemberManager } from "../../../classes/MemberManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import SMSView from "../sms/SMSView.vue";
-import { OrganizationManager } from "@stamhoofd/networking";
 
 
 export class MemberActionBuilder {
@@ -475,7 +475,7 @@ export class MemberActionBuilder {
                     }))
                 }
 
-                patches.addPatch(EncryptedMemberWithRegistrations.patch({
+                patches.addPatch(MemberWithRegistrationsBlob.patch({
                     id: member.id,
                     registrations: registrationsPatch
                 }))

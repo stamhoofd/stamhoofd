@@ -1,15 +1,15 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { SimpleError, SimpleErrors, isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors,SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { KeychainedResponseDecoder, LoginProviderType, Organization, Platform, Token, User, Version } from '@stamhoofd/structures'
+import { LoginProviderType, Organization, Platform, Token, User, Version } from '@stamhoofd/structures'
+import { isReactive } from 'vue'
 
 import { AppManager, SessionManager, UrlHelper } from '..'
+import { ContextPermissions } from './ContextPermissions'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
-import { ContextPermissions } from './ContextPermissions'
-import { isReactive } from 'vue'
 
 type AuthenticationStateListener = (changed: "user" | "organization" | "token" | "preventComplete") => void
 
@@ -93,10 +93,10 @@ export class SessionContext implements RequestMiddleware {
             const response = await SessionContext.serverForOrganization(data.organizationId).request({
                 method: "GET",
                 path: "/organization",
-                decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>),
+                decoder: Organization as Decoder<Organization>,
                 shouldRetry: false
             })
-            organization = response.data.data
+            organization = response.data
         } else {
             organization = data.organization
         }
@@ -565,11 +565,11 @@ export class SessionContext implements RequestMiddleware {
         const response = await (this.hasToken() ? this.authenticatedServer : this.server).request({
             method: "GET",
             path: "/organization",
-            decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>),
+            decoder: Organization as Decoder<Organization>,
             shouldRetry
         })
 
-        if (this.hasToken() && this.organizationPermissions && !response.data.data.privateMeta) {
+        if (this.hasToken() && this.organizationPermissions && !response.data.privateMeta) {
             console.error('Missing privateMeta in authenticated organization response');
 
             // Critical issue: log out
@@ -577,7 +577,7 @@ export class SessionContext implements RequestMiddleware {
             throw new Error("Missing privateMeta in authenticated organization response")
         }
 
-        this.updateOrganization(response.data.data)
+        this.updateOrganization(response.data)
         this.callListeners("organization")
         return this.organization!
     }

@@ -61,8 +61,6 @@ export * from "./src/endpoints/VerifyEmailRequest"
 export * from "./src/endpoints/WebshopUriAvailabilityResponse"
 
 // Grouping
-export * from "./src/grouping/KeychainedMembers"
-export * from "./src/grouping/KeychainedResponse"
 export * from "./src/grouping/PaginatedResponse"
 
 // Members
@@ -71,11 +69,11 @@ export * from "./src/files/Image"
 export * from "./src/files/Resolution"
 export * from "./src/files/ResolutionRequest"
 export * from "./src/members/EmergencyContact"
-export * from "./src/members/EncryptedMemberWithRegistrations"
 export * from "./src/members/Gender"
 export * from "./src/members/Member"
 export * from "./src/members/MemberDetails"
 export * from "./src/members/MemberWithRegistrations"
+export * from "./src/members/MemberWithRegistrationsBlob"
 export * from "./src/members/OrganizationRecordsConfiguration"
 export * from "./src/members/Parent"
 export * from "./src/members/ParentType"
@@ -98,11 +96,11 @@ export * from "./src/members/RegistrationWithMember"
 export * from "./src/members/ReviewTime"
 
 // Register checkout
-export * from "./src/members/checkout/RegisterCart"
-export * from "./src/members/checkout/RegisterCartPriceCalculator"
-export * from './src/members/checkout/RegisterCartValidator'
-export * from "./src/members/checkout/RegisterCheckout"
-export * from "./src/members/checkout/RegisterItem"
+export * from "./src/members/checkout/OldRegisterCart"
+export * from "./src/members/checkout/OldRegisterCartPriceCalculator"
+export * from './src/members/checkout/OldRegisterCartValidator'
+export * from "./src/members/checkout/OldRegisterCheckout"
+export * from "./src/members/checkout/OldRegisterItem"
 export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop

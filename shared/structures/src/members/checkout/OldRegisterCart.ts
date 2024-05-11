@@ -8,24 +8,24 @@ import { GroupCategory } from "../../GroupCategory"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from "../../Organization"
 import { PaymentConfiguration } from "../../PaymentConfiguration"
-import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistrations"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from "../MemberWithRegistrations"
-import { RegisterCartPriceCalculator } from "./RegisterCartPriceCalculator"
+import { MemberWithRegistrationsBlob } from "../MemberWithRegistrationsBlob"
+import { OldRegisterCartPriceCalculator } from "./OldRegisterCartPriceCalculator"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { BalanceItemCartItem, IDRegisterItem, RegisterItem } from "./RegisterItem"
+import { BalanceItemCartItem, OldIDRegisterItem, OldRegisterItem } from "./OldRegisterItem"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 /**
  * Contains all information about a given checkout
  */
-export class RegisterCart {
-    items: RegisterItem[] = []
+export class OldRegisterCart {
+    items: OldRegisterItem[] = []
     balanceItems: BalanceItemCartItem[] = []
     freeContribution = 0
     administrationFee = 0
 
-    constructor(items: RegisterItem[] = []) {
+    constructor(items: OldRegisterItem[] = []) {
         this.items = items
     }
 
@@ -36,8 +36,8 @@ export class RegisterCart {
         this.administrationFee = 0
     }
 
-    convert(): IDRegisterCart {
-        return IDRegisterCart.create({
+    convert(): OldIDRegisterCart {
+        return OldIDRegisterCart.create({
             items: this.items.map(i => i.convert()),
             balanceItems: this.balanceItems,
             freeContribution: this.freeContribution,
@@ -67,7 +67,7 @@ export class RegisterCart {
         return this.count === 0
     }
 
-    hasItem(item: RegisterItem): boolean {
+    hasItem(item: OldRegisterItem): boolean {
         const c = item.id
         for (const i of this.items) {
             if (i.id === c) {
@@ -77,12 +77,12 @@ export class RegisterCart {
         return false
     }
 
-    addItem(item: RegisterItem): void {
+    addItem(item: OldRegisterItem): void {
         this.removeItem(item)
         this.items.push(item)
     }
 
-    removeItem(item: RegisterItem): void {
+    removeItem(item: OldRegisterItem): void {
         const c = item.id
         for (const [index, i] of this.items.entries()) {
             if (i.id === c) {
@@ -108,7 +108,7 @@ export class RegisterCart {
     }
 
     validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], memberBalanceItems: MemberBalanceItem[]): void {
-        const newItems: RegisterItem[] = []
+        const newItems: OldRegisterItem[] = []
         const errors = new SimpleErrors()
 
         for (const item of this.items) {
@@ -137,7 +137,7 @@ export class RegisterCart {
     }
 
     calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], paymentConfiguration: PaymentConfiguration) {
-        RegisterCartPriceCalculator.calculatePrices(
+        OldRegisterCartPriceCalculator.calculatePrices(
             this.items, 
             members, 
             groups, 
@@ -150,9 +150,9 @@ export class RegisterCart {
 /**
  * Contains all information about a given checkout
  */
-export class IDRegisterCart extends AutoEncoder {
-    @field({ decoder: new ArrayDecoder(IDRegisterItem) })
-    items: IDRegisterItem[] = []
+export class OldIDRegisterCart extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(OldIDRegisterItem) })
+    items: OldIDRegisterItem[] = []
 
     @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
     balanceItems: BalanceItemCartItem[] = []
@@ -185,8 +185,8 @@ export class IDRegisterCart extends AutoEncoder {
         return this.count === 0
     }
 
-    convert(organization: Organization, members: MemberWithRegistrations[]): RegisterCart {
-        const cart = new RegisterCart()
+    convert(organization: Organization, members: MemberWithRegistrations[]): OldRegisterCart {
+        const cart = new OldRegisterCart()
         cart.items = this.items.flatMap((item) => {
             const converted = item.convert(organization, members)
             if (converted !== null) {
@@ -202,7 +202,7 @@ export class IDRegisterCart extends AutoEncoder {
     }
 
     validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], memberBalanceItems: MemberBalanceItem[]): void {
-        const newItems: IDRegisterItem[] = []
+        const newItems: OldIDRegisterItem[] = []
         const errors = new SimpleErrors()
 
         for (const item of this.items) {
@@ -231,7 +231,7 @@ export class IDRegisterCart extends AutoEncoder {
     }
 
     calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], paymentConfiguration: PaymentConfiguration, forceDate?: Date) {
-        RegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories, forceDate)
+        OldRegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories, forceDate)
         this.administrationFee = paymentConfiguration.administrationFee.calculate(this.priceWithoutFees)
     }
 }
