@@ -3,7 +3,7 @@
         <div class="password-strength">
             <div :style="{ width: strength+'%' }" :class="type" />
         </div>
-        <p v-if="!value" class="style-description-small">
+        <p v-if="!modelValue" class="style-description-small">
             Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser
         </p>
         <p v-else-if="warning.length > 0" class="style-description-small">
@@ -25,7 +25,9 @@
             Jouw wachtwoord ziet er goed uit
         </p>
 
-        <span v-if="value" slot="right" :class="type" class="password-strength-description">{{ description }}</span>
+        <template #right>
+            <span v-if="modelValue" :class="type" class="password-strength-description">{{ description }}</span>
+        </template>
     </STInputBox>
 </template>
 
@@ -41,7 +43,7 @@ import STInputBox from "./STInputBox.vue";
 })
 export default class PasswordStrength extends Vue {
     @Prop({ default: null })
-        value!: string | null
+        modelValue!: string | null
 
     strength = 0
     duration = 0
@@ -50,7 +52,7 @@ export default class PasswordStrength extends Vue {
     calculateCounter = 0
     loading = false
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null || val.length == 0) {
             this.calculateCounter++

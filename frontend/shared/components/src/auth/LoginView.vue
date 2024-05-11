@@ -30,7 +30,7 @@
 
             <hr>
             <p class="style-description-small">
-                Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres dat we al kennen.
+                Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
             </p>
 
             <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
@@ -56,8 +56,8 @@ import ForgotPasswordView from './ForgotPasswordView.vue';
 
 const props = withDefaults(
     defineProps<{
-        initialEmail: string
-        lock: string | null
+        initialEmail?: string
+        lock?: string | null
     }>(), {
         initialEmail: "",
         lock: null

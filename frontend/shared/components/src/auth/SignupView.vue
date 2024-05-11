@@ -4,10 +4,13 @@
 
         <main class="center">
             <h1>Account aanmaken</h1>
+            <p v-if="!lock">
+                Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.
+            </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" :autofocus="true" title="E-mailadres" name="username" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" :autofocus="true" title="Persoonlijk e-mailadres" name="username" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
@@ -56,8 +59,8 @@ import ConfirmEmailView from './ConfirmEmailView.vue';
 
 const props = withDefaults(
     defineProps<{
-        initialEmail: string
-        lock: string | null
+        initialEmail?: string
+        lock?: string | null
     }>(), {
         initialEmail: "",
         lock: null
