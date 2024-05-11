@@ -20,7 +20,7 @@
                 <InheritComponent name="tabbar-right" />
             </div>
         </header>
-        <main ref="mainElement" :class="{hasBar: showTopBar || tabs.length > 1}">
+        <main ref="mainElement" :class="{showTopBar, showBottomBar: !showTopBar && tabs.length > 1, hasBar: showTopBar || tabs.length > 1}">
             <FramedComponent v-if="root" :key="root.key" :root="root" />
         </main>
 
@@ -395,13 +395,27 @@ defineExpose({
         }
     }
 
+    --saved-keyboard-height: var(--keyboard-height, 0px);
+
     > main {
         // Pass an update to the --vh because we removed some
         background: var(--color-current-background);
 
         &.hasBar {
             --vh: calc(var(--saved-vh, 1vh) - var(--tab-bar-header-height) / 100);
+           
+            &.showTopBar {
+                --st-safe-area-top: 0px; // Handled by header
+            }
+
+            &.showBottomBar {
+                --st-safe-area-bottom: 0px; // Handled by footer
+
+                // Reduce keyboard height by height of tab bar
+                --keyboard-height: max(0px, calc(var(--saved-keyboard-height, 0px) - var(--tab-bar-header-height)));
+            }
         }
+
         
         height: calc(var(--vh, 1vh) * 100);
 
