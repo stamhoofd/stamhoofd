@@ -1,5 +1,5 @@
 <template>
-    <div class="st-toolbar" :class="{ sticky }">
+    <div class="st-toolbar sticky">
         <div>
             <div>
                 <slot name="left" />
@@ -11,17 +11,10 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { useHideTabBar } from '../containers/TabBarController.vue';
 
-@Component
-export default class STToolbar extends Vue {
-    /**
-     * Set sticky to false if a user is required to scroll down before completing a flow (this removes the unneeded CTA in the middle of the flow).
-     */
-    @Prop({ default: true })
-        sticky!: boolean
-}
+useHideTabBar();
 </script>
 
 <style lang="scss">
@@ -41,11 +34,6 @@ export default class STToolbar extends Vue {
     .box > & {
         margin-left: calc(-1 * var(--st-horizontal-padding, 20px));
         margin-right: calc(-1 * var(--st-horizontal-padding, 20px));
-    }
-
-    &.sticky {
-        position: sticky;
-        z-index: 10;
     }
 
     > div {

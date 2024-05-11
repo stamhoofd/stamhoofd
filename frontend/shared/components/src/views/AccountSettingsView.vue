@@ -8,7 +8,7 @@
             </h1>
             <p>Met een account kan je één of meerdere leden beheren.</p>
 
-            <p class="error-box icon privacy" v-if="isUserModeOrganization && patchedUser.organizationId === null">
+            <p v-if="isUserModeOrganization && patchedUser.organizationId === null" class="error-box icon privacy">
                 Dit is een platform account
             </p>
         

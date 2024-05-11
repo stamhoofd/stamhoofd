@@ -61,7 +61,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     await I18nController.loadDefault(reactiveSession, "registration", Country.Belgium, "nl", session?.organization?.address?.country)
     
     // Set color
-    if (session.organization?.meta.color) {
+    if (session.organization?.meta.color && ownDomain) {
         ColorHelper.setColor(session.organization?.meta.color)
     }
 
