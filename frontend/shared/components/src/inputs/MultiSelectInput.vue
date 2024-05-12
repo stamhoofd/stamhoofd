@@ -10,7 +10,7 @@
         </div>
         <div v-else class="multi-select-container">
             <div class="input">
-                <STList v-model="draggableValues" :draggable="true">
+                <STList v-model="draggableValues" :draggable="true" :item-key="(v: T) => v">
                     <template #item="{item: value}">
                         <STListItem :selectable="true" @click="openContextMenu($event, value)">
                             <span v-for="(label, index) of getValueLabels(value)" :key="index" :title="label" v-text="label" />

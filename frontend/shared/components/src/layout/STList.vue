@@ -1,5 +1,5 @@
 <template>
-    <Sortable v-if="draggable" :list="listModel" item-key="id" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @end="onEnd">
+    <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @end="onEnd">
         <template #item="{element, index}">
             <slot name="item" v-bind="{item: element, index}" />
         </template>
@@ -17,8 +17,14 @@ import { SortableEvent, SortableOptions } from "sortablejs";
 import { Sortable } from "sortablejs-vue3"
 import { computed, nextTick, ref } from 'vue';
 
-const props = withDefaults(defineProps<{draggable?: boolean, group?: string, withAnimation?: boolean}>(), {valueModel: null, draggable: false, group: undefined, withAnimation: false});
-const listModel = defineModel<T[] | undefined>({default: undefined});
+const props = withDefaults(
+    // props
+    defineProps<{draggable?: boolean, group?: string, withAnimation?: boolean, itemKey?: string | ((item: any) => string | number | symbol)}>(),
+    // default values
+    {valueModel: null, draggable: false, group: undefined, withAnimation: false, itemKey: 'id'}
+);
+
+const listModel =defineModel<T[] | undefined>({default: undefined});
 
 const options = computed<SortableOptions>(() => { return {
     animation: 200,
