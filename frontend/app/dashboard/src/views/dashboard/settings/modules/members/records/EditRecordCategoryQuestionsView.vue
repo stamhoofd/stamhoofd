@@ -15,8 +15,8 @@
             Deze vragenlijst is leeg en zal nog niet getoond worden.
         </p>
 
-        <p v-if="patchedCategory.filter" class="info-box selectable with-icon" @click="editCategory()">
-            {{ patchedCategory.filter.getString(filterDefinitionsForCategory()) }}
+        <p v-if="patchedCategory.legacyFilter" class="info-box selectable with-icon" @click="editCategory()">
+            {{ patchedCategory.legacyFilter.getString(filterDefinitionsForCategory()) }}
             <button type="button" class="button icon edit" />
         </p>
 
@@ -52,8 +52,8 @@
                     <button class="icon settings button gray" type="button" @click="editCategory(c)" />
                 </div>
             </h2>
-            <p v-if="c.filter" class="info-box selectable with-icon" @click="editCategory(c)">
-                {{ c.filter.getString(filterDefinitionsForCategory()) }}
+            <p v-if="c.legacyFilter" class="info-box selectable with-icon" @click="editCategory(c)">
+                {{ c.legacyFilter.getString(filterDefinitionsForCategory()) }}
                 <button type="button" class="button icon edit" />
             </p>
 
