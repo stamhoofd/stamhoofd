@@ -22,7 +22,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STList :draggable="true" :value="getDraggableRecords(patchedCategory)" group="records" @input="setDraggableRecords(patchedCategory, $event)">
+        <STList :draggable="true" :model-value="getDraggableRecords(patchedCategory)" group="records" @update:model-value="setDraggableRecords(patchedCategory, $event)">
             <template #item="{item: record}">
                 <RecordRow :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" />
             </template>
@@ -61,7 +61,7 @@
                 Deze categorie bevat nog geen vragen.
             </p>
                 
-            <STList :draggable="true" :value="getDraggableRecords(c)" group="records" @input="setDraggableRecords(c, $event)">
+            <STList :draggable="true" :model-value="getDraggableRecords(c)" group="records" @update:model-value="setDraggableRecords(c, $event)">
                 <template #item="{item: record}">
                     <RecordRow :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" />
                 </template>
