@@ -6,7 +6,7 @@
 
         <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
             <div class="input-icon-container icon search gray">
-                <input v-model="searchQuery" class="input" placeholder="Toevoegen" @input="searchQuery = $event.target.value">
+                <input v-model="searchQuery" class="input" placeholder="Toevoegen">
             </div>
         </LoadingButton>
     
@@ -44,10 +44,10 @@
 <script lang="ts">
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { LoadingButton,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from "@stamhoofd/structures"
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 const throttle = (func, limit) => {
     let lastFunc;

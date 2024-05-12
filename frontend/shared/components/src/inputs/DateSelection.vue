@@ -1,18 +1,18 @@
 <template>
     <div class="date-selection-container input-icon-container right icon arrow-down-small gray">
-        <div v-if="$isMobile" class="input selectable" :class="{placeholder: value === null}" @click="openContextMenu(true)">
+        <div v-if="$isMobile" class="input selectable" :class="{placeholder: modelValue === null}" @click="openContextMenu(true)">
             <div>{{ dateText }}</div>
         </div>
-        <div v-else class="input selectable" :class="{placeholder: value === null}" @click="focusFirst()" @mousedown.prevent>
+        <div v-else class="input selectable" :class="{placeholder: modelValue === null}" @click="focusFirst()" @mousedown.prevent>
             <div @click.prevent @mouseup.prevent>
-                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @input="dayText = $event.target.value; onTyping();">
+                <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @input="onTyping();">
                 <span>{{ dayText }}</span>
             </div>
 
             <span :class="{hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)" @input="monthText = $event.target.value; onTyping();">
+                <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)" @input="onTyping();">
                 <span v-if="hasFocus">{{ monthText }}</span>
                 <span v-else>{{ monthTextLong }}</span>
             </div>
@@ -20,7 +20,7 @@
             <span :class="{hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
-                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)" @input="yearText = $event.target.value; onTyping();">
+                <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)" @input="onTyping();">
                 <span>{{ yearText }}</span>
             </div>
         </div>
@@ -29,8 +29,8 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Formatter } from "@stamhoofd/utility"
 import { Component, Mixins,Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Formatter } from "@stamhoofd/utility"
 
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 
@@ -41,7 +41,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         d.setHours(0, 0, 0, 0)
         return d
     } })
-        value: Date | null
+        modelValue: Date | null
 
     @Prop({ default: true })
         required!: boolean
@@ -65,18 +65,18 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     }
 
     updateTextStrings() {
-        this.dayText = this.value ? this.value.getDate().toString() : ""
-        this.monthText = this.value ? (this.value.getMonth() + 1).toString() : ""
-        this.yearText = this.value ? this.value.getFullYear().toString() : ""
+        this.dayText = this.modelValue ? this.modelValue.getDate().toString() : ""
+        this.monthText = this.modelValue ? (this.modelValue.getMonth() + 1).toString() : ""
+        this.yearText = this.modelValue ? this.modelValue.getFullYear().toString() : ""
     }
 
-    @Watch("value")
+    @Watch("modelValue")
     onValueChange() {
         this.updateTextStrings()
     }
 
     get monthTextLong() {
-        return this.value ? Formatter.month(this.value.getMonth() + 1) : ""
+        return this.modelValue ? Formatter.month(this.modelValue.getMonth() + 1) : ""
     }
 
     get numberInputs() {
@@ -93,8 +93,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
                 getValue: () => {
                     return this.dayText
                 },
-                setValue: (value: string) => {
-                    this.dayText = value
+                setValue: (modelValue: string) => {
+                    this.dayText = modelValue
                     this.updateDate()
                 }
             },
@@ -106,8 +106,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
                 getValue: () => {
                     return this.monthText
                 },
-                setValue: (value: string) => {
-                    this.monthText = value
+                setValue: (modelValue: string) => {
+                    this.monthText = modelValue
                     this.updateDate()
                 }
             },
@@ -119,8 +119,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
                 getValue: () => {
                     return this.yearText
                 },
-                setValue: (value: string) => {
-                    this.yearText = value
+                setValue: (modelValue: string) => {
+                    this.yearText = modelValue
                     this.updateDate()
                 }
             }
@@ -297,7 +297,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     }
 
     get dateText() {
-        return this.value ? Formatter.date(this.value, true) : this.placeholder
+        return this.modelValue ? Formatter.date(this.modelValue, true) : this.placeholder
     }
 
     emitDate(value: Date | null) {
@@ -306,8 +306,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             return
         }
         const d = new Date(value.getTime())
-        if (this.value) {
-            d.setHours(this.value.getHours(), this.value.getMinutes(), 0, 0)
+        if (this.modelValue) {
+            d.setHours(this.modelValue.getHours(), this.modelValue.getMinutes(), 0, 0)
         } else {
             d.setHours(12, 0, 0, 0)
         }
@@ -327,7 +327,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             xPlacement: 'left',
             autoDismiss,
             //preferredWidth: el.offsetWidth, 
-            selectedDay: this.value ? new Date(this.value) : new Date(),
+            selectedDay: this.modelValue ? new Date(this.modelValue) : new Date(),
             allowClear: !this.required,
             setDate: (value: Date | null) => {
                 this.emitDate(value)
@@ -347,14 +347,14 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             if (instance) {
                 if (unlessFocused && instance.$el && document.activeElement && instance.$el.contains(document.activeElement)) {
                     // Add an event listener to focus yearInput when blur 
-                    const activeElement = document.activeElement
-                    const listener = () => {
-                        activeElement.removeEventListener("change", listener)
-                        activeElement.removeEventListener("focusout", listener)
-                        this.selectNext(2)
-                    }
-                    activeElement.addEventListener("change", listener)
-                    activeElement.addEventListener("focusout", listener)
+                    // const activeElement = document.activeElement
+                    // const listener = () => {
+                    //     activeElement.removeEventListener("change", listener)
+                    //     activeElement.removeEventListener("focusout", listener)
+                    //     //this.selectNext(2)
+                    // }
+                    // activeElement.addEventListener("change", listener)
+                    // activeElement.addEventListener("focusout", listener)
 
                     return;
                 }

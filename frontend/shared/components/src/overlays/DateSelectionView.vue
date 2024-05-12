@@ -52,8 +52,8 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Formatter } from "@stamhoofd/utility"
 import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Formatter } from "@stamhoofd/utility"
 
 import LongPressDirective from "../directives/LongPress";
 import Dropdown from "../inputs/Dropdown.vue";
@@ -80,6 +80,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
         selectedDay!: Date
+
     currentMonth: Date = new Date((this.selectedDay ?? new Date()).getTime())
     weeks: any = null
     monthTitle = ""
@@ -231,11 +232,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         }
         const d = new Date(this.currentMonth)
         d.setFullYear(year)
-
-        this.currentMonth = d
-        this.updateSelectedMonth()
-        this.updateMonthTitle();
-        this.weeks = this.generateDays()
+        this.setDateValue(d)
     }
 
     get month() {
@@ -251,11 +248,14 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         const d = new Date(this.currentMonth)
         d.setDate(1)
         d.setMonth(month - 1)
+        d.setDate(this.currentMonth.getDate())
 
-        this.currentMonth = d
-        this.updateSelectedMonth()
-        this.updateMonthTitle();
-        this.weeks = this.generateDays()
+        // If date overflowed
+        if (d.getMonth() != month - 1) {
+            d.setDate(0)
+        }
+
+        this.setDateValue(d)
     }
 
     monthText(month: number) {

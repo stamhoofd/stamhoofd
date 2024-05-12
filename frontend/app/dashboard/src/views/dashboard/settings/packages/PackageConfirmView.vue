@@ -228,7 +228,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     selectedPaymentMethod: PaymentMethod = PaymentMethod.Unknown
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
-    userPatch = User.patch({ id: this.user.id })
+    userPatch = User.patch({})
 
     throttledReload = throttle(this.loadProForma, 1000)
 
@@ -250,6 +250,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 
     created() {
+        this.userPatch.id = this.$user!.id
         this.organizationPatch.id = this.$organization.id
     }
 

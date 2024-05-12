@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation"
-import { ComponentPublicInstance, markRaw, Ref } from "vue"
+import { ComponentPublicInstance, markRaw, Ref, unref } from "vue"
 
 export class TabBarItem {
     name = ""
@@ -30,6 +30,13 @@ export class TabBarItem {
     get items() {
         return [this]
     }
+
+    isSelected(selectedItem: TabBarItem | Ref<TabBarItem> | null) {
+        if (unref(selectedItem) === this) {
+            return true
+        }
+        return false
+    }
 }
 
 export class TabBarItemGroup {
@@ -49,5 +56,9 @@ export class TabBarItemGroup {
 
     get isGroup() {
         return true;
+    }
+
+    isSelected(selectedItem: TabBarItem | Ref<TabBarItem> | null) {
+        return this.items.some(item => item.isSelected(selectedItem))
     }
 }

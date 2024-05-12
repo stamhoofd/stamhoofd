@@ -84,7 +84,7 @@ body.debug-safe-area {
         left: 0;
         right: 0;
         height: var(--st-safe-area-bottom);
-        opacity: 0.2;
+        opacity: 0.02;
         z-index: 1000000;
     }
 
@@ -96,7 +96,7 @@ body.debug-safe-area {
         left: 0;
         right: 0;
         height: var(--st-safe-area-top);
-        opacity: 0.2;
+        opacity: 0.02;
         z-index: 1000000;
     }
 }

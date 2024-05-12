@@ -106,6 +106,10 @@ button.st-list-item {
 
   @extend .style-normal;
 
+  &.selected {
+    color: $color-primary;
+  }
+
   > .left {
     flex-shrink: 0;
 

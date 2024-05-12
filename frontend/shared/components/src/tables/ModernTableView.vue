@@ -45,7 +45,7 @@
                 <div class="input-with-buttons">
                     <div>
                         <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                            <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @input="searchQuery = $event.target.value">
+                            <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
                         </form>
                     </div>
                     <div v-if="canFilter">
@@ -89,7 +89,7 @@
                         <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="setSelectionValue(row, $event)" />
-                                <Checkbox v-else :modelValue="false" />
+                                <Checkbox v-else :model-value="false" />
                             </label>
                             <div v-if="showPrefix" class="prefix-column" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
                                 <span v-if="row.value" v-text="prefixColumn.getFormattedValue(row.value)" />
@@ -140,15 +140,15 @@
 
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, PlainObject, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective, UIFilter, UIFilterBuilders } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { SortItemDirection, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import UIFilterEditor from "../filters/UIFilterEditor.vue";
 import { Column } from "./Column";
@@ -156,7 +156,7 @@ import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
-import {FetchAllOptions, TableObjectFetcher} from "./TableObjectFetcher"
+import { FetchAllOptions, TableObjectFetcher } from "./TableObjectFetcher";
 
 interface TableListable {
     id: string;
@@ -558,11 +558,11 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
         } else {
             // We swap columns if the startX of the column moves over the middle of a different column            
             // Calculate how many columns we have moved in the X direction 
-            let startIndex = this.draggingInitialColumns.findIndex(c => c === this.isDraggingColumn)
+            const startIndex = this.draggingInitialColumns.findIndex(c => c === this.isDraggingColumn)
             let columnMoveIndex = 0
             let remainingDifference = difference
             while (Math.sign(remainingDifference) === Math.sign(difference)) {
-                let shouldMove = (remainingDifference < 0) ? -1 : 1
+                const shouldMove = (remainingDifference < 0) ? -1 : 1
                 const column = this.draggingInitialColumns[startIndex + shouldMove + columnMoveIndex]
                 if (!column || column.width === null) {
                     break
@@ -971,7 +971,7 @@ export default class ModernTableView<Value extends TableListable> extends Mixins
                 
                 // We'll make sure we never grow or shrink more than the distribute width
 
-                for (let col of columns) {
+                for (const col of columns) {
                     if (col.width == null) {
                         throw new Error("Impossible. Typescript type checking error")
                     } 

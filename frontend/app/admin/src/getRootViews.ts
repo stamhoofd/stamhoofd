@@ -1,9 +1,8 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextProvider, LoginView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
-
 import { computed, reactive } from 'vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
@@ -78,7 +77,8 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
             reactive_navigation_url: "administratie",
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
+                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'admin'
         },

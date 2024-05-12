@@ -1,9 +1,9 @@
 <template>
     <STInputBox v-bind="$attrs">
         <template #right>
-            <button v-if="values.length" class="button text icon add" type="button" @click="openContextMenu" />
+            <button v-if="modelValue.length" class="button text icon add" type="button" @click="openContextMenu" />
         </template>
-        <div v-if="values.length == 0" class="multi-select-container input-icon-container right icon arrow-down-small gray">
+        <div v-if="modelValue.length == 0" class="multi-select-container input-icon-container right icon arrow-down-small gray">
             <div class="input selectable placeholder" @click="openContextMenu">
                 {{ placeholder }}
             </div>
@@ -31,6 +31,7 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 import { Sorter } from '@stamhoofd/utility';
 import { Formatter } from "@stamhoofd/utility"
 
@@ -40,19 +41,16 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import STInputBox from './STInputBox.vue';
 
 @Component({
-    "model": {
-        "prop": "values",
-        "event": "input"
-    },
     components: {
         STList,
         STListItem,
         STInputBox
-    }
+    },
+    emits: ['update:modelValue']
 })
 export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
     @Prop({})
-        values: T[]
+        modelValue: T[]
 
     @Prop({})
         choices: {value: T, label: string, categories?: string[]}[]
@@ -61,11 +59,11 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
         placeholder!: string
 
     get draggableValues() {
-        return this.values
+        return this.modelValue
     }
 
     set draggableValues(arr: T[]) {
-        if (arr.length != this.values.length) {
+        if (arr.length != this.modelValue.length) {
             return;
         }
         this.$emit('update:modelValue', arr)
@@ -91,20 +89,20 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
 
     addValue(value: T, replace?: T) {
         if (replace) {
-            const index = this.values.findIndex(v => v === replace)
+            const index = this.modelValue.findIndex(v => v === replace)
             if (index !== -1) {
-                const arr = [...this.values]
+                const arr = [...this.modelValue]
                 arr[index] = value;
                 this.$emit('update:modelValue', arr)
                 return;
             }
         }
-        const arr = [...this.values, value]
+        const arr = [...this.modelValue, value]
         this.$emit('update:modelValue', arr)
     }
 
     deleteValue(value: T) {
-        const arr = this.values.filter(v => v !== value)
+        const arr = this.modelValue.filter(v => v !== value)
         this.$emit('update:modelValue', arr)
     }
 

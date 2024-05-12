@@ -7,11 +7,11 @@
         <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email">
 
         <STInputBox title="Kies een wachtwoord">
-            <input v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
+            <input v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
         </STInputBox>
 
         <STInputBox title="Herhaal wachtwoord">
-            <input v-model="passwordRepeat" enterkeyhint="go" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
+            <input v-model="passwordRepeat" enterkeyhint="go" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
         </STInputBox>
 
         <PasswordStrength v-model="password" />
@@ -21,9 +21,9 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { ErrorBox, LoadingButton, PasswordStrength, SaveView, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     components: {

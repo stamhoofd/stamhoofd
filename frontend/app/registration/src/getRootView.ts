@@ -1,6 +1,6 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
-import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextProvider, OrganizationLogo, OrganizationSwitcher, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, TabBarController, TabBarItem } from "@stamhoofd/components";
 import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
@@ -61,7 +61,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     await I18nController.loadDefault(reactiveSession, "registration", Country.Belgium, "nl", session?.organization?.address?.country)
     
     // Set color
-    if (session.organization?.meta.color) {
+    if (session.organization?.meta.color && ownDomain) {
         ColorHelper.setColor(session.organization?.meta.color)
     }
 
@@ -88,7 +88,8 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                 }) : new ComponentWithProperties(OrganizationSwitcher, {
                     disabled: ownDomain
                 }),
-                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {})
+                "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
+                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'registration',
         },

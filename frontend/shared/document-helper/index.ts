@@ -40,7 +40,7 @@ export async function getDocumentPdfBuffer($context: SessionContext, document: D
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const response = await this.$context.authenticatedServer.request({
+    const response = await $context.authenticatedServer.request({
         method: "GET",
         path: "/documents/" + encodeURIComponent(document.id) + "/html",
         shouldRetry: true,

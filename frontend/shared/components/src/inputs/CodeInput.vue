@@ -23,14 +23,16 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
-@Component
+@Component({
+    emits: ['update:modelValue', 'complete']
+})
 export default class CodeInput extends Vue {
     valid = true;
 
     @Prop({ default: "" })
-    value!: string
+        modelValue!: string
 
-    @Watch("value")
+    @Watch("modelValue")
     onValueChanged(value: string, _oldValue: string) {
         if (value == _oldValue) {
             return

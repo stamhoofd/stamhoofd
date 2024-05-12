@@ -4,7 +4,7 @@ import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-na
 import { AppManager, ContextPermissions, SessionContext } from "@stamhoofd/networking";
 import { Organization, Platform, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { type App,computed, inject, Ref, ref, toRef } from "vue";
+import { type App,computed, getCurrentInstance,inject, Ref, ref, toRef } from "vue";
 import { configureCompat } from "vue";
 
 import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
@@ -32,6 +32,30 @@ export function useOrganization(): Ref<Organization | null> {
 
 export function usePlatform(): Ref<Platform> {
     return toRef(inject('$platform') as Platform)
+}
+
+export function useIsMobile(): boolean {
+    const app = getCurrentInstance()!;
+    return app.appContext.config.globalProperties.$isMobile;
+}
+
+export function useIsIOS(): boolean {
+    const app = getCurrentInstance()!;
+    return app.appContext.config.globalProperties.$isIOS;
+}
+
+export function useIsAndroid(): boolean {
+    const app = getCurrentInstance()!;
+    return app.appContext.config.globalProperties.$isAndroid;
+}
+
+const width = ref(document.documentElement.clientWidth);
+window.addEventListener('resize', () => {
+    width.value = document.documentElement.clientWidth;
+}, { passive: true })
+
+export function useDeviceWidth(): Ref<number> {
+    return width;
 }
 
 export function usePatch<T extends AutoEncoder>(obj: T): {

@@ -241,7 +241,7 @@
             min-width: 0;
         }
 
-        > .icon {
+        &:not(.column) > .icon {
             flex-shrink: 0;
 
             &:first-child {

@@ -35,7 +35,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
-        if (!await Context.auth.canManageDocuments(PermissionLevel.Write)) {
+        if (!await Context.auth.canManageDocuments(organization.id, PermissionLevel.Write)) {
             throw Context.auth.error()
         }
 

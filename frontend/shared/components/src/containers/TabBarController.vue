@@ -1,17 +1,17 @@
 <template>
     <div class="tab-bar-controller">
-        <header>
+        <header v-if="showTopBar">
             <div class="left">
                 <InheritComponent name="tabbar-left" />
             </div>
             <div class="middle">
                 <template v-if="tabs.length > 1">
-                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="(event) => selectTab(event, item)">
-                        <div class="button text" :class="{ selected: selectedItem === item }">
+                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" @click="(event) => selectTab(event, item)">
+                        <div class="button text" :class="{ selected: item.isSelected(selectedItem) }">
                             <span :class="'icon '+item.icon" />
                             <span>{{ item.name }}</span>
                             <span v-if="unref(item.badge)" class="bubble">{{ unref(item.badge) }}</span>
-                            <span v-if="item.isGroup" class="icon arrow-down-small gray"></span>
+                            <span v-if="item.isGroup" class="icon arrow-down-small gray" />
                         </div>
                     </button>
                 </template>
@@ -20,14 +20,28 @@
                 <InheritComponent name="tabbar-right" />
             </div>
         </header>
-        <main ref="mainElement">
+        <main ref="mainElement" :class="{showTopBar, showBottomBar, shouldHideBottomBar: showBottomBar && shouldHideBottomBar}">
             <FramedComponent v-if="root" :key="root.key" :root="root" />
         </main>
+
+        <footer v-if="showBottomBar" :class="{hidden: shouldHideBottomBar}">
+            <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" @click="(event) => selectTab(event, item)">
+                <div class="button text small column" :class="{ selected: item.isSelected(selectedItem) }">
+                    <span :class="'icon '+item.icon" />
+                    <span>
+                        {{ item.name }}
+                    </span>
+                    <span v-if="unref(item.badge)" class="bubble">{{ unref(item.badge) }}</span>
+                </div>
+            </button>
+        </footer>
     </div>
 </template>
 
 <script lang="ts">
 import { inject, shallowRef } from 'vue';
+
+import { useDeviceWidth } from '../VueGlobalHelper';
 import TabBarController from './TabBarController.vue';
 import TabBarDropdownView from './TabBarDropdownView.vue';
 
@@ -35,12 +49,38 @@ export function useTabBarController(): Ref<InstanceType<typeof TabBarController>
     const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController>|Ref<InstanceType<typeof TabBarController>>;
     return shallowRef(c);
 }
+
+export function useHideTabBar() {
+    const reference = {}; // new object reference
+    const injector = inject<any>('reactive_hide_tab_bar', null);
+
+    const register = () => {
+        const unwrapped = unref(injector);
+        if (unwrapped && unwrapped.register) {
+            unwrapped.register(reference);
+        }
+    };
+
+    const unregister = () => {
+        const unwrapped = unref(injector);
+        if (unwrapped && unwrapped.unregister) {
+            unwrapped.unregister(reference);
+        }
+    };
+
+    onMounted(register);
+    onActivated(register);
+    onDeactivated(unregister);
+    onBeforeUnmount(unregister);
+}
+
 </script>
 
 <script setup lang="ts">
-import { ComponentWithProperties, FramedComponent, HistoryManager, NavigationController, PushOptions, defineRoutes, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, PushOptions, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentPublicInstance, Ref, computed, getCurrentInstance, nextTick, onBeforeUnmount, provide, ref, unref } from 'vue';
+import { ComponentPublicInstance, computed, getCurrentInstance, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, Ref, ref, unref } from 'vue';
+
 import InheritComponent from './InheritComponent.vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
@@ -53,8 +93,66 @@ defineOptions({
 })
 
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
-const tabs = computed(() => unref(props.tabs))
-const flatTabs = computed<TabBarItemWithComponent[]>(() => tabs.value.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
+const tabs = computed(() => {
+    const base = unref(props.tabs);
+
+    if (!showTopBar.value) {
+        // Replace groups with tabs
+        return base.flatMap(t => {
+            if (t instanceof TabBarItemGroup) {
+                return [
+                    new TabBarItem({
+                        ...t,
+                        component: new ComponentWithProperties(NavigationController, {
+                            root: new ComponentWithProperties(TabBarDropdownView, {
+                                group: t,
+                                selectedItem: selectedItem,
+                                selectItem: selectItem
+                            })
+                        })
+                    })
+                ];
+            }
+            return [t]
+        });
+    }
+
+    return base;
+})
+
+const flatTabs = computed<TabBarItemWithComponent[]>(() => unref(props.tabs).flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
+const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties>|undefined> | undefined;
+const deviceWidth = useDeviceWidth()
+const showTopBar = computed(() => deviceWidth.value > 1100);
+const showBottomBar = computed(() => !showTopBar.value && tabs.value.length > 1);
+
+const hieBottomBarRequesters = ref(new Set());
+const shouldHideBottomBar = computed(() => {
+    return hieBottomBarRequesters.value.size > 0;
+})
+
+provide('reactive_hide_tab_bar', {
+    register: (reference: any) => {
+        console.log('register')
+        hieBottomBarRequesters.value.add(reference);
+    },
+    unregister: (reference: any) => {
+        console.log('unregister')
+        hieBottomBarRequesters.value.delete(reference);
+    }
+});
+
+provide('reactive_components', computed(() => {
+    if (!showTopBar.value) {
+        return unref(injectedComponents) ?? {};
+    }
+    // All displayed
+    return {
+        ...(unref(injectedComponents) ?? {}),
+        'tabbar-replacement': null
+    };
+}));
+
 
 const selectedItem: Ref<TabBarItem|null> = ref(null) as any as Ref<TabBarItem|null> // TypeScript is unpacking the TabBarItem to {...} for some reason
 
@@ -114,8 +212,23 @@ const shouldNavigateAway = async () => {
     return true;
 }
 
-const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
+async function selectItem (item: TabBarItem, appendHistory: boolean = true) {
     if (item === selectedItem.value) {
+        // Try to scroll this item to the top
+        if (mainElement.value) {
+            const scrollElement = mainElement.value.querySelector(".st-view > main");
+            if (scrollElement) {
+                if (scrollElement.scrollTop != 0) {
+                    // Scroll to top animated
+                    scrollElement.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    })
+                } else {
+                    // todo: try to pop
+                }
+            }
+        }
         return
     }
 
@@ -173,15 +286,20 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
         return selectItem(tab);
     }
 
+    if (!showTopBar.value) {
+        // Treat as a normal tab
+        return;
+    }
+
     const padding = 15;
     let width = 400;
     const button = event.currentTarget as HTMLElement
     const bounds = button.getBoundingClientRect()
     const win = window,
-            doc = document,
-            docElem = doc.documentElement,
-            body = doc.getElementsByTagName("body")[0],
-            clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
+        doc = document,
+        docElem = doc.documentElement,
+        body = doc.getElementsByTagName("body")[0],
+        clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
 
     let left = bounds.left - padding;
 
@@ -195,11 +313,11 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
     }
 
     // Open dropdown menu
-    present({
+    await present({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(TabBarDropdownView, {
-                    tabs: tab.items,
+                    group: tab,
                     selectedItem: selectedItem,
                     selectItem: selectItem
                 })
@@ -287,6 +405,8 @@ defineExpose({
     overflow: hidden;
     overflow: clip; // More modern + disables scrolling
     --saved-vh: var(--vh, 1vh);
+    --saved-keyboard-height: var(--keyboard-height, 0px);
+    --saved-st-safe-area-bottom: var(--st-safe-area-bottom, 0px);
 
     > header {
         box-sizing: border-box;
@@ -334,12 +454,59 @@ defineExpose({
     > main {
         // Pass an update to the --vh because we removed some
         background: var(--color-current-background);
-        --vh: calc(var(--saved-vh, 1vh) - var(--tab-bar-header-height) / 100);
+
+        &.showTopBar {
+            --vh: calc(var(--saved-vh, 1vh) - var(--tab-bar-header-height) / 100);
+            --st-safe-area-top: 0px; // Handled by header
+        }
+
+        &.showBottomBar {
+            --st-safe-area-bottom: calc(var(--saved-st-safe-area-bottom) + var(--tab-bar-header-height)); // Handled by footer
+            
+            &.shouldHideBottomBar {
+                --st-safe-area-bottom: var(--saved-st-safe-area-bottom);
+            }
+        }
+    
         height: calc(var(--vh, 1vh) * 100);
 
         // No scrolling here allowed. Child components should manage this
         overflow: hidden;
         overflow: clip; // More modern + disables scrolling
+    }
+
+
+    > footer {
+        height: var(--tab-bar-header-height);
+        border-top: $border-width-thin solid $color-border;
+        background: $color-background-shade;
+        background: color-mix(in srgb, $color-background-shade 70%, transparent);
+        padding-bottom: var(--st-safe-area-bottom, 0px);
+        user-select: none;
+
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+
+        transition: transform 0.2s, opacity 0.2s;
+
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+            
+        > button {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        &.hidden {
+            opacity: 0;
+            transform: translateY(100%);
+        }
     }
 }
 

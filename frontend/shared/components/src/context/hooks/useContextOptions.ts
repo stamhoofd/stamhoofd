@@ -138,7 +138,7 @@ export function useContextOptions() {
     }
 
     const isCurrent = (option: Option) => {
-        return (option.app === app && (option.organization?.id ?? null) === ($organization.value?.id ?? null))
+        return ((option.app === app || (option.app === 'auto' && option.organization)) && (option.organization?.id ?? null) === ($organization.value?.id ?? null))
     }
 
     return {

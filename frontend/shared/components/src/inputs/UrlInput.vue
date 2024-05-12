@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="url" :error-box="errorBox">
-        <input v-model="urlRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder || $t('dashboard.inputs.website.placeholder')" autocomplete="url" @change="validate(false)" @input="urlRaw = $event.target.value; onTyping();">
+        <input v-model="urlRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder || $t('dashboard.inputs.website.placeholder')" autocomplete="url" @change="validate(false)" @input="(event) => {urlRaw = event.target.value; onTyping();}">
     </STInputBox>
 </template>
 
@@ -28,7 +28,7 @@ export default class UrlInput extends Vue {
     valid = true;
 
     @Prop({ default: null })
-        value!: string | null
+        modelValue!: string | null
 
     @Prop({ default: true })
         required!: boolean
@@ -45,7 +45,7 @@ export default class UrlInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
             this.urlRaw = ""
@@ -66,7 +66,7 @@ export default class UrlInput extends Vue {
             })
         }
 
-        this.urlRaw = this.value ?? ""
+        this.urlRaw = this.modelValue ?? ""
     }
 
     unmounted() {
@@ -83,7 +83,7 @@ export default class UrlInput extends Vue {
                     this.errorBox = null
                 }
 
-                if (this.value !== null) {
+                if (this.modelValue !== null) {
                     this.$emit('update:modelValue', null)
                 }
                 return true
@@ -94,7 +94,7 @@ export default class UrlInput extends Vue {
                     this.errorBox = null
                 }
 
-                if (this.nullable && this.value !== null) {
+                if (this.nullable && this.modelValue !== null) {
                     this.$emit('update:modelValue', null)
                 }
                 return false
@@ -126,7 +126,7 @@ export default class UrlInput extends Vue {
             const v = silent ? this.urlRaw : autoCorrected;
             this.urlRaw = v
     
-            if (this.value !== v) {
+            if (this.modelValue !== v) {
                 this.$emit('update:modelValue', v)
             }
             if (!silent) {

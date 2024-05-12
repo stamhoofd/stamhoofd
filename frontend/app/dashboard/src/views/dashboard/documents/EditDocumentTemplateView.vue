@@ -47,7 +47,7 @@
                     Deze invoervelden zijn nodig op elk document, maar je moet hier instellen welke gegevens je uit Stamhoofd daarin wilt invullen. Koppel je met meerdere gegevens uit Stamhoofd, dan gaan we de eerste beschikbare op het document invullen. Bv. als er bij het lid zelf geen adres werd ingevuld, neem dan het adres van de eerste ouder.
                 </p>
                 
-                <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errorBox" :values="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @input="setLinkedFields(field, $event)" />
+                <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
             <hr>
@@ -61,7 +61,9 @@
                     </h2>
                     <p class="style-description-small pre-wrap" v-text="getGroupDescription(group)" />
 
-                    <template #right><button class="button icon text trash" type="button" @click="removeGroup(group)" /></template>
+                    <template #right>
+                        <button class="button icon text trash" type="button" @click="removeGroup(group)" />
+                    </template>
                 </STListItem>
             </STList>
             <p>
@@ -91,12 +93,11 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patch
 import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { AppManager, SessionManager } from "@stamhoofd/networking";
+import { AppManager } from "@stamhoofd/networking";
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType, Version } from "@stamhoofd/structures";
 import { StringCompare } from "@stamhoofd/utility";
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-
 
 import ChooseDocumentTemplateGroup from "./ChooseDocumentTemplateGroup.vue";
 import { fiscal } from "./definitions/fiscal";
@@ -550,7 +551,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         this.loadingHtml = true;
 
         console.log('loadHtml', type)
-        const imported = ((await import(/* webpackChunkName: "attest-html" */ "!!raw-loader!./templates/"+type+".html")).default)
+        const imported = ((await import(/* webpackChunkName: "attest-html" */ "./templates/"+type+".html?raw")).default)
         if (typeof imported !== "string") {
             throw new Error("Imported attest html is not a string")
         }
@@ -562,7 +563,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
     async loadXML(type: string) {
         this.loadingXml = true;
-        const imported = ((await import(/* webpackChunkName: "attest-html" */ "!!raw-loader!./templates/"+type+".xml")).default)
+        const imported = ((await import(/* webpackChunkName: "attest-html" */ "./templates/"+type+".xml?raw")).default)
         if (typeof imported !== "string") {
             throw new Error("Imported attest xml is not a string")
         }

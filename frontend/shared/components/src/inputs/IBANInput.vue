@@ -28,7 +28,7 @@ export default class IBANInput extends Vue {
     valid = true;
 
     @Prop({ default: null })
-        value!: string | null
+        modelValue!: string | null
 
     @Prop({ default: true })
         required!: boolean
@@ -41,7 +41,7 @@ export default class IBANInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
             return
@@ -56,7 +56,7 @@ export default class IBANInput extends Vue {
             })
         }
 
-        this.ibanRaw = this.value ?? ""
+        this.ibanRaw = this.modelValue ?? ""
     }
 
     unmounted() {

@@ -29,6 +29,8 @@
     align-items: center;
     display: flex;
     justify-content: flex-start;
+    width: var(--block-width, 40px);
+    height: var(--block-width, 40px);
 }
 
 .logo-text {
@@ -73,6 +75,8 @@
 
     &:last-child {
         display: none;
+        width: calc(var(--block-width, 40px) - 10px);
+        height: calc(var(--block-width, 40px) - 10px);
     }
 }
 

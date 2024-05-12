@@ -1,8 +1,8 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
         <label for="color-input" class="input color-input-box" :class="{ hasColor: !!hasColor }">
-            <input v-model="colorRaw" class="text-input" pattern="#[0-9A-Fa-f]{6}" type="text" :placeholder="placeholder" :autocomplete="autocomplete" @input="colorRaw = $event.target.value;" @blur="validate(false, false)">
-            <input id="color-input" v-model="pickerColor" pattern="#[0-9A-Fa-f]{6}" class="color-input" type="color" @input="pickerColor = $event.target.value;">
+            <input v-model="colorRaw" class="text-input" pattern="#[0-9A-Fa-f]{6}" type="text" :placeholder="placeholder" :autocomplete="autocomplete" @blur="validate(false, false)">
+            <input id="color-input" v-model="pickerColor" pattern="#[0-9A-Fa-f]{6}" class="color-input" type="color">
             <span class="color" :style="{ backgroundColor: myColor }" :class="{empty: !myColor}" />
             <span v-if="!myColor" class="icon arrow-down-small" />
         </label>
@@ -20,7 +20,8 @@ import STInputBox from "./STInputBox.vue";
 @Component({
     components: {
         STInputBox
-    }
+    },
+    emits: ['update:modelValue']
 })
 export default class ColorInput extends Vue {
     @Prop({ default: "" }) 
@@ -36,7 +37,7 @@ export default class ColorInput extends Vue {
     hasColor = "";
 
     @Prop({ default: null })
-        value!: string | null
+        modelValue!: string | null
 
     @Prop({ default: true })
         required!: boolean
@@ -49,7 +50,7 @@ export default class ColorInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: string | null) {
         if (val === null) {
             return
@@ -77,7 +78,7 @@ export default class ColorInput extends Vue {
             })
         }
 
-        this.colorRaw = this.value ?? ""
+        this.colorRaw = this.modelValue ?? ""
         this.hasColor = this.colorRaw
     }
 
@@ -100,7 +101,7 @@ export default class ColorInput extends Vue {
             }
             this.hasColor = ""
 
-            if (this.value !== null) {
+            if (this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
             }
             return true
@@ -122,7 +123,7 @@ export default class ColorInput extends Vue {
                     "field": "color"
                 }))
             }
-            if (this.value !== null) {
+            if (this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
             }
             return false
@@ -140,7 +141,7 @@ export default class ColorInput extends Vue {
                 }))
             }
 
-            if (this.value !== null) {
+            if (this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
             }
             
@@ -149,7 +150,7 @@ export default class ColorInput extends Vue {
 
         this.hasColor = this.colorRaw
 
-        if (this.colorRaw !== this.value) {
+        if (this.colorRaw !== this.modelValue) {
             this.$emit('update:modelValue', this.colorRaw)
         }
         if (!silent) {
