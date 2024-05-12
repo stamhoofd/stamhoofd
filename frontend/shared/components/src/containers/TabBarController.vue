@@ -6,8 +6,8 @@
             </div>
             <div class="middle">
                 <template v-if="tabs.length > 1">
-                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="(event) => selectTab(event, item)">
-                        <div class="button text" :class="{ selected: selectedItem === item }">
+                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" @click="(event) => selectTab(event, item)">
+                        <div class="button text" :class="{ selected: item.isSelected(selectedItem) }">
                             <span :class="'icon '+item.icon" />
                             <span>{{ item.name }}</span>
                             <span v-if="unref(item.badge)" class="bubble">{{ unref(item.badge) }}</span>
@@ -25,8 +25,8 @@
         </main>
 
         <footer v-if="showBottomBar" :class="{hidden: shouldHideBottomBar}">
-            <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: selectedItem === item }" type="button" @click="(event) => selectTab(event, item)">
-                <div class="button text small column" :class="{ selected: selectedItem === item }">
+            <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" @click="(event) => selectTab(event, item)">
+                <div class="button text small column" :class="{ selected: item.isSelected(selectedItem) }">
                     <span :class="'icon '+item.icon" />
                     <span>
                         {{ item.name }}
@@ -93,8 +93,34 @@ defineOptions({
 })
 
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
-const tabs = computed(() => unref(props.tabs))
-const flatTabs = computed<TabBarItemWithComponent[]>(() => tabs.value.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
+const tabs = computed(() => {
+    const base = unref(props.tabs);
+
+    if (!showTopBar.value) {
+        // Replace groups with tabs
+        return base.flatMap(t => {
+            if (t instanceof TabBarItemGroup) {
+                return [
+                    new TabBarItem({
+                        ...t,
+                        component: new ComponentWithProperties(NavigationController, {
+                            root: new ComponentWithProperties(TabBarDropdownView, {
+                                group: t,
+                                selectedItem: selectedItem,
+                                selectItem: selectItem
+                            })
+                        })
+                    })
+                ];
+            }
+            return [t]
+        });
+    }
+
+    return base;
+})
+
+const flatTabs = computed<TabBarItemWithComponent[]>(() => unref(props.tabs).flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
 const injectedComponents = inject('reactive_components') as Ref<Record<string, ComponentWithProperties>|undefined> | undefined;
 const deviceWidth = useDeviceWidth()
 const showTopBar = computed(() => deviceWidth.value > 1100);
@@ -186,7 +212,7 @@ const shouldNavigateAway = async () => {
     return true;
 }
 
-const selectItem = async (item: TabBarItem, appendHistory: boolean = true) => {
+async function selectItem (item: TabBarItem, appendHistory: boolean = true) {
     if (item === selectedItem.value) {
         // Try to scroll this item to the top
         if (mainElement.value) {
@@ -262,21 +288,7 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
 
     if (!showTopBar.value) {
         // Treat as a normal tab
-        return show({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(TabBarDropdownView, {
-                        tabs: tab.items,
-                        selectedItem: selectedItem,
-                        selectItem: selectItem
-                    })
-                }, {
-                    provide: {
-                        reactive_navigation_disable_url: true
-                    }
-                })
-            ]
-        })
+        return;
     }
 
     const padding = 15;
@@ -305,7 +317,7 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(TabBarDropdownView, {
-                    tabs: tab.items,
+                    group: tab,
                     selectedItem: selectedItem,
                     selectItem: selectItem
                 })
@@ -393,6 +405,8 @@ defineExpose({
     overflow: hidden;
     overflow: clip; // More modern + disables scrolling
     --saved-vh: var(--vh, 1vh);
+    --saved-keyboard-height: var(--keyboard-height, 0px);
+    --saved-st-safe-area-bottom: var(--st-safe-area-bottom, 0px);
 
     > header {
         box-sizing: border-box;
@@ -436,9 +450,6 @@ defineExpose({
             }
         }
     }
-
-    --saved-keyboard-height: var(--keyboard-height, 0px);
-    --saved-st-safe-area-bottom: var(--st-safe-area-bottom, 0px);
 
     > main {
         // Pass an update to the --vh because we removed some

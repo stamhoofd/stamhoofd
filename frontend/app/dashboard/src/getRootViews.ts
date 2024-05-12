@@ -339,10 +339,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                                 tabs.push(webshopsTab)
                             }
 
-                            if (tabs.length < 3) {
-                                tabs.push(settingsTab)
-                            }
-
+                            tabs.push(settingsTab)
                             tabs.push(moreTab);
 
                             return tabs;
