@@ -234,7 +234,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 if (patchRegistration.price) {
-                    const group = groups.find(g => g.id === registration.groupId)
                     // Create balance item
                     const balanceItem = new BalanceItem();
                     balanceItem.registrationId = registration.id;
@@ -243,7 +242,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     balanceItem.pricePaid = patchRegistration.pricePaid ?? 0
                     balanceItem.memberId = registration.memberId;
                     balanceItem.userId = member.users[0]?.id ?? null
-                    balanceItem.organizationId = member.organizationId
+                    balanceItem.organizationId = group.organizationId
                     balanceItem.status = BalanceItemStatus.Pending;
                     await balanceItem.save();
 
@@ -265,7 +264,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         const balanceItemPayment = new BalanceItemPayment()
                         balanceItemPayment.balanceItemId = balanceItem.id;
                         balanceItemPayment.paymentId = payment.id;
-                        balanceItemPayment.organizationId = member.organizationId
+                        balanceItemPayment.organizationId = group.organizationId
                         balanceItemPayment.price = payment.price;
                         await balanceItemPayment.save();
                     }
@@ -364,7 +363,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
         
         // We need to refetch the outstanding amounts of members that have changed
-        const updatedMembers = balanceItemMemberIds.length > 0 ? await Member.getAllWithRegistrations(...balanceItemMemberIds) : []
+        const updatedMembers = balanceItemMemberIds.length > 0 ? await Member.getBlobByIds(...balanceItemMemberIds) : []
         for (const member of updatedMembers) {
             const index = members.findIndex(m => m.id === member.id)
             if (index !== -1) {
@@ -379,10 +378,16 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         if (!member.details.birthDay) {
             return
         }
-        const existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
+        let existingMembers: Member[]
+
+        if (STAMHOOFD.userMode === 'platform') {
+            existingMembers = await Member.where({ organizationId: null, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
+        } else {
+            existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
+        }
         
         if (existingMembers.length > 0) {
-            const withRegistrations = await Member.getAllWithRegistrations(...existingMembers.map(m => m.id))
+            const withRegistrations = await Member.getBlobByIds(...existingMembers.map(m => m.id))
             for (const member of withRegistrations) {
                 if (member.registrations.length > 0) {
                     return member
@@ -417,10 +422,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 field: "groupId"
             });
         }
-        
+        const group = groups.find(g => g.id === registration.groupId)
+
+        if (!group) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'groupId',
+                message: 'Invalid groupId',
+                human: 'Deze inschrijvingsgroep is ongeldig'
+            })
+        }
+
         const registration = new Registration()
         registration.groupId = registrationStruct.groupId
-        registration.organizationId = member.organizationId
+        registration.organizationId = group.organizationId
         registration.cycle = registrationStruct.cycle
         registration.memberId = member.id
         registration.registeredAt = registrationStruct.registeredAt
@@ -441,7 +456,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         member.registrations.push(registration)
 
         if (registrationStruct.price) {
-            const group = groups.find(g => g.id === registration.groupId)
             // Create balance item
             const balanceItem = new BalanceItem();
             balanceItem.registrationId = registration.id;
@@ -450,7 +464,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             balanceItem.pricePaid = registrationStruct.pricePaid ?? 0
             balanceItem.memberId = registration.memberId;
             balanceItem.userId = member.users[0]?.id ?? null
-            balanceItem.organizationId = member.organizationId
+            balanceItem.organizationId = group.organizationId
             balanceItem.status = BalanceItemStatus.Pending;
             await balanceItem.save();
 
@@ -469,7 +483,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const balanceItemPayment = new BalanceItemPayment()
                 balanceItemPayment.balanceItemId = balanceItem.id;
                 balanceItemPayment.paymentId = payment.id;
-                balanceItemPayment.organizationId = member.organizationId
+                balanceItemPayment.organizationId = group.organizationId
                 balanceItemPayment.price = payment.price;
                 await balanceItemPayment.save();
             }

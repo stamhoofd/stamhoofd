@@ -1,6 +1,7 @@
 import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
 import { AccessRight, GroupCategory, GroupStatus, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, Platform } from "@stamhoofd/structures"
+import { Formatter } from "@stamhoofd/utility"
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -532,8 +533,17 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (await this.canManagePayments(member.organizationId)) {
-            return true;
+        if (member.organizationId) {
+            if (await this.canManagePayments(member.organizationId)) {
+                return true;
+            }
+        } else {
+            const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId))
+            for (const organizationId of organizationIds) {
+                if (await this.canManagePayments(organizationId)) {
+                    return true;
+                }
+            }
         }
 
         if (await this.canAccessMember(member, PermissionLevel.Write)) {

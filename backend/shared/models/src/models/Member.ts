@@ -1,11 +1,14 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
+import { SQL } from "@stamhoofd/sql";
 import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment, Registration, User } from './';
-export type MemberWithUsers = Member & { users: User[] }
-export type MemberWithRegistrations = MemberWithUsers & { registrations: Registration[] }
+export type MemberWithRegistrations = Member & { 
+    users: User[], 
+    registrations: Registration[] 
+}
 
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member }
@@ -21,8 +24,8 @@ export class Member extends Model {
     })
     id!: string;
 
-    @column({ type: "string" })
-    organizationId: string;
+    @column({ type: "string", nullable: true })
+    organizationId: string|null = null;
 
     @column({
         type: "string", 
@@ -90,7 +93,7 @@ export class Member extends Model {
      * Fetch all members with their corresponding (valid) registration
      */
     static async getWithRegistrations(id: string): Promise<MemberWithRegistrations | null> {
-        return (await this.getAllWithRegistrations(id))[0] ?? null
+        return (await this.getBlobByIds(id))[0] ?? null
     }
 
     /**
@@ -252,7 +255,7 @@ export class Member extends Model {
      /**
      * Fetch all members with their corresponding (valid) registrations, users
      */
-    static async getAllWithRegistrations(...ids: string[]): Promise<MemberWithRegistrations[]> {
+    static async getBlobByIds(...ids: string[]): Promise<MemberWithRegistrations[]> {
         if (ids.length == 0) {
             return []
         }
@@ -322,21 +325,32 @@ export class Member extends Model {
             ids.push(id)
         }
         
-        return await this.getAllWithRegistrations(...ids)
+        return await this.getBlobByIds(...ids)
     }
 
      /**
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
-        let query = `SELECT \`${Member.table}\`.\`${Member.primary.name}\` from \`${Member.users.linkTable}\`\n`;
-        query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${Member.users.linkTable}\`.\`${Member.users.linkKeyA}\`\n`
-        query += `where \`${Member.users.linkTable}\`.\`${Member.users.linkKeyB}\` = ?`
+        const query = SQL
+            .select(
+                SQL.column('id')
+            )
+            .from(SQL.table(Member.table))
+            .join(
+                SQL.leftJoin(
+                    SQL.table('_members_users')
+                ).where(
+                    SQL.column('_members_users', 'membersId'),
+                    SQL.column(Member.table, 'id'),
+                )
+            ).where(
+                SQL.column('_members_users', 'usersId'),
+                user.id,
+            )
 
-        const [results] = await Database.select(query, [user.id])
-
-        const memberIds = results.map((r: any) => r[Member.table][Member.primary.name] as string)
-        return await this.getAllWithRegistrations(...memberIds)
+        const data = await query.fetch()
+        return this.getBlobByIds(...data.map((r) => r.members.id as string));
     }
 
     getStructureWithRegistrations(this: MemberWithRegistrations, forOrganization: null | boolean = null) {

@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Organization, Payment, Webshop } from "@stamhoofd/models";
-import { Group as GroupStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrations, Organization, Payment, Webshop } from "@stamhoofd/models";
+import { Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 
@@ -96,5 +96,25 @@ export class AuthenticatedStructures {
         }
         
         return await organization.getStructure()
+    }
+
+    static async membersBlob(members: MemberWithRegistrations[]): Promise<MembersBlob> {
+        const organizations = new Map<string, Organization>()
+        for (const member of members) {
+            for (const registration of member.registrations) {
+                if (registration.organizationId !== Context.auth.organization?.id) {
+                    const found = organizations.get(registration.id);
+                    if (!found) {
+                        const organization = await Context.auth.getOrganization(registration.organizationId)
+                        organizations.set(organization.id, organization)
+                    }
+                }
+            }
+        }
+
+        return MembersBlob.create({
+            members: members.map(m => m.getStructureWithRegistrations()),
+            organizations: await Promise.all([...organizations.values()].map(o => this.organization(o)))
+        })
     }
 }

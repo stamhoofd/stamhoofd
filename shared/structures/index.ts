@@ -82,6 +82,7 @@ export * from "./src/members/PaymentDetailed"
 export * from "./src/members/PaymentGeneral"
 export * from "./src/members/PaymentPatch"
 export * from "./src/members/PaymentWithRegistrations"
+export * from "./src/members/PlatformMember"
 export * from "./src/members/records/LegacyRecord"
 export * from "./src/members/records/LegacyRecordType"
 export * from "./src/members/records/RecordAnswer"
@@ -101,6 +102,7 @@ export * from "./src/members/checkout/OldRegisterCartPriceCalculator"
 export * from './src/members/checkout/OldRegisterCartValidator'
 export * from "./src/members/checkout/OldRegisterCheckout"
 export * from "./src/members/checkout/OldRegisterItem"
+export * from "./src/members/checkout/RegisterCheckout"
 export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop
