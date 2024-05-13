@@ -937,9 +937,11 @@ export default class MailView extends Mixins(NavigationMixin) {
             if (!this.hasAdults) {
                 this.memberFilter = MemberFilter.None
                 this.parentFilter = ParentFilter.All
+                this.userFilter = UserFilter.None
             } else {
                 if (this.hasMinors) {
                     this.parentFilter = ParentFilter.Minors
+                    this.userFilter = UserFilter.None
                 } else {
                     this.parentFilter = ParentFilter.None
                 }
