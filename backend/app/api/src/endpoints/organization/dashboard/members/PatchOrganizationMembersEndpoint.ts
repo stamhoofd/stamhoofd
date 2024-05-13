@@ -422,7 +422,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 field: "groupId"
             });
         }
-        const group = groups.find(g => g.id === registration.groupId)
+        const group = groups.find(g => g.id === registrationStruct.groupId)
 
         if (!group) {
             throw new SimpleError({
