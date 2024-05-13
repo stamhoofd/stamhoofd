@@ -38,7 +38,9 @@
             Artikels
         </h2>
         <STList v-model="draggableProducts" :draggable="true">
-            <ProductRow v-for="product in products" :key="product.id" :product="product" :category="patchedCategory" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+            <template #item="{item: product}">
+                <ProductRow :product="product" :category="patchedCategory" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+            </template>
         </STList>
 
         <p>
@@ -66,9 +68,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage,ErrorBox, SaveView, STErrorsDefault,STInputBox, STList, Validator } from "@stamhoofd/components";
 import { Category, PrivateWebshop, Product, ProductType, Version, WebshopTicketType } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditProductView from '../products/EditProductView.vue';
 import ProductRow from "../products/ProductRow.vue"

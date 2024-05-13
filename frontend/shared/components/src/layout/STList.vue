@@ -1,9 +1,9 @@
 <template>
-    <draggable v-if="draggable && false" v-model="list" item-key="id" handle=".drag" tag="div" class="st-list" :class="{'is-dragging': dragging}" animation="200" ghost-class="is-dragging" :group="group" :force-fallback="true" @start="onStart" @end="onEnd">
-        <template #item="slotProps">
-            <slot name="item" v-bind="slotProps" />
+    <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @end="onEnd">
+        <template #item="{element, index}">
+            <slot name="item" v-bind="{item: element, index}" />
         </template>
-    </draggable>
+    </Sortable>
     <transition-group v-else-if="withAnimation" tag="div" name="list" class="st-list">
         <slot />
     </transition-group>
@@ -12,54 +12,57 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
-import draggable from 'vuedraggable'
+<script setup lang="ts" generic="T">
+import { SortableEvent, SortableOptions } from "sortablejs";
+import { Sortable } from "sortablejs-vue3"
+import { computed, nextTick, ref } from 'vue';
 
-@Component({
-    components: {
-        draggable
-    },
-    compatConfig: {
-        MODE: 3,
-    }
-})
-export default class STList extends Vue {
-    @Prop({ default: null })
-        valueModel!: any[] | null
+const props = withDefaults(
+    // props
+    defineProps<{draggable?: boolean, group?: string, withAnimation?: boolean, itemKey?: string | ((item: any) => string | number | symbol)}>(),
+    // default values
+    {valueModel: null, draggable: false, group: undefined, withAnimation: false, itemKey: 'id'}
+);
 
-    @Prop({ default: false })
-        draggable!: boolean;
+const listModel =defineModel<T[] | undefined>({default: undefined});
 
-    @Prop({ default: undefined })
-        group!: string | undefined;
+const options = computed<SortableOptions>(() => { return {
+    animation: 200,
+    group: props.group,
+    handle: '.drag',
+    ghostClass: 'is-dragging',
+    forceFallback: true,
+}});
 
-    @Prop({ default: false })
-        withAnimation!: boolean;
+const isDrag = ref(false);
 
-    dragging = false;
+const onStart = () => {
+    isDrag.value = true;
+};
 
-    get list() {
-        return this.valueModel;
-    }
-
-    set list(changed: any[] | null) {
-        this.$emit('update:modelValue', changed);
-    }
-
-    onStart() {
-        this.dragging = true;
+const onEnd = async ({oldIndex, newIndex}: SortableEvent) => {
+    if(listModel.value !== undefined) {
+        if(oldIndex !== undefined && newIndex !== undefined) {
+            listModel.value = await moveItemInArray(listModel.value, oldIndex, newIndex);
+        }
     }
 
-    onEnd(event) {
-        // On firefox we need to cancel all click events that happen after a drag
-        // otherwise it will click one of the elements that was dragged
+    // On firefox we need to cancel all click events that happen after a drag
+    // otherwise it will click one of the elements that was dragged
 
-        setTimeout(() => {
-            this.dragging = false;
-        }, 100)
-    }
-}
+    setTimeout(() => {
+        isDrag.value = false;
+    }, 100)
+};
+
+const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
+    const copy = [...array];
+    const item = copy.splice(from, 1)[0];
+    
+    return await nextTick(() => {
+        copy.splice(to, 0, item);
+        return copy});
+};
 </script>
 
 <style lang="scss">

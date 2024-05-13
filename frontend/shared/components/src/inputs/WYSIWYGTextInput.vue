@@ -11,10 +11,14 @@
 
                             <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
                         </div>
-                        <template #right><button class="button text" type="submit" @mousedown.prevent>
-                            {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
-                        </button></template>
-                        <template v-if="editor.isActive('link')" #right><button v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" /></template>
+                        <template #right>
+                            <button class="button text" type="submit" @mousedown.prevent>
+                                {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
+                            </button>
+                        </template>
+                        <template v-if="editor.isActive('link')" #right>
+                            <button v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                        </template>
                     </STListItem>
                 </STList>
             </form>
@@ -36,13 +40,13 @@
 
 
 <script lang="ts">
+import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { RichText } from "@stamhoofd/structures";
 import Link from '@tiptap/extension-link';
 import Typography from "@tiptap/extension-typography";
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
-import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
 import { ColorHelper } from "../ColorHelper";
 import TooltipDirective from "../directives/Tooltip";
@@ -75,7 +79,7 @@ function escapeHtml(unsafe: string ): string {
 })
 export default class WYSIWYGTextInput extends Vue {
     @Prop({ required: true })
-        value!: RichText
+        modelValue!: RichText
 
     @Prop({ default: 2 })
         headingStartLevel!: number
@@ -112,11 +116,11 @@ export default class WYSIWYGTextInput extends Vue {
     }
 
     buildEditor() {
-        let content = this.value.html;
+        let content = this.modelValue.html;
 
-        if (!content && this.value.text) {
+        if (!content && this.modelValue.text) {
             // Special conversion operation
-            const splitted = this.value.text.split("\n")
+            const splitted = this.modelValue.text.split("\n")
             for (const split of splitted) (
                 content += `<p>${escapeHtml(split)}</p>`
             )

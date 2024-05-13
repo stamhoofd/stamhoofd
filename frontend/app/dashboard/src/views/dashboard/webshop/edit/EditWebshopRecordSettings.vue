@@ -31,7 +31,9 @@
         </p>
 
         <STList v-model="categories" :draggable="true">
-            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" />
+            <template #item="{item: category}">
+                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" />
+            </template>
         </STList>
 
         <p>
@@ -46,13 +48,13 @@
 <script lang="ts">
 import { PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Checkout } from "@stamhoofd/structures";
 import { RecordEditorSettings } from "@stamhoofd/structures";
 import { PrivateWebshop, RecordCategory, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import EditRecordCategoryQuestionsView from "../../settings/modules/members/records/EditRecordCategoryQuestionsView.vue";
 import EditRecordCategoryView from "../../settings/modules/members/records/EditRecordCategoryView.vue";
@@ -110,14 +112,17 @@ export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) 
     addCategory() {
         const category = RecordCategory.create({})
 
+        console.warn('add category');
+        const filterDefinitions = this.editorSettings.filterDefinitions(this.categories);
+
         this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(EditRecordCategoryView, {
                         category,
                         isNew: true,
-                        filterDefinitions: this.editorSettings.filterDefinitions(this.categories),
-                        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => {
+                        filterDefinitions,
+                        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: typeof NavigationMixin) => {
                             this.addCategoriesPatch(patch)
                             component.show({
                                 components: [
@@ -139,7 +144,7 @@ export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) 
                 })
             ],
             modalDisplayStyle: "popup"
-        })
+        });
     }
 
     addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {

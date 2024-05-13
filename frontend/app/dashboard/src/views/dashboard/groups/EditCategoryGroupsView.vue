@@ -39,7 +39,9 @@
             <hr>
             <h2>Categorieën</h2>
             <STList v-model="draggableCategories" :draggable="true">
-                <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @delete="deleteCategory(category)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+                <template #item="{item: category}">
+                    <GroupCategoryRow :category="category" :organization="patchedOrganization" @patch="addPatch" @delete="deleteCategory(category)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+                </template>
             </STList>
         </template>
 
@@ -47,7 +49,9 @@
             <hr>
             <h2>Groepen</h2>
             <STList v-model="draggableGroups" :draggable="true">
-                <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @delete="deleteGroup(group)" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
+                <template #item="{item: group}">
+                    <GroupRow :group="group" :organization="patchedOrganization" @patch="addPatch" @delete="deleteGroup(group)" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
+                </template>
             </STList>
         </template>
 
@@ -73,7 +77,7 @@
             <STList v-if="roles.length > 0">
                 <STListItem>
                     <template #left>
-                        <Checkbox :modelValue="true" :disabled="true" />
+                        <Checkbox :model-value="true" :disabled="true" />
                     </template>
                     Hoofdbeheerders
                 </STListItem>
@@ -111,10 +115,10 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, PermissionRole, Version } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import GroupCategoryPermissionRow from '../admins/GroupCategoryPermissionRow.vue';
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';

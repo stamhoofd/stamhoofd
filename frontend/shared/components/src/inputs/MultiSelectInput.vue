@@ -10,16 +10,18 @@
         </div>
         <div v-else class="multi-select-container">
             <div class="input">
-                <STList v-model="draggableValues" :draggable="true">
-                    <STListItem v-for="value of modelValue" :key="value" :selectable="true" @click="openContextMenu($event, value)">
-                        <span v-for="(label, index) of getValueLabels(value)" :key="index" :title="label" v-text="label" />
+                <STList v-model="draggableValues" :draggable="true" :item-key="(v: T) => v">
+                    <template #item="{item: value}">
+                        <STListItem :selectable="true" @click="openContextMenu($event, value)">
+                            <span v-for="(label, index) of getValueLabels(value)" :key="index" :title="label" v-text="label" />
 
-                        <template #right>
-                            <span class="button icon arrow-down-small gray" />
-                            <span v-if="draggableValues.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
-                            <button class="button icon trash gray" type="button" @click="deleteValue(value)" />
-                        </template>
-                    </STListItem>
+                            <template #right>
+                                <span class="button icon arrow-down-small gray" />
+                                <span v-if="draggableValues.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
+                                <button class="button icon trash gray" type="button" @click="deleteValue(value)" />
+                            </template>
+                        </STListItem>
+                    </template>
                 </STList>
             </div>
         </div>

@@ -125,7 +125,9 @@
         </p>
 
         <STList v-model="categories" :draggable="true">
-            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" />
+            <template #item="{item: category}">
+                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" />
+            </template>
         </STList>
 
         <p>

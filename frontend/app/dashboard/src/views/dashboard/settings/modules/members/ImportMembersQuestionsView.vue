@@ -110,15 +110,17 @@
                             </p>
 
                             <STList v-model="draggableGroups" :draggable="true">
-                                <STListItem v-for="(group, index) of multipleGroups" :key="group.id" class="right-description">
-                                    {{ index + 1 }}. {{ group.settings.name }}
+                                <template #item="{item: group, index}">
+                                    <STListItem class="right-description">
+                                        {{ index + 1 }}. {{ group.settings.name }}
 
-                                    <template #right>
-                                        <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
-                                        <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
-                                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                                    </template>
-                                </STListItem>
+                                        <template #right>
+                                            <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
+                                            <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
+                                            <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                                        </template>
+                                    </STListItem>
+                                </template>
                             </STList>
 
                             <template #right>
