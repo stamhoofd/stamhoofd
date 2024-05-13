@@ -15,8 +15,8 @@
             </span>
         </button>
 
-        <STErrorsDefault :error-box="errorBox" />
-        <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+        <STErrorsDefault :error-box="errors$.errorBox" />
+        <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errors$.errorBox">
             <div class="input-group">
                 <div>
                     <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name" :disabled="!canEditDetails">
@@ -27,7 +27,7 @@
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails"/>
+        <EmailInput v-model="email" title="E-mailadres" :validator="errors$.validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails" />
 
         <div class="container">
             <hr>
@@ -37,7 +37,7 @@
             <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
         </div>
 
-        <div class="container" v-if="resources.length">
+        <div v-if="resources.length" class="container">
             <hr>
             <h2>Individuele toegang</h2>
             <p>Beheerders kunnen automatisch toegang krijgen tot een onderdeel als ze het zelf hebben aangemaakt maar anders niet automatisch toegang zouden hebben (bv. aanmaken van nieuwe webshops). Sowieso is het aan te raden om dit om te zetten in beheerdersrollen, aangezien die eenvoudiger te beheren zijn.</p>
@@ -48,7 +48,7 @@
                     :key="resource.id" 
                     :role="permissions.unloadedPermissions" 
                     :resource="resource" 
-                    :configurableAccessRights="[]"
+                    :configurable-access-rights="[]"
                     type="resource" 
                     @patch:role="addPermissionPatch" 
                 />
@@ -56,8 +56,7 @@
         </div>
 
         <template v-if="!isNew">
-
-        <hr v-if="!isNew">
+            <hr v-if="!isNew">
             <h2>
                 Verwijderen
             </h2>
@@ -78,11 +77,12 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions } from '@stamhoofd/components';
 import { Permissions, PermissionsResourceType, User } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+
 import EditUserPermissionsBox from './components/EditUserPermissionsBox.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
 
-const {errorBox, validator} = useErrors();
+const errors$ = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 const didSendInvite = ref(false);
@@ -148,12 +148,12 @@ const save = async () => {
     let valid = false
 
     if (errors.errors.length > 0) {
-        errorBox.value = new ErrorBox(errors)
+        errors$.errorBox = new ErrorBox(errors)
     } else {
-        errorBox.value = null
+        errors$.errorBox = null
         valid = true
     }
-    valid = valid && await validator.validate()
+    valid = valid && await errors$.validator.validate()
 
     // TODO: validate if at least email or name is filled in
 
@@ -195,7 +195,7 @@ const save = async () => {
         pop({ force: true })
     } catch (e) {
         console.error(e)
-        errorBox.value = new ErrorBox(e)
+        errors$.errorBox = new ErrorBox(e)
         saving.value = false
     }
 }
@@ -235,7 +235,7 @@ const doDelete = async () => {
         new Toast("Beheerder "+props.user.firstName+" is verwijderd", "success").setHide(2000).show()
     } catch (e) {
         console.error(e)
-        errorBox.value = new ErrorBox(e)
+        errors$.errorBox = new ErrorBox(e)
         deleting.value = false;
     }
     return false;
