@@ -1,7 +1,9 @@
 
 import { column, Model } from "@simonbackx/simple-database";
 import { Document as DocumentStruct, DocumentData, DocumentStatus } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
+
 import { render } from "../helpers/Handlebars";
 import { RegistrationWithMember } from "./Member";
 import { Organization } from "./Organization";
@@ -129,7 +131,10 @@ export class Document extends Model {
             const Member = (await import("./Member")).Member
             const member = await Member.getWithRegistrations(memberId)
             if (member) {
-                await this.updateForRegistrations(member.registrations.map(r => r.id), member.organizationId)
+                const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId))
+                for (const organizationId of organizationIds) {
+                    await this.updateForRegistrations(member.registrations.map(r => r.id), organizationId)
+                }
             }
         } catch (e) {
             console.error(e)

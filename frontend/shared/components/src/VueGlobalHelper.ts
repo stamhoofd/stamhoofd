@@ -112,7 +112,7 @@ export function useAuth(): ContextPermissions {
  * Allows you to use the ContextPermissions object in a specific context (editing user permissions mostly)
  * without inheriting permissions if the user is also a global admin (which gives them full access to everything, but breaks editing permissions)
  */
-export function useUninheritedPermissions(overrides?: {patchedUser?: User|Ref<User>, patchedOrganization?: Organization|Ref<Organization>, patchedPlatform?: Platform|Ref<Platform>}): ContextPermissions {
+export function useUninheritedPermissions(overrides?: {patchedUser?: User|Ref<User>, patchedOrganization?: Organization|Ref<Organization|null>, patchedPlatform?: Platform|Ref<Platform>}): ContextPermissions {
     const user = overrides?.patchedUser ?? useUser()
     const organization = overrides?.patchedOrganization ?? useOrganization()
     const platform = overrides?.patchedPlatform ?? usePlatform()

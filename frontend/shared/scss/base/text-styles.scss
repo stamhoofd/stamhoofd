@@ -752,6 +752,76 @@
     @extend .style-illustration-img;
 }
 
+.style-image-with-icon {
+    position: relative;
+
+    .image-component {
+        width: 40px;
+        height: 40px;
+        border-radius: $border-radius;
+
+        @media (max-width: 400px) {
+            width: 30px;
+            height: 30px;
+            margin-right: 0px;
+        }
+    
+        @media (max-width: 350px) {
+            width: 25px;
+            height: 25px;
+        }
+    }
+
+    figure {
+        width: 40px;
+        height: 40px;
+        border-radius: $border-radius;
+        text-align: center;
+        background: $color-primary-background;
+        color: $color-primary;
+        text-transform: uppercase;
+        line-height: 40px;
+        font-size: 14px;
+        font-weight: $font-weight-bold;
+
+        @media (max-width: 400px) {
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            margin-right: 0px;
+        }
+    
+        @media (max-width: 350px) {
+            width: 25px;
+            height: 25px;
+            line-height: 25px;
+            font-size: 12px;
+        }
+
+        > span {
+            opacity: 0.8;
+            vertical-align: middle;
+            margin-right: -3px; // visual correction
+        }
+    }
+
+    > aside {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        background: $color-background;
+        border-radius: 40px;
+        line-height: 24px;
+        transform: translate(40%, 40%);
+        height: 23px; // alignment fix for centered icons
+
+        display: flex;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
 .style-bubble {
     background: $color-error;
     border-radius: 30px;

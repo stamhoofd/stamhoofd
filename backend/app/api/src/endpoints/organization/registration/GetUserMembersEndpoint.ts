@@ -1,12 +1,14 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Member } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob } from "@stamhoofd/structures";
+import { MembersBlob } from "@stamhoofd/structures";
 
+import { AuthenticatedStructures } from "../../../helpers/AuthenticatedStructures";
 import { Context } from "../../../helpers/Context";
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
-type ResponseBody = MemberWithRegistrationsBlob[]
+type ResponseBody = MembersBlob
 
 /**
  * Get the members of the user
@@ -32,6 +34,8 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
 
         const members = await Member.getMembersWithRegistrationForUser(user)
         
-        return new Response(members.map(m => m.getStructureWithRegistrations()));
+        return new Response(
+            await AuthenticatedStructures.membersBlob(members)
+        );
     }
 }

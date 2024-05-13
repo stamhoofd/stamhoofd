@@ -1,28 +1,69 @@
 
 
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { SessionContext } from '@stamhoofd/networking';
-import { Document, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { Document, Group, MembersBlob, PlatformMember, RegisterCheckout, RegisterContext, RegisterItem } from '@stamhoofd/structures';
 
 /**
  * Controls the fetching and decrypting of members
  */
 export class MemberManager {
     /// Currently saved members
-    $context: SessionContext
+    $context: SessionContext;
+    members: PlatformMember[] = []
+    checkout: RegisterCheckout = new RegisterCheckout()
 
     constructor($context: SessionContext) {
         this.$context = $context
     }
 
+    get registerContext(): RegisterContext {
+        return {
+            members: this.members,
+            checkout: this.checkout
+        }
+    }
+
+    defaultItem(member: PlatformMember, group: Group): RegisterItem {
+        return RegisterItem.defaultFor(member, group, this.registerContext)
+    }
+
+    canRegister(member: PlatformMember, group: Group) {
+        const item = this.defaultItem(member, group)
+        try {
+            item.validate(this.registerContext)
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                return false;
+            }
+            throw e;
+        }
+        return true;
+    }
+
+    get isAcceptingNewMembers() {
+        return STAMHOOFD.userMode === 'platform' ? true : (this.$context.organization?.isAcceptingNewMembers(this.$context.hasPermissions()) ?? true);
+    }
 
     async loadMembers() {
         const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/members",
-            decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>)
+            decoder: MembersBlob as Decoder<MembersBlob>
         })
-        //this.setMembers(response.data)
+        const blob = response.data
+        const members: PlatformMember[] = []
+        for (const member of blob.members) {
+            members.push(
+                PlatformMember.createFrom({
+                    member,
+                    blob,
+                    contextOrganization: this.$context.organization
+                })
+            )
+        }
+        this.members = members;
     }
 
     async loadDocuments() {

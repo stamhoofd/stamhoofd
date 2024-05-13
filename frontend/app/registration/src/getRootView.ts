@@ -5,13 +5,18 @@ import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
-import { reactive } from "vue";
+import { inject, reactive } from "vue";
 
+import { MemberManager } from "./classes/MemberManager";
 import CartView from "./views/cart/CartView.vue";
 import StartView from "./views/start/StartView.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
+}
+
+export function useMemberManager() {
+    return inject('$memberManager') as MemberManager;
 }
 
 export async function getScopedRegistrationRootFromUrl() {
@@ -75,11 +80,14 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
 
     //const $checkoutManager = new CheckoutManager($memberManager)
 
+    const $memberManager = reactive(new MemberManager(reactiveSession));
+    await $memberManager.loadMembers()
+
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
             $organizationManager: new OrganizationManager(reactiveSession),
-            //$memberManager,
+            $memberManager,
             //$checkoutManager,
             reactive_navigation_url: ownDomain ? "" : "leden/" + session.organization!.uri,
             reactive_components: {

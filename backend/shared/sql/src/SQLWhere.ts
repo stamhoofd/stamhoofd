@@ -36,13 +36,13 @@ export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
             )
         }
 
-        where(...args: ParseWhereArguments) {
-            const w = this.parseWhere(...args);
-            if (!this._where) {
-                this._where = w;
+        where<T>(this: T, ...args: ParseWhereArguments): T {
+            const w = (this as any).parseWhere(...args);
+            if (!(this as any)._where) {
+                (this as any)._where = w;
                 return this;
             }
-            this._where = this._where.and(w);
+            (this as any)._where = (this as any)._where.and(w);
             return this;
         }
 

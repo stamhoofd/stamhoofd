@@ -14,34 +14,17 @@
                     Snelle acties
                 </h2>
 
-                <STList>
-                    <STListItem>
+                <STList class="illustration-list">
+                    <STListItem class="left-center" :selectable="true" @click="registerMembers">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
+                            <img src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
                         </template>
 
                         <h3 class="style-title-list">
-                            Nieuwe verkoop starten
+                            Lid inschrijven
                         </h3>
                         <p class="style-description-small">
-                            Een ticketverkoop, openbare inschrijvingen voor een evenement of een gewone webshop maken.
-                        </p>
-
-                        <template #right>
-                            <span class="icon gray arrow-right-small" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem>
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/gear.svg" class="style-illustration-img">
-                        </template>
-
-                        <h3 class="style-title-list">
-                            Instellingen beheren
-                        </h3>
-                        <p class="style-description-small">
-                            Beheer de instellingen van je vereniging
+                            Schrijf een lid in
                         </p>
 
                         <template #right>
@@ -55,5 +38,22 @@
 </template>
 
 <script setup lang="ts">
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 
+enum Routes {
+    RegisterMembers = 'registerMembers',
+}
+defineRoutes([
+    {
+        name: Routes.RegisterMembers,
+        url: 'registreren',
+        component: async () => (await import('../members/RegisterMembersView.vue')).default as any,
+        present: 'popup'
+    }
+])
+const $navigate = useNavigate();
+
+async function registerMembers() {
+    await $navigate(Routes.RegisterMembers);
+}
 </script>

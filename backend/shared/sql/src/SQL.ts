@@ -18,20 +18,20 @@ class StaticSQL {
         return new SQLColumnExpression(namespaceOrColumn, column)
     }
 
-    jsonValue(column: SQLExpression, path: string) {
+    jsonValue(column: SQLExpression, path: string): SQLJsonExtract {
         return new SQLJsonExtract(column, new SQLSafeValue(path))
     }
 
-    table(namespace: string, table: string);
-    table(table: string);
-    table(namespaceOrTable: string, table?: string) {
+    table(namespace: string, table: string): SQLTableExpression;
+    table(table: string): SQLTableExpression;
+    table(namespaceOrTable: string, table?: string): SQLTableExpression {
         if (table === undefined) {
             return new SQLTableExpression(namespaceOrTable)
         }
         return new SQLTableExpression(namespaceOrTable, table)
     }
 
-    select(...columns: SQLExpression[]) {
+    select(...columns: SQLExpression[]): InstanceType<typeof SQLSelect> {
         if (columns.length === 0) {
             return new SQLSelect(this.wildcard())
         }
