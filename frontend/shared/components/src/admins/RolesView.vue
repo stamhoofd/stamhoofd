@@ -71,6 +71,7 @@ import { CenteredMessage, SaveView, Toast } from '@stamhoofd/components';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 
+import STList from '../layout/STList.vue';
 import EditRoleView from './EditRoleView.vue';
 import { useAdmins } from './hooks/useAdmins';
 import { usePatchRoles } from './hooks/useRoles';
