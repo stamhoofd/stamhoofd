@@ -8,7 +8,7 @@
 
             <ScrollableSegmentedControl v-if="allowChangingOrganization" v-model="selectedOrganization" :items="items" :labels="labels">
                 <template #right>
-                    <button class="button icon gray add" type="button" @click="searchOrganization" />
+                    <button v-tooltip="'Bij een andere vereniging inschrijven'" class="button icon gray add" type="button" @click="searchOrganization" />
                 </template>
             </ScrollableSegmentedControl>
 
@@ -26,12 +26,6 @@
                     <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" />
                 </STList>
             </div>
-
-            <!--<hr v-if="hasMore">
-            <button v-if="hasMore" class="button text" type="button" @click="showAll">
-                <span class="icon ul" />
-                <span>Toon alles</span>
-            </button>-->
         </main>
     </div>
 </template>
