@@ -758,7 +758,10 @@
     .image-component {
         width: 40px;
         height: 40px;
-        border-radius: $border-radius;
+
+        img {
+            border-radius: $border-radius;
+        }
 
         @media (max-width: 400px) {
             width: 30px;
