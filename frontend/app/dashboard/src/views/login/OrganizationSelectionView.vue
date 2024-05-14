@@ -47,7 +47,7 @@
                     </p>
 
                     <form class="input-icon-container icon search gray" @submit.prevent>
-                        <input ref="input" autofocus v-model="query" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
+                        <input ref="input" v-model="query" autofocus class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
                     </form>
 
                     <div v-if="showDevelopment" class="version-box">
@@ -55,13 +55,17 @@
                     </div>
                     <Spinner v-else-if="loadingResults" class="gray center" />
                     <template v-else>
-                        <button ref="resultElements" v-for="(option, index) in visibleOptions" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
+                        <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
                             <ContextLogo :organization="option.organization" :app="option.app" />
                             <div>
                                 <h1>{{ getAppTitle(option.app, option.organization) }}</h1>
 
-                                <p class="style-description" v-if="getAppDescription(option.app, option.organization)">{{ getAppDescription(option.app, option.organization) }}</p>
-                                <p class="style-description-small style-em" v-if="option.userDescription">Ingelogd als {{ option.userDescription }}</p>
+                                <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
+                                    {{ getAppDescription(option.app, option.organization) }}
+                                </p>
+                                <p v-if="option.userDescription" class="style-description-small style-em">
+                                    Ingelogd als {{ option.userDescription }}
+                                </p>
                                 
                                 <span v-if="option.userDescription" class="icon gray sync floating" />
                                 <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
@@ -95,10 +99,12 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, InheritComponent, Logo, Option, STGradientBackground, Toast, getAppDescription, getAppTitle, useContextOptions, Spinner, useUser } from '@stamhoofd/components';
+import { ContextLogo, getAppDescription, getAppTitle, InheritComponent, Logo, Option, Spinner, STGradientBackground, Toast, useContextOptions, useUser } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { Ref, computed, getCurrentInstance, onMounted, reactive, ref, shallowRef, watch } from 'vue';
+import {throttle} from "@stamhoofd/utility"
+import { computed, getCurrentInstance, onMounted, reactive, Ref, ref, shallowRef, watch } from 'vue';
+
 import VersionFooter from '../dashboard/settings/VersionFooter.vue';
 
 const isNative = ref(AppManager.shared.isNative)
@@ -173,27 +179,6 @@ const setResults = async (cachedCount: number, organizations: Organization[]) =>
     results.value = options
 }
 
-const throttle = (func: any, limit: any) => {
-    let lastFunc: any;
-    let lastRan: any;
-    return function(this: any) {
-        const context = this;
-        // eslint-disable-next-line prefer-rest-params
-        const args = arguments;
-        if (lastRan) {
-            clearTimeout(lastFunc);
-        }
-        lastRan = Date.now();
-            
-        lastFunc = setTimeout(function() {
-            if (Date.now() - lastRan >= limit) {
-                func.apply(context, args);
-                lastRan = Date.now();
-            }
-        }, limit - (Date.now() - lastRan));
-    };
-};
-
 const updateResults = async () => {
     const q = query.value
     const cachedCount = counter
@@ -267,8 +252,8 @@ defineRoutes([
         name: 'join',
         component: async () => (await import('../signup/SignupGeneralView.vue')).default as any,
         paramsToProps(_, query) {
-            let code = query?.get("code")
-            let organization = query?.get("org")
+            const code = query?.get("code")
+            const organization = query?.get("org")
 
             if (code && organization) {
                 return {

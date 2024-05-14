@@ -24,6 +24,13 @@ export class PlatformMember implements ObjectWithRecords {
         this.organizations = data.organizations
     }
 
+    insertOrganization(organization: Organization) {
+        if (this.organizations.find(o => o.id === organization.id)) {
+            return;
+        }
+        this.organizations.push(organization)
+    }
+
     static createFrom(data: {member: MemberWithRegistrationsBlob, blob: MembersBlob, contextOrganization: Organization|null}) {
         // Gather all organizations
         let organizations = data.blob.organizations;
