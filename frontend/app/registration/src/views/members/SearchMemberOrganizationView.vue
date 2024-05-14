@@ -43,7 +43,7 @@ import { Ref, ref, watch } from 'vue';
 
 defineProps<{
     member: PlatformMember;
-    selectOrganization: (organization: Organization, pop?: (options?: PopOptions) => Promise<void>) => Promise<void>;
+    selectOrganization: (organization: Organization, pop: (options?: PopOptions) => Promise<void>|undefined) => Promise<void>|void;
 }>();
 
 const loadingResults = ref(false)

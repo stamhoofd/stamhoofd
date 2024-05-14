@@ -15,7 +15,9 @@
 </template>
 
 <script setup lang="ts">
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { Group, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 import { useMemberManager } from '../../../getRootView';
@@ -26,16 +28,34 @@ const props = defineProps<{
     member: PlatformMember
 }>()
 
+enum Routes {
+    Group = 'group',
+}
+defineRoutes([
+    {
+        name: Routes.Group,
+        url: Formatter.slug(props.group.settings.name),
+        component: async () => (await import('../GroupView.vue')).default as any,
+        paramsToProps() {
+            const member = props.member
+            const group = props.group
+
+            return {
+                member,
+                group
+            }
+        }
+    }
+])
+
 const memberManager = useMemberManager()
+const $navigate = useNavigate()
 
 const registerItem = computed(() => memberManager.defaultItem(props.member, props.group))
 const waitingList = computed(() => registerItem.value.waitingList)
 
-function openGroup() {
-    // this.show(new ComponentWithProperties(GroupView, {
-    //     group: this.group,
-    //     member: this.member
-    // }))
+async function openGroup() {
+    await $navigate(Routes.Group);
 }
 
 </script>

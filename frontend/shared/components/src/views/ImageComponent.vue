@@ -8,8 +8,8 @@
 </template>
 
 <script lang="ts">
-import { Image } from '@stamhoofd/structures';
 import { Component, Prop, Vue } from '@simonbackx/vue-app-navigation/classes';
+import { Image } from '@stamhoofd/structures';
 
 
 @Component({})
@@ -31,7 +31,7 @@ export default class ImageComponent extends Vue {
     elHeight: number|null = null;
 
     get resolution() {
-        return this.image.getResolutionForSize(this.elHeight ?? undefined, this.elHeight ?? undefined)
+        return this.image.getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined)
     }
 
     get imgWidth() {

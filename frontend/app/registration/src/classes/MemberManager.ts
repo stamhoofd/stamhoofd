@@ -30,16 +30,20 @@ export class MemberManager {
     }
 
     canRegister(member: PlatformMember, group: Group) {
+        return this.canRegisterError(member, group) === null;
+    }
+
+    canRegisterError(member: PlatformMember, group: Group): string|null {
         const item = this.defaultItem(member, group)
         try {
             item.validate(this.registerContext)
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
-                return false;
+                return e.getHuman();
             }
             throw e;
         }
-        return true;
+        return null;
     }
 
     get isAcceptingNewMembers() {

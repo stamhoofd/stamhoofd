@@ -161,6 +161,31 @@ export class RegisterItem {
         return null
     }
 
+    getInfoDescription(context: RegisterContext): string|null {
+        if (this.isInvited()) {
+            return 'Je bent uitgenodigd om in te schrijven voor deze groep'
+        }
+
+        if (this.waitingList) {
+            if (this.group.settings.waitingListType === WaitingListType.All) {
+                return 'Je kan enkel inschrijven voor de wachtlijst'
+            }
+            const existingMember = this.isExistingMemberOrFamily(context)
+
+            if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
+                return 'Nieuwe leden kunnen enkel inschrijven voor de wachtlijst'
+            }
+
+            if (this.group.settings.waitingListIfFull) {
+                if (this.hasReachedGroupMaximum(context)) {
+                    return 'De inschrijvingen zijn volzet, je kan enkel inschrijven voor de wachtlijst'
+                }
+            }
+        }
+
+        return null;
+    }
+
     shouldUseWaitingList(context: RegisterContext) {
         if (this.group.settings.waitingListType === WaitingListType.All) {
             return true;
