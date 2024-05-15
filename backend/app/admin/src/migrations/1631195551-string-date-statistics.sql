@@ -1,1 +1,0 @@
-ALTER TABLE `statistics` CHANGE `date` `date` varchar(36) NOT NULL;

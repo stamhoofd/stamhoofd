@@ -20,7 +20,7 @@
         ]
     },
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "always"
+        "source.fixAll.eslint": "never"
     },
     "editor.formatOnPaste": false,
     "editor.formatOnSave": false,

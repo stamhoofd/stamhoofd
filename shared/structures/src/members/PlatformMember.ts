@@ -1,4 +1,4 @@
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
+import { AutoEncoderPatchType, PartialWithoutMethods } from "@simonbackx/simple-encoding"
 
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, InMemoryFilterDefinitions } from "../filters/new/InMemoryFilter"
 import { StamhoofdFilter } from "../filters/new/StamhoofdFilter"
@@ -39,6 +39,10 @@ export class PlatformFamily {
         this.organizations.push(organization)
     }
 
+    getOrganization(id: string) {
+        return this.organizations.find(o => o.id === id)
+    }
+
     insertFromBlob(blob: MembersBlob) {
         for (const organization of blob.organizations) {
             this.insertOrganization(organization)
@@ -58,12 +62,52 @@ export class PlatformFamily {
             this.members.push(platformMember)
         }
     }
+
+    static createSingles(blob: MembersBlob, context: {contextOrganization?: Organization|null, platform: Platform}): PlatformMember[] {
+        const memberList: PlatformMember[] = []
+
+        for (const member of blob.members) {
+            const family = new PlatformFamily(context);
+
+            for (const organization of blob.organizations) {
+                // Check if this organization is relevant to this member
+                if (member.registrations.find(r => r.organizationId === organization.id)) {
+                    family.insertOrganization(organization)
+                }
+            }
+
+            const platformMember = new PlatformMember({
+                member,
+                family
+            })
+
+            family.members.push(platformMember)
+            memberList.push(platformMember)
+        }
+        return memberList
+    }
+
+    insertSingle(member: MemberWithRegistrationsBlob): PlatformMember {
+        const platformMember = new PlatformMember({
+            member,
+            family: this
+        })
+
+        this.members.push(platformMember)
+        return platformMember
+    }
 }
 
 export class PlatformMember implements ObjectWithRecords {
     member: MemberWithRegistrationsBlob
     patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>
+
+    // Save status data:
+    _savingPatch: AutoEncoderPatchType<MemberWithRegistrationsBlob>|null = null
+    _isCreating: boolean|null = null
+
     family: PlatformFamily
+    isNew = false
 
     get id() {
         return this.member.id
@@ -86,6 +130,90 @@ export class PlatformMember implements ObjectWithRecords {
         return this.family.platform
     }
 
+    get allGroups() {
+        return this.organizations.flatMap(o => o.groups)
+    }
+
+    get isSaving() {
+        return this._savingPatch !== null || this._isCreating !== null
+    }
+
+    addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
+        this.patch = this.patch.patch(MemberWithRegistrationsBlob.patch(p))
+    }
+
+    prepareSave() {
+        this._savingPatch = this.patch
+        this.patch = MemberWithRegistrationsBlob.patch({id: this.member.id})
+
+        this._isCreating = this.isNew
+        this.isNew = false
+    }
+
+    markSaved() {
+        if (this._isCreating === true) {
+            this.isNew = false;
+        }
+        this._savingPatch = null
+        this._isCreating = null
+    }
+
+    markFailedSave() {
+        if (this._savingPatch) {
+            this.patch = this._savingPatch.patch(this.patch)
+            this._savingPatch = null
+        }
+        if (this._isCreating !== null) {
+            this.isNew = this._isCreating
+            this._isCreating = null
+        }
+    }
+
+    filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
+        return this.patchedMember.registrations.filter(r => {
+            if (filters.groups && !filters.groups.find(g => g.id === r.groupId)) {
+                return false
+            }
+
+            let cycle = filters.cycle
+            if (filters.cycle === undefined) {
+                const group = (filters.groups ?? this.allGroups).find(g => g.id === r.groupId)
+                if (group) {
+                    cycle = group.cycle - (filters.cycleOffset ?? 0)
+                }
+            }
+
+            if (
+                cycle !== undefined 
+                && (filters.waitingList === undefined || r.waitingList === filters.waitingList) 
+                && r.cycle === cycle
+            ) {
+                if (filters.canRegister !== undefined && r.waitingList) {
+                    return r.canRegister === filters.canRegister
+                }
+                return true;
+            }
+            return false;
+        })
+    }
+
+    filterGroups(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
+        return this.filterRegistrations(filters).flatMap(r => {
+            const organization = this.organizations.find(o => o.id === r.organizationId);
+            if (organization) {
+                const group = organization.groups.find(g => g.id === r.groupId);
+                if (group) {
+                    return [group]
+                }
+            }
+            return []
+        })
+    }
+
+    get groups() {
+        return this.filterGroups({waitingList: false, cycleOffset: 0});
+    }
+
     insertOrganization(organization: Organization) {
         this.family.insertOrganization(organization)
     }
@@ -100,6 +228,9 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get patchedMember() {
+        if (this._savingPatch) {
+            return this.member.patch(this._savingPatch).patch(this.patch)
+        }
         return this.member.patch(this.patch)
     }
 

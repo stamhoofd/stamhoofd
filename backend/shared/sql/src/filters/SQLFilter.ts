@@ -7,7 +7,7 @@ import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch } from "../SQLJsonExpre
 import { SQLSelect } from "../SQLSelect";
 import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from "../SQLWhere";
 
-export type SQLFilterCompiler = (filter: StamhoofdKeyFilterValue, filters: SQLFilterDefinitions) => SQLWhere|null;
+export type SQLFilterCompiler = (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => SQLWhere|null;
 export type SQLFilterDefinitions = Record<string, SQLFilterCompiler>
 
 export function andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilterDefinitions): SQLWhere {
@@ -69,7 +69,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
     const norm = normalizeValue ?? ((v) => v);
     const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression
 
-    return (filter: StamhoofdKeyFilterValue, filters: SQLFilterDefinitions) => {
+    return (filter: StamhoofdFilter, filters: SQLFilterDefinitions) => {
         if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined) {
             filter = {
                 $eq: filter

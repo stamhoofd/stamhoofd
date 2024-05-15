@@ -1,9 +1,9 @@
 <template>
     <div class="modern st-view table-view background">
-        <STNavigationBar :add-shadow="wrapColumns" :title="title">
+        <STNavigationBar :add-shadow="wrapColumns" :title="title" :disable-pop="true">
             <template #left>
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
-                <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="setSelectAll(!isAllSelected)">
+                <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="isAllSelected = !isAllSelected">
                     <template v-if="isAllSelected">
                         Deselecteer alles
                     </template>
@@ -11,7 +11,7 @@
                         Selecteer alles
                     </template>
                 </button>
-                <BackButton v-else-if="canPop" slot="left" @click="pop">
+                <BackButton v-else-if="canPop" @click="pop">
                     {{ backHint || 'Terug' }}
                 </BackButton>
             </template>
@@ -36,8 +36,8 @@
             <div class="container">
                 <h1 class="style-navigation-title">
                     {{ title }}
-                    <span v-if="suffix" class="title-suffix">
-                        {{ suffix }}
+                    <span v-if="titleSuffix" class="title-suffix">
+                        {{ titleSuffix }}
                     </span>
                 </h1>
                 <slot />
@@ -58,16 +58,16 @@
                 </div>
             </div>
 
-            <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns, 'show-checkbox': showSelection, 'show-prefix': showPrefix }">
+            <div ref="tableElement" class="table-with-columns" :class="{ wrap: wrapColumns, 'show-checkbox': showSelection, 'show-prefix': showPrefix }">
                 <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
                     <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
-                            <Checkbox :model-value="isAllSelected" @update:model-value="setSelectAll($event)" />
+                            <Checkbox v-model="isAllSelected" />
                         </div>
 
                         <div class="columns">
                             <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}" :data-align="column.align">
-                                <button type="button" @mouseup.left="toggleSort(column)" @mousedown.left="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
+                                <button type="button" @mouseup.left="toggleSort(column)" @mousedown.left="(event) => columnDragStart(event, column)" @touchstart="(event) => columnDragStart(event, column)">
                                     <span>{{ column.name }}</span>
 
                                     <span
@@ -79,26 +79,26 @@
                                         }"
                                     />
                                 </button>
-                                <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="handleDragStart($event, column)" @touchstart="handleDragStart($event, column)" /></span>
+                                <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="(event) => handleDragStart(event, column)" @touchstart="(event) => handleDragStart(event, column)" /></span>
                                 <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" type="button" class="button light-gray icon collapse-left" @click="collapse" />
                             </div>
                         </div>
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
+                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }"  v-long-press="(e) => onRightClickRow(row, e)" @click="onClickRow(row)" @contextmenu.prevent="(event) => onRightClickRow(row, event)" >
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="setSelectionValue(row, $event)" />
-                                <Checkbox v-else :model-value="false" />
+                                <Checkbox v-else :model-value="isAllSelected" />
                             </label>
-                            <div v-if="showPrefix" class="prefix-column" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
+                            <div v-if="showPrefix && prefixColumn" class="prefix-column" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
                                 <span v-if="row.value" v-text="prefixColumn.getFormattedValue(row.value)" />
                                 <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*100) + '%'}" />
                             </div>
                             <div class="columns">
                                 <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)" :data-align="column.align">
                                     <span v-if="row.value" v-text="column.getFormattedValue(row.value)" />
-                                    <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 200, column.recommendedWidth)-30))+'px'}" />
+                                    <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min((!wrapColumns && column.width) ? column.width : 200, column.recommendedWidth)-30))+'px'}" />
                                 </div>
                             </div>
                         </div>
@@ -139,16 +139,16 @@
 </template>
 
 
-<script lang="ts">
+<script lang="ts" setup generic="Value extends TableListable">
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Checkbox, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective, UIFilter, UIFilterBuilders } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { SortItemDirection, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
+import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from "vue";
 
 import UIFilterEditor from "../filters/UIFilterEditor.vue";
 import { Column } from "./Column";
@@ -157,1461 +157,1481 @@ import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
 import { FetchAllOptions, TableObjectFetcher } from "./TableObjectFetcher";
-
-interface TableListable {
-    id: string;
-    matchQuery(query: string): boolean;
+ 
+export interface TableListable {
+    id: string
 }
-
+ 
 class VisibleRow<T> {
     id = uuidv4()
     y = 0
-
+ 
     /**
-     * currentIndex = null -> available for reause
-     */
+      * currentIndex = null -> available for reause
+      */
     currentIndex: null | number = null
-
+ 
     /**
-     * value = null -> show loading indicator
-     */
+      * value = null -> show loading indicator
+      */
     value: T | null = null
-
+ 
     cachedSelectionValue = false
-
+ 
     skeletonPercentage = Math.random() * 0.5 + 0.5
 }
-
+ 
 class EnabledColumnConfiguration extends AutoEncoder {
     @field({ decoder: StringDecoder })
         id: string
-
+ 
     @field({ decoder: NumberDecoder })
         width: number
 }
-
+ 
 /**
- * We store this configuration in storage, so we can reuse the previous configuration every time
- */
+  * We store this configuration in storage, so we can reuse the previous configuration every time
+  */
 class ColumnConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EnabledColumnConfiguration) })
         columns: EnabledColumnConfiguration[] = []
-
+ 
     @field({ decoder: BooleanDecoder, optional: true })
         canCollapse = false
-
+ 
     @field({ decoder: StringDecoder, optional: true })
         sortColumnId?: string
-
+ 
     @field({ decoder: new EnumDecoder(SortItemDirection), optional: true })
         sortDirection:  SortItemDirection = SortItemDirection.ASC
 }
 
-@Component({
-    components: {
-        STNavigationBar,
-        BackButton,
-        Checkbox,
-        STButtonToolbar
-    },
-    directives: {
-        tooltip: TooltipDirective,
-        longPress: LongPressDirective
-    },
-    emits: ["click"]
+const props = withDefaults(
+    defineProps<{
+        title: string,
+        backHint?: string|null,
+        description: string,
+        actions?: TableAction<Value>[],
+        estimatedRows?: number,
+        tableObjectFetcher: TableObjectFetcher<Value>,
+        filterBuilders?: UIFilterBuilders|null,
+        columnConfigurationId: string,
+        // warning: do not use as these are not reactive
+        allColumns: Column<Value, any>[],
+        prefixColumn?: Column<Value, any>|null,
+        defaultSortColumn?: Column<Value, any>|null,
+        defaultSortDirection?: SortItemDirection|null,
+    }>(), {
+        backHint: null,
+        estimatedRows: 30,
+        filterBuilders: null,
+        prefixColumn: null,
+        defaultSortColumn: null,
+        defaultSortDirection: null,
+        actions: () => [],
+    }
+)
+const reactiveColumns = reactive(props.allColumns) as Column<Value, any>[]
+const showPrefix = computed(() => props.prefixColumn !== null && wrapColumns.value && props.prefixColumn.enabled)
+const columns = computed(() => {
+    return reactiveColumns.filter(c => c.enabled && (!showPrefix.value || c.id !== props.prefixColumn?.id)).sort((a, b) => a.index - b.index)
+}) as ComputedRef<Column<Value, any>[]>
+
+const canPop = useCanPop();
+const pop = usePop();
+const present = usePresent();
+
+const deviceWidth = useDeviceWidth()
+const isMobile = computed(() => deviceWidth.value < 600)
+const wrapColumns = isMobile;
+
+const showSelection = ref(!isMobile.value)
+const isIOS = useIsIOS()
+const titleSuffix = computed(() => props.tableObjectFetcher.totalCount === null ? '' : Formatter.integer(props.tableObjectFetcher.totalCount))
+
+const instance = getCurrentInstance()
+const hasClickListener = computed(() => !!instance?.vnode.props?.onClick)
+const canLeaveSelectionMode = computed(() => wrapColumns.value || !hasClickListener.value)
+
+const sortBy = ref(props.defaultSortColumn ?? columns.value[0]) as Ref<Column<Value, any>>;
+const sortDirection = ref(props.defaultSortDirection ?? SortItemDirection.ASC) as Ref<SortItemDirection>;
+
+const values = computed(() => props.tableObjectFetcher.objects)
+const visibleRows = ref([]) as Ref<VisibleRow<Value>[]>;
+const searchQuery = ref("")
+const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
+
+watchEffect(() => {
+    props.tableObjectFetcher.setSearchQuery(searchQuery.value)
+    const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
+    props.tableObjectFetcher.setFilter(filter)
 })
-export default class ModernTableView<Value extends TableListable> extends Mixins(NavigationMixin) {
-    @Prop({ required: true})
-        title!: string
 
-    @Prop({ required: false})
-        backHint?: string
+function blurFocus() {
+    (document.activeElement as HTMLElement)?.blur()
+}
 
-    @Prop({ default: "" })
-        description!: string
+// If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows, 
+// we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
+const markedRows = ref(new Map<string, Value>());
 
-    @Prop({ required: false, default: () => [] })
-        actions!: TableAction<Value>[]
+/**
+ * When true: only the marked rows are selected.
+ * When false: all rows are selected, except the marked rows
+ */
+const markedRowsAreSelected = ref(true)
 
-    @Prop({ required: false, default: 30 })
-        estimatedRows!: number
-
-    @Prop({required: true})
-        tableObjectFetcher: TableObjectFetcher<Value>
-
-    @Prop({required: false, default: null})
-        UIFilterBuilders: UIFilterBuilders|null
-
-    selectedUIFilter: UIFilter | null = null
-    searchQuery = ""
-
-    // Where to store the latest column configuration, so we can reload it instead of switching to the defaults each time
-    @Prop({ required: true})
-        columnConfigurationId!: string
-
-    @Prop({ required: true})
-        allColumns!: Column<Value, any>[]
-
-    /**
-     * Prefix column in wrapped state
-     */
-    @Prop({ required: false, default: null })
-        prefixColumn!: Column<Value, any> | null
-
-    @Prop({ required: false, default: null })
-        defaultSortColumn!: Column<Value, any> | null
-
-    @Prop({ required: false, default: null })
-        defaultSortDirection!: SortItemDirection | null
-
-    get showPrefix() {
-        return this.prefixColumn !== null && this.wrapColumns && this.prefixColumn.enabled
-    }
-
-    get columns() {
-        return this.allColumns.filter(c => c.enabled && (!this.showPrefix || c.id !== this.prefixColumn?.id)).sort((a, b) => a.index - b.index)
-    }
-
-    get hiddenColumns() {
-        return this.allColumns.filter(c => !c.enabled)
-    }
-
-    isMobile = window.innerWidth < 600
-
-    get isIOS() {
-        return this.$OS === "iOS"
-    }
-
-    get suffix() {
-        if (this.tableObjectFetcher.totalCount === null) {
-            return ''
-        }
-
-        return Formatter.integer(this.tableObjectFetcher.totalCount)
-    }
-
-    get hiddenItemsCount() {
-        if (this.tableObjectFetcher.totalCount ===  null || this.tableObjectFetcher.totalFilteredCount ===  null) {
-            return 0;
-        }
-        return this.tableObjectFetcher.totalCount - this.tableObjectFetcher.totalFilteredCount;
-    }
-
-    get filteredText() {
-        return this.tableObjectFetcher.totalFilteredCount !== null ? `${this.tableObjectFetcher.totalFilteredCount}` : ''
-    }
-
-    wrapColumns = this.isMobile
-    showSelection = !this.isMobile
-
-    sortBy: Column<Value, any> = this.defaultSortColumn ?? this.columns[0]
-    sortDirection: SortItemDirection = this.defaultSortDirection ?? SortItemDirection.ASC
-
-    visibleRows: VisibleRow<Value>[] = []
-
-    // If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows, 
-    // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
-    markedRows = new Map<string, Value>()
-
-    /**
-     * When true: only the marked rows are selected.
-     * When false: all rows are selected, except the marked rows
-     */
-    markedRowsAreSelected = true
-
-    // Column drag helpers:
-    isDraggingColumn: Column<any, any> | null = null
-    draggingStartX = 0
-    draggingInitialWidth = 0
-    draggingInitialColumns: Column<any, any>[] = []
-    isColumnDragActive = false
-    dragType: "width" | "order" = "width"
-
-    created() {
-        this.onSortChange()
-    }
-
-    @Watch("allColumns")
-    onUpdateColumns() {
-        console.log('update columns')
-        this.loadColumnConfiguration().catch(console.error)
-        this.updateVisibleRows()
-    }
-
-    @Watch("sortBy")
-    onSortChange() {
-        this.tableObjectFetcher.setSort([
-            {
-                key: this.sortBy.id,
-                order: this.sortDirection
-            }
-        ])
-    }
-
-    @Watch("sortDirection")
-    onToggleSortDirection() {
-        this.onSortChange()
-    }
-
-    @Watch("selectedUIFilter", {deep: true})
-    onUIFilterChanged() {
-        const filter = this.selectedUIFilter ? this.selectedUIFilter.build() : null;
-        this.tableObjectFetcher.setFilter(filter)
-    }
-
-    @Watch("searchQuery")
-    onSearchQueryChanged() {
-        this.tableObjectFetcher.setSearchQuery(this.searchQuery)
-    }
-
-    getEventX(event: any) {
-        let x = 0;
-        if (event.changedTouches) {
-            const touches = event.changedTouches;
-            for (const touch of touches) {
-                x = touch.pageX;
-            }
+const isAllSelected = computed({
+    get: () => {
+        if (markedRowsAreSelected.value) {
+            return markedRows.value.size > 0 && markedRows.value.size === (props.tableObjectFetcher.totalFilteredCount ?? values.value.length)
         } else {
-            x = event.pageX;
+            return markedRows.value.size === 0
         }
-        return x;
-    }
-
-    get hasClickListener() {
-        return !!this.$.vnode.props?.onClick
-    }
-
-    blurFocus() {
-        (document.activeElement as HTMLElement)?.blur()
-    }
-
-    onClickRow(row: VisibleRow<Value>) {
-        if (!this.hasClickListener || (this.wrapColumns && this.showSelection)) {
-            // On mobile, tapping a column means selecting it when we are in editing modus
-            this.setSelectionValue(row, !this.getSelectionValue(row))
-            return
-        }
-        if (this.hasClickListener && row.value) {
-            this.$emit("click", row.value)
+    },
+    set: (selected: boolean) => {
+        markedRowsAreSelected.value = !selected
+        markedRows.value.clear()
+ 
+        for (const visibleRow of visibleRows.value) {
+            visibleRow.cachedSelectionValue = selected
         }
     }
+})
+const hasSelection = computed(() => {
+    return  markedRowsAreSelected.value ? markedRows.value.size > 0 : (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0)
+})
+const hasSingleSelection = computed(() => {
+    return markedRowsAreSelected.value && markedRows.value.size === 1
+})
 
-    onRightClickRow(row: VisibleRow<Value>, event) {
-        if (this.isMobile && !this.showSelection && !this.isIOS) {
-            // On Android, the default long press action is switching to editing mode
-            this.setSelectionValue(row, true)
-            this.setShowSelection(true)
-            return
+function setShowSelection(s: boolean) {
+    showSelection.value = s
+    if (!s) {
+        isAllSelected.value = false
+    }
+}
+
+const sortedActions = computed(() => {
+    return props.actions.slice().sort((a, b) => {
+        if (a.groupIndex !== b.groupIndex) {
+            return a.groupIndex - b.groupIndex
         }
-        // Show a context menu to select the available columns
+        return a.priority - b.priority
+    })
+})
 
-        const actions = this.actions.filter(a => a.needsSelection);
+const filteredActions = computed(() => {
+    if (!isMobile.value || !showSelection.value) {
+        return sortedActions.value.filter(action => action.enabled && !action.singleSelection).slice(0, 3)
+    }
 
-        // Also add select all actions
-        if (!this.showSelection || row.cachedSelectionValue == false) {
-            // Add select action
-            actions.push(new TableAction({
-                name: "Selecteer",
-                groupIndex: !this.showSelection ? -1 : 1,
-                priority: 10,
-                handler: () => {
-                    this.setSelectionValue(row, true)
-                    this.setShowSelection(true)
-                }
-            }))
-        } else {
-            // Add select action
-            actions.push(new TableAction({
-                name: "Deselecteer",
-                groupIndex: 1,
-                priority: 10,
-                handler: () => {
-                    this.setSelectionValue(row, false)
-                }
-            }))
+    return sortedActions.value.filter(action => {
+        return action.enabled && action.needsSelection && !action.singleSelection
+    }).slice(0, 3)
+})
+
+function getColumnContextMenu() {
+    return new ComponentWithProperties(ColumnSelectorContextMenu, {
+        columns: reactiveColumns,
+    })
+}
+
+function getSortingContextMenu() {
+    return new ComponentWithProperties(ColumnSortingContextMenu, {
+        columns: reactiveColumns,
+        sortBy: sortBy.value,
+        sortDirection: sortDirection.value,
+        setSort: (column: Column<Value, any>, direction: SortItemDirection) => {
+            sortBy.value = column
+            sortDirection.value = direction
         }
+    })
+}
+async function getSelection(options?: FetchAllOptions): Promise<Value[]> {
+    if (!showSelection.value || !hasSelection.value) {
+        return await props.tableObjectFetcher.fetchAll(options)
+    }
 
-        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: event.changedTouches ? event.changedTouches[0].pageX : event.clientX,
-            y: event.changedTouches ? event.changedTouches[0].pageY : event.clientY,
-            actions,
-            selection: {
-                isSingle: true,
-                hasSelection: true,
-                getSelection: () => {
-                    return [row.value!]
-                }
+    // TODO: fix sorting
+
+    if (markedRowsAreSelected.value) {
+        // No async needed
+        return Array.from(markedRows.value.values()) as Value[]
+    } else {
+        const all = await props.tableObjectFetcher.fetchAll(options);
+        return Array.from(all).filter(val => !markedRows.value.has(val.id))
+    }
+}
+
+async function showActions(isOnTop: boolean, event: MouseEvent) {
+    const el = event.currentTarget as HTMLElement;
+    const bounds = el.getBoundingClientRect()
+
+    const actions = (isMobile.value && showSelection.value ? props.actions.filter(a => a.needsSelection) : props.actions.slice())
+
+    // Also add select all actions
+    if (!showSelection.value && !isIOS) {
+        // Add select action
+        actions.push(new TableAction({
+            name: "Selecteer",
+            groupIndex: -1,
+            priority: 10,
+            handler: () => {
+                showSelection.value = true
             }
-        });
-
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+        }))
     }
 
-    setShowSelection(showSelection: boolean) {
-        this.showSelection = showSelection
-        if (!showSelection) {
-            this.setSelectAll(false)
-        }
-    }
-
-    columnDragStart(event, column: Column<any, any>) {
-        // Don't allow drag with right mouse or other buttons
-        if (event.button !== undefined && event.button !== 0) {
-            return
-        }
-        if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
-            // Don't allow drag with ctrl+click
-            return
-        }
-        this.draggingStartX = this.getEventX(event);
-        this.isDraggingColumn = column
-        this.dragType = "order"
-        this.draggingInitialColumns = this.columns.slice()
-        this.isColumnDragActive = false
-        this.attachDragHandlers()
-    }
-
-    handleDragStart(event, column: Column<any, any>) {
-        // Don't allow drag with right mouse or other buttons
-        if (event.button !== undefined && event.button !== 0) {
-            return
-        }
-        if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
-            // Don't allow drag with ctrl+click
-            return
-        }
-        this.draggingStartX = this.getEventX(event);
-        this.isDraggingColumn = column
-        this.dragType = "width"
-        this.draggingInitialWidth = column.width ?? 0
-        this.isColumnDragActive = true
-        this.attachDragHandlers()
-    }
-
-    horizontalPadding = 40
-
-    updatePaddingIfNeeded() {
-        if (this.horizontalPadding === 0) {
-            this.updatePadding()
-        }
-    }
-    
-    updatePadding() {
-        const padding = getComputedStyle((this.$refs["table"] as HTMLElement))
-            .getPropertyValue('--st-horizontal-padding');
-
-        this.horizontalPadding = parseInt(padding)
-    }
-
-    attachDragHandlers() {
-        this.updateRecommendedWidths();
-
-        if (this.isColumnDragActive) {
-            (this.$refs["table"] as HTMLElement).style.cursor = this.dragType === "width" ? "col-resize" : "grabbing"
-        }
-        document.addEventListener("mousemove", this.mouseMove, {
-            passive: false,
-        });
-        document.addEventListener("touchmove", this.mouseMove, {
-            passive: false,
-        });
-
-        document.addEventListener("mouseup", this.mouseUp, { passive: false });
-        document.addEventListener("touchend", this.mouseUp, { passive: false });
-    }
-
-    detachDragHandlers() {
-        (this.$refs["table"] as HTMLElement).style.cursor = ""
-        document.removeEventListener("mousemove", this.mouseMove);
-        document.removeEventListener("touchmove", this.mouseMove);
-
-        document.removeEventListener("mouseup", this.mouseUp);
-        document.removeEventListener("touchend", this.mouseUp);
-
-        this.saveColumnConfiguration()
-    }
-
-    mouseMove(event) {
-        if (!this.isDraggingColumn) {
-            return
-        }
-        const currentX = this.getEventX(event)
-        const difference = currentX - this.draggingStartX
-
-        if (!this.isColumnDragActive) {
-            if (Math.abs(difference) > 5) {
-                this.isColumnDragActive = true;
-                (this.$refs["table"] as HTMLElement).style.cursor = this.dragType === "width" ? "col-resize" : "grabbing"
-            } else {
-                return
+    // Add select all action
+    if (!isAllSelected.value) {
+        actions.push(new TableAction({
+            name: "Selecteer alles",
+            groupIndex: -1,
+            priority: 9,
+            handler: () => {
+                showSelection.value = true
+                isAllSelected.value = true;
             }
-        }
-
-        if (this.dragType === "width") {
-            const currentWidth = this.totalWidth
-
-            const newWidth = this.draggingInitialWidth + difference
-            this.isDraggingColumn.width =  Math.max(newWidth, this.isDraggingColumn.minimumWidth)
-            this.isDraggingColumn.renderWidth = Math.floor(this.isDraggingColumn.width)
-
-            this.updateColumnWidth(this.isDraggingColumn, "move", currentWidth)
-        } else {
-            // We swap columns if the startX of the column moves over the middle of a different column            
-            // Calculate how many columns we have moved in the X direction 
-            const startIndex = this.draggingInitialColumns.findIndex(c => c === this.isDraggingColumn)
-            let columnMoveIndex = 0
-            let remainingDifference = difference
-            while (Math.sign(remainingDifference) === Math.sign(difference)) {
-                const shouldMove = (remainingDifference < 0) ? -1 : 1
-                const column = this.draggingInitialColumns[startIndex + shouldMove + columnMoveIndex]
-                if (!column || column.width === null) {
-                    break
-                }
-                // Move the column if they overlap at least 50%
-                const neededMove = column.width / 2
-                if (Math.abs(remainingDifference) > neededMove) {
-                    remainingDifference -= column.width*shouldMove
-                    columnMoveIndex += shouldMove
-                } else {
-                    break
-                }
+        }))
+    } else {
+        actions.push(new TableAction({
+            name: "Deselecteer alles",
+            groupIndex: -1,
+            priority: 9,
+            handler: () => {
+                isAllSelected.value = false;
             }
-
-            const columns = this.draggingInitialColumns.slice()
-            columns.splice(startIndex, 1);
-            columns.splice(startIndex + columnMoveIndex, 0, this.isDraggingColumn);
-
-            // Update indexes
-            for (let i = 0; i < columns.length; i++) {
-                columns[i].index = i
-            }
-
-            // Translate moving column with mouse
-            (this.$refs["table"] as HTMLElement).style.setProperty("--drag-x", `${remainingDifference}px`);
-
-        }
-
-        // Prevent scrolling (on mobile) and other stuff
-        event.preventDefault();
-        return false;
+        }))
     }
+     
+    // Add action to change visible columns
+    actions.push(new TableAction({
+        name: wrapColumns.value ? "Wijzig zichtbare gegevens" : "Wijzig kolommen",
+        groupIndex: -1,
+        priority: 8,
+        childMenu: getColumnContextMenu()
+    }))
 
-    mouseUp(_event) {
-        if (this.isDraggingColumn) {
-            this.detachDragHandlers();
-            this.isDraggingColumn = null;
-        }
-        this.isColumnDragActive = false
-    }
+    actions.push(new TableAction({
+        name: "Sorteren",
+        groupIndex: -1,
+        priority: 7,
+        childMenu: getSortingContextMenu()
+    }))
 
-    mounted() {
-        this.loadColumnConfiguration().catch(console.error)
-        this.getScrollElement(this.$refs["table"] as HTMLElement).addEventListener("scroll", this.onScroll, { passive: true })
+    const selection = {
+        isSingle: hasSingleSelection.value,
+        hasSelection: hasSelection.value,
+        getSelection: getSelection
+    };
 
-        if (!this.canLeaveSelectionMode) {
-            this.showSelection = true
-        }
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+        x: bounds.right,
+        y: bounds.top + (isOnTop ? el.offsetHeight : 0),
+        xPlacement: "left",
+        yPlacement: isOnTop ? "bottom" : "top",
+        actions,
+        selection
+    });
+    await present(displayedComponent.setDisplayStyle("overlay"));
+}
 
-        this.refreshOnReturn()
-    }
+async function onTableHeadRightClick(event: MouseEvent) {
+    // Show a context menu to select the available columns
+    const displayedComponent = getColumnContextMenu();
+    displayedComponent.properties.x = event.clientX
+    displayedComponent.properties.y = event.clientY
+    await present(displayedComponent.setDisplayStyle("overlay"));
+}
 
-    activated() {
-        if (!this.wrapColumns) {
-            window.addEventListener("resize", this.onResize, { passive: true })
-            this.onResize()
-        }
-    }
-
-    deactivated() {
-        // Better to remove event resize listener, because on resize, we don't need to rerender the table
-        window.removeEventListener("resize", this.onResize)
-    }
-
-    beforeUnmount() {
-        // Remove event listeners
-        this.getScrollElement(this.$refs["table"] as HTMLElement).removeEventListener("scroll", this.onScroll)
-        window.removeEventListener("resize", this.onResize)
-        document.removeEventListener("visibilitychange", this.doRefresh)
-        this.tableObjectFetcher.destroy();
-    }
-
-    lastRefresh = new Date()
-
-    refreshOnReturn() {
-        document.addEventListener("visibilitychange", this.doRefresh);
-    }
-
-    refresh() {
-        this.lastRefresh = new Date()
-        this.tableObjectFetcher.reset()
-    }
-
-    doRefresh() {
-        if (document.visibilityState === 'visible') {
-            console.info("Window became visible again")
-            this.refresh()
-        }
-    }
-
-    get canLeaveSelectionMode() {
-        return this.wrapColumns || !this.hasClickListener
-    }
-
-    ticking = false
-
-    onScroll() {
-        if (!this.ticking) {
-            window.requestAnimationFrame(() => {
-                this.updateVisibleRows()
-                this.ticking = false;
-            });
-
-            this.ticking = true;
-        }
-    }
-
-    onResize() {
-        // Force padding update
-        this.updatePadding()
-
-        if (this.canCollapse) {
-        // Keep existing width
-            this.updateCanCollapse()
-        } else {
-        // shrink or grow width
-            this.updateColumnWidth()
-        }
-        this.updateVisibleRows()
-    }
-
-    async loadColumnConfiguration() {
-        try {
-            const json = await Storage.keyValue.getItem("column-configuration-"+this.columnConfigurationId)
-            if (json !== null) {
-                const parsed = new ObjectData(JSON.parse(json), { version: Version })
-                const decoded = (new VersionBoxDecoder(ColumnConfiguration as Decoder<ColumnConfiguration>).decode(parsed)).data
-
-                for (const col of this.allColumns) {
-                    const i = decoded.columns.findIndex(c => c.id === col.id)
-                    if (i === -1) {
-                        col.enabled = false
-                    } else {
-                        const config = decoded.columns[i]
-                        col.enabled = true
-                        col.width = config.width
-                        col.renderWidth = Math.floor(col.width)
-                        col.index = i
-                    }
-                }
-
-                if (decoded.sortColumnId) {
-                    const sortBy = this.allColumns.find(c => c.id === decoded.sortColumnId)
-                    if (sortBy) {
-                        this.sortBy = sortBy
-                        this.sortDirection = decoded.sortDirection ?? SortItemDirection.ASC
-                    }
-                }
-
-                this.updateRowHeight()
-                this.updateVisibleRows();
-                this.updateRecommendedWidths();
-
-                if (decoded.canCollapse) {
-                    this.updateCanCollapse()
-                } else {
-                    this.updateColumnWidth()
-                }
-            } else {
-                this.updateRowHeight()
-                this.updateVisibleRows();
-                this.updateRecommendedWidths();
-                this.updateColumnWidth()
-            }
-        } catch (error) {
-            console.error(error)
-        }
+const errorMessage = computed(() => {
+    if (props.tableObjectFetcher.errorState) {
+        const errors = props.tableObjectFetcher.errorState
         
+        let simpleErrors!: SimpleErrors
+        if (isSimpleError(errors)) {
+            simpleErrors = new SimpleErrors(errors)
+        } else if (isSimpleErrors(errors)) {
+            simpleErrors = errors
+        } else {
+            simpleErrors = new SimpleErrors(new SimpleError({
+                code: "unknown_error",
+                message: errors.message
+            }))
+        }
+
+        return simpleErrors.getHuman();
     }
 
-    @Watch("wrapColumns")
-    onWrapChanged() {
-        this.updateRowHeight()
-        this.updateVisibleRows()
+    return null;
+});
+
+const lastRefresh = ref(new Date())
+function refresh() {
+    lastRefresh.value = new Date()
+    props.tableObjectFetcher.reset()
+}
+
+const totalFilteredCount = computed(() => {
+    if (errorMessage.value) {
+        return 0;
+    }
+    return props.tableObjectFetcher.totalFilteredCount ?? props.estimatedRows ?? 0;
+});
+const totalItemsCount = computed(() => props.tableObjectFetcher.totalCount);
+
+function resetFilter() {
+    searchQuery.value = ""
+    selectedUIFilter.value = null
+}
+
+const isColumnDragActive = ref(false)
+
+// Column drag helpers:
+const isDraggingColumn = ref(null) as Ref<Column<any, any> | null>
+let draggingStartX = 0
+let draggingInitialWidth = 0
+let draggingInitialColumns: Column<any, any>[] = []
+const dragType = ref("width") as Ref<"width" | "order">
+
+function toggleSort(column: Column<any, any>) {
+    if (isColumnDragActive.value) {
+        //console.log("Ignored sort toggle due to drag")
+        return
+    }
+    if (sortBy.value === column) {
+        if (sortDirection.value === SortItemDirection.ASC) {
+            sortDirection.value = SortItemDirection.DESC;
+        } else {
+            sortDirection.value = SortItemDirection.ASC;
+        }
+    } else {
+        sortBy.value = column;
+    }
+    saveColumnConfiguration()
+}
+
+watchEffect(() => {
+    props.tableObjectFetcher.setSort([
+        {
+            key: sortBy.value.id,
+            order: sortDirection.value
+        }
+    ])
+});
+
+const hiddenItemsCount = computed(() => {
+    if (props.tableObjectFetcher.totalCount ===  null || props.tableObjectFetcher.totalFilteredCount ===  null) {
+        return 0;
+    }
+    return props.tableObjectFetcher.totalCount - props.tableObjectFetcher.totalFilteredCount;
+});
+
+
+const filteredText = computed(() => {
+    return props.tableObjectFetcher.totalFilteredCount !== null ? `${props.tableObjectFetcher.totalFilteredCount}` : ''
+});
+
+function getEventX(event: any) {
+    let x = 0;
+    if (event.changedTouches) {
+        const touches = event.changedTouches;
+        for (const touch of touches) {
+            x = touch.pageX;
+        }
+    } else {
+        x = event.pageX;
+    }
+    return x;
+}
+
+const emit = defineEmits<{
+    click: [value: Value]
+}>()
+
+function onClickRow(row: VisibleRow<Value>) {
+     if (!hasClickListener.value || (wrapColumns.value && showSelection.value)) {
+        // On mobile, tapping a column means selecting it when we are in editing modus
+        setSelectionValue(row, !getSelectionValue(row))
+        return
+     }
+
+     if (hasClickListener.value && row.value) {
+        emit("click", row.value)
+     }
+ }
+
+async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent|TouchEvent) {
+         if (isMobile.value && !showSelection.value && !isIOS) {
+             // On Android, the default long press action is switching to editing mode
+             setSelectionValue(row, true)
+             setShowSelection(true)
+             return
+         }
+
+         // Show a context menu to select the available columns
+ 
+         const filteredActions = props.actions.filter(a => a.needsSelection);
+ 
+         // Also add select all actions
+         if (!showSelection.value || row.cachedSelectionValue == false) {
+             // Add select action
+             filteredActions.push(new TableAction({
+                 name: "Selecteer",
+                 groupIndex: !showSelection.value ? -1 : 1,
+                 priority: 10,
+                 handler: () => {
+                    setSelectionValue(row, true)
+                    setShowSelection(true)
+                 }
+             }))
+         } else {
+             // Add select action
+             filteredActions.push(new TableAction({
+                 name: "Deselecteer",
+                 groupIndex: 1,
+                 priority: 10,
+                 handler: () => {
+                    setSelectionValue(row, false)
+                 }
+             }))
+         }
+ 
+         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+             x: "changedTouches" in event ? event.changedTouches[0].pageX : event.clientX,
+             y: "changedTouches" in event ? event.changedTouches[0].pageY : event.clientY,
+             actions: filteredActions,
+             selection: {
+                 isSingle: true,
+                 hasSelection: true,
+                 getSelection: () => {
+                     return [row.value!]
+                 }
+             }
+         });
+ 
+         await present(displayedComponent.setDisplayStyle("overlay"));
+     }
+ 
+ 
+function columnDragStart(event: MouseEvent|TouchEvent, column: Column<any, any>) {
+    // Don't allow drag with right mouse or other buttons
+    if ('button' in event) {
+        if (event.button !== 0) {
+            return
+        }
+        if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
+            // Don't allow drag with ctrl+click
+            return
+        }
+    }
+    draggingStartX = getEventX(event);
+    isDraggingColumn.value = column
+    dragType.value = "order"
+    draggingInitialColumns = columns.value.slice() as Column<any, any>[]
+    isColumnDragActive.value = false
+    attachDragHandlers()
+}
+
+function handleDragStart(event: MouseEvent|TouchEvent, column: Column<any, any>) {
+    // Don't allow drag with right mouse or other buttons
+    if ('button' in event) {
+        if (event.button !== 0) {
+            return
+        }
+        if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
+            // Don't allow drag with ctrl+click
+            return
+        }
     }
 
-    @Watch("columns")
-    onColumnsChanged() {
-        this.updateRowHeight()
-        this.updateVisibleRows()
+    draggingStartX = getEventX(event);
+    isDraggingColumn.value = column
+    dragType.value = "width"
+    draggingInitialWidth = column.width ?? 0
+    isColumnDragActive.value = false
+    attachDragHandlers()
+}
 
-        if (this.canCollapse) {
-            // Update width of new columns, without adjusting the width of any column
-            this.fixColumnWidths(this.columns)
-            this.updateCanCollapse()
+const horizontalPadding = ref(40)
+const tableElement = ref(null) as Ref<HTMLElement | null>
+const tableBody = ref(null) as Ref<HTMLElement | null>
+const canCollapse = ref(false)
 
-            if (!this.canCollapse) {
-                // Redistribute
-                this.updateColumnWidth()
+const selectionColumnWidth = computed(() => {
+    return showSelection.value ? (wrapColumns.value ? 40 : 50) : 0
+});
+
+const totalWidth = computed(() => {
+    const leftPadding = horizontalPadding.value
+    const rightPadding = horizontalPadding.value
+    return selectionColumnWidth.value + columns.value.reduce((acc, col) => acc + (col.width ?? 0), 0) + leftPadding + rightPadding
+});
+
+function updatePaddingIfNeeded() {
+    if (horizontalPadding.value === 0) {
+        updatePadding()
+    }
+}
+
+function updatePadding() {
+    if (!tableElement.value) {
+        return
+    }
+    const padding = getComputedStyle(tableElement.value)
+        .getPropertyValue('--st-horizontal-padding');
+
+    horizontalPadding.value = parseInt(padding)
+}
+
+function attachDragHandlers() {
+    updateRecommendedWidths();
+
+    if (isColumnDragActive.value) {
+        if (tableElement.value) {
+            tableElement.value.style.cursor = dragType.value === "width" ? "col-resize" : "grabbing"
+        }
+
+    }
+    document.addEventListener("mousemove", mouseMove, {
+        passive: false,
+    });
+    document.addEventListener("touchmove", mouseMove, {
+        passive: false,
+    });
+
+    document.addEventListener("mouseup", mouseUp, { passive: false });
+    document.addEventListener("touchend", mouseUp, { passive: false });
+}
+
+function detachDragHandlers() {
+    if (tableElement.value) {
+        tableElement.value.style.cursor = ""
+    }
+
+    document.removeEventListener("mousemove", mouseMove);
+    document.removeEventListener("touchmove", mouseMove);
+
+    document.removeEventListener("mouseup", mouseUp);
+    document.removeEventListener("touchend", mouseUp);
+
+    saveColumnConfiguration()
+}
+
+function mouseMove(event: MouseEvent|TouchEvent) {
+    if (!isDraggingColumn.value) {
+        return
+    }
+    const currentX = getEventX(event)
+    const difference = currentX - draggingStartX
+
+    if (!isColumnDragActive.value) {
+        if (Math.abs(difference) > 5) {
+            isColumnDragActive.value = true;
+            if (tableElement.value) {
+                tableElement.value.style.cursor = dragType.value === "width" ? "col-resize" : "grabbing"
             }
         } else {
-            this.updateColumnWidth()
+            return
         }
-        this.saveColumnConfiguration()
     }
 
-    saveColumnConfiguration() {
-        const configuration = ColumnConfiguration.create({
-            // We also need to saveh  te prefix column
-            columns: [...this.columns, ...(this.showPrefix ? [this.prefixColumn!] : [])].map(c => EnabledColumnConfiguration.create({ id: c.id, width: c.width ?? 0 })),
-            canCollapse: this.canCollapse,
-            sortColumnId: this.sortBy.id,
-            sortDirection: this.sortDirection,
-        })
+    if (dragType.value === "width") {
+        const currentWidth = totalWidth.value
 
-        const versionBox = new VersionBox(configuration)
-        const json = JSON.stringify(versionBox.encode({ version: Version }))
-        Storage.keyValue.setItem("column-configuration-"+this.columnConfigurationId, json).catch(console.error)
+        const newWidth = draggingInitialWidth + difference
+        isDraggingColumn.value.width =  Math.max(newWidth, isDraggingColumn.value.minimumWidth)
+        isDraggingColumn.value.renderWidth = Math.floor(isDraggingColumn.value.width)
+
+        updateColumnWidth(isDraggingColumn.value, "move", currentWidth)
+    } else {
+        // We swap columns if the startX of the column moves over the middle of a different column            
+        // Calculate how many columns we have moved in the X direction 
+        const startIndex = draggingInitialColumns.findIndex(c => c.id === isDraggingColumn.value?.id)
+        let columnMoveIndex = 0
+        let remainingDifference = difference
+        while (Math.sign(remainingDifference) === Math.sign(difference)) {
+            const shouldMove = (remainingDifference < 0) ? -1 : 1
+            const column = draggingInitialColumns[startIndex + shouldMove + columnMoveIndex]
+            if (!column || column.width === null) {
+                break
+            }
+            // Move the column if they overlap at least 50%
+            const neededMove = column.width / 2
+            if (Math.abs(remainingDifference) > neededMove) {
+                remainingDifference -= column.width*shouldMove
+                columnMoveIndex += shouldMove
+            } else {
+                break
+            }
+        }
+
+        const columns = draggingInitialColumns.slice()
+        columns.splice(startIndex, 1);
+        columns.splice(startIndex + columnMoveIndex, 0, isDraggingColumn.value);
+
+        // Update indexes
+        for (let i = 0; i < columns.length; i++) {
+            columns[i].index = i
+        }
+
+        // Translate moving column with mouse
+        tableElement.value?.style.setProperty("--drag-x", `${remainingDifference}px`);
+
     }
 
-    onTableHeadRightClick(event) {
-        // Show a context menu to select the available columns
-        const displayedComponent = this.getColumnContextMenu();
-        displayedComponent.properties.x = event.clientX
-        displayedComponent.properties.y = event.clientY
-        this.present(displayedComponent.setDisplayStyle("overlay"));
+    // Prevent scrolling (on mobile) and other stuff
+    event.preventDefault();
+    return false;
+}
+
+function mouseUp() {
+    if (isDraggingColumn.value) {
+        detachDragHandlers();
+        isDraggingColumn.value = null;
+    }
+    isColumnDragActive.value = false
+}
+
+onMounted(() => {
+    loadColumnConfiguration().catch(console.error)
+
+    if (tableElement.value) {
+        getScrollElement(tableElement.value).addEventListener("scroll", onScroll, { passive: true })
     }
 
-    getColumnContextMenu() {
-        return new ComponentWithProperties(ColumnSelectorContextMenu, {
-            columns: this.allColumns,
-        })
+    if (!canLeaveSelectionMode.value) {
+        showSelection.value = true
     }
 
-    getSortingContextMenu() {
-        return new ComponentWithProperties(ColumnSortingContextMenu, {
-            columns: this.allColumns,
-            table: this
-        })
+    refreshOnReturn()
+});
+
+// 
+onActivated(() => {
+    if (!wrapColumns.value) {
+        window.addEventListener("resize", onResize, { passive: true })
+        onResize()
+    }
+});
+
+onDeactivated(() => {
+    // Better to remove event resize listener, because on resize, we don't need to rerender the table
+    window.removeEventListener("resize", onResize)
+});
+
+onBeforeUnmount(() => {
+    // Remove event listeners
+    if (tableElement.value) {
+        getScrollElement(tableElement.value)?.removeEventListener("scroll", onScroll)
     }
 
-    /**
-     * Loop all visible rows, and sets the recommended width of each column to the maximum width of the column.
-     */
-    updateRecommendedWidths() {
-        //console.log("Update recommended width")
-        const measureDiv = document.createElement("div")
-        measureDiv.style.position = "absolute"
-        measureDiv.style.visibility = "hidden"
-        measureDiv.className = "table-column-content-style"
-        document.body.appendChild(measureDiv)
+    window.removeEventListener("resize", onResize)
+    document.removeEventListener("visibilitychange", doRefresh)
+    props.tableObjectFetcher.destroy();
+});
 
-        for (const column of this.columns) {
-            let maximum = column.minimumWidth
+function refreshOnReturn() {
+    document.addEventListener("visibilitychange", doRefresh);
+}
 
-            // Title
-            const text = column.name
+function doRefresh() {
+    if (document.visibilityState === 'visible') {
+        refresh()
+    }
+}
+
+let ticking = false
+function onScroll() {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            updateVisibleRows()
+            ticking = false;
+        });
+
+        ticking = true;
+    }
+}
+
+function onResize() {
+    // Force padding update
+    updatePadding()
+
+    if (canCollapse.value) {
+        // Keep existing width
+        updateCanCollapse()
+    } else {
+        // shrink or grow width
+        updateColumnWidth()
+    }
+    updateVisibleRows()
+}
+
+// 
+async function loadColumnConfiguration() {
+    try {
+        const json = await Storage.keyValue.getItem("column-configuration-"+props.columnConfigurationId)
+        if (json !== null) {
+            const parsed = new ObjectData(JSON.parse(json), { version: Version })
+            const decoded = (new VersionBoxDecoder(ColumnConfiguration as Decoder<ColumnConfiguration>).decode(parsed)).data
+ 
+            for (const col of reactiveColumns) {
+                const i = decoded.columns.findIndex(c => c.id === col.id)
+                if (i === -1) {
+                    col.enabled = false
+                } else {
+                    const config = decoded.columns[i]
+                    col.enabled = true
+                    col.width = config.width
+                    col.renderWidth = Math.floor(col.width)
+                    col.index = i
+                }
+            }
+ 
+            if (decoded.sortColumnId) {
+                const _sort = reactiveColumns.find(c => c.id === decoded.sortColumnId)
+                if (_sort) {
+                    sortBy.value = _sort
+                    sortDirection.value = decoded.sortDirection ?? SortItemDirection.ASC
+                }
+            }
+ 
+            updateVisibleRows();
+            updateRecommendedWidths();
+ 
+            if (decoded.canCollapse) {
+                updateCanCollapse()
+            } else {
+                updateColumnWidth()
+            }
+        } else {
+            updateVisibleRows();
+            updateRecommendedWidths();
+            updateColumnWidth()
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+watch(columns, () => {
+    updateVisibleRows()
+
+    if (canCollapse.value) {
+        // Update width of new columns, without adjusting the width of any column
+        fixColumnWidths(columns.value as any)
+        updateCanCollapse()
+
+        if (!canCollapse.value) {
+            // Redistribute
+            updateColumnWidth()
+        }
+    } else {
+        updateColumnWidth()
+    }
+    saveColumnConfiguration()
+});
+
+function saveColumnConfiguration() {
+    const configuration = ColumnConfiguration.create({
+        // We also need to saveh  te prefix column
+        columns: [...columns.value, ...(showPrefix.value ? [props.prefixColumn!] : [])].map(c => EnabledColumnConfiguration.create({ id: c.id, width: c.width ?? 0 })),
+        canCollapse: canCollapse.value,
+        sortColumnId: sortBy.value.id,
+        sortDirection: sortDirection.value,
+    })
+
+    const versionBox = new VersionBox(configuration)
+    const json = JSON.stringify(versionBox.encode({ version: Version }))
+    Storage.keyValue.setItem("column-configuration-"+props.columnConfigurationId, json).catch(console.error)
+}
+
+/**
+ * Loop all visible rows, and sets the recommended width of each column to the maximum width of the column.
+ */
+function updateRecommendedWidths() {
+    //console.log("Update recommended width")
+    const measureDiv = document.createElement("div")
+    measureDiv.style.position = "absolute"
+    measureDiv.style.visibility = "hidden"
+    measureDiv.className = "table-column-content-style"
+    document.body.appendChild(measureDiv)
+
+    for (const column of columns.value) {
+        let maximum = column.minimumWidth
+
+        // Title
+        const text = column.name
+        measureDiv.innerText = text
+        const width = measureDiv.clientWidth
+        if (width > maximum) {
+            maximum = width
+        }
+        let found = false
+
+        for (const visibleRow of visibleRows.value) {
+            const value = visibleRow.value
+
+            if (!value) {
+                continue
+            }
+            found = true
+
+            const text = column.getFormattedValue(value)
+                
+
             measureDiv.innerText = text
             const width = measureDiv.clientWidth
             if (width > maximum) {
                 maximum = width
             }
-            let found = false
-
-            for (const visibleRow of this.visibleRows) {
-                const value = visibleRow.value
-
-                if (!value) {
-                    continue
-                }
-                found = true
-
-                const text = column.getFormattedValue(value)
-                
-
-                measureDiv.innerText = text
-                const width = measureDiv.clientWidth
-                if (width > maximum) {
-                    maximum = width
-                }
-            }
-
-            // Also add some padding
-            if (found) {
-                column.recommendedWidth = maximum + 15;
-                // console.log("Updated recommend width of column " + column.name + " to " + (maximum + 15), column.minimumWidth)
-            }
-
         }
 
-        document.body.removeChild(measureDiv)
+        // Also add some padding
+        if (found) {
+            column.recommendedWidth = maximum + 15;
+        }
     }
 
-    canCollapse = false
+    document.body.removeChild(measureDiv)
+}
 
-    fixColumnWidths(columns: Column<any, any>[]) {
-        // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
-        // Also update columns that are smaller than the minimumWidth
-        let distributeWidth = 0
-        for (const col of columns) {
-            if (col.renderWidth === null && col.width !== null) {
-                col.renderWidth = Math.floor(col.width);
-            }
-            if (col.width === null || col.width === 0) {
-                col.width = col.recommendedWidth
-                distributeWidth -= col.recommendedWidth
-                col.renderWidth = Math.floor(col.width);
-            }
-
-            if (col.width < col.minimumWidth) {
-                distributeWidth -= col.minimumWidth - col.width
-                col.width = col.minimumWidth
-                col.renderWidth = Math.floor(col.width);
-            }
+ 
+function fixColumnWidths(columns: Column<any, any>[]) {
+    // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
+    // Also update columns that are smaller than the minimumWidth
+    let distributeWidth = 0
+    for (const col of columns) {
+        if (col.renderWidth === null && col.width !== null) {
+            col.renderWidth = Math.floor(col.width);
         }
-        return distributeWidth
+        if (col.width === null || col.width === 0) {
+            col.width = col.recommendedWidth
+            distributeWidth -= col.recommendedWidth
+            col.renderWidth = Math.floor(col.width);
+        }
+
+        if (col.width < col.minimumWidth) {
+            distributeWidth -= col.minimumWidth - col.width
+            col.width = col.minimumWidth
+            col.renderWidth = Math.floor(col.width);
+        }
+    }
+    return distributeWidth
+}
+// 
+/**
+ * Update the width of the columns by distributing the available width across the columns, except the ignored column (optional)
+ */
+function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
+    updatePaddingIfNeeded()
+    // console.log("Update column width")
+        
+    if (wrapColumns.value) {
+        return
     }
 
-    /**
-     * Update the width of the columns by distributing the available width across the columns, except the ignored column (optional)
-     */
-    updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
-        this.updatePaddingIfNeeded()
-        // console.log("Update column width")
+    if (!tableElement.value) {
+        return;
+    }
         
-        if (this.wrapColumns) {
-            return
-        }
+    const leftPadding = horizontalPadding.value
+    const rightPadding = horizontalPadding.value
+
+    const availableWidth = (forceWidth ?? tableElement.value.clientWidth) - selectionColumnWidth.value - leftPadding - rightPadding;
+
+    if (isNaN(availableWidth) || availableWidth <= 0) {
+        console.warn("Available width is NaN or <= 0")
+        return
+    }
+    const currentWidth = columns.value.reduce((acc, col) => acc + (col.width ?? 0), 0);
+    let distributeWidth = availableWidth - currentWidth;
+
+    const affectedColumns = afterColumn ? columns.value.slice(columns.value.findIndex(c => c === afterColumn ) + 1) : columns.value
         
-        const leftPadding = this.horizontalPadding
-        const rightPadding = this.horizontalPadding
+    // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
+    // Also update columns that are smaller than the minimumWidth
+    distributeWidth += fixColumnWidths(affectedColumns)
 
-        const availableWidth = (forceWidth ?? (this.$refs["table"] as HTMLElement).clientWidth) - this.selectionColumnWidth - leftPadding - rightPadding;
+    if (strategy === "grow") {
 
-        if (isNaN(availableWidth) || availableWidth <= 0) {
-            console.warn("Available width is NaN or <= 0")
-            return
-        }
-        const currentWidth = this.columns.reduce((acc, col) => acc + (col.width ?? 0), 0);
-        let distributeWidth = availableWidth - currentWidth;
+        // Get columns with the highest priority for shrinking or growing
+        // growing: the ones with a width lower than the recommendedWidth
+        // shrinking: the ones with a width higher than the recommendedWidth
 
-        const affectedColumns = afterColumn ? this.columns.slice(this.columns.findIndex(c => c === afterColumn ) + 1) : this.columns
-        
-        // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
-        // Also update columns that are smaller than the minimumWidth
-        distributeWidth += this.fixColumnWidths(affectedColumns)
+        const shrinking = distributeWidth < 0
 
-        if (strategy === "grow") {
+        const columnPriorities: ((col: Column<any, any>) => boolean)[] = shrinking ? [
+            // First, shrink all the columns that are larger than the recommendedWidth
+            (c) => c.width !== null && c.width > c.recommendedWidth,
 
-            // Get columns with the highest priority for shrinking or growing
-            // growing: the ones with a width lower than the recommendedWidth
-            // shrinking: the ones with a width higher than the recommendedWidth
+            // At last, only shrink columns larger than the minimum width
+            (c) => c.width !== null && c.width > c.minimumWidth
+        ] : [
+            // First grow all the columns that are smaller than the recommendedWidth
+            (c) => c.width !== null && c.width < c.minimumWidth,
+            (c) => c.width !== null && c.width < c.recommendedWidth,
 
-            const shrinking = distributeWidth < 0
+            // Grow only columns that have grow = true (unless none of the columns have grow = true, in which case this step is skipped automatically)
+            (c) => c.width !== null && c.grow === true,
 
-            const columnPriorities: ((col: Column<any, any>) => boolean)[] = shrinking ? [
-                // First, shrink all the columns that are larger than the recommendedWidth
-                (c) => c.width !== null && c.width > c.recommendedWidth,
+            // At last, grow any column, exept when they don't have width yet
+            (c) => c.width !== null
+        ]
 
-                // At last, only shrink columns larger than the minimum width
-                (c) => c.width !== null && c.width > c.minimumWidth
-            ] : [
-                // First grow all the columns that are smaller than the recommendedWidth
-                (c) => c.width !== null && c.width < c.minimumWidth,
-                (c) => c.width !== null && c.width < c.recommendedWidth,
-
-                // Grow only columns that have grow = true (unless none of the columns have grow = true, in which case this step is skipped automatically)
-                (c) => c.width !== null && c.grow === true,
-
-                // At last, grow any column, exept when they don't have width yet
-                (c) => c.width !== null
-            ]
-
-            const columnLimits: {minimum?: (col: Column<any, any>) => number, maximum?: (col: Column<any, any>) => number}[] = shrinking ? [
-                { minimum: c => c.recommendedWidth },
-                { minimum: c => c.minimumWidth },
-            ] : [
-                { maximum: c => c.minimumWidth }, // Grow to recommended size and continue to next step
-                { maximum: c => c.recommendedWidth }, // Grow to recommended size and continue to next step
-                { },
-                { },
-            ]
+        const columnLimits: {minimum?: (col: Column<any, any>) => number, maximum?: (col: Column<any, any>) => number}[] = shrinking ? [
+            { minimum: c => c.recommendedWidth },
+            { minimum: c => c.minimumWidth },
+        ] : [
+            { maximum: c => c.minimumWidth }, // Grow to recommended size and continue to next step
+            { maximum: c => c.recommendedWidth }, // Grow to recommended size and continue to next step
+            { },
+            { },
+        ]
             
-            let columnPriorityIndex = 0
+        let columnPriorityIndex = 0
 
-            let columns = affectedColumns // use same type, and don't allocate a new array because we'll override it shortly
+        let columns = affectedColumns // use same type, and don't allocate a new array because we'll override it shortly
 
-            //console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
+        //console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
 
-            const updateColumns = () => {
-                columns = affectedColumns.filter(c => columnPriorities[columnPriorityIndex](c))
-            }
-            updateColumns()
+        const updateColumns = () => {
+            columns = affectedColumns.filter(c => columnPriorities[columnPriorityIndex](c))
+        }
+        updateColumns()
 
-            while (distributeWidth !== 0 && (columns.length > 0 || columnPriorityIndex < columnPriorities.length - 1)) {
-                if (columns.length == 0) {
-                    columnPriorityIndex++
+        while (distributeWidth !== 0 && (columns.length > 0 || columnPriorityIndex < columnPriorities.length - 1)) {
+            if (columns.length == 0) {
+                columnPriorityIndex++
                     
-                    updateColumns()
-                    // console.log("Moving to columnPriorityIndex", columnPriorityIndex)
-                    // console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
-
-                    // Check loop conditions again, and if needed, jump to the next priority or start distributing
-                    continue
-                }
-
-                // Always try to grow with rounded numbers, because else we'll get rounding errors
-                let change = Math.round(distributeWidth / columns.length);
-
-                if (Math.abs(change) < 1) {
-                    // Make sure change is never zero, or we'll have an infinite loop
-                    change = Math.sign(distributeWidth)
-                }
-
-                // console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
-                
-                // We'll make sure we never grow or shrink more than the distribute width
-
-                for (const col of columns) {
-                    if (col.width == null) {
-                        throw new Error("Impossible. Typescript type checking error")
-                    } 
-
-                    const start = col.width
-
-                    if ((shrinking && change < distributeWidth) || (!shrinking && change > distributeWidth)) {
-                        // Prevent growing more than the distributeWidth
-                        //console.log("Limited change to distributeWidth", change, distributeWidth)
-                        change = distributeWidth
-                    }
-
-                    col.width += change;
-                    
-                    // A column can never shrink more than its recommended width, or it's start width, if that was already smaller (only in case of minimum)
-                    const limits = columnLimits[columnPriorityIndex]
-                    
-                    const min = limits.minimum ? Math.min(start, limits.minimum(col)) : undefined
-                    const max = limits.maximum ? Math.max(start, limits.maximum(col)) : undefined
-
-                    if (min !== undefined && col.width <= min) {
-                        // we hit the minimum width, so we need to distribute the width that we couldn't absorb
-                        col.width = min;
-                        //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
-                    } else if (max !== undefined && col.width >= max) {
-                        // we hit the minimum width, so we need to distribute the width that we couldn't absorb
-                        col.width = max;
-                        //
-                    }
-
-                    const absorbed = col.width - start;
-                    distributeWidth -= absorbed;
-                    //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at ", col.width)
-                    col.renderWidth = Math.floor(col.width);
-                }
-
-                // Update columns
                 updateColumns()
-            }
+                // console.log("Moving to columnPriorityIndex", columnPriorityIndex)
+                // console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
 
-            //console.log("Done distributing with distributeWidth left: ", distributeWidth)
-        } else {
-            // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
-
-            for (const column of affectedColumns) {
-                if (column.width == null) {
-                    continue;
-                }
-
-                if (distributeWidth < 0) {
-                    if (column.width > column.recommendedWidth) {
-                        const shrinkAmount = Math.min(-distributeWidth, column.width - column.recommendedWidth);
-                        column.width -= shrinkAmount
-                        column.renderWidth = Math.floor(column.width);
-                        distributeWidth += shrinkAmount;
-
-                        if (distributeWidth >= 0) {
-                            break
-                        }
-                    }
-                } else {
-                    column.width += distributeWidth
-                    column.renderWidth = Math.floor(column.width);
-                    break
-                }
-            }
-        }
-
-        this.updateCanCollapse()
-    }
-
-    updateCanCollapse() {
-        this.updatePaddingIfNeeded()
-
-        if (this.wrapColumns) {
-            return
-        }
-        const n = this.canCollapse
-        this.canCollapse = Math.floor(this.totalWidth) > Math.floor((this.$refs["table"] as HTMLElement).clientWidth);
-
-        if (n !== this.canCollapse) {
-            this.saveColumnConfiguration()
-        }
-    }
-
-    collapse() {
-        this.updateColumnWidth(null, "grow")
-        this.saveColumnConfiguration()
-    }
-
-    get selectionColumnWidth() {
-        return this.showSelection ? (this.wrapColumns ? 40 : 50) : 0
-    }
-
-    get totalWidth() {
-        const leftPadding = this.horizontalPadding
-        const rightPadding = this.horizontalPadding
-        return this.selectionColumnWidth + this.columns.reduce((acc, col) => acc + (col.width ?? 0), 0) + leftPadding + rightPadding
-    }
-
-    get totalRenderWidth() {
-        const leftPadding = this.horizontalPadding
-        const rightPadding = this.horizontalPadding
-        return this.selectionColumnWidth + this.columns.reduce((acc, col) => acc + (col.renderWidth ?? 0), 0) + leftPadding + rightPadding
-    }
-
-    get gridTemplateColumns() {
-        return this.columns.map(col => `${(col.renderWidth ?? 0)}px`).join(" ")
-    }
-
-    @Watch("gridTemplateColumns")
-    updateGridSize(val: string) {
-        if (!this.wrapColumns) {
-            (this.$refs["table"] as HTMLElement).style.setProperty("--table-columns", val);
-        }
-    }
-
-    resetFilter() {
-        this.searchQuery = ""
-        this.selectedUIFilter = null
-    }
-
-    /**
-     * @deprecated
-     */
-    get filteredValues() {
-        return this.values
-    }
-
-    get sortedActions() {
-        return this.actions.slice().sort((a,b) => b.priority - a.priority)
-    }
-
-    get filteredActions() {
-        if (!this.isMobile || !this.showSelection) {
-            return this.sortedActions.filter(action => action.enabled && !action.singleSelection).slice(0, 3)
-        }
-
-        return this.sortedActions.filter(action => {
-            return action.enabled && action.needsSelection && !action.singleSelection
-        }).slice(0, 3)
-    }
-
-    get canFilter() {
-        return !!this.UIFilterBuilders
-    }
-
-    editFilter() {
-        if (!this.UIFilterBuilders) {
-            return
-        }
-        const filter = this.selectedUIFilter ?? this.UIFilterBuilders[0].create()
-        if (!this.selectedUIFilter) {
-            this.selectedUIFilter = filter;
-        }
-
-        this.present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(UIFilterEditor, {
-                        filter
-                    })
-                })
-            ],
-            modalDisplayStyle: 'popup',
-            modalClass: 'positionable-sheet',
-            modalCssStyle: '--sheet-position-right: 40px;'
-        })
-    }
-
-    get values() {
-        return this.tableObjectFetcher.objects
-    }
-
-    /**
-     * @deprecated
-     */
-    get sortedValues() {
-        return this.values
-    }
-
-    toggleSort(column: Column<any, any>) {
-        if (this.isColumnDragActive) {
-            //console.log("Ignored sort toggle due to drag")
-            return
-        }
-        if (this.sortBy === column) {
-            if (this.sortDirection === SortItemDirection.ASC) {
-                this.sortDirection = SortItemDirection.DESC;
-            } else {
-                this.sortDirection = SortItemDirection.ASC;
-            }
-        } else {
-            this.sortBy = column;
-        }
-        this.saveColumnConfiguration()
-    }
-
-    isValueSelected(value: Value) {
-        const found = this.markedRows.has(value.id)
-
-        if (this.markedRowsAreSelected) {
-            return found
-        } else {
-            return !found
-        }
-    }
-
-    getSelectionValue(row: VisibleRow<Value>) {
-        const value = row.value
-        if (!value) {
-            return false
-        }
-
-        return this.isValueSelected(value)
-    }
-
-    setSelectionValues(values: Value[], selected: boolean) {
-        for (const value of values) {
-            if (selected) {
-                if (this.markedRowsAreSelected) {
-                    this.markedRows.set(value.id, value)
-                } else {
-                    this.markedRows.delete(value.id)
-                }
-            } else {
-                if (!this.markedRowsAreSelected) {
-                    this.markedRows.set(value.id, value)
-                } else {
-                    this.markedRows.delete(value.id)
-                }
-            }
-
-            // Update cached value of visible row
-            const row = this.visibleRows.find(r => r.value?.id === value.id)
-            if (row) {
-                row.cachedSelectionValue = selected
-            }
-        }
-
-        // Update cached all selection
-        this.updateHasSelection()
-    }
-
-    setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
-        const value = row.value
-        if (!value) {
-            return
-        }
-        if (selected) {
-            if (this.markedRowsAreSelected) {
-                this.markedRows.set(value.id, value)
-            } else {
-                this.markedRows.delete(value.id)
-            }
-        } else {
-            if (!this.markedRowsAreSelected) {
-                this.markedRows.set(value.id, value)
-            } else {
-                this.markedRows.delete(value.id)
-            }
-        }
-
-        row.cachedSelectionValue = selected
-        
-
-        // Update cached all selection
-        this.updateHasSelection()
-    }
-
-    isAllSelected = false
-    hasSelection = false;
-    hasSingleSelection = false;
-
-    /**
-     * Cached because of usage of maps which are not reactive
-     */
-    updateHasSelection() {
-        this.hasSelection = this.markedRowsAreSelected ? this.markedRows.size > 0 : (((this.tableObjectFetcher.totalFilteredCount ?? this.values.length) - this.markedRows.size) > 0)
-        this.isAllSelected = this.getSelectAll()
-        this.hasSingleSelection = this.markedRowsAreSelected && this.markedRows.size === 1
-    }
-
-    /**
-     * This is not reactive, due to the use of maps, which are not reactive in vue.
-     * Thats why we need a cached value.
-     */
-    getSelectAll(): boolean {
-        if (this.markedRowsAreSelected) {
-            return this.markedRows.size === (this.tableObjectFetcher.totalFilteredCount ?? this.values.length)
-        } else {
-            return this.markedRows.size === 0
-        }
-    }
-
-    setSelectAll(selected: boolean) {
-        this.markedRowsAreSelected = !selected
-        this.markedRows.clear()
-
-        for (const visibleRow of this.visibleRows) {
-            visibleRow.cachedSelectionValue = selected
-        }
-        this.updateHasSelection()
-    }
-
-    async getSelection(options?: FetchAllOptions): Promise<Value[]> {
-        if (!this.showSelection || !this.hasSelection) {
-            return await this.tableObjectFetcher.fetchAll(options)
-        }
-
-        // TODO: fix sorting
-
-        if (this.markedRowsAreSelected) {
-            // No async needed
-            return Array.from(this.markedRows.values())
-        } else {
-            const all = await this.tableObjectFetcher.fetchAll(options);
-            return Array.from(all).filter(val => !this.markedRows.has(val.id))
-        }
-    }
-
-    getExpectedSelectionLength(): number {
-        if (!this.showSelection || !this.hasSelection) {
-            return this.tableObjectFetcher.totalFilteredCount ?? this.values.length ?? 0
-        }
-
-        // TODO: fix sorting
-
-        if (this.markedRowsAreSelected) {
-            return this.markedRows.size
-        } else {
-            return (this.tableObjectFetcher.totalFilteredCount  ?? this.values.length ?? 0) - this.markedRows.size
-        }
-    }
-
-    handleAction(action: TableAction<Value>, event) {
-        if (action.needsSelection && this.getExpectedSelectionLength() === 0) {
-            return
-        }
-
-        const selection = {
-            isSingle: this.hasSingleSelection,
-            hasSelection: this.hasSelection,
-            getSelection: this.getSelection
-        };
-
-        if (action.hasChildActions) {
-            const el = event.currentTarget;
-            const bounds = el.getBoundingClientRect()
-            const isOnTop = !(this.isIOS && this.isMobile)
-
-            const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-                x: bounds.left,
-                y: isOnTop ? bounds.bottom : bounds.top,
-                xPlacement: "right",
-                yPlacement: isOnTop ? "bottom" : "top",
-                actions: action.getChildActions(),
-                selection
-            });
-            this.present(displayedComponent.setDisplayStyle("overlay"));
-            return
-        }
-
-        action.handle(selection)?.catch((e) => {
-            console.error(e)
-            Toast.fromError(e).show
-        })
-    }
-
-    showActions(isOnTop: boolean, event) {
-        const el = event.currentTarget;
-        const bounds = el.getBoundingClientRect()
-
-        const actions = (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions.slice())
-
-        // Also add select all actions
-        if (!this.showSelection && !this.isIOS) {
-            // Add select action
-            actions.push(new TableAction({
-                name: "Selecteer",
-                groupIndex: -1,
-                priority: 10,
-                handler: () => {
-                    this.setShowSelection(true)
-                }
-            }))
-        }
-
-        // Add select all action
-        if (!this.isAllSelected) {
-            actions.push(new TableAction({
-                name: "Selecteer alles",
-                groupIndex: -1,
-                priority: 9,
-                handler: () => {
-                    this.setShowSelection(true)
-                    this.setSelectAll(true)
-                }
-            }))
-        } else {
-            actions.push(new TableAction({
-                name: "Deselecteer alles",
-                groupIndex: -1,
-                priority: 9,
-                handler: () => {
-                    this.setSelectAll(false)
-                }
-            }))
-        }
-        
-        // Add action to change visible columns
-        actions.push(new TableAction({
-            name: this.wrapColumns ? "Wijzig zichtbare gegevens" : "Wijzig kolommen",
-            groupIndex: -1,
-            priority: 8,
-            childMenu: this.getColumnContextMenu()
-        }))
-
-        actions.push(new TableAction({
-            name: "Sorteren",
-            groupIndex: -1,
-            priority: 7,
-            childMenu: this.getSortingContextMenu()
-        }))
-
-        const selection = {
-            isSingle: this.hasSingleSelection,
-            hasSelection: this.hasSelection,
-            getSelection: this.getSelection
-        };
-
-        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: bounds.right,
-            y: bounds.top + (isOnTop ? el.offsetHeight : 0),
-            xPlacement: "left",
-            yPlacement: isOnTop ? "bottom" : "top",
-            actions,
-            selection
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-    }
-
-    @Watch("tableObjectFetcher.objects", { deep: false })
-    onUpdateValues() {
-        for (const visibleRow of this.visibleRows) {
-            // has this row changed and should it now display a different value? -> clear it and mark it for reuse
-            if (visibleRow.currentIndex !== null && (visibleRow.currentIndex >= this.sortedValues.length || visibleRow.value !== this.sortedValues[visibleRow.currentIndex])) {
-                // Mark this row to be reused
-                visibleRow.value = null
-                visibleRow.currentIndex = null
-            }
-        }
-
-        // Update all rows
-        this.updateVisibleRows()
-        this.updateRecommendedWidths()
-    }
-
-    /**
-     * Cached offset between scroll and top of the table
-     */
-    cachedTableYPosition: number | null = 0
-    cachedScrollElement: HTMLElement | null = null
-
-    getScrollElement(element: HTMLElement | null = null): HTMLElement {
-        if (!element) {
-            element = this.$el as HTMLElement;
-        }
-
-        const style = window.getComputedStyle(element);
-        if (
-            style.overflowY == "scroll" ||
-            style.overflow == "scroll" ||
-            style.overflow == "auto" ||
-            style.overflowY == "auto" ||
-            // Windows fix
-            style.overflow == "overlay" ||
-            style.overflowY == "overlay"
-        ) {
-            return element;
-        } else {
-            if (!element.parentElement) {
-                return document.documentElement;
-            }
-            return this.getScrollElement(element.parentElement);
-        }
-    }
-
-    updateVisibleRows() {
-        let topOffset = 0
-
-        const scrollElement = this.cachedScrollElement ?? this.getScrollElement(this.$refs["table"] as HTMLElement)
-        this.cachedScrollElement = scrollElement
-
-        // innerHeight is a fix for animations, causing wrong initial bouding client rect
-        if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
-            const tableBody = this.$refs["tableBody"] as HTMLElement
-            const rect = tableBody.getBoundingClientRect();
-
-            const top = rect.top
-            this.cachedTableYPosition = top + scrollElement.scrollTop
-        }
-
-        // During animations, the scrollTop often jumps temporarily to a negative value
-        topOffset = Math.max(0, (scrollElement.scrollTop - this.cachedTableYPosition))
-
-        const totalItems = this.totalFilteredCount
-        const extraItems = 10
-
-        const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, totalItems - 1))
-
-        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
-
-        const unBoundedLastVisibleItemIndex =  Math.max(0, Math.floor((topOffset + vh) / this.rowHeight) + extraItems)
-
-        const lastVisibleItemIndex = Math.min(unBoundedLastVisibleItemIndex, totalItems - 1)
-
-        //console.log("First visible item index: " + firstVisibleItemIndex + " Last visible item index: " + lastVisibleItemIndex)
-        //console.log("vh: " + vh + " topOffset: " + topOffset + " rowHeight: " + this.rowHeight+" total: "+totalItems)
-        //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
-
-        // Make all visible rows available if not visible any longer
-        for (const visibleRow of this.visibleRows) {
-            if (visibleRow.currentIndex === null || visibleRow.currentIndex < firstVisibleItemIndex || visibleRow.currentIndex > lastVisibleItemIndex) {
-                // console.log("Freed visibleRow at index "+visibleRow.currentIndex)
-                visibleRow.value = null
-                visibleRow.currentIndex = null
-            }
-        }
-
-        for (let index = firstVisibleItemIndex; index <= lastVisibleItemIndex; index++) {
-            // Is this already visible?
-            let visibleRow = this.visibleRows.find(r => r.currentIndex === index)
-            if (visibleRow) {
-                // Nothing to do, it's already visible
-                visibleRow.y = index * this.rowHeight
+                // Check loop conditions again, and if needed, jump to the next priority or start distributing
                 continue
             }
 
-            //console.log("Row at index "+index+" is not yet loaded. Searching for a spot...")
-            visibleRow = this.visibleRows.find(r => r.currentIndex === null)
+            // Always try to grow with rounded numbers, because else we'll get rounding errors
+            let change = Math.round(distributeWidth / columns.length);
 
-            if (!visibleRow) {
-                //console.log("Created new cached row for index "+index)
-                visibleRow = new VisibleRow<Value>()
-                this.visibleRows.push(visibleRow)
+            if (Math.abs(change) < 1) {
+                // Make sure change is never zero, or we'll have an infinite loop
+                change = Math.sign(distributeWidth)
             }
 
-            const value = this.sortedValues[index] ?? null
+            // console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
+                
+            // We'll make sure we never grow or shrink more than the distribute width
 
-            visibleRow.value = value
-            visibleRow.y = index * this.rowHeight
-            visibleRow.currentIndex = index
-            visibleRow.cachedSelectionValue = this.getSelectionValue(visibleRow)
+            for (const col of columns) {
+                if (col.width == null) {
+                    throw new Error("Impossible. Typescript type checking error")
+                } 
+
+                const start = col.width
+
+                if ((shrinking && change < distributeWidth) || (!shrinking && change > distributeWidth)) {
+                    // Prevent growing more than the distributeWidth
+                    //console.log("Limited change to distributeWidth", change, distributeWidth)
+                    change = distributeWidth
+                }
+
+                col.width += change;
+                    
+                // A column can never shrink more than its recommended width, or it's start width, if that was already smaller (only in case of minimum)
+                const limits = columnLimits[columnPriorityIndex]
+                    
+                const min = limits.minimum ? Math.min(start, limits.minimum(col)) : undefined
+                const max = limits.maximum ? Math.max(start, limits.maximum(col)) : undefined
+
+                if (min !== undefined && col.width <= min) {
+                    // we hit the minimum width, so we need to distribute the width that we couldn't absorb
+                    col.width = min;
+                    //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
+                } else if (max !== undefined && col.width >= max) {
+                    // we hit the minimum width, so we need to distribute the width that we couldn't absorb
+                    col.width = max;
+                    //
+                }
+
+                const absorbed = col.width - start;
+                distributeWidth -= absorbed;
+                //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at ", col.width)
+                col.renderWidth = Math.floor(col.width);
+            }
+
+            // Update columns
+            updateColumns()
         }
 
-        //console.log("Rendered rows: "+this.visibleRows.length)
-        this.tableObjectFetcher.setVisible(firstVisibleItemIndex, unBoundedLastVisibleItemIndex)
-    }
+        //console.log("Done distributing with distributeWidth left: ", distributeWidth)
+    } else {
+        // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
-    get rowHeight() {
-        if (this.wrapColumns) {
-            const padding = 15
-            const firstColumnHeight = 16
-            const otherColumnsHeight = 14
-            const borderHeight = 2
-            const margin = 6
-            return padding * 2 + firstColumnHeight + ((otherColumnsHeight + margin) * Math.max(this.columns.length - 1, 0)) + borderHeight
-        }
-        return 60
-    }
+        for (const column of affectedColumns) {
+            if (column.width == null) {
+                continue;
+            }
 
-    // Can't use a watcher since rowHeight is never used
-    updateRowHeight() {
-        (this.$refs["table"] as HTMLElement).style.setProperty("--table-row-height", `${this.rowHeight}px`);
-    }
+            if (distributeWidth < 0) {
+                if (column.width > column.recommendedWidth) {
+                    const shrinkAmount = Math.min(-distributeWidth, column.width - column.recommendedWidth);
+                    column.width -= shrinkAmount
+                    column.renderWidth = Math.floor(column.width);
+                    distributeWidth += shrinkAmount;
 
-    get totalFilteredCount() {
-        if (this.errorMessage) {
-            return 0;
-        }
-        return this.tableObjectFetcher.totalFilteredCount ?? this.estimatedRows ?? 0;
-    }
-
-    get totalItemsCount() {
-        return this.tableObjectFetcher.totalCount
-    }
-
-    get totalHeight() {
-        return this.rowHeight * this.totalFilteredCount
-    }
-
-    get errorMessage() {
-        if (this.tableObjectFetcher.errorState) {
-            const errors = this.tableObjectFetcher.errorState
-            
-            let simpleErrors!: SimpleErrors
-            if (isSimpleError(errors)) {
-                simpleErrors = new SimpleErrors(errors)
-            } else if (isSimpleErrors(errors)) {
-                simpleErrors = errors
+                    if (distributeWidth >= 0) {
+                        break
+                    }
+                }
             } else {
-                simpleErrors = new SimpleErrors(new SimpleError({
-                    code: "unknown_error",
-                    message: errors.message
-                }))
+                column.width += distributeWidth
+                column.renderWidth = Math.floor(column.width);
+                break
             }
-
-            return simpleErrors.getHuman();
         }
-
-        return null;
     }
 
-    getPrevious(value: Value): Value | null {
-        for (let index = 0; index < this.sortedValues.length; index++) {
-            const _value = this.sortedValues[index];
-            if (_value.id == value.id) {
-                if (index == 0) {
-                    return null;
-                }
-                return this.sortedValues[index - 1];
-            }
-        }
-        return null;
-    }
+    updateCanCollapse()
+}
 
-    getNext(value: Value): Value | null {
-        for (let index = 0; index < this.sortedValues.length; index++) {
-            const _value = this.sortedValues[index];
-            if (_value.id == value.id) {
-                if (index == this.sortedValues.length - 1) {
-                    return null;
-                }
-                return this.sortedValues[index + 1];
-            }
-        }
-        return null;
+function updateCanCollapse() {
+    updatePaddingIfNeeded()
+
+    if (wrapColumns.value) {
+        return
+    }
+    if (!tableElement.value) {
+        return
+    }
+    const n = canCollapse.value
+    canCollapse.value = Math.floor(totalWidth.value) > Math.floor(tableElement.value.clientWidth);
+
+    if (n !== canCollapse.value) {
+        saveColumnConfiguration()
     }
 }
+
+function collapse() {
+    updateColumnWidth(null, "grow")
+    saveColumnConfiguration()
+}
+
+const totalRenderWidth = computed(() => {
+    const leftPadding = horizontalPadding.value
+    const rightPadding = horizontalPadding.value
+    return selectionColumnWidth.value + columns.value.reduce((acc, col) => acc + (col.renderWidth ?? 0), 0) + leftPadding + rightPadding
+});
+
+
+const gridTemplateColumns = computed(() => {
+    return columns.value.map(col => `${(col.renderWidth ?? 0)}px`).join(" ")
+});
+
+watchEffect(() => {
+    if (!wrapColumns.value) {
+        tableElement.value?.style.setProperty("--table-columns", gridTemplateColumns.value);
+    }
+});
+
+const canFilter = computed(() => {
+    return !!props.filterBuilders
+});
+
+async function editFilter() {
+    if (!props.filterBuilders) {
+        return
+    }
+    const filter = selectedUIFilter.value ?? props.filterBuilders[0].create()
+    if (!selectedUIFilter.value) {
+        selectedUIFilter.value = filter;
+    }
+
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(UIFilterEditor, {
+                    filter
+                })
+            })
+        ],
+        modalDisplayStyle: 'popup',
+        modalClass: 'positionable-sheet',
+        modalCssStyle: '--sheet-position-right: 40px;'
+    })
+}
+
+// 
+//     get values() {
+//         return props.tableObjectFetcher.objects
+//     }
+// 
+//     /**
+//      * @deprecated
+//      */
+//     get sortedValues() {
+//         return values.value
+//     }
+// 
+//     toggleSort(column: Column<any, any>) {
+//         if (isColumnDragActive.value) {
+//             //console.log("Ignored sort toggle due to drag")
+//             return
+//         }
+//         if (this.sortBy === column) {
+//             if (this.sortDirection === SortItemDirection.ASC) {
+//                 this.sortDirection = SortItemDirection.DESC;
+//             } else {
+//                 this.sortDirection = SortItemDirection.ASC;
+//             }
+//         } else {
+//             this.sortBy = column;
+//         }
+//         saveColumnConfiguration()
+//     }
+// 
+function isValueSelected(value: Value) {
+    const found = markedRows.value.has(value.id)
+
+    if (markedRowsAreSelected.value) {
+        return found
+    } else {
+        return !found
+    }
+}
+
+function getSelectionValue(row: VisibleRow<Value>) {
+    const value = row.value
+    if (!value) {
+        return isAllSelected.value
+    }
+
+    return isValueSelected(value)
+}
+// 
+//     setSelectionValues(values: Value[], selected: boolean) {
+//         for (const value of values) {
+//             if (selected) {
+//                 if (markedRowsAreSelected.value) {
+//                     markedRows.value.set(value.id, value)
+//                 } else {
+//                     markedRows.value.delete(value.id)
+//                 }
+//             } else {
+//                 if (!markedRowsAreSelected.value) {
+//                     markedRows.value.set(value.id, value)
+//                 } else {
+//                     markedRows.value.delete(value.id)
+//                 }
+//             }
+// 
+//             // Update cached value of visible row
+//             const row = visibleRows.value.find(r => r.value?.id === value.id)
+//             if (row) {
+//                 row.cachedSelectionValue = selected
+//             }
+//         }
+// 
+//         // Update cached all selection
+//         this.updateHasSelection()
+//     }
+// 
+
+function setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
+    const value = row.value
+    if (!value) {
+        return
+    }
+    if (selected) {
+        if (markedRowsAreSelected.value) {
+            markedRows.value.set(value.id, value)
+        } else {
+            markedRows.value.delete(value.id)
+        }
+    } else {
+        if (!markedRowsAreSelected.value) {
+            markedRows.value.set(value.id, value)
+        } else {
+            markedRows.value.delete(value.id)
+        }
+    }
+
+    row.cachedSelectionValue = selected
+}
+
+// 
+//     isAllSelected = false
+//     hasSelection = false;
+//     hasSingleSelection = false;
+// 
+//     /**
+//      * Cached because of usage of maps which are not reactive
+//      */
+//     updateHasSelection() {
+//         hasSelection.value = markedRowsAreSelected.value ? markedRows.value.size > 0 : (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0)
+//         this.isAllSelected = this.getSelectAll()
+//         this.hasSingleSelection = markedRowsAreSelected.value && markedRows.value.size === 1
+//     }
+// 
+//     /**
+//      * This is not reactive, due to the use of maps, which are not reactive in vue.
+//      * Thats why we need a cached value.
+//      */
+//     getSelectAll(): boolean {
+//         if (markedRowsAreSelected.value) {
+//             return markedRows.value.size === (props.tableObjectFetcher.totalFilteredCount ?? values.value.length)
+//         } else {
+//             return markedRows.value.size === 0
+//         }
+//     }
+// 
+//     setSelectAll(selected: boolean) {
+//         markedRowsAreSelected.value = !selected
+//         markedRows.value.clear()
+// 
+//         for (const visibleRow of visibleRows.value) {
+//             visibleRow.cachedSelectionValue = selected
+//         }
+//         this.updateHasSelection()
+//     }
+// 
+//     async getSelection(options?: FetchAllOptions): Promise<Value[]> {
+//         if (!showSelection.value || !hasSelection.value) {
+//             return await props.tableObjectFetcher.fetchAll(options)
+//         }
+// 
+//         // TODO: fix sorting
+// 
+//         if (markedRowsAreSelected.value) {
+//             // No async needed
+//             return Array.from(markedRows.value.values())
+//         } else {
+//             const all = await props.tableObjectFetcher.fetchAll(options);
+//             return Array.from(all).filter(val => !markedRows.value.has(val.id))
+//         }
+//     }
+// 
+function getExpectedSelectionLength(): number {
+    if (!showSelection.value || !hasSelection.value) {
+        return props.tableObjectFetcher.totalFilteredCount ?? values.value.length ?? 0
+    }
+
+    if (markedRowsAreSelected.value) {
+        return markedRows.value.size
+    } else {
+        return (props.tableObjectFetcher.totalFilteredCount  ?? values.value.length ?? 0) - markedRows.value.size
+    }
+}
+
+async function handleAction(action: TableAction<Value>, event: MouseEvent) {
+    if (action.needsSelection && getExpectedSelectionLength() === 0) {
+        return
+    }
+
+    const selection = {
+        isSingle: hasSingleSelection.value,
+        hasSelection: hasSelection.value,
+        getSelection
+    };
+
+    if (action.hasChildActions) {
+        const el = event.currentTarget as HTMLElement;
+        const bounds = el.getBoundingClientRect()
+        const isOnTop = !(isIOS && isMobile.value)
+
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: bounds.left,
+            y: isOnTop ? bounds.bottom : bounds.top,
+            xPlacement: "right",
+            yPlacement: isOnTop ? "bottom" : "top",
+            actions: action.getChildActions(),
+            selection
+        });
+        await present(displayedComponent.setDisplayStyle("overlay"));
+        return
+    }
+
+    action.handle(selection)?.catch((e) => {
+        console.error(e)
+        Toast.fromError(e).show
+    })
+}
+
+watch(values, () => {
+    console.log('Detected objects changed');
+    for (const visibleRow of visibleRows.value) {
+        // has this row changed and should it now display a different value? -> clear it and mark it for reuse
+        if (visibleRow.currentIndex !== null && (visibleRow.currentIndex >= values.value.length || visibleRow.value !== values.value[visibleRow.currentIndex])) {
+            // Mark this row to be reused
+            visibleRow.value = null
+            visibleRow.currentIndex = null
+        }
+    }
+
+    // Update all rows
+    updateVisibleRows()
+    updateRecommendedWidths()
+}, { deep: true });
+
+// 
+//     /**
+//      * Cached offset between scroll and top of the table
+//      */
+//     cachedTableYPosition: number | null = 0
+//     cachedScrollElement: HTMLElement | null = null
+// 
+function getScrollElement(element: HTMLElement): HTMLElement {
+    const style = window.getComputedStyle(element);
+    if (
+        style.overflowY == "scroll" ||
+        style.overflow == "scroll" ||
+        style.overflow == "auto" ||
+        style.overflowY == "auto" ||
+        // Windows fix
+        style.overflow == "overlay" ||
+        style.overflowY == "overlay"
+    ) {
+        return element;
+    } else {
+        if (!element.parentElement) {
+            return document.documentElement;
+        }
+        return getScrollElement(element.parentElement);
+    }
+}
+
+let cachedScrollElement: HTMLElement | null = null
+let cachedTableYPosition: number | null = 0
+
+function updateVisibleRows() {
+    if (!tableElement.value) {
+        return;
+    }
+    
+    let topOffset = 0
+
+    const scrollElement = cachedScrollElement ?? getScrollElement(tableElement.value)
+    cachedScrollElement = scrollElement
+
+    // innerHeight is a fix for animations, causing wrong initial bouding client rect
+    if (!cachedTableYPosition || cachedTableYPosition > window.innerHeight) {
+        if (!tableBody.value) {
+            return;
+        }
+
+        const rect = tableBody.value.getBoundingClientRect();
+
+        const top = rect.top
+        cachedTableYPosition = top + scrollElement.scrollTop
+    }
+
+    // During animations, the scrollTop often jumps temporarily to a negative value
+    topOffset = Math.max(0, (scrollElement.scrollTop - cachedTableYPosition))
+
+    const totalItems = totalFilteredCount.value
+    const extraItems = 5
+
+    const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / rowHeight.value) - extraItems, totalItems - 1))
+
+    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+
+    const unBoundedLastVisibleItemIndex =  Math.max(0, Math.floor((topOffset + vh) / rowHeight.value) + extraItems)
+
+    const lastVisibleItemIndex = Math.min(unBoundedLastVisibleItemIndex, totalItems - 1)
+
+    //console.log("First visible item index: " + firstVisibleItemIndex + " Last visible item index: " + lastVisibleItemIndex)
+    //console.log("vh: " + vh + " topOffset: " + topOffset + " rowHeight: " + rowHeight.value+" total: "+totalItems)
+    //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
+
+    // Make all visible rows available if not visible any longer
+    for (const visibleRow of visibleRows.value) {
+        if (visibleRow.currentIndex === null || visibleRow.currentIndex < firstVisibleItemIndex || visibleRow.currentIndex > lastVisibleItemIndex) {
+            visibleRow.value = null
+            visibleRow.currentIndex = null
+        }
+    }
+
+    for (let index = firstVisibleItemIndex; index <= lastVisibleItemIndex; index++) {
+        // Is this already visible?
+        let visibleRow = visibleRows.value.find(r => r.currentIndex === index)
+        if (visibleRow) {
+            // Nothing to do, it's already visible
+            visibleRow.y = index * rowHeight.value
+            continue
+        }
+
+        visibleRow = visibleRows.value.find(r => r.currentIndex === null)
+
+        if (!visibleRow) {
+            visibleRow = new VisibleRow<Value>()
+            visibleRows.value.push(visibleRow)
+        }
+
+        const value = values.value[index] ?? null
+
+        visibleRow.value = value
+        visibleRow.y = index * rowHeight.value
+        visibleRow.currentIndex = index
+        visibleRow.cachedSelectionValue = getSelectionValue(visibleRow)
+    }
+
+    //console.log("Rendered rows: "+visibleRows.value.length)
+    props.tableObjectFetcher.setVisible(firstVisibleItemIndex, unBoundedLastVisibleItemIndex)
+}
+
+const rowHeight = computed(() => {
+    if (wrapColumns.value) {
+        const padding = 15
+        const firstColumnHeight = 16
+        const otherColumnsHeight = 14
+        const borderHeight = 2
+        const margin = 6
+        return padding * 2 + firstColumnHeight + ((otherColumnsHeight + margin) * Math.max(columns.value.length - 1, 0)) + borderHeight
+    }
+    return 60
+});
+
+watchEffect(() => {
+    tableElement.value?.style.setProperty("--table-row-height", `${rowHeight.value}px`);
+});
+
+const totalHeight = computed(() => {
+    return rowHeight.value * totalFilteredCount.value
+});
+
+function getPrevious(value: Value): Value | null {
+    for (let index = 0; index < values.value.length; index++) {
+        const _value = values.value[index];
+        if (_value.id == value.id) {
+            if (index == 0) {
+                return null;
+            }
+            return values.value[index - 1];
+        }
+    }
+    return null;
+}
+
+function getNext(value: Value): Value | null {
+    for (let index = 0; index < values.value.length; index++) {
+        const _value = values.value[index];
+        if (_value.id == value.id) {
+            if (index == values.value.length - 1) {
+                return null;
+            }
+            return values.value[index + 1];
+        }
+    }
+    return null;
+}
+
+defineExpose({
+    getPrevious,
+    getNext
+})
+
 </script>
 
 <style lang="scss">

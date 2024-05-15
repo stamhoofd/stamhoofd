@@ -26,9 +26,8 @@ import { Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, Reco
 import { Formatter, Sorter } from "@stamhoofd/utility";
 
 import { MemberChangeEvent } from "../../../classes/MemberManager";
-
 import EditMemberView from "../member/edit/EditMemberView.vue";
-import MemberView from "../member/MemberView.vue";
+import MemberSegmentedView from "../member/MemberSegmentedView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
 
 @Component({
@@ -250,7 +249,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                         return null
                     }
 
-                    let filtered = !this.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.map(r => r.createdAt!.getTime())
+                    const filtered = !this.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.map(r => r.createdAt!.getTime())
 
                     if (filtered.length == 0) {
                         return null
@@ -446,7 +445,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     openMember(member: MemberWithRegistrations) {
         const table = this.$refs.table as TableView<MemberWithRegistrations> | undefined
         const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberView, {
+            root: new ComponentWithProperties(MemberSegmentedView, {
                 member: member,
                 getNextMember: table?.getNext,
                 getPreviousMember: table?.getPrevious,

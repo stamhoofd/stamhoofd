@@ -1,4 +1,4 @@
-import { AccessRight, Group, Organization, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, User } from "@stamhoofd/structures";
+import { AccessRight, Group, Organization, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, User } from "@stamhoofd/structures";
 import { Ref, unref } from "vue";
 
 export class ContextPermissions {
@@ -53,6 +53,10 @@ export class ContextPermissions {
         return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions) ?? null
     }
 
+    getPermissionsForOrganization(organization: Organization) {
+        return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions) ?? null
+    }
+
     get unloadedPermissions(): Permissions|null {
         if (!this.organization) {
             return unref(this.userPermissions)?.globalPermissions ?? null
@@ -86,6 +90,29 @@ export class ContextPermissions {
         }
 
         return group.hasAccess(this.permissions, this.organization, permissionLevel)
+    }
+
+    canAccessPlatformMember(member: PlatformMember, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (this.hasFullPlatformAccess()) {
+            return true;
+        }
+
+        for (const registration of member.member.registrations) {
+            const organization = member.family.getOrganization(registration.organizationId);
+            if (organization) {
+                const group = organization.groups.find(g => g.id === registration.groupId);
+                if (group) {
+                    if (group.hasAccess(this.getPermissionsForOrganization(organization), organization, permissionLevel)) {
+                        return true;
+                    }
+                } else {
+                    if (this.getPermissionsForOrganization(organization)?.hasAccess(permissionLevel)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     canAccessPayment(payment: PaymentGeneral|null|undefined, level: PermissionLevel) {

@@ -1,8 +1,8 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { CountResponse, CountFilteredRequest } from '@stamhoofd/structures';
-
 import { Decoder } from '@simonbackx/simple-encoding';
-import { AdminToken } from '../../models/AdminToken';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
+
+import { Context } from '../../../helpers/Context';
 import { GetMembersEndpoint } from './GetMembersEndpoint';
 
 type Params = Record<string, never>;
@@ -27,7 +27,8 @@ export class GetMembersCountEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await AdminToken.authenticate(request);
+        await Context.setOptionalOrganizationScope();
+        await Context.authenticate()
         const query = GetMembersEndpoint.buildQuery(request.query)
         
         const count = await query

@@ -1,17 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, Organization } from '@stamhoofd/models';
+import { Member, MemberWithRegistrations } from '@stamhoofd/models';
 import { baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler,SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions } from "@stamhoofd/sql";
-import { CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MemberSummary, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
-import { DataValidator, Formatter, Sorter } from '@stamhoofd/utility';
+import { CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { DataValidator, Formatter } from '@stamhoofd/utility';
 
-import { AdminToken } from '../../models/AdminToken';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<MemberSummary, LimitedFilteredRequest>
+type ResponseBody = PaginatedResponse<MembersBlob, LimitedFilteredRequest>
 
 const filterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -49,7 +51,8 @@ const filterCompilers: SQLFilterDefinitions = {
     ),
 
     registrations: createSQLRelationFilterCompiler(
-        SQL.select().from(
+        SQL.select()
+        .from(
             SQL.table('registrations')
         ).join(
             SQL.join(
@@ -58,9 +61,6 @@ const filterCompilers: SQLFilterDefinitions = {
                 SQL.column('groups', 'id'),
                 SQL.column('registrations', 'groupId')
             )
-        ).where(
-            SQL.column('memberId'),
-            SQL.column('members', 'id'),
         ).where(
             SQL.column('memberId'),
             SQL.column('members', 'id'),
@@ -82,24 +82,27 @@ const filterCompilers: SQLFilterDefinitions = {
             "waitingList": createSQLColumnFilterCompiler('waitingList'),
             "canRegister": createSQLColumnFilterCompiler('canRegister'),
             "cycle": createSQLColumnFilterCompiler('cycle'),
+            "organizationId": createSQLColumnFilterCompiler('organizationId'),
+            "groupId": createSQLColumnFilterCompiler('groupId'),
 
             "group": createSQLFilterNamespace({
                 ...baseSQLFilterCompilers,
+                id: createSQLColumnFilterCompiler('groupId'),
                 name: createSQLExpressionFilterCompiler(
                     SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name')
+                ),
+                status: createSQLExpressionFilterCompiler(
+                    SQL.column('groups', 'status')
                 ),
             })
         }
     ),
 }
 
-const sorters: SQLSortDefinitions<MemberSummary> = {
+const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
     'id': {
         getValue(a) {
             return a.id
-        },
-        sort: (a, b) => {
-            return Sorter.byStringValue(a.id, b.id);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -110,10 +113,7 @@ const sorters: SQLSortDefinitions<MemberSummary> = {
     },
     'name': {
         getValue(a) {
-            return a.name
-        },
-        sort: (a, b) => {
-            return Sorter.byStringValue(a.name, b.name);
+            return a.details.name
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return SQLOrderBy.combine([
@@ -130,10 +130,7 @@ const sorters: SQLSortDefinitions<MemberSummary> = {
     },
     'birthDay': {
         getValue(a) {
-            return a.birthDay?.getTime() ?? 0
-        },
-        sort: (a, b) => {
-            return Sorter.byNumberValue(b.birthDay?.getTime() ?? 0, a.birthDay?.getTime() ?? 0);
+            return a.details.birthDay?.getTime()
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -142,34 +139,18 @@ const sorters: SQLSortDefinitions<MemberSummary> = {
             })
         }
     },
-    'organizationName': {
+    'age': {
         getValue(a) {
-            return a.organizationName
-        },
-        sort: (a, b) => {
-            return Sorter.byStringValue(b.organizationName, a.organizationName);
+            return a.details.birthDay?.getTime()
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('organizations', 'name'),
-                direction
+                column: SQL.column('birthDay'),
+                // Reverse direction
+                direction: direction === 'ASC' ? 'DESC' : 'ASC'
             })
         }
-    },
-    'email': {
-        getValue(a) {
-            return a.email
-        },
-        sort: (a, b) => {
-            return Sorter.byStringValue(b.email ?? '', a.email ?? '');
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('details'), '$.value.email'),
-                direction
-            })
-        }
-    },
+    }
 }
 
 export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -189,28 +170,43 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
+        const organization = Context.organization
+
+        if (!organization && !Context.auth.hasPlatformFullAccess()) {
+            throw new SimpleError({
+                code: 'not_implemented',
+                message: 'Listing members platform wide without full permissions is not yet implemented'
+            })
+        }
+
+        let scopeFilter: StamhoofdFilter|undefined = undefined;
+
+        if (organization) {
+            // Add organization scope filter
+            scopeFilter = {
+                registrations: {
+                    $elemMatch: {
+                        organizationId: organization.id
+                    }
+                }
+            };
+        }
+        
         const query = SQL
             .select(
-                SQL.wildcard('members'),
-                SQL.column('organizations', 'id'),
-                SQL.column('organizations', 'name'),
+                SQL.column('members', 'id')
             )
             .from(
                 SQL.table('members')
-            )
-            .join(
-                SQL.leftJoin(
-                    SQL.table('organizations')
-                ).where(
-                    SQL.column('organizations', 'id'),
-                    SQL.column('members', 'organizationId')
-                )
-            )
-        
+            );
+            
+        if (scopeFilter) {
+            query.where(compileToSQLFilter(scopeFilter, filterCompilers))
+        }
+
         if (q.filter) {
             query.where(compileToSQLFilter(q.filter, filterCompilers))
         }
-
 
         if (q.search) {
             let searchFilter: StamhoofdFilter|null = null
@@ -259,12 +255,13 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             query.orderBy(compileToSQLSorter(q.sort, sorters))
             query.limit(q.limit)
         }
-        
+       
         return query
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await AdminToken.authenticate(request);
+        await Context.setOptionalOrganizationScope();
+        await Context.authenticate()
 
         if (request.query.limit > 100) {
             throw new SimpleError({
@@ -284,20 +281,21 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         
         const data = await GetMembersEndpoint.buildQuery(request.query).fetch()
         
-        const members = Member.fromRows(data, 'members');
-        const organizations = Organization.fromRows(data, 'organizations');
+        const memberIds = data.map((r) => {
+            if (typeof r.members.id === 'string') {
+                return r.members.id
+            }
+            throw new Error('Expected string')
+        });
 
-        const memberStructures = members.map(m => MemberSummary.create({
-            id: m.id,
-            organizationName: organizations.find(o => o.id == m.organizationId)?.name ?? "Onbekend",
-            organizationId: m.organizationId,
-            ...m.details
-        }));
-        
+        const _members = await Member.getBlobByIds(...memberIds)
+        // Make sure members is in same order as memberIds
+        const members = memberIds.map(id => _members.find(m => m.id === id)!)
+
         let next: LimitedFilteredRequest|undefined;
 
-        if (memberStructures.length >= request.query.limit) {
-            const lastObject = memberStructures[memberStructures.length - 1];
+        if (memberIds.length >= request.query.limit) {
+            const lastObject = members[members.length - 1];
             const nextFilter = getSortFilter(lastObject, sorters, request.query.sort);
 
             next = new LimitedFilteredRequest({
@@ -315,8 +313,8 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         return new Response(
-            new PaginatedResponse<MemberSummary, LimitedFilteredRequest>({
-                results: memberStructures,
+            new PaginatedResponse<MembersBlob, LimitedFilteredRequest>({
+                results: await AuthenticatedStructures.membersBlob(members),
                 next
             })
         );
