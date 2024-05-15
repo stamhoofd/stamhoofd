@@ -73,20 +73,27 @@
         <p v-if="allowOptional" class="style-description-small">
             * Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.
         </p>
+
+        <div v-if="isDevelopment">
+            <code class="style-code">
+                {{ encodedJson }}
+            </code>
+        </div>
     </div>
 </template>
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { FilterDefinition, FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
+import { isEmptyFilter,Organization, PropertyFilter, StamhoofdFilter, Version } from '@stamhoofd/structures';
 
 import Radio from "../../inputs/Radio.vue";
 import STInputBox from "../../inputs/STInputBox.vue";
 import STList from "../../layout/STList.vue";
 import STListItem from "../../layout/STListItem.vue";
-import FilterEditor from './FilterEditor.vue';
+import { filterToString,UIFilter, UIFilterBuilder } from '../UIFilter';
+import UIFilterEditor from '../UIFilterEditor.vue';
 
 @Component({
     components: {
@@ -98,96 +105,92 @@ import FilterEditor from './FilterEditor.vue';
 })
 export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        modelValue: PropertyFilter<any>
+        modelValue!: PropertyFilter
 
     @Prop({ default: true })
-        allowOptional: boolean
+        allowOptional!: boolean
 
     @Prop({ required: true })
-        organization: Organization
+        builder!: UIFilterBuilder
 
-    @Prop({ required: true })
-        definitions!: FilterDefinition[]
-
-    cachedRequiredFilter: FilterGroup<any> | null = null
-    cachedEnabledFilter: FilterGroup<any> = new FilterGroup(this.definitions) // need a value to keep this reactive
-
-    created() {
-        this.onConfigurationChange()
-    }
-
-    @Watch('value')
-    onConfigurationChange() {
-        if (this.modelValue.requiredWhen) {
-            try {
-                this.cachedRequiredFilter = this.modelValue.requiredWhen.decode(this.definitions)
-            } catch (e) {
-                console.error('Error decoding required filter', e)
-                this.cachedRequiredFilter = null
-            }
-        } else {
-            this.cachedRequiredFilter = null
-        }
-
-        try {
-            this.cachedEnabledFilter = this.modelValue.enabledWhen.decode(this.definitions)
-        } catch (e) {
-            console.error('Error decoding required filter', e)
-            this.cachedEnabledFilter = new FilterGroup(this.definitions)
-        }
-        console.log('onConfigurationChange', this.modelValue, this.cachedEnabledFilter, this.cachedRequiredFilter)
-    }
+    cachedRequiredFilter: StamhoofdFilter|null = null;
+    cachedEnabledFilter: StamhoofdFilter|null = null;
 
     isAlwaysEnabled() {
-        return this.cachedEnabledFilter.filters.length == 0
+        return this.modelValue.enabledWhen === null || isEmptyFilter(this.modelValue.enabledWhen)
     }
 
     isAlwaysRequired() {
-        return this.cachedRequiredFilter && this.cachedRequiredFilter.filters.length == 0
+        return this.modelValue.requiredWhen !== null && isEmptyFilter(this.modelValue.requiredWhen)
     }
 
     isNeverRequired() {
         return this.modelValue.requiredWhen === null
     }
 
+    mounted() {
+        this.cacheIfNeeded()
+    }
+
+    get isDevelopment() {
+        return STAMHOOFD.environment === 'development'
+    }
+
+    get encodedJson() {
+        return JSON.stringify(
+            this.modelValue.encode({version: Version}),
+            null,
+            4
+        )
+    }
+
+    cacheIfNeeded() {
+        if (this.modelValue.requiredWhen && !isEmptyFilter(this.modelValue.requiredWhen)) {
+            this.cachedRequiredFilter = this.modelValue.requiredWhen
+        }
+        if (this.modelValue.enabledWhen && !isEmptyFilter(this.modelValue.enabledWhen)) {
+            this.cachedEnabledFilter = this.modelValue.enabledWhen
+        }
+    }
+
     setAlwaysEnabled() {
         this.$emit('update:modelValue', 
-            new PropertyFilter<any>(
-                new FilterGroup(this.definitions).encoded,
+            new PropertyFilter(
+                null,
                 this.modelValue.requiredWhen
             )
         )
     }
 
     setEnabledWhen(useCache = false) {
-        this.present(new ComponentWithProperties(FilterEditor, {
-            title: "Vragen als...",
-            selectedFilter: this.cachedEnabledFilter,
-            organization: this.organization,
-            setFilter: (enabledWhen: FilterGroup<any>) => {
-                this.$emit('update:modelValue', 
-                    new PropertyFilter<any>(
-                        enabledWhen.encoded,
-                        this.modelValue.requiredWhen
-                    )
-                )
-            },
-            definitions: this.definitions
-        }).setDisplayStyle("popup"))
+        //this.present(new ComponentWithProperties(FilterEditor, {
+        //    title: "Vragen als...",
+        //    selectedFilter: this.cachedEnabledFilter,
+        //    organization: this.organization,
+        //    setFilter: (enabledWhen: FilterGroup<any>) => {
+        //        this.$emit('update:modelValue', 
+        //            new PropertyFilter<any>(
+        //                enabledWhen.encoded,
+        //                this.modelValue.requiredWhen
+        //            )
+        //        )
+        //    },
+        //    definitions: this.definitions
+        //}).setDisplayStyle("popup"))
     }
 
     setAlwaysRequired() {
         this.$emit('update:modelValue', 
-            new PropertyFilter<any>(
+            new PropertyFilter(
                 this.modelValue.enabledWhen,
-                new FilterGroup(this.definitions).encoded
+                {}
             )
         )
     }
 
     setNeverRequired() {
         this.$emit('update:modelValue', 
-            new PropertyFilter<any>(
+            new PropertyFilter(
                 this.modelValue.enabledWhen,
                 null
             )
@@ -195,37 +198,64 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     setRequiredWhen(useCache = false) {
-        if (useCache && this.cachedRequiredFilter) {
+        console.log('setRequiredwhen', useCache);
+
+        if (useCache && this.cachedRequiredFilter && !isEmptyFilter(this.cachedRequiredFilter)) {
             this.$emit('update:modelValue', 
-                new PropertyFilter<any>(
+                new PropertyFilter(
                     this.modelValue.enabledWhen,
-                    this.cachedRequiredFilter.encoded
+                    this.cachedRequiredFilter
                 )
             )
             return
         }
-        this.present(new ComponentWithProperties(FilterEditor, {
-            title: "Verplicht als...",
-            selectedFilter: this.cachedRequiredFilter ?? new FilterGroup(this.definitions),
-            organization: this.organization,
-            setFilter: (requiredWhen: FilterGroup<any>) => {
-                this.$emit('update:modelValue', 
-                    new PropertyFilter<any>(
-                        this.modelValue.enabledWhen,
-                        requiredWhen.encoded
-                    )
-                )
-            },
-            definitions: this.definitions
-        }).setDisplayStyle("popup"))
+
+        const filter = this.modelValue.requiredWhen ? this.builder.fromFilter(this.modelValue.requiredWhen) : this.builder.create() 
+        console.log('filter', filter);
+
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(UIFilterEditor, {
+                        filter,
+                        saveHandler: (filter: UIFilter) => {
+                            this.cachedRequiredFilter = filter.build();
+                            
+                            this.$emit('update:modelValue', 
+                                new PropertyFilter(
+                                    this.modelValue.enabledWhen,
+                                    this.cachedRequiredFilter
+                                )
+                            )
+                        }
+                    })
+                })
+            ],
+            modalDisplayStyle: 'sheet'
+        })
+
+        //this.present(new ComponentWithProperties(FilterEditor, {
+        //    title: "Verplicht als...",
+        //    selectedFilter: this.cachedRequiredFilter ?? new FilterGroup(this.definitions),
+        //    organization: this.organization,
+        //    setFilter: (requiredWhen: FilterGroup<any>) => {
+        //        this.$emit('update:modelValue', 
+        //            new PropertyFilter<any>(
+        //                this.modelValue.enabledWhen,
+        //                requiredWhen.encoded
+        //            )
+        //        )
+        //    },
+        //    definitions: this.definitions
+        //}).setDisplayStyle("popup"))
     }
 
     get enabledText() {
-        return (this.cachedEnabledFilter).toString()
+        return this.modelValue.enabledWhen ? filterToString(this.modelValue.enabledWhen, this.builder) : '';
     }
 
     get requiredText() {
-        return (this.cachedRequiredFilter ?? "").toString()
+        return this.modelValue.requiredWhen ? filterToString(this.modelValue.requiredWhen, this.builder) : '';
     }
 
 }

@@ -76,7 +76,7 @@ export class Document extends Model {
             "organization.logo": organization.meta.squareLogo,
         };
 
-        for (const field of this.data.fieldAnswers) {
+        for (const field of this.data.fieldAnswers.values()) {
             const keys = field.settings.id.split('.')
             let current = data
             const lastKey = keys.pop()!

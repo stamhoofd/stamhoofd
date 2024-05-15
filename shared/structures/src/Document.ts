@@ -1,8 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
+import { StamhoofdFilter } from "./filters/new/StamhoofdFilter";
+import { ObjectWithRecords, PatchAnswers } from "./members/ObjectWithRecords";
 import { RecordAnswer, RecordAnswerDecoder } from "./members/records/RecordAnswer";
 import { RecordCategory } from "./members/records/RecordCategory";
+import { RecordSettings } from "./members/records/RecordSettings";
 
 export enum DocumentStatus {
     Draft = "Draft",
@@ -43,7 +46,18 @@ export class DocumentSettings extends AutoEncoder {
      * Fields defined by the template that can be set.
      */
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
-    fieldAnswers: RecordAnswer[] = []
+    @field({ 
+        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), 
+        version: 252, 
+        upgrade: (old: RecordAnswer[]) => {
+            const map = new Map<string, RecordAnswer>()
+            for (const answer of old) {
+                map.set(answer.settings.id, answer)
+            }
+            return map;
+        } 
+    })
+    fieldAnswers: Map<string, RecordAnswer> = new Map()
 
     /**
      * Defines where to automatically find the answer for a given question
@@ -101,7 +115,18 @@ export class DocumentTemplateGroup extends AutoEncoder {
      * Answers for groupFieldCategories for this group
      */
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
-    fieldAnswers: RecordAnswer[] = []
+    @field({ 
+        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), 
+        version: 252, 
+        upgrade: (old: RecordAnswer[]) => {
+            const map = new Map<string, RecordAnswer>()
+            for (const answer of old) {
+                map.set(answer.settings.id, answer)
+            }
+            return map;
+        } 
+    })
+    fieldAnswers: Map<string, RecordAnswer> = new Map()
 }
 
 export class DocumentPrivateSettings extends AutoEncoder {
@@ -115,7 +140,7 @@ export class DocumentPrivateSettings extends AutoEncoder {
     groups: DocumentTemplateGroup[] = []
 }
 
-export class DocumentTemplatePrivate extends AutoEncoder {
+export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -139,6 +164,22 @@ export class DocumentTemplatePrivate extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt = new Date()
+
+    isRecordCategoryEnabled(recordCategory: RecordCategory): boolean {
+        throw new Error("Method not implemented.");
+    }
+    isRecordEnabled(record: RecordSettings): boolean {
+        throw new Error("Method not implemented.");
+    }
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        throw new Error("Method not implemented.");
+    }
+    doesMatchFilter(filter: StamhoofdFilter): boolean {
+        throw new Error("Method not implemented.");
+    }
+    patchRecordAnswers(patch: PatchAnswers): this {
+        throw new Error("Method not implemented.");
+    }
 }
 
 /**
@@ -155,10 +196,26 @@ export class DocumentData extends AutoEncoder {
      * Contains a snapshot of all the answers
      */
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
-    fieldAnswers: RecordAnswer[] = []
+    @field({ 
+        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), 
+        version: 252, 
+        upgrade: (old: RecordAnswer[]) => {
+            const map = new Map<string, RecordAnswer>()
+            for (const answer of old) {
+                map.set(answer.settings.id, answer)
+            }
+            return map;
+        } 
+    })
+    fieldAnswers: Map<string, RecordAnswer> = new Map()
 
     matchQuery(query: string) {
-        return !!this.fieldAnswers.find(a => a.matchQuery(query))
+        for (const answer of this.fieldAnswers.values()) {
+            if (answer.matchQuery(query)) {
+                return true
+            }
+        }
+        return false
     }
 }
 

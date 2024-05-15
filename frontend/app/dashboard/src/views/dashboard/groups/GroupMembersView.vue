@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :back-hint="backHint" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : (category ? 'category-' + category.id : 'members')" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openMember">
+    <TableView ref="table" :back-hint="backHint" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : (category ? 'category-' + category.id : 'members')" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" @refresh="reload(false)" @click="openMember">
         <template #empty>
             <template v-if="cycleOffset != 0">
                 Er zijn nog geen leden ingeschreven in deze {{ waitingList ? 'wachtlijst tijdens deze periode' : 'inschrijvingsperiode' }}.
@@ -19,13 +19,13 @@
 <script lang="ts">
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, FilterDefinition, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
+import { Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
-import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
+import { MemberChangeEvent } from "../../../classes/MemberManager";
 
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
@@ -477,16 +477,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     get records(): RecordSettings[] {
         // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
         return this.recordCategories.flatMap(c => c.records)
-    }
-
-    get filterDefinitions() {
-        const base: FilterDefinition<MemberWithRegistrations>[] = MemberWithRegistrations.getBaseFilterDefinitions(this.$organization)
-
-        base.push(
-            ...RecordCategory.getRecordCategoryDefinitions<MemberWithRegistrations>(this.recordCategories, (member) => member.details.recordAnswers)
-        )
-
-        return base
     }
 
     created() {

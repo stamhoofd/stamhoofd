@@ -1,13 +1,16 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NonScalarIdentifiable, NumberDecoder, PatchableArray, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 
 import { ValidatedAddress } from '../addresses/Address';
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
 import { FilterDefinition } from '../filters/FilterDefinition';
+import { StamhoofdFilter } from '../filters/new/StamhoofdFilter';
 import { I18n } from '../I18nInterface';
+import { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords';
 import { RecordAnswer, RecordAnswerDecoder } from '../members/records/RecordAnswer';
-import { RecordCategory } from '../members/records/RecordCategory';
+import { Filterable, RecordCategory } from '../members/records/RecordCategory';
+import { RecordSettings } from '../members/records/RecordSettings';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
 import { User } from '../User';
@@ -19,7 +22,7 @@ import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
 
-export class Checkout extends AutoEncoder {
+export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })
     timeSlot: WebshopTimeSlot | null = null
     
@@ -39,7 +42,19 @@ export class Checkout extends AutoEncoder {
     fieldAnswers: WebshopFieldAnswer[] = []
 
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder), optional: true })
-    recordAnswers: RecordAnswer[] = []
+    @field({ 
+        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), 
+        version: 252, 
+        optional: true,
+        upgrade: (old: RecordAnswer[]) => {
+            const map = new Map<string, RecordAnswer>()
+            for (const answer of old) {
+                map.set(answer.settings.id, answer)
+            }
+            return map;
+        } 
+    })
+    recordAnswers: Map<string, RecordAnswer> = new Map()
 
     @field({ decoder: Cart })
     cart: Cart = Cart.create({})
@@ -158,6 +173,27 @@ export class Checkout extends AutoEncoder {
 
     get totalPriceWithoutAdministrationFee() {
         return this.totalPrice - this.administrationFee
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter): boolean {
+        throw new Error('Method not implemented.');
+    }
+
+    isRecordCategoryEnabled(recordCategory: RecordCategory): boolean {
+        return true;
+    }
+
+    isRecordEnabled(record: RecordSettings): boolean {
+        return true;
+    }
+
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return new Map();
+        //return this.recordAnswers
+    }
+
+    patchRecordAnswers(patch: PatchAnswers): this {
+        throw new Error("Method not implemented.");
     }
 
     validateAnswers(webshop: Webshop) {
@@ -446,12 +482,11 @@ export class Checkout extends AutoEncoder {
     }
 
     validateRecordAnswersFor(webshop: Webshop, category: RecordCategory) {
-        RecordCategory.validate([category], this.recordAnswers, this, Checkout.getFilterDefinitions(webshop, webshop.meta.recordCategories), true)
+        RecordCategory.validate([category], this)
     }
 
     validateRecordAnswers(webshop: Webshop) {
-        const answers = RecordCategory.validate(webshop.meta.recordCategories, this.recordAnswers, this, Checkout.getFilterDefinitions(webshop, webshop.meta.recordCategories), true)
-        this.recordAnswers = answers
+        RecordCategory.validate(webshop.meta.recordCategories, this)
     }
 
     private updateAdministrationFee(webshop: Webshop) {
@@ -544,86 +579,5 @@ export class Checkout extends AutoEncoder {
         }
 
         return this.checkoutMethod
-    }
-
-    static getFilterDefinitions(webshop: Webshop, categories: RecordCategory[]): FilterDefinition<Checkout>[] {
-        const filters = RecordCategory.getRecordCategoryDefinitions(categories, (checkout: Checkout) => {
-            return checkout.recordAnswers
-        })
-
-        if (webshop.meta.checkoutMethods.length) {
-            filters.push(new ChoicesFilterDefinition<Checkout>({
-                id: "order_checkoutMethod",
-                name: "Afhaal/leveringsmethode",
-                choices: (webshop.meta.checkoutMethods ?? []).flatMap(method => {
-                    // TODO: also add checkout methods that are not valid anymore from existing orders
-                    const choices: ChoicesFilterChoice[] = []
-
-                    if (method.timeSlots.timeSlots.length == 0) {
-                        choices.push(
-                            new ChoicesFilterChoice(method.id, method.type+": "+method.name)
-                        )
-                    }
-                    
-                    for (const time of method.timeSlots.timeSlots) {
-                        choices.push(
-                            new ChoicesFilterChoice(method.id+"-"+time.id, method.type+": "+method.name, time.toString())
-                        )
-                    }
-                    return choices
-                }),
-                defaultMode: ChoicesFilterMode.Or,
-                getValue: (checkout) => {
-                    const ids: string[] = []
-                    if (checkout.checkoutMethod) {
-                        ids.push(checkout.checkoutMethod.id)
-                        
-                        if (checkout.timeSlot) {
-                            ids.push(checkout.checkoutMethod.id+"-"+checkout.timeSlot.id)
-                        }
-                    }
-                    return ids
-                }
-            }))
-        }
-
-        filters.push(
-            new ChoicesFilterDefinition<Checkout>({
-                id: "order_products",
-                name: "Bestelde artikels",
-                choices: (webshop.products ?? []).map(product => {
-                    return new ChoicesFilterChoice(product.id, product.name+(product.dateRange ? " ("+product.dateRange.toString()+")" : ""))
-                }),
-                defaultMode: ChoicesFilterMode.Or,
-                getValue: (checkout) => {
-                    return checkout.cart.items.flatMap(i => i.product.id)
-                }
-            })
-        )
-
-        const priceChoices: ChoicesFilterChoice[]= [];
-        for (const product of webshop.products) {
-            if (product.prices.length > 1) {
-                for (const price of product.prices) {
-                    priceChoices.push(new ChoicesFilterChoice(product.id + ':' + price.id, product.name+": "+price.name))
-                }
-            }
-        }
-
-        if (priceChoices.length > 0) {
-            filters.push(
-                new ChoicesFilterDefinition<Checkout>({
-                    id: "order_product_prices",
-                    name: "Bestelde prijskeuzes",
-                    choices: priceChoices,
-                    defaultMode: ChoicesFilterMode.Or,
-                    getValue: (checkout) => {
-                        return checkout.cart.items.flatMap(i => i.product.id + ':' + i.productPrice.id)
-                    }
-                })
-            )
-        }
-
-        return filters;
     }
 }

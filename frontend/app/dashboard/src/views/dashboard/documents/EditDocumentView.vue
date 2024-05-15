@@ -69,11 +69,11 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
     }
 
     get definitions() {
-        return RecordCategory.getRecordCategoryDefinitions([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories], () => this.editingAnswers)
+        return []
     }
 
     get fieldCategories() {
-        return RecordCategory.flattenCategories([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories], {} as any, this.definitions, true)
+        return RecordCategory.flattenCategories([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories], {} as any)
     }
 
     @Watch("editingAnswers")

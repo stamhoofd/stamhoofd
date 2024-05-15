@@ -1,9 +1,10 @@
-import { AutoEncoder, Data, Decoder, EncodeContext, Encodeable, IntegerDecoder, PlainObject, StringDecoder, field } from "@simonbackx/simple-encoding";
+import { AutoEncoder, Data, Decoder, Encodeable, EncodeContext, field,IntegerDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { SortList, SortListDecoder, encodeSortList } from "./SortList";
+
+import { encodeSortList,SortList, SortListDecoder } from "./SortList";
 import { StamhoofdFilter } from "./StamhoofdFilter";
 
-export class StamhoofdFilterDecoder {
+export class StamhoofdFilterJSONDecoder {
     static decode(data: Data): StamhoofdFilter {
         const str = data.string;
         try {
@@ -16,6 +17,20 @@ export class StamhoofdFilterDecoder {
                 field: data.currentField,
             });
         }
+    }
+}
+
+export class StamhoofdFilterDecoder {
+    static decode(data: Data): StamhoofdFilter {
+        if (typeof data.value === 'object' && data.value !== null) {
+            return data.value as StamhoofdFilter;
+        }
+        
+        throw new SimpleError({
+            code: "invalid_field",
+            message: `Expected filter object at ${data.currentField}`,
+            field: data.currentField,
+        });
     }
 }
 
@@ -35,7 +50,7 @@ export class CountFilteredRequest implements Encodeable {
 
     static decode(data: Data): CountFilteredRequest {
         return new CountFilteredRequest({
-            filter: data.optionalField('filter')?.nullable(StamhoofdFilterDecoder),
+            filter: data.optionalField('filter')?.nullable(StamhoofdFilterJSONDecoder),
             search: data.optionalField('search')?.nullable(StringDecoder)
         })
     }
@@ -73,8 +88,8 @@ export class LimitedFilteredRequest implements Encodeable {
 
     static decode(data: Data): LimitedFilteredRequest {
         return new LimitedFilteredRequest({
-            filter: data.optionalField('filter')?.nullable(StamhoofdFilterDecoder),
-            pageFilter: data.optionalField('pageFilter')?.nullable(StamhoofdFilterDecoder),
+            filter: data.optionalField('filter')?.nullable(StamhoofdFilterJSONDecoder),
+            pageFilter: data.optionalField('pageFilter')?.nullable(StamhoofdFilterJSONDecoder),
             sort: data.field('sort').decode(SortListDecoder as Decoder<SortList>),
             limit: data.field('limit').integer,
             search: data.optionalField('search')?.nullable(StringDecoder)

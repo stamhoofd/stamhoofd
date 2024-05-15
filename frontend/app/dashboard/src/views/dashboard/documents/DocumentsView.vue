@@ -197,9 +197,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     }
 
     get filterDefinitions() {
-        return RecordCategory.getRecordCategoryDefinitions([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories, ...this.template.privateSettings.templateDefinition.fieldCategories], (document: Document) => {
-            return document.data.fieldAnswers
-        });
+        return []
     }
 
     beforeUnmount() {

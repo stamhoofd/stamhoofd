@@ -34,7 +34,14 @@
                 <h2>{{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
-                <RecordAnswerInput v-for="record of category.filterRecords(true)" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
+                <RecordAnswerInput 
+                    v-for="record of category.filterRecords(patchedDocument)" 
+                    :key="record.id" 
+                    :record="record" 
+                    :answers="patchedDocument.getRecordAnswers()"
+                    @patch="patchAnswers"
+                    :validator="validator" 
+                />
             </div>
 
             <!-- Display all the required linking -->
@@ -96,7 +103,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager } from "@stamhoofd/networking";
-import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType, Version } from "@stamhoofd/structures";
+import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordSettings, RecordTextAnswer, RecordType, Version } from "@stamhoofd/structures";
 import { StringCompare } from "@stamhoofd/utility";
 
 import ChooseDocumentTemplateGroup from "./ChooseDocumentTemplateGroup.vue";
@@ -143,12 +150,8 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         return this.document.patch(this.patchDocument)
     }
 
-    get definitions() {
-        return RecordCategory.getRecordCategoryDefinitions(this.patchedDocument.privateSettings.templateDefinition.fieldCategories, () => this.editingAnswers)
-    }
-
     get fieldCategories() {
-        return RecordCategory.flattenCategories(this.patchedDocument.privateSettings.templateDefinition.fieldCategories, {} as any, this.definitions, true)
+        return RecordCategory.flattenCategories(this.patchedDocument.privateSettings.templateDefinition.fieldCategories, this.patchedDocument)
     }
 
     get documentFieldCategories() {
@@ -168,6 +171,14 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         this.patchDocument = this.patchDocument.patch({
             settings: DocumentSettings.patch({
                 fieldAnswers: this.editingAnswers as any
+            })
+        })
+    }
+
+    patchAnswers(patch: PatchAnswers) {
+        this.patchDocument = this.patchDocument.patch({
+            settings: DocumentSettings.patch({
+                fieldAnswers: patch
             })
         })
     }

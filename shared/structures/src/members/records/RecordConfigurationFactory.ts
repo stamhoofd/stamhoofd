@@ -1,11 +1,7 @@
 import { Country } from "../../addresses/CountryDecoder"
-import { ChoicesFilterDefinition } from "../../filters/ChoicesFilter"
-import { FilterGroup, GroupFilterMode } from "../../filters/FilterGroup"
-import { NumberFilterDefinition, NumberFilterMode } from "../../filters/NumberFilter"
 import { PropertyFilter } from "../../filters/PropertyFilter"
 import { OrganizationType } from "../../OrganizationType"
-import { MemberDetails } from "../MemberDetails"
-import { DataPermissionsSettings, MemberDetailsWithGroups, OrganizationRecordsConfiguration } from "../OrganizationRecordsConfiguration"
+import { DataPermissionsSettings, OrganizationRecordsConfiguration } from "../OrganizationRecordsConfiguration"
 import { LegacyRecordType } from "./LegacyRecordType"
 import { RecordCategory } from "./RecordCategory"
 import { RecordFactory } from "./RecordFactory"
@@ -33,31 +29,45 @@ export class RecordConfigurationFactory {
         configuration.gender = PropertyFilter.createDefault()
         configuration.birthDay = PropertyFilter.createDefault()
 
-        // Every organization types uses these defaults
-        const detailsDefinitions = MemberDetails.getBaseFilterDefinitions()
-
-        // Phone number is asked for +11, and only required for +18
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const ageDef = detailsDefinitions.find(d => d.id == "member_age")! as NumberFilterDefinition<MemberDetails>
-
-        const plus18Filter = ageDef.createFilter()
-        plus18Filter.mode = NumberFilterMode.GreaterThan
-        plus18Filter.start = 18
-
-        const plus11Filter = ageDef.createFilter()
-        plus11Filter.mode = NumberFilterMode.GreaterThan
-        plus11Filter.start = 11
-
-        configuration.phone = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus11Filter]).encoded, new FilterGroup(detailsDefinitions, [plus18Filter]).encoded)
-        configuration.emailAddress = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus11Filter]).encoded, new FilterGroup(detailsDefinitions, [plus18Filter]).encoded)
+        configuration.phone = new PropertyFilter(
+            {
+                age: {
+                    $gt: 10
+                }
+            },
+            {
+                age: {
+                    $gt: 17
+                }
+            }
+        )
+        configuration.emailAddress = new PropertyFilter(
+            {
+                age: {
+                    $gt: 10
+                }
+            },
+            {
+                age: {
+                    $gt: 17
+                }
+            }
+        )
 
         // Only make address optional for youth and sport organizations for now
         if (type === OrganizationType.Youth || [OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
-            const plus26Filter = ageDef.createFilter()
-            plus26Filter.mode = NumberFilterMode.GreaterThan
-            plus26Filter.start = 30
-
-            configuration.address = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus18Filter]).encoded, new FilterGroup(detailsDefinitions, [plus26Filter]).encoded)
+            configuration.address = new PropertyFilter(
+                {
+                    age: {
+                        $gt: 17
+                    }
+                },
+                {
+                    age: {
+                        $gt: 29
+                    }
+                }
+            )
         } else {
             configuration.address = PropertyFilter.createDefault()
         }
@@ -67,55 +77,56 @@ export class RecordConfigurationFactory {
     static setDefaultParents(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
         // For now, only enable parents for youth and sport organizations
         if (type === OrganizationType.Youth || [OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
-            const definitions = MemberDetailsWithGroups.getBaseFilterDefinitions()
-            const ageDef = definitions.find(d => d.id == "member_age")! as NumberFilterDefinition<MemberDetailsWithGroups>
-            const missingFilter = definitions.find(d => d.id == "member_missing_data")! as ChoicesFilterDefinition<MemberDetailsWithGroups>
-
-            const minus18Filter = ageDef.createFilter()
-            minus18Filter.mode = NumberFilterMode.LessThan
-            minus18Filter.end = 17
-
-            const minus26Filter = ageDef.createFilter()
-            minus26Filter.mode = NumberFilterMode.LessThan
-            minus26Filter.end = 29
-
-            const addressMissingFilter = missingFilter.createFilter()
-            addressMissingFilter.choiceIds = ["address"]
-
             configuration.parents = new PropertyFilter(
-                new FilterGroup(definitions, [minus26Filter]).encoded, 
-                new FilterGroup(definitions, [minus18Filter, addressMissingFilter], GroupFilterMode.Or).encoded
+                {
+                    age: {
+                        $lt: 30
+                    }
+                },
+                {
+                    $or: [
+                        {
+                            age: {
+                                $lt: 18
+                            }
+                        },
+                        {
+                            address: null
+                        }
+                    ]
+                }
             )
         }
     }
 
     static setDefaultEmergencyContacts(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
-        const definitions = MemberDetailsWithGroups.getBaseFilterDefinitions()
-
         // For now, only enable parents for youth and sport organizations
         if (type === OrganizationType.Youth || [OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
-            const ageDef = definitions.find(d => d.id == "member_age")! as NumberFilterDefinition<MemberDetailsWithGroups>
-            const missingFilter = definitions.find(d => d.id == "member_missing_data")! as ChoicesFilterDefinition<MemberDetailsWithGroups>
-
-            const minus18Filter = ageDef.createFilter()
-            minus18Filter.mode = NumberFilterMode.LessThan
-            minus18Filter.end = 17
-
-            const minus26Filter = ageDef.createFilter()
-            minus26Filter.mode = NumberFilterMode.LessThan
-            minus26Filter.end = 29
-
-            const parentsMissingFilter = missingFilter.createFilter()
-            parentsMissingFilter.choiceIds = ["parents"]
-
             configuration.emergencyContacts = new PropertyFilter(
-                new FilterGroup(definitions, [minus26Filter]).encoded, 
-                new FilterGroup(definitions, [minus18Filter, parentsMissingFilter], GroupFilterMode.Or).encoded
+                {
+                    age: {
+                        $lt: 30
+                    }
+                }, 
+                {
+                    $or: [
+                        {
+                            age: {
+                                $lt: 18
+                            }
+                        },
+                        {
+                            parents: {
+                                $length: 0
+                            }
+                        }
+                    ]
+                }
             )
         } else if (type === OrganizationType.LGBTQ) {
             // Optional emergency contact
             configuration.emergencyContacts = new PropertyFilter(
-                new FilterGroup(definitions).encoded, 
+                null, 
                 null
             )
         }

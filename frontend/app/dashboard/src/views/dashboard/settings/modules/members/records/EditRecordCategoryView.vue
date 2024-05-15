@@ -42,7 +42,7 @@
             Je kan kiezen wanneer deze vragen van toepassing zijn.
         </p>
 
-        <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" :definitions="filterDefinitions" />
+        <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :builder="filterBuilder" />
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -63,10 +63,8 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchC
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
-
-
+import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, UIFilterBuilder, Validator } from '@stamhoofd/components';
+import { PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
 
 @Component({
     components: {
@@ -99,7 +97,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
         saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => void;
 
     @Prop({ required: true })
-        filterDefinitions!: FilterDefinition[]
+        filterBuilder!: UIFilterBuilder
 
     get patchedCategory() {
         return this.category.patch(this.patchCategory)
@@ -132,11 +130,11 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     get filter() {
-        return this.patchedCategory.legacyFilter ?? PropertyFilter.createDefault();
+        return this.patchedCategory.filter ?? PropertyFilter.createDefault();
     }
 
-    set filter(legacyFilter: PropertyFilter<MemberDetailsWithGroups> | null) {
-        this.patchCategory = this.patchCategory.patch({ legacyFilter })
+    set filter(filter: PropertyFilter | null) {
+        this.patchCategory = this.patchCategory.patch({ filter })
     }
 
     get description() {

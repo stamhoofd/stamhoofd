@@ -1,24 +1,20 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../../filters/ChoicesFilter";
 import { DateFilterDefinition } from "../../filters/DateFilter";
 import { FilterDefinition } from "../../filters/FilterDefinition";
+import { StamhoofdFilter } from "../../filters/new/StamhoofdFilter";
 import { NumberFilterDefinition } from "../../filters/NumberFilter";
 import { PropertyFilter } from "../../filters/PropertyFilter";
 import { StringFilterDefinition } from "../../filters/StringFilter";
+import { ObjectWithRecords } from "../ObjectWithRecords";
 import { RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer } from "./RecordAnswer";
 import { RecordSettings, RecordType } from "./RecordSettings";
 
-export class RecordEditorSettings<T> {
-    dataPermission = false
-    filterDefinitions: (categories: RecordCategory[]) => FilterDefinition<T>[]
-    filterValueForAnswers: (answers: RecordAnswer[]) => T
-
-    constructor(options: Partial<RecordEditorSettings<T>>) {
-        Object.assign(this, options)
-    }
+export interface Filterable {
+    doesMatchFilter(filter: StamhoofdFilter): boolean
 }
 
 export class RecordCategory extends AutoEncoder {
@@ -41,8 +37,8 @@ export class RecordCategory extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordSettings) })
     records: RecordSettings[] = []
 
-    @field({ decoder: PropertyFilter, version: 126, nullable: true, optional: true, field: 'filter' })
-    legacyFilter: PropertyFilter<any> | null = null
+    @field({ decoder: PropertyFilter, version: 126, nullable: true, optional: true })
+    filter: PropertyFilter | null = null
 
     getAllRecords(): RecordSettings[] {
         if (this.childCategories.length > 0) {
@@ -51,71 +47,66 @@ export class RecordCategory extends AutoEncoder {
         return this.records
     }
 
-    getAllFilteredRecords<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordSettings[] {
+    getAllFilteredRecords<T extends ObjectWithRecords>(filterValue: T): RecordSettings[] {
         if (this.childCategories.length > 0) {
             return [
-                ...this.filterChildCategories(filterValue, filterDefinitions, dataPermission).flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission)),
-                ...this.filterRecords(dataPermission)
+                ...this.filterChildCategories(filterValue).flatMap(c => c.getAllFilteredRecords(filterValue)),
+                ...this.filterRecords(filterValue)
             ]
         }
-        return this.filterRecords(dataPermission)
+        return this.filterRecords(filterValue)
     }
 
-    filterRecords(dataPermission: boolean) {
-        if (dataPermission) {
-            return this.records
-        }
-        return this.records.filter(r => !r.sensitive)
+    filterRecords<T extends ObjectWithRecords>(filterValue: T) {
+        return this.records.filter(r => filterValue.isRecordEnabled(r))
     }
 
-    isEnabled<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean) {
-        if (this.legacyFilter && !this.legacyFilter.enabledWhen.decode(filterDefinitions).doesMatch(filterValue)) {
+    isEnabled<T extends ObjectWithRecords>(filterValue: T) {
+        if (this.filter && this.filter.enabledWhen !== null && !filterValue.doesMatchFilter(this.filter.enabledWhen)) {
             return false
         }
 
         if (this.childCategories.length > 0) {
-            if (this.filterChildCategories(filterValue, filterDefinitions, dataPermission).length > 0) {
+            if (this.filterChildCategories(filterValue).length > 0) {
                 return true;
             }
         }
 
-        if (this.filterRecords(dataPermission).length > 0) {
+        if (this.filterRecords(filterValue).length > 0) {
             return true
         }
 
         return false
     }
 
-    static filterCategories<T>(categories: RecordCategory[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
+    static filterCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T): RecordCategory[] {
         return categories.filter(category => {
-            return category.isEnabled(filterValue, filterDefinitions, dataPermission)
+            return category.isEnabled(filterValue)
         })
     }
 
-    filterChildCategories<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
-        return RecordCategory.filterCategories(this.childCategories, filterValue, filterDefinitions, dataPermission)
+    filterChildCategories<T extends ObjectWithRecords>(filterValue: T): RecordCategory[] {
+        return RecordCategory.filterCategories(this.childCategories, filterValue)
     }
 
     /**
      * Flatten all categories and child categories into a single array
      */
-    static flattenCategories<T>(categories: RecordCategory[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
+    static flattenCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T): RecordCategory[] {
         return RecordCategory.filterCategories(
             categories,
-            filterValue,
-            filterDefinitions,
-            dataPermission
+            filterValue
         ).flatMap(cat => {
              // Make a (not deep!) clone
             const cat2 = RecordCategory.create(cat)
             cat2.childCategories = []
-            cat2.records = cat2.filterRecords(dataPermission)
+            cat2.records = cat2.filterRecords(filterValue)
 
             if (cat.childCategories.length > 0) {
                 // Make a (not deep!) clone
                 return [
                     ...(cat2.records.length > 0 ? [cat2] : []),
-                    ...this.flattenCategories(cat.childCategories, filterValue, filterDefinitions, dataPermission).map(c => {
+                    ...this.flattenCategories(cat.childCategories, filterValue).map(c => {
                         // Make a (not deep!) clone
                         const cc = RecordCategory.create(c)
                         cc.name = cat.name + " → " + c.name
@@ -185,164 +176,15 @@ export class RecordCategory extends AutoEncoder {
         });
     }
 
-    static getRecordCategoryDefinitions<T>(recordCategories: RecordCategory[], getAnswers: (value: T) => RecordAnswer[]): FilterDefinition<T>[] {
-        const definitions: FilterDefinition<T>[] = []
-
-        for (const recordCategory of recordCategories) {
-            for (const record of recordCategory.records) {
-                definitions.push(...this.filterDefinitionsFromRecord(record, recordCategory.name, getAnswers))
-            }
-
-            for (const category of recordCategory.childCategories) {
-                for (const record of category.getAllRecords()) {
-                    definitions.push(...this.filterDefinitionsFromRecord(record, recordCategory.name + ' → ' + category.name, getAnswers))
-                }
-            }
-        }
-
-        return definitions
-    }
-
-    static filterDefinitionsFromRecord<T>(record: RecordSettings, category: string, getAnswers: (value: T) => RecordAnswer[]): FilterDefinition<T>[] {
-        if (record.type === RecordType.Checkbox) {
-            return [
-                new ChoicesFilterDefinition<T>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    choices: [
-                        new ChoicesFilterChoice("checked", "Aangevinkt"),
-                        new ChoicesFilterChoice("not_checked", "Niet aangevinkt")
-                    ], 
-                    getValue: (v) => {
-                        const answers = getAnswers(v)
-                        const answer = answers.find(a => a.settings?.id === record.id)
-                        if (answer instanceof RecordCheckboxAnswer) {
-                            return answer?.selected ? ["checked"] : ["not_checked"]
-                        }
-                        return ["not_checked"]
-                    },
-                    defaultMode: ChoicesFilterMode.Or
-                })
-            ]
-        }
-
-        if (record.type === RecordType.MultipleChoice) {
-            return [
-                new ChoicesFilterDefinition<T>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
-                    getValue: (v) => {
-                        const answers = getAnswers(v)
-                        const answer = answers.find(a => a.settings?.id === record.id) 
-
-                        if (!answer || !(answer instanceof RecordMultipleChoiceAnswer)) {
-                            return []
-                        }
-
-                        return answer.selectedChoices.map(c => c.id)
-                    },
-                    defaultMode: ChoicesFilterMode.And
-                })
-            ]
-        }
-
-        if (record.type === RecordType.ChooseOne) {
-            return [
-                new ChoicesFilterDefinition<T>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
-                    getValue: (v) => {
-                        const answers = getAnswers(v)
-                        const answer = answers.find(a => a.settings?.id === record.id) 
-
-                        if (!answer || !(answer instanceof RecordChooseOneAnswer) || !answer.selectedChoice) {
-                            return []
-                        }
-
-                        return [answer.selectedChoice.id]
-                    },
-                    defaultMode: ChoicesFilterMode.Or
-                })
-            ]
-        }
-
-        if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
-            return [
-                new StringFilterDefinition<T>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    getValue: (v) => {
-                        const answers = getAnswers(v)
-                        const answer = answers.find(a => a.settings?.id === record.id) 
-                        if (answer instanceof RecordTextAnswer) {
-                            return answer?.value ?? ""
-                        }
-                        return ""
-                    }
-                })
-            ]
-        }
-
-        if (record.type === RecordType.Price) {
-            return [
-                new NumberFilterDefinition<T>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    currency: true,
-                    floatingPoint: true,
-                    category,
-                    getValue: (v) => {
-                        const answers = getAnswers(v)
-                        const answer = answers.find(a => a.settings?.id === record.id)
-                        if (answer instanceof RecordPriceAnswer) {
-                            return answer.value ?? 0
-                        }
-                        return 0
-                    }
-                })
-            ]
-        }
-
-        if (record.type === RecordType.Date) {
-            return [
-                new DateFilterDefinition<T>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    time: false,
-                    category,
-                    getValue: (v) => {
-                        const answers = getAnswers(v)
-                        const answer = answers.find(a => a.settings?.id === record.id)
-                        if (answer instanceof RecordDateAnswer) {
-                            return answer.dateValue ?? new Date(1900)
-                        }
-                        return new Date(1900)
-                    }
-                })
-            ]
-        }
-        return []
-    }
-
-    static validate<T>(categories: RecordCategory[], answers: RecordAnswer[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean) {
-        const filteredCategories = RecordCategory.filterCategories(categories, filterValue, filterDefinitions, dataPermission)
-        const allRecords = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission))
-        const cleanedAnswers: RecordAnswer[] = []
+    static validate<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T) {
+        const filteredCategories = RecordCategory.filterCategories(categories, filterValue)
+        const allRecords = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue))
         const errors = new SimpleErrors()
 
         // Delete all records that are not in the list
         for (const record of allRecords) {
             try {
-                const answer = record.validate(answers)
-                if (answer && !cleanedAnswers.includes(answer)) {
-                    cleanedAnswers.push(answer)
-                }
+                record.validate(filterValue.getRecordAnswers())
             } catch (e) {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     errors.addError(e)
@@ -353,6 +195,5 @@ export class RecordCategory extends AutoEncoder {
         }
 
         errors.throwIfNotEmpty()
-        return cleanedAnswers;
     }
 }

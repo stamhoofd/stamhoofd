@@ -1,27 +1,35 @@
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
 
+import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, InMemoryFilterDefinitions } from "../filters/new/InMemoryFilter"
+import { StamhoofdFilter } from "../filters/new/StamhoofdFilter"
+import { Group } from "../Group"
 import { Organization } from "../Organization"
 import { Platform } from "../Platform"
-import { Member } from "./Member"
-import { MemberDetails } from "./MemberDetails"
-import { MemberWithRegistrations } from "./MemberWithRegistrations"
-import { MembersBlob,MemberWithRegistrationsBlob } from "./MemberWithRegistrationsBlob"
-import { ObjectWithRecords } from "./ObjectWithRecords"
+import { RegisterCheckout, RegisterItem } from "./checkout/RegisterCheckout"
+import { MembersBlob, MemberWithRegistrationsBlob } from "./MemberWithRegistrationsBlob"
+import { ObjectWithRecords, PatchAnswers } from "./ObjectWithRecords"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
 
-export class PlatformMember implements ObjectWithRecords {
-    member: MemberWithRegistrationsBlob
-    patch: AutoEncoderPatchType<Member>
+export const platformMemberInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    age: createInMemoryFilterCompiler('details.age'),
+}
+
+
+export class PlatformFamily {
+    members: PlatformMember[] = []
+    
+    // Checkout is required for the member to know whether certain fields are required to get collected
+    checkout = new RegisterCheckout()
+    
     platform: Platform
     organizations: Organization[] = []
 
-    constructor(data: {member: MemberWithRegistrationsBlob, platform: Platform, organizations: Organization[]}) {
-        this.member = data.member
-        this.patch = Member.patch({id: this.member.id})
-        this.platform = data.platform
-        this.organizations = data.organizations
+    constructor(context: {contextOrganization?: Organization|null, platform: Platform}) {
+        this.platform = context.platform
+        this.organizations =context.contextOrganization ? [context.contextOrganization] : []
     }
 
     insertOrganization(organization: Organization) {
@@ -31,23 +39,89 @@ export class PlatformMember implements ObjectWithRecords {
         this.organizations.push(organization)
     }
 
-    static createFrom(data: {member: MemberWithRegistrationsBlob, blob: MembersBlob, contextOrganization: Organization|null}) {
-        // Gather all organizations
-        let organizations = data.blob.organizations;
-
-        if (data.contextOrganization && !organizations.find(o => o.id === data.contextOrganization!.id)) {
-            organizations = [...organizations, data.contextOrganization]
+    insertFromBlob(blob: MembersBlob) {
+        for (const organization of blob.organizations) {
+            this.insertOrganization(organization)
         }
 
-        return new PlatformMember({
-            member: data.member,
-            organizations,
-            platform: Platform.shared
-        })
+        for (const member of blob.members) {
+            const existing = this.members.find(m => m.id === member.id);
+            if (existing) {
+                existing.member = member
+                continue;
+            }
+
+            const platformMember = new PlatformMember({
+                member,
+                family: this
+            })
+            this.members.push(platformMember)
+        }
+    }
+}
+
+export class PlatformMember implements ObjectWithRecords {
+    member: MemberWithRegistrationsBlob
+    patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>
+    family: PlatformFamily
+
+    get id() {
+        return this.member.id
+    }
+
+    constructor(data: {
+        member: MemberWithRegistrationsBlob, 
+        family: PlatformFamily
+    }) {
+        this.member = data.member
+        this.patch = MemberWithRegistrationsBlob.patch({id: this.member.id})
+        this.family = data.family
+    }
+
+    get organizations() {
+        return this.family.organizations
+    }
+
+    get platform() {
+        return this.family.platform
+    }
+
+    insertOrganization(organization: Organization) {
+        this.family.insertOrganization(organization)
+    }
+
+    canRegister(group: Group) {
+        const item = RegisterItem.defaultFor(this, group);
+        const error = item.validationError;
+        if (error === null) {
+            return true;
+        }
+        return false;
     }
 
     get patchedMember() {
         return this.member.patch(this.patch)
+    }
+
+    doesMatchFilter(filter: StamhoofdFilter)  {
+        try {
+            const compiledFilter = compileToInMemoryFilter(filter, platformMemberInMemoryFilterCompilers)
+            return compiledFilter(this.patchedMember)
+        } catch (e) {
+            console.error('Error while compiling filter', e, filter);
+        }
+        return false;
+    }
+
+    getAllRecordCategories(): RecordCategory[] {
+        // From organization
+        const categories: RecordCategory[] = [];
+        for (const organization of this.organizations) {
+            categories.push(...organization.meta.recordsConfiguration.recordCategories)
+        }
+
+        // Todo: read from platform
+        return categories;
     }
 
     isExistingMember(organizationId: string): boolean {
@@ -93,19 +167,11 @@ export class PlatformMember implements ObjectWithRecords {
         return true;
     }
 
-    getAllRecordCategories(): RecordCategory[] {
-        return []
+    getRecordAnswers(): Map<string, RecordAnswer> {
+        return new Map();
+        //return this.patchedMember.details.recordAnswers
     }
-
-    getRecords(): RecordAnswer[] {
-        return this.patchedMember.details.recordAnswers
-    }
-
-    patchRecords(patch: PatchableArrayAutoEncoder<RecordAnswer>) {
-        this.patch = this.patch.patch({
-            details: MemberDetails.patch({
-                recordAnswers: patch
-            })
-        })
+    patchRecordAnswers(patch: PatchAnswers): this {
+        throw new Error("Method not implemented.");
     }
 }

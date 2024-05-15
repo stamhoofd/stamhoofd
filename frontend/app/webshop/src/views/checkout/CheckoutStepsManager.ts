@@ -162,9 +162,6 @@ export class CheckoutStepsManager {
             validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n, false, loggedIn ? (this.$context.user ?? null) : null)
         }))
 
-        // Now add all the Record Category steps
-        const filterDefinitions = Checkout.getFilterDefinitions(webshop, webshop.meta.recordCategories);
-
         for (const category of webshop.meta.recordCategories) {
             const id = `category-${category.id}`
             const url = "/checkout/"+Formatter.slug(category.name)
@@ -172,28 +169,22 @@ export class CheckoutStepsManager {
             steps.push(new CheckoutStep({
                 id,
                 url,
-                active: category.isEnabled(checkout, filterDefinitions, true),
+                active: category.isEnabled(checkout),
                 getComponent: async () => {
                     const {FillRecordCategoryView} = await import(/* webpackChunkName: "FillRecordCategoryView", webpackPrefetch: true */ '@stamhoofd/components');
                     return new ComponentWithProperties(FillRecordCategoryView, {
                         category,
                         url,
-                        answers: checkout.recordAnswers,
+                        value: checkout,
                         markReviewed: true,
                         dataPermission: true,
-                        filterDefinitions,
-                        saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
-                            checkout.recordAnswers = answers
-                            this.$checkoutManager.saveCheckout()
-
-                            // Force a save if nothing changed (to fix timeSlot + updated data)
-                            await this.goNext(id, component)
-                        },
-                        filterValueForAnswers: (answers: RecordAnswer[]) => {
-                            const checkout = Checkout.create(this.$checkoutManager.checkout)
-                            checkout.recordAnswers = answers
-                            return checkout;
-                        }
+                        //saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
+                        //    checkout.recordAnswers = answers
+                        //    this.$checkoutManager.saveCheckout()
+                        //
+                        //    // Force a save if nothing changed (to fix timeSlot + updated data)
+                        //    await this.goNext(id, component)
+                        //}
                     });
                 },
                 validate: (checkout, webshop) => {

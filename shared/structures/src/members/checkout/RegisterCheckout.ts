@@ -1,11 +1,11 @@
 import { AutoEncoder, BooleanDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from "../../Group";
 import { WaitingListType } from "../../GroupSettings";
-import { PlatformMember } from "../PlatformMember";
+import { PlatformFamily, PlatformMember } from "../PlatformMember";
 
 
 export type RegisterContext = {
@@ -44,13 +44,21 @@ export class RegisterItem {
         this.waitingList = data.waitingList
     }
 
-    static defaultFor(member: PlatformMember, group: Group, context: RegisterContext) {
+    get family() {
+        return this.member.family
+    }
+
+    get checkout() {
+        return this.family.checkout
+    }
+
+    static defaultFor(member: PlatformMember, group: Group) {
         const item = new RegisterItem({
             member,
             group,
             waitingList: false
         });
-        item.waitingList = item.shouldUseWaitingList(context)
+        item.waitingList = item.shouldUseWaitingList()
         return item;
     }
 
@@ -61,7 +69,7 @@ export class RegisterItem {
     /**
      * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
      */
-    refresh(context: RegisterContext) {
+    refresh() {
         // todo
     }
 
@@ -69,7 +77,7 @@ export class RegisterItem {
         return !!this.member.member.registrations.find(r => r.groupId === this.group.id && (this.waitingList || r.registeredAt !== null) && r.deactivatedAt === null && r.waitingList === this.waitingList && r.cycle === this.group.cycle)
     }
     
-    hasReachedCategoryMaximum(context: RegisterContext): boolean {
+    hasReachedCategoryMaximum(): boolean {
         const parents = this.group.getParentCategories(this.organization.meta.categories, false)
     
         for (const parent of parents) {
@@ -83,7 +91,7 @@ export class RegisterItem {
                     return false
                 }).length
     
-                const waiting = context.checkout.cart.items.filter(item => {
+                const waiting = this.checkout.cart.items.filter(item => {
                     return item.member.member.id === this.member.member.id && parent.groupIds.includes(item.group.id) && item.group.id !== this.group.id
                 }).length
                 if (count + waiting >= parent.settings.maximumRegistrations) {
@@ -98,7 +106,7 @@ export class RegisterItem {
         return !!this.member.member.registrations.find(r => r.groupId === this.group.id && r.waitingList && r.canRegister && r.cycle === this.group.cycle)
     }
 
-    doesMeetRequireGroupIds(context: RegisterContext) {
+    doesMeetRequireGroupIds() {
         if (this.group.settings.requireGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
                 const registrationGroup = this.organization.groups.find(g => g.id === r.groupId)
@@ -108,7 +116,7 @@ export class RegisterItem {
                 return this.group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle
             });
 
-            if (!hasGroup && !context.checkout.cart.items.find(item => this.group.settings.requireGroupIds.includes(item.group.id) && item.member.member.id === this.member.member.id && !item.waitingList)) {
+            if (!hasGroup && !this.checkout.cart.items.find(item => this.group.settings.requireGroupIds.includes(item.group.id) && item.member.member.id === this.member.member.id && !item.waitingList)) {
                 return false;
             }
         }
@@ -149,8 +157,8 @@ export class RegisterItem {
         return true;
     }
 
-    isExistingMemberOrFamily(context: RegisterContext) {
-        return this.member.isExistingMember(this.group.organizationId) || (this.group.settings.priorityForFamily && !!context.members.find(f => f.isExistingMember(this.group.organizationId)))
+    isExistingMemberOrFamily() {
+        return this.member.isExistingMember(this.group.organizationId) || (this.group.settings.priorityForFamily && !!this.family.members.find(f => f.isExistingMember(this.group.organizationId)))
     }
 
     get rowLabel(): string|null {
@@ -161,7 +169,7 @@ export class RegisterItem {
         return null
     }
 
-    getInfoDescription(context: RegisterContext): string|null {
+    get infoDescription(): string|null {
         if (this.isInvited()) {
             return 'Je bent uitgenodigd om in te schrijven voor deze groep'
         }
@@ -170,14 +178,14 @@ export class RegisterItem {
             if (this.group.settings.waitingListType === WaitingListType.All) {
                 return 'Je kan enkel inschrijven voor de wachtlijst'
             }
-            const existingMember = this.isExistingMemberOrFamily(context)
+            const existingMember = this.isExistingMemberOrFamily()
 
             if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
                 return 'Nieuwe leden kunnen enkel inschrijven voor de wachtlijst'
             }
 
             if (this.group.settings.waitingListIfFull) {
-                if (this.hasReachedGroupMaximum(context)) {
+                if (this.hasReachedGroupMaximum()) {
                     return 'De inschrijvingen zijn volzet, je kan enkel inschrijven voor de wachtlijst'
                 }
             }
@@ -186,28 +194,28 @@ export class RegisterItem {
         return null;
     }
 
-    shouldUseWaitingList(context: RegisterContext) {
+    shouldUseWaitingList() {
         if (this.group.settings.waitingListType === WaitingListType.All) {
             return true;
         }
-        const existingMember = this.isExistingMemberOrFamily(context)
+        const existingMember = this.isExistingMemberOrFamily()
 
         if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
             return true;
         }
 
         if (this.group.settings.waitingListIfFull) {
-            if (this.hasReachedGroupMaximum(context)) {
+            if (this.hasReachedGroupMaximum()) {
                 return true;
             }
         }
         return false
     }
 
-    hasReachedGroupMaximum(context: RegisterContext) {
+    hasReachedGroupMaximum() {
         const available = this.group.settings.availableMembers
         if (available !== null) {
-            const count = context.checkout.cart.items.filter(item => item.group.id === this.group.id && item.member.member.id !== this.member.member.id && !item.waitingList).length
+            const count = this.checkout.cart.items.filter(item => item.group.id === this.group.id && item.member.member.id !== this.member.member.id && !item.waitingList).length
             if (count >= available) {
                 // Check if we have a reserved spot
                 const now = new Date()
@@ -220,7 +228,19 @@ export class RegisterItem {
         return false;
     }
 
-    validate(context: RegisterContext) {
+    get validationError() {
+        try {
+            this.validate()
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                return e.getHuman();
+            }
+            throw e;
+        }
+        return null;
+    }
+
+    validate() {
         // Already registered
         if (this.isAlreadyRegistered()) {
             throw new SimpleError({
@@ -230,7 +250,7 @@ export class RegisterItem {
             })
         }
 
-        if (this.hasReachedCategoryMaximum(context)) {
+        if (this.hasReachedCategoryMaximum()) {
             // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
             throw new SimpleError({
                 code: "maximum_reached",
@@ -273,7 +293,7 @@ export class RegisterItem {
         }
 
          // Check if registrations are limited
-        if (!this.doesMeetRequireGroupIds(context)) {
+        if (!this.doesMeetRequireGroupIds()) {
             throw new SimpleError({
                 code: "not_matching",
                 message: "Not matching",
@@ -296,7 +316,7 @@ export class RegisterItem {
                 human: `Je voldoet niet aan de voorwaarden om in te schrijven voor ${this.group.settings.name}.`
             })
         }
-        const existingMember = this.isExistingMemberOrFamily(context)
+        const existingMember = this.isExistingMemberOrFamily()
 
         // Pre registrations?
         if (this.group.activePreRegistrationDate) {
@@ -309,7 +329,7 @@ export class RegisterItem {
             }
         }
 
-        if (!this.waitingList && this.shouldUseWaitingList(context)) {
+        if (!this.waitingList && this.shouldUseWaitingList()) {
             throw new SimpleError({
                 code: "waiting_list_required",
                 message: "Waiting list required",
@@ -319,7 +339,7 @@ export class RegisterItem {
 
         if (!this.waitingList) {
             if (!this.group.settings.waitingListIfFull) {
-                if (this.hasReachedGroupMaximum(context)) {
+                if (this.hasReachedGroupMaximum()) {
                     throw new SimpleError({
                         code: "maximum_reached",
                         message: "Maximum reached",
@@ -327,7 +347,7 @@ export class RegisterItem {
                     })
                 }
             } else {
-                if (this.hasReachedGroupMaximum(context)) {
+                if (this.hasReachedGroupMaximum()) {
                     throw new SimpleError({
                         code: "maximum_reached",
                         message: "Maximum reached",
@@ -349,8 +369,8 @@ export class RegisterItem {
         })
     }
 
-    static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
-        const member = context.members.find(m => m.member.id === idRegisterItem.memberId)
+    static fromId(idRegisterItem: IDRegisterItem, family: PlatformFamily) {
+        const member = family.members.find(m => m.member.id === idRegisterItem.memberId)
         if (!member) {
             throw new Error("Member not found")
         }

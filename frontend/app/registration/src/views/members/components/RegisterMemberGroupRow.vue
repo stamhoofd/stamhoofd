@@ -20,8 +20,7 @@ import { Group, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
-import { useMemberManager } from '../../../getRootView';
-import GroupIcon from './GroupIcon.vue'
+import GroupIcon from './GroupIcon.vue';
 
 const props = defineProps<{
     group: Group;
@@ -48,10 +47,9 @@ defineRoutes([
     }
 ])
 
-const memberManager = useMemberManager()
 const $navigate = useNavigate()
 
-const registerItem = computed(() => memberManager.defaultItem(props.member, props.group))
+const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group))
 const waitingList = computed(() => registerItem.value.waitingList)
 
 async function openGroup() {

@@ -319,14 +319,12 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, MemberWithRegistrationsBlob, FinancialSupportSettings, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, FinancialSupportSettings, MemberWithRegistrations, MemberWithRegistrationsBlob, Parent, ParentTypeHelper, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
-import { MemberManager } from "../../../classes/MemberManager";
 
 import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
@@ -467,22 +465,9 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     editRecordCategory(category: RecordCategory) {
         const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
             category,
-            answers: this.member.details.recordAnswers,
+            value: this.member.details,
             markReviewed: false,
             hasNextStep: false,
-            dataPermission: this.member.details.dataPermissions?.value ?? false,
-            filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(this.$organization, {member: this.member}),
-            filterValueForAnswers: (answers) => {
-                const details = this.member.details.patch({
-                    recordAnswers: answers
-                });
-                return new MemberDetailsWithGroups(details, this.member, [])
-            },
-            saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
-                this.member.details.recordAnswers = answers
-                await this.familyManager.patchAllMembersWith(this.member)
-                component.dismiss({ force: true })
-            }
         }).setDisplayStyle("popup");
         this.present(displayedComponent);
     }

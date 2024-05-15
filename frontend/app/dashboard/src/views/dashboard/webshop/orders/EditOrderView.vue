@@ -268,9 +268,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategories(
             this.webshop.meta.recordCategories, 
-            this.patchedOrder.data, 
-            this.webshopManager.webshop ? Checkout.getFilterDefinitions(this.webshopManager.webshop, this.webshop.meta.recordCategories) : [],
-            true
+            this.patchedOrder.data
         )
     }
 
