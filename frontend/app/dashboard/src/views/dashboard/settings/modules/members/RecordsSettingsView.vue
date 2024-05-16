@@ -160,8 +160,8 @@ import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchCont
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, GroupUIFilterBuilder, PropertyFilterView, STErrorsDefault, STList, STListItem, SaveView, StringFilterBuilder, Toast, UIFilterBuilders, Validator, propertyFilterToString, unwrapFilter } from "@stamhoofd/components";
-import { AskRequirement, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
+import { CenteredMessage, Checkbox, ErrorBox, GroupUIFilterBuilder, MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption, NumberFilterBuilder, PropertyFilterView, STErrorsDefault, STList, STListItem, SaveView, StringFilterBuilder, Toast, UIFilterBuilders, Validator, propertyFilterToString, unwrapFilter } from "@stamhoofd/components";
+import { AskRequirement, Gender, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
 
 import EditRecordCategoryQuestionsView from './records/EditRecordCategoryQuestionsView.vue';
 import EditRecordCategoryView from './records/EditRecordCategoryView.vue';
@@ -171,38 +171,25 @@ import { RecordEditorSettings } from './records/RecordEditorSettings';
 type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
 
 const memberUIFilterBuilders: UIFilterBuilders = [
-    new StringFilterBuilder({
-        name: 'Naam',
-        key: 'name'
+    new NumberFilterBuilder({
+        name: 'Leeftijd',
+        key: 'age',
     }),
-    new StringFilterBuilder({
-        name: 'Naam vereniging',
-        key: 'organizationName'
-    }),
-    new StringFilterBuilder({
-        name: 'E-mailadres lid',
-        key: 'email'
-    }),
-    new StringFilterBuilder({
-        name: 'E-mailadres ouder',
-        key: 'parentEmail'
-    }),
-    new StringFilterBuilder({
-        name: 'Inschrijvingsgroepen',
-        key: 'name',
-        wrapFilter: (f) => {
+    new MultipleChoiceFilterBuilder({
+        name: 'Gender',
+        options: [
+            new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
+            new MultipleChoiceUIFilterOption('Man', Gender.Male),
+            new MultipleChoiceUIFilterOption('Andere', Gender.Other)
+        ],
+        buildFilter: (choices) => {
             return {
-                registrations: {
-                    $elemMatch: [
-                        {
-                            group: f
-                        }
-                    ]
+                gender: {
+                    $in: choices.map(c => c)
                 }
             }
-        },
-        unwrapFilter: (f) => unwrapFilter(f, ['registrations', '$elemMatch', 0, 'group'])
-    }),
+        }
+    })
 ];
 
 // Recursive: self referencing groups

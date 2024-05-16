@@ -7,7 +7,7 @@ import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFi
 export class StringUIFilter extends UIFilter {
     builder!: StringFilterBuilder
     value = ""
-    mode: StringFilterMode = StringFilterMode.Contains
+    mode: StringFilterMode = StringFilterMode.Equals
 
     constructor(data: Partial<StringUIFilter>) {
         super(data)

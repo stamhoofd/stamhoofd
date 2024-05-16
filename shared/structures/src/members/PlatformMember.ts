@@ -1,12 +1,12 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 
 import { Address } from "../addresses/Address"
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, InMemoryFilterDefinitions } from "../filters/new/InMemoryFilter"
 import { StamhoofdFilter } from "../filters/new/StamhoofdFilter"
 import { Group } from "../Group"
 import { Organization } from "../Organization"
 import { Platform } from "../Platform"
 import { RegisterCheckout, RegisterItem } from "./checkout/RegisterCheckout"
+import { EmergencyContact } from "./EmergencyContact"
 import { MemberDetails } from "./MemberDetails"
 import { MembersBlob, MemberWithRegistrationsBlob } from "./MemberWithRegistrationsBlob"
 import { ObjectWithRecords, PatchAnswers } from "./ObjectWithRecords"
@@ -14,13 +14,6 @@ import { Parent } from "./Parent"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
-import { EmergencyContact } from "./EmergencyContact"
-
-export const platformMemberInMemoryFilterCompilers: InMemoryFilterDefinitions = {
-    ...baseInMemoryFilterCompilers,
-    age: createInMemoryFilterCompiler('details.age'),
-}
-
 
 export class PlatformFamily {
     members: PlatformMember[] = []
@@ -510,13 +503,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     doesMatchFilter(filter: StamhoofdFilter)  {
-        try {
-            const compiledFilter = compileToInMemoryFilter(filter, platformMemberInMemoryFilterCompilers)
-            return compiledFilter(this.patchedMember)
-        } catch (e) {
-            console.error('Error while compiling filter', e, filter);
-        }
-        return false;
+        return this.patchedMember.doesMatchFilter(filter);
     }
 
     getAllRecordCategories(): RecordCategory[] {

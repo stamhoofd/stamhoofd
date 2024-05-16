@@ -9,7 +9,7 @@ export type InMemoryFilterCompiler = (filter: StamhoofdFilter, filters: InMemory
 export type InMemoryFilterDefinitions = Record<string, InMemoryFilterCompiler>
 
 
-function andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
+function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
     const runners = compileInMemoryFilter(filter, filters);
     return (object) => {
         for (const runner of runners) {
@@ -21,7 +21,7 @@ function andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFil
     };
 }
 
-function orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
+function $orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
     const runners = compileInMemoryFilter(filter, filters)
     return (object) => {
         for (const runner of runners) {
@@ -33,14 +33,14 @@ function orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilt
     };
 }
 
-function notInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
-    const andRunner = andInMemoryFilterCompiler(filter, filters);
+function $notInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
+    const andRunner = $andInMemoryFilterCompiler(filter, filters);
     return (object) => {
         return !andRunner(object);
     };
 }
 
-function lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
+function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const a = normalizeValue(guardFilterCompareValue(val));
         const b = normalizeValue(guardFilterCompareValue(filter));
@@ -51,7 +51,7 @@ function lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilter
     };
 }
 
-function equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
+function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const a = normalizeValue(guardFilterCompareValue(val));
         const b = normalizeValue(guardFilterCompareValue(filter));
@@ -68,7 +68,7 @@ function invertFilterCompiler(compiler: InMemoryFilterCompiler): InMemoryFilterC
     }
 }
 
-function containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
+function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const a = normalizeValue(guardFilterCompareValue(val));
         const needle = normalizeValue(guardFilterCompareValue(filter));
@@ -80,8 +80,26 @@ function containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilter
     };
 }
 
-function lengthInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
-    const runner = andInMemoryFilterCompiler(filter, filters);
+function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
+    return (val) => {
+        if (!Array.isArray(filter)) {
+            throw new Error('Invalid filter: expected array as value for $in filter')
+        }
+        const a = normalizeValue(guardFilterCompareValue(val));
+
+        for (const element of filter) {
+            const b = normalizeValue(guardFilterCompareValue(element));
+            if (a === b) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+}
+
+function $lengthInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterDefinitions): InMemoryFilterRunner {
+    const runner = $andInMemoryFilterCompiler(filter, filters);
 
     return (val) => {
         if (typeof val === 'string' || Array.isArray(val)) {
@@ -161,7 +179,7 @@ export function createInMemoryFilterCompiler(path: string): InMemoryFilterCompil
     const splitted = path.split('.');
 
     return (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
-        const runner = andInMemoryFilterCompiler(filter, filters)
+        const runner = $andInMemoryFilterCompiler(filter, filters)
 
         return (object) => {
             const value = objectPathValue(object, splitted);
@@ -171,22 +189,16 @@ export function createInMemoryFilterCompiler(path: string): InMemoryFilterCompil
 }
 
 export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = {
-    '$and': andInMemoryFilterCompiler,
-    '$or': orInMemoryFilterCompiler,
-    '$not': notInMemoryFilterCompiler,
-    '$eq': equalsInMemoryFilterCompiler,
-    '$neq': invertFilterCompiler(equalsInMemoryFilterCompiler),
-    '$gt': lessThanInMemoryFilterCompiler,
-    '$lt': invertFilterCompiler(lessThanInMemoryFilterCompiler),
-    '$contains': containsInMemoryFilterCompiler,
-    '$length': lengthInMemoryFilterCompiler,
-}
-
-export const memberInMemoryFilterCompilers: InMemoryFilterDefinitions = {
-    ...baseInMemoryFilterCompilers,
-    id: createInMemoryFilterCompiler('id'),
-    name: createInMemoryFilterCompiler('name'),
-    birthDay: createInMemoryFilterCompiler('birthDay'),
+    '$and': $andInMemoryFilterCompiler,
+    '$or': $orInMemoryFilterCompiler,
+    '$not': $notInMemoryFilterCompiler,
+    '$eq': $equalsInMemoryFilterCompiler,
+    '$neq': invertFilterCompiler($equalsInMemoryFilterCompiler),
+    '$lt': $lessThanInMemoryFilterCompiler,
+    '$gt': invertFilterCompiler($lessThanInMemoryFilterCompiler),
+    '$in': $inInMemoryFilterCompiler,
+    '$contains': $containsInMemoryFilterCompiler,
+    '$length': $lengthInMemoryFilterCompiler,
 }
 
 function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFilterDefinitions): InMemoryFilterRunner[] {
@@ -219,4 +231,4 @@ function compileInMemoryFilter(filter: StamhoofdFilter, definitions: InMemoryFil
     return runners
 }
 
-export const compileToInMemoryFilter = andInMemoryFilterCompiler
+export const compileToInMemoryFilter = $andInMemoryFilterCompiler

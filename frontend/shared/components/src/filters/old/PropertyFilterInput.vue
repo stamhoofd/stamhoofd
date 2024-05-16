@@ -163,20 +163,38 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     setEnabledWhen(useCache = false) {
-        //this.present(new ComponentWithProperties(FilterEditor, {
-        //    title: "Vragen als...",
-        //    selectedFilter: this.cachedEnabledFilter,
-        //    organization: this.organization,
-        //    setFilter: (enabledWhen: FilterGroup<any>) => {
-        //        this.$emit('update:modelValue', 
-        //            new PropertyFilter<any>(
-        //                enabledWhen.encoded,
-        //                this.modelValue.requiredWhen
-        //            )
-        //        )
-        //    },
-        //    definitions: this.definitions
-        //}).setDisplayStyle("popup"))
+        if (useCache && this.cachedEnabledFilter && !isEmptyFilter(this.cachedEnabledFilter)) {
+            this.$emit('update:modelValue', 
+                new PropertyFilter(
+                    this.cachedEnabledFilter,
+                    this.modelValue.requiredWhen
+                )
+            )
+            return
+        }
+
+        const filter = this.modelValue.enabledWhen ? this.builder.fromFilter(this.modelValue.enabledWhen) : this.builder.create() 
+
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(UIFilterEditor, {
+                        filter,
+                        saveHandler: (filter: UIFilter) => {
+                            this.cachedEnabledFilter = filter.build();
+                            
+                            this.$emit('update:modelValue', 
+                                new PropertyFilter(
+                                    this.cachedEnabledFilter,
+                                    this.modelValue.requiredWhen
+                                )
+                            )
+                        }
+                    })
+                })
+            ],
+            modalDisplayStyle: 'sheet'
+        })
     }
 
     setAlwaysRequired() {
@@ -198,7 +216,6 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     setRequiredWhen(useCache = false) {
-        console.log('setRequiredwhen', useCache);
 
         if (useCache && this.cachedRequiredFilter && !isEmptyFilter(this.cachedRequiredFilter)) {
             this.$emit('update:modelValue', 
@@ -211,7 +228,6 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         }
 
         const filter = this.modelValue.requiredWhen ? this.builder.fromFilter(this.modelValue.requiredWhen) : this.builder.create() 
-        console.log('filter', filter);
 
         this.present({
             components: [
