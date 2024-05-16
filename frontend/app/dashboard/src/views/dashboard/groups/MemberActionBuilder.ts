@@ -6,7 +6,7 @@ import { Formatter } from "@stamhoofd/utility";
 
 import { MemberManager } from "../../../classes/MemberManager";
 import MailView from "../mail/MailView.vue";
-import EditMemberView from "../member/edit/EditMemberView.vue";
+//import EditMemberView from "../member/edit/EditMemberView.vue";
 import SMSView from "../sms/SMSView.vue";
 
 
@@ -350,12 +350,12 @@ export class MemberActionBuilder {
     }
 
     editMember(member: MemberWithRegistrations) {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditMemberView, {
-                member,
-            })
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
+        // const displayedComponent = new ComponentWithProperties(NavigationController, {
+        //     root: new ComponentWithProperties(EditMemberView, {
+        //         member,
+        //     })
+        // });
+        // this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async exportToExcel(members: MemberWithRegistrations[]) {

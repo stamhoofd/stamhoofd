@@ -1,5 +1,6 @@
-import { AutoEncoderPatchType, PartialWithoutMethods } from "@simonbackx/simple-encoding"
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 
+import { Address } from "../addresses/Address"
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, InMemoryFilterDefinitions } from "../filters/new/InMemoryFilter"
 import { StamhoofdFilter } from "../filters/new/StamhoofdFilter"
 import { Group } from "../Group"
@@ -9,6 +10,7 @@ import { RegisterCheckout, RegisterItem } from "./checkout/RegisterCheckout"
 import { MemberDetails } from "./MemberDetails"
 import { MembersBlob, MemberWithRegistrationsBlob } from "./MemberWithRegistrationsBlob"
 import { ObjectWithRecords, PatchAnswers } from "./ObjectWithRecords"
+import { Parent } from "./Parent"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
@@ -126,6 +128,80 @@ export class PlatformFamily {
             }
         }
     }
+
+    getAddressOccurrences(address: Address, skip?: {memberId?: string, parentId?: string}): string[] {
+        const occurrences = new Set<string>()
+
+        const searchString = address.toString()
+
+        for (const member of this.members) {
+            if (member.patchedMember.details.address) {
+                if (!skip?.memberId || member.id !== skip?.memberId) {
+                    if (member.patchedMember.details.address.toString() === searchString) {
+                        occurrences.add(member.patchedMember.details.name)
+                    }
+                }
+            }
+
+            for (const parent of member.patchedMember.details.parents) {
+                if (parent.address) {
+                    if (!skip?.parentId || parent.id !== skip?.parentId) {
+                        if (parent.address.toString() === searchString) {
+                            occurrences.add(parent.name)
+                        }
+                    }
+                }
+            }
+        }
+
+        return Array.from(occurrences.values())
+    }
+
+    get addresses() {
+        const addresses = new Map<string, Address>()
+        for (const member of this.members) {
+            if (member.member.details.address) {
+                addresses.set(member.member.details.address.toString(), member.member.details.address)
+            }
+
+            if (member.patchedMember.details.address) {
+                addresses.set(member.patchedMember.details.address.toString(), member.patchedMember.details.address)
+            }
+
+            for (const parent of member.member.details.parents) {
+                if (parent.address) {
+                    addresses.set(parent.address.toString(), parent.address)
+                }
+            }
+            
+            for (const parent of member.patchedMember.details.parents) {
+                if (parent.address) {
+                    addresses.set(parent.address.toString(), parent.address)
+                }
+            }
+        }
+
+        return Array.from(addresses.values())
+    }
+
+    updateAddress(oldValue: Address, newValue: Address) {
+        for (const member of this.members) {
+            const patch = member.patchedMember.details.updateAddressPatch(oldValue, newValue)
+            if (patch !== null) {
+                member.addDetailsPatch(patch)
+            }
+        }
+    }
+
+    /// Update all references to this parent (with same id)
+    updateParent(parent: Parent) {
+        for (const member of this.members) {
+            const patch = member.patchedMember.details.updateParentPatch(parent)
+            if (patch !== null) {
+                member.addDetailsPatch(patch)
+            }
+        }
+    }
 }
 
 export class PlatformMember implements ObjectWithRecords {
@@ -185,6 +261,14 @@ export class PlatformMember implements ObjectWithRecords {
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
         this.patch = this.patch.patch(MemberWithRegistrationsBlob.patch(p))
+    }
+
+    addParent(parent: Parent) {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>
+        arr.addPut(parent);
+        this.addDetailsPatch({
+            parents: arr
+        })
     }
 
     addDetailsPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) {

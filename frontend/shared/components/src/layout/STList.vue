@@ -4,9 +4,9 @@
             <slot name="item" v-bind="{item: element, index}" />
         </template>
     </Sortable>
-    <transition-group v-else-if="withAnimation" tag="div" name="list" class="st-list">
+    <TransitionGroup v-else-if="withAnimation" tag="div" name="list" class="st-list">
         <slot />
-    </transition-group>
+    </TransitionGroup>
     <div v-else class="st-list">
         <slot />
     </div>
@@ -19,9 +19,20 @@ import { computed, nextTick, ref } from 'vue';
 
 const props = withDefaults(
     // props
-    defineProps<{draggable?: boolean, group?: string, withAnimation?: boolean, itemKey?: string | ((item: any) => string | number | symbol)}>(),
+    defineProps<{
+        draggable?: boolean, 
+        group?: string, 
+        withAnimation?: boolean, 
+        itemKey?: string | ((item: any) => string | number | symbol)
+    }>(),
     // default values
-    {valueModel: null, draggable: false, group: undefined, withAnimation: false, itemKey: 'id'}
+    {
+        valueModel: null, 
+        draggable: false, 
+        group: undefined, 
+        withAnimation: false, 
+        itemKey: 'id'
+    }
 );
 
 const listModel =defineModel<T[] | undefined>({default: undefined});
@@ -79,8 +90,23 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
 
     > .st-list-item {        
         &.list-move {
-            transition: transform 0.2s;
+            transition: transform 0.2s, opacity 0.2s;
         }
+
+        &.list-enter-active,
+        &.list-leave-active {
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        &.list-enter-from,
+        &.list-leave-to {
+        opacity: 0;
+        transform: translateX(30px);
+        }
+
+        &.list-leave-active {
+            position: absolute;
+            }
 
         &.is-dragging {
             .middle, .right, .left {

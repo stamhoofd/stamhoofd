@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { useAuth, useKeyUpDown, SegmentedControl, FemaleIcon, MaleIcon, MemberStepView, EditMemberGeneralBox, NavigationActions } from '@stamhoofd/components';
+import { EditMemberAllBox, FemaleIcon, MaleIcon, MemberStepView, NavigationActions, SegmentedControl, useAuth, useKeyUpDown } from '@stamhoofd/components';
 import { Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
@@ -197,7 +197,7 @@ async function editMember() {
             new ComponentWithProperties(MemberStepView, {
                 member: props.member,
                 title: props.member.member.firstName + ' bewerken',
-                component: EditMemberGeneralBox,
+                component: EditMemberAllBox,
                 saveHandler: async ({dismiss}: NavigationActions) => {
                     await dismiss({force: true});
                 }

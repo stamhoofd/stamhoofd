@@ -26,7 +26,6 @@ import { Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, Reco
 import { Formatter, Sorter } from "@stamhoofd/utility";
 
 import { MemberChangeEvent } from "../../../classes/MemberManager";
-import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberSegmentedView from "../member/MemberSegmentedView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
 
@@ -587,11 +586,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     addMember() {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditMemberView, {
-
-            })
-        }).setDisplayStyle("popup"))
+        //this.present(new ComponentWithProperties(NavigationController, {
+        //    root: new ComponentWithProperties(EditMemberView, {
+//
+        //    })
+        //}).setDisplayStyle("popup"))
     }
 
     openWaitingList(animated = true) {

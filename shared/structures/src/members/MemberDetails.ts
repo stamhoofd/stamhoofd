@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder,Data,DateDecoder,EnumDecoder,field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, AutoEncoderPatchType, BooleanDecoder,Data,DateDecoder,EnumDecoder,field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
@@ -290,6 +290,7 @@ export class MemberDetails extends AutoEncoder {
         return groups.filter(g => this.doesMatchGroup(g))
     }
 
+
     updateAddress(oldValue: Address, newValue: Address) {
         const str = oldValue.toString()
 
@@ -304,6 +305,32 @@ export class MemberDetails extends AutoEncoder {
         }
     }
 
+    updateAddressPatch(oldValue: Address, newValue: Address): AutoEncoderPatchType<MemberDetails>|null {
+        const str = oldValue.toString()
+        let patch = MemberDetails.patch({})
+        let changed = false
+
+        if (this.address && this.address.toString() == str) {
+            patch = patch.patch({ address: newValue })
+            changed = true
+        }
+
+        for (const parent of this.parents) {
+            if (parent.address && parent.address.toString() == str) {
+                //parent.address = newValue
+                const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>
+                arr.addPatch(Parent.patch({ id: parent.id, address: newValue }))
+                patch = patch.patch({ parents: arr })
+                changed = true
+            }
+        }
+
+        if (changed) {
+            return patch;
+        }
+        return null;
+    }
+
     /**
      * This will SET the parent
      */
@@ -314,6 +341,34 @@ export class MemberDetails extends AutoEncoder {
             }
         }
     }
+
+     /**
+     * This will SET the parent
+     */
+     updateParentPatch(parent: Parent): AutoEncoderPatchType<MemberDetails>|null {
+        let patch = MemberDetails.patch({})
+        let changed = false
+
+        for (const [index, _parent] of this.parents.entries()) {
+            if (_parent.id == parent.id || _parent.isEqual(parent)) {
+                const arr = new PatchableArray() as PatchableArrayAutoEncoder<Parent>
+                
+                // Assure we auto correct possible duplicates
+                arr.addDelete(_parent.id)
+                arr.addDelete(_parent.id)
+
+                arr.addPut(parent)
+                patch = patch.patch({ parents: arr })
+                changed = true
+            }
+        }
+
+        if (changed) {
+            return patch;
+        }
+        return null;
+    }
+
 
     /**
      * This will add or update the parent (possibily partially if not all data is present)
