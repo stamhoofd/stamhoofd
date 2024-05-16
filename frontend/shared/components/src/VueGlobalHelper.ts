@@ -346,7 +346,7 @@ export class VueGlobalHelper {
                     $url: useUrl(),
                     $user: useUser(),
                     $organization: useOrganization(),
-                    $context: useContext(),
+                    $context: useContext()
                 };
 
                 injectHooks(this, directives)

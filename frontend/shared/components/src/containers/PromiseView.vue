@@ -7,8 +7,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import LoadingView from "./LoadingView.vue";
 
@@ -18,7 +18,7 @@ import LoadingView from "./LoadingView.vue";
         LoadingView
     }
 })
-export default class PromiseView extends Mixins(NavigationMixin) {
+export default class PromiseView extends VueComponent {
     @Prop({required: true})
         promise!: () => Promise<ComponentWithProperties>
 
