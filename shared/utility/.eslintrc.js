@@ -11,12 +11,10 @@ module.exports = {
     extends: [
         "eslint:recommended",
     ],
-    plugins: ["simple-import-sort"],
+    plugins: [],
     rules: {
         "no-console": "off",
         "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-        "simple-import-sort/imports": "warn",
-        "simple-import-sort/exports": "warn",
         "sort-imports": "off",
         "import/order": "off"
     },
@@ -28,7 +26,7 @@ module.exports = {
             parserOptions: {
                 project: ["./tsconfig.json"]
             },
-            plugins: ["@typescript-eslint", "jest", "simple-import-sort"],
+            plugins: ["@typescript-eslint", "jest"],
             extends: [
                 "eslint:recommended",
                 "plugin:@typescript-eslint/eslint-recommended",
@@ -39,8 +37,6 @@ module.exports = {
             rules: {
                 "no-console": "off",
                 "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-                "simple-import-sort/imports": "warn",
-                "simple-import-sort/exports": "warn",
                 "sort-imports": "off",
                 "import/order": "off",
                 "@typescript-eslint/explicit-function-return-type": "off",

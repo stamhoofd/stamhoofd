@@ -15,8 +15,8 @@
             Deze vragenlijst is leeg en zal nog niet getoond worden.
         </p>
 
-        <p v-if="patchedCategory.legacyFilter" class="info-box selectable with-icon" @click="editCategory()">
-            {{ patchedCategory.legacyFilter.getString(filterDefinitionsForCategory()) }}
+        <p v-if="patchedCategory.filter" class="info-box selectable with-icon" @click="editCategory()">
+            {{ patchedCategory.filter.getString() }}
             <button type="button" class="button icon edit" />
         </p>
 
@@ -52,8 +52,8 @@
                     <button class="icon settings button gray" type="button" @click="editCategory(c)" />
                 </div>
             </h2>
-            <p v-if="c.legacyFilter" class="info-box selectable with-icon" @click="editCategory(c)">
-                {{ c.legacyFilter.getString(filterDefinitionsForCategory()) }}
+            <p v-if="c.filter" class="info-box selectable with-icon" @click="editCategory(c)">
+                {{ c.filter.getString() }}
                 <button type="button" class="button icon edit" />
             </p>
 
@@ -91,11 +91,12 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, ErrorBox, FillRecordCategoryView, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { MemberDetailsWithGroups, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, RecordSettings } from '@stamhoofd/structures';
+import { CenteredMessage, ErrorBox, FillRecordCategoryView, PropertyFilterInput, STErrorsDefault, STInputBox, STList, SaveView, Validator } from "@stamhoofd/components";
+import { Filterable, PropertyFilter, RecordAnswer, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import EditRecordView from "./EditRecordView.vue";
+import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordRow from "./RecordRow.vue";
 
 @Component({
@@ -108,7 +109,7 @@ import RecordRow from "./RecordRow.vue";
         PropertyFilterInput
     },
 })
-export default class EditRecordCategoryQuestionsView<T> extends Mixins(NavigationMixin) {
+export default class EditRecordCategoryQuestionsView<T extends Filterable> extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
@@ -125,18 +126,18 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
      * Pass along the changes of the array (so we can also delete with the save handler)
      */
     @Prop({ required: true })
-        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
+        saveHandler!: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
 
     @Prop({ required: true })
-        settings: RecordEditorSettings<T>
+        settings!: RecordEditorSettings<T>
 
-    filterDefinitionsForCategory() {
+    filterBuilderForCategory() {
         const rootIndex = this.patchedRootCategories.findIndex(c => c.id === this.categoryId)
         if (rootIndex === -1) {
-            return this.settings.filterDefinitions([])
+            return this.settings.filterBuilder([])
         }
         const rootCategories = this.patchedRootCategories.slice(0, rootIndex + 1)
-        return this.settings.filterDefinitions(rootCategories)
+        return this.settings.filterBuilder(rootCategories)
     }
 
     editCategory(category: RecordCategory = this.patchedCategory) {
@@ -154,7 +155,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
                         }
                         component.pop({ force: true })
                     },
-                    filterDefinitions: this.filterDefinitionsForCategory()
+                    filterBuilder: this.filterBuilderForCategory()
                 })
             ],
             modalDisplayStyle: "popup"
@@ -197,7 +198,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
         return this.patchedCategory.filter ?? PropertyFilter.createDefault()
     }
 
-    set filter(filter: PropertyFilter<MemberDetailsWithGroups> | null) {
+    set filter(filter: PropertyFilter | null) {
         this.addPatchSimple({ filter })
     }
 
@@ -269,7 +270,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
                         category,
                         isNew: true,
                         parentCategory: this.patchedCategory,
-                        filterDefinitions: this.filterDefinitionsForCategory(),
+                        filterBuilder: this.filterBuilderForCategory(),
                         saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => {
                             this.addCategoriesPatch(patch)
                             component.pop({ force: true })
@@ -351,7 +352,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
             category: this.patchedCategory,
             answers: [],
             dataPermission: true,
-            filterDefinitions: this.filterDefinitionsForCategory(),
+            filterBuilder: this.filterBuilderForCategory(),
             markReviewed: false,
             hasNextStep: false,
             filterValueForAnswers: (answers: RecordAnswer[]) => {

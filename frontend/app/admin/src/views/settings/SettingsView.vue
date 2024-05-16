@@ -7,8 +7,6 @@
                 Instellingen
             </h1>
 
-            <BillingWarningBox />
-
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="$navigate('beheerders')">
                     <template #left><img src="@stamhoofd/assets/images/illustrations/admin.svg"></template>
@@ -31,7 +29,7 @@
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { ComponentOptions } from 'vue';
 import {AdminsView} from '@stamhoofd/components';
-
+ 
 defineRoutes([
     {
         url: 'beheerders',

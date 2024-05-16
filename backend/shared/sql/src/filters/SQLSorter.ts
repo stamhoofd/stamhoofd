@@ -1,9 +1,9 @@
 import { PlainObject } from "@simonbackx/simple-encoding";
-import { InMemorySortDefinition, SortList } from "@stamhoofd/structures";
+import { SortDefinition, SortList } from "@stamhoofd/structures";
 
 import { SQLOrderBy, SQLOrderByDirection } from "../SQLOrderBy";
 
-export type SQLSortDefinition<T, B extends PlainObject = PlainObject> = InMemorySortDefinition<T, B> & {
+export type SQLSortDefinition<T, B extends PlainObject = PlainObject> = SortDefinition<T, B> & {
     toSQL(direction: SQLOrderByDirection): SQLOrderBy
 };
 

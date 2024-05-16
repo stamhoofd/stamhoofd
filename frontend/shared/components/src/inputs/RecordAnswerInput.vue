@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Checkbox v-if="answer.settings.type == RecordType.Checkbox" v-model="answer.selected">
+        <Checkbox v-if="answer.settings.type == RecordType.Checkbox" v-model="selected">
             <h3 class="style-title-list">
                 {{ label }}
             </h3>
@@ -8,9 +8,9 @@
                 {{ answer.settings.description }}
             </p>
         </Checkbox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errorBox">
+        <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errors.errorBox">
             <STList>
-                <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
+                <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox :model-value="getChoiceSelected(choice)" @update:model-value="setChoiceSelected(choice, $event)" />
                     </template>
@@ -23,11 +23,11 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.ChooseOne" class="max" :title="label" error-fields="input" :error-box="errorBox">
+        <STInputBox v-else-if="answer.settings.type == RecordType.ChooseOne" class="max" :title="label" error-fields="input" :error-box="errors.errorBox">
             <STList>
-                <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
+                <STListItem v-for="choice in record.choices" :key="choice.id" :selectable="true" element-name="label">
                     <template #left>
-                        <Radio v-model="answer.selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
+                        <Radio v-model="selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
                     </template>
                     <h3 class="style-title-list">
                         {{ choice.name }}
@@ -38,24 +38,24 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.Text" :title="label" error-fields="input" :error-box="errorBox">
-            <input v-model="answer.value" :placeholder="inputPlaceholder" class="input">
+        <STInputBox v-else-if="answer.settings.type == RecordType.Text" :title="label" error-fields="input" :error-box="errors.errorBox">
+            <input v-model="textValue" :placeholder="inputPlaceholder" class="input">
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.Textarea" :title="label" class="max" error-fields="input" :error-box="errorBox">
-            <textarea v-model="answer.value" :placeholder="inputPlaceholder" class="input" />
+        <STInputBox v-else-if="answer.settings.type == RecordType.Textarea" :title="label" class="max" error-fields="input" :error-box="errors.errorBox">
+            <textarea v-model="textValue" :placeholder="inputPlaceholder" class="input" />
         </STInputBox>
-        <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="answer.address" :title="label" :required="required" :validator="validator" :nullable="true" />
-        <PhoneInput v-else-if="answer.settings.type == RecordType.Phone" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
-        <EmailInput v-else-if="answer.settings.type == RecordType.Email" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
-        <STInputBox v-else-if="answer.settings.type == RecordType.Date" :title="label" error-fields="input" :error-box="errorBox">
-            <DateSelection v-model="answer.dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+        <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="addressValue" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
+        <PhoneInput v-else-if="answer.settings.type == RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
+        <EmailInput v-else-if="answer.settings.type == RecordType.Email" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
+        <STInputBox v-else-if="answer.settings.type == RecordType.Date" :title="label" error-fields="input" :error-box="errors.errorBox">
+            <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.Price" :title="label" error-fields="input" :error-box="errorBox">
-            <PriceInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+        <STInputBox v-else-if="answer.settings.type == RecordType.Price" :title="label" error-fields="input" :error-box="errors.errorBox">
+            <PriceInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
-        <ImageInput v-else-if="answer.settings.type == RecordType.Image" v-model="answer.image" :title="label" :required="required" :validator="validator" :resolutions="recordSettings.resolutions" />
-        <STInputBox v-else-if="answer.settings.type == RecordType.Integer" :title="label" error-fields="input" :error-box="errorBox">
-            <NumberInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+        <ImageInput v-else-if="answer.settings.type == RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" />
+        <STInputBox v-else-if="answer.settings.type == RecordType.Integer" :title="label" error-fields="input" :error-box="errors.errorBox">
+            <NumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
 
         <p v-else class="error-box">
@@ -63,15 +63,15 @@
         </p>
 
         <!-- Comments if checkbox is selected -->
-        <div v-if="answer.settings.type == RecordType.Checkbox && answer.selected && answer.settings.askComments" class="textarea-container">
-            <textarea v-model="answer.comments" class="input small" :placeholder="inputPlaceholder" />
+        <div v-if="answer.settings.type == RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">
+            <textarea v-model="comments" class="input small" :placeholder="inputPlaceholder" />
             <p v-if="answer.settings.commentsDescription" class="info-box">
                 {{ answer.settings.commentsDescription }}
             </p>
         </div>
 
         <!-- Unhandled errors -->
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <!-- Footer description -->
         <p v-if="answer.settings.type != RecordType.Checkbox && answer.settings.description" class="style-description-small">
@@ -81,13 +81,12 @@
 </template>
 
 
-<script lang="ts">
-import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
-import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { PatchAnswers, RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType, RecordAddressAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordPriceAnswer, RecordTextAnswer, Address, Image } from "@stamhoofd/structures";
 
-import {ErrorBox} from "../errors/ErrorBox";
+import { computed, onMounted } from "vue";
 import STErrorsDefault from "../errors/STErrorsDefault.vue";
-import {Validator} from "../errors/Validator";
+import { Validator } from "../errors/Validator";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import AddressInput from "./AddressInput.vue";
@@ -100,148 +99,222 @@ import PhoneInput from "./PhoneInput.vue";
 import PriceInput from "./PriceInput.vue";
 import Radio from "./Radio.vue";
 import STInputBox from "./STInputBox.vue";
+import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding";
+import { useErrors } from "../errors/useErrors";
+import { ErrorBox } from "../errors/ErrorBox";
 
-@Component({
-    components: {
-        STInputBox,
-        STListItem,
-        STList,
-        Checkbox,
-        Radio,
-        AddressInput,
-        STErrorsDefault,
-        EmailInput,
-        PhoneInput,
-        DateSelection,
-        PriceInput,
-        ImageInput,
-        NumberInput
-    }
-})
-export default class RecordAnswerInput extends Vue {
-    @Prop({ required: true }) 
-        recordSettings: RecordSettings
+const props = defineProps<{
+    record: RecordSettings,
+    // Used to find the currently saved answer
+    answers: Map<string, RecordAnswer>,
+    validator: Validator | null,
+    allOptional: boolean,
+}>()
 
-    /**
-     * We'll update the record answers in this array
-     */
-    @Prop({ required: true }) 
-        recordAnswers: RecordAnswer[]
+const emit = defineEmits<{
+  patch: [patch: PatchAnswers]
+}>()
+const errors = useErrors({validator: props.validator});
 
-    @Prop({ default: null }) 
-        validator: Validator | null
-
-    @Prop({ default: false }) 
-        allOptional: boolean
-
-    errorBox: ErrorBox | null = null
-
-    get RecordType() {
-        return RecordType
-    }
-
-    get label() {
-        return this.recordSettings.label || this.recordSettings.name
-    }
-
-    get required() {
-        return !this.allOptional && this.recordSettings.required
-    }
-
-    getChoiceSelected(choice: RecordChoice): boolean {
-        return !!(this.answer as RecordMultipleChoiceAnswer).selectedChoices.find(c => c.id === choice.id)
-    }
-
-    setChoiceSelected(choice: RecordChoice, selected: boolean) {
-        if (selected === this.getChoiceSelected(choice)) {
-            return
-        }
-        if (selected) {
-            (this.answer as RecordMultipleChoiceAnswer).selectedChoices.push(choice)
-        } else {
-            const index = (this.answer as RecordMultipleChoiceAnswer).selectedChoices.findIndex(c => c.id === choice.id)
-            if (index != -1) {
-                (this.answer as RecordMultipleChoiceAnswer).selectedChoices.splice(index, 1)
+const answer = computed({
+    get: () => {
+        const existing = props.answers.get(props.record.id)
+        const type = RecordAnswerDecoder.getClassForType(props.record.type)
+        if (existing !== undefined && existing instanceof type) {
+            if (existing.settings !== props.record) {
+                existing.settings = props.record
             }
+            return existing
         }
-    }
-
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, async () => {
-                return await this.isValid()
-            })
-        }
-
-        // Make sure the answer (updated one) is inside the recordAnswers, and is made reactive
-        this.answer = (this.answer as any)
-    }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this)
-        }
-    }
-
-    get inputPlaceholder() {
-        if (!this.required) {
-            if (this.answer.settings.inputPlaceholder.length > 0) {
-                if (this.recordSettings.type === RecordType.Integer) {
-                    return this.answer.settings.inputPlaceholder
-                }
-                return "Optioneel. "+this.answer.settings.inputPlaceholder
-            }
-            return "Optioneel"
-        }
-        return this.answer.settings.inputPlaceholder || this.answer.settings.name
-    }
-
-    get answer(): RecordAnswer {
-        const answer = this.recordAnswers.find(a => a.settings.id === this.recordSettings.id)
-        const type = RecordAnswerDecoder.getClassForType(this.recordSettings.type)
-        if (answer !== undefined && answer instanceof type) {
-            if (answer.settings !== this.recordSettings) {
-                answer.settings = this.recordSettings
-            }
-            return answer
-        }
-
+ 
         // Create a new one
         // TODO: try to migrate old values if possible
         const a = type.create({
-            settings: this.recordSettings
+            settings: props.record
         })
-
+ 
         // This is required, because in very rare situations, the answer that was set on mount could have been removed from the array
-        this.answer = a
+        answer.value = a
         return a
-    }
+    },
 
-    set answer(answer: RecordAnswer) {
-        const index = this.recordAnswers.findIndex(a => a.settings.id === this.recordSettings.id)
-        if (index != -1) {
-            const old = this.recordAnswers[index]
-            if (old === answer) {
-                return
+    set: (value: RecordAnswer) => {
+        const patch = new PatchMap() as PatchAnswers;
+        patch.set(props.record.id, value);
+        emit('patch', patch)
+    }
+})
+
+function patchAnswer(patch: AutoEncoderPatchType<RecordAnswer>) {
+    const patchMap = new PatchMap() as PatchAnswers;
+    patchMap.set(props.record.id, patch);
+    emit('patch', patchMap)
+}
+
+const casted = {
+    RecordTextAnswer: computed(() => answer.value instanceof RecordTextAnswer ? answer.value : null),
+    RecordMultipleChoiceAnswer: computed(() => answer.value instanceof RecordMultipleChoiceAnswer ? answer.value : null),
+    RecordCheckboxAnswer: computed(() => answer.value instanceof RecordCheckboxAnswer ? answer.value : null),
+    RecordChooseOneAnswer: computed(() => answer.value instanceof RecordChooseOneAnswer ? answer.value : null),
+    RecordAddressAnswer: computed(() => answer.value instanceof RecordAddressAnswer ? answer.value : null),
+    RecordDateAnswer: computed(() => answer.value instanceof RecordDateAnswer ? answer.value : null),
+    RecordPriceAnswer: computed(() => answer.value instanceof RecordPriceAnswer ? answer.value : null),
+    RecordImageAnswer: computed(() => answer.value instanceof RecordImageAnswer ? answer.value : null),
+    RecordIntegerAnswer: computed(() => answer.value instanceof RecordIntegerAnswer ? answer.value : null),
+};
+
+const label = computed(() => props.record.label || props.record.name)
+const required = computed(() => !props.allOptional && props.record.required)
+const inputPlaceholder = computed(() => {
+    if (!required.value) {
+        if (answer.value.settings.inputPlaceholder.length > 0) {
+            if (props.record.type === RecordType.Integer) {
+                return answer.value.settings.inputPlaceholder
             }
-            this.recordAnswers.splice(index, 1, answer)
-        } else {
-            this.recordAnswers.push(answer)
+            return "Optioneel. "+answer.value.settings.inputPlaceholder
         }
+        return "Optioneel"
+    }
+    return answer.value.settings.inputPlaceholder || answer.value.settings.name
+})
+
+const selected = computed({
+    get: () => {
+        return casted.RecordCheckboxAnswer.value?.selected ?? false
+    },
+    set: (selected: boolean) => {
+        patchAnswer(RecordCheckboxAnswer.patch({
+            selected
+        }))
+    }
+})
+
+const comments = computed({
+    get: () => {
+        return casted.RecordCheckboxAnswer.value?.comments ?? ""
+    },
+    set: (comments: string) => {
+        patchAnswer(RecordCheckboxAnswer.patch({
+            comments
+        }))
+    }
+})
+
+const selectedChoice = computed({
+    get: () => {
+        return casted.RecordChooseOneAnswer.value?.selectedChoice ?? null
+    },
+    set: (selectedChoice: RecordChoice | null) => {
+        patchAnswer(RecordChooseOneAnswer.patch({
+            selectedChoice
+        }))
+    }
+})
+
+const integerValue = computed({
+    get: () => {
+        return casted.RecordIntegerAnswer.value?.value ?? null
+    },
+    set: (value: number | null) => {
+        patchAnswer(RecordIntegerAnswer.patch({
+            value
+        }))
+    }
+})
+
+const textValue = computed({
+    get: () => {
+        return casted.RecordTextAnswer.value?.value ?? ""
+    },
+    set: (value: string) => {
+        patchAnswer(RecordTextAnswer.patch({
+            value
+        }))
+    }
+})
+
+const addressValue = computed({
+    get: () => {
+        return casted.RecordAddressAnswer.value?.address ?? null
+    },
+    set: (address: Address|null) => {
+        patchAnswer(RecordAddressAnswer.patch({
+            address
+        }))
+    }
+})
+
+const dateValue = computed({
+    get: () => {
+        return casted.RecordDateAnswer.value?.dateValue ?? null
+    },
+    set: (dateValue: Date|null) => {
+        patchAnswer(RecordDateAnswer.patch({
+            dateValue
+        }))
+    }
+})
+
+const imageValue = computed({
+    get: () => {
+        return casted.RecordImageAnswer.value?.image ?? null
+    },
+    set: (image: Image|null) => {
+        patchAnswer(RecordImageAnswer.patch({
+            image
+        }))
+    }
+})
+
+function getChoiceSelected(choice: RecordChoice): boolean {
+    return !!(casted.RecordMultipleChoiceAnswer.value)?.selectedChoices.find(c => c.id === choice.id)
+}
+
+function setChoiceSelected(choice: RecordChoice, selected: boolean) {
+    if (selected === getChoiceSelected(choice)) {
+        return
+    }
+    const v = casted.RecordMultipleChoiceAnswer.value
+    if (!v) {
+        return
     }
 
-    async isValid(): Promise<boolean> {
-        if (this.allOptional && this.answer.isEmpty) {
-            return Promise.resolve(true)
-        }
-        try {
-            this.answer.validate()
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
-            return false
-        }
-        this.errorBox = null
-        return Promise.resolve(true)
+    const choices = v.selectedChoices.filter(c => c.id !== choice.id)
+
+    if (selected) {
+        patchAnswer(RecordMultipleChoiceAnswer.patch({
+            selectedChoices: [...choices, choice] as any
+        }))
+    } else {
+        patchAnswer(RecordMultipleChoiceAnswer.patch({
+            selectedChoices: choices as any
+        }))
     }
+}
+
+onMounted(() => {
+    if (errors.validator) {
+        errors.validator.addValidation(this, async () => {
+            return await isValid()
+        })
+    }
+
+    // Make sure the answer (updated one) is inside the recordAnswers
+    answer.value = (answer.value as any)
+})
+
+async function isValid() {
+    if (props.allOptional && answer.value.isEmpty) {
+        return true;
+    }
+
+    try {
+        answer.value.validate()
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+        return false
+    }
+    errors.errorBox = null
+    return true
 }
 </script>

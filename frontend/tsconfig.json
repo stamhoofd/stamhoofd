@@ -25,7 +25,8 @@
         "strict": true,
         "importHelpers": true,
         "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "strictPropertyInitialization": false,
     },
     "include": [
         "../*.d.ts",

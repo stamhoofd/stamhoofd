@@ -200,8 +200,8 @@ export class RecordSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
     resolutions?: ResolutionRequest[]
 
-    validate(answers: RecordAnswer[]): RecordAnswer | undefined {
-        const answer = answers.find(a => a.settings.id === this.id)
+    validate(answers: Map<string, RecordAnswer>) {
+        const answer = answers.get(this.id)
 
         if (this.required && !answer) {
             throw new SimpleError({
@@ -211,7 +211,9 @@ export class RecordSettings extends AutoEncoder {
             })
         }
 
-        return answer;
+        if (answer) {
+            answer.validate()
+        }
     }
 
     get excelColumns() {

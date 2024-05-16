@@ -19,7 +19,9 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openMembers(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/group.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
+                    </template>
                     <h2 v-if="group.cycle > 0" class="style-title-list">
                         Inschrijvingen
                     </h2>
@@ -32,24 +34,32 @@
                     <p v-else class="style-description">
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
-                    <template #right><span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
-                    <span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/clock.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/clock.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Wachtlijst
                     </h2>
                     <p class="style-description">
                         Bekijk leden op de wachtlijst.
                     </p>
-                    <template #right><span v-if="group.settings.waitingListSize !== null" class="style-description-small">{{ group.settings.waitingListSize }}</span>
-                    <span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span v-if="group.settings.waitingListSize !== null" class="style-description-small">{{ group.settings.waitingListSize }}</span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-for="offset in limitedCycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/package-members.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/package-members.svg">
+                    </template>
                     <h2 v-if="offset === 1" class="style-title-list">
                         Vorige inschrijvingsperiode
                     </h2>
@@ -61,8 +71,10 @@
                         {{ group.getTimeRangeOffset(offset) }}
                     </p>
 
-                    <template #right><span v-if="group.getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
-                    <span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span v-if="group.getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -76,59 +88,79 @@
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/flag.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/flag.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Algemeen
                         </h2>
                         <p class="style-description">
                             Naam en periode
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editPrices(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Prijs
                         </h2>
                         <p class="style-description">
                             Wijzig de inschrijvingsprijs en eventuele kortingen
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editRestrictions(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/account.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/account.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Inschrijvingsbeperkingen
                         </h2>
                         <p class="style-description">
                             Pas aan wie kan inschrijven
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editWaitinglist(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/clock.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/clock.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Wachtlijst, voorinschrijvingen en limieten
                         </h2>
                         <p class="style-description">
                             Stel het maximum aantal leden in of schakel de wachtlijst in
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
 
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/lock.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/lock.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Toegangsbeheer
                         </h2>
                         <p class="style-description">
                             Bepaal wie leden en instellingen van deze groep kan bekijken of wijzigen
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
 
@@ -137,25 +169,33 @@
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/palette.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/palette.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Beschrijving, locatie en foto's
                         </h2>
                         <p class="style-description">
                             Wijzig de informatie die zichtbaar is op het ledenportaal.
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/email.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/email.svg">
+                        </template>
                         <h2 class="style-title-list">
                             E-mails
                         </h2>
                         <p class="style-description">
                             Wijzig de inhoud van automatische e-mails naar leden.
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
 
@@ -170,11 +210,13 @@
                         <p class="style-description">
                             Open inschrijvingen van leden via het ledenportaal.
                         </p>
-                        <template #right><button type="button" class="button secundary green hide-smartphone">
-                            <span class="icon power" />
-                            <span>Open</span>
-                        </button>
-                        <button type="button" class="button icon power only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary green hide-smartphone">
+                                <span class="icon power" />
+                                <span>Open</span>
+                            </button>
+                            <button type="button" class="button icon power only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
@@ -184,11 +226,13 @@
                         <p class="style-description">
                             Stop inschrijvingen van leden via het ledenportaal. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.
                         </p>
-                        <template #right><button type="button" class="button secundary danger hide-smartphone">
-                            <span class="icon power" />
-                            <span>Sluiten</span>
-                        </button>
-                        <button type="button" class="button icon power only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary danger hide-smartphone">
+                                <span class="icon power" />
+                                <span>Sluiten</span>
+                            </button>
+                            <button type="button" class="button icon power only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="restoreGroup($event)">
@@ -198,11 +242,13 @@
                         <p class="style-description">
                             Zet de inschrijvingsgroep terug.
                         </p>
-                        <template #right><button type="button" class="button secundary hide-smartphone">
-                            <span class="icon undo" />
-                            <span>Terugzetten</span>
-                        </button>
-                        <button type="button" class="button icon undo only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon undo" />
+                                <span>Terugzetten</span>
+                            </button>
+                            <button type="button" class="button icon undo only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="hasMembers && !isArchive" :selectable="true" @click="newPeriod()">
@@ -212,11 +258,13 @@
                         <p class="style-description">
                             Maak de lijst met ingeschreven leden terug leeg, maar maak het mogelijk om de lijst van de vorige leden nog te raadplegen. Ideaal voor groepen die elk jaar opnieuw inschrijven.
                         </p>
-                        <template #right><button type="button" class="button secundary hide-smartphone">
-                            <span class="icon reverse" />
-                            <span>Nieuw</span>
-                        </button>
-                        <button type="button" class="button icon reverse only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon reverse" />
+                                <span>Nieuw</span>
+                            </button>
+                            <button type="button" class="button icon reverse only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="!hasMembers && cycleOffsets.length && !isArchive" @click="undoPeriod()">
@@ -226,11 +274,13 @@
                         <p class="style-description">
                             Keer terug naar de vorige inschrijvingsperiode.
                         </p>
-                        <template #right><button type="button" class="button secundary danger hide-smartphone">
-                            <span class="icon undo" />
-                            <span>Terug</span>
-                        </button>
-                        <button type="button" class="button icon undo only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary danger hide-smartphone">
+                                <span class="icon undo" />
+                                <span>Terug</span>
+                            </button>
+                            <button type="button" class="button icon undo only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveGroup()">
@@ -240,11 +290,13 @@
                         <p class="style-description">
                             Verplaats de groep naar het archief, maar behoud alle gegevens zodat je ze later nog kan raadplegen. 
                         </p>
-                        <template #right><button type="button" class="button secundary hide-smartphone">
-                            <span class="icon archive" />
-                            <span>Archiveren</span>
-                        </button>
-                        <button type="button" class="button icon archive only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon archive" />
+                                <span>Archiveren</span>
+                            </button>
+                            <button type="button" class="button icon archive only-smartphone" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteGroup()">
@@ -254,11 +306,13 @@
                         <p class="style-description">
                             Verwijder deze groep en alle daarbij horende informatie. Dit is meestal niet nodig.
                         </p>
-                        <template #right><button type="button" class="button secundary danger hide-smartphone">
-                            <span class="icon trash" />
-                            <span>Verwijderen</span>
-                        </button>
-                        <button type="button" class="button icon trash only-smartphone" /></template>
+                        <template #right>
+                            <button type="button" class="button secundary danger hide-smartphone">
+                                <span class="icon trash" />
+                                <span>Verwijderen</span>
+                            </button>
+                            <button type="button" class="button icon trash only-smartphone" />
+                        </template>
                     </STListItem>
                 </STList>
             </template>
@@ -270,12 +324,13 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
+import MembersTableView from '../member/MembersTableView.vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import CategoryView from './CategoryView.vue';
 import EditGroupEmailsView from './edit/EditGroupEmailsView.vue';
@@ -372,7 +427,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             animated,
             adjustHistory: animated,
             components: [
-                new ComponentWithProperties(GroupMembersView, {
+                new ComponentWithProperties(MembersTableView, {
                     group: this.group,
                     initialCycleOffset: cycleOffset
                 })

@@ -249,13 +249,13 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, Dropdown,ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { RecordEditorSettings } from '@stamhoofd/structures';
-import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
+import { Filterable, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
 
 import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import PreviewRecordView from './PreviewRecordView.vue';
 import RecordChoiceRow from "./RecordChoiceRow.vue";
+import { RecordEditorSettings } from './RecordEditorSettings';
 
 @Component({
     components: {
@@ -270,7 +270,7 @@ import RecordChoiceRow from "./RecordChoiceRow.vue";
         RecordChoiceRow
     },
 })
-export default class EditRecordView<T> extends Mixins(NavigationMixin) {
+export default class EditRecordView<T extends Filterable> extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
@@ -286,10 +286,10 @@ export default class EditRecordView<T> extends Mixins(NavigationMixin) {
     patchRecord: AutoEncoderPatchType<RecordSettings> = RecordSettings.patch({ id: this.record.id })
 
     @Prop({ required: true })
-        saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
+        saveHandler!: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
 
     @Prop({ required: true })
-        settings: RecordEditorSettings<T>
+        settings!: RecordEditorSettings<T>
 
     get patchedRecord() {
         return this.record.patch(this.patchRecord)

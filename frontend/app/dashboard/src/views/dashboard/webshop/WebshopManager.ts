@@ -678,13 +678,13 @@ export class WebshopManager {
         })
     }
 
-    async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<PrivateOrder, WebshopOrdersQuery>> {
+    async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<PrivateOrder[], WebshopOrdersQuery>> {
         const response = await this.context.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id+"/orders",
             query,
             shouldRetry: retry,
-            decoder: new PaginatedResponseDecoder(PrivateOrder as Decoder<PrivateOrder>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
+            decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
             owner: this
         })
 
@@ -857,7 +857,7 @@ export class WebshopManager {
             })
 
             while (query) {
-                const response: PaginatedResponse<PrivateOrder, WebshopOrdersQuery> = await this.fetchOrders(query, retry)
+                const response: PaginatedResponse<PrivateOrder[], WebshopOrdersQuery> = await this.fetchOrders(query, retry)
 
                 if (reset && !didClear) {
                     // Clear only if we have internet access
@@ -1078,13 +1078,13 @@ export class WebshopManager {
         })
     }
 
-    async fetchTickets(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<TicketPrivate, WebshopTicketsQuery>> {
+    async fetchTickets(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<TicketPrivate[], WebshopTicketsQuery>> {
         const response = await this.context.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id+"/tickets/private",
             query,
             shouldRetry: retry,
-            decoder: new PaginatedResponseDecoder(TicketPrivate as Decoder<TicketPrivate>, WebshopTicketsQuery as Decoder<WebshopTicketsQuery>),
+            decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), WebshopTicketsQuery as Decoder<WebshopTicketsQuery>),
             owner: this
         })
 
@@ -1132,7 +1132,7 @@ export class WebshopManager {
             })
 
             while (query) {
-                const response: PaginatedResponse<TicketPrivate, WebshopTicketsQuery> = await this.fetchTickets(query, retry)
+                const response: PaginatedResponse<TicketPrivate[], WebshopTicketsQuery> = await this.fetchTickets(query, retry)
 
                 if (response.results.length > 0) {
                     // Save these orders to the local database

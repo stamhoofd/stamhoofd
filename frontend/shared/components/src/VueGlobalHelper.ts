@@ -1,19 +1,18 @@
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges,PatchType } from "@simonbackx/simple-encoding";
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges, PatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
-import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
+import { injectHooks, useCurrentComponent, useFocused, useUrl } from "@simonbackx/vue-app-navigation";
 import { AppManager, ContextPermissions, SessionContext } from "@stamhoofd/networking";
-import { Organization, Platform, User, Version } from "@stamhoofd/structures";
+import { Country, CountryHelper, Organization, Platform, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { type App,computed, getCurrentInstance,inject, Ref, ref, toRef } from "vue";
-import { configureCompat } from "vue";
+import { type App,computed, getCurrentInstance, inject, onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, toRef, unref } from "vue";
 
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, TooltipDirective } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
 import STInputBox from "./inputs/STInputBox.vue";
-import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
+import { I18nController } from "@stamhoofd/frontend-i18n";
 
 export function useContext(): Ref<SessionContext> {
     const refOrReal = inject('$context', null) as SessionContext|null;
@@ -108,6 +107,10 @@ export function useAuth(): ContextPermissions {
     return context.value.auth;
 }
 
+export function useCountry(): Ref<Country> {
+    return computed(() => I18nController.shared?.country ?? Country.Belgium)
+}
+
 /**
  * Allows you to use the ContextPermissions object in a specific context (editing user permissions mostly)
  * without inheriting permissions if the user is also a global admin (which gives them full access to everything, but breaks editing permissions)
@@ -119,6 +122,59 @@ export function useUninheritedPermissions(overrides?: {patchedUser?: User|Ref<Us
 
     return new ContextPermissions(user, organization, platform, {allowInheritingPermissions: false})
 }
+
+export function useKeyUpDown(actions: {up: () => void, down: () => void}) {
+    const isFocused = useFocused()
+    const onKey = (event: KeyboardEvent) => {
+        if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+    
+        if (!unref(isFocused)) {
+            return
+        }
+    
+        const key = event.key || event.keyCode;
+    
+        if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
+            actions.up();
+            event.preventDefault();
+        } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
+            actions.down();
+            event.preventDefault();
+        }
+    }
+
+    const remove = () => {
+        document.removeEventListener("keydown", onKey);
+    }
+
+    const add = () => {
+        remove();
+        document.addEventListener("keydown", onKey);
+    }
+
+    onActivated(() => {
+        add()
+    });
+
+    onMounted(() => {
+        add()
+    });
+
+    onBeforeUnmount(() => {
+        remove();
+    })
+
+    onDeactivated(() => {
+        remove();
+    })
+}
+
+export type ComponentExposed<T> =
+	T extends new (...angs: any) => infer E ? E :
+	    T extends (props: any, ctx: any, expose: (exposed: infer E) => any, ...args: any) => any ? NonNullable<E> :
+	        {};
 
 /**
  * Return false if it should not cancel the default behaviour
@@ -180,8 +236,6 @@ function focusNextElement () {
 
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
-        configureCompat({ WATCH_ARRAY: false, COMPONENT_V_MODEL: false });
-
         (window as any).PromiseComponent = PromiseView
         app.config.globalProperties.$country = "BE" // todo
         app.config.globalProperties.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
@@ -308,7 +362,8 @@ export class VueGlobalHelper {
                 formatTime: Formatter.time.bind(Formatter),
                 setUrl(url: string, title?: string) {
                     console.warn('old usage of this.setUrl, change to $url.setTitle and move url definitions to parent components')
-                }
+                },
+                formatCountry: CountryHelper.getName.bind(CountryHelper)
             }
         })
     }

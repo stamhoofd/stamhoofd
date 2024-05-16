@@ -1,12 +1,12 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-
 import { StamhoofdFilter } from "@stamhoofd/structures";
+
 import GroupUIFilterView from "./GroupUIFilterView.vue";
 import { UIFilter, UIFilterBuilder, UIFilterWrapper } from "./UIFilter";
 
 export class GroupUIFilter extends UIFilter {
     filters: UIFilter[] = []
-    builder: GroupUIFilterBuilder
+    builder!: GroupUIFilterBuilder
 
     get builders() {
         return this.builder.builders
@@ -91,5 +91,32 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
             builder: this
         })
     }
-        
+
+    fromFilter(filter: StamhoofdFilter): UIFilter | null {
+        let allowSelf = false;
+        if (typeof filter === 'object' && filter !== null && ("$and" in filter)) {
+            filter = filter.$and;
+            allowSelf = true;
+        }
+
+        // Match
+        const subfilters: UIFilter[] = [];
+
+        for (const f of Array.isArray(filter) ? filter : [filter]) {
+            for (const builder of this.builders) {
+                if (builder === this && !allowSelf) {
+                    continue;
+                }
+                const decoded = builder.fromFilter(f);
+                if (decoded !== null) {
+                    subfilters.push(decoded);
+                    break;
+                }
+            }
+        }
+
+        const groupFilter = this.create();
+        groupFilter.filters = subfilters;
+        return groupFilter;
+    }
 }

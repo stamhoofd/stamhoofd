@@ -1,5 +1,5 @@
 <template>
-    <form class="st-view filter-editor" @submit.prevent="applyFilter">
+    <form class="st-view filter-editor" @submit.prevent="save">
         <STNavigationBar :title="title" />
 
         <main>
@@ -8,7 +8,7 @@
             </h1>
             <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
 
-            <PropertyFilterInput v-model="editingConfiguration" :organization="organization" :definitions="definitions" />
+            <PropertyFilterInput v-model="editingConfiguration" :builder="builder" />
         </main>
 
         <STToolbar>
@@ -26,12 +26,13 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { FilterDefinition, Organization, PropertyFilter, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { PropertyFilter, Version } from "@stamhoofd/structures";
 
 import STNavigationBar from "../../navigation/STNavigationBar.vue";
 import STToolbar from "../../navigation/STToolbar.vue";
 import { CenteredMessage } from "../../overlays/CenteredMessage";
+import { UIFilterBuilder } from "../UIFilter";
 import PropertyFilterInput from "./PropertyFilterInput.vue";
 
 @Component({
@@ -46,18 +47,15 @@ export default class PropertyFilterView extends Mixins(NavigationMixin) {
         title!: string
 
     @Prop({ required: true })
-        organization: Organization
+        builder!: UIFilterBuilder
 
     @Prop({ required: true })
-        definitions: FilterDefinition[]
+        configuration!: PropertyFilter
 
     @Prop({ required: true })
-        configuration!: PropertyFilter<any>
+        setConfiguration!: (configuration: PropertyFilter) => void
 
-    @Prop({ required: true })
-        setConfiguration: (configuration: PropertyFilter<any>) => void
-
-    editingConfiguration: PropertyFilter<any> = this.configuration
+    editingConfiguration: PropertyFilter = this.configuration
 
     cancel() {
         this.dismiss({ force: true })

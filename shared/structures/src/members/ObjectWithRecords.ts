@@ -1,19 +1,14 @@
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder,PatchMap } from "@simonbackx/simple-encoding"
 
-import { Organization } from "../Organization"
-import { Platform } from "../Platform"
-import { Member } from "./Member"
-import { MemberDetails } from "./MemberDetails"
-import { MemberWithRegistrations } from "./MemberWithRegistrations"
-import { MembersBlob } from "./MemberWithRegistrationsBlob"
 import { RecordAnswer } from "./records/RecordAnswer"
-import { RecordCategory } from "./records/RecordCategory"
+import { Filterable, RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
 
-export interface ObjectWithRecords {
+export type PatchAnswers = PatchMap<string, RecordAnswer|AutoEncoderPatchType<RecordAnswer>|null>
+
+export interface ObjectWithRecords extends Filterable {
     isRecordCategoryEnabled(recordCategory: RecordCategory): boolean
     isRecordEnabled(record: RecordSettings): boolean
-    getAllRecordCategories(): RecordCategory[]
-    getRecords(): RecordAnswer[]
-    patchRecords(patch: PatchableArrayAutoEncoder<RecordAnswer>)
+    getRecordAnswers(): Map<string, RecordAnswer>
+    patchRecordAnswers(patch: PatchAnswers): this
 }

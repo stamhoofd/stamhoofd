@@ -329,9 +329,9 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
             category,
             answers: this.template.settings.fieldAnswers,
             markReviewed: true,
-            dataPermission: true,
             hasNextStep: index < this.template.privateSettings.templateDefinition.exportFieldCategories.length - 1,
-            filterDefinitions: [],
+            filterValue: this.template,
+            
             saveHandler: async (fieldAnswers: RecordAnswer[], component: NavigationMixin) => {
                 await this.patchTemplate(DocumentTemplatePrivate.patch({
                     settings: DocumentSettings.patch({
@@ -346,6 +346,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
                 }
                 component.show(c)
             },
+
             filterValueForAnswers: (fieldAnswers: RecordAnswer[]) => {
                 return this.template
             },

@@ -4,15 +4,17 @@
             <STList>
                 <STListItem v-for="_address in addresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
                     <template #left>
-                        <Radio v-model="selectedAddress" :value="_address" @change="changeSelected" />
+                        <Radio v-model="selectedAddress" :value="_address" @update:model-value="changeSelected" />
                     </template>
                     {{ _address.street }} {{ _address.number }}<br>
                     {{ _address.postalCode }} {{ _address.city }}
-                    <template #right><button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)" /></template>
+                    <template #right v-if="hasModifyListener">
+                        <button class="button icon gray edit" type="button" @click.stop="doEditAddress(_address)" />
+                    </template>
                 </STListItem>
                 <STListItem element-name="label" :selectable="true" class="left-center">
                     <template #left>
-                        <Radio v-model="selectedAddress" :value="null" @change="changeSelected" />
+                        <Radio v-model="selectedAddress" :value="null" @update:model-value="changeSelected" />
                     </template>
                     Een ander adres ingeven
                 </STListItem>
@@ -26,22 +28,15 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Address, ValidatedAddress} from "@stamhoofd/structures"
 import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Address, ValidatedAddress } from "@stamhoofd/structures";
 
-import {ErrorBox} from "../errors/ErrorBox";
+import { ErrorBox } from "../errors/ErrorBox";
 import STErrorsDefault from "../errors/STErrorsDefault.vue";
-import {Validator} from "../errors/Validator";
+import { Validator } from "../errors/Validator";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import AddressInput from "./AddressInput.vue";
-import Checkbox from "./Checkbox.vue";
-import DateSelection from "./DateSelection.vue";
-import EmailInput from "./EmailInput.vue";
-import ImageInput from "./ImageInput.vue";
-import NumberInput from "./NumberInput.vue";
-import PhoneInput from "./PhoneInput.vue";
-import PriceInput from "./PriceInput.vue";
 import Radio from "./Radio.vue";
 import STInputBox from "./STInputBox.vue";
 
@@ -53,7 +48,8 @@ import STInputBox from "./STInputBox.vue";
         Radio,
         AddressInput,
         STList
-    }
+    },
+    emits: ['update:modelValue', 'modify'],
 })
 export default class SelectionAddressInput extends Vue {
     @Prop({ required: true }) 
@@ -73,13 +69,13 @@ export default class SelectionAddressInput extends Vue {
     internalValidator = new Validator()
     
     @Prop({ default: null })
-        value: Address | ValidatedAddress | null
+        modelValue: Address | ValidatedAddress | null
 
     selectedAddress: Address | null = null
     customAddress: Address | null = null
     editingAddress = false
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: Address | null) {
         if (val === this.selectedAddress ?? this.customAddress ?? null) {
             // Not changed
@@ -107,8 +103,12 @@ export default class SelectionAddressInput extends Vue {
         }
     }
 
+    get hasModifyListener() {
+        return !!this.$.vnode.props?.onModify
+    }
+
     mounted() {
-        const a = this.addresses.find(aa => aa.toString() == this.value?.toString())
+        const a = this.addresses.find(aa => aa.toString() == this.modelValue?.toString())
         if (a) {
             this.selectedAddress = a
             this.editingAddress = false
@@ -116,9 +116,9 @@ export default class SelectionAddressInput extends Vue {
         } else {
             this.selectedAddress = null
             this.editingAddress = false
-            this.customAddress = this.value
+            this.customAddress = this.modelValue
 
-            if (this.required && !this.value && this.addresses.length > 0) {
+            if (this.required && !this.modelValue && this.addresses.length > 0) {
                 this.$emit('update:modelValue', this.addresses[0])
             }
         }

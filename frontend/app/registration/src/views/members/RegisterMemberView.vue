@@ -32,11 +32,10 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, PopOptions, usePresent } from '@simonbackx/vue-app-navigation';
-import { ScrollableSegmentedControl,useUninheritedPermissions } from '@stamhoofd/components';
+import { ScrollableSegmentedControl, useUninheritedPermissions } from '@stamhoofd/components';
 import { GroupCategoryTree, Organization, PlatformMember } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 
-import { useMemberManager } from '../../getRootView';
 import RegisterMemberGroupRow from './components/RegisterMemberGroupRow.vue';
 import SearchMemberOrganizationView from './SearchMemberOrganizationView.vue';
 
@@ -46,7 +45,6 @@ const props = defineProps<{
 
 const selectedOrganization = ref(props.member.organizations[0] ?? null) as Ref<Organization|null>;
 const auth = useUninheritedPermissions({patchedOrganization: selectedOrganization})
-const memberManager  = useMemberManager();
 const present = usePresent()
 
 const items = computed(() => {
@@ -66,7 +64,7 @@ const tree = computed(() => {
         admin: !!auth.permissions, 
         smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
         filterGroups: (g) => {
-            return memberManager.canRegister(props.member, g);
+            return props.member.canRegister(g);
         }
     })
 });

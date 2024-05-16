@@ -4,7 +4,7 @@
             {{ category.name }}
         </h3>
         <p v-if="category.filter" class="style-description-small">
-            {{ category.filter.getString(filterDefinitionsForCategory()) }}
+            {{ propertyFilterToString(category.filter) }}
         </p>
         <p v-if="!category.childCategories.length && !category.records.length" class="style-description-small">
             Leeg
@@ -31,11 +31,12 @@
 <script lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
-import { RecordCategory, RecordEditorSettings } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ContextMenu, ContextMenuItem, LongPressDirective, propertyFilterToString,STListItem } from "@stamhoofd/components";
+import { Filterable, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 
 import EditRecordCategoryQuestionsView from './EditRecordCategoryQuestionsView.vue';
+import { RecordEditorSettings } from './RecordEditorSettings';
 
 @Component({
     components: {
@@ -45,26 +46,30 @@ import EditRecordCategoryQuestionsView from './EditRecordCategoryQuestionsView.v
         longPress: LongPressDirective
     }
 })
-export default class RecordCategoryRow<T> extends Mixins(NavigationMixin) {
+export default class RecordCategoryRow<T extends Filterable> extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        category: RecordCategory
+        category!: RecordCategory
 
     @Prop({ required: false, default: null })
         parentCategory!: RecordCategory | null
 
     @Prop({ required: true })
-        categories: RecordCategory[]
+        categories!: RecordCategory[]
 
     @Prop({ required: true })
-        settings: RecordEditorSettings<T>
+        settings!: RecordEditorSettings<T>
 
-    filterDefinitionsForCategory() {
+    filterBuilderForCategory() {
         const rootIndex = this.categories.findIndex(c => c.id === this.category.id)
         if (rootIndex === -1) {
-            return this.settings.filterDefinitions([])
+            return this.settings.filterBuilder([])
         }
         const rootCategories = this.categories.slice(0, rootIndex + 1)
-        return this.settings.filterDefinitions(rootCategories)
+        return this.settings.filterBuilder(rootCategories)
+    }
+
+    propertyFilterToString(filter: PropertyFilter) {
+        return propertyFilterToString(filter, this.filterBuilderForCategory());
     }
 
     editCategory() {

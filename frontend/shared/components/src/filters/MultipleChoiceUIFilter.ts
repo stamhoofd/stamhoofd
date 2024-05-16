@@ -1,9 +1,9 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
-
 import { Formatter } from "@stamhoofd/utility";
+
 import MultipleChoiceUIFilterView from "./MultipleChoiceUIFilterView.vue";
-import { UIFilter, UIFilterBuilder } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterWrapper } from "./UIFilter";
 
 export class MultipleChoiceUIFilterOption {
     name: string;
@@ -68,6 +68,11 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
         this.name = data.name;
         this.options = data.options;
         this.buildFilter = data.buildFilter
+    }
+    wrapFilter?: UIFilterWrapper | null | undefined;
+    
+    fromFilter(_filter: StamhoofdFilter): UIFilter | null {
+        return null;
     }
     
     create(): MultipleChoiceUIFilter {

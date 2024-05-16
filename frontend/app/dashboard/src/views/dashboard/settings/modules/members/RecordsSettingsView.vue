@@ -24,8 +24,8 @@
                 <p class="style-title-list">
                     {{ $t('shared.inputs.mobile.label') }} (van lid zelf)
                 </p>
-                <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.phone.getString(getFilterDefinitionsForProperty('phone')) }}
+                <p v-if="patchedOrganization.meta.recordsConfiguration.phone" class="style-description-small">
+                    {{ propertyFilterToString(patchedOrganization.meta.recordsConfiguration.phone) }}
                 </p>
                 <template v-if="getEnableFilterConfiguration('phone')" #right>
                     <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" />
@@ -38,8 +38,8 @@
                 <p class="style-title-list">
                     E-mailadres (van lid zelf)
                 </p>
-                <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.emailAddress.getString(getFilterDefinitionsForProperty('emailAddress')) }}
+                <p v-if="patchedOrganization.meta.recordsConfiguration.emailAddress" class="style-description-small">
+                    {{ propertyFilterToString(patchedOrganization.meta.recordsConfiguration.emailAddress) }}
                 </p>
                 <template v-if="getEnableFilterConfiguration('emailAddress')" #right>
                     <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" />
@@ -52,8 +52,8 @@
                 <p class="style-title-list">
                     Geslacht
                 </p>
-                <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.gender.getString(getFilterDefinitionsForProperty('gender')) }}
+                <p v-if="patchedOrganization.meta.recordsConfiguration.gender" class="style-description-small">
+                    {{ propertyFilterToString(patchedOrganization.meta.recordsConfiguration.gender) }}
                 </p>
                 <template v-if="getEnableFilterConfiguration('gender')" #right>
                     <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" />
@@ -66,8 +66,8 @@
                 <p class="style-title-list">
                     Geboortedatum
                 </p>
-                <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.birthDay.getString(getFilterDefinitionsForProperty('birthDay')) }}
+                <p v-if="patchedOrganization.meta.recordsConfiguration.birthDay" class="style-description-small">
+                    {{ propertyFilterToString(patchedOrganization.meta.recordsConfiguration.birthDay) }}
                 </p>
                 <template v-if="getEnableFilterConfiguration('birthDay')" #right>
                     <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" />
@@ -80,8 +80,8 @@
                 <p class="style-title-list">
                     Adres (van lid zelf)
                 </p>
-                <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.address.getString(getFilterDefinitionsForProperty('address')) }}
+                <p v-if="patchedOrganization.meta.recordsConfiguration.address" class="style-description-small">
+                    {{ propertyFilterToString(patchedOrganization.meta.recordsConfiguration.address) }}
                 </p>
                 <template v-if="getEnableFilterConfiguration('address')" #right>
                     <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" />
@@ -94,8 +94,8 @@
                 <p class="style-title-list">
                     Ouders
                 </p>
-                <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.parents.getString(getFilterDefinitionsForProperty('parents')) }}
+                <p v-if="patchedOrganization.meta.recordsConfiguration.parents" class="style-description-small">
+                    {{ propertyFilterToString(patchedOrganization.meta.recordsConfiguration.parents) }}
                 </p>
                 <template v-if="getEnableFilterConfiguration('parents')" #right>
                     <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" />
@@ -108,8 +108,8 @@
                 <p class="style-title-list">
                     Noodcontactpersoon
                 </p>
-                <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts.getString(getFilterDefinitionsForProperty('emergencyContacts')) }}
+                <p v-if="patchedOrganization.meta.recordsConfiguration.emergencyContacts" class="style-description-small">
+                    {{ propertyFilterToString(patchedOrganization.meta.recordsConfiguration.emergencyContacts) }}
                 </p>
                 <template v-if="getEnableFilterConfiguration('emergencyContacts')" #right>
                     <button class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')" />
@@ -160,13 +160,15 @@ import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchCont
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, PropertyFilterView, SaveView, STErrorsDefault, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, Version } from "@stamhoofd/structures";
+import { CenteredMessage, Checkbox, ErrorBox, GroupUIFilterBuilder, MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption, NumberFilterBuilder, PropertyFilterView, STErrorsDefault, STList, STListItem, SaveView, StringFilterBuilder, Toast, UIFilterBuilders, Validator, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, unwrapFilter } from "@stamhoofd/components";
+import { AskRequirement, Gender, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
 
 import EditRecordCategoryQuestionsView from './records/EditRecordCategoryQuestionsView.vue';
 import EditRecordCategoryView from './records/EditRecordCategoryView.vue';
 import RecordCategoryRow from "./records/RecordCategoryRow.vue";
+import { RecordEditorSettings } from './records/RecordEditorSettings';
+
+type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
 
 @Component({
     components: {
@@ -253,23 +255,21 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         this.addRecordsConfigurationPatch(p)
     }
 
+    propertyFilterToString(filter: PropertyFilter) {
+        return propertyFilterToString(filter, this.editorSettings.filterBuilder([]));
+    }
+
     get editorSettings() {
         return new RecordEditorSettings({
             dataPermission: true,
-            filterDefinitions: (categories: RecordCategory[]) => {
-                return [
-                    ...MemberDetailsWithGroups.getBaseFilterDefinitions(),
-                    ...RecordCategory.getRecordCategoryDefinitions(categories, (member: MemberDetailsWithGroups) => {
-                        return member.details.recordAnswers
-                    }),
-                ]
+            filterBuilder: (categories: RecordCategory[]) => {
+                return memberWithRegistrationsBlobUIFilterBuilders[0];
             },
-            filterValueForAnswers: (recordAnswers: RecordAnswer[]) => new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
+            filterValueForAnswers: (recordAnswers: RecordAnswer[]) => {
+                // new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
+                throw new Error('Not implemented')
+            }
         })
-    }
-
-    get filterDefinitions() {
-        return MemberDetailsWithGroups.getFilterDefinitions(this.patchedOrganization, {});
     }
 
     addCategory() {
@@ -281,7 +281,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
                     root: new ComponentWithProperties(EditRecordCategoryView, {
                         category,
                         isNew: true,
-                        filterDefinitions: this.filterDefinitions,
+                        filterBuilder: this.editorSettings.filterBuilder([]),
                         saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => {
                             this.addCategoriesPatch(patch)
                             component.show({
@@ -307,11 +307,11 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         })
     }
     
-    getEnableFilterConfiguration(property: string) {
+    getEnableFilterConfiguration(property: PropertyName) {
         return this.patchedOrganization.meta.recordsConfiguration[property] !== null
     }
 
-    setEnableFilterConfiguration(property: string, enable: boolean) {
+    setEnableFilterConfiguration(property: PropertyName, enable: boolean) {
         if (enable === this.getEnableFilterConfiguration(property)) {
             return
         }
@@ -327,20 +327,12 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    getFilterDefinitionsForProperty(property: string) {
-        if (['parents', 'emergencyContacts'].includes(property)) {
-            return MemberDetailsWithGroups.getBaseFilterDefinitions()
-        }
-        return MemberDetails.getBaseFilterDefinitions()
-    }
-
-    editEnableFilterConfiguration(property: string, title: string) {
+    editEnableFilterConfiguration(property: PropertyName, title: string) {
         this.present(new ComponentWithProperties(PropertyFilterView, {
             configuration: this.patchedOrganization.meta.recordsConfiguration[property],
             title,
-            organization: this.patchedOrganization,
-            definitions: this.getFilterDefinitionsForProperty(property),
-            setConfiguration: (configuration: PropertyFilter<MemberDetails | MemberDetailsWithGroups>) => {
+            builder: this.editorSettings.filterBuilder([]),
+            setConfiguration: (configuration: PropertyFilter) => {
                 this.patchConfigProperty(property, configuration)
             }
         }).setDisplayStyle("popup"))
@@ -394,10 +386,6 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-    }
-   
-    mounted() {
-        this.setUrl("/records");
     }
 }
 </script>

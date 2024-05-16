@@ -1,6 +1,6 @@
 
 
-type Validation = () => Promise<boolean> | boolean
+export type Validation = () => Promise<boolean> | boolean
 /***
  * Pass a Validator instance to mutliple components so you can validate the state of multiple input components at once. 
  * This is usefull because some validation already happens on the fly in components, that way we can reuse that behaviour

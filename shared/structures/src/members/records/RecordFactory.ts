@@ -1,8 +1,5 @@
-import { FilterGroup } from "../../filters/FilterGroup"
-import { NumberFilter, NumberFilterMode } from "../../filters/NumberFilter"
 import { PropertyFilter } from "../../filters/PropertyFilter"
-import { MemberDetailsWithGroups } from "../OrganizationRecordsConfiguration"
-import { LegacyRecordType, LegacyRecordTypePriority } from "./LegacyRecordType"
+import { LegacyRecordType } from "./LegacyRecordType"
 import { RecordCategory } from "./RecordCategory"
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from "./RecordSettings"
 
@@ -84,11 +81,6 @@ export class RecordFactory {
                 })
 
             case LegacyRecordType.MedicinePermissions: {
-                const definitions = MemberDetailsWithGroups.getBaseFilterDefinitions()
-                const ageFilter = definitions.find(d => d.id === "member_age")!.createFilter() as NumberFilter<MemberDetailsWithGroups>
-                ageFilter.mode = NumberFilterMode.LessThan
-                ageFilter.end = 17
-
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: "RecordCategory.MedicinePermissions",
@@ -96,11 +88,13 @@ export class RecordFactory {
                     description: "Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.",
                     
                     // Only ask if <18y
-                    legacyFilter: new PropertyFilter(
-                        new FilterGroup(definitions, [
-                            ageFilter
-                        ]).encoded, 
-                        new FilterGroup(definitions).encoded
+                    filter: new PropertyFilter(
+                        {
+                            age: {
+                                $lt: 18
+                            }
+                        }, 
+                        {}
                     )
                 })
             }
@@ -637,8 +631,6 @@ export class RecordFactory {
     }
 
     static createDoctorCategory(required = true) {
-        const definitions = MemberDetailsWithGroups.getBaseFilterDefinitions()
-
         return RecordCategory.create({
             name: "Contactgegevens huisarts",
             records: [
@@ -646,11 +638,11 @@ export class RecordFactory {
                 this.createDoctorPhone()
             ],
             // Allow to skip this step?
-            legacyFilter: required ? 
+            filter: required ? 
                 undefined
                 // Optional
                 : new PropertyFilter(
-                    new FilterGroup(definitions).encoded, 
+                    {}, 
                     null
                 )
         })

@@ -20,10 +20,10 @@
         ]
     },
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "always"
+        "source.fixAll.eslint": "never"
     },
     "editor.formatOnPaste": false,
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "eslint.format.enable": true,
     "eslint.validate": [
         "typescript",
@@ -56,5 +56,5 @@
     "[typescript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "editor.codeLens": false
+    "editor.codeLens": false,
 }

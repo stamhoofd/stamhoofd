@@ -49,7 +49,7 @@ import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
 const $navigate = useNavigate();
-const members = memberManager.members;
+const members = computed(() => memberManager.family.members);
 const title = 'Wie wil je inschrijven?'
 
 enum Routes {
@@ -64,7 +64,7 @@ defineRoutes([
             name: String
         },
         paramsToProps(params) {
-            const member = members.find(m => Formatter.slug(m.member.firstName) === params.name);
+            const member = members.value.find(m => Formatter.slug(m.member.firstName) === params.name);
             if (!member) {
                 throw new Error("Member not found");
             }

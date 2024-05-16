@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="phone" :error-box="errorBox">
-        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" type="tel" @change="validate(false)" @input="phoneRaw = $event.target.value; onTyping();">
+        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" type="tel" @change="validate(false)" @input="(event) => {phoneRaw = event.target.value; onTyping();}">
     </STInputBox>
 </template>
 
@@ -17,7 +17,8 @@ import STInputBox from "./STInputBox.vue";
 @Component({
     components: {
         STInputBox
-    }
+    },
+    emits: ["update:modelValue"]
 })
 export default class PhoneInput extends Vue {
     @Prop({ default: "" }) 
@@ -30,13 +31,13 @@ export default class PhoneInput extends Vue {
     valid = true;
 
     @Prop({ default: null })
-        value!: string | null
+        modelValue!: string | null
 
     @Prop({ default: true })
         required!: boolean
 
     /**
-     * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
+     * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
      */
     @Prop({ default: false })
@@ -47,8 +48,8 @@ export default class PhoneInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('value')
-    onValueChanged(val: string | null) {
+    @Watch('modelValue')
+    onmodelValueChanged(val: string | null) {
         if (val === null) {
             this.phoneRaw = ""
             return
@@ -57,7 +58,7 @@ export default class PhoneInput extends Vue {
     }
 
     onTyping() {
-        // Silently send value to parents, but don't show visible errors yet
+        // Silently send modelValue to parents, but don't show visible errors yet
         this.validate(false, true).catch(console.error)
     }
 
@@ -68,7 +69,7 @@ export default class PhoneInput extends Vue {
             })
         }
 
-        this.phoneRaw = this.value ?? ""
+        this.phoneRaw = this.modelValue ?? ""
     }
 
     unmounted() {
@@ -86,7 +87,7 @@ export default class PhoneInput extends Vue {
                     this.errorBox = null
                 }
 
-                if (this.value !== null) {
+                if (this.modelValue !== null) {
                     this.$emit('update:modelValue', null)
                 }
                 return true
@@ -97,7 +98,7 @@ export default class PhoneInput extends Vue {
                     this.errorBox = null
                 }
 
-                if (this.nullable && this.value !== null) {
+                if (this.nullable && this.modelValue !== null) {
                     this.$emit('update:modelValue', null)
                 }
                 return false
@@ -135,7 +136,7 @@ export default class PhoneInput extends Vue {
                 const v = silent ? this.phoneRaw : phoneNumber.formatInternational();
                 this.phoneRaw = v
         
-                if (this.value !== v) {
+                if (this.modelValue !== v) {
                     this.$emit('update:modelValue', v)
                 }
                 if (!silent) {

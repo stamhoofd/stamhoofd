@@ -1,7 +1,9 @@
 <template>
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
-        <STNavigationBar :title="filter.name" :disableDismiss="canPop">
-            <template v-if="canDelete" #right><button class="button icon trash" type="button" @click="deleteFilter" /></template>
+        <STNavigationBar :title="filter.name" :disable-dismiss="canPop">
+            <template v-if="canDelete" #right>
+                <button class="button icon trash" type="button" @click="deleteFilter" />
+            </template>
         </STNavigationBar>
 
         <main>
@@ -13,16 +15,18 @@
         </main>
 
         <STToolbar v-if="!live">
-            <template #right><button class="button primary full" type="button" @click="applyFilter">
-                Toepassen
-            </button></template>
+            <template #right>
+                <button class="button primary full" type="button" @click="applyFilter">
+                    Toepassen
+                </button>
+            </template>
         </STToolbar>
     </form>
 </template>
 
 
 <script lang="ts">
-import { FramedComponent,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { FramedComponent, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import Radio from "../inputs/Radio.vue";
@@ -30,6 +34,7 @@ import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import STNavigationBar from "../navigation/STNavigationBar.vue";
 import STToolbar from "../navigation/STToolbar.vue";
+import { CenteredMessage } from "../overlays/CenteredMessage";
 import { UIFilter } from './UIFilter';
 
 @Component({

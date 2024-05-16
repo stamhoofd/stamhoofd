@@ -1461,6 +1461,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             const value = this.sortedValues[index] ?? null
 
+
             visibleRow.value = value
             visibleRow.y = index * this.rowHeight
             visibleRow.currentIndex = index

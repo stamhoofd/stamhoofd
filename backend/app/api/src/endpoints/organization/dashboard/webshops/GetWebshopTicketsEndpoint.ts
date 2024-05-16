@@ -8,7 +8,7 @@ import { Context } from "../../../../helpers/Context";
 type Params = { id: string };
 type Query = WebshopTicketsQuery
 type Body = undefined
-type ResponseBody = PaginatedResponse<TicketPrivate, Query>
+type ResponseBody = PaginatedResponse<TicketPrivate[], Query>
 
 export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = WebshopTicketsQuery as Decoder<WebshopTicketsQuery>

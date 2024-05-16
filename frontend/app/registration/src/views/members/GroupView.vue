@@ -13,8 +13,8 @@
 
             <p v-if="group.settings.description" class="style-description pre-wrap" v-text="group.settings.description" />
 
-            <p v-if="canRegisterError" class="warning-box">
-                {{ canRegisterError }}
+            <p v-if="validationError" class="warning-box">
+                {{ validationError }}
             </p>
 
             <p v-if="infoDescription" class="info-box">
@@ -60,7 +60,7 @@
             </STList>
         </main>
 
-        <STToolbar v-if="!canRegisterError && member">
+        <STToolbar v-if="!validationError && member">
             <template #right>
                 <button class="primary button" type="button" @click="registerMember">
                     <span>{{ member.member.firstName }} inschrijven</span>
@@ -73,20 +73,18 @@
 
 <script setup lang="ts">
 import { ImageComponent, STToolbar } from '@stamhoofd/components';
-import { Group, PlatformMember } from '@stamhoofd/structures';
+import { Group, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
-import { useMemberManager } from '../../getRootView';
 
 const props = defineProps<{
     group: Group,
     member: PlatformMember
 }>();
-const memberManager = useMemberManager()
-const registerItem = computed(() => memberManager.defaultItem(props.member, props.group))
-const canRegisterError = computed(() => memberManager.canRegisterError(props.member, props.group))
-const infoDescription = computed(() => canRegisterError.value ? null : registerItem.value.getInfoDescription(memberManager.registerContext));
+const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group))
+const validationError = computed(() => registerItem.value.validationError )
+const infoDescription = computed(() => validationError.value ? null : registerItem.value.infoDescription);
 
 function registerMember() {
     // todo

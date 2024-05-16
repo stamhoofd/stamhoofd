@@ -68,8 +68,8 @@ export class DocumentTemplate extends Model {
     /**
      * Returns the default answers for a given registration
      */
-    async buildAnswers(registration: RegistrationWithMember): Promise<{fieldAnswers: RecordAnswer[], missingData: boolean}> {
-        const fieldAnswers: RecordAnswer[] = []
+    async buildAnswers(registration: RegistrationWithMember): Promise<{fieldAnswers: Map<string, RecordAnswer>, missingData: boolean}> {
+        const fieldAnswers = new Map<string, RecordAnswer>()
         let missingData = false
 
         const group = await Group.getByID(registration.groupId)
@@ -190,7 +190,7 @@ export class DocumentTemplate extends Model {
             if (linkedToMemberAnswerSettingsIds) {
                 for (const linkedToMemberAnswerSettingsId of linkedToMemberAnswerSettingsIds) {
                     if (linkedToMemberAnswerSettingsId) {
-                        const answer = registration.member.details.recordAnswers.find(a => a.settings.id === linkedToMemberAnswerSettingsId);
+                        const answer = registration.member.details.recordAnswers.get(linkedToMemberAnswerSettingsId);
                         if (answer && !answer.isEmpty && answer.settings.type === field.type) {  
                             // We need to link it with the settings in the template
                             const clone = answer.clone()
@@ -198,7 +198,7 @@ export class DocumentTemplate extends Model {
                             clone.reviewedAt = null // All linked fields are not reviewed. Unless they are manually changed by an admin later
                         
                             found = true
-                            fieldAnswers.push(clone)
+                            fieldAnswers.set(field.id, clone)
                             break;
                         }
 
@@ -210,7 +210,7 @@ export class DocumentTemplate extends Model {
                                 clone.settings = field
 
                                 found = true
-                                fieldAnswers.push(clone )
+                                fieldAnswers.set(field.id, clone)
                                 break;
                             } else {
                                 console.warn("Found type mismatch for default data: " + linkedToMemberAnswerSettingsId + " - " + field.id)
@@ -229,34 +229,34 @@ export class DocumentTemplate extends Model {
                 const clone = RecordAnswerDecoder.getClassForType(field.type).create({
                     settings: field,
                 })
-                fieldAnswers.push(clone)
+                fieldAnswers.set(field.id, clone)
             }
         }
 
         // Add global answers (same for each document)
-        for (const anwer of this.settings.fieldAnswers) {
+        for (const answer of this.settings.fieldAnswers.values()) {
             // todo: check duplicate
-            anwer.reviewedAt = null
-            fieldAnswers.push(anwer)
+            answer.reviewedAt = null
+            fieldAnswers.set(answer.settings.id, answer)
         }
 
         // Add group based answers (same for each group)
-        for (const anwer of this.privateSettings.groups.find(g => g.groupId === registration.groupId && g.cycle === registration.cycle)?.fieldAnswers ?? []) {
+        for (const answer of this.privateSettings.groups.find(g => g.groupId === registration.groupId && g.cycle === registration.cycle)?.fieldAnswers?.values() ?? []){
             // todo: check duplicate
-            anwer.reviewedAt = null
-            fieldAnswers.push(anwer)
+            answer.reviewedAt = null
+            fieldAnswers.set(answer.settings.id, answer)
         }
 
         // Add other default data
         for (const key in defaultData) {
-            if (defaultData[key] && defaultData[key].settings.id === key && !fieldAnswers.find(a => a.settings.id === key)) {
-                fieldAnswers.push(defaultData[key])
+            if (defaultData[key] && defaultData[key].settings.id === key && !fieldAnswers.get(key)) {
+                fieldAnswers.set(key, defaultData[key])
             }
         }
 
         // Verify answers
         if (!missingData) {
-            for (const answer of fieldAnswers) {
+            for (const answer of fieldAnswers.values()) {
                 try {
                     answer.validate()
                 } catch (e) {
@@ -340,12 +340,12 @@ export class DocumentTemplate extends Model {
         }
     }
 
-    checkIncluded(registration: RegistrationWithMember, fieldAnswers: RecordAnswer[]) {
+    checkIncluded(registration: RegistrationWithMember, fieldAnswers: Map<string, RecordAnswer>) {
         if (this.settings.maxAge !== null) {
             const fieldId = 'registration.startDate';
             let startDate: null | Date = null;
 
-            for (const answer of fieldAnswers) {
+            for (const answer of fieldAnswers.values()) {
                 if (answer instanceof RecordDateAnswer) {
                     if (answer.settings.id === fieldId && !answer.isEmpty) {
                         startDate = answer.dateValue;
@@ -490,7 +490,7 @@ export class DocumentTemplate extends Model {
             "documents": documents.map(d => d.buildContext(organization)),
         };
 
-        for (const field of this.settings.fieldAnswers) {
+        for (const field of this.settings.fieldAnswers.values()) {
             const keys = field.settings.id.split('.')
             let current = data
             const lastKey = keys.pop()!
@@ -531,9 +531,9 @@ export class DocumentTemplate extends Model {
         }
     }
 
-    areAnswersComplete(answers: RecordAnswer[]) {
+    areAnswersComplete(answers: Map<string, RecordAnswer>) {
         for (const field of this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
-            const answer = answers.find(a => a.settings.id === field.id)
+            const answer = answers.get(field.id)
             if (!answer) {
                 return false;
             }
@@ -553,18 +553,17 @@ export class DocumentTemplate extends Model {
         const {fieldAnswers} = await this.buildAnswers(registration)
         const existingAnswers = document.data.fieldAnswers
 
-        const newAnswers: RecordAnswer[] = existingAnswers.slice()
+        const newAnswers = new Map(existingAnswers)
 
-        for (const addAnswer of fieldAnswers) {
-            const existingIndex = newAnswers.findIndex(a => a.settings.id === addAnswer.settings.id)
-            const existing = existingIndex !== -1 ? newAnswers[existingIndex] : null
+        for (const addAnswer of fieldAnswers.values()) {
+            const existing = newAnswers.get(addAnswer.settings.id) //newAnswers.findIndex(a => a.settings.id === addAnswer.settings.id)
             if (existing) {
                 // We already have an answer for this field, we'll only update it if addAnswer is reviewed later
                 if (!existing.isReviewedAfter(addAnswer)) {
-                    newAnswers[existingIndex] = addAnswer
+                    newAnswers.set(addAnswer.settings.id, addAnswer)
                 }
             } else {
-                newAnswers.push(addAnswer)
+                newAnswers.set(addAnswer.settings.id, addAnswer)
             }
         }
 

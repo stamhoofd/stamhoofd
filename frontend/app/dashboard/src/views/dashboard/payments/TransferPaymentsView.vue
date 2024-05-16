@@ -175,70 +175,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     get filterDefinitions(): FilterDefinition<PaymentGeneral, Filter<PaymentGeneral>, any>[] {
-        return [
-            new ChoicesFilterDefinition<PaymentGeneral>({
-                id: "webshops", 
-                name: "Webshops", 
-                choices: this.organization.webshops.map(webshop => new ChoicesFilterChoice(webshop.id, webshop.meta.name)),
-                getValue: (payment) => {
-                    return payment.orders.map(o => o.webshopId)
-                },
-                defaultMode: ChoicesFilterMode.Or
-            }),
-
-            new ChoicesFilterDefinition<PaymentGeneral>({
-                id: "registrations", 
-                name: "Inschrijvingen", 
-                choices: this.organization.getGroupsForPermissions(this.$context.organizationPermissions).map(group => new ChoicesFilterChoice(group.id, group.settings.name)),
-                getValue: (payment) => {
-                    return payment.registrations.map(r => r.groupId)
-                },
-                defaultMode: ChoicesFilterMode.Or
-            }),
-
-            new ChoicesFilterDefinition<PaymentGeneral>({
-                id: "paid", 
-                name: "Betaald", 
-                choices: [
-                    new ChoicesFilterChoice("checked", "Betaald"),
-                    new ChoicesFilterChoice("not_checked", "Niet betaald")
-                ],
-                getValue: (payment) => {
-                    return [payment.status == PaymentStatus.Succeeded ? "checked" : "not_checked"]
-                },
-                defaultMode: ChoicesFilterMode.Or
-            }),
-
-            new DateFilterDefinition<PaymentGeneral>({
-                id: "created_at", 
-                name: "Aanmaakdatum", 
-                description: "Datum waarop overschrijving werd aangemaakt in het systeem.",
-                getValue: (payment) => {
-                    return payment.createdAt
-                },
-                time: false
-            }),
-
-            new DateFilterDefinition<PaymentGeneral>({
-                id: "paid_at", 
-                name: "Betaaldatum", 
-                description: "Datum waarop overschrijving als betaald werd gemarkeerd",
-                getValue: (payment) => {
-                    return payment.paidAt ?? new Date(1900, 0, 1)
-                },
-                time: false
-            }),
-
-            new NumberFilterDefinition<PaymentGeneral>({
-                id: "price",
-                name: "Bedrag",
-                currency: true,
-                floatingPoint: true,
-                getValue: (payment) => {
-                    return payment.price
-                }
-            })
-        ]
+        return []
     }
 
     allColumns = ((): Column<PaymentGeneral, any>[] => {

@@ -1,5 +1,5 @@
 import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
-import { Organization, User } from "@stamhoofd/structures";
+import { CountryHelper, Organization, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import Vue from "vue";
 
@@ -10,8 +10,6 @@ declare module 'vue' {
     const Vue: CompatVue
     export default Vue
     export * from '@vue/runtime-dom';
-    export { configureCompat };
-    const { configureCompat } = Vue
 }
   
 declare module "*.vue" {
@@ -53,5 +51,6 @@ declare module 'vue' {
         capitalizeFirstLetter: typeof Formatter.capitalizeFirstLetter,
         formatDateWithDay: typeof Formatter.dateWithDay,
         formatTime: typeof Formatter.time,
+        formatCountry: typeof CountryHelper.getName,
     }
 }

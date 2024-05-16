@@ -1,69 +1,95 @@
 
 import { Data, Encodeable, EncodeContext, PlainObject } from "@simonbackx/simple-encoding"
 
-import { FilterDefinition } from "./FilterDefinition"
-import { FilterGroup, FilterGroupEncoded } from "./FilterGroup"
+import { FilterGroupEncoded } from "./FilterGroup"
+import { StamhoofdFilterDecoder } from "./new/FilteredRequest"
+import { StamhoofdFilter } from "./new/StamhoofdFilter"
 
-export class PropertyFilter<T> implements Encodeable {
-    constructor(enabledWhen: FilterGroupEncoded<T>, requiredWhen: FilterGroupEncoded<T> | null) {
+export class PropertyFilter implements Encodeable {
+    constructor(enabledWhen: StamhoofdFilter | null, requiredWhen: StamhoofdFilter | null) {
         this.enabledWhen = enabledWhen
         this.requiredWhen = requiredWhen
     }
 
-    static createDefault<T>() {
-        return new PropertyFilter<T>(new FilterGroup([]).encoded, new FilterGroup([]).encoded)
+    static createDefault() {
+        return new PropertyFilter(null, {})
     }
 
     /**
      * Enabled when...
-     * cannot be null (always should be enabled)
+     * null = always enabled
      */
-    enabledWhen: FilterGroupEncoded<T>
+    enabledWhen: StamhoofdFilter | null = null
 
     /**
      * If enabled, whether it is required
+     * null = always skippable
+     * empty filter = always required
      */
-    requiredWhen: FilterGroupEncoded<T> | null = null
+    requiredWhen: StamhoofdFilter | null = null
 
-    getString(definitions: FilterDefinition<T>[]): string {
-        const decodedEnabledWhen = this.enabledWhen.decode(definitions)
-        const decodedRequiredWhen = this.requiredWhen === null ? null : this.requiredWhen.decode(definitions)
+    getString(): string {
+        //const decodedEnabledWhen = this.enabledWhen.decode(definitions)
+        //const decodedRequiredWhen = this.requiredWhen === null ? null : this.requiredWhen.decode(definitions)
 
-        if (decodedEnabledWhen.filters.length == 0) {
-            // Always enabled
+        //if (decodedEnabledWhen.filters.length == 0) {
+        //    // Always enabled
 
-            if (decodedRequiredWhen === null) {
-                return "Stap kan worden overgeslagen"
-            }
-            if (decodedRequiredWhen.filters.length == 0) {
-                return "Stap kan niet worden overgeslagen"
-            }
+        //    if (decodedRequiredWhen === null) {
+        //        return "Stap kan worden overgeslagen"
+        //    }
+        //    if (decodedRequiredWhen.filters.length == 0) {
+        //        return "Stap kan niet worden overgeslagen"
+        //    }
 
-            return "Stap kan niet worden overgeslagen als: "+decodedRequiredWhen.toString()
-        }
+        //    return "Stap kan niet worden overgeslagen als: "+decodedRequiredWhen.toString()
+        //}
 
-        if (decodedRequiredWhen === null) {
-            return "Ingeschakeld (kan altijd worden overgeslagen) als: "+decodedEnabledWhen.toString()
-        }
+        //if (decodedRequiredWhen === null) {
+        //    return "Ingeschakeld (kan altijd worden overgeslagen) als: "+decodedEnabledWhen.toString()
+        //}
 
-        if (decodedRequiredWhen.filters.length == 0) {
-            return "Ingeschakeld als: "+decodedEnabledWhen.toString()
-        }
+        //if (decodedRequiredWhen.filters.length == 0) {
+        //    return "Ingeschakeld als: "+decodedEnabledWhen.toString()
+        //}
 
-        return "Ingeschakeld als: "+decodedEnabledWhen+", enkel verplicht invullen als: "+decodedRequiredWhen.toString()
+        //return "Ingeschakeld als: "+decodedEnabledWhen+", enkel verplicht invullen als: "+decodedRequiredWhen.toString()
+
+        return "TODO"
     }
 
     encode(context: EncodeContext): PlainObject {
         return {
-            enabledWhen: this.enabledWhen.encode(context),
-            requiredWhen: this.requiredWhen === null ? null : this.requiredWhen.encode(context)
+            enabledWhen: this.enabledWhen as PlainObject,
+            requiredWhen: this.requiredWhen as PlainObject
         }
     }
 
-    static decode<T>(data: Data): PropertyFilter<T> {
-        return new PropertyFilter<T>(
-            data.field("enabledWhen").decode(FilterGroupEncoded),
-            data.field("requiredWhen").nullable(FilterGroupEncoded)
+    static decode<T>(data: Data): PropertyFilter {
+        if (data.context.version < 251) {
+            // Legacy filters: convert to StamhoofdFilter
+            const oldData = {
+                enabledWhen: data.field("enabledWhen").decode(FilterGroupEncoded),
+                requiredWhen: data.field("requiredWhen").nullable(FilterGroupEncoded)
+            };
+
+            return new PropertyFilter(
+                oldData.enabledWhen ? convertFilterGroupEncoded(oldData.enabledWhen) : null,
+                oldData.requiredWhen ? convertFilterGroupEncoded(oldData.requiredWhen) : null
+            )   
+        }
+
+        return new PropertyFilter(
+            data.field("enabledWhen").decode(StamhoofdFilterDecoder),
+            data.field("requiredWhen").nullable(StamhoofdFilterDecoder)
         )
     }
+}
+
+
+function convertFilterGroupEncoded(obj: FilterGroupEncoded<any>): StamhoofdFilter|null {
+    if (obj === null) {
+        return null;
+    }
+    return {}
 }

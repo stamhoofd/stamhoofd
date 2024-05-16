@@ -1,0 +1,322 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { Decoder } from '@simonbackx/simple-encoding';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Member, MemberWithRegistrations } from '@stamhoofd/models';
+import { baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler,SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions } from "@stamhoofd/sql";
+import { CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { DataValidator, Formatter } from '@stamhoofd/utility';
+
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../helpers/Context';
+
+type Params = Record<string, never>;
+type Query = LimitedFilteredRequest;
+type Body = undefined;
+type ResponseBody = PaginatedResponse<MembersBlob, LimitedFilteredRequest>
+
+const filterCompilers: SQLFilterDefinitions = {
+    ...baseSQLFilterCompilers,
+    id: createSQLColumnFilterCompiler('id'),
+    name: createSQLExpressionFilterCompiler(
+        new SQLConcat(
+            SQL.column('firstName'),
+            new SQLScalar(' '),
+            SQL.column('lastName'),
+        )
+    ),
+    birthDay: createSQLColumnFilterCompiler('birthDay', (d) => {
+        if (typeof d === 'number') {
+            const date = new Date(d)
+            return Formatter.dateIso(date);
+        }
+        return d;
+    }),
+    organizationName: createSQLExpressionFilterCompiler(
+        SQL.column('organizations', 'name')
+    ),
+
+    email: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.email'),
+        undefined,
+        true,
+        false
+    ),
+
+    parentEmail: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.parents[*].email'),
+        undefined,
+        true,
+        true
+    ),
+
+    registrations: createSQLRelationFilterCompiler(
+        SQL.select()
+        .from(
+            SQL.table('registrations')
+        ).join(
+            SQL.join(
+                SQL.table('groups')
+            ).where(
+                SQL.column('groups', 'id'),
+                SQL.column('registrations', 'groupId')
+            )
+        ).where(
+            SQL.column('memberId'),
+            SQL.column('members', 'id'),
+        ).whereNot(
+            SQL.column('registeredAt'),
+            null,
+        ).whereNot(
+            SQL.column('groups', 'status'),
+            GroupStatus.Archived
+        ).where(
+            SQL.column('registrations', 'cycle'),
+            SQL.column('groups', 'cycle'),
+        ),
+
+        {
+            ...baseSQLFilterCompilers,
+            "price": createSQLColumnFilterCompiler('price'),
+            "pricePaid": createSQLColumnFilterCompiler('pricePaid'),
+            "waitingList": createSQLColumnFilterCompiler('waitingList'),
+            "canRegister": createSQLColumnFilterCompiler('canRegister'),
+            "cycle": createSQLColumnFilterCompiler('cycle'),
+            "organizationId": createSQLColumnFilterCompiler('organizationId'),
+            "groupId": createSQLColumnFilterCompiler('groupId'),
+
+            "group": createSQLFilterNamespace({
+                ...baseSQLFilterCompilers,
+                id: createSQLColumnFilterCompiler('groupId'),
+                name: createSQLExpressionFilterCompiler(
+                    SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name')
+                ),
+                status: createSQLExpressionFilterCompiler(
+                    SQL.column('groups', 'status')
+                ),
+            })
+        }
+    ),
+}
+
+const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
+    'id': {
+        getValue(a) {
+            return a.id
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('id'),
+                direction
+            })
+        }
+    },
+    'name': {
+        getValue(a) {
+            return a.details.name
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return SQLOrderBy.combine([
+                new SQLOrderBy({
+                    column: SQL.column('firstName'),
+                    direction
+                }),
+                new SQLOrderBy({
+                    column: SQL.column('lastName'),
+                    direction
+                })
+            ])
+        }
+    },
+    'birthDay': {
+        getValue(a) {
+            return a.details.birthDay?.getTime()
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('birthDay'),
+                direction
+            })
+        }
+    },
+    'age': {
+        getValue(a) {
+            return a.details.birthDay?.getTime()
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('birthDay'),
+                // Reverse direction
+                direction: direction === 'ASC' ? 'DESC' : 'ASC'
+            })
+        }
+    }
+}
+
+export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>
+
+    protected doesMatch(request: Request): [true, Params] | [false] {
+        if (request.method != "GET") {
+            return [false];
+        }
+
+        const params = Endpoint.parseParameters(request.url, "/members", {});
+
+        if (params) {
+            return [true, params as Params];
+        }
+        return [false];
+    }
+
+    static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
+        const organization = Context.organization
+
+        if (!organization && !Context.auth.hasPlatformFullAccess()) {
+            throw new SimpleError({
+                code: 'not_implemented',
+                message: 'Listing members platform wide without full permissions is not yet implemented'
+            })
+        }
+
+        let scopeFilter: StamhoofdFilter|undefined = undefined;
+
+        if (organization) {
+            // Add organization scope filter
+            scopeFilter = {
+                registrations: {
+                    $elemMatch: {
+                        organizationId: organization.id
+                    }
+                }
+            };
+        }
+        
+        const query = SQL
+            .select(
+                SQL.column('members', 'id')
+            )
+            .from(
+                SQL.table('members')
+            );
+            
+        if (scopeFilter) {
+            query.where(compileToSQLFilter(scopeFilter, filterCompilers))
+        }
+
+        if (q.filter) {
+            query.where(compileToSQLFilter(q.filter, filterCompilers))
+        }
+
+        if (q.search) {
+            let searchFilter: StamhoofdFilter|null = null
+
+            // Two search modes:
+            // e-mail or name based searching
+            if (q.search.includes('@')) {
+                const isCompleteAddress = DataValidator.isEmailValid(q.search);
+
+                // Member email address contains, or member parent contains
+                searchFilter = {
+                    '$or': [
+                        {
+                            email: {
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
+                            }
+                        },
+                        {
+                            parentEmail: {
+                                [(isCompleteAddress ? '$eq' : '$contains')]: q.search
+                            }
+                        }
+                    ]
+                } as any as StamhoofdFilter
+            } else {
+                searchFilter = {
+                    name: {
+                        $contains: q.search
+                    }
+                }
+            }
+
+            // todo: Address search detection
+            // todo: Phone number search detection
+
+            if (searchFilter) {
+                query.where(compileToSQLFilter(searchFilter, filterCompilers))
+            }
+        }
+
+        if (q instanceof LimitedFilteredRequest) {
+            if (q.pageFilter) {
+                query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
+            }
+
+            query.orderBy(compileToSQLSorter(q.sort, sorters))
+            query.limit(q.limit)
+        }
+       
+        return query
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>) {
+        await Context.setOptionalOrganizationScope();
+        await Context.authenticate()
+
+        if (request.query.limit > 100) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be more than 100'
+            })
+        }
+
+        if (request.query.limit < 1) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be less than 1'
+            })
+        }
+        
+        const data = await GetMembersEndpoint.buildQuery(request.query).fetch()
+        
+        const memberIds = data.map((r) => {
+            if (typeof r.members.id === 'string') {
+                return r.members.id
+            }
+            throw new Error('Expected string')
+        });
+
+        const _members = await Member.getBlobByIds(...memberIds)
+        // Make sure members is in same order as memberIds
+        const members = memberIds.map(id => _members.find(m => m.id === id)!)
+
+        let next: LimitedFilteredRequest|undefined;
+
+        if (memberIds.length >= request.query.limit) {
+            const lastObject = members[members.length - 1];
+            const nextFilter = getSortFilter(lastObject, sorters, request.query.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: request.query.filter,
+                pageFilter: nextFilter,
+                sort: request.query.sort,
+                limit: request.query.limit,
+                search: request.query.search
+            })
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(request.query.pageFilter)) {
+                console.error('Found infinite loading loop for', request.query);
+                next = undefined;
+            }
+        }
+
+        return new Response(
+            new PaginatedResponse<MembersBlob, LimitedFilteredRequest>({
+                results: await AuthenticatedStructures.membersBlob(members),
+                next
+            })
+        );
+    }
+}

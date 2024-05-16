@@ -95,8 +95,9 @@ $segmented-control-height: 60px;
     position: relative;
     --seek-x: 0px;
     --seek-width: 100px;
+    scrollbar-width: thin;
 
-    &:after {
+    &:before {
         content: '';
         position: absolute;
         background: $color-border;
@@ -116,13 +117,14 @@ $segmented-control-height: 60px;
         
         width: var(--seek-width);
         transform: translateX(var(--seek-x));
+        border-radius: 1.5px;
     }
 
     > .item {
         height: $segmented-control-height;
         min-width: 0;
         flex-shrink: 0;
-        max-width: 20vw;
+        max-width: 30vw;
         @extend .style-interactive-small;
         border-bottom: 3px solid transparent;
         line-height: $segmented-control-height;

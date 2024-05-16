@@ -3,7 +3,8 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { SessionContext } from '@stamhoofd/networking';
-import { Document, Group, MembersBlob, PlatformMember, RegisterCheckout, RegisterContext, RegisterItem } from '@stamhoofd/structures';
+import { Document, Group, MembersBlob, Platform, PlatformFamily, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { reactive } from 'vue';
 
 /**
  * Controls the fetching and decrypting of members
@@ -11,39 +12,16 @@ import { Document, Group, MembersBlob, PlatformMember, RegisterCheckout, Registe
 export class MemberManager {
     /// Currently saved members
     $context: SessionContext;
-    members: PlatformMember[] = []
-    checkout: RegisterCheckout = new RegisterCheckout()
+    family: PlatformFamily;
 
     constructor($context: SessionContext) {
         this.$context = $context
-    }
-
-    get registerContext(): RegisterContext {
-        return {
-            members: this.members,
-            checkout: this.checkout
-        }
-    }
-
-    defaultItem(member: PlatformMember, group: Group): RegisterItem {
-        return RegisterItem.defaultFor(member, group, this.registerContext)
-    }
-
-    canRegister(member: PlatformMember, group: Group) {
-        return this.canRegisterError(member, group) === null;
-    }
-
-    canRegisterError(member: PlatformMember, group: Group): string|null {
-        const item = this.defaultItem(member, group)
-        try {
-            item.validate(this.registerContext)
-        } catch (e) {
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                return e.getHuman();
-            }
-            throw e;
-        }
-        return null;
+        this.family = reactive(
+            new PlatformFamily({
+                contextOrganization: $context.organization,
+                platform: Platform.shared,
+            })
+        ) as PlatformFamily;
     }
 
     get isAcceptingNewMembers() {
@@ -57,17 +35,7 @@ export class MemberManager {
             decoder: MembersBlob as Decoder<MembersBlob>
         })
         const blob = response.data
-        const members: PlatformMember[] = []
-        for (const member of blob.members) {
-            members.push(
-                PlatformMember.createFrom({
-                    member,
-                    blob,
-                    contextOrganization: this.$context.organization
-                })
-            )
-        }
-        this.members = members;
+        this.family.insertFromBlob(blob)
     }
 
     async loadDocuments() {
