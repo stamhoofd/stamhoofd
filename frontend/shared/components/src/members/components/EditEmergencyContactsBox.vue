@@ -47,17 +47,17 @@
 <script setup lang="ts">
 import { EmergencyContact, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { computed } from 'vue';
 import { useAuth } from '../../VueGlobalHelper';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import editContactView from './editContactView.vue';
 import STList from '../../layout/STList.vue';
+import EditEmergencyContactView from './EditEmergencyContactView.vue';
 
 const props = defineProps<{
     member: PlatformMember,
@@ -142,30 +142,30 @@ function isPropertyRequired(property: 'birthDay'|'gender'|'address'|'emergencyCo
     return props.member.isPropertyRequired(property)
 }
 
-async function editContact(contact: EmergencyContact) {
-    // await present({
-    //     components: [
-    //         new ComponentWithProperties(editContactView, {
-    //             member: props.member,
-    //             contact,
-    //             isNew: false
-    //         })
-    //     ],
-    //     modalDisplayStyle: "popup"
-    // })
+async function editContact(emergencyContact: EmergencyContact) {
+    await present({
+        components: [
+            new ComponentWithProperties(EditEmergencyContactView, {
+                member: props.member,
+                emergencyContact,
+                isNew: false
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
 }
 
 async function addContact() {
-    const contact = EmergencyContact.create({})
-    // await present({
-    //     components: [
-    //         new ComponentWithProperties(editContactView, {
-    //             member: props.member,
-    //             contact,
-    //             isNew: true
-    //         })
-    //     ],
-    //     modalDisplayStyle: "popup"
-    // })
+    const emergencyContact = EmergencyContact.create({})
+    await present({
+        components: [
+            new ComponentWithProperties(EditEmergencyContactView, {
+                member: props.member,
+                emergencyContact,
+                isNew: true
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
 }
 </script>

@@ -14,6 +14,7 @@ import { Parent } from "./Parent"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
+import { EmergencyContact } from "./EmergencyContact"
 
 export const platformMemberInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
@@ -202,6 +203,15 @@ export class PlatformFamily {
             }
         }
     }
+
+    updateEmergencyContact(emergencyContact: EmergencyContact) {
+        for (const member of this.members) {
+            const patch = member.patchedMember.details.updateEmergencyContactPatch(emergencyContact)
+            if (patch !== null) {
+                member.addDetailsPatch(patch)
+            }
+        }
+    }
 }
 
 export class PlatformMember implements ObjectWithRecords {
@@ -261,6 +271,14 @@ export class PlatformMember implements ObjectWithRecords {
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
         this.patch = this.patch.patch(MemberWithRegistrationsBlob.patch(p))
+    }
+
+    addEmergencyContact(emergencyContact: EmergencyContact) {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>
+        arr.addPut(emergencyContact);
+        this.addDetailsPatch({
+            emergencyContacts: arr
+        })
     }
 
     addParent(parent: Parent) {

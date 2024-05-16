@@ -369,6 +369,32 @@ export class MemberDetails extends AutoEncoder {
         return null;
     }
 
+     /**
+     * This will SET the parent
+     */
+    updateEmergencyContactPatch(emergencyContact: EmergencyContact): AutoEncoderPatchType<MemberDetails>|null {
+        let patch = MemberDetails.patch({})
+        let changed = false
+
+        for (const [index, _emergencyContact] of this.emergencyContacts.entries()) {
+            if (_emergencyContact.id == emergencyContact.id || _emergencyContact.isEqual(emergencyContact)) {
+                const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>
+                
+                // Assure we auto correct possible duplicates
+                arr.addDelete(_emergencyContact.id)
+                arr.addDelete(_emergencyContact.id)
+
+                arr.addPut(emergencyContact)
+                patch = patch.patch({ emergencyContacts: arr })
+                changed = true
+            }
+        }
+
+        if (changed) {
+            return patch;
+        }
+        return null;
+    }
 
     /**
      * This will add or update the parent (possibily partially if not all data is present)
