@@ -4,13 +4,12 @@ import { injectHooks, useCurrentComponent, useFocused, useUrl } from "@simonback
 import { AppManager, ContextPermissions, SessionContext } from "@stamhoofd/networking";
 import { Country, CountryHelper, Organization, Platform, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { type App,computed, configureCompat, getCurrentInstance, inject, onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, toRef, unref } from "vue";
+import { type App,computed, getCurrentInstance, inject, onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, toRef, unref } from "vue";
 
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, TooltipDirective } from "..";
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, TooltipDirective } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
 import STInputBox from "./inputs/STInputBox.vue";
-import STList from "./layout/STListBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
 import { I18nController } from "@stamhoofd/frontend-i18n";
@@ -237,8 +236,6 @@ function focusNextElement () {
 
 export class VueGlobalHelper {
     static setup(app: App<Element>) {
-        configureCompat({ WATCH_ARRAY: false, COMPONENT_V_MODEL: false });
-
         (window as any).PromiseComponent = PromiseView
         app.config.globalProperties.$country = "BE" // todo
         app.config.globalProperties.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
