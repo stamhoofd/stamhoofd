@@ -173,6 +173,7 @@ export * from "./src/filters/MultipleChoiceUIFilter"
 export * from "./src/filters/StringUIFilter"
 export * from "./src/filters/UIFilter"
 export * from "./src/filters/NumberUIFilter"
+export * from "./src/filters/filterBuilders"
 
 // tables
 export * from "./src/tables/Column"

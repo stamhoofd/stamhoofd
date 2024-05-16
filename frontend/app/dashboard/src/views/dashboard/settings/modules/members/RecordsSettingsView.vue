@@ -160,7 +160,7 @@ import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchCont
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ErrorBox, GroupUIFilterBuilder, MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption, NumberFilterBuilder, PropertyFilterView, STErrorsDefault, STList, STListItem, SaveView, StringFilterBuilder, Toast, UIFilterBuilders, Validator, propertyFilterToString, unwrapFilter } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ErrorBox, GroupUIFilterBuilder, MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption, NumberFilterBuilder, PropertyFilterView, STErrorsDefault, STList, STListItem, SaveView, StringFilterBuilder, Toast, UIFilterBuilders, Validator, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, unwrapFilter } from "@stamhoofd/components";
 import { AskRequirement, Gender, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
 
 import EditRecordCategoryQuestionsView from './records/EditRecordCategoryQuestionsView.vue';
@@ -169,36 +169,6 @@ import RecordCategoryRow from "./records/RecordCategoryRow.vue";
 import { RecordEditorSettings } from './records/RecordEditorSettings';
 
 type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
-
-const memberUIFilterBuilders: UIFilterBuilders = [
-    new NumberFilterBuilder({
-        name: 'Leeftijd',
-        key: 'age',
-    }),
-    new MultipleChoiceFilterBuilder({
-        name: 'Gender',
-        options: [
-            new MultipleChoiceUIFilterOption('Vrouw', Gender.Female),
-            new MultipleChoiceUIFilterOption('Man', Gender.Male),
-            new MultipleChoiceUIFilterOption('Andere', Gender.Other)
-        ],
-        buildFilter: (choices) => {
-            return {
-                gender: {
-                    $in: choices.map(c => c)
-                }
-            }
-        }
-    })
-];
-
-// Recursive: self referencing groups
-memberUIFilterBuilders.unshift(
-    new GroupUIFilterBuilder({
-        builders: memberUIFilterBuilders
-    })
-)
-
 
 @Component({
     components: {
@@ -293,7 +263,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         return new RecordEditorSettings({
             dataPermission: true,
             filterBuilder: (categories: RecordCategory[]) => {
-                return memberUIFilterBuilders[0];
+                return memberWithRegistrationsBlobUIFilterBuilders[0];
             },
             filterValueForAnswers: (recordAnswers: RecordAnswer[]) => {
                 // new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
