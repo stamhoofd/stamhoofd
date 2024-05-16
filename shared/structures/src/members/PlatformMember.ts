@@ -6,6 +6,7 @@ import { Group } from "../Group"
 import { Organization } from "../Organization"
 import { Platform } from "../Platform"
 import { RegisterCheckout, RegisterItem } from "./checkout/RegisterCheckout"
+import { MemberDetails } from "./MemberDetails"
 import { MembersBlob, MemberWithRegistrationsBlob } from "./MemberWithRegistrationsBlob"
 import { ObjectWithRecords, PatchAnswers } from "./ObjectWithRecords"
 import { RecordAnswer } from "./records/RecordAnswer"
@@ -96,6 +97,35 @@ export class PlatformFamily {
         this.members.push(platformMember)
         return platformMember
     }
+
+    /**
+     * These clones are for patches so they only become visible after saving
+     */
+    clone() {
+        const family = new PlatformFamily({
+            platform: this.platform
+        })
+        family.organizations = this.organizations;
+        family.checkout = this.checkout;
+        family.members = this.members.map(m => m._cloneWithFamily(family))
+        return family
+    }
+
+    copyFromClone(clone: PlatformFamily) {
+        for (const member of this.members) {
+            const cloneMember = clone.members.find(m => m.id === member.id)
+            if (cloneMember) {
+                member.member.set(cloneMember.member)
+            }
+        }
+
+        for (const c of clone.members) {
+            const member = this.members.find(m => m.id === c.id)
+            if (!member) {
+                this.members.push(c)
+            }
+        }
+    }
 }
 
 export class PlatformMember implements ObjectWithRecords {
@@ -115,11 +145,26 @@ export class PlatformMember implements ObjectWithRecords {
 
     constructor(data: {
         member: MemberWithRegistrationsBlob, 
-        family: PlatformFamily
+        family: PlatformFamily,
+        isNew?: boolean
     }) {
         this.member = data.member
         this.patch = MemberWithRegistrationsBlob.patch({id: this.member.id})
         this.family = data.family
+        this.isNew = data.isNew ?? false
+    }
+
+    clone() {
+        const family = this.family.clone()
+        return family.members.find(m => m.id === this.id)!
+    }
+
+    _cloneWithFamily(family: PlatformFamily) {
+        return new PlatformMember({
+            member: this.patchedMember.clone(),
+            family,
+            isNew: this.isNew
+        })
     }
 
     get organizations() {
@@ -140,6 +185,58 @@ export class PlatformMember implements ObjectWithRecords {
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {
         this.patch = this.patch.patch(MemberWithRegistrationsBlob.patch(p))
+    }
+
+    addDetailsPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) {
+        this.addPatch({
+            details: MemberDetails.patch(p)
+        })
+    }
+
+    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+        // todo: platform
+
+        const organizations = this.filterOrganizations({cycleOffset: 0})
+
+        for (const organization of organizations) {
+            const def = organization.meta.recordsConfiguration[property];
+            if (def === null) {
+                continue;
+            }
+            if (def.enabledWhen === null) {
+                return true;
+            }
+            if (this.doesMatchFilter(def.enabledWhen)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+        return false;
+    }
+
+    isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+        if (this.isPropertyRequiredForPlatform(property)) {
+            return true;
+        }
+
+        const organizations = this.filterOrganizations({cycleOffset: 0})
+
+        for (const organization of organizations) {
+            const def = organization.meta.recordsConfiguration[property];
+            if (def === null) {
+                continue;
+            }
+            if (def.requiredWhen === null) {
+                continue
+            }
+            if (this.doesMatchFilter(def.requiredWhen)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     prepareSave() {
@@ -198,16 +295,92 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     filterGroups(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
-        return this.filterRegistrations(filters).flatMap(r => {
-            const organization = this.organizations.find(o => o.id === r.organizationId);
+        const registrations =  this.filterRegistrations(filters);
+        const base: Group[] = [];
+
+        for (const registration of registrations) {
+            if (base.find(g => g.id === registration.groupId)) {
+                continue;
+            }
+
+            const organization = this.organizations.find(o => o.id === registration.organizationId);
             if (organization) {
-                const group = organization.groups.find(g => g.id === r.groupId);
+                const group = organization.groups.find(g => g.id === registration.groupId);
                 if (group) {
-                    return [group]
+                    base.push(group)
                 }
             }
-            return []
-        })
+        }
+
+        // Loop checkout
+        for (const item of this.family.checkout.cart.items) {
+            if (item.member.id === this.id) {
+                if (filters.waitingList !== undefined && filters.waitingList !== item.waitingList) {
+                    continue
+                }
+
+                if (filters.cycle !== undefined && item.group.cycle !== filters.cycle) {
+                    continue
+                }
+
+                if (filters.cycleOffset !== undefined && filters.cycleOffset !== 0) {
+                    continue
+                }
+
+                if (filters.canRegister !== undefined && item.waitingList) {
+                    continue
+                }
+
+                if (!base.find(g => g.id === item.group.id)) {
+                    base.push(item.group)
+                }
+            }
+        }
+
+        return base;
+    }
+
+    filterOrganizations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
+        const registrations =  this.filterRegistrations(filters);
+        const base: Organization[] = [];
+
+        for (const registration of registrations) {
+            if (base.find(g => g.id === registration.organizationId)) {
+                continue;
+            }
+
+            const organization = this.organizations.find(o => o.id === registration.organizationId);
+            if (organization) {
+                base.push(organization)
+            }
+        }
+
+        // Loop checkout
+        for (const item of this.family.checkout.cart.items) {
+            if (item.member.id === this.id) {
+                if (filters.waitingList !== undefined && filters.waitingList !== item.waitingList) {
+                    continue
+                }
+
+                if (filters.cycle !== undefined && item.group.cycle !== filters.cycle) {
+                    continue
+                }
+
+                if (filters.cycleOffset !== undefined && filters.cycleOffset !== 0) {
+                    continue
+                }
+
+                if (filters.canRegister !== undefined && item.waitingList) {
+                    continue
+                }
+
+                if (!base.find(g => g.id === item.organization.id)) {
+                    base.push(item.organization)
+                }
+            }
+        }
+
+        return base;
     }
 
     get groups() {

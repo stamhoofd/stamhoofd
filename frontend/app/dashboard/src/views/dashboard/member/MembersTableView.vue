@@ -23,8 +23,8 @@ import { Column, ComponentExposed, ModernTableView, TableAction, useContext, use
 import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, ref } from "vue";
+import MemberSegmentedView from './MemberSegmentedView.vue';
 import { memberUIFilterBuilders } from './memberUIFilterBuilders';
-import MemberSegmentedView from './MemberSegmentedView.vue'
 
 type ObjectType = PlatformMember;
 
@@ -41,8 +41,6 @@ const props = withDefaults(
     }
 )
 
-const isMobile = useIsMobile();
-const show = useShow();
 const context = useContext();
 const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
@@ -147,16 +145,10 @@ async function showMember(member: PlatformMember) {
         }),
     });
 
-    if (isMobile) {
-        await show({
-            components: [component]
-        });
-    } else {
-        await present({
-            components: [component],
-            modalDisplayStyle: "popup"
-        });
-    }
+    await present({
+        components: [component],
+        modalDisplayStyle: "popup"
+    });
 }
 
 const actions: TableAction<PlatformMember>[] = [

@@ -24,8 +24,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { useAuth, useKeyUpDown, SegmentedControl, FemaleIcon, MaleIcon } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { useAuth, useKeyUpDown, SegmentedControl, FemaleIcon, MaleIcon, MemberStepView, EditMemberGeneralBox, NavigationActions } from '@stamhoofd/components';
 import { Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
@@ -55,6 +55,7 @@ const tabIndex = computed(() => {
     return Math.max(0, tabs.findIndex(t => t === tab.value))
 });
 const show = useShow();
+const present = usePresent();
 const auth = useAuth();
 const hasWrite = computed(() => {
     return auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
@@ -190,8 +191,20 @@ async function goNext() {
     await seek(false);
 }
 
-function editMember() {
-    // todo
+async function editMember() {
+    await present({
+        components: [
+            new ComponentWithProperties(MemberStepView, {
+                member: props.member,
+                title: props.member.member.firstName + ' bewerken',
+                component: EditMemberGeneralBox,
+                saveHandler: async ({dismiss}: NavigationActions) => {
+                    await dismiss({force: true});
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
 }
 
 function showContextMenu() {

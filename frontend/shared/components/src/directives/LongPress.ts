@@ -31,7 +31,7 @@ function distance(a: { x: number, y: number }, b: { x: number, y: number }) {
 const LongPressDirective: ObjectDirective<HTMLElement & {$longPressTimer: NodeJS.Timeout|null, $didTriggerLongPress: boolean}, () => void> = {
     beforeMount(el, binding) {
         // If we are on Android or Desktop, we can ignore this listener
-        if (!(binding.instance as any).$isIOS) {
+        if (!(binding.instance?.$.proxy?.$isIOS)) {
             return
         }
 
@@ -50,7 +50,7 @@ const LongPressDirective: ObjectDirective<HTMLElement & {$longPressTimer: NodeJS
             }
         }
 
-        const touchMoveListener = (event) => {
+        const touchMoveListener = (event: TouchEvent) => {
             if (!event.touches || event.touches.length < 1) {
                 return
             }

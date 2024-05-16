@@ -5,6 +5,7 @@ export { default as STErrorsDefault } from "./src/errors/STErrorsDefault.vue"
 export { default as STErrorsInput } from "./src/errors/STErrorsInput.vue"
 export * from "./src/errors/useErrors"
 export * from "./src/errors/Validator"
+export * from "./src/errors/useValidation"
 
 // Classes
 export { EditorSmartButton } from "./src/editor/EditorSmartButton"
@@ -12,6 +13,12 @@ export { EditorSmartVariable } from "./src/editor/EditorSmartVariable"
 export { EmailStyler } from "./src/editor/EmailStyler"
 export * from "./src/EventBus"
 export * from "./src/ViewportHelper"
+
+// Members
+export { default as EditMemberGeneralBox } from "./src/members/components/EditMemberGeneralBox.vue"
+export { default as MemberStepView } from "./src/members/MemberStepView.vue"
+export * from "./src/members/PlatformFamilyManager"
+
 
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"

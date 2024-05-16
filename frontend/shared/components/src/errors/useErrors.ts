@@ -7,5 +7,8 @@ export function useErrors(options?: {validator?: Validator|null}) {
     return reactive({
         errorBox: null as ErrorBox | null,
         validator: options?.validator ?? new Validator()
-    })
+    }) as {
+        errorBox: ErrorBox | null,
+        validator: Validator
+    }
 }

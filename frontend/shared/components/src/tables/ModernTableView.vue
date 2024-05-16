@@ -210,7 +210,6 @@ const props = withDefaults(
     defineProps<{
         title: string,
         backHint?: string|null,
-        description: string,
         actions?: TableAction<Value>[],
         estimatedRows?: number,
         tableObjectFetcher: TableObjectFetcher<Value>,

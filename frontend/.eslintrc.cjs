@@ -19,14 +19,12 @@ module.exports = {
         extraFileExtensions: ['.vue'], // Additional file extensions
         ignorePatterns: ['.eslintrc.cjs']
     },
-    plugins: ['vue', '@typescript-eslint', "simple-import-sort"],
+    plugins: ['vue', '@typescript-eslint'],
     rules: {
         "vue/html-indent": ["warn", 4],
         "@typescript-eslint/indent": ["warn", 4],
         "no-undef": "off", // broken with typescript: constantly complains about "'components' is not defined" in vue. 
         "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-        "simple-import-sort/imports": "warn",
-        "simple-import-sort/exports": "warn",
         "sort-imports": "off",
         "import/order": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
