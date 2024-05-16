@@ -12,7 +12,6 @@
         "dist"
     ],
     "dependencies": {
-        "@sentry/vue": "^6.13.3",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
         "@stamhoofd/scss": "1.0.0",

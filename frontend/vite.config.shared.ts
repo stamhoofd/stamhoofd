@@ -55,11 +55,7 @@ if (process.env.LOAD_ENV) {
 // https://vitejs.dev/config/
 export function buildConfig(options: {port: number}) {
     return {
-        resolve: {
-            alias: {
-                vue: '@vue/compat'
-            }
-        },
+        resolve: {},
         plugins: [
             vue({
                 template: {

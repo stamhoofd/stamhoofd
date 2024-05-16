@@ -5,23 +5,14 @@
 import 'virtual:vite-svg-2-webfont.css';
 
 // Continue
-import * as Sentry from '@sentry/vue';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
-import Vue, { createApp } from "vue"
+import { createApp } from "vue"
 
 import App from "./src/App.vue";
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
-
-if (!isPrerender && STAMHOOFD.environment == "production") {
-    Sentry.init({
-        Vue,
-        dsn: "https://00c3e526a886491e853cf060f3b00b05@o431770.ingest.sentry.io/6002539",
-        logErrors: true
-    });
-}
 
 document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 

@@ -4,22 +4,12 @@
 // Load icon font
 import 'virtual:vite-svg-2-webfont.css';
 
-import * as Sentry from "@sentry/vue";
 import { ViewportHelper, VueGlobalHelper } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { AppManager } from "@stamhoofd/networking";
-import Vue from "vue";
 import { createApp } from 'vue'
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
-
-if (!isPrerender && STAMHOOFD.environment == "production") {
-    Sentry.init({
-        Vue,
-        dsn: "https://23478e05aa5948959641d836213ba82c@o431770.ingest.sentry.io/6002543",
-        logErrors: true
-    });
-}
 
 import App from "./src/App.vue";
 

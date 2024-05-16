@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
@@ -168,22 +167,11 @@ export class SessionManagerStatic {
             if (session.organization) {
                 this.addOrganizationToStorage(session.organization).catch(console.error)
             }
-            this.setUserId(session);
             this.callListeners(changed)
         })
 
-        this.setUserId(session);
         await session.saveToStorage();
         return session
-    }
-
-    setUserId(session: SessionContext) {
-        if (session.user) {
-            const id = session.user.id;
-            Sentry.configureScope(function(scope) {
-                scope.setUser({"id": id});
-            });
-        }
     }
 
     /**
