@@ -20,6 +20,8 @@ export class Platform extends Model {
     @column({ type: "json", decoder: PlatformPrivateConfig })
     privateConfig: PlatformPrivateConfig = PlatformPrivateConfig.create({})
 
+    static sharedStruct: PlatformStruct | null = null;
+
     static async getSharedStruct(): Promise<PlatformStruct> {
         const struct = await this.getSharedPrivateStruct();
         const clone = struct.clone();
@@ -29,14 +31,14 @@ export class Platform extends Model {
     }
 
     static async getSharedPrivateStruct(): Promise<PlatformStruct> {
-        if (PlatformStruct.optionalShared) {
-            return PlatformStruct.optionalShared;
+        if (this.sharedStruct && this.sharedStruct.privateConfig) {
+            return this.sharedStruct;
         }
 
         return await QueueHandler.schedule('Platform.getSharedStruct', async () => {
             const model = await this.getShared();
             const struct = PlatformStruct.create(model);
-            struct.setShared();
+            this.sharedStruct = struct;
 
             return struct;
         });
@@ -58,7 +60,7 @@ export class Platform extends Model {
     }
 
     async save() {
-        PlatformStruct.clearShared()
+        Platform.sharedStruct = null
         return await super.save()
     }
 }
