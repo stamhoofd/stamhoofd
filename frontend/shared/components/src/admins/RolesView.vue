@@ -33,7 +33,7 @@
                 </template>
             </STListItem>
 
-            <STList v-if="roles.length" v-model="draggableRoles" :draggable="true">
+            <STList v-if="roles.length" :model-value="roles" :draggable="true" @update:model-value="setDraggableRoles($event)">
                 <template #item="{item: role}">
                     <STListItem :selectable="true" class="right-stack" @click="editRole(role)">
                         <template #left>
@@ -68,9 +68,10 @@
 import { type AutoEncoderPatchType,PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, SaveView, Toast } from '@stamhoofd/components';
-import { PermissionRoleDetailed } from '@stamhoofd/structures';
+import { OrganizationPrivateMetaData, PermissionRoleDetailed } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 
+import { createPatchableArrayForReorder } from '../../../helpers/patchableArrayHelpers';
 import STList from '../layout/STList.vue';
 import EditRoleView from './EditRoleView.vue';
 import { useAdmins } from './hooks/useAdmins';
@@ -152,8 +153,6 @@ const createRolePatchArray = () => {
     return new PatchableArray() as PatchableArrayAutoEncoder<PermissionRoleDetailed>
 }
 
-const draggableRoles = roles;
-
 const getAdminsForRole = (role: PermissionRoleDetailed): number => {
     return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.roles.find(r => r.id === role.id) ? 1 : 0), 0)
 }
@@ -186,6 +185,14 @@ const shouldNavigateAway = async () => {
         return true;
     }
     return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+}
+
+function setDraggableRoles(draggableRoles: PermissionRoleDetailed[] | undefined) {
+    const patchableArray = createPatchableArrayForReorder<OrganizationPrivateMetaData, PermissionRoleDetailed>(draggableRoles, roles.value,OrganizationPrivateMetaData, 'roles' );
+
+    if(patchableArray) {
+        patchRoles(patchableArray)
+    }
 }
 
 defineExpose({
