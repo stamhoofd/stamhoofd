@@ -103,7 +103,6 @@ async function checkGlobalRoutes() {
     }
 
     if (parts.length >= 1 && parts[0] == 'login' && queryString.get("refresh_token") && queryString.get("organization_id")) {
-        UrlHelper.initial.clear()
         const organizationId = queryString.get("organization_id")!
         const refreshToken = queryString.get("refresh_token")!
         
@@ -111,7 +110,6 @@ async function checkGlobalRoutes() {
     }
 
     if (parts.length == 1 && parts[0] == 'unsubscribe') {
-        UrlHelper.initial.clear()
         const id = queryString.get('id')
         const token = queryString.get('token')
         const type = queryString.get('type') ?? 'all'
@@ -122,8 +120,6 @@ async function checkGlobalRoutes() {
     }
 
     if (parts.length >= 1 && parts[0] == 'verify-email') {
-        UrlHelper.initial.clear()
-
         const token = queryString.get('token')
         const code = queryString.get('code')
             

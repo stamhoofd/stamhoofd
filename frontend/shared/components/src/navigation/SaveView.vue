@@ -19,7 +19,7 @@
                 <button v-else-if="canDismiss && !$isAndroid && !$isMobile && !$isIOS" class="button navigation icon close" type="button" @click="dismiss" />
             </template>
         </STNavigationBar>
-        <main>
+        <main class="center">
             <slot />
         </main>
         <STToolbar v-if="preferLargeButton || (!$isMobile && !$isIOS && !$isAndroid)">

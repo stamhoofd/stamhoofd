@@ -198,3 +198,6 @@ export { default as NoPermissionsView } from "./src/auth/NoPermissionsView.vue"
 
 // Admin views
 export * from './src/admins'
+
+// Admin views
+export * from './src/records'

@@ -33,6 +33,10 @@ export class Toast {
         this.icon = icon
     }
 
+    static success(message: string): Toast {
+        return new Toast(message, "success green")
+    }
+
     static fromError(errors: Error): Toast {
         let simpleErrors!: SimpleErrors
         if (isSimpleError(errors)) {
