@@ -37,7 +37,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
             from: organization ? organization.getStrongEmail(request.i18n) : Email.getInternalEmailFor(request.i18n),
             replyTo: undefined
         }
-        const name = organization ? organization.name : STAMHOOFD.platformName
+        const name = organization ? organization.name : STAMHOOFD.translationNamespace
 
         if (!user) {
             // Send email
@@ -62,7 +62,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
             to: user.email,
             subject: "Wachtwoord vergeten",
             type: "transactional",
-            text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe gaf aan dat je jouw wachtwoord bent vergeten. Je kan een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet aangeduid dat je je wachtwoord vergeten bent? Dan mag je deze e-mail gewoon negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? STAMHOOFD.platformName : name)
+            text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe gaf aan dat je jouw wachtwoord bent vergeten. Je kan een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet aangeduid dat je je wachtwoord vergeten bent? Dan mag je deze e-mail gewoon negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? STAMHOOFD.translationNamespace : name)
         });
 
         return new Response(undefined);

@@ -8,7 +8,7 @@
                 <template #left>
                     <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener" class="logo-container">
                         <Logo class="responsive" />
-                        <span class="logo-text horizontal hide-medium">Beheerders</span>
+                        <span class="logo-text horizontal hide-medium" v-if="!isPlatform">Beheerders</span>
                     </a>
                 </template>
 
@@ -32,22 +32,16 @@
 
             <main class="limit-width">
                 <div class="organization-selection-view" :class="{native: isNative}">
-                    <h1 v-if="!isPlatform">
-                        Beheer jouw vereniging
-                    </h1>
-                    <h1 v-else>
-                        Zoek jouw lokale groep
+                    <h1>
+                        {{ $t('dashboard.organization-selection.welcome-title') }}
                     </h1>
 
-                    <p v-if="!isNative" class="style-description-block style-description-large">
-                        Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging als is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
-                    </p>
-                    <p v-else class="style-description-block style-description-large">
-                        Welkom in de Stamhoofd app voor beheerders. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
+                    <p class="style-description-block style-description-large">
+                        {{ $t('dashboard.organization-selection.welcome-description') }}
                     </p>
 
                     <form class="input-icon-container icon search gray" @submit.prevent>
-                        <input ref="input" v-model="query" autofocus class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
+                        <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('dashboard.organization-selection.search-placeholder')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
                     </form>
 
                     <div v-if="showDevelopment" class="version-box">

@@ -1,9 +1,8 @@
 
 
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { SessionContext } from '@stamhoofd/networking';
-import { Document, Group, MembersBlob, Platform, PlatformFamily, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { Document, MembersBlob, Platform, PlatformFamily } from '@stamhoofd/structures';
 import { reactive } from 'vue';
 
 /**
@@ -31,7 +30,7 @@ export class MemberManager {
     async loadMembers() {
         const response = await this.$context.authenticatedServer.request({
             method: "GET",
-            path: "/members",
+            path: "/user/members",
             decoder: MembersBlob as Decoder<MembersBlob>
         })
         const blob = response.data

@@ -18,7 +18,7 @@ export class I18n {
             tags: ['i18n']
         }, async () => {
             console.log("Loading locales...")
-            const directory = path.dirname(require.resolve("@stamhoofd/locales"))+"/backend"
+            const directory = path.dirname(require.resolve("@stamhoofd/locales"))+"/" + STAMHOOFD.translationNamespace
             const files = (await fs.readdir(directory, { withFileTypes: true }))
                 .filter((dirent) => !dirent.isDirectory())
 

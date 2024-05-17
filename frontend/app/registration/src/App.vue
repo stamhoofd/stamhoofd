@@ -88,7 +88,7 @@ export default class App extends Vue {
         } catch (e) {
             if (!I18nController.shared) {
                 try {
-                    await I18nController.loadDefault(null, "registration", undefined, "nl")
+                    await I18nController.loadDefault(null, undefined, "nl")
                 } catch (e) {
                     console.error(e)
                 }

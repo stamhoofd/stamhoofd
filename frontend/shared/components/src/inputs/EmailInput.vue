@@ -1,5 +1,5 @@
 <template>
-    <STInputBox :title="title" error-fields="email" :error-box="errorBox">
+    <STInputBox :title="title" error-fields="email" :error-box="errorBox" :class="class">
         <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event) => {emailRaw = event.target.value; onTyping();}">
         <template #right>
             <slot name="right" />
@@ -37,6 +37,9 @@ export default class EmailInput extends Vue {
 
     @Prop({ default: null })
         modelValue!: string | null
+
+    @Prop({ default: null })
+        class!: string | null
 
     @Prop({ default: true })
         required!: boolean

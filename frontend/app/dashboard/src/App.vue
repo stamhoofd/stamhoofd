@@ -10,14 +10,16 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Ref, nextTick, onMounted, reactive, ref } from 'vue';
-import { getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
+import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent>|null>;
 HistoryManager.activate();
+const $t = useTranslate();
 
 const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {
@@ -32,7 +34,6 @@ const root = new ComponentWithProperties(PromiseView, {
                 }
             }
 
-            await checkGlobalRoutes();
 
             let app: 'dashboard' | 'admin' | 'registration' | 'auto' = 'auto';
 
@@ -45,19 +46,20 @@ const root = new ComponentWithProperties(PromiseView, {
                 app = 'registration';
             }
 
+            let component: ComponentWithProperties
             if (app === 'auto') {
-                return (await getScopedAutoRootFromUrl())
+                component = (await getScopedAutoRootFromUrl())
+            } else if (app == 'dashboard') {
+                component =  (await getScopedDashboardRootFromUrl())
+            } else if (app == 'admin') {
+                component =  (await getScopedAdminRootFromUrl())
+            } else {
+                component =  (await getScopedRegistrationRootFromUrl())
             }
 
-            if (app == 'dashboard') {
-                return (await getScopedDashboardRootFromUrl())
-            }
-            
-            if (app == 'admin') {
-                return (await getScopedAdminRootFromUrl())
-            }
-
-            return (await getScopedRegistrationRootFromUrl())
+            // Check routes after mounting component
+            checkGlobalRoutes().catch(console.error)
+            return component
         } catch (e) {
             console.error(e)
             Toast.fromError(e).setHide(null).show()
@@ -72,9 +74,10 @@ async function checkGlobalRoutes() {
         return await checkGlobalRoutes();
     }
 
-    const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
-    const parts = UrlHelper.shared.getParts();
-    const queryString = UrlHelper.shared.getSearchParams()
+    const currentPath = UrlHelper.initial.getPath({ removeLocale: true })
+    const parts = UrlHelper.initial.getParts();
+    const queryString = UrlHelper.initial.getSearchParams()
+    console.log('check global routes', parts, queryString, currentPath)
 
     if (parts.length > 0 && parts[0] == 'reset-password') {
         UrlHelper.shared.clear()
@@ -83,16 +86,15 @@ async function checkGlobalRoutes() {
 
         const token = queryString.get('token');
         const session = parts[1] ? (await SessionContext.createFrom({organizationId: parts[1]})) : new SessionContext(null);
-
         modalStack.value.present({
-            url: UrlHelper.transformUrl(currentPath),
             adjustHistory: false,
             components: [
                 new ComponentWithProperties(ContextProvider, {
                     context: {
                         $context: reactive(session),
+                        reactive_navigation_url: currentPath,
                     },
-                    root: new ComponentWithProperties(ForgotPasswordResetView, { token }).setDisplayStyle("popup").setAnimated(false)
+                    root: new ComponentWithProperties(ForgotPasswordResetView, { token })
                 })
             ],
             modalDisplayStyle: "popup",
@@ -101,7 +103,7 @@ async function checkGlobalRoutes() {
     }
 
     if (parts.length >= 1 && parts[0] == 'login' && queryString.get("refresh_token") && queryString.get("organization_id")) {
-        UrlHelper.shared.clear()
+        UrlHelper.initial.clear()
         const organizationId = queryString.get("organization_id")!
         const refreshToken = queryString.get("refresh_token")!
         
@@ -109,7 +111,7 @@ async function checkGlobalRoutes() {
     }
 
     if (parts.length == 1 && parts[0] == 'unsubscribe') {
-        UrlHelper.shared.clear()
+        UrlHelper.initial.clear()
         const id = queryString.get('id')
         const token = queryString.get('token')
         const type = queryString.get('type') ?? 'all'
@@ -119,8 +121,8 @@ async function checkGlobalRoutes() {
         }
     }
 
-    if (parts.length == 2 && parts[0] == 'verify-email') {
-        UrlHelper.shared.clear()
+    if (parts.length >= 1 && parts[0] == 'verify-email') {
+        UrlHelper.initial.clear()
 
         const token = queryString.get('token')
         const code = queryString.get('code')
@@ -129,13 +131,13 @@ async function checkGlobalRoutes() {
             const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
             
             try {
-                const session = await SessionContext.createFrom({organizationId: parts[1]});
+                const session = reactive(parts[1] ? await SessionContext.createFrom({organizationId: parts[1]}) : new SessionContext(null)) as SessionContext;
                 await session.loadFromStorage()
                 await LoginHelper.verifyEmail(session, code, token)
                 toast.hide()
                 new Toast("E-mailadres is gevalideerd", "success green").show()
 
-                const dashboardContext = await getScopedDashboardRoot(session)
+                const dashboardContext = await getScopedAutoRoot(session)
                 await ReplaceRootEventBus.sendEvent("replace", dashboardContext);
             } catch (e) {
                 toast.hide()
@@ -160,7 +162,7 @@ onMounted(() => {
             stack.present(options)
         }
     })
-    
+
     ReplaceRootEventBus.addListener(this, "replace", async (component: ComponentWithProperties) => {
         stack.replace(component, false)
     })
@@ -172,7 +174,7 @@ onMounted(() => {
             ]
         })
     })
-    
+
     AppManager.shared.checkUpdates({
         visibleCheck: 'spinner',
         visibleDownload: true,

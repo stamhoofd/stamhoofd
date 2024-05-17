@@ -109,7 +109,7 @@ export default class App extends Vue {
                 const session = new SessionContext(response.data.organization)
                 await session.loadFromStorage()       
 
-                await I18nController.loadDefault(session, "webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
+                await I18nController.loadDefault(session, response.data.organization.address.country, "nl", response.data.organization.address.country)
 
                 await session.checkSSO()
                 await SessionManager.prepareSessionForUsage(session)
@@ -134,7 +134,7 @@ export default class App extends Vue {
                 // Check if we have an organization on this domain
                 if (!I18nController.shared) {
                     try {
-                        await I18nController.loadDefault(null, "webshop", undefined, "nl")
+                        await I18nController.loadDefault(null, undefined, "nl")
                     } catch (e) {
                         console.error(e)
                     }

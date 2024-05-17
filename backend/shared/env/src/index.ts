@@ -23,8 +23,8 @@ export function load(settings?: { path?: string, service?: "redirecter" | "api" 
         throw new Error("Expected environment variable userMode")
     }
 
-    if (!STAMHOOFD.platformName) {
-        throw new Error("Expected environment variable platformName")
+    if (!STAMHOOFD.translationNamespace) {
+        throw new Error("Expected environment variable translationNamespace")
     }
 
     // Database

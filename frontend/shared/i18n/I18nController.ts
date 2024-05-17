@@ -2,7 +2,14 @@
 import { countries, languages } from "@stamhoofd/locales"
 import { SessionContext, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
-import { I18n, createI18n } from 'vue-i18n'
+import { I18n } from "./I18n"
+import { HistoryManager } from "@simonbackx/vue-app-navigation"
+
+
+export function useTranslate(): typeof I18n.prototype.$t {
+    const i18n = I18nController.getI18n()
+    return i18n ? i18n.$t.bind(i18n) : ((k) => k)
+}
 
 export class I18nController {
     static i18n: I18n
@@ -20,14 +27,13 @@ export class I18nController {
     namespace = ""
     language = ""
     country = Country.Belgium
-    loadedLocale?: string
 
     // Used for SEO
     defaultCountry = Country.Belgium
     defaultLanguage = "nl"
 
     // Allows you to set and remove meta data
-    vueMetaApp?: VueMetaApp
+    // vueMetaApp?: VueMetaApp
     
     $context: SessionContext|null|undefined
 
@@ -48,14 +54,7 @@ export class I18nController {
         if (this.i18n) {
             return this.i18n
         }
-        this.i18n = createI18n({
-            locale: "en", // set locale
-            fallbackLocale: "en",
-            messages: {
-                // not yet loaded
-            }
-        })
-        
+        this.i18n = new I18n()
         return this.i18n
     }
 
@@ -79,20 +78,42 @@ export class I18nController {
         this.saveLocaleToStorage().catch(console.error)
     }
 
+    transformUrlForLocale(url: string, language: string, country: string, addPrefix = true) {
+        
+        const prefix = UrlHelper.fixedPrefix && addPrefix ? "/"+UrlHelper.fixedPrefix : ""
+        const locale = language+"-"+country
+        if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== locale)) {
+            if (I18nController.fixedCountry) {
+                return "/"+language+prefix+url
+            } else {
+                return "/"+language+"-"+country+prefix+url
+            }
+        } else {
+            return prefix+url
+        }
+    }
+
     updateUrl() {
-        // Update url's
-        // const current = new UrlHelper()
-        // UrlHelper.setUrl(current.getPath({ removeLocale: true }))
+        if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
+            if (I18nController.fixedCountry) {
+                UrlHelper.localePrefix = I18nController.shared.language
+            } else {
+                UrlHelper.localePrefix = I18nController.shared.locale
+            }
+        } else {
+            UrlHelper.localePrefix = ""
+        }
+        HistoryManager.updateUrl()
     }
 
     correctLocale() {
         // Some locales are invalid
-        const validLocales = {
+        const validLocales: Record<string, undefined|string[]> = {
             [Country.Belgium]: ["nl", "en"],
             [Country.Netherlands]: ["nl", "en"],
         }
 
-        if (!validLocales[this.country]) {
+        if (!(this.country in validLocales)) {
             // Find first coutnry with same language
             for (const country of countries) {
                 if (validLocales[country]?.includes(this.language)) {
@@ -104,19 +125,19 @@ export class I18nController {
 
             // Fallback
             this.country = countries[0] as Country
-            this.language = validLocales[this.country][0]
+            this.language = validLocales[this.country]![0]
             console.info("[I18n] Corrected country to "+this.country + " and language to "+this.language)
             return;
         }
 
-        if (!validLocales[this.country].includes(this.language)) {
-            if (validLocales[this.country].includes("en")) {
+        if (!validLocales[this.country]?.includes(this.language)) {
+            if (validLocales[this.country]?.includes("en")) {
                 this.language = "en"
                 console.info("[I18n] Corrected language to en")
                 return
             }
 
-            this.language = validLocales[this.country][0]
+            this.language = validLocales[this.country]![0]
             console.info("[I18n] Corrected language to "+this.language)
         }
     }
@@ -128,23 +149,17 @@ export class I18nController {
         console.info("[I18n] Loading locale "+locale)
         // If the same language
 
-        if (this.loadedLocale === locale) {
-            console.warn("[I18n] Locale already loaded")
-            return
+        const i18n = I18nController.getI18n()
+        const namespace = this.namespace
+
+        if (!i18n.isLocaleLoaded(namespace, locale)) {
+            // If the language hasn't been loaded yet
+            const messages = await import(/* webpackChunkName: "lang-[request]" */ `../../../shared/locales/dist/${namespace}/${locale}.json`)
+            i18n.loadLocale(namespace, locale, messages.default)
+            console.log("[I18n] Successfully loaded locale", namespace, locale)
         }
 
-        const i18n = I18nController.getI18n()
-
-        // If the language hasn't been loaded yet
-        const namespace = this.namespace
-        const messages = await import(/* webpackChunkName: "lang-[request]" */ `../../../shared/locales/dist/${namespace}/${locale}.json`)
-        
-        i18n.global.setLocaleMessage(locale, messages.default)
-        i18n.global.locale = locale
-        i18n.global.fallbackLocale = [this.language, "en"]
-        this.loadedLocale = locale
-
-        console.log("[I18n] Successfully loaded locale", locale)
+        i18n.setLocale(locale)
     }
 
     static async getLocaleFromStorage(): Promise<{ language?: string, country?: string }> {
@@ -182,7 +197,8 @@ export class I18nController {
         return countries.includes(country)
     }
 
-    static async loadDefault($context: SessionContext|null|undefined, namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
+    static async loadDefault($context: SessionContext|null|undefined, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
+        const namespace = STAMHOOFD.translationNamespace
         let language: string | undefined = undefined
         let needsSave = false
 
@@ -329,7 +345,6 @@ export class I18nController {
         const def = new I18nController($context, language, country, namespace)
         def.defaultCountry = defaultCountry ?? def.defaultCountry
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage
-        def.loadedLocale = I18nController.shared?.loadedLocale
         I18nController.shared = def
 
         // Automatically set country when the organization is loaded
@@ -361,6 +376,7 @@ export class I18nController {
 
         // Update meta data
         def.updateMetaData()
+        def.updateUrl()
         
         await def.loadLocale()
     }
@@ -404,7 +420,7 @@ export class I18nController {
                 links.push({
                     hid: `i18n-alt-${locale}`,
                     rel: "alternate",
-                    href: hostProtocol + UrlHelper.transformUrlForLocale(path, language, country, addPrefix),
+                    href: hostProtocol + this.transformUrlForLocale(path, language, country, addPrefix),
                     hreflang: locale
                 })
 
@@ -426,7 +442,7 @@ export class I18nController {
             links.push({
                 hid: `i18n-alt-default`,
                 rel: "alternate",
-                href: hostProtocol + UrlHelper.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountry, addPrefix),
+                href: hostProtocol + this.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountry, addPrefix),
                 hreflang: "x-default"
             })
         }
@@ -436,7 +452,7 @@ export class I18nController {
         links.push({
             hid: 'i18n-can',
             rel: 'canonical',
-            href: hostProtocol+UrlHelper.transformUrlForLocale(path, this.language, this.country, addPrefix)
+            href: hostProtocol+this.transformUrlForLocale(path, this.language, this.country, addPrefix)
         })
 
         // If we are in prerender mode, we also want to redirect the crawler if needed
@@ -448,7 +464,7 @@ export class I18nController {
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
         if (isPrerender) {
-            const currentPath = UrlHelper.transformUrlForLocale(path, this.language, this.country)
+            const currentPath = this.transformUrlForLocale(path, this.language, this.country)
 
             let redirected = false
             if (currentPath != UrlHelper.initial.path) {

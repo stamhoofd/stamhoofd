@@ -19,7 +19,7 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/members", {});
+        const params = Endpoint.parseParameters(request.url, "/user/members", {});
 
         if (params) {
             return [true, params as Params];
