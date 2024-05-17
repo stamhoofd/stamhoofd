@@ -102,6 +102,12 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
             return;
         }
         this.scrollElement = this.getScrollElement();
+        
+        if (!this.scrollElement) {
+            console.error("No scroll element found for STNavigationBar");
+            return;
+        }
+        
         if (this.scrollElement === document.documentElement) {
             window.addEventListener("scroll", this.onScroll, { passive: true });
         } else {

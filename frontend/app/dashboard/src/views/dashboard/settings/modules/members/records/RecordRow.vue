@@ -125,7 +125,7 @@ export default class RecordRow<T extends Filterable> extends Mixins(NavigationMi
         return 'Tekstveld';
     }
 
-    editRecord() {
+    editRecord() {∂
         this.present(new ComponentWithProperties(EditRecordView, {
             record: this.record,
             category: this.category,

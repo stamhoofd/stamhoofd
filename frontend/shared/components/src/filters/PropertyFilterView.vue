@@ -29,10 +29,10 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { PropertyFilter, Version } from "@stamhoofd/structures";
 
-import STNavigationBar from "../../navigation/STNavigationBar.vue";
-import STToolbar from "../../navigation/STToolbar.vue";
-import { CenteredMessage } from "../../overlays/CenteredMessage";
-import { UIFilterBuilder } from "../UIFilter";
+import STNavigationBar from "../navigation/STNavigationBar.vue";
+import STToolbar from "../navigation/STToolbar.vue";
+import { CenteredMessage } from "../overlays/CenteredMessage";
+import { UIFilterBuilder } from "./UIFilter";
 import PropertyFilterInput from "./PropertyFilterInput.vue";
 
 @Component({

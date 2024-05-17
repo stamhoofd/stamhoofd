@@ -34,6 +34,7 @@ import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
     emits: ["click"],
+    inheritAttrs: false,
 })
 export default class STListItem extends Vue {
     @Prop({ default: "article", type: String })

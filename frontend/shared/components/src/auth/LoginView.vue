@@ -50,7 +50,7 @@ import { onMounted, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import EmailInput from '../inputs/EmailInput.vue';
-import { useContext } from '../VueGlobalHelper';
+import { useContext } from '../hooks';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 import ForgotPasswordView from './ForgotPasswordView.vue';
 

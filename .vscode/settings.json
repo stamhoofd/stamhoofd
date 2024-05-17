@@ -60,4 +60,5 @@
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features"
     },
+    "typescript.preferences.importModuleSpecifier": "project-relative"
 }

@@ -42,7 +42,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { Address, Parent, ParentType, ParentTypeHelper, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { usePatch } from '../../VueGlobalHelper';
+import { usePatch } from '../../hooks';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import Dropdown from '../../inputs/Dropdown.vue';

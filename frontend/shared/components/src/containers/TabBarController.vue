@@ -41,7 +41,7 @@
 <script lang="ts">
 import { inject, shallowRef } from 'vue';
 
-import { useDeviceWidth } from '../VueGlobalHelper';
+import { useDeviceWidth } from '../hooks';
 import TabBarController from './TabBarController.vue';
 import TabBarDropdownView from './TabBarDropdownView.vue';
 

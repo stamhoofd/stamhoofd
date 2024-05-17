@@ -1,177 +1,18 @@
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges, PatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
-import { injectHooks, useCurrentComponent, useFocused, useUrl } from "@simonbackx/vue-app-navigation";
-import { AppManager, ContextPermissions, SessionContext } from "@stamhoofd/networking";
-import { Country, CountryHelper, Organization, Platform, User, Version } from "@stamhoofd/structures";
+import { injectHooks, useCurrentComponent, useUrl } from "@simonbackx/vue-app-navigation";
+import { AppManager } from "@stamhoofd/networking";
+import { CountryHelper } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { type App,computed, getCurrentInstance, inject, onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, toRef, unref } from "vue";
+import { type App } from "vue";
 
 import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, TooltipDirective } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
+import { useContext, useOrganization, useUser } from "./hooks";
 import STInputBox from "./inputs/STInputBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
-import { I18nController } from "@stamhoofd/frontend-i18n";
 
-export function useContext(): Ref<SessionContext> {
-    const refOrReal = inject('$context', null) as SessionContext|null;
-    return toRef(refOrReal) as Ref<SessionContext>
-}
-
-export function useUser(): Ref<User | null> {
-    const context = useContext()
-    return computed(() => context.value.user);
-}
-
-export function useOrganization(): Ref<Organization | null> {
-    const context = useContext()
-    return computed(() => context.value.organization);
-}
-
-export function usePlatform(): Ref<Platform> {
-    return toRef(inject('$platform') as Platform)
-}
-
-export function useIsMobile(): boolean {
-    const app = getCurrentInstance()!;
-    return app.appContext.config.globalProperties.$isMobile;
-}
-
-export function useIsIOS(): boolean {
-    const app = getCurrentInstance()!;
-    return app.appContext.config.globalProperties.$isIOS;
-}
-
-export function useIsAndroid(): boolean {
-    const app = getCurrentInstance()!;
-    return app.appContext.config.globalProperties.$isAndroid;
-}
-
-const width = ref(document.documentElement.clientWidth);
-window.addEventListener('resize', () => {
-    width.value = document.documentElement.clientWidth;
-}, { passive: true })
-
-export function useDeviceWidth(): Ref<number> {
-    return width;
-}
-
-export function usePatch<T extends AutoEncoder>(obj: T|Ref<T>): {
-    createPatch: () => AutoEncoderPatchType<T>,
-    patched: Ref<T>, 
-    patch: Ref<AutoEncoderPatchType<T>>,
-    addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void,
-    hasChanges: Ref<boolean>
-} {
-    const initialValue = unref(obj)
-    if (!initialValue) {
-        throw new Error('Expected a reference with an initial value at usePatch')
-    }
-    const patch = ref("id" in initialValue ? initialValue.static.patch({id: initialValue.id}) : initialValue.static.patch({})) as Ref<AutoEncoderPatchType<T>>;
-
-    return {
-        createPatch: () => {
-            const iv = unref(obj)
-            return ("id" in iv ? iv.static.patch({id: iv.id}) : iv.static.patch({})) as AutoEncoderPatchType<T>;
-        },
-        patch,
-        patched: computed(() => {
-            return unref(obj).patch(patch.value)
-        }),
-        addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
-            patch.value = patch.value.patch(unref(obj).static.patch(newPatch))
-        },
-        hasChanges: computed(() => {
-            return patchContainsChanges(patch.value as PatchType<T>, unref(obj), { version: Version })
-        })
-    }
-}
-
-export function useEmitPatch<T extends AutoEncoder>(props: any, emit: any, propName: string): { 
-    createPatch: () => AutoEncoderPatchType<T>,
-    patched: Ref<T>, 
-    addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void 
-} {
-    return {
-        createPatch: () => {
-            return ("id" in props[propName] ? props[propName].static.patch({id: props[propName].id}) : props[propName].static.patch({})) as AutoEncoderPatchType<T>;
-        },
-        patched: computed(() => props[propName]) as Ref<T>,
-        addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
-            emit('patch:' + propName, props[propName].static.patch(newPatch))
-        }
-    } as any
-}
-
-export function useAuth(): ContextPermissions {
-    const context = useContext()
-    return context.value.auth;
-}
-
-export function useCountry(): Ref<Country> {
-    return computed(() => I18nController.shared?.country ?? Country.Belgium)
-}
-
-/**
- * Allows you to use the ContextPermissions object in a specific context (editing user permissions mostly)
- * without inheriting permissions if the user is also a global admin (which gives them full access to everything, but breaks editing permissions)
- */
-export function useUninheritedPermissions(overrides?: {patchedUser?: User|Ref<User>, patchedOrganization?: Organization|Ref<Organization|null>, patchedPlatform?: Platform|Ref<Platform>}): ContextPermissions {
-    const user = overrides?.patchedUser ?? useUser()
-    const organization = overrides?.patchedOrganization ?? useOrganization()
-    const platform = overrides?.patchedPlatform ?? usePlatform()
-
-    return new ContextPermissions(user, organization, platform, {allowInheritingPermissions: false})
-}
-
-export function useKeyUpDown(actions: {up: () => void, down: () => void}) {
-    const isFocused = useFocused()
-    const onKey = (event: KeyboardEvent) => {
-        if (event.defaultPrevented || event.repeat) {
-            return;
-        }
-    
-        if (!unref(isFocused)) {
-            return
-        }
-    
-        const key = event.key || event.keyCode;
-    
-        if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
-            actions.up();
-            event.preventDefault();
-        } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
-            actions.down();
-            event.preventDefault();
-        }
-    }
-
-    const remove = () => {
-        document.removeEventListener("keydown", onKey);
-    }
-
-    const add = () => {
-        remove();
-        document.addEventListener("keydown", onKey);
-    }
-
-    onActivated(() => {
-        add()
-    });
-
-    onMounted(() => {
-        add()
-    });
-
-    onBeforeUnmount(() => {
-        remove();
-    })
-
-    onDeactivated(() => {
-        remove();
-    })
-}
 
 export type ComponentExposed<T> =
 	T extends new (...angs: any) => infer E ? E :

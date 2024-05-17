@@ -54,7 +54,7 @@ import BirthDayInput from '../../inputs/BirthDayInput.vue';
 import EmailInput from '../../inputs/EmailInput.vue';
 import PhoneInput from '../../inputs/PhoneInput.vue';
 import RadioGroup from '../../inputs/RadioGroup.vue';
-import { useAuth } from '../../VueGlobalHelper';
+import { useAuth } from '../../hooks';
 
 const props = defineProps<{
     member: PlatformMember,

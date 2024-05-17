@@ -3,7 +3,7 @@ import { Organization } from "@stamhoofd/structures";
 
 import { PromiseComponent } from "../../containers/AsyncComponent";
 import { ReplaceRootEventBus } from "../../overlays/ModalStackEventBus";
-import { useOrganization, useUser } from "../../VueGlobalHelper";
+import { useOrganization, useUser } from '../../hooks';
 import { AppType, useAppContext } from "../appContext";
 
 export type Option = {

@@ -33,22 +33,37 @@
         </STList>
 
         <hr>
-        <h2>Verplichte vragenlijsten</h2>
-        <p>Deze vragenlijsten staan aan voor alle leden. Een lokale groep kan dit niet uitschakelen of wijzigen.</p>
+        <h2>Vragenlijsten</h2>
+        <p>
+            Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+        </p>
 
-        <hr>
-        <h2>Optionele vragenlijsten</h2>
-        <p>Een groep kan zelf kiezen of ze deze vragenlijsten aanzetten. De gegevens zijn gedeeld tussen alle lokale groepen en de koepel. Een lokale groep kan de vragenlijst dus niet wijzigen, maar kan het eventueel aanvullen door zelf extra vragenlijsten toe te voegen.</p>
+        <STList v-model="categories" :draggable="true">
+            <template #item="{item: category}">
+                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch="addCategoriesPatch" @edit="editCategory"/>
+            </template>
+        </STList>
+
+        <p>
+            <button class="button text" type="button" @click="$navigate(Routes.NewRecordCategory)">
+                <span class="icon add" />
+                <span>Nieuwe vragenlijst</span>
+            </button>
+        </p>
     </SaveView>
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useErrors, usePatch } from '@stamhoofd/components';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { OrganizationRecordsConfiguration, PropertyFilter } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { OrganizationRecordsConfiguration, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { ComponentOptions, computed, ref } from 'vue';
+import EditRecordCategoryView from './EditRecordCategoryView.vue';
+import { RecordEditorSettings } from './RecordEditorSettings';
+import RecordCategoryRow from './components/RecordCategoryRow.vue';
+type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
 
 const props = defineProps<{
     recordsConfiguration: OrganizationRecordsConfiguration,
@@ -56,15 +71,109 @@ const props = defineProps<{
     saveHandler: (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => Promise<void>
 }>();
 
+enum Routes {
+    NewRecordCategory = "newRecordCategory",
+    EditRecordCategory = "editRecordCategory"
+}
+defineRoutes([
+    {
+        name: Routes.NewRecordCategory,
+        url: 'vragenlijst/nieuw',
+        component: EditRecordCategoryView as ComponentOptions,
+        paramsToProps() {
+            const category = RecordCategory.create({});
+            const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>;
+            arr.addPut(category)
+
+            return {
+                categoryId: category.id,
+                rootCategories: [...patched.value.recordCategories, category],
+                settings,
+                isNew: true,
+                allowChildCategories: true,
+                saveHandler: async (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                    addCategoriesPatch(arr.patch(patch))
+                }
+            }
+        },
+        present: 'popup'
+    },
+    {
+        name: Routes.EditRecordCategory,
+        url: 'vragenlijst/@categoryId',
+        params: {
+            categoryId: String
+        },
+        component: EditRecordCategoryView as ComponentOptions,
+        paramsToProps(params) {
+            const category = patched.value.recordCategories.find(c => c.id === params.categoryId);
+            if (!category) {
+                throw new Error('Category not found')
+            }
+            return {
+                categoryId: category.id,
+                rootCategories: patched.value.recordCategories,
+                settings,
+                isNew: false,
+                allowChildCategories: true,
+                saveHandler: async (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                    addCategoriesPatch(patch)
+                }
+            }
+        },
+        propsToParams(props) {
+            if (!('category' in props) || !(props.category instanceof RecordCategory)) {
+                throw new Error('Category is required')
+            }
+            return {
+                params: {
+                    categoryId: props.category.id
+                }
+            }
+        },
+        present: 'popup'
+    }
+])
+
+// Hooks
 const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
 const {patch, patched, addPatch, hasChanges} = usePatch(props.recordsConfiguration);
 const $t = useTranslate();
+const $navigate = useNavigate();
 
-type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
-
+// Data
+const categories = useDraggableArray(
+    () => patched.value.recordCategories, 
+    (p) => {
+        addPatch({recordCategories: p})
+    }
+);
 const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0]
+
+const settings = new RecordEditorSettings({
+    dataPermission: true,
+    filterBuilder: (categories: RecordCategory[]) => {
+        return memberWithRegistrationsBlobUIFilterBuilders[0];
+    },
+    filterValueForAnswers: (recordAnswers: RecordAnswer[]) => {
+        // new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
+        throw new Error('Not implemented')
+    }
+})
+
+const properties = [
+    buildPropertyRefs('phone', $t('shared.inputs.mobile.label') + ' (van lid zelf)'),
+    buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)'),
+    buildPropertyRefs('gender', 'Geslacht'),
+    buildPropertyRefs('birthDay', 'Geboortedatum'),
+    buildPropertyRefs('address', 'Adres'),
+    buildPropertyRefs('parents', 'Ouders'),
+    buildPropertyRefs('emergencyContacts', 'Noodcontactpersonen'),
+]
+
+// Methods
 function getFilterConfiguration(property: PropertyName): PropertyFilter|null {
     return patched.value[property]
 }
@@ -105,15 +214,14 @@ function buildPropertyRefs(property: PropertyName, title: string) {
     })
 }
 
-const properties = [
-    buildPropertyRefs('phone', $t('shared.inputs.mobile.label') + ' (van lid zelf)'),
-    buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)'),
-    buildPropertyRefs('gender', 'Geslacht'),
-    buildPropertyRefs('birthDay', 'Geboortedatum'),
-    buildPropertyRefs('address', 'Adres'),
-    buildPropertyRefs('parents', 'Ouders'),
-    buildPropertyRefs('emergencyContacts', 'Noodcontactpersonen'),
-]
+// Methods
+function addCategoriesPatch(p: PatchableArrayAutoEncoder<RecordCategory>) {
+    addPatch({recordCategories: p})
+}
+
+async function editCategory(category: RecordCategory) {
+    await $navigate(Routes.EditRecordCategory, {params: {categoryId: category.id}})
+}
 
 async function save() {
     if (saving.value) {

@@ -133,13 +133,13 @@ export class RecordSettings extends AutoEncoder {
      * Text: required input
      */
     @field({ decoder: BooleanDecoder })
-    required = false
+    required = true
 
     /**
      * Whether you need permission to collect this information
      */
     @field({ decoder: BooleanDecoder, version: 123 })
-    sensitive = true
+    sensitive = false
 
     /**
      * Only used for checkboxes
