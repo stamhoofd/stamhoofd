@@ -127,7 +127,7 @@
         }
     },
     "admin.settings.admins.title": "Beheerders",
-    "admin.settings.admins.description": "Beheerders",
+    "admin.settings.admins.description": "Beheer de beheerders van het platform",
     "admin.settings.records.title": "Gegevens van leden",
     "admin.settings.records.description": "Bepaal welke gegevens van leden worden verzameld"
 }
