@@ -11,10 +11,25 @@
                 <STListItem :selectable="true" class="left-center" @click="$navigate('beheerders')">
                     <template #left><img src="@stamhoofd/assets/images/illustrations/admin.svg"></template>
                     <h2 class="style-title-list">
-                        Beheerders
+                        {{ $t('admin.settings.admins.title') }}
                     </h2>
                     <p class="style-description">
-                        Stel in wie toegang heeft tot het administratieportaal
+                        {{ $t('admin.settings.admins.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate('beheerders')">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('admin.settings.records.title') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('admin.settings.records.description') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
