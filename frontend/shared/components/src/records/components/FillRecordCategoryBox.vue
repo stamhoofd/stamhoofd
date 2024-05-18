@@ -20,12 +20,12 @@
         <p v-if="!markReviewed && lastReviewed" class="style-description-small">
             Laatst nagekeken op {{ formatDate(lastReviewed) }}<template v-if="isLastReviewIncomplete">
                 (onvolledig)
-            </template>. <button class="inline-link" type="button" @click="doMarkReviewed" v-if="canMarkReviewed">
+            </template>. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 Markeer als nagekeken
             </button>
         </p>
         <p v-if="!markReviewed && !lastReviewed" class="style-description-small">
-            Nog nooit nagekeken. <button class="inline-link" type="button" @click="doMarkReviewed" v-if="canMarkReviewed">
+            Nog nooit nagekeken. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 Markeer als nagekeken
             </button>
         </p>
@@ -39,8 +39,8 @@ import { computed, nextTick } from "vue";
 import { useAppContext } from '../../context/appContext';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
-import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';
 import { useValidation } from '../../errors/useValidation';
+import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';
 
 const props = withDefaults(
     defineProps<{

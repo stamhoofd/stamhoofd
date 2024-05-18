@@ -16,6 +16,18 @@
         </p>
 
         <STList>
+            <STListItem element-name="label" :selectable="!dataPermissions.locked.value">
+                <template #left>
+                    <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="dataPermissions.locked.value" />
+                </template>
+                <p class="style-title-list">
+                    Toestemming gegevensverzameling
+                </p>
+                <template v-if="!dataPermissions.locked.value && dataPermissions.enabled.value" #right>
+                    <button class="button gray icon settings" type="button" @click.stop="dataPermissions.edit" />
+                </template>
+            </STListItem>
+
             <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
                 <template #left>
                     <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
@@ -74,12 +86,13 @@ import { AutoEncoderPatchType, PatchMap, PatchableArray, PatchableArrayAutoEncod
 import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, NavigationActions, PropertyFilterView, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { DataPermissionsSettings, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordCategoryRow from './components/RecordCategoryRow.vue';
+import DataPermissionSettingsView from './DataPermissionSettingsView.vue';
 type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
 
 const props = defineProps<{
@@ -90,7 +103,8 @@ const props = defineProps<{
 
 enum Routes {
     NewRecordCategory = "newRecordCategory",
-    EditRecordCategory = "editRecordCategory"
+    EditRecordCategory = "editRecordCategory",
+    DataPermissions = "dataPermissions"
 }
 defineRoutes([
     {
@@ -145,6 +159,20 @@ defineRoutes([
             return {
                 params: {
                     categoryId: props.category.id
+                }
+            }
+        },
+        present: 'popup'
+    },
+    {
+        name: Routes.DataPermissions,
+        url: 'toestemming-gegevensverzameling',
+        component: DataPermissionSettingsView as ComponentOptions,
+        paramsToProps() {
+            return {
+                recordsConfiguration: patched.value,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
+                    addPatch(patch)
                 }
             }
         },
@@ -213,6 +241,25 @@ const properties = [
     buildPropertyRefs('parents', 'Ouders'),
     buildPropertyRefs('emergencyContacts', 'Noodcontactpersonen'),
 ]
+
+const dataPermissions = {
+    locked: computed(() => !!props.inheritedRecordsConfiguration?.dataPermission),
+    enabled: computed({
+        get: () => !!props.inheritedRecordsConfiguration?.dataPermission || patched.value.dataPermission !== null,
+        set: (value: boolean) => {
+            if (value) {
+                addPatch({
+                    dataPermission: props.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
+                });
+            } else {
+                addPatch({dataPermission: null});
+            }
+        }
+    }),
+    edit: async () => {
+        await $navigate(Routes.DataPermissions)
+    }
+}
 
 // Methods
 function buildPropertyRefs(property: PropertyName, title: string) {

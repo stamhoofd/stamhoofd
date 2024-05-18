@@ -204,22 +204,6 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageDataPermission(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Toestemming gegevensverzameling
-                        </h2>
-                        <p class="style-description">
-                            Vaak heb je toestemming nodig om bepaalde gegevens te verzamelen. Dat stel je hier in.
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageFreeContribution(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
@@ -380,7 +364,6 @@ import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import LabsView from './LabsView.vue';
-import DataPermissionSettingsView from './modules/members/DataPermissionSettingsView.vue';
 import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
@@ -727,19 +710,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         })
     }
 
-    manageDataPermission(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(DataPermissionSettingsView, {})
-                })
-            ]
-        })
-    }
-
     manageFreeContribution(animated = true) {
         this.present({
             animated,
@@ -874,9 +844,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.manageFinancialSupport(false)
         }
 
-        if (this.$url.match('data-permission')) {
-            this.manageDataPermission(false)
-        }
         UrlHelper.shared.clear()
         this.loadStripeAccounts(null).catch(console.error);
     }
