@@ -1,20 +1,9 @@
 <template>
     <div class="st-menu st-view members-menu">
-        <STNavigationBar title="Leden"></STNavigationBar>
+        <STNavigationBar title="Leden" />
 
         <main>
             <h1>Leden</h1>
-
-            <button v-if="!enableMemberModule" type="button" class="menu-button button cta" @click="openSignupSelection()">
-                <span class="icon flag" />
-                <span>Proefperiode starten</span>
-            </button>
-
-            <button v-if="enableMemberModule && tree.getAllGroups().length == 0 && fullAccess" type="button" class="menu-button button cta" @click="manageGroups(true)">
-                <span class="icon settings" />
-                <span>Ledenadministratie</span>
-            </button>
-
 
             <template v-if="enableMemberModule && tree.categories.length">
                 <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
@@ -70,7 +59,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
-import { GroupAvatar, useContext, useOrganization, useUser } from '@stamhoofd/components';
+import { GroupAvatar, useContext, useOrganization } from '@stamhoofd/components';
 import { Group, GroupCategory, GroupCategoryTree } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
@@ -120,7 +109,7 @@ const isCategoryDeactivated = (category: GroupCategoryTree) => {
 }
 
 defineRoutes([
-{
+    {
         url: 'categorie/@slug',
         name: 'category',
         params: {
