@@ -549,10 +549,6 @@ export class PlatformMember implements ObjectWithRecords {
         return false
     }
 
-    isRecordCategoryEnabled(recordCategory: RecordCategory): boolean {
-        return false;
-    }
-
     isRecordEnabled(record: RecordSettings): boolean {
         if (record.sensitive && !this.patchedMember.details.dataPermissions?.value) {
             return false;

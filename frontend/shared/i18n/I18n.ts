@@ -57,7 +57,7 @@ export class I18n {
     }
 
     $t(key: string, replace?: Record<string, string>): string {
-        return this.replace(this.messages.get(key) ?? key, replace)
+        return this.replace(this.messages?.get(key) ?? key, replace)
     }
 
     escapeRegex(string: string) {

@@ -47,15 +47,11 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, LoadComponent, Spinner, Toast } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, LoadComponent, Spinner, Toast } from "@stamhoofd/components";
+import { OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures";
 
-
-import ActivatedView from './modules/members/ActivatedView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
-
 
 @Component({
     components: {
@@ -122,12 +118,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                     root: new ComponentWithProperties(MembersStructureSetupView, {})
                 }).setDisplayStyle("popup"))
             } else {
-                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").then(() => {
-                    // Wait for the backend to fill in all the default categories and groups
-                    this.present(new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(ActivatedView, {})
-                    }).setDisplayStyle("popup"))
-                }).catch(e => console.error(e))
+                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").catch(e => console.error(e))
             }
         } else {
             if (!enable && this.enableMemberModule) {

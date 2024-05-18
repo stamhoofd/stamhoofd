@@ -2,7 +2,7 @@
     <ModernTableView
         ref="modernTableView" 
         :table-object-fetcher="tableObjectFetcher" 
-        :filterBuilders="memberUIFilterBuilders" 
+        :filter-builders="memberWithRegistrationsBlobUIFilterBuilders" 
         :default-sort-direction="SortItemDirection.DESC" 
         :title="title" 
         column-configuration-id="members" 
@@ -18,13 +18,12 @@
 
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, ModernTableView, TableAction, useContext, useIsMobile, useTableObjectFetcher } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
+import { Column, ComponentExposed, ModernTableView, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useContext, useTableObjectFetcher } from "@stamhoofd/components";
 import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
-import { memberUIFilterBuilders } from './memberUIFilterBuilders';
 
 type ObjectType = PlatformMember;
 

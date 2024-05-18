@@ -16,9 +16,9 @@
         </p>
 
         <STList>
-            <STListItem v-for="property of properties" :key="property.value.title">
+            <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
                 <template #left>
-                    <Checkbox v-model="property.value.enabled" />
+                    <Checkbox v-model="property.value.enabled" :disabled="property.value.locked" />
                 </template>
                 <p class="style-title-list">
                     {{ property.value.title }}
@@ -26,8 +26,8 @@
                 <p v-if="property.value.configuration" class="style-description-small">
                     {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
                 </p>
-                <template v-if="property.value.enabled" #right>
-                    <button class="button gray icon settings" type="button" @click="property.value.edit" />
+                <template v-if="!property.value.locked && property.value.enabled" #right>
+                    <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
                 </template>
             </STListItem>
         </STList>
@@ -55,8 +55,8 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, PropertyFilterView, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
@@ -143,6 +143,7 @@ const {patch, patched, addPatch, hasChanges} = usePatch(props.recordsConfigurati
 const $t = useTranslate();
 const $navigate = useNavigate();
 const organization = useOrganization()
+const present = usePresent();
 
 // Data
 const categories = useDraggableArray(
@@ -197,10 +198,13 @@ const properties = [
 
 // Methods
 function getFilterConfiguration(property: PropertyName): PropertyFilter|null {
-    return patched.value[property]
+    return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property]
 }
 
 function setEnableFilterConfiguration(property: PropertyName, enable: boolean) {
+    if (props.inheritedRecordsConfiguration?.[property]) {
+        return
+    }
     if (enable === !!getFilterConfiguration(property)) {
         return
     }
@@ -215,16 +219,30 @@ function setEnableFilterConfiguration(property: PropertyName, enable: boolean) {
     }
 }
 
-function editEnableFilterConfiguration(property: PropertyName, title: string) {
-    // todo
+async function editEnableFilterConfiguration(property: PropertyName, title: string) {
+    await present({
+        components: [
+            new ComponentWithProperties(PropertyFilterView, {
+                configuration: getFilterConfiguration(property) ?? PropertyFilter.createDefault(),
+                title,
+                builder: settings.filterBuilder([]),
+                setConfiguration: (configuration: PropertyFilter) => {
+                    addPatch({
+                        [property]: configuration
+                    })
+                }
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
 }
 
 function buildPropertyRefs(property: PropertyName, title: string) {
+    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property])
     const enabled = computed({
         get: () => !!getFilterConfiguration(property),
         set: (value: boolean) => setEnableFilterConfiguration(property, value)
     })
-    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property])
     const configuration = computed(() => getFilterConfiguration(property))
 
     return ref({
