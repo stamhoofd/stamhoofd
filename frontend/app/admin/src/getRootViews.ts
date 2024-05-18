@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
@@ -48,12 +48,22 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         root: AsyncComponent(() => import('./views/settings/SettingsView.vue'), {})
     })
 
+    const membersTableView = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(MembersTableView, {})
+    })
+
     setTitleSuffix('Administratie');
 
     const startTab =  new TabBarItem({
         icon: 'home',
         name: 'Start',
         component: startView
+    });
+
+    const membersTab =  new TabBarItem({
+        icon: 'group',
+        name: 'Leden',
+        component: membersTableView
     });
 
     const settingsTab =  new TabBarItem({
@@ -89,6 +99,7 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                         tabs: computed(() => {
                             const tabs: (TabBarItem|TabBarItemGroup)[] = [
                                 startTab,
+                                membersTab,
                                 settingsTab
                             ]
 
