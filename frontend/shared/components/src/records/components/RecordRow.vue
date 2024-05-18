@@ -131,20 +131,27 @@ function addPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
     // Is category a root category or not?
     const rootCategory = props.rootCategories.find(c => c.id == props.category.id)
     if (rootCategory) {
-        const categoryPatch = RecordCategory.patch({id: rootCategory.id})
-        categoryPatch.records.merge(patch)
+        const categoryPatch = RecordCategory.patch({
+            id: rootCategory.id,
+            records: patch
+        })
         addRootPatch(categoryPatch)
     } else {
         // Find the root category that contains this category
         const rootCategory = props.rootCategories.find(c => c.childCategories.find(r => r.id == props.category.id))
         if (rootCategory) {
-            const childCategoryPatch = RecordCategory.patch({id: props.category.id})
-            childCategoryPatch.records.merge(patch)
+            const childCategoryPatch = RecordCategory.patch({
+                id: props.category.id,
+                records: patch
+            })
 
             const arr: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
             arr.addPatch(childCategoryPatch)
 
-            const categoryPatch = RecordCategory.patch({id: rootCategory.id, childCategories: arr})
+            const categoryPatch = RecordCategory.patch({
+                id: rootCategory.id, 
+                childCategories: arr
+            })
             addRootPatch(categoryPatch)
         } else {
             console.warn('Could not find root category to patch for this record')
@@ -174,7 +181,7 @@ function moveTo(category: RecordCategory) {
         return;
     }
 
-    const parentRootCategory = props.rootCategories.find(r => r.childCategories.find(rr => rr.id === category.id));
+    const parentRootCategory = props.rootCategories.find(r => !!r.childCategories.find(rr => rr.id === category.id));
     if (!parentRootCategory) {
         console.error('Invalid move');
         return;
