@@ -125,13 +125,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
 import { Country, GroupGenderType, GroupSettings } from '@stamhoofd/structures';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
-
-import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
-import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import SelectGroupsView from '../SelectGroupsView.vue';
 import EditGroupMixin from './EditGroupMixin';
 
@@ -149,9 +146,7 @@ import EditGroupMixin from './EditGroupMixin';
         AgeInput,
         Slider,
         TimeInput,
-        EditGroupPriceBox,
         STList,
-        GroupPermissionRow,
         UploadButton,
         STListItem
     },

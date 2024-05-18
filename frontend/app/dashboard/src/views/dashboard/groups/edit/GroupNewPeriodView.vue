@@ -83,13 +83,11 @@
 </template>
 
 <script lang="ts">
-import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, DateSelection, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput } from "@stamhoofd/components";
 import { CycleInformation, Group, GroupGenderType, GroupSettings, GroupStatus, Image, ResolutionFit, ResolutionRequest, WaitingListType } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
-import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
-import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import EditGroupMixin from './EditGroupMixin';
 
 @Component({
@@ -97,19 +95,10 @@ import EditGroupMixin from './EditGroupMixin';
         SaveView,
         STInputBox,
         STErrorsDefault,
-        SegmentedControl,
         DateSelection,
-        RadioGroup,
-        PriceInput,
-        Radio,
         Checkbox,
-        AgeInput,
-        Slider,
         TimeInput,
-        EditGroupPriceBox,
         STList,
-        GroupPermissionRow,
-        UploadButton,
         STListItem
     },
 })

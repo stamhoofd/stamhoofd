@@ -14,7 +14,7 @@
             <h2>Rollen</h2>
             <p>Je kan een API-key verschillende rollen geven, net zoals een beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.</p>
 
-            <EditUserPermissionsBox :user="patchedUser" @patch="addPatch($event)" />
+            <EditUserPermissionsBox :user="patchedUser" @patch:user="addPatch($event)" />
         </div>
 
         <hr v-if="!isNew">
@@ -34,14 +34,12 @@ import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, patchContainsChan
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator, EditUserPermissionsBox } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
-import { ApiUser, ApiUserWithToken, PermissionLevel, Permissions, User, Version } from "@stamhoofd/structures";
+import { ApiUser, ApiUserWithToken, PermissionLevel, Permissions, User, UserPermissions, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-
 import CopyApiTokenView from './CopyApiTokenView.vue';
-import EditUserPermissionsBox from './EditUserPermissionsBox.vue';
 
 @Component({
     components: {
@@ -106,7 +104,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return !!this.patchUser.permissions?.forOrganization(this.organization)?.hasFullAccess()
+        return !!this.patchedUser.permissions?.forOrganization(this.organization)?.hasFullAccess()
     }
 
     async save() {
@@ -144,7 +142,6 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
         }
 
         const permissions = Permissions.patch({ level: this.fullAccess ? PermissionLevel.Full : (PermissionLevel.None )})
-
         this.addPermissionsPatch(permissions)
 
         try {
@@ -236,7 +233,14 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
     }
 
     addPermissionsPatch(patch: PartialWithoutMethods<PatchType<Permissions>>) {
-        this.addPatch({ permissions: Permissions.patch(patch) })
+        if (!this.patchedUser.permissions) {
+            const base = UserPermissions.create({})
+            const p = base.convertPatch(Permissions.patch(patch), this.organization.id)
+            this.addPatch({ permissions: base.patch(p) })
+            return;
+        }
+
+        this.addPatch({ permissions: this.patchedUser.permissions!.convertPatch(Permissions.patch(patch), this.organization.id) })
     }
 
 

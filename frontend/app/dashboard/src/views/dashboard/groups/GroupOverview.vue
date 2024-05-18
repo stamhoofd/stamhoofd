@@ -325,9 +325,9 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import MembersTableView from '../member/MembersTableView.vue';
@@ -336,7 +336,6 @@ import CategoryView from './CategoryView.vue';
 import EditGroupEmailsView from './edit/EditGroupEmailsView.vue';
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
-import EditGroupPermissionsView from './edit/EditGroupPermissionsView.vue';
 import EditGroupPricesView from './edit/EditGroupPricesView.vue';
 import EditGroupRestrictionsView from './edit/EditGroupRestrictionsView.vue';
 import EditGroupWaitinglistView from './edit/EditGroupWaitinglistView.vue';
@@ -465,7 +464,22 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     editPermissions(animated = true) {
-        this.displayEditComponent(EditGroupPermissionsView, animated)
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(EditResourceRolesView, {
+                    description: 'Kies hier welke beheerdersrollen deze inschrijvingsgroep kunnen bekijken, bewerken of beheren.',
+                    resource: {
+                        id: this.group.id,
+                        name: this.group.settings.name,
+                        type: PermissionsResourceType.Groups
+                    },
+                    configurableAccessRights: []
+                })
+            ]
+        });
     }
 
     editPage(animated = true) {

@@ -70,36 +70,15 @@
             </STInputBox>
             <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" title="Tot welk tijdstip" :validator="validator" />
         </div>
-
-        <template v-if="isNew && roles.length">
-            <hr>
-            <h2>Toegangsbeheer</h2>
-            <p>Kies welke beheerdersrollen toegang hebben tot deze inschrijvingsgroep (hoofdbeheerders kunnen beheerdersrollen wijzigen via Instellingen → Beheerders)</p>
-            <STErrorsDefault :error-box="errorBox" />
-
-            <STList>
-                <STListItem>
-                    <template #left>
-                        <Checkbox :modelValue="true" :disabled="true" />
-                    </template>
-                    Hoofdbeheerders
-                </STListItem>
-
-                <GroupPermissionRow v-for="role in roles" :key="role.id" :role="role" :show-role="true" :organization="patchedOrganization" :group="patchedGroup" @patch="addOrganizationPatch" />
-            </STList>
-        </template>
     </SaveView>
 </template>
 
 <script lang="ts">
-import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
-import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Image, PermissionLevel, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, WaitingListType } from '@stamhoofd/structures';
-import { StringCompare } from '@stamhoofd/utility';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, SaveView, SegmentedControl, Slider, TimeInput, UploadButton } from "@stamhoofd/components";
+import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Image, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, WaitingListType } from '@stamhoofd/structures';
+import { StringCompare } from '@stamhoofd/utility';
 
-
-import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
-import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import EditGroupMixin from './EditGroupMixin';
 
 @Component({
@@ -116,9 +95,7 @@ import EditGroupMixin from './EditGroupMixin';
         AgeInput,
         Slider,
         TimeInput,
-        EditGroupPriceBox,
         STList,
-        GroupPermissionRow,
         UploadButton,
         STListItem
     },

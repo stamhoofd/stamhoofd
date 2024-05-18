@@ -10,32 +10,17 @@
 </template>
 
 <script lang="ts">
-import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { SaveView, STErrorsDefault } from "@stamhoofd/components";
 
-import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
 import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import EditGroupMixin from './EditGroupMixin';
 
 @Component({
     components: {
         SaveView,
-        STInputBox,
         STErrorsDefault,
-        SegmentedControl,
-        DateSelection,
-        RadioGroup,
-        PriceInput,
-        Radio,
-        Checkbox,
-        AgeInput,
-        Slider,
-        TimeInput,
         EditGroupPriceBox,
-        STList,
-        GroupPermissionRow,
-        UploadButton,
-        STListItem
     },
 })
 export default class EditGroupPricesView extends Mixins(EditGroupMixin) {

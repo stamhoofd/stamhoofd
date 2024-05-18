@@ -74,11 +74,10 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions } from '@stamhoofd/components';
+import { CenteredMessage, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions, EditUserPermissionsBox } from '@stamhoofd/components';
 import { Permissions, PermissionsResourceType, User } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
-import EditUserPermissionsBox from './components/EditUserPermissionsBox.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
 
@@ -192,7 +191,7 @@ const save = async () => {
             pushInMemory(props.user)
         }
 
-        pop({ force: true })
+        await pop({ force: true })
     } catch (e) {
         console.error(e)
         errors$.errorBox = new ErrorBox(e)
@@ -230,7 +229,7 @@ const doDelete = async () => {
         props.user.set(response.data);
         dropFromMemory(props.user)
 
-        pop({ force: true })
+        await pop({ force: true })
 
         new Toast("Beheerder "+props.user.firstName+" is verwijderd", "success").setHide(2000).show()
     } catch (e) {
