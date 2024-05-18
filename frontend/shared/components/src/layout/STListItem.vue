@@ -2,12 +2,12 @@
     <component
         :is="dynamicElementName"
         class="st-list-item"
-        :class="{
+        :class="[{
             selectable,
             hoverable,
             disabled,
-            button: dynamicElementName === 'button',
-        }"
+            button: dynamicElementName === 'button'
+        }, $attrs.class]"
         :type="dynamicElementName === 'button' ? 'button' : undefined"
         @click="onClick"
         @contextmenu="$emit('contextmenu', $event)"

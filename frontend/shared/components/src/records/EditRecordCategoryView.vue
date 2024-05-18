@@ -4,10 +4,10 @@
             {{ title }}
         </h1>
 
-        <p class="style-description" v-if="allowChildCategories">
+        <p v-if="allowChildCategories" class="style-description">
             Een vragenlijst bevat één of meerdere vragen, eventueel opgedeeld in categorieën. Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
-        <p class="style-description" v-else>
+        <p v-else class="style-description">
             Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
 
@@ -37,7 +37,22 @@
             />
         </STInputBox>
 
-        
+        <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="defaultEnabled" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Verplicht ingeschakeld voor alle groepen
+                </h3>
+
+                <p class="style-description-small">
+                    Schakel je dit uit, dan kan elke groep zelf kiezen of ze dit inschakelen of niet.
+                </p>
+            </STListItem>
+        </STList>
+
         <p v-if="records.length === 0 && categories.length === 0" class="info-box">
             Deze vragenlijst is leeg en zal nog niet getoond worden.
         </p>
@@ -82,7 +97,7 @@
                 Deze categorie bevat nog geen vragen.
             </p>
 
-            <p class="style-description-block style-em pre-wrap" v-text="c.description" v-if="c.description" />
+            <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description" />
                 
             <STList :model-value="getDraggableRecords(c).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(c).computed.value = newValue!">
                 <template #item="{item: record}">
@@ -91,16 +106,18 @@
             </STList>
         </div>
 
-        <hr>
-        <h2>Filters</h2>
-        <p v-if="allowChildCategories">
-            Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.
-        </p>
-        <p v-else>
-            Je kan kiezen wanneer deze vragen van toepassing zijn.
-        </p>
+        <div v-if="defaultEnabled" class="container">
+            <hr>
+            <h2>Filters</h2>
+            <p v-if="allowChildCategories">
+                Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.
+            </p>
+            <p v-else>
+                Je kan kiezen wanneer deze vragen van toepassing zijn.
+            </p>
 
-        <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories" :builder="filterBuilder" />
+            <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories" :builder="filterBuilder" />
+        </div>
 
         <div class="container">
             <hr>
@@ -115,7 +132,7 @@
                 </button>
 
                 <LoadingButton v-if="!isNew" :loading="deleting">
-                    <button  class="button secundary danger" type="button" @click="deleteMe">
+                    <button class="button secundary danger" type="button" @click="deleteMe">
                         <span class="icon trash" />
                         <span>Verwijderen</span>
                     </button>
@@ -199,6 +216,18 @@ const description = computed({
             RecordCategory.patch({
                 id: patchedCategory.value.id,
                 description: v
+            })
+        )
+    }
+})
+const defaultEnabled = computed({
+    get: () => patchedCategory.value.defaultEnabled,
+    set: (v: boolean) => {
+        addPatch(
+            RecordCategory.patch({
+                id: patchedCategory.value.id,
+                defaultEnabled: v,
+                filter: !defaultEnabled.value ? null : undefined
             })
         )
     }

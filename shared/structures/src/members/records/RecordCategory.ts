@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,6 +26,13 @@ export class RecordCategory extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     description = ""
+
+    /**
+     * Sometimes a category needs to be in the list but not enabled.
+     * E.g. when decendants can enable it optionally and share the data
+     */
+    @field({ decoder: BooleanDecoder, version: 255 })
+    defaultEnabled = true
 
     /**
      * A category can either have childCategories or records, but never both. Records are ignored as soon as the category has at least one child category.

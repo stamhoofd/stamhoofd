@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { PropertyFilter } from "../filters/PropertyFilter"
 import { LegacyRecordType } from "./records/LegacyRecordType"
@@ -140,6 +140,12 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
     recordCategories: RecordCategory[] = []
+
+    /**
+     * Defines if optional record categories in the parent are enabled, and when they are enabled (using a filter)
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, PropertyFilter), version: 254 })
+    inheritedRecordCategories: Map<string, PropertyFilter> = new Map()
 
     // General configurations
     @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
