@@ -14,6 +14,7 @@ import { Parent } from "./Parent"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
+import { PropertyFilter } from "../filters/PropertyFilter"
 
 export class PlatformFamily {
     members: PlatformMember[] = []
@@ -288,8 +289,18 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
+    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+        const def = this.platform.config.recordsConfiguration[property];
+        if (def === null) {
+            return false;
+        }
+        return def.isEnabled(this)
+    }
+
     isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
-        // todo: platform
+        if (this.isPropertyEnabledForPlatform(property)) {
+            return true;
+        }
 
         const organizations = this.filterOrganizations({cycleOffset: 0})
 
@@ -309,7 +320,11 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
-        return false;
+        const def = this.platform.config.recordsConfiguration[property];
+        if (def === null) {
+            return false;
+        }
+        return def.isRequired(this)
     }
 
     isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
@@ -324,10 +339,7 @@ export class PlatformMember implements ObjectWithRecords {
             if (def === null) {
                 continue;
             }
-            if (def.requiredWhen === null) {
-                continue
-            }
-            if (this.doesMatchFilter(def.requiredWhen)) {
+            if (def.isRequired(this)) {
                 return true;
             }
         }
@@ -513,7 +525,38 @@ export class PlatformMember implements ObjectWithRecords {
             categories.push(...organization.meta.recordsConfiguration.recordCategories)
         }
 
-        // Todo: read from platform
+        categories.push(...this.platform.config.recordsConfiguration.recordCategories)
+        return categories;
+    }
+
+    getEnabledRecordCategories(): RecordCategory[] {
+        // From organization
+        const categories: RecordCategory[] = [];
+        const inheritedFilters = new Map<string, PropertyFilter[]>()
+
+        for (const organization of this.organizations) {
+            categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => r.defaultEnabled && r.isEnabled(this)))
+
+            // Any optional categories from the platform that have been enabled?
+            for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
+                inheritedFilters.set(id, [...(inheritedFilters.get(id) ?? []), filter])
+            }
+        }
+
+        // All required categories of the platform
+        for (const category of this.platform.config.recordsConfiguration.recordCategories) {
+            if (category.defaultEnabled && category.isEnabled(this)) {
+                categories.push(category)
+            } else {
+                const filters = inheritedFilters.get(category.id)
+                if (filters) {
+                    if (filters.find(f => f.isEnabled(this))) {
+                        categories.push(category)
+                    }
+                }
+            }
+        }
+
         return categories;
     }
 

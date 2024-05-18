@@ -145,7 +145,9 @@ const answer = computed({
 
 function patchAnswer(patch: AutoEncoderPatchType<RecordAnswer>) {
     const patchMap = new PatchMap() as PatchAnswers;
-    patchMap.set(props.record.id, patch);
+
+    // PatchAnswer doesn't support pathces becase it is a generic type (needs type for decoding, which we don't support yet - See RecordAnswerDecoder)
+    patchMap.set(props.record.id, answer.value.patch(patch));
     emit('patch', patchMap)
 }
 

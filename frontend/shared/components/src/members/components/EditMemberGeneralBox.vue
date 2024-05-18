@@ -45,24 +45,25 @@ import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { computed } from 'vue';
+import { useAppContext } from '../../context/appContext';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
+import { useAuth } from '../../hooks';
 import AddressInput from '../../inputs/AddressInput.vue';
 import BirthDayInput from '../../inputs/BirthDayInput.vue';
 import EmailInput from '../../inputs/EmailInput.vue';
 import PhoneInput from '../../inputs/PhoneInput.vue';
 import RadioGroup from '../../inputs/RadioGroup.vue';
-import { useAuth } from '../../hooks';
+import { useIsPropertyRequired } from '../hooks/useIsPropertyRequired';
 
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator
 }>();
 
-const auth = useAuth();
-
+const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const errors = useErrors({validator: props.validator});
 
 useValidation(errors.validator, () => {
@@ -79,15 +80,6 @@ useValidation(errors.validator, () => {
             code: "invalid_field",
             message: "Vul de achternaam in",
             field: "lastName"
-        }))
-    }
-    
-    if (!birthDay.value && props.isPropertyRequired("birthDay")) {
-        // Security check in case event based validation fails
-        // no translations needed here, since this is an edge case
-        se.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Birthday check failed",
         }))
     }
 
@@ -147,11 +139,4 @@ const phone = computed({
     get: () => props.member.patchedMember.details.phone,
     set: (phone) => props.member.addDetailsPatch({phone})
 });
-
-function isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
-    if (auth.canAccessPlatformMember(props.member, PermissionLevel.Write)) {
-        return props.member.isPropertyRequiredForPlatform(property)
-    }
-    return props.member.isPropertyRequired(property)
-}
 </script>

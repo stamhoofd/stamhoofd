@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
         <h1>{{ title }}</h1>
-        <component :is="component" :validator="errors.validator" :member="cloned" />
+        <component :is="component" :validator="errors.validator" :member="cloned" v-bind="$attrs" />
     </SaveView>
 </template>
 
@@ -17,13 +17,17 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
 import { NavigationActions } from '../types/NavigationActions';
 
+defineOptions({
+    inheritAttrs: false
+})
+
 const props = withDefaults(
     defineProps<{
         title: string
         saveText?: string,
         component: ComponentOptions,
         // do not change this
-        member: Readonly<PlatformMember>,
+        member: PlatformMember,
         saveHandler: (navigate: NavigationActions) => Promise<void>|void
     }>(), {
         saveText: 'Opslaan'
@@ -31,7 +35,7 @@ const props = withDefaults(
 );
 
 // We use a clone, so we don't propate the patches to the rest of the app until the save was successful
-const cloned = ref<PlatformMember>(props.member.clone()) as Ref<PlatformMember>;
+const cloned = ref(props.member.clone() as any) as Ref<PlatformMember>;
 const show = useShow();
 const present = usePresent();
 const dismiss = useDismiss();

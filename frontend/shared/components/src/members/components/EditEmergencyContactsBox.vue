@@ -45,18 +45,18 @@
 </template>
 
 <script setup lang="ts">
-import { EmergencyContact, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
 
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { computed } from 'vue';
-import { useAuth } from '../../hooks';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
 import STList from '../../layout/STList.vue';
+import { useIsPropertyRequired } from '../hooks/useIsPropertyRequired';
 import EditEmergencyContactView from './EditEmergencyContactView.vue';
 
 const props = defineProps<{
@@ -64,7 +64,7 @@ const props = defineProps<{
     validator: Validator
 }>();
 
-const auth = useAuth();
+const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const present = usePresent();
 const errors = useErrors({validator: props.validator});
 
@@ -133,13 +133,6 @@ function setContactSelected(contact: EmergencyContact, selected: boolean) {
         patch.addDelete(contact.id);
         props.member.addDetailsPatch({emergencyContacts: patch})
     }
-}
-
-function isPropertyRequired(property: 'birthDay'|'gender'|'address'|'emergencyContacts'|'emailAddress'|'phone'|'emergencyContacts') {
-    if (auth.canAccessPlatformMember(props.member, PermissionLevel.Write)) {
-        return props.member.isPropertyRequiredForPlatform(property)
-    }
-    return props.member.isPropertyRequired(property)
 }
 
 async function editContact(emergencyContact: EmergencyContact) {

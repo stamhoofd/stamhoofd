@@ -60,16 +60,16 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import EditParentView from './EditParentView.vue';
 import STList from '../../layout/STList.vue';
+import { useIsPropertyRequired } from '../hooks/useIsPropertyRequired';
 
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator
 }>();
 
-const auth = useAuth();
+const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const present = usePresent();
 const errors = useErrors({validator: props.validator});
-
 useValidation(errors.validator, () => {
     const se = new SimpleErrors()
     if (isPropertyRequired("parents") && parents.value.length === 0) {
@@ -135,13 +135,6 @@ function setParentSelected(parent: Parent, selected: boolean) {
         patch.addDelete(parent.id);
         props.member.addDetailsPatch({parents: patch})
     }
-}
-
-function isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
-    if (auth.canAccessPlatformMember(props.member, PermissionLevel.Write)) {
-        return props.member.isPropertyRequiredForPlatform(property)
-    }
-    return props.member.isPropertyRequired(property)
 }
 
 async function editParent(parent: Parent) {

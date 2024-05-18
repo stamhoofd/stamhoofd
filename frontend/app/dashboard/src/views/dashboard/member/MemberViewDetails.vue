@@ -440,7 +440,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
             category,
             value: this.member.details,
-            markReviewed: false,
             hasNextStep: false,
         }).setDisplayStyle("popup");
         this.present(displayedComponent);

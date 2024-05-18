@@ -13,6 +13,11 @@
             <h2>Noodcontactpersonen</h2>
             <EditEmergencyContactsBox v-bind="$attrs" :member="member" />
         </div>
+
+        <div v-for="category of recordCategories" :key="category.id" class="container">
+            <hr>
+            <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :mark-reviewed="true" :level="2" />
+        </div>
     </div>
 </template>
 
@@ -22,13 +27,17 @@ import { PlatformMember } from '@stamhoofd/structures';
 import EditEmergencyContactsBox from './EditEmergencyContactsBox.vue';
 import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
 import EditMemberParentsBox from './EditMemberParentsBox.vue';
+import { computed } from 'vue';
+import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
 
 defineOptions({
-  inheritAttrs: false
+    inheritAttrs: false
 })
 
-defineProps<{
+const props = defineProps<{
     member: PlatformMember,
 }>();
+
+const recordCategories = computed(() => props.member.getEnabledRecordCategories())
 
 </script>
