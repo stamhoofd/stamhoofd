@@ -4,7 +4,10 @@
             {{ title }}
         </h1>
 
-        <p class="style-description">
+        <p class="style-description" v-if="allowChildCategories">
+            Een vragenlijst bevat één of meerdere vragen, eventueel opgedeeld in categorieën. Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+        </p>
+        <p class="style-description" v-else>
             Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
 
@@ -78,6 +81,8 @@
             <p v-if="c.records.length === 0" class="info-box">
                 Deze categorie bevat nog geen vragen.
             </p>
+
+            <p class="style-description-block style-em" v-text="c.description" v-if="c.description" />
                 
             <STList :model-value="getDraggableRecords(c).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(c).computed.value = newValue!">
                 <template #item="{item: record}">
@@ -103,15 +108,19 @@
                 Acties
             </h2>
 
-            <button class="button secundary" type="button" @click="showExample">
-                <span class="icon eye" />
-                <span>Voorbeeld</span>
-            </button>
+            <div class="style-button-bar">
+                <button class="button secundary" type="button" @click="showExample">
+                    <span class="icon eye" />
+                    <span>Voorbeeld</span>
+                </button>
 
-            <button v-if="!isNew" class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
+                <LoadingButton v-if="!isNew" :loading="deleting">
+                    <button  class="button secundary danger" type="button" @click="deleteMe">
+                        <span class="icon trash" />
+                        <span>Verwijderen</span>
+                    </button>
+                </LoadingButton>
+            </div>
         </div>
     </SaveView>
 </template>
@@ -128,6 +137,7 @@ import { useDraggableArray, usePatchArray } from '../hooks';
 import EditRecordView from './EditRecordView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 // Define
 const props = defineProps<{
@@ -147,6 +157,7 @@ const present = usePresent();
 
 // Data
 const saving = ref(false);
+const deleting = ref(false);
 const filterBuilder = props.settings.filterBuilder(props.rootCategories)
 
 // Computed
@@ -250,6 +261,29 @@ function getDraggableRecords(category: RecordCategory): {computed: Ref<RecordSet
     cachedComputers.set(category.id, c);
     return {computed: c};
 }
+
+// Methods
+function getPatchParentCategories(patch: PatchableArrayAutoEncoder<RecordCategory>, categoryId = props.categoryId): PatchableArrayAutoEncoder<RecordCategory> {
+    // Is it a root category?
+    if (props.rootCategories.find(r => r.id === categoryId)) {
+        return patch
+    }
+
+    const parentRootCategory = props.rootCategories.find(r => !!r.childCategories.find(c => c.id === categoryId))
+    if (parentRootCategory) {
+        const rootPatch = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>
+        rootPatch.addPatch(RecordCategory.patch({
+            id: parentRootCategory.id,
+            childCategories: patch
+        }))
+        return rootPatch;
+
+    } else {
+        console.error('Could not patch inside EditRecordCategoryView: could not find parent category', patch)
+    }
+    return new PatchableArray() 
+}
+
 
 // Methods
 function addPatch(patch: AutoEncoderPatchType<RecordCategory>) {
@@ -362,15 +396,59 @@ async function addCategory() {
     })
 }
 
-function editCategory(c: RecordCategory) {
-
+async function editCategory(category: RecordCategory) {
+    await present({
+        components: [
+            new ComponentWithProperties(Self, {
+                categoryId: category.id,
+                isNew: false,
+                rootCategories: patchedRootCategories.value,
+                settings: props.settings,
+                allowChildCategories: false,
+                saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                    addRootCategoriesPatch(patch)
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
 }
 
-function deleteMe() {
+async function deleteMe() {
+    if (deleting.value) {
+        return;
+    }
 
+    if (!await CenteredMessage.confirm('Weet je zeker dat je deze vragenlijst wilt verwijderen?', 'Verwijderen')) {
+        return;
+    }
+    // Note we create a patch, but don't use it internally because that would throw errors. The view itszelf is not aware of the delete
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<RecordCategory>
+    arr.addDelete(props.categoryId)
+    const patch = getPatchParentCategories(arr, props.categoryId)
+
+    deleting.value = true;
+    try {
+        await props.saveHandler(patch) 
+        await pop({force: true});
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    deleting.value = false;
 }
 
 function showExample() {
 
 }
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+}
+
+defineExpose({
+    shouldNavigateAway
+})
 </script>
