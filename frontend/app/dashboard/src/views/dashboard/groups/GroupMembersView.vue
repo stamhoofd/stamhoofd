@@ -20,13 +20,12 @@
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { Column, GlobalEventBus, TableAction, TableView, Toast, MemberSegmentedView } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 
 import { MemberChangeEvent } from "../../../classes/MemberManager";
-import MemberSegmentedView from "../member/MemberSegmentedView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
 
 @Component({

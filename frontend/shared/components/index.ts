@@ -15,13 +15,7 @@ export * from "./src/EventBus"
 export * from "./src/ViewportHelper"
 
 // Members
-export { default as EditMemberGeneralBox } from "./src/members/components/EditMemberGeneralBox.vue"
-export { default as EditMemberParentsBox } from "./src/members/components/EditMemberParentsBox.vue"
-export { default as EditMemberAllBox } from "./src/members/components/EditMemberAllBox.vue"
-
-export { default as MemberStepView } from "./src/members/MemberStepView.vue"
-export * from "./src/members/PlatformFamilyManager"
-
+export * from "./src/members"
 
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"
