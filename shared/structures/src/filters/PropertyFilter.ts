@@ -80,7 +80,7 @@ export class PropertyFilter implements Encodeable {
         }
 
         return new PropertyFilter(
-            data.field("enabledWhen").decode(StamhoofdFilterDecoder),
+            data.field("enabledWhen").nullable(StamhoofdFilterDecoder),
             data.field("requiredWhen").nullable(StamhoofdFilterDecoder)
         )
     }

@@ -74,7 +74,7 @@ export async function getOrganizationSelectionRoot() {
     const reactiveSession = session
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
-    await I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl")
+    await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl")
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
 
@@ -94,9 +94,8 @@ export async function getOrganizationSelectionRoot() {
             $platformManager: platformManager,
             reactive_navigation_url: "/",
             reactive_components: {
-                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
+                // Only display a right account switcher (if signed in), because we are already in the 'selection view', so adding another selection in the left top corner would be weird
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
-                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'dashboard',
         },
@@ -148,7 +147,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
         // So return the login view, that will call getScopedAutoRoot again after login
         const reactiveSession = reactive(session) as SessionContext
         const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
-        I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
+        I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
 
         return new ComponentWithProperties(ContextProvider, {
             context: {
@@ -182,21 +181,19 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
         return getOrganizationSelectionRoot()
     }
 
-    if (STAMHOOFD.userMode === 'organization') {
-        // Organization specific registration root
-        if (!session.auth.permissions && session.organization.meta.packages.useMembers) {
-            const registration = await import('@stamhoofd/registration');
-            return await registration.getRootView(session)
-        }
+    // Organization specific registration root
+    if (!session.auth.permissions && session.organization.meta.packages.useMembers) {
+        const registration = await import('@stamhoofd/registration');
+        return await registration.getRootView(session)
     }
-
+    
     return await getScopedDashboardRoot(session, options)
 }
 
 export async function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     const reactiveSession = reactive(session) as SessionContext
-    I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
+    I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
 

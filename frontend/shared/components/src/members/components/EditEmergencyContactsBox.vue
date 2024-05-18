@@ -51,7 +51,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { computed } from 'vue';
-import { useAuth } from '../../VueGlobalHelper';
+import { useAuth } from '../../hooks';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';

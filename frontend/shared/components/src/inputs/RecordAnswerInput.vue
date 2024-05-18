@@ -82,11 +82,14 @@
 
 
 <script lang="ts" setup>
-import { PatchAnswers, RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType, RecordAddressAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordPriceAnswer, RecordTextAnswer, Address, Image } from "@stamhoofd/structures";
+import { Address, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
 
+import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding";
 import { computed, onMounted } from "vue";
+import { ErrorBox } from "../errors/ErrorBox";
 import STErrorsDefault from "../errors/STErrorsDefault.vue";
 import { Validator } from "../errors/Validator";
+import { useErrors } from "../errors/useErrors";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import AddressInput from "./AddressInput.vue";
@@ -99,20 +102,18 @@ import PhoneInput from "./PhoneInput.vue";
 import PriceInput from "./PriceInput.vue";
 import Radio from "./Radio.vue";
 import STInputBox from "./STInputBox.vue";
-import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding";
-import { useErrors } from "../errors/useErrors";
-import { ErrorBox } from "../errors/ErrorBox";
+import { useValidation } from "../errors/useValidation";
 
 const props = defineProps<{
     record: RecordSettings,
     // Used to find the currently saved answer
     answers: Map<string, RecordAnswer>,
-    validator: Validator | null,
+    validator: Validator,
     allOptional: boolean,
 }>()
 
 const emit = defineEmits<{
-  patch: [patch: PatchAnswers]
+    patch: [patch: PatchAnswers]
 }>()
 const errors = useErrors({validator: props.validator});
 
@@ -128,13 +129,10 @@ const answer = computed({
         }
  
         // Create a new one
-        // TODO: try to migrate old values if possible
         const a = type.create({
             settings: props.record
         })
  
-        // This is required, because in very rare situations, the answer that was set on mount could have been removed from the array
-        answer.value = a
         return a
     },
 
@@ -292,15 +290,18 @@ function setChoiceSelected(choice: RecordChoice, selected: boolean) {
     }
 }
 
-onMounted(() => {
-    if (errors.validator) {
-        errors.validator.addValidation(this, async () => {
-            return await isValid()
-        })
-    }
+useValidation(props.validator, async () => {
+    return await isValid()
+})
 
+onMounted(() => {
     // Make sure the answer (updated one) is inside the recordAnswers
-    answer.value = (answer.value as any)
+    const existing = props.answers.get(props.record.id)
+    const readValue = answer.value
+    if (existing !== readValue) {
+        answer.value = readValue
+    }
+    
 })
 
 async function isValid() {

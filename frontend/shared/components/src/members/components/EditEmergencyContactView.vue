@@ -50,7 +50,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { usePatch } from '../../VueGlobalHelper';
+import { usePatch } from '../../hooks';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import PhoneInput from '../../inputs/PhoneInput.vue';

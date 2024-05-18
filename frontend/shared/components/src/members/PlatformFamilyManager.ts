@@ -1,13 +1,10 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { Request, RequestResult } from "@simonbackx/simple-networking"
-import { useDismiss, usePop, usePresent, useShow } from "@simonbackx/vue-app-navigation"
 import { useContext } from "@stamhoofd/components"
 import { SessionContext } from "@stamhoofd/networking"
 import { MemberWithRegistrationsBlob, PlatformMember, Version } from "@stamhoofd/structures"
 import { onBeforeUnmount, unref } from "vue"
-
-export type NavigationActions = {show: ReturnType<typeof useShow>, present: ReturnType<typeof usePresent>, dismiss: ReturnType<typeof useDismiss>, pop: ReturnType<typeof usePop>}
 
 export function usePlatformFamilyManager() {
     const context = useContext()

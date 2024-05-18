@@ -29,8 +29,7 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 
 import Checkbox from "../inputs/Checkbox.vue";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
@@ -46,7 +45,7 @@ import ContextMenuView from "./ContextMenuView.vue";
         Checkbox
     }
 })
-export default class GeneralContextMenuView extends Mixins(NavigationMixin) {
+export default class GeneralContextMenuView extends VueComponent {
     @Prop({ required: false })
         menu: ContextMenu;
 
@@ -55,7 +54,11 @@ export default class GeneralContextMenuView extends Mixins(NavigationMixin) {
             return
         }
         item.action.call(item, event)
-    } 
+    }
+
+    pop(popParents = false) {
+        this.$refs.contextMenuView.pop(popParents);
+    }
 
 }
 </script>

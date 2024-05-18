@@ -10,5 +10,4 @@ export interface ObjectWithRecords extends Filterable {
     isRecordCategoryEnabled(recordCategory: RecordCategory): boolean
     isRecordEnabled(record: RecordSettings): boolean
     getRecordAnswers(): Map<string, RecordAnswer>
-    patchRecordAnswers(patch: PatchAnswers): this
 }

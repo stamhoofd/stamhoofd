@@ -36,5 +36,18 @@ export default class ContextProvider extends Vue {
     async shouldNavigateAway() {
         return await this.root.shouldNavigateAway()
     }
+
+    returnToHistoryIndex() {
+        if (this.root) {
+            return this.root.returnToHistoryIndex()
+        }
+        return false;
+    }
+
+    beforeMount() {
+        if (this.root) {
+            this.root.assignHistoryIndex()
+        }
+    }
 }
 </script>

@@ -1,120 +1,133 @@
 {
-  "shared": {
-    "login": "Inloggen",
-    "transferTypes": {
-      "structured": "Gestructureerde mededeling"
-    },
-    "inputs": {
-      "iban": {
-        "placeholder": "Bv. BE71 6316 1793 1960"
-      },
-      "companyNumber": {
-        "label": "Ondernemingsnummer"
-      },
-      "mobile": {
-        "label": "Mobiel nummer",
-        "invalidMessage": "Ongeldig GSM-nummer",
-        "invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31."
-      },
-      "url": {
-        "labelOptional": "Website (optioneel)",
-        "invalidMessage": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens."
-      }
-    },
-    "domains": {
-      "marketing": "www.stamhoofd.be",
-      "email": "stamhoofd.be"
-    },
-    "emails": {
-      "general": "hallo@stamhoofd.be",
-      "complaints": "klachten@stamhoofd.be",
-      "personal": "simon@stamhoofd.be"
-    },
-    "exampleData": {
-      "phone": "+32 470 12 34 56",
-      "email": "voorbeeld@gmail.com",
-      "name": "Jan Janssens",
-      "names": "Lies en Jan Janssens"
-    }
-  },
-  "backend": {},
-  "dashboard": {
-    "join": "Aansluiten",
-    "settings": {
-      "billing": {
-        "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid"
-      },
-      "menu": {
-        "paymentMethods": {
-          "description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",
-          "title": "Betaalmethodes voor inschrijvingen"
+    "shared": {
+        "login": "Inloggen",
+        "transferTypes": {
+            "structured": "Gestructureerde mededeling"
         },
-        "paymentAccounts": {
-          "title": "Betaalaccounts",
-          "description": "Sluit aan bij een online betaalprovider zodat je online geld kan ontvangen."
-        }
-      },
-      "paymentMethods": {
-        "mollie": {
-          "activeDescription": "Online betalingen (via o.a. Bancontact, iDEAL of kredietkaart) zijn mogelijk. Vink de betaalmethodes die je wilt activeren aan, en zorg dat ze ook in Mollie geactiveerd staan.",
-          "description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner."
+        "inputs": {
+            "iban": {
+                "placeholder": "Bv. BE71 6316 1793 1960"
+            },
+            "companyNumber": {
+                "label": "Ondernemingsnummer"
+            },
+            "mobile": {
+                "label": "Mobiel nummer",
+                "invalidMessage": "Ongeldig GSM-nummer",
+                "invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31."
+            },
+            "url": {
+                "labelOptional": "Website (optioneel)",
+                "invalidMessage": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens."
+            }
         },
-        "buckaroo": {
-          "description": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft."
+        "domains": {
+            "marketing": "www.stamhoofd.be",
+            "email": "stamhoofd.be"
+        },
+        "emails": {
+            "general": "hallo@stamhoofd.be",
+            "complaints": "klachten@stamhoofd.be",
+            "personal": "simon@stamhoofd.be"
+        },
+        "exampleData": {
+            "phone": "+32 470 12 34 56",
+            "email": "voorbeeld@gmail.com",
+            "name": "Jan Janssens",
+            "names": "Lies en Jan Janssens"
         }
-      },
-      "domain": {
-        "domainPlaceholder": "bv. jouwvereniging.be"
-      },
-      "email": {
-        "description": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen."
-      },
-      "personalize": {
-        "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
-        "domainDescription": "{'Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.'}"
-      },
-      "registrationPage": {
-        "linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be"
-      }
     },
-    "inputs": {
-      "parentPhone": {
-        "placeholder": "Mobiel nummer van ouder"
-      },
-      "website": {
-        "placeholder": "bv. https://www.vereniging.be"
-      },
-      "privacyUrl": {
-        "placeholder": "bv. https://www.vereniging.be/privacy"
-      },
-      "shopUrl": {
-        "placeholder": "bv. shop.domeinnaam.be/wafelbak"
-      }
-    },
-    "webshop": {
-      "customDomain": {
-        "description": "Hier kan je jouw eigen domeinnaam kiezen (die moet je wel zelf al in bezit hebben), eventueel met iets na het streepje (/). Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
-      },
-      "deliveryMethod": {
-        "name": {
-          "placeholder": "bv. Bpost"
+    "backend": {},
+    "dashboard": {
+        "start": {
+            "title": "Beheerdersportaal",
+            "title-description": "Welkom op het beheerdersportaal. Hier kan je jouw vereniging beheren en instellingen aanpassen."
+        },
+        "organization-selection": {
+            "welcome-title": "Zoek jouw vereniging",
+            "welcome-description": "Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.",
+            "search-placeholder": "Zoek op naam of postcode"
+        },
+        "join": "Aansluiten",
+        "settings": {
+            "billing": {
+                "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid"
+            },
+            "menu": {
+                "paymentMethods": {
+                    "description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",
+                    "title": "Betaalmethodes voor inschrijvingen"
+                },
+                "paymentAccounts": {
+                    "title": "Betaalaccounts",
+                    "description": "Sluit aan bij een online betaalprovider zodat je online geld kan ontvangen."
+                }
+            },
+            "paymentMethods": {
+                "mollie": {
+                    "activeDescription": "Online betalingen (via o.a. Bancontact, iDEAL of kredietkaart) zijn mogelijk. Vink de betaalmethodes die je wilt activeren aan, en zorg dat ze ook in Mollie geactiveerd staan.",
+                    "description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner."
+                },
+                "buckaroo": {
+                    "description": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft."
+                }
+            },
+            "domain": {
+                "domainPlaceholder": "bv. jouwvereniging.be"
+            },
+            "email": {
+                "description": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen."
+            },
+            "personalize": {
+                "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
+                "domainDescription": "{'Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.'}"
+            },
+            "registrationPage": {
+                "linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be"
+            }
+        },
+        "inputs": {
+            "parentPhone": {
+                "placeholder": "Mobiel nummer van ouder"
+            },
+            "website": {
+                "placeholder": "bv. https://www.vereniging.be"
+            },
+            "privacyUrl": {
+                "placeholder": "bv. https://www.vereniging.be/privacy"
+            },
+            "shopUrl": {
+                "placeholder": "bv. shop.domeinnaam.be/wafelbak"
+            }
+        },
+        "webshop": {
+            "customDomain": {
+                "description": "Hier kan je jouw eigen domeinnaam kiezen (die moet je wel zelf al in bezit hebben), eventueel met iets na het streepje (/). Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
+            },
+            "deliveryMethod": {
+                "name": {
+                    "placeholder": "bv. Bpost"
+                }
+            }
         }
-      }
-    }
-  },
-  "webshop": {},
-  "registration": {
-    "inputs": {
-      "parentPhone": {
-        "placeholder": "Mobiel nummer van ouder"
-      }
-    }
-  },
-  "dasboard": {
-    "settings": {
-      "paymentMethods": {
-        "mollie": {}
-      }
-    }
-  }
+    },
+    "webshop": {},
+    "registration": {
+        "inputs": {
+            "parentPhone": {
+                "placeholder": "Mobiel nummer van ouder"
+            }
+        }
+    },
+    "dasboard": {
+        "settings": {
+            "paymentMethods": {
+                "mollie": {}
+            }
+        }
+    },
+    "admin.settings.admins.title": "Beheerders",
+    "admin.settings.admins.description": "Beheer de beheerders van het platform",
+    "admin.settings.records.title": "Gegevens van leden",
+    "admin.settings.records.description": "Bepaal welke gegevens van leden worden verzameld"
 }

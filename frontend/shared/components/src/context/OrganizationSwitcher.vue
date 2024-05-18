@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 
-import { useOrganization } from '../VueGlobalHelper';
+import { useOrganization } from '../hooks';
 import { getAppDescription, getAppTitle, useAppContext } from './appContext';
 import ContextLogo from './ContextLogo.vue'
 import OrganizationAppSelector from './OrganizationAppSelector.vue';

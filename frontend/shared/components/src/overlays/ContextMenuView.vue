@@ -251,10 +251,10 @@ export default class ContextMenuView extends VueComponent {
 
     popChildMenu() {
         if (this.childMenu) {
-            const instance =  this.childMenu.componentInstance() as any
+            const instance = this.childMenu.componentInstance() as any
 
             if (instance) {
-                instance.$children[0].pop(false)
+                instance.pop(false)
             }
         }
         this.childMenu = null

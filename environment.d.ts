@@ -55,7 +55,7 @@ declare global {
          * platform = users are shared between organizations
          */
         readonly userMode: 'organization'|'platform'
-        readonly platformName: string
+        readonly translationNamespace: string
     }
 
     /** 

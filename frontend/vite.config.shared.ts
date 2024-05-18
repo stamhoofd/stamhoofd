@@ -18,7 +18,7 @@ if (process.env.LOAD_ENV) {
     // Load this in the environment
     const decode = JSON.parse(process.env.LOAD_ENV);
 
-    if (!decode.userMode || !decode.platformName) {
+    if (!decode.userMode || !decode.translationNamespace) {
         throw new Error('Invalid env file: missing some variables')
     }
 
@@ -34,7 +34,7 @@ if (process.env.LOAD_ENV) {
     const decode = JSON.parse(contents);
     const node_env = JSON.stringify(decode.environment === "production" ? "production" : "development")
 
-    if (!decode.userMode || !decode.platformName) {
+    if (!decode.userMode || !decode.translationNamespace) {
         throw new Error('Invalid env file: missing some variables')
     }
 

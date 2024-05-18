@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/sim
 
 import { PermissionRoleDetailed } from "./Permissions";
 import { User } from "./User";
+import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -9,8 +10,8 @@ export class PlatformPrivateConfig extends AutoEncoder {
 }
 
 export class PlatformConfig extends AutoEncoder {
-    @field({ decoder: StringDecoder, nullable: true, optional: true })
-    placeholder: string|null = null
+    @field({ decoder: OrganizationRecordsConfiguration, version: 253 })
+    recordsConfiguration = OrganizationRecordsConfiguration.create({})
 }
 
 

@@ -16,7 +16,11 @@
   },
   "backend": {},
   "dashboard": {
-    "join": "Join us"
+    "join": "Join us",
+    "start": {
+        "title": "Administrator portal",
+        "title-description": "Welcome to the administrator portal. Here you can manage your organization and manage settings."
+    }
   },
   "webshop": {},
   "registration": {}

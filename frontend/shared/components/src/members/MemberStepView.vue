@@ -14,7 +14,8 @@ import { ComponentOptions, Ref, computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { NavigationActions, usePlatformFamilyManager } from './PlatformFamilyManager';
+import { usePlatformFamilyManager } from './PlatformFamilyManager';
+import { NavigationActions } from '../types/NavigationActions';
 
 const props = withDefaults(
     defineProps<{

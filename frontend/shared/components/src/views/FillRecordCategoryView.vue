@@ -52,7 +52,7 @@ const patch = ref(new PatchMap()) as Ref<PatchAnswers>
 const loading = ref(false)
 
 const patchedValue = computed(() => {
-    return props.value.patchRecordAnswers(patch.value)
+    return props.value
 })
 const originalAnswers = computed(() => {
     return props.value.getRecordAnswers()

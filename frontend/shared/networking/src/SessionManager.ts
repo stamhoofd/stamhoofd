@@ -86,7 +86,9 @@ export class SessionManagerStatic {
         this.saveSessionStorage(storage)
     }
 
-    async prepareSessionForUsage(session: SessionContext, shouldRetry = true) {       
+    async prepareSessionForUsage(session: SessionContext, shouldRetry = true) {      
+        session.enableStorage();
+         
         if (!isReactive(session)) {
             console.error('Passing around a non-reactive session can cause issues. Prevent using a session that is not reactive.')
         }

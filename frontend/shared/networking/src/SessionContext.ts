@@ -51,9 +51,20 @@ export class SessionContext implements RequestMiddleware {
 
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
+    isStorageDisabled = false;
+
     constructor(organization: Organization|null) {
         this.organization = organization
         this.usedPlatformStorage = this.organization === null
+    }
+
+    disableStorage() {
+        this.isStorageDisabled = true;
+    }
+
+    enableStorage() {
+        this.isStorageDisabled = false;
+        this.saveToStorage().catch(console.error)
     }
 
     /**
@@ -114,6 +125,10 @@ export class SessionContext implements RequestMiddleware {
     }
 
     async loadTokenFromStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+
         console.log('[SessionContext] Loading Token from Storage')
 
         // Check localstorage
@@ -152,6 +167,10 @@ export class SessionContext implements RequestMiddleware {
     }
 
     async loadFromStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+
         // Check localstorage
         try {
             await this.loadTokenFromStorage()
@@ -177,6 +196,10 @@ export class SessionContext implements RequestMiddleware {
     }
 
     async saveToStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+
         try {
             // Save token to localStorage
             if (this.token) {
@@ -213,6 +236,10 @@ export class SessionContext implements RequestMiddleware {
     }
 
     deleteFromStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
+
         try {
             if (this.organization) {
                 void Storage.secure.removeItem('token-' + this.organization.id)
@@ -231,6 +258,9 @@ export class SessionContext implements RequestMiddleware {
     }
 
     removeFromStorage() {
+        if (this.isStorageDisabled) {
+            return;
+        }
         try {
             void Storage.secure.removeItem('token-' + this.organizationId)
             void Storage.secure.removeItem('user-' + this.organizationId)
@@ -709,6 +739,12 @@ export class SessionContext implements RequestMiddleware {
             await SessionManager.removeOrganizationFromStorage(this.organization.id)
             this.temporaryLogout()
             window.location.reload();
+            return false;
+        }
+
+        if (error.hasCode('not_activated') && !this.isStorageDisabled) {
+            // The user is not activated, logout
+            await this.logout()
             return false;
         }
 

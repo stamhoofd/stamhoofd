@@ -151,7 +151,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), field: "enabledRecords" })
     @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), upgrade: () => [], version: 55, field: "enabledRecords" })
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), version: 117, field: "enabledLegacyRecords" })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), version: 117, field: "enabledLegacyRecords", optional: true })
     enabledLegacyRecords: LegacyRecordType[] = []
 
     /**

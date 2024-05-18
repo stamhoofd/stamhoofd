@@ -162,8 +162,6 @@ export { default as ChoicesFilterView } from "./src/filters/old/ChoicesFilterVie
 export { default as FilterEditor } from "./src/filters/old/FilterEditor.vue"
 export { default as FilterGroupView } from "./src/filters/old/FilterGroupView.vue"
 export { default as NumberFilterView } from "./src/filters/old/NumberFilterView.vue"
-export { default as PropertyFilterInput } from "./src/filters/old/PropertyFilterInput.vue"
-export { default as PropertyFilterView } from "./src/filters/old/PropertyFilterView.vue"
 export { default as RegistrationsFilterView } from "./src/filters/old/RegistrationsFilterView.vue"
 export { default as StringFilterView } from "./src/filters/old/StringFilterView.vue"
 
@@ -174,6 +172,8 @@ export * from "./src/filters/StringUIFilter"
 export * from "./src/filters/UIFilter"
 export * from "./src/filters/NumberUIFilter"
 export * from "./src/filters/filterBuilders"
+export { default as PropertyFilterInput } from "./src/filters/PropertyFilterInput.vue"
+export { default as PropertyFilterView } from "./src/filters/PropertyFilterView.vue"
 
 // tables
 export * from "./src/tables/Column"
@@ -198,3 +198,11 @@ export { default as NoPermissionsView } from "./src/auth/NoPermissionsView.vue"
 
 // Admin views
 export * from './src/admins'
+
+// Admin views
+export * from './src/records'
+
+// Hooks
+export * from './src/hooks'
+
+export * from './src/types/NavigationActions'

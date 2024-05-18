@@ -2,10 +2,17 @@
 import { promises as fs } from "fs";
 import { countries, languages } from "./dist/index.js";
 
-const files = await fs.readdir("./src");
+async function fileExists(file) {
+    try {
+        await fs.access(file, fs.constants.F_OK);
+        return true;
+    } catch (e) {
+        // ignore
+    }
+    return false;
+}
 
-
-const namespaces = ['dashboard', "webshop", "registration", "backend", "admin"]
+const namespaces = ["stamhoofd", "digit"]
 
 for (const namespace of namespaces) {
     await fs.rm("./dist/"+namespace, { recursive: true, force: true })
@@ -56,6 +63,22 @@ function mergeObjects(into, from) {
     return into
 }
 
+
+function replaceValues(object, callback) {
+    for (const key in object) {
+        if (!Object.prototype.hasOwnProperty.call(object, key)) {
+            // Not own property
+            continue
+        }
+
+        if (typeof object[key] === "object") {
+            replaceValues(object[key], callback)
+        } else {
+            object[key] = callback(object[key])
+        }
+    }
+}
+
 // Step 1: build full list of all available keys with default values
 
 // Make sure English is loaded as last, because this should contain the default values for untranslated properties
@@ -65,83 +88,110 @@ if (enIndex != -1) {
     languages.push("en")
 }
 
-let defaultKeys = {}
+const fallbackLanguages = ['en', 'nl']
 
-for (const country of countries) {
-    for (const language of languages) {
-        const locale = language+"-"+country
+let defaultKeys = JSON.parse(await fs.readFile("./src/base.json"))
 
-        if (!files.includes(language+".json")) {
-            throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
-        }
+function runReplacements(json) {
+    const replacements = json.replacements
+    if (replacements) {
+        replaceValues(json, (value) => {
+            if (typeof value !== 'string') {
+                return value;
+            }
+            for (const r of Object.keys(replacements)) {
+                value = value.replaceAll(r, replacements[r])
+            }
 
-        let json = JSON.parse(await fs.readFile("./src/"+language+".json"))
-
-        if (files.includes(locale+".json")) {
-            const specifics = JSON.parse(await fs.readFile("./src/"+locale+".json"))
-            json = mergeObjects(json, specifics)
-        }
-
-        defaultKeys = mergeObjects(defaultKeys, json)
+            return value
+        })
     }
+    delete json.replacements
 }
 
 for (const country of countries) {
     // Build country defatuls
-    let countryDefaults = JSON.parse(JSON.stringify(defaultKeys))
-
     for (const language of languages) {
         const locale = language+"-"+country
-
-        if (!files.includes(language+".json")) {
-            throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
-        }
-
-        let json = JSON.parse(await fs.readFile("./src/"+language+".json"))
-
-        if (files.includes(locale+".json")) {
-            const specifics = JSON.parse(await fs.readFile("./src/"+locale+".json"))
-            json = mergeObjects(json, specifics)
-        }
-
-        countryDefaults = mergeObjects(countryDefaults, json)
-    }
-
-
-    for (const language of languages) {
-        const locale = language+"-"+country
-
-        if (!files.includes(language+".json")) {
-            throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
-        }
-
-        let json = JSON.parse(JSON.stringify(countryDefaults))
-
-        const base = JSON.parse(await fs.readFile("./src/"+language+".json"))
-
-        // Replace default values with the right translations
-        // Missing translations will keep their default values
-        json = mergeObjects(json, base)
-
-        if (files.includes(locale+".json")) {
-            const specifics = JSON.parse(await fs.readFile("./src/"+locale+".json"))
-            json = mergeObjects(json, specifics)
-        }
 
         for (const namespace of namespaces) {
-            fs.writeFile("./dist/"+namespace+"/"+locale+".json", JSON.stringify(
-                {
-                    shared: json.shared,
-                    [namespace]: json[namespace]
-                }
-            ))
+            // global base
+            let json = JSON.parse(JSON.stringify(defaultKeys))
 
-            fs.writeFile("./esm/dist/"+namespace+"/"+locale+".json", JSON.stringify(
-                {
-                    shared: json.shared,
-                    [namespace]: json[namespace]
+            // Fallbacks
+            for (const fallbackLanguage of fallbackLanguages) {
+                if (fallbackLanguage === language) {
+                    continue;
                 }
-            ))
+                const fallbackLocale = fallbackLanguage+"-"+country
+
+                // Namespace base
+                if (await fileExists("./src/" + namespace + '/base.json')) {
+                    const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/base.json'))
+                    json = mergeObjects(json, specifics)
+                }
+
+                // Language
+                if (await fileExists("./src/" + fallbackLanguage + ".json")) {
+                    const specifics = JSON.parse(await fs.readFile("./src/" + fallbackLanguage + ".json"))
+                    json = mergeObjects(json, specifics)
+                }
+
+                // Namespace language
+                if (await fileExists("./src/" + namespace + '/' + fallbackLanguage + ".json")) {
+                    const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + fallbackLanguage + ".json"))
+                    json = mergeObjects(json, specifics)
+                }
+
+                // Locale
+                if (await fileExists("./src/" + fallbackLocale + ".json")) {
+                    const specifics = JSON.parse(await fs.readFile("./src/" + fallbackLocale + ".json"))
+                    json = mergeObjects(json, specifics)
+                }
+
+                // Namespace locale
+                if (await fileExists("./src/" + namespace + '/' + fallbackLocale + ".json")) {
+                    const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + fallbackLocale + ".json"))
+                    json = mergeObjects(json, specifics)
+                }
+
+                // Run replacements in local context
+                runReplacements(json)
+            }
+
+            // Namespace base
+            if (await fileExists("./src/" + namespace + '/base.json')) {
+                const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/base.json'))
+                json = mergeObjects(json, specifics)
+            }
+
+            // Language
+            if (await fileExists("./src/" + language + ".json")) {
+                const specifics = JSON.parse(await fs.readFile("./src/" + language + ".json"))
+                json = mergeObjects(json, specifics)
+            }
+
+            // Namespace language
+            if (await fileExists("./src/" + namespace + '/' + language + ".json")) {
+                const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + language + ".json"))
+                json = mergeObjects(json, specifics)
+            }
+
+            // Locale
+            if (await fileExists("./src/" + locale + ".json")) {
+                const specifics = JSON.parse(await fs.readFile("./src/" + locale + ".json"))
+                json = mergeObjects(json, specifics)
+            }
+
+            // Namespace locale
+            if (await fileExists("./src/" + namespace + '/' + locale + ".json")) {
+                const specifics = JSON.parse(await fs.readFile("./src/" + namespace + '/' + locale + ".json"))
+                json = mergeObjects(json, specifics)
+            }
+
+            runReplacements(json)
+            fs.writeFile("./dist/"+namespace+"/"+locale+".json", JSON.stringify(json));
+            fs.writeFile("./esm/dist/"+namespace+"/"+locale+".json", JSON.stringify(json));
         }
     }
 }

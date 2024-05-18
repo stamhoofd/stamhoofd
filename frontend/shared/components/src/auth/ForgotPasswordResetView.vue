@@ -146,6 +146,8 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
             }).then(async (response) => {
                 // Create new session to prevent signing in
                 this.session = new SessionContext(this.$context.organization)
+                // We don't want to save this session or reuse it on the next loads (yet)
+                this.session.disableStorage()
                 await this.session.setToken(response.data)
                 await this.session.updateData(false, false)
                 return this.session

@@ -1,0 +1,11 @@
+{
+    "replacements": {
+        "Stamhoofd": "Digit"
+    },
+    "dashboard": {
+        "organization-selection": {
+            "welcome-title": "Zoek jouw lokale groep",
+            "welcome-description": "Welkom op Digit. Zoek hieronder jouw lokale groep om je in te schrijven of om jouw gegevens te beheren."
+        }
+    }
+}

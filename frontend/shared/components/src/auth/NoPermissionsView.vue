@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useOrganization } from '../VueGlobalHelper';
+import { useOrganization } from '../hooks';
 
 const organization = useOrganization()
 </script>

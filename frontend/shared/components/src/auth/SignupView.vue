@@ -54,7 +54,7 @@ import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import EmailInput from '../inputs/EmailInput.vue';
 import PasswordStrength from '../inputs/PasswordStrength.vue';
-import { useContext, useOrganization } from '../VueGlobalHelper';
+import { useContext, useOrganization } from '../hooks';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 
 const props = withDefaults(

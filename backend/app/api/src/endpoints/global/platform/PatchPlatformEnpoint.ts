@@ -48,6 +48,15 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         }
 
+        if (request.body.config) {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error()
+            }
+
+            // Update config
+            platform.config = patchObject(platform.config, request.body.config)
+        }
+
         await platform.save()
         return new Response(await Platform.getSharedPrivateStruct());
     }

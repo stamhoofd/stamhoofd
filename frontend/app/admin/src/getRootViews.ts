@@ -14,7 +14,7 @@ export async function getScopedAdminRootFromUrl() {
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
 
-    await I18nController.loadDefault(session, "admin", Country.Belgium, "nl")
+    await I18nController.loadDefault(session, Country.Belgium, "nl")
 
     return await getScopedAdminRoot(session)
 }
@@ -36,7 +36,7 @@ export function getNoPermissionsView() {
 export async function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
     const reactiveSession = reactive(session) as SessionContext
-    I18nController.loadDefault(reactiveSession, "dashboard", Country.Belgium, "nl").catch(console.error)
+    I18nController.loadDefault(reactiveSession, Country.Belgium, "nl").catch(console.error)
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true, true)
 

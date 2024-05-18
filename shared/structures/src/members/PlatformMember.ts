@@ -561,10 +561,6 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     getRecordAnswers(): Map<string, RecordAnswer> {
-        return new Map();
-        //return this.patchedMember.details.recordAnswers
-    }
-    patchRecordAnswers(patch: PatchAnswers): this {
-        throw new Error("Method not implemented.");
+        return this.patchedMember.details.recordAnswers
     }
 }

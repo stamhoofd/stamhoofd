@@ -13,7 +13,7 @@ import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
-import { useUser } from '../VueGlobalHelper';
+import { useUser } from '../hooks';
 
 const $user = useUser();
 const $navigate = useNavigate();
