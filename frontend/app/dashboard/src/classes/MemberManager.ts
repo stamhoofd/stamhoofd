@@ -239,14 +239,12 @@ export class MemberManager extends MemberManagerBase {
             member.details.gender = Gender.Other
             member.details.reviewTimes.removeReview("details")
 
-            member.details.records = []
             member.details.reviewTimes.removeReview("records")
 
-            member.details.recordAnswers = []
+            member.details.recordAnswers = new Map()
             member.details.requiresFinancialSupport = undefined
 
             member.details.emergencyContacts = []
-            member.details.doctor = null
             member.details.reviewTimes.removeReview("emergencyContacts")
 
             if (!member.details.age || member.details.age >= 18) {
@@ -269,14 +267,12 @@ export class MemberManager extends MemberManagerBase {
 
             member.details.reviewTimes.removeReview("details")
 
-            member.details.records = []
             member.details.reviewTimes.removeReview("records")
 
-            member.details.recordAnswers = []
+            member.details.recordAnswers = new Map()
             member.details.requiresFinancialSupport = undefined
 
             member.details.emergencyContacts = []
-            member.details.doctor = null
             member.details.reviewTimes.removeReview("emergencyContacts")
 
             member.details.parents = []

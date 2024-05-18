@@ -144,31 +144,4 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     // General configurations
     @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
     freeContribution: FreeContributionSettings | null = null
-
-    /**
-     * @deprecated
-     * Moved to recordCategories
-     */
-    @field({ decoder: new ArrayDecoder(StringDecoder), field: "enabledRecords" })
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), upgrade: () => [], version: 55, field: "enabledRecords" })
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), version: 117, field: "enabledLegacyRecords", optional: true })
-    enabledLegacyRecords: LegacyRecordType[] = []
-
-    /**
-     * @deprecated
-     * true: required
-     * false: don't ask
-     * null: optional
-     */
-    @field({ decoder: new EnumDecoder(AskRequirement), optional: true })
-    doctor = AskRequirement.NotAsked
-
-    /**
-     * @deprecated
-     * true: required
-     * false: don't ask
-     * null: optional
-     */
-    @field({ decoder: new EnumDecoder(AskRequirement), optional: true })
-    emergencyContact = AskRequirement.Optional
 }

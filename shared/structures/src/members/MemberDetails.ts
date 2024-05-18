@@ -93,14 +93,6 @@ export class MemberDetails extends AutoEncoder {
     })
     recordAnswers: Map<string, RecordAnswer> = new Map()
 
-    /**
-     * @deprecated
-     */
-    @field({ 
-        decoder: new ArrayDecoder(LegacyRecord), version: 54, optional: true
-    })
-    records: LegacyRecord[] = [];    
-
     @field({ decoder: BooleanStatus, version: 117, optional: true })
     requiresFinancialSupport?: BooleanStatus
 
@@ -109,12 +101,6 @@ export class MemberDetails extends AutoEncoder {
      */
     @field({ decoder: BooleanStatus, version: 117, optional: true })
     dataPermissions?: BooleanStatus
-
-    /**
-     * @deprecated
-     */
-    @field({ decoder: EmergencyContact, nullable: true, optional: true })
-    doctor: EmergencyContact | null = null;
 
     /**
      * Last time the records were reviewed
@@ -131,15 +117,6 @@ export class MemberDetails extends AutoEncoder {
         return times
     } })
     reviewTimes = ReviewTimes.create({})
-
-    /**
-     * @deprecated
-     * Keep track whether this are recovered member details. Only set this back to false when:
-     * - The data is entered manually again (by member / parents)
-     * - Warning message is dismissed / removed in the dashboard by organization
-     */
-    @field({ decoder: BooleanDecoder, version: 69, optional: true})
-    isRecovered = false
 
     /**
      * Call this to clean up capitals in all the available data
@@ -455,35 +432,6 @@ export class MemberDetails extends AutoEncoder {
             }
         }
         this.parents.push(parent)
-    }
-
-    /**
-     * @deprecated
-     * This will add or update the parent (possibily partially if not all data is present)
-     */
-    addRecord(record: LegacyRecord) {
-        for (const [index, _record] of this.records.entries()) {
-            if (_record.type === record.type) {
-                this.records[index] = record
-                return
-            }
-        }
-        this.records.push(record)
-    }
-
-    /**
-     * @deprecated
-     */
-    removeRecord(type: LegacyRecordType) {
-        for (let index = this.records.length - 1; index >= 0; index--) {
-            const record = this.records[index];
-
-            if (record.type === type) {
-                this.records.splice(index, 1)
-                // Keep going to fix possible previous errors that caused duplicate types
-                // This is safe because we loop backwards
-            }
-        }
     }
 
     get parentsHaveAccess() {
