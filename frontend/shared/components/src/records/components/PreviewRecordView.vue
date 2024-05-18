@@ -10,7 +10,7 @@
 
             <hr>
         
-            <RecordAnswerInput :record-settings="record" :record-answers="recordAnswers" />
+            <RecordAnswerInput :record="record" :answers="recordAnswers" @patch="addPatch"/>
 
             <div v-if="isDevelopment" class="container">
                 <hr>
@@ -32,7 +32,7 @@
 import { encodeObject } from "@simonbackx/simple-encoding";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { RecordAnswerInput,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { RecordAnswer, RecordSettings, Version } from "@stamhoofd/structures"
+import { PatchAnswers, RecordAnswer, RecordSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
@@ -52,7 +52,7 @@ export default class PreviewRecordView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     record!: RecordSettings
 
-    recordAnswers: RecordAnswer[] = []
+    recordAnswers: Map<string, RecordAnswer> = new Map()
 
     get encodedResult() {
         return encodeObject(this.recordAnswers, { version: Version })
@@ -60,6 +60,10 @@ export default class PreviewRecordView extends Mixins(NavigationMixin) {
 
     get isDevelopment() {
         return STAMHOOFD.environment === "development"
+    }
+
+    addPatch(patch: PatchAnswers) {
+        this.recordAnswers = patch.applyTo(this.recordAnswers)
     }
 }
 </script>

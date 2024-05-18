@@ -56,9 +56,9 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { OrganizationRecordsConfiguration, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
@@ -142,6 +142,7 @@ const pop = usePop();
 const {patch, patched, addPatch, hasChanges} = usePatch(props.recordsConfiguration);
 const $t = useTranslate();
 const $navigate = useNavigate();
+const organization = useOrganization()
 
 // Data
 const categories = useDraggableArray(
@@ -152,16 +153,37 @@ const categories = useDraggableArray(
 );
 const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0]
 
+const family = new PlatformFamily({
+    platform: Platform.shared,
+    contextOrganization: organization.value
+})
+
 const settings = new RecordEditorSettings({
     dataPermission: true,
     filterBuilder: (categories: RecordCategory[]) => {
         return memberWithRegistrationsBlobUIFilterBuilders[0];
     },
-    filterValueForAnswers: (recordAnswers: RecordAnswer[]) => {
-        // new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
-        throw new Error('Not implemented')
-    }
+    exampleValue: new PlatformMember({
+        member: MemberWithRegistrationsBlob.create({
+            details: MemberDetails.create({
+                firstName: 'Voorbeeld',
+                lastName: 'Lid',
+            }),
+            users: [],
+            registrations: []
+        }),
+        isNew: true,
+        family
+    }),
+    patchExampleValue(value: PlatformMember, patch) {
+        const cloned = value.clone()
+        value.addDetailsPatch(MemberDetails.patch({
+            recordAnswers: patch
+        }))
+        return cloned;
+    },
 })
+family.members.push(settings.exampleValue)
 
 const properties = [
     buildPropertyRefs('phone', $t('shared.inputs.mobile.label') + ' (van lid zelf)'),

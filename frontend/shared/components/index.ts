@@ -204,3 +204,5 @@ export * from './src/records'
 
 // Hooks
 export * from './src/hooks'
+
+export * from './src/types/NavigationActions'

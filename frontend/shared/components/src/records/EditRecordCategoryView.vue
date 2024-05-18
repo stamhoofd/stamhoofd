@@ -82,7 +82,7 @@
                 Deze categorie bevat nog geen vragen.
             </p>
 
-            <p class="style-description-block style-em" v-text="c.description" v-if="c.description" />
+            <p class="style-description-block style-em pre-wrap" v-text="c.description" v-if="c.description" />
                 
             <STList :model-value="getDraggableRecords(c).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(c).computed.value = newValue!">
                 <template #item="{item: record}">
@@ -128,16 +128,18 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { ObjectWithRecords, PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
-import { Ref, computed, getCurrentInstance, ref } from 'vue';
+import { ObjectWithRecords, PatchAnswers, PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import { Ref, computed, getCurrentInstance, reactive, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import PropertyFilterInput from '../filters/PropertyFilterInput.vue';
 import { useDraggableArray, usePatchArray } from '../hooks';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 import EditRecordView from './EditRecordView.vue';
+import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
-import { CenteredMessage } from '../overlays/CenteredMessage';
+import { NavigationActions } from '../types/NavigationActions';
 
 // Define
 const props = defineProps<{
@@ -437,8 +439,24 @@ async function deleteMe() {
     deleting.value = false;
 }
 
-function showExample() {
-
+async function showExample() {
+    const reactiveValue = reactive(props.settings.exampleValue)
+    await present({
+        components: [
+            new ComponentWithProperties(FillRecordCategoryView, {
+                category: patchedCategory.value,
+                value: reactiveValue,
+                saveText: 'Opslaan',
+                patchHandler: (patch: PatchAnswers) => {
+                    return props.settings.patchExampleValue(reactiveValue, patch)
+                },
+                saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
+                    await navigationActions.pop({force: true})
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
 }
 
 const shouldNavigateAway = async () => {
