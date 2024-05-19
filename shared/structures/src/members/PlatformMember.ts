@@ -127,6 +127,7 @@ export class PlatformFamily {
             const cloneMember = clone.members.find(m => m.id === member.id)
             if (cloneMember) {
                 member.member.set(cloneMember.member)
+                member.patch.set(cloneMember.patch)
             }
         }
 

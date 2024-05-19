@@ -15,6 +15,9 @@
                         </div>
                     </div>
                 </STInputBox>
+                <p v-if="member.isNew" class="style-description-small">
+                    Let op dat je geen spelfouten maakt.
+                </p>
 
                 <BirthDayInput v-if="member.isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
 
