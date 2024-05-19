@@ -118,10 +118,14 @@ async function registerAsAdmin(group: Group) {
                     await manager.save(cloned.family.members)
                     await navigate.dismiss({force: true})
                     Toast.success(cloned.patchedMember.firstName + " is ingeschreven").show()
+
+                    // Copy over all the changes to the original member
+                    props.member.family.copyFromClone(cloned.family)
+
                     await navigate.present({
                         components: [
                             new ComponentWithProperties(MemberStepView, {
-                                member: cloned,
+                                member: props.member,
                                 title: 'Gegevens aanvullen',
                                 component: EditMemberAllBox
                             })
