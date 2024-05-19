@@ -225,7 +225,7 @@
 <script lang="ts" setup>
 import { AutoEncoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent } from "@simonbackx/vue-app-navigation";
-import { Dropdown, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, useOrganization } from "@stamhoofd/components";
+import { Dropdown, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, useOrganizationThrowIfNull, usePatch } from "@stamhoofd/components";
 import { Gender, Group, Organization, OrganizationPatch, Parent, ParentTypeHelper, Registration } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { FamilyManager } from '../../../../../classes/FamilyManager';
@@ -240,25 +240,18 @@ const props = defineProps<{ members: ImportingMember[] }>();
 // there is no reactivity if the members prop is updated, neither with computed.
 const $members = ref(props.members) as unknown as Ref<ImportingMember[]>;
 
-const $organization = useOrganization();
+const $organization = useOrganizationThrowIfNull();
 const $memberManager = useLegacyMemberManager();
+const {patched: organization} = usePatch($organization);
 const present = usePresent();
 const dismiss = useDismiss();
 const canDismiss = useCanDismiss();
-
-if ($organization.value === null) {
-    const message = "Organization is not set.";
-    console.error(message);
-    throw new Error(message);
-}
 
 onMounted(() => {
     multipleGroups.value = calculateMultipleGroups()
     autoAssignMembers($members.value);
 });
 
-const organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({});
-const organization = computed(() => $organization.value!.patch(organizationPatch));
 const errorBox: Ref<ErrorBox | null> = ref(null);
 const saving = ref(false);
 const paid = ref<boolean | null>(true);
@@ -280,10 +273,6 @@ const draggableGroups = computed({
 });
 
 const defaultGroup = ref(organization.value.groups[0]) as Ref<Group>;
-
-//#region created
-organizationPatch.id = organization.value.id
-//#endregion
 
 const membersWithNewRegistrations = computed(() => {
     return $members.value.filter(m => {
