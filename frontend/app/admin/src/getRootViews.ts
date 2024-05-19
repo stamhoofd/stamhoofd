@@ -81,8 +81,6 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
     return new ComponentWithProperties(ContextProvider, {
         context: {
             $context: reactiveSession,
-            $platform: computed(() => platformManager.$platform),
-            $user: computed(() => reactiveSession.user),
             $platformManager: platformManager,
             reactive_navigation_url: "administratie",
             reactive_components: {

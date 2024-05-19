@@ -431,13 +431,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         if (!member.details.birthDay) {
             return
         }
-        let existingMembers: Member[]
-
-        if (STAMHOOFD.userMode === 'platform') {
-            existingMembers = await Member.where({ organizationId: null, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
-        } else {
-            existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
-        }
+        const existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
         
         if (existingMembers.length > 0) {
             const withRegistrations = await Member.getBlobByIds(...existingMembers.map(m => m.id))

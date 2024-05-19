@@ -1,6 +1,8 @@
+import { usePlatformManager } from "@stamhoofd/networking";
 import { Platform } from "@stamhoofd/structures";
-import { Ref, inject, toRef } from "vue";
+import { Ref, computed } from "vue";
 
 export function usePlatform(): Ref<Platform> {
-    return toRef(inject('$platform') as Platform) as Ref<Platform>
+    const platformManager = usePlatformManager();
+    return computed(() => platformManager.value.$platform)
 }
