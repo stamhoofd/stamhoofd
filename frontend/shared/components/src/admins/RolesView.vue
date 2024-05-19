@@ -33,7 +33,7 @@
                 </template>
             </STListItem>
 
-            <STList v-if="roles.length" :model-value="roles" :draggable="true" @update:model-value="setDraggableRoles($event)">
+            <STList v-if="draggableRoles.length" v-model="draggableRoles" :draggable="true">
                 <template #item="{item: role}">
                     <STListItem :selectable="true" class="right-stack" @click="editRole(role)">
                         <template #left>
@@ -70,8 +70,6 @@ import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigatio
 import { CenteredMessage, SaveView, Toast, useDraggableArray } from '@stamhoofd/components';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
-
-import { createPatchableArrayForReorder } from '../../../helpers/patchableArrayHelpers';
 import STList from '../layout/STList.vue';
 import EditRoleView from './EditRoleView.vue';
 import { useAdmins } from './hooks/useAdmins';
@@ -171,18 +169,18 @@ const roleDescription = (role: PermissionRoleDetailed): string => {
     return role.getDescription()
 }
 
-const addRole = () => {
-    $navigate('createRole')
+const addRole = async () => {
+    await $navigate('createRole')
 }
 
-const editRole = (role: PermissionRoleDetailed) => {
-    $navigate('editRole', {params: {roleId: role.id}}) // not using properties because the saveHandler is set in the route
+const editRole = async (role: PermissionRoleDetailed) => {
+    await $navigate('editRole', {params: {roleId: role.id}}) // not using properties because the saveHandler is set in the route
 }
 
 const save = async () => {
     await rawSave(() => {
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
-        pop({ force: true })
+        void pop({ force: true });
     });
 }
 
@@ -191,14 +189,6 @@ const shouldNavigateAway = async () => {
         return true;
     }
     return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-}
-
-function setDraggableRoles(draggableRoles: PermissionRoleDetailed[] | undefined) {
-    const patchableArray = createPatchableArrayForReorder<OrganizationPrivateMetaData, PermissionRoleDetailed>(draggableRoles, roles.value,OrganizationPrivateMetaData, 'roles' );
-
-    if(patchableArray) {
-        patchRoles(patchableArray)
-    }
 }
 
 defineExpose({
