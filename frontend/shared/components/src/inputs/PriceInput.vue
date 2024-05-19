@@ -30,7 +30,11 @@
 <script lang="ts">
 import { Component, Prop,Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 
-@Component
+@Component({
+    emits: {
+        'update:modelValue': (_value: number | null) => true
+    }
+})
 export default class PriceInput extends Vue {
     /** Price in cents */
     @Prop({ default: 0 })
