@@ -1,22 +1,15 @@
-import { ArrayDecoder,AutoEncoder, AutoEncoderPatchType, BooleanDecoder,Data,DateDecoder,EnumDecoder,field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
 import { Replacement } from '../endpoints/EmailRequest';
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
-import { NumberFilterDefinition } from '../filters/NumberFilter';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
-import { OrganizationMetaData } from '../OrganizationMetaData';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
-import { LegacyRecord,OldRecord } from './records/LegacyRecord';
-import { LegacyRecordType,OldRecordType } from './records/LegacyRecordType';
-import { RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordTextAnswer } from './records/RecordAnswer';
-import { RecordFactory } from './records/RecordFactory';
-import { RecordChoice, RecordType, RecordWarning, RecordWarningType } from './records/RecordSettings';
+import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
 import { ReviewTimes } from './ReviewTime';
 
 /**
@@ -93,14 +86,6 @@ export class MemberDetails extends AutoEncoder {
     })
     recordAnswers: Map<string, RecordAnswer> = new Map()
 
-    /**
-     * @deprecated
-     */
-    @field({ 
-        decoder: new ArrayDecoder(LegacyRecord), version: 54, optional: true
-    })
-    records: LegacyRecord[] = [];    
-
     @field({ decoder: BooleanStatus, version: 117, optional: true })
     requiresFinancialSupport?: BooleanStatus
 
@@ -108,13 +93,14 @@ export class MemberDetails extends AutoEncoder {
      * Gave permission to collect sensitive information
      */
     @field({ decoder: BooleanStatus, version: 117, optional: true })
-    dataPermissions?: BooleanStatus
-
-    /**
-     * @deprecated
-     */
-    @field({ decoder: EmergencyContact, nullable: true, optional: true })
-    doctor: EmergencyContact | null = null;
+    @field({ 
+        decoder: BooleanStatus, 
+        version: 256, 
+        optional: true, 
+        nullable: true,
+        downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
+    })
+    dataPermissions: BooleanStatus|null = null
 
     /**
      * Last time the records were reviewed
@@ -131,15 +117,6 @@ export class MemberDetails extends AutoEncoder {
         return times
     } })
     reviewTimes = ReviewTimes.create({})
-
-    /**
-     * @deprecated
-     * Keep track whether this are recovered member details. Only set this back to false when:
-     * - The data is entered manually again (by member / parents)
-     * - Warning message is dismissed / removed in the dashboard by organization
-     */
-    @field({ decoder: BooleanDecoder, version: 69, optional: true})
-    isRecovered = false
 
     /**
      * Call this to clean up capitals in all the available data
@@ -169,6 +146,37 @@ export class MemberDetails extends AutoEncoder {
         for (const contact of this.emergencyContacts) {
             contact.cleanData()
         }
+    }
+
+    isEqual(other: MemberDetails): boolean {
+        if (!this.firstName || !other.firstName) {
+            // Not possible to compare
+            return false
+        }
+
+        if (!this.lastName || !other.lastName) {
+            // Not possible to compare
+            return false
+        }
+
+        if (!this.birthDay || !other.birthDay) {
+            // Not possible to compare
+            return false
+        }
+
+        if (this.firstName != other.firstName) {
+            return false
+        }
+
+        if (this.lastName != other.lastName) {
+            return false
+        }
+
+        if (this.birthDayFormatted != other.birthDayFormatted) {
+            return false
+        }
+
+        return true;
     }
 
     get name() {
@@ -455,35 +463,6 @@ export class MemberDetails extends AutoEncoder {
             }
         }
         this.parents.push(parent)
-    }
-
-    /**
-     * @deprecated
-     * This will add or update the parent (possibily partially if not all data is present)
-     */
-    addRecord(record: LegacyRecord) {
-        for (const [index, _record] of this.records.entries()) {
-            if (_record.type === record.type) {
-                this.records[index] = record
-                return
-            }
-        }
-        this.records.push(record)
-    }
-
-    /**
-     * @deprecated
-     */
-    removeRecord(type: LegacyRecordType) {
-        for (let index = this.records.length - 1; index >= 0; index--) {
-            const record = this.records[index];
-
-            if (record.type === type) {
-                this.records.splice(index, 1)
-                // Keep going to fix possible previous errors that caused duplicate types
-                // This is safe because we loop backwards
-            }
-        }
     }
 
     get parentsHaveAccess() {

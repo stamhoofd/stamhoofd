@@ -179,10 +179,6 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         throw new Error('Method not implemented.');
     }
 
-    isRecordCategoryEnabled(recordCategory: RecordCategory): boolean {
-        return true;
-    }
-
     isRecordEnabled(record: RecordSettings): boolean {
         return true;
     }

@@ -14,7 +14,7 @@
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
+                    <button class="button primary" type="button" @click="save">
                         Volgende
                     </button>
                 </LoadingButton>
@@ -24,16 +24,14 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder,patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { GroupPrices, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STPackageBundle, Version } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { GroupPrices, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STPackageBundle, Version } from "@stamhoofd/structures";
 
 import EditGroupPriceBox from '../../../groups/EditGroupPriceBox.vue';
-import ActivatedView from './ActivatedView.vue';
 
 @Component({
     components: {
@@ -115,12 +113,7 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
             await this.checkout(STPackageBundle.TrialMembers)
             this.organizationPatch = OrganizationPatch.create({ id: this.$organization.id })
             new Toast('Je kan nu de ledenadministratie uittesten', "success green").show()
-
-            this.show({
-                components: [new ComponentWithProperties(ActivatedView)],
-                replace: this.navigationController?.components.length,
-                force: true
-            })
+            this.dismiss({force: true})
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

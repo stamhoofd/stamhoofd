@@ -16,9 +16,21 @@
         </p>
 
         <STList>
-            <STListItem v-for="property of properties" :key="property.value.title">
+            <STListItem element-name="label" :selectable="!dataPermissions.locked.value">
                 <template #left>
-                    <Checkbox v-model="property.value.enabled" />
+                    <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="dataPermissions.locked.value" />
+                </template>
+                <p class="style-title-list">
+                    Toestemming gegevensverzameling
+                </p>
+                <template v-if="!dataPermissions.locked.value && dataPermissions.enabled.value" #right>
+                    <button class="button gray icon settings" type="button" @click.stop="dataPermissions.edit" />
+                </template>
+            </STListItem>
+
+            <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
+                <template #left>
+                    <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
                 </template>
                 <p class="style-title-list">
                     {{ property.value.title }}
@@ -26,8 +38,24 @@
                 <p v-if="property.value.configuration" class="style-description-small">
                     {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
                 </p>
-                <template v-if="property.value.enabled" #right>
-                    <button class="button gray icon settings" type="button" @click="property.value.edit" />
+                <template v-if="!property.value.locked && property.value.enabled" #right>
+                    <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
+                </template>
+            </STListItem>
+
+            <STListItem v-for="category of inheritedRecordsConfiguration?.recordCategories ?? []" :key="category.id" element-name="label" :selectable="!getRefForInheritedCategory(category.id).value.locked" class="right-stack">
+                <template #left>
+                    <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
+                </template>
+                <p class="style-title-list">
+                    {{ getRefForInheritedCategory(category.id).value.title }}
+                </p>
+                <p v-if="getRefForInheritedCategory(category.id).value.configuration" class="style-description-small">
+                    {{ propertyFilterToString(getRefForInheritedCategory(category.id).value.configuration!, filterBuilder) }}
+                </p>
+                <template #right>
+                    <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)" />
+                    <button v-if="!getRefForInheritedCategory(category.id).value.locked && getRefForInheritedCategory(category.id).value.enabled" class="button gray icon settings" type="button" @click.stop="getRefForInheritedCategory(category.id).value.edit" />
                 </template>
             </STListItem>
         </STList>
@@ -40,7 +68,7 @@
 
         <STList v-model="categories" :draggable="true">
             <template #item="{item: category}">
-                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch="addCategoriesPatch" @edit="editCategory"/>
+                <RecordCategoryRow :category="category" :categories="categories" :selectable="true" :settings="settings" @patch="addCategoriesPatch" @edit="editCategory" />
             </template>
         </STList>
 
@@ -54,15 +82,17 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { AutoEncoderPatchType, PatchMap, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, NavigationActions, PropertyFilterView, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { DataPermissionsSettings, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
+import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordCategoryRow from './components/RecordCategoryRow.vue';
+import DataPermissionSettingsView from './DataPermissionSettingsView.vue';
 type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
 
 const props = defineProps<{
@@ -73,7 +103,8 @@ const props = defineProps<{
 
 enum Routes {
     NewRecordCategory = "newRecordCategory",
-    EditRecordCategory = "editRecordCategory"
+    EditRecordCategory = "editRecordCategory",
+    DataPermissions = "dataPermissions"
 }
 defineRoutes([
     {
@@ -132,6 +163,20 @@ defineRoutes([
             }
         },
         present: 'popup'
+    },
+    {
+        name: Routes.DataPermissions,
+        url: 'toestemming-gegevensverzameling',
+        component: DataPermissionSettingsView as ComponentOptions,
+        paramsToProps() {
+            return {
+                recordsConfiguration: patched.value,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
+                    addPatch(patch)
+                }
+            }
+        },
+        present: 'popup'
     }
 ])
 
@@ -143,6 +188,7 @@ const {patch, patched, addPatch, hasChanges} = usePatch(props.recordsConfigurati
 const $t = useTranslate();
 const $navigate = useNavigate();
 const organization = useOrganization()
+const present = usePresent();
 
 // Data
 const categories = useDraggableArray(
@@ -160,6 +206,7 @@ const family = new PlatformFamily({
 
 const settings = new RecordEditorSettings({
     dataPermission: true,
+    toggleDefaultEnabled: !props.inheritedRecordsConfiguration,
     filterBuilder: (categories: RecordCategory[]) => {
         return memberWithRegistrationsBlobUIFilterBuilders[0];
     },
@@ -195,12 +242,51 @@ const properties = [
     buildPropertyRefs('emergencyContacts', 'Noodcontactpersonen'),
 ]
 
-// Methods
-function getFilterConfiguration(property: PropertyName): PropertyFilter|null {
-    return patched.value[property]
+const dataPermissions = {
+    locked: computed(() => !!props.inheritedRecordsConfiguration?.dataPermission),
+    enabled: computed({
+        get: () => !!props.inheritedRecordsConfiguration?.dataPermission || patched.value.dataPermission !== null,
+        set: (value: boolean) => {
+            if (value) {
+                addPatch({
+                    dataPermission: props.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
+                });
+            } else {
+                addPatch({dataPermission: null});
+            }
+        }
+    }),
+    edit: async () => {
+        await $navigate(Routes.DataPermissions)
+    }
 }
 
-function setEnableFilterConfiguration(property: PropertyName, enable: boolean) {
+// Methods
+function buildPropertyRefs(property: PropertyName, title: string) {
+    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property])
+    const enabled = computed({
+        get: () => !!getFilterConfiguration(property),
+        set: (value: boolean) => setEnableProperty(property, value)
+    })
+    const configuration = computed(() => getFilterConfiguration(property))
+
+    return ref({
+        title,
+        enabled,
+        locked,
+        configuration,
+        edit: () => editPropertyFilterConfiguration(property, title)
+    })
+}
+
+function getFilterConfiguration(property: PropertyName): PropertyFilter|null {
+    return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property]
+}
+
+function setEnableProperty(property: PropertyName, enable: boolean) {
+    if (props.inheritedRecordsConfiguration?.[property]) {
+        return
+    }
     if (enable === !!getFilterConfiguration(property)) {
         return
     }
@@ -215,34 +301,128 @@ function setEnableFilterConfiguration(property: PropertyName, enable: boolean) {
     }
 }
 
-function editEnableFilterConfiguration(property: PropertyName, title: string) {
-    // todo
+async function editPropertyFilterConfiguration(property: PropertyName, title: string) {
+    await present({
+        components: [
+            new ComponentWithProperties(PropertyFilterView, {
+                configuration: getFilterConfiguration(property) ?? PropertyFilter.createDefault(),
+                title,
+                builder: settings.filterBuilder([]),
+                setConfiguration: (configuration: PropertyFilter) => {
+                    addPatch({
+                        [property]: configuration
+                    })
+                }
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
 }
 
-function buildPropertyRefs(property: PropertyName, title: string) {
+// Inherited categories
+const cachedInheritedCategories = new Map<string, ReturnType<typeof buildRefForInheritedCategory>>();
+function getRefForInheritedCategory(categoryId: string) {
+    if (!cachedInheritedCategories.has(categoryId)) {
+        cachedInheritedCategories.set(categoryId, buildRefForInheritedCategory(categoryId))
+    }
+    return cachedInheritedCategories.get(categoryId)!
+}
+
+function buildRefForInheritedCategory(categoryId: string) {
+    const category = computed(() => props.inheritedRecordsConfiguration?.recordCategories?.find(c => c.id === categoryId))
+    
+    const locked = computed(() => !category.value || category.value.defaultEnabled)
     const enabled = computed({
-        get: () => !!getFilterConfiguration(property),
-        set: (value: boolean) => setEnableFilterConfiguration(property, value)
+        get: () => locked.value || !!patched.value.inheritedRecordCategories.has(categoryId),
+        set: (enable: boolean) => {
+            if (enable === enabled.value) {
+                return
+            }
+            const patchMap = new PatchMap() as PatchMap<string, PropertyFilter|null>;
+
+            if (enable) {
+                // Set
+                patchMap.set(
+                    categoryId, 
+                    // Reuse saved one in case of accidental disable - enable
+                    props.recordsConfiguration.inheritedRecordCategories.get(categoryId) ?? PropertyFilter.createDefault()
+                )
+            } else {
+                // Remove
+                patchMap.set(categoryId, null)
+            }
+            addPatch({
+                inheritedRecordCategories: patchMap
+            })
+        }
     })
-    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property])
-    const configuration = computed(() => getFilterConfiguration(property))
+    const configuration = computed(() => patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? null)
 
     return ref({
-        title,
+        title: category.value?.name ?? 'Naamloos',
         enabled,
         locked,
         configuration,
-        edit: () => editEnableFilterConfiguration(property, title)
+        edit: async () => {
+            await editInheritedFilterConfiguration(categoryId)
+        }
     })
 }
 
-// Methods
+async function editInheritedFilterConfiguration(categoryId: string) {
+    const category = props.inheritedRecordsConfiguration?.recordCategories?.find(c => c.id === categoryId);
+    if (!category) {
+        return
+    }
+
+    await present({
+        components: [
+            new ComponentWithProperties(PropertyFilterView, {
+                configuration: props.recordsConfiguration.inheritedRecordCategories.get(categoryId) ?? PropertyFilter.createDefault(),
+                title: category.name,
+                builder: settings.filterBuilder([]),
+                setConfiguration: (configuration: PropertyFilter) => {
+                    const patchMap = new PatchMap() as PatchMap<string, PropertyFilter|null>;
+                    patchMap.set(
+                        categoryId, 
+                        configuration
+                    )
+
+                    addPatch({
+                        inheritedRecordCategories: patchMap
+                    })
+                }
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
+}
+
 function addCategoriesPatch(p: PatchableArrayAutoEncoder<RecordCategory>) {
     addPatch({recordCategories: p})
 }
 
 async function editCategory(category: RecordCategory) {
     await $navigate(Routes.EditRecordCategory, {params: {categoryId: category.id}})
+}
+
+async function previewCategory(category: RecordCategory) {
+    await present({
+        components: [
+            new ComponentWithProperties(FillRecordCategoryView, {
+                category,
+                value: settings.exampleValue,
+                markReviewed: false,
+                patchHandler: (patch: PatchAnswers) => {
+                    return settings.patchExampleValue(settings.exampleValue, patch)
+                },
+                saveHandler: async (_patch: PatchAnswers, navigate: NavigationActions) => {
+                    await navigate.pop({force: true})
+                }
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
 }
 
 async function save() {

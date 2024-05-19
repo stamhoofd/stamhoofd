@@ -14,6 +14,7 @@ import { Parent } from "./Parent"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
+import { PropertyFilter } from "../filters/PropertyFilter"
 
 export class PlatformFamily {
     members: PlatformMember[] = []
@@ -58,6 +59,20 @@ export class PlatformFamily {
             })
             this.members.push(platformMember)
         }
+    }
+
+    newMember(): PlatformMember {
+        const member = new PlatformMember({
+            member: MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({}),
+                users: [],
+                registrations: []
+            }),
+            family: this,
+            isNew: true
+        })
+        this.members.push(member)
+        return member;
     }
 
     static createSingles(blob: MembersBlob, context: {contextOrganization?: Organization|null, platform: Platform}): PlatformMember[] {
@@ -112,6 +127,7 @@ export class PlatformFamily {
             const cloneMember = clone.members.find(m => m.id === member.id)
             if (cloneMember) {
                 member.member.set(cloneMember.member)
+                member.patch.set(cloneMember.patch)
             }
         }
 
@@ -120,6 +136,10 @@ export class PlatformFamily {
             if (!member) {
                 this.members.push(c)
             }
+        }
+
+        for (const o of clone.organizations) {
+            this.insertOrganization(o)
         }
     }
 
@@ -288,12 +308,36 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
-    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
-        // todo: platform
+    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission') {
+        if (property === 'dataPermission') {
+            if (this.platform.config.recordsConfiguration[property]) {
+                return true;
+            }
+            return false;
+        }
+
+        const def = this.platform.config.recordsConfiguration[property];
+        if (def === null) {
+            return false;
+        }
+        return def.isEnabled(this)
+    }
+
+    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission') {
+        if (this.isPropertyEnabledForPlatform(property)) {
+            return true;
+        }
 
         const organizations = this.filterOrganizations({cycleOffset: 0})
 
         for (const organization of organizations) {
+            if (property === 'dataPermission') {
+                if (organization.meta.recordsConfiguration[property]) {
+                    return true;
+                }
+                continue;
+            }
+
             const def = organization.meta.recordsConfiguration[property];
             if (def === null) {
                 continue;
@@ -309,7 +353,11 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
-        return false;
+        const def = this.platform.config.recordsConfiguration[property];
+        if (def === null) {
+            return false;
+        }
+        return def.isRequired(this)
     }
 
     isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
@@ -324,10 +372,7 @@ export class PlatformMember implements ObjectWithRecords {
             if (def === null) {
                 continue;
             }
-            if (def.requiredWhen === null) {
-                continue
-            }
-            if (this.doesMatchFilter(def.requiredWhen)) {
+            if (def.isRequired(this)) {
                 return true;
             }
         }
@@ -509,11 +554,47 @@ export class PlatformMember implements ObjectWithRecords {
     getAllRecordCategories(): RecordCategory[] {
         // From organization
         const categories: RecordCategory[] = [];
+        categories.push(...this.platform.config.recordsConfiguration.recordCategories)
+
         for (const organization of this.organizations) {
             categories.push(...organization.meta.recordsConfiguration.recordCategories)
         }
 
-        // Todo: read from platform
+        return categories;
+    }
+
+    getEnabledRecordCategories(): RecordCategory[] {
+        // From organization
+        const categories: RecordCategory[] = [];
+        const inheritedFilters = new Map<string, PropertyFilter[]>()
+
+        // First push all platform record categories, these should be first
+        for (const organization of this.organizations) {
+            // Any optional categories from the platform that have been enabled?
+            for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
+                inheritedFilters.set(id, [...(inheritedFilters.get(id) ?? []), filter])
+            }
+        }
+
+        // All required categories of the platform
+        for (const category of this.platform.config.recordsConfiguration.recordCategories) {
+            if (category.isEnabled(this)) {
+                categories.push(category)
+            } else {
+                const filters = inheritedFilters.get(category.id)
+                if (filters && category.isEnabled(this, true)) {
+                    if (filters.find(f => f.isEnabled(this))) {
+                        categories.push(category)
+                    }
+                }
+            }
+        }
+
+        // All organization record categories
+        for (const organization of this.organizations) {
+            categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => r.isEnabled(this)))
+        }
+        
         return categories;
     }
 
@@ -547,10 +628,6 @@ export class PlatformMember implements ObjectWithRecords {
         }
     
         return false
-    }
-
-    isRecordCategoryEnabled(recordCategory: RecordCategory): boolean {
-        return false;
     }
 
     isRecordEnabled(record: RecordSettings): boolean {

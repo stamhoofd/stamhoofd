@@ -1,7 +1,4 @@
-import { StringDecoder } from "@simonbackx/simple-encoding";
-import { AutoEncoder } from "@simonbackx/simple-encoding/dist/src/classes/AutoEncoder";
-import { field } from "@simonbackx/simple-encoding/dist/src/decorators/Field";
-import { EnumDecoder } from "@simonbackx/simple-encoding/dist/src/structs/EnumDecoder";
+import { AutoEncoder, EnumDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 
 import { Country } from "../addresses/CountryDecoder";
 

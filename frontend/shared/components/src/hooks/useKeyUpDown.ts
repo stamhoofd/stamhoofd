@@ -1,7 +1,7 @@
 import { useFocused } from "@simonbackx/vue-app-navigation";
 import { unref, onActivated, onMounted, onBeforeUnmount, onDeactivated } from "vue";
 
-export function useKeyUpDown(actions: {up: () => void, down: () => void}) {
+export function useKeyUpDown(actions: {up: () => unknown|Promise<void>, down: () => unknown|Promise<void>}) {
     const isFocused = useFocused()
     const onKey = (event: KeyboardEvent) => {
         if (event.defaultPrevented || event.repeat) {
@@ -15,11 +15,11 @@ export function useKeyUpDown(actions: {up: () => void, down: () => void}) {
         const key = event.key || event.keyCode;
     
         if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
-            actions.up();
             event.preventDefault();
+            void actions.up();
         } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
-            actions.down();
             event.preventDefault();
+            void actions.down();
         }
     }
 

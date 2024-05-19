@@ -499,6 +499,9 @@ function toggleSort(column: Column<any, any>) {
         //console.log("Ignored sort toggle due to drag")
         return
     }
+    if (column.allowSorting === false) {
+        return
+    }
     if (sortBy.value === column) {
         if (sortDirection.value === SortItemDirection.ASC) {
             sortDirection.value = SortItemDirection.DESC;

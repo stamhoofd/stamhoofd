@@ -67,8 +67,8 @@
 <script lang="ts" setup>
 import { type AutoEncoderPatchType,PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, SaveView, Toast } from '@stamhoofd/components';
-import { OrganizationPrivateMetaData, PermissionRoleDetailed } from '@stamhoofd/structures';
+import { CenteredMessage, SaveView, Toast, useDraggableArray } from '@stamhoofd/components';
+import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 
 import { createPatchableArrayForReorder } from '../../../helpers/patchableArrayHelpers';
@@ -152,6 +152,12 @@ const pop = usePop()
 const createRolePatchArray = () => {
     return new PatchableArray() as PatchableArrayAutoEncoder<PermissionRoleDetailed>
 }
+
+const draggableRoles = useDraggableArray(() => {
+    return roles.value
+}, (roles) => {
+    patchRoles(roles)
+});
 
 const getAdminsForRole = (role: PermissionRoleDetailed): number => {
     return admins.value.reduce((acc, admin) => acc + (getPermissions(admin)?.roles.find(r => r.id === role.id) ? 1 : 0), 0)

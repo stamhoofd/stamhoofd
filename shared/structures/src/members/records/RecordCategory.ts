@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,6 +26,13 @@ export class RecordCategory extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     description = ""
+
+    /**
+     * Sometimes a category needs to be in the list but not enabled.
+     * E.g. when decendants can enable it optionally and share the data
+     */
+    @field({ decoder: BooleanDecoder, version: 255 })
+    defaultEnabled = true
 
     /**
      * A category can either have childCategories or records, but never both. Records are ignored as soon as the category has at least one child category.
@@ -61,9 +68,14 @@ export class RecordCategory extends AutoEncoder {
         return this.records.filter(r => filterValue.isRecordEnabled(r))
     }
 
-    isEnabled<T extends ObjectWithRecords>(filterValue: T) {
-        if (this.filter && this.filter.enabledWhen !== null && !filterValue.doesMatchFilter(this.filter.enabledWhen)) {
-            return false
+    isEnabled<T extends ObjectWithRecords>(filterValue: T, ignoreFilter = false) {
+        if (!ignoreFilter) {
+            if (!this.defaultEnabled) {
+                return false;
+            }
+            if (this.filter && !this.filter.isEnabled(filterValue)) {
+                return false;
+            }
         }
 
         if (this.childCategories.length > 0) {

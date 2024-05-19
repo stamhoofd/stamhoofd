@@ -736,7 +736,6 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         return new ComponentWithProperties(FillRecordCategoryView, {
             category,
             answers: group.fieldAnswers,
-            markReviewed: true,
             dataPermission: true,
             hasNextStep: index < this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories.length - 1,
             filterDefinitions: [],

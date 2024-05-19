@@ -121,12 +121,12 @@ export function propertyFilterToString(filter: PropertyFilter, builder: UIFilter
     const enabledDescription = filterToString(filter.enabledWhen, builder);
 
     if (filter.requiredWhen === null) {
-        return 'Wordt enkel gevraagd als ' + enabledDescription+ ' (stap kan ook worden overgeslagen)'
+        return 'Wordt enkel gevraagd als: ' + enabledDescription+ ' (optioneel)'
     }
 
     if (isEmptyFilter(filter.requiredWhen)) {
-        return 'Wordt enkel gevraagd als ' + enabledDescription
+        return 'Wordt enkel gevraagd als: ' + enabledDescription
     }
 
-    return 'Wordt enkel gevraagd als ' + enabledDescription+ ' (stap kan ook worden overgeslagen als '+filterToString(filter.requiredWhen, builder)+')'
+    return 'Wordt enkel gevraagd als: ' + enabledDescription+ ' (enkel verplicht invullen als: '+filterToString(filter.requiredWhen, builder)+')'
 }

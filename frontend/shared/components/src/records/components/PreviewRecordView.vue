@@ -10,7 +10,7 @@
 
             <hr>
         
-            <RecordAnswerInput :record="record" :answers="recordAnswers" @patch="addPatch"/>
+            <RecordAnswerInput :record="record" :answers="recordAnswers" :validator="validator" @patch="addPatch" />
 
             <div v-if="isDevelopment" class="container">
                 <hr>
@@ -31,9 +31,9 @@
 <script lang="ts">
 import { encodeObject } from "@simonbackx/simple-encoding";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { RecordAnswerInput,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { PatchAnswers, RecordAnswer, RecordSettings, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { RecordAnswerInput, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { PatchAnswers, RecordAnswer, RecordSettings, Version } from "@stamhoofd/structures";
 
 
 @Component({
@@ -50,7 +50,9 @@ import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 })
 export default class PreviewRecordView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    record!: RecordSettings
+        record!: RecordSettings
+
+    validator = new Validator()
 
     recordAnswers: Map<string, RecordAnswer> = new Map()
 

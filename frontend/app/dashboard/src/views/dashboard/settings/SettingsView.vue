@@ -19,29 +19,39 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/flag.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/flag.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Algemeen
                     </h2>
                     <p class="style-description">
                         Naam, adres en website
                     </p>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openPersonalize(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/palette.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/palette.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Personaliseren
                     </h2>
                     <p class="style-description">
                         Logo, kleur en domeinnaam
                     </p>
-                    <template #right><span class="icon arrow-right-small gray" /></template>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="setupEmail(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/email.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
+                    </template>
                     <h2 class="style-title-list">
                         E-mailadressen
                     </h2>
@@ -55,7 +65,9 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openAdmins(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/admin.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/admin.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Beheerders
                     </h2>
@@ -68,7 +80,9 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openPrivacy(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Privacyvoorwaarden
                     </h2>
@@ -82,7 +96,9 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/creditcards.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
+                    </template>
                     <h2 class="style-title-list">
                         {{ $t('dashboard.settings.menu.paymentAccounts.title') }}
                     </h2>
@@ -101,7 +117,9 @@
 
                 <STList class="illustration-list">    
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/laptop.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Link naar ledenportaal
                         </h2>
@@ -115,7 +133,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="openRegistrationPayment(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/creditcards.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
+                        </template>
                         <h2 class="style-title-list">
                             {{ $t('dashboard.settings.menu.paymentMethods.title') }}
                         </h2>
@@ -129,7 +149,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/group.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/group.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Inschrijvingsgroepen<template v-if="enableActivities">
                                 en activiteiten
@@ -151,7 +173,9 @@
 
 
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/health-data.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Vragenlijsten en gegevens van leden
                         </h2>
@@ -165,7 +189,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageFinancialSupport(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/discount.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Financiële ondersteuning
                         </h2>
@@ -178,22 +204,10 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageDataPermission(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/agreement.svg"></template>
-                        <h2 class="style-title-list">
-                            Toestemming gegevensverzameling
-                        </h2>
-                        <p class="style-description">
-                            Vaak heb je toestemming nodig om bepaalde gegevens te verzamelen. Dat stel je hier in.
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageFreeContribution(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Vrije bijdrage
                         </h2>
@@ -207,7 +221,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center right-stack" @click="importMembers(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/import-excel.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Leden importeren
                         </h2>
@@ -221,7 +237,9 @@
                     </STListItem>
 
                     <STListItem v-if="isSGV" :selectable="true" class="left-center right-stack" @click="openSyncScoutsEnGidsen(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/sync-scouts.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/sync-scouts.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Synchroniseer met de groepsadministratie
                         </h2>
@@ -241,7 +259,9 @@
                 <h2>Geavanceerd</h2>
                 <STList class="illustration-list">    
                     <STListItem :selectable="true" class="left-center" @click="openSSO(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/lock.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/lock.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Single-Sign-On (SSO)
                         </h2>
@@ -260,7 +280,9 @@
                 <h2>Stamhoofd</h2>
                 <STList class="illustration-list">    
                     <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/stock.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/stock.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Pakketten aankopen
                         </h2>
@@ -273,7 +295,9 @@
                     </STListItem>
 
                     <STListItem v-if="false" :selectable="true" class="left-center" @click="openBilling(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/transfer.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Facturen en betalingen
                         </h2>
@@ -286,7 +310,9 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/credits.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/credits.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Vertel Stamhoofd door aan andere verenigingen
                         </h2>
@@ -299,14 +325,18 @@
                     </STListItem>
 
                     <STListItem :selectable="true" class="left-center" @click="openLabs(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/experiment.svg"></template>
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
+                        </template>
                         <h2 class="style-title-list">
                             Experimenten
                         </h2>
                         <p class="style-description">
                             Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
 
@@ -321,23 +351,21 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { AdminsView, AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
+import { AdminsView, AsyncComponent, BackButton, CenteredMessage, LoadComponent, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
-import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
+import { Organization, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, PaymentMethod, Platform, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import LabsView from './LabsView.vue';
-import DataPermissionSettingsView from './modules/members/DataPermissionSettingsView.vue';
 import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
-import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
@@ -651,7 +679,19 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             modalDisplayStyle: "popup",
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(RecordsSettingsView, {})
+                    root: new ComponentWithProperties(RecordsConfigurationView, {
+                        inheritedRecordsConfiguration: Platform.shared.config.recordsConfiguration,
+                        recordsConfiguration: this.$organization.meta.recordsConfiguration,
+                        saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
+                            await this.$organizationManager.patch(Organization.patch({
+                                id: this.$organization.id,
+                                meta: OrganizationMetaData.patch({
+                                    recordsConfiguration: patch
+                                })
+                            }))
+                            Toast.success("De aanpassingen zijn opgeslagen").show();
+                        }
+                    })
                 })
             ]
         })
@@ -665,19 +705,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(FinancialSupportSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    manageDataPermission(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(DataPermissionSettingsView, {})
                 })
             ]
         })
@@ -817,9 +844,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.manageFinancialSupport(false)
         }
 
-        if (this.$url.match('data-permission')) {
-            this.manageDataPermission(false)
-        }
         UrlHelper.shared.clear()
         this.loadStripeAccounts(null).catch(console.error);
     }

@@ -339,7 +339,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective, EditResourceRolesView } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { AccessRight, EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -571,7 +571,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                     resource: {
                         id: this.preview.id,
                         name: this.preview.meta.name,
-                        type: 'webshop'
+                        type: PermissionsResourceType.Webshops
                     },
                     configurableAccessRights: this.preview.hasTickets ? [AccessRight.WebshopScanTickets] : []
                 })

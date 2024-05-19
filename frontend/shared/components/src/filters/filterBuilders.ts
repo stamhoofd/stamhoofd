@@ -33,3 +33,15 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
         builders: memberWithRegistrationsBlobUIFilterBuilders
     })
 )
+
+// This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
+export const checkoutUIFilterBuilders: UIFilterBuilders = [
+    // todo
+];
+
+// Recursive: self referencing groups
+checkoutUIFilterBuilders.unshift(
+    new GroupUIFilterBuilder({
+        builders: checkoutUIFilterBuilders
+    })
+)

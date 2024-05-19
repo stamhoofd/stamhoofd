@@ -69,26 +69,6 @@
             </button>
         </p>
 
-        <div v-if="!isRoot && enableActivities" class="container">
-            <hr>
-            <h2>Toegangsbeheer</h2>
-            <p>Je kan toegang tot leden instellen per inschrijvingsgroep (instellingen van groep zelf) of per categorie (hieronder). Je kan de beschikbare rollen bewerken bij de instellingen van je vereniging, daar kan je ook instellen welke rollen elke beheerder heeft.</p>
-    
-            <STList v-if="roles.length > 0">
-                <STListItem>
-                    <template #left>
-                        <Checkbox :model-value="true" :disabled="true" />
-                    </template>
-                    Hoofdbeheerders
-                </STListItem>
-                <GroupCategoryPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :category="patchedCategory" :organization="patchedOrganization" @patch="addCategoryPatch" />
-            </STList>
-
-            <p v-else-if="fullAccess" class="info-box">
-                Je hebt nog geen rollen aangemaakt. Maak rollen aan via Instellingen → Beheerders
-            </p>
-        </div>
-
         <div v-if="isRoot && fullAccess" class="container">
             <hr>
             <h2>Prullenmand inschrijvingsgroepen</h2>
@@ -117,10 +97,8 @@ import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, PermissionRole, Version } from "@stamhoofd/structures";
+import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Version } from "@stamhoofd/structures";
 
-import GroupCategoryPermissionRow from '../admins/GroupCategoryPermissionRow.vue';
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue";
 import GroupRow from "./GroupRow.vue";
@@ -137,8 +115,7 @@ import GroupTrashView from './GroupTrashView.vue';
         LoadingButton,
         BackButton,
         Checkbox,
-        STListItem,
-        GroupCategoryPermissionRow
+        STListItem
     },
 })
 export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {

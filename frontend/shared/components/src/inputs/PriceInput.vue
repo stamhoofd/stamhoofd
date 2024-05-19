@@ -2,7 +2,7 @@
     <label class="price-input input" :class="{ error: !valid, disabled }">
         <!-- 
             We use type = text here because the specs of number inputs ensure that we can't get 
-            the raw string value, but we need this for our placeholder logic.
+            the raw string modelValue, but we need this for our placeholder logic.
             Also inputmode is more specific on mobile devices. 
             Only downside is that we lose the stepper input on desktop.
         -->
@@ -45,7 +45,7 @@ export default class PriceInput extends Vue {
 
     /** Price in cents */
     @Prop({ default: null })
-        value!: number | null
+        modelValue!: number | null
 
     currency = "euro";
 
@@ -58,7 +58,7 @@ export default class PriceInput extends Vue {
     @Prop({ default: false })
         disabled!: boolean
 
-    @Watch('value')
+    @Watch('modelValue')
     onRealValueChanged(val: number | null, old: number | null) {
         if (old === val) {
             return
@@ -71,7 +71,7 @@ export default class PriceInput extends Vue {
 
         if (val === null)  {
             if (this.required) {
-                this.internalValue = this.constrain(this.value ?? this.min ?? 0);
+                this.internalValue = this.constrain(this.modelValue ?? this.min ?? 0);
             }
             this.clean();
             return;
@@ -82,7 +82,7 @@ export default class PriceInput extends Vue {
     }
 
     get internalValue() {
-        return this.value
+        return this.modelValue
     }
 
     set internalValue(val: number | null) {
@@ -94,7 +94,7 @@ export default class PriceInput extends Vue {
     }
 
     stringToValue(str: string) {
-        // We need the value string here! Vue does some converting to numbers automatically
+        // We need the modelValue string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
         if (str == "") {
             if (this.required) {
@@ -189,7 +189,7 @@ export default class PriceInput extends Vue {
         if (!this.valid) {
             return;
         }
-        this.internalValue = this.constrain((this.value ?? this.min ?? 0) + add);
+        this.internalValue = this.constrain((this.modelValue ?? this.min ?? 0) + add);
         this.$nextTick(() => {
             this.clean();
         })

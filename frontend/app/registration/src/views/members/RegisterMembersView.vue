@@ -44,7 +44,7 @@ import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-
+import {RegisterMemberView} from '@stamhoofd/components'
 import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
@@ -59,7 +59,7 @@ defineRoutes([
     {
         name: Routes.RegisterMember,
         url: '@name',
-        component: async () => (await import('./RegisterMemberView.vue')).default as any,
+        component: RegisterMemberView as any,
         params: {
             name: String
         },

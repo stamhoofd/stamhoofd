@@ -4,6 +4,7 @@ import { Data, Encodeable, EncodeContext, PlainObject } from "@simonbackx/simple
 import { FilterGroupEncoded } from "./FilterGroup"
 import { StamhoofdFilterDecoder } from "./new/FilteredRequest"
 import { StamhoofdFilter } from "./new/StamhoofdFilter"
+import { Filterable } from "../members/records/RecordCategory"
 
 export class PropertyFilter implements Encodeable {
     constructor(enabledWhen: StamhoofdFilter | null, requiredWhen: StamhoofdFilter | null) {
@@ -27,6 +28,20 @@ export class PropertyFilter implements Encodeable {
      * empty filter = always required
      */
     requiredWhen: StamhoofdFilter | null = null
+
+    isEnabled(object: Filterable): boolean {
+        if (this.enabledWhen === null) {
+            return true
+        }
+        return object.doesMatchFilter(this.enabledWhen)
+    }
+
+    isRequired(object: Filterable): boolean {
+        if (this.requiredWhen === null) {
+            return false
+        }
+        return object.doesMatchFilter(this.requiredWhen)
+    }
 
     getString(): string {
         //const decodedEnabledWhen = this.enabledWhen.decode(definitions)

@@ -19,17 +19,17 @@
 
             <div v-if="priceGroup.startDate !== null" class="split-inputs">
                 <STInputBox title="Vanaf" error-fields="startDate" :error-box="errorBox">
-                    <DateSelection :value="priceGroup.startDate" @input="setStartDate(priceGroup, $event)" />
+                    <DateSelection :model-value="priceGroup.startDate" @update:model-value="setStartDate(priceGroup, $event)" />
                 </STInputBox>
 
-                <TimeInput :value="priceGroup.startDate" title="Tijdstip" placeholder="Tijdstip" :validator="validator" @input="setStartDate(priceGroup, $event)" />
+                <TimeInput :model-value="priceGroup.startDate" title="Tijdstip" placeholder="Tijdstip" :validator="validator" @update:model-value="setStartDate(priceGroup, $event)" />
             </div>
 
             <STList>
                 <STListItem v-for="(p, index) of priceGroup.prices" :key="index">
                     <div class="split-inputs">
                         <STInputBox :title="priceGroup.prices.length <= 1 ? 'Prijs' : (ordinalNumber(priceGroup, index + 1, priceGroup.prices.length))" error-fields="price" :error-box="errorBox">
-                            <PriceInput :value="p.price" placeholder="Gratis" @input="setPrice(priceGroup, index, $event)" />
+                            <PriceInput :model-value="p.price" placeholder="Gratis" @update:model-value="setPrice(priceGroup, index, $event)" />
 
                             <template v-if="index > 0 && index == priceGroup.prices.length - 1" #right><button type="button" class="button text" @click="removeFamilyPrice(priceGroup, index)">
                                 <span class="icon trash" />
@@ -39,7 +39,7 @@
 
                         <div v-if="p.reducedPrice !== null || enableFinancialSupport">
                             <STInputBox title="Verlaagd tarief*" error-fields="reducedPrice" :error-box="errorBox">
-                                <PriceInput :value="p.reducedPrice" :placeholder="formatPrice(p.price)" :required="false" @input="setReducedPrice(priceGroup, index, $event)" />
+                                <PriceInput :model-value="p.reducedPrice" :placeholder="formatPrice(p.price)" :required="false" @update:model-value="setReducedPrice(priceGroup, index, $event)" />
                             </STInputBox>
                         </div>
                     </div>

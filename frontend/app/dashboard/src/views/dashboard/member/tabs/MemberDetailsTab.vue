@@ -171,10 +171,9 @@
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Toast, useCountry, useIsMobile, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
+import { CenteredMessage, Toast, useCountry, useIsMobile, useOrganization, usePlatformFamilyManager, MemberSegmentedView } from '@stamhoofd/components';
 import { DataPermissionsSettings, FinancialSupportSettings, PlatformMember, RecordWarning, RecordWarningType, User } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import MemberSegmentedView from '../MemberSegmentedView.vue';
 
 const isMobile = useIsMobile();
 const present = usePresent();

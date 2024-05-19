@@ -137,7 +137,7 @@
                 :validator="validator" 
                 :show-administration-fee="false" 
                 @patch:config="patchConfig($event)"
-                @patch:privateConfig="patchPrivateConfig($event)"
+                @patch:private-config="patchPrivateConfig($event)"
             />
         </template>
 
@@ -179,15 +179,13 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
 
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
-import WebshopPermissionRow from '../../admins/WebshopPermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
@@ -201,7 +199,6 @@ import EditWebshopMixin from './EditWebshopMixin';
         TimeInput,
         Radio,
         SaveView,
-        WebshopPermissionRow,
         EditPaymentMethodsBox
     },
 })

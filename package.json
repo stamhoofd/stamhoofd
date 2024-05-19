@@ -33,11 +33,11 @@
         "caddy": "caddy run --config .development/caddy.json",
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
         "mail": "maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password",
-        "clear-depedencies": "rm -rf node_modules */node_modules **/node_modules"
+        "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",
-        "@simonbackx/simple-encoding": "2.10.2",
+        "@simonbackx/simple-encoding": "2.10.4",
         "@simonbackx/simple-errors": "^1.4.0",
         "@simonbackx/simple-networking": "1.16.0",
         "@simonbackx/vue-app-navigation": "2.0.0-alpha.13",

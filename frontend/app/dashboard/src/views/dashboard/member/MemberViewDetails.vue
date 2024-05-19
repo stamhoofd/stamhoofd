@@ -165,32 +165,6 @@
                 </dl>
             </div>
 
-            <div v-if="member.details.doctor" class="hover-box container">
-                <hr>
-                <h2 class="style-with-button">
-                    <div>Huisarts</div>
-                    <div class="hover-show">
-                        <button v-if="hasWrite" type="button" class="button icon gray edit" @click="editContact(member.details.doctor)" />
-                    </div>
-                </h2>
-
-                <dl class="details-grid hover">
-                    <template v-if="member.details.doctor.name">
-                        <dt>Naam</dt>
-                        <dd v-copyable>
-                            {{ member.details.doctor.name }}
-                        </dd>
-                    </template>
-
-                    <template v-if="member.details.doctor.phone">
-                        <dt>Telefoonnummer</dt>
-                        <dd v-copyable>
-                            {{ member.details.doctor.phone }}
-                        </dd>
-                    </template>
-                </dl>
-            </div>
-
             <!-- Loop all records -->
             <div v-for="category in recordCategories" :key="'category-'+category.id" class="hover-box container">
                 <hr>
@@ -466,7 +440,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
             category,
             value: this.member.details,
-            markReviewed: false,
             hasNextStep: false,
         }).setDisplayStyle("popup");
         this.present(displayedComponent);
@@ -535,11 +508,9 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.loadingComplete = true
         try {
             // Mark this member as complete again
-            this.member.details.isRecovered = false
             await this.familyManager.patchAllMembersWith(this.member)
         } catch (e) {
             // Reset
-            this.member.details.isRecovered = true
             console.error(e)
             Toast.fromError(e).show()
         }

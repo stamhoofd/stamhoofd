@@ -1,7 +1,6 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
-        <h1>{{ title }}</h1>
-        <component :is="component" :validator="errors.validator" :member="cloned" />
+        <component :is="component" :validator="errors.validator" :member="cloned" v-bind="$attrs" :level="1" />
     </SaveView>
 </template>
 
@@ -14,8 +13,12 @@ import { ComponentOptions, Ref, computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { usePlatformFamilyManager } from './PlatformFamilyManager';
 import { NavigationActions } from '../types/NavigationActions';
+import { usePlatformFamilyManager } from './PlatformFamilyManager';
+
+defineOptions({
+    inheritAttrs: false
+})
 
 const props = withDefaults(
     defineProps<{
@@ -23,15 +26,19 @@ const props = withDefaults(
         saveText?: string,
         component: ComponentOptions,
         // do not change this
-        member: Readonly<PlatformMember>,
-        saveHandler: (navigate: NavigationActions) => Promise<void>|void
+        member: PlatformMember,
+        // Whether the member should be saved to the API
+        doSave?: boolean,
+        saveHandler?: ((navigate: NavigationActions) => Promise<void>|void)|null
     }>(), {
-        saveText: 'Opslaan'
+        doSave: true,
+        saveText: 'Opslaan',
+        saveHandler: null
     }
 );
 
 // We use a clone, so we don't propate the patches to the rest of the app until the save was successful
-const cloned = ref<PlatformMember>(props.member.clone()) as Ref<PlatformMember>;
+const cloned = ref(props.member.clone() as any) as Ref<PlatformMember>;
 const show = useShow();
 const present = usePresent();
 const dismiss = useDismiss();
@@ -53,14 +60,21 @@ async function save() {
             return;
         }
 
-        console.log("Saving member", cloned.value.family.members, cloned.value);
-        await manager.save(cloned.value.family.members)
-
+        if (props.doSave) {
+            await manager.save(cloned.value.family.members)
+        }
+        
         // Copy over clone
         props.member.family.copyFromClone(cloned.value.family)
-        await props.saveHandler({
-            show, present, dismiss, pop
-        });
+
+        if (props.saveHandler) {
+            await props.saveHandler({
+                show, present, dismiss, pop
+            });
+        } else {
+            await pop({force: true});
+        }
+
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }

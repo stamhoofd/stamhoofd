@@ -165,9 +165,6 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
     @field({ decoder: DateDecoder })
     updatedAt = new Date()
 
-    isRecordCategoryEnabled(recordCategory: RecordCategory): boolean {
-        throw new Error("Method not implemented.");
-    }
     isRecordEnabled(record: RecordSettings): boolean {
         throw new Error("Method not implemented.");
     }

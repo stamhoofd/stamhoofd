@@ -109,14 +109,13 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder,PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, FillRecordCategoryView, Spinner, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, Checkbox, FillRecordCategoryView, STList, STListItem, STNavigationBar, Spinner, Toast, TooltipDirective } from "@stamhoofd/components";
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, RecordAnswer } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import DocumentsView from "./DocumentsView.vue";
 import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";
@@ -328,7 +327,6 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
         return new ComponentWithProperties(FillRecordCategoryView, {
             category,
             answers: this.template.settings.fieldAnswers,
-            markReviewed: true,
             hasNextStep: index < this.template.privateSettings.templateDefinition.exportFieldCategories.length - 1,
             filterValue: this.template,
             

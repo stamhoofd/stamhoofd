@@ -6,6 +6,7 @@ export class RecordEditorSettings<T extends ObjectWithRecords> {
      * Whether the record questions support sensitive data
      */
     dataPermission = false
+    toggleDefaultEnabled = false
 
     exampleValue!: T
     patchExampleValue!: (exampleValue: T, patch: PatchAnswers) => T

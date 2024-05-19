@@ -76,14 +76,25 @@ export class PlatformFamilyManager {
                 throw e;
             }
 
+            const createdMembers = response.data.filter(m => !members.find(mm => mm.id === m.id))
+
             for (const c of clearAfter.values()) {
                 c.markSaved();
-            }
 
-            for (const updatedMember of response.data) {
-                const existingMember = members.find(m => m.id === updatedMember.id);
-                if (existingMember) {
-                    existingMember.member.set(updatedMember)
+                // Check in response
+                const updatedMember = response.data.find(m => m.id === c.id);
+                if (updatedMember) {
+                    c.member.set(updatedMember)
+                } else {
+                    // Probably duplicate member, so we have a different id
+                    const updatedMember = createdMembers.find(m => m.details.isEqual(c.member.details));
+                    if (updatedMember) {
+                        // We have an id change here
+                        c.member.set(updatedMember)
+                        c.patch.id = updatedMember.id
+                    } else {
+                        console.error('Patched members but missing in response. This should not happen.')
+                    }
                 }
             }
         }

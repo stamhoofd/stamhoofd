@@ -7,7 +7,6 @@ import { RecordSettings } from "./records/RecordSettings"
 export type PatchAnswers = PatchMap<string, RecordAnswer|AutoEncoderPatchType<RecordAnswer>|null>
 
 export interface ObjectWithRecords extends Filterable {
-    isRecordCategoryEnabled(recordCategory: RecordCategory): boolean
     isRecordEnabled(record: RecordSettings): boolean
     getRecordAnswers(): Map<string, RecordAnswer>
 }

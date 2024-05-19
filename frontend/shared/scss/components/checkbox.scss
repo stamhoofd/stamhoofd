@@ -194,8 +194,8 @@ label.style-label {
 
 
 
-label:active .checkbox, label:active .radio, .checkbox:active, .radio:active {
-    > div {
+label:active:not(:has(button:active)) .checkbox, label:active:not(:has(button:active)) .radio, .checkbox:active, .radio:active {
+    > input:not(:disabled) + div {
         > div:first-child {
             transform: scale(0.8, 0.8);
         }

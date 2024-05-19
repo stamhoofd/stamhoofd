@@ -104,9 +104,6 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
             memberDetails.emergencyContacts.push(await emergencyContactFactory.create());
         }
 
-        memberDetails.doctor = await emergencyContactFactory.create();
-        memberDetails.doctor.name = "Dr. " + memberDetails.doctor.name;
-
         const member = new Member()
             .setManyRelation(Member.registrations, [])
             .setManyRelation(Member.users, this.options.user ? [this.options.user] : [])

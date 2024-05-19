@@ -1,6 +1,6 @@
 <template>
     <SaveView :loading="loading" :save-text="saveText" @save="save">
-        <FillRecordCategoryBox :category="category" :value="patchedValue" :validator="errors.validator" :mark-reviewed="markReviewed" @patch="addPatch" />
+        <FillRecordCategoryBox :category="category" :value="patchedValue" :validator="errors.validator" @patch="addPatch" />
     </SaveView>
 </template>
 
@@ -20,13 +20,11 @@ const props = withDefaults(
     defineProps<{
         category: RecordCategory,
         value: T,
-        markReviewed?: boolean,
         patchHandler: (patch: PatchAnswers) => T,
         saveHandler: (patch: PatchAnswers, navigate: NavigationActions) => Promise<void>|void,
         saveText?: string,
     }>(), {
-        saveText: 'Opslaan',
-        markReviewed: true
+        saveText: 'Opslaan'
     }
 );
 
