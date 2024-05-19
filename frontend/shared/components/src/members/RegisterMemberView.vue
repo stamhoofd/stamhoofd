@@ -61,7 +61,7 @@ const items = computed(() => {
 const labels = computed(() => {
     return items.value.map(o => o.name)
 });
-const allowChangingOrganization = STAMHOOFD.userMode === 'platform'
+const allowChangingOrganization = STAMHOOFD.userMode === 'platform' && (app === 'registration' || app == 'admin');
 
 const tree = computed(() => {
     if (!selectedOrganization.value) {
