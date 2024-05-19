@@ -549,9 +549,8 @@ export class PlatformMember implements ObjectWithRecords {
         const categories: RecordCategory[] = [];
         const inheritedFilters = new Map<string, PropertyFilter[]>()
 
+        // First push all platform record categories, these should be first
         for (const organization of this.organizations) {
-            categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => r.isEnabled(this)))
-
             // Any optional categories from the platform that have been enabled?
             for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
                 inheritedFilters.set(id, [...(inheritedFilters.get(id) ?? []), filter])
@@ -572,6 +571,11 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
+        // All organization record categories
+        for (const organization of this.organizations) {
+            categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => r.isEnabled(this)))
+        }
+        
         return categories;
     }
 

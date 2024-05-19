@@ -1,5 +1,5 @@
 <template>
-    <FillRecordCategoryBox :category="category" :value="member" :validator="validator" :level="level" :all-optional="allOptional" @patch="addPatch" :titleSuffix="titleSuffix"/>
+    <FillRecordCategoryBox :category="category" :value="member" :validator="validator" :level="level" :all-optional="allOptional" :title-suffix="titleSuffix" @patch="addPatch" />
 </template>
 
 <script setup lang="ts">
