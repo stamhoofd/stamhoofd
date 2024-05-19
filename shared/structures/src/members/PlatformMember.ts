@@ -137,6 +137,10 @@ export class PlatformFamily {
                 this.members.push(c)
             }
         }
+
+        for (const o of clone.organizations) {
+            this.insertOrganization(o)
+        }
     }
 
     getAddressOccurrences(address: Address, skip?: {memberId?: string, parentId?: string}): string[] {
