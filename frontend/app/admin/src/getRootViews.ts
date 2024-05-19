@@ -3,7 +3,7 @@ import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBa
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
-import { computed, reactive } from 'vue';
+import { computed, markRaw, reactive } from 'vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
@@ -79,10 +79,8 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
     });
 
     return new ComponentWithProperties(ContextProvider, {
-        context: {
+        context: markRaw({
             $context: reactiveSession,
-            $platform: computed(() => platformManager.$platform),
-            $user: computed(() => reactiveSession.user),
             $platformManager: platformManager,
             reactive_navigation_url: "administratie",
             reactive_components: {
@@ -91,7 +89,7 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                 "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'admin'
-        },
+        }),
         root: wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {
                 root: wrapWithModalStack(

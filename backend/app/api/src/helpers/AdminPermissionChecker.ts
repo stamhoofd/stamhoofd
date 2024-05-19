@@ -191,6 +191,14 @@ export class AdminPermissionChecker {
             return false
         }
 
+        if (this.hasPlatformFullAccess()) {
+            return true
+        }
+
+        if (member.organizationId && await this.hasFullAccess(member.organizationId)) {
+            return true
+        }
+
         for (const registration of member.registrations) {
             if (await this.canAccessRegistration(registration, permissionLevel)) {
                 return true;

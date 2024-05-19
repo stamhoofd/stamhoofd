@@ -1,5 +1,4 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { SessionContext, Storage } from '@stamhoofd/networking';
 import { Platform, User, Version } from '@stamhoofd/structures';
 import { Ref, inject, reactive, toRef } from 'vue';

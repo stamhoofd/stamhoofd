@@ -5,7 +5,7 @@ import { PromiseView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization } from '@stamhoofd/structures';
-import { computed, reactive, ref } from 'vue';
+import { computed, markRaw, reactive, ref } from 'vue';
 
 import { MemberManager } from './classes/MemberManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
@@ -89,7 +89,7 @@ export async function getOrganizationSelectionRoot() {
     }
 
     return new ComponentWithProperties(ContextProvider, {
-        context: {
+        context: markRaw({
             $context: reactiveSession,
             $platformManager: platformManager,
             reactive_navigation_url: "/",
@@ -98,7 +98,7 @@ export async function getOrganizationSelectionRoot() {
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
             },
             stamhoofd_app: 'dashboard',
-        },
+        }),
         root: wrapWithModalStack(baseRoot)
     });
 }
@@ -150,7 +150,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
         I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
 
         return new ComponentWithProperties(ContextProvider, {
-            context: {
+            context: markRaw({
                 $context: reactiveSession,
                 $platformManager: platformManager,
                 reactive_navigation_url: "auto/" + session.organization!.uri,
@@ -160,7 +160,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
                     "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
                 },
                 stamhoofd_app: 'auto',
-            },
+            }),
             root: wrapWithModalStack(
                 new ComponentWithProperties(AuthenticatedView, {
                     root: new ComponentWithProperties(PromiseView, {
@@ -304,7 +304,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
     // }
 
     return new ComponentWithProperties(ContextProvider, {
-        context: {
+        context: markRaw({
             $context: reactiveSession,
             $platformManager: platformManager,
             $organizationManager: new OrganizationManager(reactiveSession),
@@ -316,7 +316,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                 "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'dashboard',
-        },
+        }),
         root: wrapWithModalStack(
             new ComponentWithProperties(AuthenticatedView, {
                 root: wrapWithModalStack(

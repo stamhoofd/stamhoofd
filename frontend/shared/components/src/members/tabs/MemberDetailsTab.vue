@@ -71,6 +71,8 @@
                     </template>
                 </dl>
             </div>
+
+            <MemberRegistrationsBox :member="member" />
         </div>
 
         <div v-if="(hasWarnings && !isMobile) || member.patchedMember.users.length > 0 || familyMembers.length > 0">
@@ -175,6 +177,7 @@ import { CenteredMessage, Toast, useCountry, useIsMobile, useOrganization, usePl
 import { DataPermissionsSettings, FinancialSupportSettings, PlatformMember, RecordWarning, RecordWarningType, User } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import MemberSegmentedView from '../MemberSegmentedView.vue';
+import MemberRegistrationsBox from '../components/MemberRegistrationsBox.vue';
 
 const isMobile = useIsMobile();
 const present = usePresent();

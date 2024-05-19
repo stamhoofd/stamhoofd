@@ -5,7 +5,7 @@ import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
-import { inject, reactive } from "vue";
+import { inject, reactive, markRaw } from "vue";
 
 import { MemberManager } from "./classes/MemberManager";
 import { MemberManager as LegacyMemberManager } from "../../dashboard/src/classes/MemberManager";
@@ -93,7 +93,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     await $memberManager.loadMembers()
 
     return new ComponentWithProperties(ContextProvider, {
-        context: {
+        context: markRaw({
             $context: reactiveSession,
             $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager,
@@ -109,7 +109,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                 "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
             stamhoofd_app: 'registration',
-        },
+        }),
         root: new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {
