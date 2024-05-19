@@ -35,7 +35,12 @@
             "email": "voorbeeld@gmail.com",
             "name": "Jan Janssens",
             "names": "Lies en Jan Janssens"
-        }
+        },
+        "organization": {
+            "singular": "Vereniging",
+            "plural": "Verenigingen"
+        },
+        "notRegistered": "Niet ingeschreven"
     },
     "backend": {},
     "dashboard": {

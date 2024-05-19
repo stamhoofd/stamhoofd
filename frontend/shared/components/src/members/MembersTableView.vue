@@ -19,11 +19,12 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, ModernTableView, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useContext, useTableObjectFetcher } from "@stamhoofd/components";
-import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
+import { Column, ComponentExposed, ModernTableView, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useContext, useTableObjectFetcher } from "@stamhoofd/components";
+import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
+import { useTranslate } from "@stamhoofd/frontend-i18n";
 
 type ObjectType = PlatformMember;
 
@@ -42,6 +43,8 @@ const props = withDefaults(
 
 const context = useContext();
 const present = usePresent();
+const app = useAppContext();
+const $t = useTranslate();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 
 function extendSort(list: SortList): SortList  {
@@ -102,7 +105,6 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'name',
         name: "Naam", 
         getValue: (member) => member.member.name,
-        compare: (a, b) => Sorter.byStringValue(a, b),
         minimumWidth: 100,
         recommendedWidth: 200,
         grow: true
@@ -111,21 +113,35 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'birthDay',
         name: "Geboortedatum", 
         getValue: (member) => member.member.details.birthDay, 
-        compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900), a ?? new Date(1900)),
         format: (date) => date ? Formatter.dateNumber(date, true) : '',
         minimumWidth: 50,
-        recommendedWidth: 150,
+        recommendedWidth: 170,
+        enabled: false
     }),
     new Column<ObjectType, number | null>({
         id: 'age',
         name: "Leeftijd", 
         getValue: (member) => member.member.details.age, 
-        compare: (a, b) => 0,
         format: (age) => age ? Formatter.integer(age) + ' jaar' : 'onbekend',
         minimumWidth: 30,
-        recommendedWidth: 100,
+        recommendedWidth: 120,
     })
 ];
+
+if (app == 'admin') {
+    allColumns.push(
+        new Column<ObjectType, Organization[]>({
+            id: 'organization',
+            allowSorting: false,
+            name: $t('shared.organization.singular'), 
+            getValue: (member) => member.organizations, 
+            format: (organizations) => Formatter.joinLast(organizations.map(o => o.name), ', ', ' en ') || $t('shared.notRegistered'),
+            getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 300,
+        })
+    )
+}
 
 async function showMember(member: PlatformMember) {
     if (!modernTableView.value) {

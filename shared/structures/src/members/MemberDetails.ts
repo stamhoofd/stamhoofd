@@ -1,22 +1,15 @@
-import { ArrayDecoder,AutoEncoder, AutoEncoderPatchType, BooleanDecoder,Data,DateDecoder,EnumDecoder,field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
 import { Replacement } from '../endpoints/EmailRequest';
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
-import { NumberFilterDefinition } from '../filters/NumberFilter';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
-import { OrganizationMetaData } from '../OrganizationMetaData';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
-import { LegacyRecord,OldRecord } from './records/LegacyRecord';
-import { LegacyRecordType,OldRecordType } from './records/LegacyRecordType';
-import { RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordTextAnswer } from './records/RecordAnswer';
-import { RecordFactory } from './records/RecordFactory';
-import { RecordChoice, RecordType, RecordWarning, RecordWarningType } from './records/RecordSettings';
+import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
 import { ReviewTimes } from './ReviewTime';
 
 /**
@@ -100,7 +93,14 @@ export class MemberDetails extends AutoEncoder {
      * Gave permission to collect sensitive information
      */
     @field({ decoder: BooleanStatus, version: 117, optional: true })
-    dataPermissions?: BooleanStatus
+    @field({ 
+        decoder: BooleanStatus, 
+        version: 256, 
+        optional: true, 
+        nullable: true,
+        downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
+    })
+    dataPermissions: BooleanStatus|null = null
 
     /**
      * Last time the records were reviewed

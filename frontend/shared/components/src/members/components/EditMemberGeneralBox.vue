@@ -41,16 +41,14 @@
 </template>
 
 <script setup lang="ts">
-import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { PlatformMember } from '@stamhoofd/structures';
 
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { computed } from 'vue';
-import { useAppContext } from '../../context/appContext';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
-import { useAuth } from '../../hooks';
 import AddressInput from '../../inputs/AddressInput.vue';
 import BirthDayInput from '../../inputs/BirthDayInput.vue';
 import EmailInput from '../../inputs/EmailInput.vue';

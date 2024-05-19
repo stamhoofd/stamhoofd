@@ -4,6 +4,7 @@ export class Column<T, ValueType> {
     index = 100
     id: string
     align?: "left" | "right" | "center"
+    allowSorting = true
 
     /**
      * null means: generate width + save it,  based on grow property
@@ -59,6 +60,7 @@ export class Column<T, ValueType> {
         grow?: boolean,
         minimumWidth?: number,
         recommendedWidth?: number,
+        allowSorting?: boolean
     }) {
         this.enabled = settings.enabled ?? true
         this.index = settings.index ?? 100
@@ -79,6 +81,7 @@ export class Column<T, ValueType> {
         this.align = settings.align
 
         this.width = this.recommendedWidth
+        this.allowSorting = settings.allowSorting ?? true
     }
 
     getFormattedValue(val: T) {

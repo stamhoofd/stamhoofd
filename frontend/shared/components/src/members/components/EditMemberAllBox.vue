@@ -2,6 +2,11 @@
     <div>
         <EditMemberGeneralBox v-bind="$attrs" :member="member" />
 
+        <div v-if="member.isPropertyEnabled('dataPermission')" class="container">
+            <hr>
+            <EditMemberDataPermissionsBox v-bind="$attrs" :member="member" :level="2" />
+        </div>
+
         <div v-if="member.isPropertyEnabled('parents')" class="container">
             <hr>
             <h2>Ouders</h2>
@@ -29,6 +34,7 @@ import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
 import EditMemberParentsBox from './EditMemberParentsBox.vue';
 import { computed } from 'vue';
 import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
+import EditMemberDataPermissionsBox from './EditMemberDataPermissionsBox.vue';
 
 defineOptions({
     inheritAttrs: false

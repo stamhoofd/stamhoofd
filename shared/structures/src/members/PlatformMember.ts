@@ -289,7 +289,14 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
-    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission') {
+        if (property === 'dataPermission') {
+            if (this.platform.config.recordsConfiguration[property]) {
+                return true;
+            }
+            return false;
+        }
+
         const def = this.platform.config.recordsConfiguration[property];
         if (def === null) {
             return false;
@@ -297,7 +304,7 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isEnabled(this)
     }
 
-    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission') {
         if (this.isPropertyEnabledForPlatform(property)) {
             return true;
         }
@@ -305,6 +312,13 @@ export class PlatformMember implements ObjectWithRecords {
         const organizations = this.filterOrganizations({cycleOffset: 0})
 
         for (const organization of organizations) {
+            if (property === 'dataPermission') {
+                if (organization.meta.recordsConfiguration[property]) {
+                    return true;
+                }
+                continue;
+            }
+
             const def = organization.meta.recordsConfiguration[property];
             if (def === null) {
                 continue;
