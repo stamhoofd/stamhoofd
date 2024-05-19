@@ -2,7 +2,7 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController } fr
 import { AuthenticatedView, ContextProvider } from "@stamhoofd/components";
 import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
 import { Webshop, WebshopAuthType } from "@stamhoofd/structures";
-import { reactive } from 'vue';
+import { reactive, markRaw } from 'vue';
 
 import { CheckoutManager } from "./classes/CheckoutManager";
 import { WebshopManager } from "./classes/WebshopManager";
@@ -30,12 +30,12 @@ export function getWebshopRootView(session: SessionContext, webshop: Webshop) {
     const reactiveSession = reactive(session) as SessionContext
     const $webshopManager = reactive(new WebshopManager(reactiveSession, webshop)) as WebshopManager;
     return new ComponentWithProperties(ContextProvider, {
-        context: {
+        context: markRaw({
             $context: reactiveSession,
             $organizationManager: reactive(new OrganizationManager(reactiveSession)),
             $webshopManager,
             $checkoutManager: reactive(new CheckoutManager($webshopManager)),
-        },
+        }),
         root
     });
 }

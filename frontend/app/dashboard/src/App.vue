@@ -14,7 +14,7 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
-import { Ref, nextTick, onMounted, reactive, ref } from 'vue';
+import { Ref, nextTick, onMounted, reactive, ref, markRaw } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent>|null>;
@@ -90,10 +90,10 @@ async function checkGlobalRoutes() {
             adjustHistory: false,
             components: [
                 new ComponentWithProperties(ContextProvider, {
-                    context: {
+                    context: markRaw({
                         $context: reactive(session),
                         reactive_navigation_url: currentPath,
-                    },
+                    }),
                     root: new ComponentWithProperties(ForgotPasswordResetView, { token })
                 })
             ],
