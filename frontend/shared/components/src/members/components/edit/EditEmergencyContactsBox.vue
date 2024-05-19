@@ -1,5 +1,7 @@
 <template>
     <div class="container">
+        <Title v-bind="$attrs" title="Noodcontactpersonen" />
+
         <p v-if="member.isPropertyEnabled('parents')" class="style-description-block">
             Voeg geen ouders toe als noodcontactpersoon. Ouders worden altijd als eerste gecontacteerd in geval van nood.
         </p>
@@ -53,19 +55,23 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { computed } from 'vue';
-import { ErrorBox } from '../../errors/ErrorBox';
-import { Validator } from '../../errors/Validator';
-import { useErrors } from '../../errors/useErrors';
-import { useValidation } from '../../errors/useValidation';
-import STList from '../../layout/STList.vue';
-import { useIsPropertyRequired } from '../hooks/useIsPropertyRequired';
+import { ErrorBox } from '../../../errors/ErrorBox';
+import { Validator } from '../../../errors/Validator';
+import { useErrors } from '../../../errors/useErrors';
+import { useValidation } from '../../../errors/useValidation';
+import STList from '../../../layout/STList.vue';
+import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditEmergencyContactView from './EditEmergencyContactView.vue';
+import Title from './Title.vue';
+
+defineOptions({
+    inheritAttrs: false
+})
 
 const props = defineProps<{
     member: PlatformMember,
-    validator: Validator
+    validator: Validator,
 }>();
-
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const present = usePresent();
 const errors = useErrors({validator: props.validator});

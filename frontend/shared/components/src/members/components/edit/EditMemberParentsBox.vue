@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <div class="container">
+        <Title v-bind="$attrs" title="Ouders" />
         <STErrorsDefault :error-box="errors.errorBox" />
         
         <p v-if="visibleParents.length === 0" class="info-box">
@@ -49,21 +50,24 @@
 </template>
 
 <script setup lang="ts">
-import { Parent, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { Parent, PlatformMember } from '@stamhoofd/structures';
 
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { computed } from 'vue';
-import { useAuth } from '../../hooks';
-import { ErrorBox } from '../../errors/ErrorBox';
-import { Validator } from '../../errors/Validator';
-import { useErrors } from '../../errors/useErrors';
-import { useValidation } from '../../errors/useValidation';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { computed } from 'vue';
+import { ErrorBox } from '../../../errors/ErrorBox';
+import { Validator } from '../../../errors/Validator';
+import { useErrors } from '../../../errors/useErrors';
+import { useValidation } from '../../../errors/useValidation';
+import STList from '../../../layout/STList.vue';
+import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditParentView from './EditParentView.vue';
-import STList from '../../layout/STList.vue';
-import { useIsPropertyRequired } from '../hooks/useIsPropertyRequired';
+import Title from './Title.vue';
 
+defineOptions({
+    inheritAttrs: false
+})
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator

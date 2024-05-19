@@ -34,7 +34,7 @@ defineRoutes([
     {
         name: Routes.Group,
         url: Formatter.slug(props.group.settings.name),
-        component: async () => (await import('../GroupView.vue')).default as any,
+        component: async () => (await import('../../GroupView.vue')).default as any,
         paramsToProps() {
             const member = props.member
             const group = props.group

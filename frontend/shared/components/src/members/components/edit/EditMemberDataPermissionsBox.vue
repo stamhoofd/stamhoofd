@@ -1,8 +1,6 @@
 <template>
     <div v-if="isAdmin" class="container">
-        <component :is="level === 1 ? 'h1' : 'h2'">
-            {{ title }}
-        </component>
+        <Title v-bind="$attrs" :title="title" />
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -15,9 +13,7 @@
         </p>
     </div>
     <div v-else class="container">
-        <component :is="level === 1 ? 'h1' : 'h2'">
-            {{ title }}
-        </component>
+        <Title v-bind="$attrs" :title="title" />
         <p class="style-description pre-wrap" v-text="description" />
             
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -32,14 +28,18 @@
 import { BooleanStatus, DataPermissionsSettings, PlatformMember } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import { useAppContext } from '../../context/appContext';
-import { Validator } from '../../errors/Validator';
-import { useErrors } from '../../errors/useErrors';
+import { useAppContext } from '../../../context/appContext';
+import { Validator } from '../../../errors/Validator';
+import { useErrors } from '../../../errors/useErrors';
+import Title from './Title.vue';
+
+defineOptions({
+    inheritAttrs: false
+})
 
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
-    level?: number
 }>();
 
 const errors = useErrors({validator: props.validator});

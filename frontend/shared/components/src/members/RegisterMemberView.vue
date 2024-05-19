@@ -36,14 +36,14 @@ import { ScrollableSegmentedControl, useUninheritedPermissions } from '@stamhoof
 import { GroupCategoryTree, Organization, PlatformMember } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 
-import RegisterMemberGroupRow from './components/RegisterMemberGroupRow.vue';
+import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import SearchMemberOrganizationView from './SearchMemberOrganizationView.vue';
 
 const props = defineProps<{
     member: PlatformMember;
 }>();
 
-const selectedOrganization = ref(props.member.organizations[0] ?? null) as Ref<Organization|null>;
+const selectedOrganization = ref((props.member.organizations[0] ?? null) as any) as Ref<Organization|null>;
 const auth = useUninheritedPermissions({patchedOrganization: selectedOrganization})
 const present = usePresent()
 

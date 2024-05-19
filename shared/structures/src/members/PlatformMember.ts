@@ -61,6 +61,20 @@ export class PlatformFamily {
         }
     }
 
+    newMember(): PlatformMember {
+        const member = new PlatformMember({
+            member: MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({}),
+                users: [],
+                registrations: []
+            }),
+            family: this,
+            isNew: true
+        })
+        this.members.push(member)
+        return member;
+    }
+
     static createSingles(blob: MembersBlob, context: {contextOrganization?: Organization|null, platform: Platform}): PlatformMember[] {
         const memberList: PlatformMember[] = []
 

@@ -1,7 +1,6 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
-        <h1>{{ title }}</h1>
-        <component :is="component" :validator="errors.validator" :member="cloned" v-bind="$attrs" />
+        <component :is="component" :validator="errors.validator" :member="cloned" v-bind="$attrs" :level="1" />
     </SaveView>
 </template>
 
@@ -14,8 +13,8 @@ import { ComponentOptions, Ref, computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { usePlatformFamilyManager } from './PlatformFamilyManager';
 import { NavigationActions } from '../types/NavigationActions';
+import { usePlatformFamilyManager } from './PlatformFamilyManager';
 
 defineOptions({
     inheritAttrs: false
@@ -28,8 +27,11 @@ const props = withDefaults(
         component: ComponentOptions,
         // do not change this
         member: PlatformMember,
+        // Whether the member should be saved to the API
+        doSave?: boolean,
         saveHandler: (navigate: NavigationActions) => Promise<void>|void
     }>(), {
+        doSave: true,
         saveText: 'Opslaan'
     }
 );
@@ -57,11 +59,13 @@ async function save() {
             return;
         }
 
-        console.log("Saving member", cloned.value.family.members, cloned.value);
-        await manager.save(cloned.value.family.members)
-
+        if (props.doSave) {
+            await manager.save(cloned.value.family.members)
+        }
+        
         // Copy over clone
         props.member.family.copyFromClone(cloned.value.family)
+
         await props.saveHandler({
             show, present, dismiss, pop
         });

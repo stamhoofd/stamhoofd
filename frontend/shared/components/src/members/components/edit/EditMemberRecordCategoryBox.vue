@@ -5,12 +5,12 @@
 <script setup lang="ts">
 import { PatchAnswers, PlatformMember, RecordCategory } from '@stamhoofd/structures';
 
-import { Validator } from '../../errors/Validator';
+import { Validator } from '../../../errors/Validator';
 
 import { computed } from 'vue';
-import FillRecordCategoryBox from '../../records/components/FillRecordCategoryBox.vue';
-import { useIsAllOptional } from '../hooks/useIsPropertyRequired';
-import { useAppContext } from '../../context/appContext';
+import FillRecordCategoryBox from '../../../records/components/FillRecordCategoryBox.vue';
+import { useIsAllOptional } from '../../hooks/useIsPropertyRequired';
+import { useAppContext } from '../../../context/appContext';
 
 const props = defineProps<{
     member: PlatformMember,
@@ -18,6 +18,10 @@ const props = defineProps<{
     category: RecordCategory,
     level?: number
 }>();
+
+defineOptions({
+    inheritAttrs: false
+})
 
 const allOptional = useIsAllOptional(computed(() => props.member));
 const app = useAppContext()

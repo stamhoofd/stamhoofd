@@ -1,5 +1,7 @@
 <template>
-    <div>
+    <div class="container">
+        <Title v-bind="$attrs" :title="title" />
+
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
@@ -16,7 +18,7 @@
 
                 <BirthDayInput v-if="member.isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
 
-                <STInputBox v-if="member.isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
+                <STInputBox v-if="!member.isNew && member.isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
                     <RadioGroup>
                         <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
                             Man
@@ -31,7 +33,7 @@
                 </STInputBox>
             </div>
 
-            <div>
+            <div v-if="!member.isNew">
                 <AddressInput v-if="member.isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
                 <EmailInput v-if="member.isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
                 <PhoneInput v-if="member.isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
@@ -45,24 +47,36 @@ import { PlatformMember } from '@stamhoofd/structures';
 
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { computed } from 'vue';
-import { ErrorBox } from '../../errors/ErrorBox';
-import { Validator } from '../../errors/Validator';
-import { useErrors } from '../../errors/useErrors';
-import { useValidation } from '../../errors/useValidation';
-import AddressInput from '../../inputs/AddressInput.vue';
-import BirthDayInput from '../../inputs/BirthDayInput.vue';
-import EmailInput from '../../inputs/EmailInput.vue';
-import PhoneInput from '../../inputs/PhoneInput.vue';
-import RadioGroup from '../../inputs/RadioGroup.vue';
-import { useIsPropertyRequired } from '../hooks/useIsPropertyRequired';
+import { ErrorBox } from '../../../errors/ErrorBox';
+import { Validator } from '../../../errors/Validator';
+import { useErrors } from '../../../errors/useErrors';
+import { useValidation } from '../../../errors/useValidation';
+import AddressInput from '../../../inputs/AddressInput.vue';
+import BirthDayInput from '../../../inputs/BirthDayInput.vue';
+import EmailInput from '../../../inputs/EmailInput.vue';
+import PhoneInput from '../../../inputs/PhoneInput.vue';
+import RadioGroup from '../../../inputs/RadioGroup.vue';
+import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
+import Title from './Title.vue';
+
+defineOptions({
+    inheritAttrs: false
+})
 
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator
-}>();
+}>()
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const errors = useErrors({validator: props.validator});
+
+const title = computed(() => {
+    if (props.member.isNew) {
+        return "Nieuw lid"
+    }
+    return "Algemeen"
+})
 
 useValidation(errors.validator, () => {
     const se = new SimpleErrors()

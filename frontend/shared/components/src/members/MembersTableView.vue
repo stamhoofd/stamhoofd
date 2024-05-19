@@ -19,12 +19,13 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, ModernTableView, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useContext, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
 import { useTranslate } from "@stamhoofd/frontend-i18n";
+import RegisterMemberView from "./RegisterMemberView.vue";
 
 type ObjectType = PlatformMember;
 
@@ -46,6 +47,9 @@ const present = usePresent();
 const app = useAppContext();
 const $t = useTranslate();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
+const auth = useAuth();
+const organization = useOrganization();
+const platform = usePlatform()
 
 function extendSort(list: SortList): SortList  {
     if (list.find(l => l.key === 'id')) {
@@ -168,293 +172,42 @@ async function showMember(member: PlatformMember) {
 
 const actions: TableAction<PlatformMember>[] = [
     new TableAction({
-        name: "E-mailen",
-        icon: "email",
-        priority: 10,
-        groupIndex: 1,
-        handler: (members: ObjectType[]) => {
-            //this.openMail(members)
-        }
-    }),
-
-    new TableAction({
-        name: "Exporteren naar Excel",
-        icon: "download",
-        priority: 10,
-        groupIndex: 1,
-        handler: async (members: ObjectType[]) => {
-            //await this.exportToExcel(members)
-        }
-    }),
-
-    new TableAction({
-        name: "Bekijken",
-        icon: "eye",
+        name: "Nieuw lid",
+        icon: "add",
         priority: 0,
         groupIndex: 1,
-        needsSelection: true,
-        singleSelection: true,
-        handler: (members: ObjectType[]) => {
-            //this.showMember(members[0])
-        }
-    })
-]
+        needsSelection: false,
+        enabled: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value) : auth.permissions?.hasWriteAccess()) && !props.waitingList,
+        handler: async () => {
+            const family = new PlatformFamily({
+                contextOrganization: organization.value,
+                platform: platform.value
+            })
+            const member = family.newMember()
 
-// @Component({
-//     components: {
-//         ModernTableView
-//     }
-// })
-// export default class MembersView extends Mixins(NavigationMixin) {
-//     members: MemberSummary[] = [];
-//     tableObjectFetcher = new TableObjectFetcher({
-//         objectFetcher: new MemberFetcher()
-//     })
-//     UIFilterBuilders = memberUIFilterBuilders
-// 
-//     showMember(member: MemberSummary) {
-//         console.log("show", member)
-//         this.present(new ComponentWithProperties(MemberView, { member: member }).setDisplayStyle("popup"))
-//     }
-// 
-//     get actions(): TableAction<MemberSummary>[] {
-//         return [
-//             new TableAction({
-//                 name: "E-mailen",
-//                 icon: "email",
-//                 priority: 10,
-//                 groupIndex: 1,
-//                 handler: (members: MemberSummary[]) => {
-//                     this.openMail(members)
-//                 }
-//             }),
-// 
-//             new TableAction({
-//                 name: "Exporteren naar Excel",
-//                 icon: "download",
-//                 priority: 10,
-//                 groupIndex: 1,
-//                 handler: async (members: MemberSummary[]) => {
-//                     await this.exportToExcel(members)
-//                 }
-//             }),
-// 
-//             new TableAction({
-//                 name: "Bekijken",
-//                 icon: "eye",
-//                 priority: 0,
-//                 groupIndex: 1,
-//                 needsSelection: true,
-//                 singleSelection: true,
-//                 handler: (members: MemberSummary[]) => {
-//                     this.showMember(members[0])
-//                 }
-//             })
-//         ]
-//     }
-// 
-//     allColumns = ((): Column<MemberSummary, any>[] => {
-//         const cols: Column<MemberSummary, any>[] = [
-//             new Column<MemberSummary, string>({
-//                 id: 'name',
-//                 name: "Naam", 
-//                 getValue: (member) => member.firstName + " " + member.lastName,
-//                 compare: (a, b) => Sorter.byStringValue(a, b),
-//                 minimumWidth: 100,
-//                 recommendedWidth: 200,
-//                 grow: true
-//             }),
-//             new Column<MemberSummary, Date | null>({
-//                 id: 'birthDay',
-//                 name: "Geboortedatum", 
-//                 getValue: (member) => member.birthDay, 
-//                 compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900), a ?? new Date(1900)),
-//                 format: (date) => date ? Formatter.dateNumber(date, true) : '',
-//                 minimumWidth: 50,
-//                 recommendedWidth: 150,
-//             }),
-//             new Column<MemberSummary, string>({
-//                 id: 'organizationName',
-//                 name: "Vereniging", 
-//                 getValue: (member) => member.organizationName, 
-//                 compare: (a, b) => Sorter.byStringValue(a, b),
-//                 minimumWidth: 100,
-//                 recommendedWidth: 400
-//             }),
-//             new Column<MemberSummary, string>({
-//                 id: 'email',
-//                 name: "E-mailadres", 
-//                 getValue: (member) => member.email ?? '', 
-//                 compare: (a, b) => Sorter.byStringValue(a, b),
-//                 minimumWidth: 100,
-//                 recommendedWidth: 200,
-//                 enabled: false
-//             }),
-//             new Column<MemberSummary, string>({
-//                 id: 'parent-0-email',
-//                 name: "E-mailadres ouder 1", 
-//                 getValue: (member) => member.parents[0]?.email ?? '', 
-//                 compare: (a, b) => Sorter.byStringValue(a, b),
-//                 minimumWidth: 100,
-//                 recommendedWidth: 200,
-//                 enabled: false
-//             }),
-//             new Column<MemberSummary, Address | null>({
-//                 name: "Adres 1", 
-//                 getValue: (member) => member.addresses[0] ?? null, 
-//                 compare: (a, b) => Sorter.stack(Sorter.byStringValue(a?.city ?? "", b?.city ?? ""), Sorter.byStringValue(a?.street ?? "", b?.street ?? ""), Sorter.byStringValue(a?.number ?? "", b?.number ?? "")),
-//                 format: (address) => address?.toString() ?? "",
-//                 minimumWidth: 100,
-//                 recommendedWidth: 200,
-//                 enabled: false
-//             }),
-//             new Column<MemberSummary, Address | null>({
-//                 name: "Adres 2", 
-//                 getValue: (member) => member.addresses[1] ?? null, 
-//                 compare: (a, b) => Sorter.stack(Sorter.byStringValue(a?.city ?? "", b?.city ?? ""), Sorter.byStringValue(a?.street ?? "", b?.street ?? ""), Sorter.byStringValue(a?.number ?? "", b?.number ?? "")),
-//                 format: (address) => address?.toString() ?? "",
-//                 minimumWidth: 100,
-//                 recommendedWidth: 200,
-//                 enabled: false
-//             }),
-//         ]
-//         return cols
-//     })()
-// 
-//     get prefixColumn() {
-//         // Needs to stay the same reference to enable disable/enable functionality
-//         return null
-//     }
-// 
-//     /*get filterDefinitions(): FilterDefinition<MemberSummary, Filter<MemberSummary>, any>[] {
-//         const definitions: FilterDefinition<MemberSummary, Filter<MemberSummary>, any>[] = [
-//             new StringFilterDefinition<MemberSummary>({
-//                 id: "member_organization", 
-//                 name: "Naam vereniging", 
-//                 getValue: (member) => {
-//                     return member.organizationName
-//                 }
-//             }),
-//             new StringFilterDefinition<MemberSummary>({
-//                 id: "member_name", 
-//                 name: "Naam lid", 
-//                 getValue: (member) => {
-//                     return member.firstName + " " + member.lastName
-//                 }
-//             }),
-//             new NumberFilterDefinition<MemberSummary>({
-//                 id: "member_age", 
-//                 name: "Leeftijd", 
-//                 getValue: (member) => {
-//                     return member.age ?? 99
-//                 },
-//                 floatingPoint: false
-//             }),
-//             new DateFilterDefinition<MemberSummary>({
-//                 id: "member_birthDay", 
-//                 name: "Geboortedatum", 
-//                 getValue: (member) => {
-//                     return member.birthDay ?? new Date(1900, 0, 1)
-//                 },
-//                 time: false
-//             }),
-//             new StringFilterDefinition<MemberSummary>({
-//                 id: "member_city", 
-//                 name: "Gemeente", 
-//                 description: "Gemeente van het eerste adres van het lid",
-//                 getValue: (member) => {
-//                     return member.addresses[0]?.city ?? ""
-//                 }
-//             }),
-//             new ChoicesFilterDefinition<MemberSummary>({
-//                 id: "gender", 
-//                 name: "Geslacht", 
-//                 choices: [
-//                     new ChoicesFilterChoice(Gender.Male, "Man"),
-//                     new ChoicesFilterChoice(Gender.Female, "Vrouw"),
-//                     new ChoicesFilterChoice(Gender.Other, "Andere"),
-//                 ], 
-//                 getValue: (member) => {
-//                     return [member.gender]
-//                 },
-//                 defaultMode: ChoicesFilterMode.Or
-//             }),
-// 
-//             new ChoicesFilterDefinition<MemberSummary>({
-//                 id: "member_missing_data", 
-//                 name: "Ontbrekende gegevens", 
-//                 description: "Toon leden als één van de geselecteerde gegevens ontbreekt of niet is ingevuld.",
-//                 choices: [
-//                     new ChoicesFilterChoice("birthDay", "Geboortedatum"),
-//                     new ChoicesFilterChoice("address", "Adres", "Van lid zelf"),
-//                     new ChoicesFilterChoice("phone", "Telefoonnummer", "Van lid zelf"),
-//                     new ChoicesFilterChoice("email", "E-mailadres", "Van lid zelf"),
-//                     new ChoicesFilterChoice("parents", "Ouders"),
-//                     new ChoicesFilterChoice("secondParent", "Tweede ouder", "Als er maar één ouder is toegevoegd aan een lid. Handig om te selecteren op een eenoudergezin."),
-//                 ], 
-//                 getValue: (member) => {
-//                     const missing: string[] = []
-//                     if (!member.birthDay) {
-//                         missing.push("birthDay")
-//                     }
-// 
-//                     if (!member.address) {
-//                         missing.push("address")
-//                     }
-// 
-//                     if (!member.phone) {
-//                         missing.push("phone")
-//                     }
-// 
-//                     if (!member.email) {
-//                         missing.push("email")
-//                     }
-// 
-//                     if (member.parents.length == 0) {
-//                         missing.push("parents")
-//                     }
-// 
-//                     if (member.parents.length == 1) {
-//                         missing.push("secondParent")
-//                     }
-// 
-//                     return missing
-//                 },
-//                 defaultMode: ChoicesFilterMode.Or
-//             })
-//         ];
-// 
-//         return definitions
-//     }*/
-// 
-//     get title() {
-//         return "Leden"
-//     }
-// 
-//     async exportToExcel(members: MemberSummary[]) {
-//         const displayedComponent = new ComponentWithProperties(NavigationController, {
-//             root: await LoadComponent(() => import(/* webpackChunkName: "AdminMemberExcelBuilderView"*/ './MemberExcelBuilderView.vue'), {
-//                 members
-//             })
-//         });
-//         this.present(displayedComponent.setDisplayStyle("popup"));
-//     }
-// 
-//     openMail(members: MemberSummary[]) {
-//         const emails = members.flatMap(member => {
-//             return member.emailRecipients
-//         })
-//         
-//         const displayedComponent = new ComponentWithProperties(NavigationController, {
-//             root: new ComponentWithProperties(MailView, {
-//                 members: members,
-//                 otherRecipients: emails,
-//                 defaultSubject: "",
-//                 defaultReplacements: []
-//             })
-//         });
-//         this.present(displayedComponent.setDisplayStyle("popup"));
-//     }
-// }
-// 
+            const component = new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(MemberStepView, {
+                    title: 'Nieuw lid',
+                    member,
+                    component: EditMemberGeneralBox,
+                    doSave: false,
+                    saveHandler: async (navigate: NavigationActions) => {
+                        await navigate.show({
+                            components: [
+                                new ComponentWithProperties(RegisterMemberView, {
+                                    member
+                                })
+                            ]
+                        })
+                    }
+                }),
+            });
+
+            await present({
+                components: [component],
+                modalDisplayStyle: "popup"
+            });
+        }
+    }),
+]
 </script>

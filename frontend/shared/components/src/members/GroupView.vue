@@ -77,7 +77,6 @@ import { Group, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
-
 const props = defineProps<{
     group: Group,
     member: PlatformMember
