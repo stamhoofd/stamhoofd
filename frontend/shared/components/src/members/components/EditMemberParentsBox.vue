@@ -1,5 +1,7 @@
 <template>
     <div>
+        <STErrorsDefault :error-box="errors.errorBox" />
+        
         <p v-if="visibleParents.length === 0" class="info-box">
             Nog geen ouders toegevoegd. Voeg een ouder van {{ member.patchedMember.details.firstName }} toe via de knop hieronder.
         </p>

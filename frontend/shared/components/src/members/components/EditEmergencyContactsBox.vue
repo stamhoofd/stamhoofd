@@ -4,6 +4,8 @@
             Voeg geen ouders toe als noodcontactpersoon. Ouders worden altijd als eerste gecontacteerd in geval van nood.
         </p>
 
+        <STErrorsDefault :error-box="errors.errorBox" />
+
         <p v-if="visibleContacts.length === 0" class="info-box">
             Er zijn nog geen noodcontactpersonen toegevoegd. Voeg een noodcontact van {{ member.patchedMember.details.firstName }} toe via de knop hieronder.
         </p>
