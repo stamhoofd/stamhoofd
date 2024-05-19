@@ -292,12 +292,12 @@ const membersWithNewRegistrations = computed(() => {
     })
 });
 
-const needsPaidStatus = computed(() => Boolean(membersWithNewRegistrations.value.find(m => m.registration.paid === null && m.registration.paidPrice === null)));
-const somePaid = computed(() => Boolean(membersWithNewRegistrations.value.find(m => m.registration.paid !== null || m.registration.paidPrice !== null)));
+const needsPaidStatus = computed(() => !!membersWithNewRegistrations.value.find(m => m.registration.paid === null && m.registration.paidPrice === null));
+const somePaid = computed(() => !!membersWithNewRegistrations.value.find(m => m.registration.paid !== null || m.registration.paidPrice !== null));
 const membersNeedingAssignment = computed(() => $members.value.filter(m => shouldAssignRegistrationToMember(m)));
 const needsGroupAssignment = computed(() => membersNeedingAssignment.value.length > 0);
 const existingCount = computed(() => $members.value.filter(m => m.equal !== null).length);
-const hasWaitingLists = computed(() => Boolean(organization.value.groups.find(g => g.hasWaitingList())));
+const hasWaitingLists = computed(() => !!organization.value.groups.find(g => g.hasWaitingList()));
 const deletedRegistrationsCount = computed(() => membersWithNewRegistrations.value.reduce((acc, m) => {
     const registration = buildRegistration(m)
     if (!registration) {
