@@ -2,6 +2,9 @@
     <div class="container">
         <component :is="level === 1 ? 'h1' : 'h2'">
             {{ category.name }}
+            <span v-if="titleSuffix" class="title-suffix">
+                {{ titleSuffix }}
+            </span>
         </component>
         <p v-if="category.description" class="style-description-block pre-wrap" v-text="category.description" />
 
@@ -51,7 +54,8 @@ const props = withDefaults(
         value: T,
         validator: Validator
         level?: number,
-        allOptional?: boolean
+        allOptional?: boolean,
+        titleSuffix?: string
     }>(), {
         level: 1,
         allOptional: false

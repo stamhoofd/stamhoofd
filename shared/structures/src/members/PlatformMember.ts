@@ -535,11 +535,12 @@ export class PlatformMember implements ObjectWithRecords {
     getAllRecordCategories(): RecordCategory[] {
         // From organization
         const categories: RecordCategory[] = [];
+        categories.push(...this.platform.config.recordsConfiguration.recordCategories)
+
         for (const organization of this.organizations) {
             categories.push(...organization.meta.recordsConfiguration.recordCategories)
         }
 
-        categories.push(...this.platform.config.recordsConfiguration.recordCategories)
         return categories;
     }
 
@@ -549,7 +550,7 @@ export class PlatformMember implements ObjectWithRecords {
         const inheritedFilters = new Map<string, PropertyFilter[]>()
 
         for (const organization of this.organizations) {
-            categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => r.defaultEnabled && r.isEnabled(this)))
+            categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => r.isEnabled(this)))
 
             // Any optional categories from the platform that have been enabled?
             for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
@@ -559,11 +560,11 @@ export class PlatformMember implements ObjectWithRecords {
 
         // All required categories of the platform
         for (const category of this.platform.config.recordsConfiguration.recordCategories) {
-            if (category.defaultEnabled && category.isEnabled(this)) {
+            if (category.isEnabled(this)) {
                 categories.push(category)
             } else {
                 const filters = inheritedFilters.get(category.id)
-                if (filters) {
+                if (filters && category.isEnabled(this, true)) {
                     if (filters.find(f => f.isEnabled(this))) {
                         categories.push(category)
                     }

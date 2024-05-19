@@ -68,9 +68,14 @@ export class RecordCategory extends AutoEncoder {
         return this.records.filter(r => filterValue.isRecordEnabled(r))
     }
 
-    isEnabled<T extends ObjectWithRecords>(filterValue: T) {
-        if (this.filter && this.filter.isEnabled(filterValue)) {
-            return false
+    isEnabled<T extends ObjectWithRecords>(filterValue: T, ignoreFilter = false) {
+        if (!ignoreFilter) {
+            if (!this.defaultEnabled) {
+                return false;
+            }
+            if (this.filter && !this.filter.isEnabled(filterValue)) {
+                return false;
+            }
         }
 
         if (this.childCategories.length > 0) {
