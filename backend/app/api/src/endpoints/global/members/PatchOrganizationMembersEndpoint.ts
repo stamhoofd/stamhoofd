@@ -6,7 +6,7 @@ import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory
 import { BalanceItemStatus, MemberWithRegistrationsBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -34,27 +34,60 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
-        } 
+        if (organization) {
+            if (!await Context.auth.hasSomeAccess(organization.id)) {
+                throw Context.auth.error()
+            } 
+        } else {
+            if (!Context.auth.hasSomePlatformAccess()) {
+                throw Context.auth.error()
+            } 
+        }
 
         const members: MemberWithRegistrations[] = []
-        const groups = await Context.auth.getOrganizationGroups(organization.id) // allows to reuse it when checking permissions
+
+        // Cache
+        const groups: Group[] = []
+        
+        async function getGroup(id: string) {
+            const f = groups.find(g => g.id === id)
+            if (f) {
+                return f
+            }
+            const group = await Group.getByID(id)
+            if (group) {
+                groups.push(group)
+                return group
+            }
+            return null
+        }
         const updateGroups = new Map<string, Group>()
 
         const balanceItemMemberIds: string[] = []
-        const balanceItemRegistrationIds: string[] = []
+        const balanceItemRegistrationIdsPerOrganization: Map<string, string[]> = new Map()
+
+        function addBalanceItemRegistrationId(organizationId: string, registrationId: string) {
+            const existing = balanceItemRegistrationIdsPerOrganization.get(organizationId);
+            if (existing) {
+                existing.push(registrationId)
+                return;
+            }
+            balanceItemRegistrationIdsPerOrganization.set(organizationId, [registrationId])
+        }
 
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
             const struct = put.put
             let member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
             member.id = struct.id
-            member.organizationId = organization.id
+
+            if (organization && STAMHOOFD.userMode !== 'platform') {
+                member.organizationId = organization.id
+            }
 
             struct.details.cleanData()
             member.details = struct.details
@@ -77,27 +110,38 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
 
+            // Throw early
             for (const registrationStruct of struct.registrations) {
-                const group = groups.find(g => g.id === registrationStruct.groupId)
-                if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                const group = await getGroup(registrationStruct.groupId)
+                if (!group || group.organizationId !== registrationStruct.organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                     throw Context.auth.notFoundOrNoAccess("Je hebt niet voldoende rechten om leden toe te voegen in deze groep")
                 }
 
-                // Update occupancy at the end of the call
-                updateGroups.set(group.id, group)
+                // Set organization id of member based on registrations
+                if (!organization && STAMHOOFD.userMode !== 'platform' && !member.organizationId) {
+                    member.organizationId = group.organizationId
+                }
             }
 
+            if (STAMHOOFD.userMode !== 'platform' && !member.organizationId) {
+                throw new SimpleError({
+                    code: "missing_organization",
+                    message: "Missing organization",
+                    human: "Je moet een organisatie selecteren voor dit lid",
+                    statusCode: 400
+                })
+            }
 
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
-            if (STAMHOOFD.environment == "development" || STAMHOOFD.environment == "staging") {
+            if ((STAMHOOFD.environment == "development" || STAMHOOFD.environment == "staging") && organization) {
                 if (member.details.firstName.toLocaleLowerCase() == "create" && parseInt(member.details.lastName) > 0) {
                     const count = parseInt(member.details.lastName);
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
-                        const g = groups.find(g => g.id === registrationStruct.groupId)
+                        const g = await getGroup(registrationStruct.groupId)
                         if (g) {
                             group = g
                         }
@@ -108,27 +152,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     // Skip creating this member
                     continue;
                 }
-
-                if (member.details.firstName == "clear" || member.details.firstName == "Clear") {
-                    let group = groups[0];
-
-                    for (const registrationStruct of struct.registrations) {
-                        const g = groups.find(g => g.id === registrationStruct.groupId)
-                        if (g) {
-                            group = g
-                        }
-                    }
-
-                    // Delete all members of this group
-                    const groupMembers = await group.getMembersWithRegistration()
-
-                    for (const m of groupMembers) {
-                        await User.deleteForDeletedMember(m.id)
-                        await m.delete()
-                    }
-            
-                    continue;
-                }
             }
 
             await member.save()
@@ -137,8 +160,16 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                const reg = await this.addRegistration(member, registrationStruct, groups)
-                balanceItemRegistrationIds.push(reg.id)
+                const group = await getGroup(registrationStruct.groupId)
+                if (!group || group.organizationId !== registrationStruct.organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                    throw Context.auth.notFoundOrNoAccess("Je hebt niet voldoende rechten om leden toe te voegen in deze groep")
+                }
+
+                const reg = await this.addRegistration(member, registrationStruct, group)
+                addBalanceItemRegistrationId(reg.organizationId, reg.id)
+
+                // Update occupancy at the end of the call
+                updateGroups.set(group.id, group)
             }
 
             // Add users if they don't exist (only placeholders allowed)
@@ -175,23 +206,24 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 let group: Group | null = null
+                
 
                 if (patchRegistration.groupId) {
-                    group = groups.find(g => g.id == patchRegistration.groupId) ?? null
+                    group = await getGroup(patchRegistration.groupId)
                     if (group) {
                         // We need to update group occupancy because we moved a member to it
                         updateGroups.set(group.id, group)
                     }
-                    const oldGroup = groups.find(g => g.id == registration.groupId) ?? null
+                    const oldGroup = await getGroup(registration.groupId)
                     if (oldGroup) {
                         // We need to update this group occupancy because we moved one member away from it
                         updateGroups.set(oldGroup.id, oldGroup)
                     }
                 } else {
-                    group = groups.find(g => g.id == registration.groupId) ?? null
+                    group = await getGroup(registration.groupId)
                 }
 
-                if (!group) {
+                if (!group || group.organizationId !== (patchRegistration.organizationId ?? registration.organizationId)) {
                     throw new SimpleError({
                         code: "invalid_field",
                         message: "Group doesn't exist",
@@ -225,6 +257,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
                 registration.cycle = patchRegistration.cycle ?? registration.cycle
                 registration.groupId = patchRegistration.groupId ?? registration.groupId
+                registration.organizationId = patchRegistration.organizationId ?? registration.organizationId
 
                 // Check if we should create a placeholder payment?
 
@@ -246,7 +279,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     balanceItem.status = BalanceItemStatus.Pending;
                     await balanceItem.save();
 
-                    balanceItemRegistrationIds.push(registration.id)
+                    addBalanceItemRegistrationId(registration.organizationId, registration.id)
                     balanceItemMemberIds.push(member.id)
 
                     if (balanceItem.pricePaid > 0) {
@@ -292,7 +325,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 await registration.delete()
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
 
-                const oldGroup = groups.find(g => g.id == registration.groupId) ?? null
+                const oldGroup = await getGroup(registration.groupId)
                 if (oldGroup) {
                     // We need to update this group occupancy because we moved one member away from it
                     updateGroups.set(oldGroup.id, oldGroup)
@@ -302,15 +335,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Add registrations
             for (const registrationStruct of patch.registrations.getPuts()) {
                 const struct = registrationStruct.put
-                const group = groups.find(g => g.id === struct.groupId)
+                const group = await getGroup(struct.groupId)
 
-                if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                if (!group || group.organizationId !== struct.organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om inschrijvingen in deze groep te maken")
                 }
 
-                const reg = await this.addRegistration(member, struct, groups)
+                const reg = await this.addRegistration(member, struct, group)
                 balanceItemMemberIds.push(member.id)
-                balanceItemRegistrationIds.push(reg.id)
+                addBalanceItemRegistrationId(reg.organizationId, reg.id)
 
                 // We need to update this group occupancy because we moved one member away from it
                 updateGroups.set(group.id, group)
@@ -345,7 +378,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Update occupancy of this member because we removed registrations
             const groupIds = member.registrations.flatMap(r => r.groupId)
             for (const id of groupIds) {
-                const group = groups.find(g => g.id == id) ?? null
+                const group = await getGroup(id)
                 if (group) {
                     // We need to update this group occupancy because we moved one member away from it
                     updateGroups.set(group.id, group)
@@ -354,7 +387,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
-        await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds), organization.id)
+        for (const [organizationId, balanceItemRegistrationIds] of balanceItemRegistrationIdsPerOrganization) {
+            await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds), organizationId)
+        }
         
         // Loop all groups and update occupancy if needed
         for (const group of updateGroups.values()) {
@@ -400,7 +435,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    async addRegistration(member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, groups: Group[]) {
+    async addRegistration(member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, group: Group) {
         // Check if this member has this registration already.
         // Note: we cannot use the relation here, because invalid ones or reserved ones are not loaded in there
         const existings = await Registration.where({ 
@@ -422,7 +457,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 field: "groupId"
             });
         }
-        const group = groups.find(g => g.id === registrationStruct.groupId)
 
         if (!group) {
             throw new SimpleError({

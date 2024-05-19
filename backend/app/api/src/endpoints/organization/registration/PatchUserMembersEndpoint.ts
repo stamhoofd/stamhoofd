@@ -5,7 +5,7 @@ import { Document, Member } from '@stamhoofd/models';
 import { MemberWithRegistrationsBlob, User as UserStruct } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
-import { PatchOrganizationMembersEndpoint } from '../dashboard/members/PatchOrganizationMembersEndpoint';
+import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
