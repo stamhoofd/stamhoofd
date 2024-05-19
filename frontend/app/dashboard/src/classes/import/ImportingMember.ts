@@ -119,7 +119,7 @@ export class ImportingMember {
 
                 try {
                     await column.matcher.apply(valueCell, member)
-                } catch (e) {
+                } catch (e: any) {
                     console.error(e);
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         errorStack.push(new ImportError(row, column.index, e.getHuman()))

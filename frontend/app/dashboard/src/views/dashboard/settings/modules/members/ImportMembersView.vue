@@ -5,12 +5,18 @@
         <main>
             <h1>Leden importeren</h1>
             <p>
-                Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.
+                Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen
+                aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft
+                en koppel hieronder de kolom met een waarde in Stamhoofd.
             </p>
 
             <p v-if="!hasMembers" class="warning-box">
-                <span>Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.
-                    <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">Meer info</a>
+                <span>Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan
+                    raden we af om eerst alle leden te importeren.
+                    <a
+                        :href="'https://' + $t('shared.domains.marketing') + '/docs/waarom-je-leden-beter-niet-importeert/'"
+                        class="inline-link" target="_blank"
+                    >Meer info</a>
                 </span>
             </p>
             <STErrorsDefault :error-box="errorBox" />
@@ -34,7 +40,11 @@
                         {{ rowCount }} rijen, {{ columnCount }} kolommen
                     </p>
                 </div>
-                <input type="file" multiple="multiple" style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
+                <input
+                    type="file" multiple style="display: none;"
+                    accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    @change="changedFile"
+                >
                 <span v-if="file" class="icon sync gray" />
             </label>
 
@@ -64,7 +74,10 @@
                 <tbody>
                     <tr v-for="column in columns" :key="column.name">
                         <td>
-                            <Checkbox :model-value="getColumnSelected(column)" @update:model-value="setColumnSelected(column, $event)">
+                            <Checkbox
+                                :model-value="getColumnSelected(column)"
+                                @update:model-value="setColumnSelected(column, $event)"
+                            >
                                 <h2 class="style-title-list">
                                     {{ column.name }}
                                 </h2>
@@ -88,9 +101,13 @@
                     </tr>
                 </tbody>
             </table>
-            
+
             <p v-if="file && columns.length > 0" class="warning-box">
-                Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.
+                Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met
+                zekerheid
+                detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren
+                i.p.v. een
+                nieuw lid aan te maken.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -99,7 +116,10 @@
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="saving">
-                    <button class="button primary" :disabled="!file || columns.length == 0 || rowCount === 0" type="button" @click="goNext">
+                    <button
+                        class="button primary" :disabled="!file || columns.length == 0 || rowCount === 0"
+                        type="button" @click="goNext"
+                    >
                         Volgende
                     </button>
                 </LoadingButton>
@@ -108,396 +128,378 @@
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Vue } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
+import { ComponentWithProperties, NavigationMixin, useShow } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useOrganization } from "@stamhoofd/components";
+import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordDateAnswer, RecordSettings, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
 import XLSX from "xlsx";
-
 import { allMatchers } from "../../../../../classes/import/defaultMatchers";
 import { ImportingMember } from "../../../../../classes/import/ImportingMember";
 import { MatchedColumn } from "../../../../../classes/import/MatchedColumn";
 import { MatcherCategory } from '../../../../../classes/import/MatcherCategory';
-import { AddressColumnMatcher, DateColumnMatcher,TextColumnMatcher } from "../../../../../classes/import/matchers";
+import { AddressColumnMatcher, DateColumnMatcher, TextColumnMatcher } from "../../../../../classes/import/matchers";
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
+import { onMounted, ref, computed, Ref } from 'vue'
+import { useLegacyMemberManager } from '@stamhoofd/registration';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        BackButton,
-        LoadingButton,
-        Dropdown
-    },
-})
-export default class ImportMembersView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
-    file: null | string = null
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
+const organization = useOrganization();
+const memberManager = useLegacyMemberManager();
+const show = useShow();
+const errorBox: Ref<ErrorBox | null> = ref(null);
+const saving = ref(false);
+const file = ref<string | null>(null);
+const organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
 
-    rowCount = 0
-    columnCount = 0
+let rowCount = 0
+let columnCount = 0
 
-    sheets: Record<string, XLSX.WorkSheet> = {}
-    internalSheetKey: string | null = null
+const sheets = ref<Record<string, XLSX.WorkSheet>>({});
+const internalSheetKey = ref<string | null>(null);
 
-    matchers = allMatchers.slice()
-    columns: MatchedColumn[] = []
+const matchers = ref<typeof allMatchers>(allMatchers.slice());
+const columns = ref<MatchedColumn[]>([]);
 
-    created() {
-        this.organizationPatch.id = this.$organization.id
+//#region created
+/**
+* Because setup is run around the beforeCreate and created lifecycle hooks, you do not need to explicitly define them
+*/
+if (organization.value !== null)
+    organizationPatch.id = organization.value.id;
+//#endregion
+
+const sheetKey = computed<string | null>(() => internalSheetKey.value);
+
+const sheet = computed(() => {
+    const key = sheetKey.value;
+    if (!key) {
+        return null
+    }
+    return sheets.value[key] ?? null;
+});
+
+function setSheetKey(key: string | null) {
+    if (key === null) {
+        internalSheetKey.value = null
+        columns.value = []
+        rowCount = 0
+        columnCount = 0
+        return
     }
 
-    mounted() {
-        this.matchers = allMatchers.slice()
+    const sheet = sheets.value[key]
+    if (!sheet) {
+        return
+    }
 
-        // If parents are disabled, remove all parent categories
-        if (this.organization.meta.recordsConfiguration.parents === null) {
-            this.matchers = this.matchers.filter(m => m.category !== MatcherCategory.Parent1 && m.category !== MatcherCategory.Parent2)
+    if (!sheet['!ref']) {
+        throw new Error("Missing ref in sheet")
+    }
+    const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
+    rowCount = range.e.r + 1
+    columnCount = range.e.c + 1
+    internalSheetKey.value = key
+    readColumns()
+}
+
+const sheetSelectionList = computed(() => Object.keys(sheets.value));
+const hasMembers = computed(() => {
+    const organizationValue = organization.value;
+    if (organizationValue === null) return false;
+    const packages = organizationValue.meta.packages;
+    const count = organizationValue.adminCategoryTree.getMemberCount({})
+    return packages.useMembers && packages.isMembersTrial && count !== null && count > 30
+});
+
+const matcherCategories = computed(() => {
+    const arr: Record<string, { name: string, matchers: (typeof allMatchers) }> = {}
+    for (const m of matchers.value) {
+        const matcher = m as typeof allMatchers[0];
+        const cat = matcher.category.toLowerCase()
+        if (arr[cat]) {
+            arr[cat].matchers.push(matcher)
+        } else {
+            arr[cat] = {
+                name: matcher.category,
+                matchers: [matcher]
+            }
         }
+    }
+    return Object.values(arr)
+});
 
-        // Include all custom fields
-        for (const category of this.organization.meta.recordsConfiguration.recordCategories) {
-            for (const record of category.getAllRecords()) {
-                switch (record.type) {
-                    case RecordType.Textarea:
-                    case RecordType.Phone: 
-                    case RecordType.Email: 
-                    case RecordType.Text: {
-                        this.matchers.push(new TextColumnMatcher({
-                            name: record.name,
-                            category: category.name,
-                            required: false,
-                            save(value: string, member: ImportingMember) {
-                                if (!value) {
-                                    return;
-                                }
 
-                                const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
-                                if (index !== -1) {
-                                    member.details.recordAnswers.splice(index, 1)
-                                }
+type RecordAnswerType<R> = R extends RecordAddressAnswer ? typeof RecordAddressAnswer : R extends RecordTextAnswer ? typeof RecordTextAnswer : R extends RecordDateAnswer ? typeof RecordDateAnswer : never;
+type RecordAnswerChild = RecordAddressAnswer | RecordTextAnswer | RecordDateAnswer;
 
-                                const answer = RecordTextAnswer.create({
-                                    settings: record
-                                })
-                                answer.value = value
-                                member.details.recordAnswers.push(answer);
-                            }
-                        }));
-                        break;
-                    }
-                    case RecordType.Address: {
-                        this.matchers.push(new AddressColumnMatcher({
-                            name: record.name,
-                            category: category.name,
-                            required: false,
-                            save(value: Address, member: ImportingMember) {
-                                if (!value) {
-                                    return;
-                                }
+function saveRecordAnswerValue<R extends RecordAnswerChild, P extends keyof R>(
+    recordAnswer: RecordAnswerType<R>,
+    member: ImportingMember,
+    record: RecordSettings,
+    property: P,
+    value: R[P] | null | undefined) {
+    if (value === null || value === undefined) {
+        console.error(`Update failed: value is ${typeof value}.`);
+        return;
+    }
 
-                                const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
-                                if (index !== -1) {
-                                    member.details.recordAnswers.splice(index, 1)
-                                }
+    const answer = recordAnswer.create({
+        settings: record
+    }) as R;
 
-                                const answer = RecordAddressAnswer.create({
-                                    settings: record
-                                })
-                                answer.address = value
-                                member.details.recordAnswers.push(answer);
-                            }
-                        }));
-                        break;
-                    }
-                    case RecordType.Date: {
-                        this.matchers.push(new DateColumnMatcher({
-                            name: record.name,
-                            category: category.name,
-                            required: false,
-                            save(value: Date, member: ImportingMember) {
-                                if (!value) {
-                                    return;
-                                }
-                                console.log(value)
+    answer[property] = value;
+    member.details.recordAnswers.set(answer.id, answer);
+}
 
-                                const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
-                                if (index !== -1) {
-                                    member.details.recordAnswers.splice(index, 1)
-                                }
+onMounted(() => {
+    matchers.value = allMatchers.slice()
 
-                                const answer = RecordDateAnswer.create({
-                                    settings: record
-                                })
-                                answer.dateValue = value
-                                member.details.recordAnswers.push(answer);
-                            }
-                        }));
-                        break;
-                    }
+    // If parents are disabled, remove all parent categories
+    if (organization.value === null) {
+        console.error('Organization is null.')
+        return;
+    }
+
+    if (organization.value.meta.recordsConfiguration.parents === null) {
+        matchers.value = matchers.value.filter(m => m.category !== MatcherCategory.Parent1 && m.category !== MatcherCategory.Parent2)
+    }
+
+    // Include all custom fields
+    for (const category of organization.value.meta.recordsConfiguration.recordCategories) {
+        for (const record of category.getAllRecords()) {
+            switch (record.type) {
+                case RecordType.Textarea:
+                case RecordType.Phone:
+                case RecordType.Email:
+                case RecordType.Text: {
+                    matchers.value.push(new TextColumnMatcher({
+                        name: record.name,
+                        category: category.name,
+                        required: false,
+                        save(value: string, member: ImportingMember) {
+                            saveRecordAnswerValue<RecordTextAnswer, 'value'>(RecordTextAnswer, member, record, 'value', value);
+                        }
+                    }));
+                    break;
+                }
+                case RecordType.Address: {
+                    matchers.value.push(new AddressColumnMatcher({
+                        name: record.name,
+                        category: category.name,
+                        required: false,
+                        save(value: Address, member: ImportingMember) {
+                            saveRecordAnswerValue<RecordAddressAnswer, 'address'>(RecordAddressAnswer, member, record, 'address', value);
+                        }
+                    }));
+                    break;
+                }
+                case RecordType.Date: {
+                    matchers.value.push(new DateColumnMatcher({
+                        name: record.name,
+                        category: category.name,
+                        required: false,
+                        save(value: Date, member: ImportingMember) {
+                            saveRecordAnswerValue<RecordDateAnswer, 'dateValue'>(RecordDateAnswer, member, record, 'dateValue', value);
+                        }
+                    }));
+                    break;
                 }
             }
         }
     }
+});
 
-    get sheet() {
-        if (!this.sheetKey) {
-            return null
-        }
-        return this.sheets[this.sheetKey] ?? null
+function changedFile(event: Event) {
+    function isFileEvent(event: Event): event is (Event & { target?: EventTarget & { files: FileList, value: null } }) {
+        return Boolean((event as any)?.target?.files?.length);
     }
 
-    get sheetKey() {
-        return this.internalSheetKey
+    if(!isFileEvent(event)) {
+        return;
     }
-    
-    set sheetKey(key: string | null) {
-        if (key === null) {
-            this.internalSheetKey = null
-            this.columns = []
-            this.rowCount = 0
-            this.columnCount = 0
+
+    file.value = null
+
+    const files = event.target.files as FileList
+    const firstFile = files[0]
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (!e.target || !e.target.result) {
+            new CenteredMessage("Inlezen mislukt, kijk na of dit wel een geldig bestand is").addCloseButton().show()
             return
         }
+        const data = new Uint8Array(e.target.result as any);
+        const workbook = XLSX.read(data, { type: 'array', raw: true });
 
-        const sheet = this.sheets[key]
-        if (!sheet) {
+        /* DO SOMETHING WITH workbook HERE */
+        const keys = Object.keys(workbook.Sheets)
+        if (keys.length === 0) {
+            new CenteredMessage("Dit bestand heeft geen werkbladen").addCloseButton().show()
             return
         }
+        sheets.value = workbook.Sheets
+        file.value = firstFile.name;
+        setSheetKey(keys[0]);
+    };
+    reader.readAsArrayBuffer(firstFile);
 
-        if (!sheet['!ref']) {
-            throw new Error("Missing ref in sheet")
+    // Clear selection
+    event.target.value = null;
+}
+
+function readColumns() {
+    if (!sheet.value) {
+        return
+    }
+
+    const sheetRef = sheet.value['!ref'];
+
+    if (!sheetRef) {
+        throw new Error("Missing ref in sheet")
+    }
+
+    const range = XLSX.utils.decode_range(sheetRef); // get the range
+    const previousColumns = columns.value
+    columns.value = []
+    let skipAuto = previousColumns.length > 0
+
+    const availableMatchers = matchers.value.slice()
+
+    // Read all the names + some examples and try to match them to columns
+    for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
+        const cell = sheet.value[XLSX.utils.encode_cell({ r: range.s.r, c: colNum })] as XLSX.CellObject
+        const columnName = (cell.w ?? cell.v ?? "") + ""
+        const matched = new MatchedColumn(colNum, columnName, matchers.value)
+
+        for (let row = range.s.r + 1; row <= range.e.r && row < 10; row++) {
+            const valueCell = sheet.value[XLSX.utils.encode_cell({ r: row, c: colNum })]
+
+            if (!valueCell) {
+                continue
+            }
+            matched.examples.push((valueCell.w ?? valueCell.v ?? "") + "")
         }
-        const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
-        this.rowCount = range.e.r + 1
-        this.columnCount = range.e.c + 1
-        this.internalSheetKey = key
-        this.readColumns()
-    }
 
-    get sheetSelectionList() {
-        return Object.keys(this.sheets)
-    }
-
-    get organization() {
-        return this.$organization.patch(this.organizationPatch)
-    }
-
-    get hasMembers() {
-        const count = this.organization.adminCategoryTree.getMemberCount({})
-        return this.organization.meta.packages.useMembers && !this.organization.meta.packages.isMembersTrial && count !== null && count > 30
-    }
-
-    get matcherCategories() {
-        const arr = {}
-        for (const matcher of this.matchers) {
-            const cat = matcher.category.toLowerCase()
-            if (arr[cat]) {
-                arr[cat].matchers.push(matcher)
-            } else {
-                arr[cat] = {
-                    name: matcher.category,
-                    matchers: [matcher]
-                }
+        const previous = previousColumns.find(c => c.name === columnName)
+        if (previous) {
+            const uptodateMatcher = availableMatchers.find(m => m.id === previous.matcherCode)
+            if (uptodateMatcher) {
+                skipAuto = true;
+                matched.matcher = uptodateMatcher
+                matched.selected = true
+                availableMatchers.splice(availableMatchers.indexOf(uptodateMatcher), 1)
             }
         }
-        return Object.values(arr)
-    }
 
-    async shouldNavigateAway() {
-        if (!this.file) {
-            return true;
-        }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-    }
+        if (!matched.matcher && !skipAuto) {
+            for (const [index, matcher] of availableMatchers.entries()) {
 
-    changedFile(event) {
-        if (!event.target.files || event.target.files.length == 0) {
-            return;
-        }
+                if (matcher.doesMatch(columnName, matched.examples)) {
+                    availableMatchers.splice(index, 1)
 
-        this.file = null
-
-        const files = event.target.files as FileList
-        const file = files[0]
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            if (!e.target || !e.target.result) {
-                new CenteredMessage("Inlezen mislukt, kijk na of dit wel een geldig bestand is").addCloseButton().show()
-                return
-            }
-            const data = new Uint8Array(e.target.result as any);
-            const workbook = XLSX.read(data, {type: 'array', raw: true });
-
-            /* DO SOMETHING WITH workbook HERE */
-            const keys = Object.keys(workbook.Sheets)
-            if (keys.length === 0) {
-                new CenteredMessage("Dit bestand heeft geen werkbladen").addCloseButton().show()
-                return
-            }
-            this.sheets = workbook.Sheets
-            this.file = file.name
-            this.sheetKey = keys[0]
-        };
-        reader.readAsArrayBuffer(file);
-        
-        // Clear selection
-        event.target.value = null;
-    }
-
-    readColumns() {
-        if (!this.sheet) {
-            return
-        }
-
-        if (!this.sheet['!ref']) {
-            throw new Error("Missing ref in sheet")
-        }
-
-        const range = XLSX.utils.decode_range(this.sheet['!ref']); // get the range
-        const previousColumns = this.columns
-        this.columns = []
-        let skipAuto = previousColumns.length > 0
-
-        const availableMatchers = this.matchers.slice()
-
-        // Read all the names + some examples and try to match them to columns
-        for(let colNum = range.s.c; colNum <= range.e.c; colNum++){
-            const cell = this.sheet[XLSX.utils.encode_cell({r: range.s.r, c: colNum})] as XLSX.CellObject
-            const columnName = (cell.w ?? cell.v ?? "")+""
-            const matched = new MatchedColumn(colNum, columnName, this.matchers)
-
-            for(let row = range.s.r + 1; row <= range.e.r && row < 10; row++){
-                const valueCell = this.sheet[XLSX.utils.encode_cell({r: row, c: colNum})]
-
-                if (!valueCell) {
-                    continue
-                }
-                matched.examples.push((valueCell.w ?? valueCell.v ?? "")+"")
-            }
-
-            const previous = previousColumns.find(c => c.name === columnName)
-            if (previous) {
-                const uptodateMatcher = availableMatchers.find(m => m.id === previous.matcherCode)
-                if (uptodateMatcher) {
-                    skipAuto = true;
-                    matched.matcher = uptodateMatcher
+                    matched.matcher = matcher
                     matched.selected = true
-                    availableMatchers.splice(availableMatchers.indexOf(uptodateMatcher), 1)   
-                }
-            }
-
-            if (!matched.matcher && !skipAuto) {
-                for (const [index, matcher] of availableMatchers.entries()) {
-
-                    if (matcher.doesMatch(columnName, matched.examples)) {
-                        availableMatchers.splice(index, 1)
-
-                        matched.matcher = matcher
-                        matched.selected = true
-                        break
-                    }
-                }
-            }
-
-            this.columns.push(matched)
-        }
-    }
-
-    getColumnSelected(column: MatchedColumn) {
-        return column.selected
-    }
-
-    setColumnSelected(column: MatchedColumn, value: boolean) {
-        column.selected = value
-
-        if (value && column.matcher === null) {
-            // Find best matching by default
-            for (const matcher of this.matchers) {
-                // Not yet used
-                if (this.columns.find(c => c.matcher?.id === matcher.id)) {
-                    continue
-                }
-                if (matcher.doesMatch(column.name, column.examples)) {
-                    column.matcher = matcher
                     break
                 }
             }
         }
 
-        if (!value) {
-            column.matcher = null
-        }
+        columns.value.push(matched)
     }
+}
 
-    didChangeColumn(column: MatchedColumn) {
-        if (column.matcher === null) {
-            return
-        }
+function getColumnSelected(column: MatchedColumn) {
+    return column.selected
+}
 
-        column.selected = true
-        // Check if others have the same matcher, then clear those
-        for (const col of this.columns) {
-            if (col === column) {
+function setColumnSelected(column: MatchedColumn, value: boolean) {
+    column.selected = value
+
+    if (value && column.matcher === null) {
+        // Find best matching by default
+        for (const matcher of matchers.value) {
+            // Not yet used
+            if (columns.value.find(c => c.matcher?.id === matcher.id)) {
                 continue
             }
-            if (col.matcherCode === column.matcherCode) {
-                col.matcher = null
-                col.selected = false
+            if (matcher.doesMatch(column.name, column.examples)) {
+                column.matcher = matcher
+                break
             }
         }
     }
 
-    async goNext() {
-        if (!this.sheet || this.saving) {
-            return
-        }
-
-        this.saving = true
-
-        try {
-            const result = await ImportingMember.importAll(this.sheet, this.columns, this.$memberManager, this.organization)
-
-            if (result.errors.length > 0) {
-                this.show(new ComponentWithProperties(ImportMembersErrorsView, {
-                    errors: result.errors
-                }))
-            } else {
-                const probablyEqual = result.members.filter(m => !m.equal && m.probablyEqual)
-                if (probablyEqual.length) {
-                    this.show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
-                        members: probablyEqual,
-                        onVerified: (component) => {
-                            component.show(new ComponentWithProperties(ImportMembersQuestionsView, {
-                                members: result.members
-                            }))
-                        }
-                    }))
-                    this.saving = false 
-                    return
-                }
-
-                this.show(new ComponentWithProperties(ImportMembersQuestionsView, {
-                    members: result.members
-                }))
-            }
-        } catch (e) {
-            this.errorBox = new ErrorBox(e)
-        }
-
-        this.saving = false 
+    if (!value) {
+        column.matcher = null
     }
+}
+
+function didChangeColumn(column: MatchedColumn) {
+    if (column.matcher === null) {
+        return
+    }
+
+    column.selected = true
+    // Check if others have the same matcher, then clear those
+    for (const col of columns.value) {
+        if (col === column) {
+            continue
+        }
+        if (col.matcherCode === column.matcherCode) {
+            col.matcher = null
+            col.selected = false
+        }
+    }
+}
+
+async function goNext() {
+    if (!sheet.value || saving.value) {
+        return
+    }
+
+    saving.value = true
+
+    if (!organization.value) {
+        console.error("Organization not set.");
+        return;
+    }
+
+    try {
+
+        const result = await ImportingMember.importAll(sheet.value, columns.value, memberManager, organization.value)
+
+        if (result.errors.length > 0) {
+            await show(new ComponentWithProperties(ImportMembersErrorsView, {
+                errors: result.errors
+            }))
+        } else {
+            const probablyEqual = result.members.filter(m => !m.equal && m.probablyEqual)
+            if (probablyEqual.length) {
+                await show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
+                    members: probablyEqual,
+                    onVerified: (component: typeof NavigationMixin) => {
+                        component.show(new ComponentWithProperties(ImportMembersQuestionsView, {
+                            members: result.members
+                        }))
+                    }
+                }))
+                saving.value = false
+                return
+            }
+
+            await show(new ComponentWithProperties(ImportMembersQuestionsView, {
+                members: result.members
+            }))
+        }
+    } catch (e: any) {
+        console.error(e);
+        errorBox.value = new ErrorBox(e);
+    }
+
+    saving.value = false
 }
 </script>
 
@@ -514,8 +516,8 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         background: $color-background-shade;
         display: flex;
         width: 100%;
-        flex-direction: row;     
-        align-items: center;    
+        flex-direction: row;
+        align-items: center;
         justify-content: flex-start;
         cursor: pointer;
         touch-action: manipulation;
@@ -530,17 +532,16 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
             background-color: $color-background-shade-darker;
         }
 
-        > .icon:first-child {
+        >.icon:first-child {
             padding-right: 20px;
             flex-shrink: 0;
         }
 
-        > .icon:last-child {
+        >.icon:last-child {
             padding-left: 20px;
             flex-shrink: 0;
             margin-left: auto;
         }
     }
 }
-
 </style>

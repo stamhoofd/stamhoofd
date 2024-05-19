@@ -8,11 +8,20 @@ import { Country, Organization } from "@stamhoofd/structures";
 import { inject, reactive } from "vue";
 
 import { MemberManager } from "./classes/MemberManager";
+import { MemberManager as LegacyMemberManager } from "../../dashboard/src/classes/MemberManager";
 import CartView from "./views/cart/CartView.vue";
 import StartView from "./views/start/StartView.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
+}
+
+/**
+ * @deprecated use useMemberManager instead
+ * @returns 
+ */
+export function useLegacyMemberManager() {
+    return inject('$memberManager') as LegacyMemberManager;
 }
 
 export function useMemberManager() {
