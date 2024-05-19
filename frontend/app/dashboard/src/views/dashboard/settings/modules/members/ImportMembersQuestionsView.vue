@@ -235,7 +235,10 @@ import { Ref, ref, computed, onMounted } from 'vue';
 import { useLegacyMemberManager } from '@stamhoofd/registration';
 
 const props = defineProps<{ members: ImportingMember[] }>();
-const $members = ref(props.members) as Ref<ImportingMember[]>;
+
+// Internal ref for reactivity if autoAssignMembers is called
+// there is no reactivity if the members prop is updated, neither with computed.
+const $members = ref(props.members) as unknown as Ref<ImportingMember[]>;
 
 const $organization = useOrganization();
 const $memberManager = useLegacyMemberManager();
