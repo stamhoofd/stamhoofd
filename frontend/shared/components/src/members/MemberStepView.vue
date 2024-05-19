@@ -29,10 +29,11 @@ const props = withDefaults(
         member: PlatformMember,
         // Whether the member should be saved to the API
         doSave?: boolean,
-        saveHandler: (navigate: NavigationActions) => Promise<void>|void
+        saveHandler?: ((navigate: NavigationActions) => Promise<void>|void)|null
     }>(), {
         doSave: true,
-        saveText: 'Opslaan'
+        saveText: 'Opslaan',
+        saveHandler: null
     }
 );
 
@@ -66,9 +67,14 @@ async function save() {
         // Copy over clone
         props.member.family.copyFromClone(cloned.value.family)
 
-        await props.saveHandler({
-            show, present, dismiss, pop
-        });
+        if (props.saveHandler) {
+            await props.saveHandler({
+                show, present, dismiss, pop
+            });
+        } else {
+            await pop({force: true});
+        }
+
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }

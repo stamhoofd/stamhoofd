@@ -23,7 +23,7 @@
             </STInputBox>
 
             <STInputBox v-for="n in amountCount" :key="n" :title="'Voorgesteld bedrag '+n">
-                <PriceInput :value="getFreeContributionAmounts(n - 1)" :placeholder="'Optie '+n" @input="setFreeContributionAmounts(n - 1, $event)" />
+                <PriceInput :model-value="getFreeContributionAmounts(n - 1)" :placeholder="'Optie '+n" @update:model-value="setFreeContributionAmounts(n - 1, $event)" />
 
                 <template #right>
                     <button class="button icon trash gray" type="button" @click="deleteOption(n - 1)" />

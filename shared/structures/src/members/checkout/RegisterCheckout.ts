@@ -36,6 +36,7 @@ export class RegisterItem {
     member: PlatformMember
     group: Group
     waitingList = false
+    calculatedPrice = 0
 
     constructor(data: {id?: string, member: PlatformMember, group: Group, waitingList: boolean}) {
         this.id = data.id ?? uuidv4()
@@ -397,6 +398,25 @@ export class RegisterItem {
 export class RegisterCart {
     items: RegisterItem[] = []
 
+    calculatePrices() {
+        for (const item of this.items) {
+            if (item.waitingList) {
+                item.calculatedPrice = 0
+                continue
+            }
+            item.calculatedPrice = item.group.settings.getGroupPrices(new Date())?.getPriceFor(
+                item.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
+                0
+            ) ?? 0
+        }
+        // todo: apply discounts at a later stage
+        
+        // this.administrationFee = paymentConfiguration.administrationFee.calculate(this.priceWithoutFees)
+    }
+
+    add(item: RegisterItem) {
+        this.items.push(item)
+    }
 }
 
 export class RegisterCheckout{

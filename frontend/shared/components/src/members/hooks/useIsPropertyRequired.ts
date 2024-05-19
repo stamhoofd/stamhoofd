@@ -10,7 +10,7 @@ export function useIsPropertyRequired(member: Ref<PlatformMember>) {
     return (property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') => {
         const m = member.value
         if (isAllOptional.value) {
-            return m.isPropertyRequiredForPlatform(property)
+            return m.isPropertyRequiredForPlatform(property) && (['birthDay'].includes(property))
         }
         return m.isPropertyRequired(property)
     }

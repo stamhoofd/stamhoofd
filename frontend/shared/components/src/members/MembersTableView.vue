@@ -17,15 +17,16 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from "@simonbackx/simple-encoding";
+import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
-import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, RegisterItem, Registration, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import RegisterMemberView from "./RegisterMemberView.vue";
+import ConfigureNewRegistrationsView from "./ConfigureNewRegistrationsView.vue";
 
 type ObjectType = PlatformMember;
 
@@ -183,7 +184,7 @@ const actions: TableAction<PlatformMember>[] = [
                 contextOrganization: organization.value,
                 platform: platform.value
             })
-            const member = reactive(family.newMember())
+            const member = reactive(family.newMember() as any) as PlatformMember
 
             const component = new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(MemberStepView, {
@@ -195,7 +196,10 @@ const actions: TableAction<PlatformMember>[] = [
                         await navigate.show({
                             components: [
                                 new ComponentWithProperties(RegisterMemberView, {
-                                    member
+                                    member,
+                                    choiceHandler: async (group: Group, navigate: NavigationActions) => {
+                                        
+                                    },
                                 })
                             ]
                         })

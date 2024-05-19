@@ -63,7 +63,7 @@
         <STToolbar v-if="!validationError && member">
             <template #right>
                 <button class="primary button" type="button" @click="registerMember">
-                    <span>{{ member.member.firstName }} inschrijven</span>
+                    <span>{{ member.patchedMember.firstName }} inschrijven</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>

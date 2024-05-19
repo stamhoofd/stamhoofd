@@ -177,6 +177,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             for (const placeholder of struct.users) {
                 await PatchOrganizationMembersEndpoint.linkUser(placeholder, member)
             }
+
+            // Auto link users based on data
+            await PatchOrganizationMembersEndpoint.updateManagers(member)
         }
 
         // Loop all members one by one
@@ -187,7 +190,16 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
             
             if (patch.details) {
+                if (patch.details.isPut()) {
+                    throw new SimpleError({
+                        code: "not_allowed",
+                        message: "Cannot override details",
+                        human: "Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.",
+                        field: "details"
+                    })
+                }
                 member.details.patchOrPut(patch.details)
+                member.details.cleanData()
             }
             
             await member.save();
@@ -358,6 +370,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Unlink users
             for (const userId of patch.users.getDeletes()) {
                 await PatchOrganizationMembersEndpoint.unlinkUser(userId, member)
+            }
+
+            // Auto link users based on data
+            if (patch.users.changes.length || patch.details) {
+                await PatchOrganizationMembersEndpoint.updateManagers(member)
             }
 
             if (!members.find(m => m.id === member.id)) {
@@ -548,6 +565,34 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             member.registrations.push(registration)
             await registration.save()
+        }
+    }
+
+    static async updateManagers(member: MemberWithRegistrations) {
+        // Check accounts
+        const managers = member.details.getManagerEmails()
+
+        for(const email of managers) {
+            const u = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase())
+            if (!u) {
+                console.log("Linking user "+email+" to member "+member.id)
+                await PatchOrganizationMembersEndpoint.linkUser(UserStruct.create({
+                    firstName: member.details.parents.find(p => p.email === email)?.firstName,
+                    lastName: member.details.parents.find(p => p.email === email)?.lastName,
+                    email,
+                }), member)
+            }
+        }
+
+        // Delete accounts that should no longer have access
+        for (const u of member.users) {
+            if (!u.hasAccount()) {
+                // And not in managers list (case insensitive)
+                if (!managers.find(m => m.toLocaleLowerCase() === u.email.toLocaleLowerCase())) {
+                    console.log("Unlinking user "+u.email+" from member "+member.id)
+                    await PatchOrganizationMembersEndpoint.unlinkUser(u.id, member)
+                }
+            }
         }
     }
 

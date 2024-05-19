@@ -23,7 +23,7 @@
                     <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock" />
                 </h2>
                 <STList class="illustration-list">
-                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" />
+                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" @click="openGroup(group)"/>
                 </STList>
             </div>
         </main>
@@ -31,13 +31,18 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, PopOptions, usePresent } from '@simonbackx/vue-app-navigation';
-import { ScrollableSegmentedControl, useUninheritedPermissions } from '@stamhoofd/components';
-import { GroupCategoryTree, Organization, PlatformMember } from '@stamhoofd/structures';
+import { ComponentWithProperties, PopOptions, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, usePlatformFamilyManager, useUninheritedPermissions } from '@stamhoofd/components';
+import { Group, GroupCategoryTree, Organization, PlatformMember, RegisterCart, RegisterItem, Registration } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
+import GroupView from './GroupView.vue';
 import SearchMemberOrganizationView from './SearchMemberOrganizationView.vue';
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import ConfigureNewRegistrationsView from './ConfigureNewRegistrationsView.vue';
+import MemberStepView from './MemberStepView.vue';
+import EditMemberAllBox from './components/edit/EditMemberAllBox.vue';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -46,6 +51,9 @@ const props = defineProps<{
 const selectedOrganization = ref((props.member.organizations[0] ?? null) as any) as Ref<Organization|null>;
 const auth = useUninheritedPermissions({patchedOrganization: selectedOrganization})
 const present = usePresent()
+const show = useShow()
+const app = useAppContext();
+const manager = usePlatformFamilyManager();
 
 const items = computed(() => {
     return props.member.organizations
@@ -72,6 +80,72 @@ const tree = computed(() => {
 function addOrganization(organization: Organization) {
     props.member.insertOrganization(organization);
     selectedOrganization.value = organization;
+}
+
+async function registerAsAdmin(group: Group) {
+    const cart = new RegisterCart()
+    const cartItem = RegisterItem.defaultFor(props.member, group)
+    cart.add(cartItem)
+    cart.calculatePrices()
+
+    // Create a registration
+    const registration = Registration.create({
+        groupId: group.id,
+        organizationId: group.organizationId,
+        registeredAt: new Date(),
+        waitingList: cartItem.waitingList,
+        price: cartItem.calculatedPrice,
+        pricePaid: 0,
+        cycle: group.cycle
+    })
+
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Registration>
+    arr.addPut(registration)
+
+    // Create a clone
+    // (prevents adding the same registration twice)
+    const cloned = props.member.clone()
+    cloned.addPatch({
+        registrations: arr
+    })
+
+    // Show registration editor
+    await show({
+        components: [
+            new ComponentWithProperties(ConfigureNewRegistrationsView, {
+                members: [cloned],
+                saveHandler: async (navigate: NavigationActions) => {
+                    await manager.save(cloned.family.members)
+                    await navigate.dismiss({force: true})
+                    Toast.success(cloned.patchedMember.firstName + " is ingeschreven").show()
+                    await navigate.present({
+                        components: [
+                            new ComponentWithProperties(MemberStepView, {
+                                member: cloned,
+                                title: 'Gegevens aanvullen',
+                                component: EditMemberAllBox
+                            })
+                        ],
+                        modalDisplayStyle: "popup"
+                    })
+                }
+            })
+        ]
+    })
+}
+
+async function openGroup(group: Group) {
+    if (app !== 'registration') {
+        return await registerAsAdmin(group)
+    }
+    await show({
+        components: [
+            new ComponentWithProperties(GroupView, {
+                member: props.member,
+                group
+            })
+        ]
+    })
 }
 
 async function searchOrganization() {

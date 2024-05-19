@@ -148,6 +148,37 @@ export class MemberDetails extends AutoEncoder {
         }
     }
 
+    isEqual(other: MemberDetails): boolean {
+        if (!this.firstName || !other.firstName) {
+            // Not possible to compare
+            return false
+        }
+
+        if (!this.lastName || !other.lastName) {
+            // Not possible to compare
+            return false
+        }
+
+        if (!this.birthDay || !other.birthDay) {
+            // Not possible to compare
+            return false
+        }
+
+        if (this.firstName != other.firstName) {
+            return false
+        }
+
+        if (this.lastName != other.lastName) {
+            return false
+        }
+
+        if (this.birthDayFormatted != other.birthDayFormatted) {
+            return false
+        }
+
+        return true;
+    }
+
     get name() {
         if (!this.firstName) {
             return this.lastName;

@@ -72,10 +72,21 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         if (addedMembers.length > 0) {
             // Give access to created members
             await Member.users.reverse("members").link(user, addedMembers)
+
         }
 
         // Modify members
         const members = await Member.getMembersWithRegistrationForUser(user)
+
+        for (const member of addedMembers) {
+            const updatedMember = members.find(m => m.id === member.id);
+            if (updatedMember) {
+                // Make sure we also give access to other parents
+                await PatchOrganizationMembersEndpoint.updateManagers(updatedMember)
+                await Document.updateForMember(updatedMember.id)
+            }
+        }
+
         for (const struct of request.body.getPatches()) {
             const member = members.find((m) => m.id == struct.id)
             if (!member) {
@@ -87,6 +98,14 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             if (struct.details) {
+                if (struct.details.isPut()) {
+                    throw new SimpleError({
+                        code: "not_allowed",
+                        message: "Cannot override details",
+                        human: "Er ging iets mis bij het aanpassen van de gegevens van dit lid. Probeer het later opnieuw en neem contact op als het probleem zich blijft voordoen.",
+                        field: "details"
+                    })
+                }
                 member.details.patchOrPut(struct.details)
                 member.details.cleanData()
             }
@@ -100,32 +119,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 })
             }
             await member.save();
-
-            // Check accounts
-            const managers = member.details.getManagerEmails()
-
-            for(const email of managers) {
-                const u = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase())
-                if (!u) {
-                    console.log("Linking user "+email+" to member "+member.id + " from patch by " + user.id)
-                    await PatchOrganizationMembersEndpoint.linkUser(UserStruct.create({
-                        firstName: member.details.parents.find(p => p.email === email)?.firstName,
-                        lastName: member.details.parents.find(p => p.email === email)?.lastName,
-                        email,
-                    }), member)
-                }
-            }
-
-            // Delete accounts that should no longer have access
-            for (const u of member.users) {
-                if (!u.hasAccount()) {
-                    // And not in managers list (case insensitive)
-                    if (!managers.find(m => m.toLocaleLowerCase() === u.email.toLocaleLowerCase())) {
-                        console.log("Unlinking user "+u.email+" from member "+member.id + " from patch by " + user.id)
-                        await PatchOrganizationMembersEndpoint.unlinkUser(u.id, member)
-                    }
-                }
-            }
+            await PatchOrganizationMembersEndpoint.updateManagers(member)
 
             // Update documents
             await Document.updateForMember(member.id)
