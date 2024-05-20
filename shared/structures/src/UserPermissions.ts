@@ -31,7 +31,9 @@ export class UserPermissions extends AutoEncoder {
     for(organizationId: string, platform: Platform, organizationRoles: PermissionRoleDetailed[], inherit = true): LoadedPermissions|null {
         if (inherit) {
             const platformPermissions = this.forPlatform(platform);
-            if (platformPermissions && platformPermissions.hasResourceAccessRight(PermissionsResourceType.Organizations, organizationId, AccessRight.PlatformLoginAs)) {
+
+            // todo: op basis van categorieën van de vereniging
+            if (platformPermissions && platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs)) {
                 return LoadedPermissions.create({
                     level: PermissionLevel.Full,
                 })

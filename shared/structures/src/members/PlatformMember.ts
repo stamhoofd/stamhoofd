@@ -15,6 +15,7 @@ import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
 import { PropertyFilter } from "../filters/PropertyFilter"
+import { LoadedPermissions, PermissionLevel, PermissionsResourceType } from "../Permissions"
 
 export class PlatformFamily {
     members: PlatformMember[] = []
@@ -563,7 +564,11 @@ export class PlatformMember implements ObjectWithRecords {
         return categories;
     }
 
-    getEnabledRecordCategories(): RecordCategory[] {
+    getEnabledRecordCategories(permissions: LoadedPermissions|null, permissionLevel = PermissionLevel.Read): RecordCategory[] {
+        if (!permissions) {
+            return []
+        }
+        
         // From organization
         const categories: RecordCategory[] = [];
         const inheritedFilters = new Map<string, PropertyFilter[]>()
@@ -595,7 +600,9 @@ export class PlatformMember implements ObjectWithRecords {
             categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => r.isEnabled(this)))
         }
         
-        return categories;
+        return categories.filter(c => {
+            return permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, c.id, permissionLevel)
+        })
     }
 
     isExistingMember(organizationId: string): boolean {

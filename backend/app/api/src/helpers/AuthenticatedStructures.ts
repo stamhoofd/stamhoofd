@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Group, MemberWithRegistrations, Organization, Payment, Webshop } from "@stamhoofd/models";
-import { Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview } from '@stamhoofd/structures';
+import { Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 
@@ -100,6 +100,7 @@ export class AuthenticatedStructures {
 
     static async membersBlob(members: MemberWithRegistrations[]): Promise<MembersBlob> {
         const organizations = new Map<string, Organization>()
+        const memberBlobs: MemberWithRegistrationsBlob[] = []
         for (const member of members) {
             for (const registration of member.registrations) {
                 if (registration.organizationId !== Context.auth.organization?.id) {
@@ -110,10 +111,15 @@ export class AuthenticatedStructures {
                     }
                 }
             }
+
+            const blob = member.getStructureWithRegistrations()
+            memberBlobs.push(
+                await Context.auth.filterMemberData(member, blob)
+            )
         }
 
         return MembersBlob.create({
-            members: members.map(m => m.getStructureWithRegistrations()),
+            members: memberBlobs,
             organizations: await Promise.all([...organizations.values()].map(o => this.organization(o)))
         })
     }

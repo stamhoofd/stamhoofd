@@ -1,16 +1,15 @@
 <template>
     <STListItem element-name="label" :selectable="true">
         <template #left>
-            <Checkbox v-model="selected" />
+            <Checkbox v-model="selected" :disabled="locked" />
         </template>
         <template v-if="type === 'resource'">
             <h2 class="style-title-list">
                 {{ resource.name }}
             </h2>
             <p v-if="isEditingUserPermissions" class="style-description-small">
-                {{ capitalizeFirstLetter(getPermissionResourceTypeName(resource.type, false))  }}
+                {{ capitalizeFirstLetter(getPermissionResourceTypeName(resource.type, false)) }}
             </p>
-
         </template>
         <template v-else>
             <h2 class="style-title-list">
@@ -21,12 +20,14 @@
             </p>
         </template>
 
-        <template #right><div v-if="selected">
-            <button class="button text" type="button" @click.stop.prevent="choosePermissions($event)">
-                <span>{{ levelText }}</span>
-                <span class="icon arrow-down-small" />
-            </button>
-        </div></template>
+        <template #right>
+            <div v-if="selected">
+                <button class="button text" type="button" @click.stop.prevent="choosePermissions($event)">
+                    <span>{{ levelText }}</span>
+                    <span class="icon arrow-down-small" />
+                </button>
+            </div>
+        </template>
     </STListItem>
 </template>
 
@@ -59,10 +60,27 @@ const isMe = computed(() => {
 
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id))
 
+const lockedMinimumLevel = computed(() => {
+    return props.role.level
+})
+
 const permissionLevel = computed({
-    get: () => resourcePermissions.value?.level ?? PermissionLevel.None,
+    get: () => {
+        const base = resourcePermissions.value?.level ?? PermissionLevel.None
+        const inherited = lockedMinimumLevel.value
+
+        if (getPermissionLevelNumber(base) < getPermissionLevelNumber(inherited)) {
+            return inherited
+        }
+
+        return base;
+    },
     set: (level: PermissionLevel) => {
         if (permissionLevel.value === level) {
+            return
+        }
+
+        if (getPermissionLevelNumber(level) < getPermissionLevelNumber(lockedMinimumLevel.value)) {
             return
         }
 
@@ -70,7 +88,7 @@ const permissionLevel = computed({
         if (level == PermissionLevel.None) {
             // Delete the resource if no access rights
             if (resourcePermissions.value?.accessRights.length) {
-               // Keep it but set the level
+                // Keep it but set the level
             } else {
                 // Delete it
                 const subPatch = new PatchMap<string, AutoEncoderPatchType<ResourcePermissions>|ResourcePermissions|null>()
@@ -136,10 +154,16 @@ for (const accessRight of props.configurableAccessRights) {
     accessRightsMap.set(accessRight, hasAccessRight)
 }
 
+const locked = computed(() => {
+    return lockedMinimumLevel.value !== PermissionLevel.None
+})
 const selected = computed({
-    get: () => !!resourcePermissions.value && (resourcePermissions.value.level !== PermissionLevel.None || !!resourcePermissions.value?.accessRights.length),
+    get: () => lockedMinimumLevel.value !== PermissionLevel.None || (!!resourcePermissions.value && (resourcePermissions.value.level !== PermissionLevel.None || !!resourcePermissions.value?.accessRights.length)),
     set: (value: boolean) => {
         if (value === selected.value) {
+            return
+        }
+        if (locked.value) {
             return
         }
         
@@ -223,6 +247,7 @@ const choosePermissions = async (event: MouseEvent) => {
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.None,
                 name: 'Geen basistoegang',
+                disabled: getPermissionLevelNumber(PermissionLevel.None) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.None
                 }
@@ -230,6 +255,7 @@ const choosePermissions = async (event: MouseEvent) => {
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Read,
                 name: 'Lezen',
+                disabled: getPermissionLevelNumber(PermissionLevel.Read) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Read
                 }
@@ -237,12 +263,14 @@ const choosePermissions = async (event: MouseEvent) => {
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Write,
                 name: 'Bewerken',
+                disabled: getPermissionLevelNumber(PermissionLevel.Write) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 action: () => {
                     permissionLevel.value = PermissionLevel.Write
                 }
             }),
             new ContextMenuItem({
                 selected: permissionLevel.value === PermissionLevel.Full,
+                disabled: getPermissionLevelNumber(PermissionLevel.Full) < getPermissionLevelNumber(lockedMinimumLevel.value),
                 name: 'Volledige toegang',
                 action: () => {
                     permissionLevel.value = PermissionLevel.Full

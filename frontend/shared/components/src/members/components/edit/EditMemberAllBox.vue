@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformMember } from '@stamhoofd/structures';
+import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import { Validator } from '../../../errors/Validator';
@@ -37,6 +37,7 @@ import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
 import EditMemberParentsBox from './EditMemberParentsBox.vue';
 import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
 import Title from './Title.vue';
+import { useAuth } from '../../../hooks';
 
 defineOptions({
     inheritAttrs: false
@@ -51,7 +52,8 @@ const props = withDefaults(
         level: 0
     }
 );
+const auth = useAuth()
 
-const recordCategories = computed(() => props.member.getEnabledRecordCategories())
+const recordCategories = computed(() => props.member.getEnabledRecordCategories(auth.permissions, PermissionLevel.Write))
 
 </script>
