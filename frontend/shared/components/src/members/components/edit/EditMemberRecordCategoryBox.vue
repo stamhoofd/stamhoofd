@@ -11,11 +11,13 @@ import { computed } from 'vue';
 import FillRecordCategoryBox from '../../../records/components/FillRecordCategoryBox.vue';
 import { useIsAllOptional } from '../../hooks/useIsPropertyRequired';
 import { useAppContext } from '../../../context/appContext';
+import { ErrorBox } from '../../../errors/ErrorBox';
 
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
     category: RecordCategory,
+    parentErrorBox?: ErrorBox | null
     level?: number
 }>();
 

@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
-        <component :is="component" :validator="errors.validator" :member="cloned" v-bind="$attrs" :level="1" />
+        <component :is="component" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" v-bind="$attrs" :level="1" />
     </SaveView>
 </template>
 

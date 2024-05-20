@@ -2,6 +2,7 @@
     <div v-if="isAdmin" class="container">
         <Title v-bind="$attrs" :title="title" />
 
+        <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox v-model="dataPermissions">
@@ -32,6 +33,7 @@ import { useAppContext } from '../../../context/appContext';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import Title from './Title.vue';
+import { ErrorBox } from '../../../errors/ErrorBox';
 
 defineOptions({
     inheritAttrs: false
@@ -40,6 +42,7 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
+    parentErrorBox?: ErrorBox | null
 }>();
 
 const errors = useErrors({validator: props.validator});

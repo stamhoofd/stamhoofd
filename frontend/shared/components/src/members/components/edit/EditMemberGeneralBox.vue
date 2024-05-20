@@ -2,6 +2,7 @@
     <div class="container">
         <Title v-bind="$attrs" :title="title" />
 
+        <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
@@ -68,7 +69,8 @@ defineOptions({
 
 const props = defineProps<{
     member: PlatformMember,
-    validator: Validator
+    validator: Validator,
+    parentErrorBox?: ErrorBox | null
 }>()
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));

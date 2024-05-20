@@ -6,6 +6,7 @@
             Voeg geen ouders toe als noodcontactpersoon. Ouders worden altijd als eerste gecontacteerd in geval van nood.
         </p>
 
+        <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="visibleContacts.length === 0" class="info-box">
@@ -71,6 +72,7 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
+    parentErrorBox?: ErrorBox | null
 }>();
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const present = usePresent();

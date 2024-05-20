@@ -10,13 +10,13 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
             
-        <RecordAnswerInput v-for="record of filteredRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" @patch="addPatch" />
+        <RecordAnswerInput v-for="record of filteredRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :force-creation="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
             <hr>
             <h2>{{ childCategory.name }}</h2>
             <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description" />
 
-            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" @patch="addPatch" />
+            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :force-creation="markReviewed" @patch="addPatch" />
         </div>
 
 
@@ -58,7 +58,8 @@ const props = withDefaults(
         titleSuffix?: string
     }>(), {
         level: 1,
-        allOptional: false
+        allOptional: false,
+        titleSuffix: ""
     }
 )
 const errors = useErrors({validator: props.validator})

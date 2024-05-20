@@ -2,6 +2,7 @@
     <div class="container">
         <Title :title="member.patchedMember.firstName + ' bewerken'" :level="level" />
 
+        <STErrorsDefault :error-box="parentErrorBox" />
         <EditMemberGeneralBox v-bind="$attrs" :member="member" :validator="validator" />
 
         <div v-if="member.isPropertyEnabled('dataPermission')" class="container">
@@ -38,6 +39,7 @@ import EditMemberParentsBox from './EditMemberParentsBox.vue';
 import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
 import Title from './Title.vue';
 import { useAuth } from '../../../hooks';
+import { ErrorBox } from '../../../errors/ErrorBox';
 
 defineOptions({
     inheritAttrs: false
@@ -47,9 +49,11 @@ const props = withDefaults(
     defineProps<{
         member: PlatformMember,
         validator: Validator,
-        level?: number
+        level?: number,
+        parentErrorBox?: ErrorBox | null
     }>(), {
-        level: 0
+        level: 0,
+        parentErrorBox: null
     }
 );
 const auth = useAuth()

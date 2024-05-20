@@ -788,8 +788,57 @@ export class AdminPermissionChecker {
         return cloned;
     }
 
-    async filterMemberDetailsPatch(patch: AutoEncoderPatchType<MemberDetails>): Promise<AutoEncoderPatchType<MemberDetails>> {
-        return Promise.resolve(patch);
+    async filterMemberPatch(member: MemberWithRegistrations, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
+        if (!data.details) {
+            return data;
+        }
+        if (data.details.isPut()) {
+            throw new SimpleError({
+                code: 'invalid_request',
+                message: 'Cannot PUT a full member details object',
+                statusCode: 400
+            })
+        }
+        if (!data.details.recordAnswers) {
+            return data;
+        }
+
+        const records = await this.getAccessibleRecordSet(member, PermissionLevel.Write)
+
+        for (const [key, value] of data.details.recordAnswers.entries()) {
+            let name: string | undefined = undefined
+            if (value) {
+                if (value.isPatch()) {
+                    throw new SimpleError({
+                        code: 'invalid_request',
+                        message: 'Cannot PATCH a record answer object',
+                        statusCode: 400
+                    })
+                }
+
+                const id = value.settings.id
+
+                if (id !== key) {
+                    throw new SimpleError({
+                        code: 'invalid_request',
+                        message: 'Record answer key does not match record id',
+                        statusCode: 400
+                    })
+                }
+
+                name = value.settings.name
+            }
+
+            if (!records.has(key)) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
+                    statusCode: 400
+                })
+            }
+        }
+
+        return data
     }
 
     canAccessAllPlatformMembers(): boolean {

@@ -183,12 +183,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         // Loop all members one by one
-        for (const patch of request.body.getPatches()) {
+        for (let patch of request.body.getPatches()) {
             const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id)
             if (!member || !await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
                 throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang tot dit lid of het bestaat niet")
             }
-            
+            patch = await Context.auth.filterMemberPatch(member, patch)
+
             if (patch.details) {
                 if (patch.details.isPut()) {
                     throw new SimpleError({
@@ -198,6 +199,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         field: "details"
                     })
                 }
+                
                 member.details.patchOrPut(patch.details)
                 member.details.cleanData()
             }
