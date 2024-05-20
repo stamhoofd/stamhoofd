@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, MemberWithRegistrations } from '@stamhoofd/models';
 import { baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler,SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions } from "@stamhoofd/sql";
-import { CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -172,7 +172,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
         const organization = Context.organization
 
-        if (!organization && !Context.auth.hasPlatformFullAccess()) {
+        if (!organization && !Context.auth.canAccessAllPlatformMembers()) {
             throw new SimpleError({
                 code: 'not_implemented',
                 message: 'Listing members platform wide without full permissions is not yet implemented'

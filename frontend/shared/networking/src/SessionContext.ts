@@ -470,7 +470,7 @@ export class SessionContext implements RequestMiddleware {
     }
 
     get optionalAuthenticatedServer() {
-        if (this.isComplete()) {
+        if (this.hasToken()) {
             return this.authenticatedServer
         }
         return this.server

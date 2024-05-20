@@ -72,12 +72,6 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         component: settingsView
     });
 
-    const moreTab = new TabBarItemGroup({
-        icon: 'category',
-        name: 'Meer',
-        items: []
-    });
-
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: reactiveSession,
@@ -97,11 +91,12 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                         tabs: computed(() => {
                             const tabs: (TabBarItem|TabBarItemGroup)[] = [
                                 startTab,
-                                membersTab,
-                                settingsTab
+                                membersTab
                             ]
 
-                            tabs.push(moreTab);
+                            if (reactiveSession.auth.hasFullPlatformAccess()) {
+                                tabs.push(settingsTab)
+                            }
 
                             return tabs;
                         })

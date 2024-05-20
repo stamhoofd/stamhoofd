@@ -3,6 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
 import { AccessRight, GroupCategory, GroupStatus, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, Platform, RecordCategory, RecordSettings } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
+import { Platform as PlatformStruct } from "@stamhoofd/structures";
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -11,12 +12,14 @@ import { Formatter } from "@stamhoofd/utility"
 export class AdminPermissionChecker {
     organization: Organization|null
     user: User
+    platform: PlatformStruct
 
     organizationCache: Map<string, Organization|Promise<Organization|undefined>> = new Map()
     organizationGroupsCache: Map<string, Group[]|Promise<Group[]>> = new Map()
 
-    constructor(user: User, organization?: Organization) {
+    constructor(user: User, platform: PlatformStruct, organization?: Organization,) {
         this.user = user
+        this.platform = platform
 
         if (user.organizationId && (!organization || organization.id !== user.organizationId)) {
             throw new SimpleError({
@@ -92,10 +95,6 @@ export class AdminPermissionChecker {
             return this.getOrganizationRoles(loadedOrg)
         }
         return [...(organization.privateMeta.roles ?? [])]
-    }
-
-    get platform() {
-        return Platform.shared
     }
 
     get platformPermissions() {
@@ -791,6 +790,11 @@ export class AdminPermissionChecker {
 
     async filterMemberDetailsPatch(patch: AutoEncoderPatchType<MemberDetails>): Promise<AutoEncoderPatchType<MemberDetails>> {
         return Promise.resolve(patch);
+    }
+
+    canAccessAllPlatformMembers(): boolean {
+        console.log('canAccessAllPlatformMembers', this.platformPermissions)
+        return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs)
     }
 
     hasPlatformFullAccess(): boolean {

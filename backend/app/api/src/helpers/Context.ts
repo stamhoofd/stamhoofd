@@ -1,7 +1,7 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { I18n } from "@stamhoofd/backend-i18n";
-import { Organization, RateLimiter, Token, User } from "@stamhoofd/models";
+import { Organization, Platform, RateLimiter, Token, User } from "@stamhoofd/models";
 import { AsyncLocalStorage } from "async_hooks";
 
 import { AdminPermissionChecker } from "./AdminPermissionChecker";
@@ -185,7 +185,7 @@ export class ContextInstance {
 
         const user = token.user
         this.user = user
-        this.#auth = new AdminPermissionChecker(user, this.organization);
+        this.#auth = new AdminPermissionChecker(user, await Platform.getSharedPrivateStruct(), this.organization);
 
         return {user, token};
     }

@@ -26,6 +26,7 @@ export class Platform extends Model {
         const struct = await this.getSharedPrivateStruct();
         const clone = struct.clone();
         clone.privateConfig = null;
+        clone.setShared();
 
         return clone;
     }

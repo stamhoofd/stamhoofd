@@ -20,7 +20,7 @@ export class UserPermissions extends AutoEncoder {
             return null;
         }
 
-        const platformRoles = Platform.shared.getRoles()
+        const platformRoles = platform.getRoles()
         return LoadedPermissions.from(this.globalPermissions, platformRoles)
     }
 
