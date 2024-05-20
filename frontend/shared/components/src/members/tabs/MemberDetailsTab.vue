@@ -19,6 +19,7 @@
             <ViewMemberGeneralBox :member="member" />
             <MemberRegistrationsBox :member="member" />
             <ViewMemberParentsBox :member="member" />
+            <ViewMemberEmergencyContactsBox :member="member" />
         </div>
 
         <div v-if="(hasWarnings && !isMobile) || member.patchedMember.users.length > 0 || familyMembers.length > 0">
@@ -124,6 +125,7 @@ import { DataPermissionsSettings, FinancialSupportSettings, PlatformMember, Reco
 import { computed } from 'vue';
 import MemberSegmentedView from '../MemberSegmentedView.vue';
 import MemberRegistrationsBox from '../components/MemberRegistrationsBox.vue';
+import ViewMemberEmergencyContactsBox from '../components/view/ViewMemberEmergencyContactsBox.vue';
 import ViewMemberGeneralBox from '../components/view/ViewMemberGeneralBox.vue';
 import ViewMemberParentsBox from '../components/view/ViewMemberParentsBox.vue';
 
@@ -136,7 +138,6 @@ const props = defineProps<{
 }>();
 
 const organization = useOrganization();
-const currentCountry = useCountry();
 const familyMembers = computed(() => props.member.family.members.filter(m => m.id !== props.member.id))
 const maxFamilyAge = computed(() => {
     const ages = familyMembers.value.map(m => m.patchedMember.details.age ?? 99)
