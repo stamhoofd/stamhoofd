@@ -1,15 +1,13 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, MemberWithRegistrations } from "@stamhoofd/models";
-import { Member } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob } from "@stamhoofd/structures";
+import { Member, MemberWithRegistrations } from "@stamhoofd/models";
 
 import { Context } from "../../../../helpers/Context";
+import { MembersBlob } from "@stamhoofd/structures";
+import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
-type ResponseBody = MemberWithRegistrationsBlob[];
+type ResponseBody = MembersBlob
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -65,6 +63,8 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw Context.auth.error("Je hebt geen toegang tot dit lid")
         }
 
-        return new Response(validatedMembers.map(m => m.getStructureWithRegistrations(true)));
+        return new Response(
+            await AuthenticatedStructures.membersBlob(validatedMembers)
+        );
     }
 }
