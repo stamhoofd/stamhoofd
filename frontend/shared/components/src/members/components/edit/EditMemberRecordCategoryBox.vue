@@ -12,6 +12,7 @@ import FillRecordCategoryBox from '../../../records/components/FillRecordCategor
 import { useIsAllOptional } from '../../hooks/useIsPropertyRequired';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
+import { useOrganization } from '../../../hooks';
 
 const props = defineProps<{
     member: PlatformMember,
@@ -27,6 +28,7 @@ defineOptions({
 
 const allOptional = useIsAllOptional(computed(() => props.member));
 const app = useAppContext()
+const organization = useOrganization();
 
 const owningOrganization = computed(() => {
     return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id == props.category.id))
@@ -35,12 +37,12 @@ const titleSuffix = computed(() => {
     if (allOptional.value && app == 'registration') {
         return " (optioneel)"
     }
-    if (app == 'registration' || app == 'dashboard') {
+    if (app == 'registration') {
         return ""
     }
 
     // Platform admins can see who owns the record category
-    if (owningOrganization.value) {
+    if (owningOrganization.value && (!organization.value || owningOrganization.value.id !== organization.value.id)) {
         return owningOrganization.value.name
     }
 

@@ -58,6 +58,6 @@ const props = withDefaults(
 );
 const auth = useAuth()
 
-const recordCategories = computed(() => props.member.getEnabledRecordCategories(auth.permissions, PermissionLevel.Write))
+const recordCategories = computed(() => props.member.getEnabledRecordCategories(auth.userPermissions, PermissionLevel.Write))
 
 </script>
