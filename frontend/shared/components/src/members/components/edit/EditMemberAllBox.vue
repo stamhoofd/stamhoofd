@@ -38,7 +38,7 @@ import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
 import EditMemberParentsBox from './EditMemberParentsBox.vue';
 import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
 import Title from './Title.vue';
-import { useAuth } from '../../../hooks';
+import { useAuth, useOrganization } from '../../../hooks';
 import { ErrorBox } from '../../../errors/ErrorBox';
 
 defineOptions({
@@ -57,7 +57,8 @@ const props = withDefaults(
     }
 );
 const auth = useAuth()
+const organization = useOrganization()
 
-const recordCategories = computed(() => props.member.getEnabledRecordCategories(auth.userPermissions, PermissionLevel.Write))
+const recordCategories = computed(() => props.member.getEnabledRecordCategories(auth.userPermissions, PermissionLevel.Write, organization.value))
 
 </script>

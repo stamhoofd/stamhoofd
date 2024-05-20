@@ -565,7 +565,7 @@ export class PlatformMember implements ObjectWithRecords {
         return categories;
     }
 
-    getEnabledRecordCategories(permissions: UserPermissions|null, permissionLevel = PermissionLevel.Read): RecordCategory[] {
+    getEnabledRecordCategories(permissions: UserPermissions|null, permissionLevel = PermissionLevel.Read, scopeOrganization?: Organization|null): RecordCategory[] {
         if (!permissions) {
             return []
         }
@@ -573,9 +573,11 @@ export class PlatformMember implements ObjectWithRecords {
         // From organization
         const categories: RecordCategory[] = [];
         const inheritedFilters = new Map<string, PropertyFilter[]>()
+        const scopedOrganizations = scopeOrganization ? [scopeOrganization] : this.organizations;
 
         // First push all platform record categories, these should be first
-        for (const organization of this.organizations) {
+        for (const organization of scopedOrganizations) {
+
             const organizationPermissions = permissions.forOrganization(organization, true);
 
             if (!organizationPermissions) {
@@ -593,7 +595,7 @@ export class PlatformMember implements ObjectWithRecords {
         // All required categories of the platform
         for (const category of this.platform.config.recordsConfiguration.recordCategories) {
             if (category.isEnabled(this)) {
-                const hasAnyAccess = this.organizations.find(o => {
+                const hasAnyAccess = !!scopedOrganizations.find(o => {
                     const organizationPermissions = permissions.forOrganization(o, true);
 
                     if (!organizationPermissions) {
@@ -618,7 +620,7 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // All organization record categories
-        for (const organization of this.organizations) {
+        for (const organization of scopedOrganizations) {
             const organizationPermissions = permissions.forOrganization(organization, true);
 
             if (!organizationPermissions) {
