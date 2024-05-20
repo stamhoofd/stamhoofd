@@ -49,7 +49,7 @@ const props = withDefaults(
     }
 );
 
-const tabs: unknown[] = [markRaw(MemberDetailsTab)]; //[MemberViewDetails, MemberViewPayments];
+const tabs: unknown[] = [markRaw(MemberDetailsTab)]; 
 const tabLabels = ["Gegevens", "Rekening"];
 const tab = ref(tabs[props.initialTab && props.initialTab < tabs.length ? (props.initialTab) : 0]);
 const tabIndex = computed(() => {
