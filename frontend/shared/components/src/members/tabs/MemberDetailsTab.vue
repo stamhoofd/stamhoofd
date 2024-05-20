@@ -18,6 +18,7 @@
 
             <ViewMemberGeneralBox :member="member" />
             <MemberRegistrationsBox :member="member" />
+            <ViewMemberParentsBox :member="member" />
         </div>
 
         <div v-if="(hasWarnings && !isMobile) || member.patchedMember.users.length > 0 || familyMembers.length > 0">
@@ -124,6 +125,7 @@ import { computed } from 'vue';
 import MemberSegmentedView from '../MemberSegmentedView.vue';
 import MemberRegistrationsBox from '../components/MemberRegistrationsBox.vue';
 import ViewMemberGeneralBox from '../components/view/ViewMemberGeneralBox.vue';
+import ViewMemberParentsBox from '../components/view/ViewMemberParentsBox.vue';
 
 const isMobile = useIsMobile();
 const present = usePresent();
