@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors"
 import { Request, RequestResult } from "@simonbackx/simple-networking"
 import { useContext } from "@stamhoofd/components"
 import { SessionContext } from "@stamhoofd/networking"
-import { MemberWithRegistrationsBlob, PlatformMember, Version } from "@stamhoofd/structures"
+import { MemberWithRegistrationsBlob, MembersBlob, PlatformMember, Version } from "@stamhoofd/structures"
 import { onBeforeUnmount, unref } from "vue"
 
 export function usePlatformFamilyManager() {
@@ -58,12 +58,12 @@ export class PlatformFamilyManager {
                 c.prepareSave();
             }
 
-            let response: RequestResult<MemberWithRegistrationsBlob[]>;
+            let response: RequestResult<MembersBlob>;
             try {
                 response = await this.context.authenticatedServer.request({
                     method: "PATCH",
                     path: "/organization/members",
-                    decoder: new ArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>),
+                    decoder: MembersBlob as Decoder<MembersBlob>,
                     body: patches,
                     shouldRetry,
                     owner: this
@@ -76,13 +76,13 @@ export class PlatformFamilyManager {
                 throw e;
             }
 
-            const createdMembers = response.data.filter(m => !members.find(mm => mm.id === m.id))
+            const createdMembers = response.data.members.filter(m => !members.find(mm => mm.id === m.id))
 
             for (const c of clearAfter.values()) {
                 c.markSaved();
 
                 // Check in response
-                const updatedMember = response.data.find(m => m.id === c.id);
+                const updatedMember = response.data.members.find(m => m.id === c.id);
                 if (updatedMember) {
                     c.member.set(updatedMember)
                 } else {

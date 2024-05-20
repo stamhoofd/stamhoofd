@@ -3,15 +3,16 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, User } from '@stamhoofd/models';
-import { BalanceItemStatus, MemberWithRegistrationsBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItemStatus, MemberWithRegistrationsBlob, MembersBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
-type ResponseBody = MemberWithRegistrationsBlob[]
+type ResponseBody = MembersBlob
 
 /**
  * One endpoint to create, patch and delete members and their registrations and payments
@@ -426,7 +427,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
         }
 
-        return new Response(members.map(m => m.getStructureWithRegistrations(true)));
+        return new Response(
+            await AuthenticatedStructures.membersBlob(members)
+        );
     }
 
     static async checkDuplicate(member: Member) {
