@@ -14,64 +14,9 @@
                 </ul>
             </div>
 
-            <div class="hover-box container">
-                <hr v-if="(isMobile && hasWarnings)">
-                <dl class="details-grid hover">
-                    <template v-if="member.patchedMember.details.firstName">
-                        <dt>Voornaam</dt>
-                        <dd v-copyable>
-                            {{ member.patchedMember.details.firstName }}
-                        </dd>
-                    </template>
+            <hr v-if="(isMobile && hasWarnings)">
 
-                    <template v-if="member.patchedMember.details.lastName">
-                        <dt>Achternaam</dt>
-                        <dd v-copyable>
-                            {{ member.patchedMember.details.lastName }}
-                        </dd>
-                    </template>
-
-                    <template v-if="member.patchedMember.details.memberNumber">
-                        <dt>Lidnummer</dt>
-                        <dd v-copyable>
-                            {{ member.patchedMember.details.memberNumber }}
-                        </dd>
-                    </template>
-
-                    <template v-if="member.patchedMember.details.birthDay">
-                        <dt>Verjaardag</dt>
-                        <dd v-copyable>
-                            {{ member.patchedMember.details.birthDayFormatted }} ({{ member.patchedMember.details.age }} jaar)
-                        </dd>
-                    </template>
-
-                    <template v-if="member.patchedMember.details.phone">
-                        <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
-                        <dd v-copyable>
-                            {{ member.patchedMember.details.phone }}
-                        </dd>
-                    </template>
-
-                    <template v-if="member.patchedMember.details.email">
-                        <dt>E-mailadres</dt>
-                        <dd v-copyable>
-                            {{ member.patchedMember.details.email }}
-                        </dd>
-                    </template>
-
-                    <template v-if="member.patchedMember.details.address">
-                        <dt>Adres</dt>
-                        <dd v-copyable>
-                            {{ member.patchedMember.details.address.street }} {{ member.patchedMember.details.address.number }}<br>{{ member.patchedMember.details.address.postalCode }}
-                            {{ member.patchedMember.details.address.city }}
-                            <template v-if="member.patchedMember.details.address.country !== currentCountry">
-                                <br>{{ formatCountry(member.patchedMember.details.address.country) }}
-                            </template>
-                        </dd>
-                    </template>
-                </dl>
-            </div>
-
+            <ViewMemberGeneralBox :member="member" />
             <MemberRegistrationsBox :member="member" />
         </div>
 
@@ -178,6 +123,7 @@ import { DataPermissionsSettings, FinancialSupportSettings, PlatformMember, Reco
 import { computed } from 'vue';
 import MemberSegmentedView from '../MemberSegmentedView.vue';
 import MemberRegistrationsBox from '../components/MemberRegistrationsBox.vue';
+import ViewMemberGeneralBox from '../components/view/ViewMemberGeneralBox.vue';
 
 const isMobile = useIsMobile();
 const present = usePresent();
