@@ -6,6 +6,10 @@
         <h3 class="style-title-list">
             {{ group.settings.name }}
         </h3>
+        <p v-if="registrationOrganization && (!organization || registrationOrganization.id !== organization.id)" class="style-description-small">
+            {{ registrationOrganization.name }}
+        </p>
+
         <p v-if="!registration.waitingList && registration.registeredAt" class="style-description-small">
             Ingeschreven op {{ formatDateTime(registration.registeredAt) }}
         </p>
@@ -26,6 +30,7 @@
 import { PlatformMember, Registration } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
 import GroupIcon from './group/GroupIcon.vue';
+import { useOrganization } from '../../hooks';
 
 const props = defineProps<{
     registration: Registration;
@@ -34,11 +39,15 @@ const props = defineProps<{
 const emit = defineEmits(["edit"]);
 
 const instance = getCurrentInstance();
+const organization = useOrganization();
 const isEditable = computed(() => {
     return !!instance?.vnode.props?.onEdit
 })
 const group = computed(() => {
     return props.member.allGroups.find(g => g.id === props.registration.groupId)!
+})
+const registrationOrganization = computed(() => {
+    return props.member.organizations.find(o => o.id === group.value.organizationId)
 })
 
 function editRegistration(event: any) {

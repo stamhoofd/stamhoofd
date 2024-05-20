@@ -31,7 +31,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { PermissionLevel, PlatformMember, Registration } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import { useAuth } from '../../hooks';
+import { useAuth, useOrganization } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import RegisterMemberView from '../RegisterMemberView.vue';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
@@ -54,10 +54,14 @@ const visibleRegistrationsTitle = computed(() => {
 const cycleOffset = ref(0);
 const auth = useAuth();
 const present = usePresent();
+const organization = useOrganization();
 
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
 const visibleRegistrations = computed(() => {
     return props.member.patchedMember.registrations.filter(r => {
+        if (organization.value && r.organizationId !== organization.value.id) {
+            return false;
+        }
         const group = props.member.allGroups.find(g => g.id === r.groupId);
         if (!group) {
             return false;
