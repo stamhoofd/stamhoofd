@@ -88,7 +88,7 @@
     padding-top: 5px;
     padding-bottom: 30px;
     display: grid;
-    grid-template-columns: calc(58% - 20px) 42%;
+    grid-template-columns: 1fr 42%;
     gap: 20px;
 
     @media (max-width: 700px) {
@@ -98,6 +98,10 @@
     > div,
     > div > div {
         --st-horizontal-padding: 0px;
+    }
+
+    &:has(> div:last-child:empty) {
+        grid-template-columns: 1fr;
     }
 
     > div:first-child > .container:first-child {
