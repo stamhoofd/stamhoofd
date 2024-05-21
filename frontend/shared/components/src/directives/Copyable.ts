@@ -2,6 +2,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
 import { ModalStackEventBus } from "../overlays/ModalStackEventBus";
 import Tooltip from "../overlays/Tooltip.vue";
+import { ObjectDirective } from "vue";
 
 const helper = {
     copyElementFallback(event, vnode) {
@@ -86,10 +87,8 @@ const helper = {
     },
 };
 
-export default {
-     
-
-    inserted(el, binding, vnode) {
+const CopyableDirective: ObjectDirective<HTMLElement & {$tooltipDisplayedComponent: null|ComponentWithProperties}, string>  =  {
+    beforeMount(el, binding, vnode) {
         // Add a hover listener
         el.addEventListener(
             "click",
@@ -100,3 +99,5 @@ export default {
         );
     },
 };
+
+export default CopyableDirective;
