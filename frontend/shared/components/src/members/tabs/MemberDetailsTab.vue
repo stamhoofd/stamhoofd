@@ -1,47 +1,18 @@
 <template>
     <div class="member-view-details split">
         <div>
-            <div v-if="isMobile && hasWarnings" class="hover-box container">
-                <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
-                        <span :class="'icon '+warning.icon" />
-                        <span class="text">{{ warning.text }}</span>
-                    </li>
-                </ul>
-            </div>
-
-            <hr v-if="(isMobile && hasWarnings)">
-
+            <ViewMemberWarningsBox v-if="isMobile" :member="member" />
             <ViewMemberGeneralBox :member="member" />
             <MemberRegistrationsBox :member="member" />
             <ViewMemberParentsBox :member="member" />
             <ViewMemberEmergencyContactsBox :member="member" />
         </div>
 
-        <div v-if="(hasWarnings && !isMobile) || member.patchedMember.users.length > 0 || familyMembers.length > 0">
-            <div v-if="hasWarnings && !isMobile" class="hover-box container">
-                <ul class="member-records">
-                    <li
-                        v-for="warning in sortedWarnings"
-                        :key="warning.id"
-                        :class="{ [warning.type]: true }"
-                    >
-                        <span :class="'icon '+warning.icon" />
-                        <span class="text">{{ warning.text }}</span>
-                    </li>
-                </ul>
-
-                <template v-if="member.patchedMember.users.length > 0">
-                    <hr>
-                </template>
-            </div>
+        <div>
+            <ViewMemberWarningsBox v-if="!isMobile" :member="member" />
 
             <div v-if="member.patchedMember.users.length > 0" class="hover-box container">
-                <hr v-if="isMobile">
+                <hr>
                 <h2 class="style-with-button">
                     <span class="icon-spacer">Accounts</span>
                     <a 
@@ -54,9 +25,15 @@
 
                 <STList>
                     <STListItem v-for="user in member.patchedMember.users" :key="user.id" class="hover-box">
-                        <template v-if="user.hasAccount && user.verified" #left><span class="icon user small" /></template>
-                        <template v-else-if="user.hasAccount && !user.verified" #left><span v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" /></template>
-                        <template v-else #left><span v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" /></template>
+                        <template v-if="user.hasAccount && user.verified" #left>
+                            <span class="icon user small" />
+                        </template>
+                        <template v-else-if="user.hasAccount && !user.verified" #left>
+                            <span v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" />
+                        </template>
+                        <template v-else #left>
+                            <span v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" />
+                        </template>
 
                         <template v-if="user.firstName || user.lastName">
                             <h3 v-if="user.firstName || user.lastName" class="style-title-list">
@@ -82,8 +59,8 @@
                             Beheerder
                         </p>
 
-                        <template  #right>
-                            <button class="button icon trash hover-show" type="button" @click="unlinkUser(user)" :disabled="member.isSaving" />
+                        <template #right>
+                            <button class="button icon trash hover-show" type="button" :disabled="member.isSaving" @click="unlinkUser(user)" />
                         </template>
                     </STListItem>
                 </STList>
@@ -102,14 +79,18 @@
 
                 <STList>
                     <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
-                        <template #left><span class="icon user small" /></template>
+                        <template #left>
+                            <span class="icon user small" />
+                        </template>
                         <h3 class="style-title-list">
                             {{ familyMember.patchedMember.firstName }} {{ familyMember.patchedMember.details ? familyMember.patchedMember.details.lastName : "" }}
                         </h3>
                         <p v-if="familyMember.groups.length > 0" class="style-description-small">
                             {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                 </STList>
             </div>
@@ -120,14 +101,15 @@
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Toast, useCountry, useIsMobile, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
-import { DataPermissionsSettings, FinancialSupportSettings, PlatformMember, RecordWarning, RecordWarningType, User } from '@stamhoofd/structures';
+import { CenteredMessage, Toast, useIsMobile, usePlatformFamilyManager } from '@stamhoofd/components';
+import { PlatformMember, User } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import MemberSegmentedView from '../MemberSegmentedView.vue';
 import MemberRegistrationsBox from '../components/MemberRegistrationsBox.vue';
 import ViewMemberEmergencyContactsBox from '../components/view/ViewMemberEmergencyContactsBox.vue';
 import ViewMemberGeneralBox from '../components/view/ViewMemberGeneralBox.vue';
 import ViewMemberParentsBox from '../components/view/ViewMemberParentsBox.vue';
+import ViewMemberWarningsBox from '../components/view/ViewMemberWarningsBox.vue';
 
 const isMobile = useIsMobile();
 const present = usePresent();
@@ -137,7 +119,6 @@ const props = defineProps<{
     member: PlatformMember
 }>();
 
-const organization = useOrganization();
 const familyMembers = computed(() => props.member.family.members.filter(m => m.id !== props.member.id))
 const maxFamilyAge = computed(() => {
     const ages = familyMembers.value.map(m => m.patchedMember.details.age ?? 99)
@@ -146,36 +127,6 @@ const maxFamilyAge = computed(() => {
     }
     return Math.max(...ages)
 })
-
-const warnings = computed(() => {
-    const warnings: RecordWarning[] = []
-
-    for (const answer of props.member.patchedMember.details.recordAnswers.values()) {
-        warnings.push(...answer.getWarnings())
-    }
-
-    if (organization.value && organization.value.meta.recordsConfiguration.financialSupport) {
-        if (props.member.patchedMember.details.requiresFinancialSupport && props.member.patchedMember.details.requiresFinancialSupport.value) {
-            warnings.push(RecordWarning.create({
-                text: organization.value.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
-                type: RecordWarningType.Error
-            }))
-        }
-    }
-    
-    if (organization.value && organization.value.meta.recordsConfiguration.dataPermission) {
-        if (props.member.patchedMember.details.dataPermissions && !props.member.patchedMember.details.dataPermissions.value) {
-            warnings.push(RecordWarning.create({
-                text: organization.value.meta.recordsConfiguration.dataPermission?.warningText || DataPermissionsSettings.defaultWarningText,
-                type: RecordWarningType.Error
-            }))
-        }
-    }
-
-    return warnings
-});
-const hasWarnings = computed(() => warnings.value.length > 0);
-const sortedWarnings = computed(() => warnings.value.slice().sort(RecordWarning.sort))
 
 async function gotoMember(member: PlatformMember) {
     await present({
