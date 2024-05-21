@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import { DataPermissionsSettings, FinancialSupportSettings, PlatformMember, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, PermissionLevel, PlatformMember, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useOrganization, usePlatform } from '../../../hooks';
+import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 
 defineOptions({
     inheritAttrs: false
@@ -28,11 +28,27 @@ const props = defineProps<{
 }>()
 const organization = useOrganization();
 const platform = usePlatform();
+const auth = useAuth();
+
+// Possible the member didn't fill in the answers yet
+const autoCompletedAnswers = computed(() => {
+    const recordCategories = props.member.getEnabledRecordCategories(auth.userPermissions, PermissionLevel.Read, organization.value);
+    const allRecords = recordCategories.flatMap(category => category.getAllFilteredRecords(props.member));
+    const answerClone = new Map(props.member.patchedMember.details.recordAnswers);
+
+    for (const record of allRecords) {
+        if (!answerClone.has(record.id)) {
+            answerClone.set(record.id, record.createDefaultAnswer())
+        }
+    }
+
+    return answerClone
+});
 
 const warnings = computed(() => {
     const warnings: RecordWarning[] = []
 
-    for (const answer of props.member.patchedMember.details.recordAnswers.values()) {
+    for (const answer of autoCompletedAnswers.value.values()) {
         warnings.push(...answer.getWarnings())
     }
 

@@ -133,11 +133,7 @@ const answer = computed({
         }
  
         // Create a new one
-        const a = type.create({
-            settings: props.record
-        })
- 
-        return a
+        return props.record.createDefaultAnswer()
     },
 
     set: (value: RecordAnswer) => {

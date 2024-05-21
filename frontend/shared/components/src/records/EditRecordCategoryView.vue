@@ -53,6 +53,8 @@
             </STListItem>
         </STList>
 
+        <hr>
+
         <p v-if="records.length === 0 && categories.length === 0" class="info-box">
             Deze vragenlijst is leeg en zal nog niet getoond worden.
         </p>
