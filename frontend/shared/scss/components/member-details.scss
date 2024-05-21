@@ -100,9 +100,17 @@
         --st-horizontal-padding: 0px;
     }
 
-    > div > .container:first-child {
+    > div:first-child > .container:first-child {
         > hr:first-child {
             display: none;
+        }
+    }
+
+    @media (min-width: 701px) {
+        > div:last-child > .container:first-child {
+            > hr:first-child {
+                display: none;
+            }
         }
     }
 }
