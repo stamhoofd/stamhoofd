@@ -11,10 +11,6 @@
                 <span class="text">{{ warning.text }}</span>
             </li>
         </ul>
-
-        <template v-if="member.patchedMember.users.length > 0">
-            <hr>
-        </template>
     </div>
 </template>
 

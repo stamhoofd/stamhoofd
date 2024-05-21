@@ -1,5 +1,6 @@
 <template>
     <div class="hover-box container">
+        <hr>
         <dl class="details-grid hover">
             <template v-if="!member.isNew && app === 'admin'">
                 <dt>ID</dt>
