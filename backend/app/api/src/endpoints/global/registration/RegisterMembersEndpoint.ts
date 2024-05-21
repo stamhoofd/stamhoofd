@@ -5,14 +5,14 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, RateLimiter,Registration, Token} from '@stamhoofd/models';
-import { BalanceItemStatus, MemberBalanceItem, OldIDRegisterCheckout, OldIDRegisterItem, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
+import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, RateLimiter, Registration } from '@stamhoofd/models';
+import { BalanceItemStatus, MemberBalanceItem, OldIDRegisterCheckout, OldIDRegisterItem, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
-import { ExchangePaymentEndpoint } from '../shared/ExchangePaymentEndpoint';
+import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = OldIDRegisterCheckout

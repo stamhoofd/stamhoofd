@@ -26,7 +26,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        await Context.setUserOrganizationScope();
         const {user} = await Context.authenticate()
         
         const payment = await Payment.getByID(request.params.id)

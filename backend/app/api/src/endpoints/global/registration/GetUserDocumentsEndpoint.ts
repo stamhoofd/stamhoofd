@@ -28,32 +28,44 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setUserOrganizationScope();
         const {user} = await Context.authenticate()
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        const templates = await DocumentTemplate.where({ status: 'Published', organizationId: organization.id })
+        let templates = organization ? await DocumentTemplate.where({ status: 'Published', organizationId: organization.id }) : null
         const memberIds = members.map(m => m.id)
-        const templateIds = templates.map(t => t.id)
+        const templateIds = templates ? templates.map(t => t.id) : null
 
-        if (memberIds.length == 0 || templateIds.length == 0) {
+        if (memberIds.length == 0 || (templateIds !== null && templateIds.length == 0)) {
             return new Response([]);
         }
 
-        const documents = (await Document.where({ 
+        const w: any = { 
             memberId: {
                 sign: 'IN',
                 value: memberIds
-            },
-            templateId: {
-                sign: 'IN',
-                value: templateIds
             },
             status: {
                 sign: 'IN',
                 value: [DocumentStatus.MissingData, DocumentStatus.Published]
             },
-        })).filter(document => {
+        }
+
+        if (templateIds !== null) {
+            w.templateId = {
+                sign: 'IN',
+                value: templateIds
+            }
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const documents = await Document.where(w);
+
+        if (!templates) {
+            templates = documents.length > 0 ? await DocumentTemplate.getByIDs(...documents.map(d => d.templateId)) : []
+        }
+        
+        const filteredDocuments = documents.filter(document => {
             const template = templates.find(t => t.id == document.templateId)
             if (!template || (!template.updatesEnabled && document.status === DocumentStatus.MissingData)) {
                 return false
@@ -61,8 +73,8 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
             return true;
         })
 
-        documents.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
+        filteredDocuments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
         
-        return new Response(documents.map(d => d.getStructure()));
+        return new Response(filteredDocuments.map(d => d.getStructure()));
     }
 }

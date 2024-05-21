@@ -29,7 +29,7 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        await Context.setOrganizationScope();
+        await Context.setUserOrganizationScope();
         const {user} = await Context.authenticate()
 
         const members = await Member.getMembersWithRegistrationForUser(user)

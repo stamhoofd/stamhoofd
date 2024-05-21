@@ -86,10 +86,10 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: reactiveSession,
-            $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager,
-            //$checkoutManager,
-            reactive_navigation_url: ownDomain ? "" : "leden/" + session.organization!.uri,
+            reactive_navigation_url: ownDomain ? "" : (
+                session.organization ? ("leden/" + session.organization.uri) : 'leden'
+            ),
             reactive_components: {
                 "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
                     organization: reactiveSession.organization

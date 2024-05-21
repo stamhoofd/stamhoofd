@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob, User as UserStruct } from "@stamhoofd/structures";
+import { MemberWithRegistrationsBlob } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
@@ -31,7 +31,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setUserOrganizationScope();
         const {user} = await Context.authenticate()
 
         // Process changes
@@ -41,7 +41,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             const member = new Member()
             member.id = struct.id
-            member.organizationId = organization.id
+            member.organizationId = organization?.id ?? null
 
             struct.details.cleanData()
             member.details = struct.details
