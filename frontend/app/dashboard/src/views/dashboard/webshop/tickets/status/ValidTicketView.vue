@@ -247,7 +247,7 @@
                 <h2>
                     {{ category.name }}
                 </h2>
-                <RecordCategoryAnswersBox :category="category" :answers="recordAnswers" :data-permission="true" />
+                <ViewRecordCategoryAnswersBox :category="category" :value="order.data" />
             </div>
 
             <div v-if="order.data.comments" class="container">
@@ -392,10 +392,10 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemRow, ColorHelper, GlobalEventBus, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CartItemRow, ColorHelper, GlobalEventBus, LongPressDirective, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { AccessRight, BalanceItemDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditPaymentView from "../../../member/EditPaymentView.vue";
@@ -411,7 +411,7 @@ import { WebshopManager } from "../../WebshopManager";
         STListItem,
         STToolbar,
         Spinner,
-        RecordCategoryAnswersBox,
+        ViewRecordCategoryAnswersBox,
         CartItemRow
     },
     filters: {

@@ -3,13 +3,15 @@
     <div v-else class="st-view order-view box-shade">
         <STNavigationBar :large="true" :sticky="false">
             <OrganizationLogo #left :organization="organization" :webshop="webshop" />
-            <template #right><button class="text button" type="button" @click="pop">
-                Sluiten
-            </button></template>
+            <template #right>
+                <button class="text button" type="button" @click="pop">
+                    Sluiten
+                </button>
+            </template>
         </STNavigationBar>
 
         <main>
-            <p class="stamhoofd-header" v-if="!webshop.meta.reduceBranding">
+            <p v-if="!webshop.meta.reduceBranding" class="stamhoofd-header">
                 <a :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw je betaalbare webshop via</span>  <Logo /></a>
             </p>
             <div class="box">
@@ -170,7 +172,9 @@
                                 <span v-else class="icon clock" />
                             </p>
 
-                            <span v-if="order.payments.length > 1" slot="right">{{ formatPrice(payment.price) }}</span>
+                            <template #right>
+                                <span v-if="order.payments.length > 1">{{ formatPrice(payment.price) }}</span>
+                            </template>
                         </STListItem>
                         <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
                             <h3 class="style-definition-label">
@@ -289,7 +293,7 @@
                         <h2>
                             {{ category.name }}
                         </h2>
-                        <RecordCategoryAnswersBox :category="category" :answers="recordAnswers" :data-permission="true" />
+                        <ViewRecordCategoryAnswersBox :category="category" :value="order.data" />
                     </div>
 
                     <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
@@ -311,11 +315,11 @@
                         <hr>
 
                         <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                            <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+                            <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
                         </p>
 
                         <STList>
-                            <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="false" />
+                            <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="false" />
                         </STList>
 
                         <hr>
@@ -343,15 +347,13 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CheckoutPriceBreakdown, CartItemRow, CenteredMessage, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { Payment, RecordCategory } from '@stamhoofd/structures';
-import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CartItemRow, CenteredMessage, CheckoutPriceBreakdown, DetailedTicketView, ErrorBox, LoadingButton, LoadingView, Logo, OrganizationLogo, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
+import { CartItem, Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import TicketListItem from '../products/TicketListItem.vue';
 
 @Component({
@@ -367,7 +369,7 @@ import TicketListItem from '../products/TicketListItem.vue';
         OrganizationLogo,
         Spinner,
         TicketListItem,
-        RecordCategoryAnswersBox,
+        ViewRecordCategoryAnswersBox,
         Logo,
         CartItemRow,
         CheckoutPriceBreakdown

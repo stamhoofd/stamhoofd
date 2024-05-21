@@ -140,7 +140,6 @@ export { default as LogoEditor } from "./src/views/LogoEditor.vue"
 export { default as OptionMenuBox } from "./src/views/OptionMenuBox.vue"
 export { default as ProductBox } from "./src/views/ProductBox.vue"
 export { default as ProductGrid } from "./src/views/ProductGrid.vue"
-export { default as RecordCategoryAnswersBox } from "./src/views/RecordCategoryAnswersBox.vue"
 export { default as SeatSelectionBox } from "./src/views/SeatSelectionBox.vue"
 export { default as ShowSeatsView } from "./src/views/ShowSeatsView.vue"
 
