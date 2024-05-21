@@ -842,7 +842,6 @@ export class AdminPermissionChecker {
     }
 
     canAccessAllPlatformMembers(): boolean {
-        console.log('canAccessAllPlatformMembers', this.platformPermissions)
         return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs)
     }
 
