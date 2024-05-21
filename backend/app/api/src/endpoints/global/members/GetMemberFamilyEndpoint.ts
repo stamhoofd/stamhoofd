@@ -1,9 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Member, MemberWithRegistrations } from "@stamhoofd/models";
 
-import { Context } from "../../../../helpers/Context";
 import { MembersBlob } from "@stamhoofd/structures";
-import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
+import { AuthenticatedStructures } from "../../../helpers/AuthenticatedStructures";
+import { Context } from "../../../helpers/Context";
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
@@ -28,13 +28,19 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
-        }  
+        if (organization) {
+            if (!await Context.auth.hasSomeAccess(organization.id)) {
+                throw Context.auth.error()
+            }  
+        } else {
+            if (!Context.auth.hasSomePlatformAccess()) {
+                throw Context.auth.error()
+            }
+        }
 
         const members = (await Member.getFamilyWithRegistrations(request.params.id))
 
@@ -51,7 +57,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
                     throw Context.auth.error("Je hebt geen toegang tot dit lid")
                 }
                 validatedMembers.push(member)
-                break;
+                continue;
             }
             if (await Context.auth.canAccessMember(member)) {
                 // Remove from result

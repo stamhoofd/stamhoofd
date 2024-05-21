@@ -17,8 +17,9 @@
 </template>
 
 <script setup lang="ts">
-import { useIsMobile } from '@stamhoofd/components';
+import { useIsMobile, usePlatformFamilyManager } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
+import { onMounted } from 'vue';
 import MemberRegistrationsBox from '../components/MemberRegistrationsBox.vue';
 import ViewMemberAccountsBox from '../components/view/ViewMemberAccountsBox.vue';
 import ViewMemberEmergencyContactsBox from '../components/view/ViewMemberEmergencyContactsBox.vue';
@@ -29,8 +30,13 @@ import ViewMemberWarningsBox from '../components/view/ViewMemberWarningsBox.vue'
 
 const isMobile = useIsMobile();
 
-defineProps<{
+const props = defineProps<{
     member: PlatformMember
 }>();
 
+const platformFamilyManager = usePlatformFamilyManager();
+
+onMounted(() => {
+    platformFamilyManager.loadFamilyMembers(props.member, {shouldRetry: true}).catch(console.error)
+});
 </script>

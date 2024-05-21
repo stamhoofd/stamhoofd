@@ -1,6 +1,13 @@
 <template>
     <div class="hover-box container">
         <dl class="details-grid hover">
+            <template v-if="!member.isNew && app === 'admin'">
+                <dt>ID</dt>
+                <dd v-copyable>
+                    {{ member.patchedMember.id }}
+                </dd>
+            </template>
+
             <template v-if="member.patchedMember.details.firstName">
                 <dt>Voornaam</dt>
                 <dd v-copyable>
@@ -60,6 +67,7 @@
 <script setup lang="ts">
 import { PlatformMember } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
+import { useAppContext } from '../../../context/appContext';
 
 defineOptions({
     inheritAttrs: false
@@ -69,6 +77,7 @@ defineProps<{
     member: PlatformMember
 }>()
 
+const app = useAppContext();
 const currentCountry = useCountry();
 
 </script>

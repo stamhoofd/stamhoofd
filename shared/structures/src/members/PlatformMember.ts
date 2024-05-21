@@ -51,7 +51,7 @@ export class PlatformFamily {
         for (const member of blob.members) {
             const existing = this.members.find(m => m.id === member.id);
             if (existing) {
-                existing.member = member
+                existing.member.set(member)
                 continue;
             }
 

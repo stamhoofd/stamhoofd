@@ -1,4 +1,4 @@
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding"
+import { Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { Request, RequestResult } from "@simonbackx/simple-networking"
 import { useContext } from "@stamhoofd/components"
@@ -26,6 +26,18 @@ export class PlatformFamilyManager {
 
     destroy() {
         Request.cancelAll(this)
+    }
+
+    async loadFamilyMembers(member: PlatformMember, options?: {shouldRetry?: boolean}) {
+        const response = await this.context.authenticatedServer.request({
+            method: "GET",
+            path: `/organization/members/${member.id}/family`,
+            decoder: MembersBlob as Decoder<MembersBlob>,
+            owner: this,
+            shouldRetry: options?.shouldRetry ?? false
+        });
+
+        member.family.insertFromBlob(response.data)
     }
 
     async save(members: PlatformMember[], shouldRetry: boolean = false) {
