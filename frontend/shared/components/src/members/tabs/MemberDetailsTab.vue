@@ -6,6 +6,7 @@
             <MemberRegistrationsBox :member="member" />
             <ViewMemberParentsBox :member="member" />
             <ViewMemberEmergencyContactsBox :member="member" />
+            <ViewMemberRecordCategoriesBox :member="member" />
         </div>
 
         <div>
@@ -27,6 +28,7 @@ import ViewMemberFamilyBox from '../components/view/ViewMemberFamilyBox.vue';
 import ViewMemberGeneralBox from '../components/view/ViewMemberGeneralBox.vue';
 import ViewMemberParentsBox from '../components/view/ViewMemberParentsBox.vue';
 import ViewMemberWarningsBox from '../components/view/ViewMemberWarningsBox.vue';
+import ViewMemberRecordCategoriesBox from '../components/view/ViewMemberRecordCategoriesBox.vue';
 
 const isMobile = useIsMobile();
 
