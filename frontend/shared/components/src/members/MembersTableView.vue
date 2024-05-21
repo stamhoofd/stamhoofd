@@ -17,20 +17,18 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
-import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, RegisterItem, Registration, SortItemDirection, SortList } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Ref, reactive, ref } from "vue";
-import MemberSegmentedView from './MemberSegmentedView.vue';
 import { useTranslate } from "@stamhoofd/frontend-i18n";
+import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { Ref, computed, reactive, ref } from "vue";
+import MemberSegmentedView from './MemberSegmentedView.vue';
 import RegisterMemberView from "./RegisterMemberView.vue";
-import ConfigureNewRegistrationsView from "./ConfigureNewRegistrationsView.vue";
 
 type ObjectType = PlatformMember;
 
-const title = 'Leden';
 const props = withDefaults(
     defineProps<{
         group?: Group | null,
@@ -42,6 +40,18 @@ const props = withDefaults(
         cycleOffset: 0
     }
 )
+
+const title = computed(() => {
+    if (props.waitingList) {
+        return "Wachtlijst"
+    }
+
+    if (props.group) {
+        return props.group.settings.name
+    }
+
+    return 'Leden'
+})
 
 const context = useContext();
 const present = usePresent();
