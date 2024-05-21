@@ -40,17 +40,18 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, defineRoutes, useNavigate, useShow } from '@simonbackx/vue-app-navigation';
 import { PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
-import {RegisterMemberView} from '@stamhoofd/components'
+import { computed, markRaw, reactive } from 'vue';
+import {EditMemberGeneralBox, MemberStepView, NavigationActions, RegisterMemberView} from '@stamhoofd/components'
 import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
 const $navigate = useNavigate();
 const members = computed(() => memberManager.family.members);
 const title = 'Wie wil je inschrijven?'
+const show = useShow();
 
 enum Routes {
     RegisterMember = 'registerMember',
@@ -93,7 +94,35 @@ async function selectMember(member: PlatformMember) {
     await $navigate(Routes.RegisterMember, { properties: { member } });
 }
 
-function addNewMember() {
-    // todo
+async function addNewMember() {
+    const clonedFamily = memberManager.family.clone();
+    const member = reactive(clonedFamily.newMember() as any) as PlatformMember
+
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(MemberStepView, {
+            title: 'Nieuw lid inschrijven',
+            member,
+            component: markRaw(EditMemberGeneralBox),
+            saveHandler: async (navigate: NavigationActions) => {
+                memberManager.family.copyFromClone(clonedFamily)
+                await navigate.show({
+                    force: true,
+                    url: Formatter.slug(member.patchedMember.firstName),
+                    components: [
+                        new ComponentWithProperties(RegisterMemberView, {
+                            member
+                        })
+                    ],
+                    replace: 1
+                })
+            }
+        }),
+    });
+
+    await show({
+        components: [
+            component
+        ]
+    })
 }
 </script>

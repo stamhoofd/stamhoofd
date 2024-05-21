@@ -11,10 +11,10 @@ import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptio
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { AppManager, LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { EmailAddressSettings, Token } from '@stamhoofd/structures';
-import { Ref, nextTick, onMounted, reactive, ref, markRaw } from 'vue';
+import { Ref, nextTick, onMounted, reactive, ref, markRaw, Raw } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent>|null>;
@@ -85,13 +85,15 @@ async function checkGlobalRoutes() {
         // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
         const token = queryString.get('token');
-        const session = parts[1] ? (await SessionContext.createFrom({organizationId: parts[1]})) : new SessionContext(null);
+        const session = reactive((parts[1] ? (await SessionContext.createFrom({organizationId: parts[1]})) : new SessionContext(null)) as Raw<SessionContext>) as SessionContext;
+        const platformManager = await PlatformManager.createFromCache(session, false)
         modalStack.value.present({
             adjustHistory: false,
             components: [
                 new ComponentWithProperties(ContextProvider, {
                     context: markRaw({
-                        $context: reactive(session),
+                        $context: session,
+                        $platformManager: platformManager,
                         reactive_navigation_url: currentPath,
                     }),
                     root: new ComponentWithProperties(ForgotPasswordResetView, { token })

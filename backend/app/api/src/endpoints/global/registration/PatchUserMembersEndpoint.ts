@@ -2,14 +2,15 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob } from "@stamhoofd/structures";
+import { MemberWithRegistrationsBlob, MembersBlob } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
-type ResponseBody = MemberWithRegistrationsBlob[]
+type ResponseBody = MembersBlob
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
@@ -126,7 +127,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         return new Response(
-            members.map(m => m.getStructureWithRegistrations()),
+            await AuthenticatedStructures.membersBlob(members)
         );
     }
 }

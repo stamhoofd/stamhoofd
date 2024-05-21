@@ -140,6 +140,9 @@ export class PlatformFamily {
             }
         }
 
+        // Delete members that are not in the clone
+        this.members = this.members.filter(m => clone.members.find(c => c.id === m.id))
+
         for (const o of clone.organizations) {
             this.insertOrganization(o)
         }
@@ -355,6 +358,10 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+        if (!this.isPropertyEnabledForPlatform(property)) {
+            return false;
+        }
+
         const def = this.platform.config.recordsConfiguration[property];
         if (def === null) {
             return false;
@@ -365,6 +372,10 @@ export class PlatformMember implements ObjectWithRecords {
     isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
         if (this.isPropertyRequiredForPlatform(property)) {
             return true;
+        }
+
+        if (!this.isPropertyEnabled(property)) {
+            return false;
         }
 
         const organizations = this.filterOrganizations({cycleOffset: 0})

@@ -696,6 +696,8 @@ export class AdminPermissionChecker {
      * Return a list of RecordSettings the current user can view or edit
      */
     async getAccessibleRecordCategories(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<RecordCategory[]> {
+        const isUserManager = member.users.find(u => u.id === this.user.id)
+
         // First list all organizations this member is part of
         const organizations: Organization[] = [];
         for (const registration of member.registrations) {
@@ -710,6 +712,27 @@ export class AdminPermissionChecker {
         // Check if we have access to their data
         const recordCategories: RecordCategory[] = []
         for (const organization of organizations) {
+            if (isUserManager) {
+                // If the user is a manager, we can always access all records
+                // if we ever add private records, we can exclude them here
+                for (const category of organization.meta.recordsConfiguration.recordCategories) {
+                    recordCategories.push(category)
+                }
+
+                for (const [id] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
+                    if (recordCategories.find(c => c.id === id)) {
+                        // Already added
+                        continue;
+                    }
+    
+                    const category = this.platform.config.recordsConfiguration.recordCategories.find(c => c.id === id)
+                    if (category) {
+                        recordCategories.push(category)
+                    }
+                }
+                continue;
+            }
+
             const permissions = await this.getOrganizationPermissions(organization)
             if (!permissions) {
                 continue;

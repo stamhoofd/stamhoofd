@@ -128,7 +128,7 @@ export default class App extends Vue {
 
                 document.title = webshop.meta.name +" - "+organization.name
 
-                return getWebshopRootView(session, webshop)
+                return await getWebshopRootView(session, webshop)
             } catch (e) {
                 console.log(e)
                 // Check if we have an organization on this domain

@@ -57,6 +57,12 @@ export default class PhoneInput extends Vue {
         this.phoneRaw = val
     }
 
+    @Watch('required', { deep: true })
+    onChangeRequired() {
+        // Revalidate, because the fields might be empty, and required goes false -> send null so any saved address gets cleared
+        this.validate(false, true).catch(console.error)
+    }
+
     onTyping() {
         // Silently send modelValue to parents, but don't show visible errors yet
         this.validate(false, true).catch(console.error)

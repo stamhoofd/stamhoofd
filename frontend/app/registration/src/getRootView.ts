@@ -3,7 +3,7 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController, Url
 import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, TabBarController, TabBarItem } from "@stamhoofd/components";
 import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
+import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
 import { inject, reactive, markRaw } from "vue";
 
@@ -57,6 +57,7 @@ export async function getScopedRegistrationRootFromUrl() {
         if (STAMHOOFD.userMode === 'platform' && parts[0] === 'leden') {
             session = new SessionContext(null)
             await session.loadFromStorage()
+            await SessionManager.prepareSessionForUsage(session, true);
             return await getRootView(session)
         }
         const dashboard = await import('@stamhoofd/dashboard')
@@ -68,8 +69,9 @@ export async function getScopedRegistrationRootFromUrl() {
 
 export async function getRootView(session: SessionContext, ownDomain = false) {
     const reactiveSession = reactive(session as any) as SessionContext
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
     await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country)
-    
+
     // Set color
     if (session.organization?.meta.color && ownDomain) {
         ColorHelper.setColor(session.organization?.meta.color)
@@ -84,14 +86,14 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     })
 
     //const $checkoutManager = new CheckoutManager($memberManager)
-
-    const $memberManager = reactive(new MemberManager(reactiveSession));
+    const $memberManager = reactive(new MemberManager(reactiveSession, platformManager.$platform));
     await $memberManager.loadMembers()
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: reactiveSession,
             $memberManager,
+            $platformManager: platformManager,
             reactive_navigation_url: ownDomain ? "" : (
                 session.organization ? ("leden/" + session.organization.uri) : 'leden'
             ),

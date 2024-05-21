@@ -10,6 +10,7 @@ import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-nav
 import { PlatformMember, Version } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
 
+import { onActivated } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
@@ -47,6 +48,10 @@ const loading = ref(false);
 const errors = useErrors()
 const manager = usePlatformFamilyManager();
 
+onActivated(() => {
+    cloned.value = props.member.clone() 
+});
+
 async function save() {
     if (loading.value) {
         return;
@@ -61,12 +66,15 @@ async function save() {
         }
 
         if (props.doSave) {
-            await manager.save(cloned.value.family.members)
+            // Extra clone for saving, so the view doesn't change during saving
+            const saveClone = cloned.value.clone();
+            await manager.save(saveClone.family.members)
+            props.member.family.copyFromClone(saveClone.family)
+        } else {
+            // Copy over clone
+            props.member.family.copyFromClone(cloned.value.family)
         }
-        
-        // Copy over clone
-        props.member.family.copyFromClone(cloned.value.family)
-
+    
         if (props.saveHandler) {
             await props.saveHandler({
                 show, present, dismiss, pop

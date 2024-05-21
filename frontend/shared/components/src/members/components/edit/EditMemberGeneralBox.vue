@@ -16,13 +16,10 @@
                         </div>
                     </div>
                 </STInputBox>
-                <p v-if="member.isNew" class="style-description-small">
-                    Let op dat je geen spelfouten maakt.
-                </p>
 
                 <BirthDayInput v-if="member.isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
 
-                <STInputBox v-if="!member.isNew && member.isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
+                <STInputBox v-if="member.isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
                     <RadioGroup>
                         <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
                             Man
@@ -37,7 +34,7 @@
                 </STInputBox>
             </div>
 
-            <div v-if="!member.isNew">
+            <div>
                 <AddressInput v-if="member.isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
                 <EmailInput v-if="member.isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
                 <PhoneInput v-if="member.isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />

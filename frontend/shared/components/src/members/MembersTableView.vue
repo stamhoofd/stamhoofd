@@ -240,10 +240,7 @@ const actions: TableAction<PlatformMember>[] = [
                         await navigate.show({
                             components: [
                                 new ComponentWithProperties(RegisterMemberView, {
-                                    member,
-                                    choiceHandler: async (group: Group, navigate: NavigationActions) => {
-                                        
-                                    },
+                                    member
                                 })
                             ]
                         })

@@ -13,13 +13,13 @@ export class MemberManager {
     $context: SessionContext;
     family: PlatformFamily;
 
-    constructor($context: SessionContext) {
+    constructor($context: SessionContext, platform: Platform) {
         this.$context = $context
         this.family = reactive(
             new PlatformFamily({
                 contextOrganization: $context.organization,
-                platform: Platform.shared,
-            })
+                platform,
+            }) as any
         ) as PlatformFamily;
     }
 
