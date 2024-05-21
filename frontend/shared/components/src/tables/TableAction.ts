@@ -86,14 +86,15 @@ export class TableAction<T> {
         let toast: Toast = new Toast("Ophalen...", "spinner").setHide(null)
         const timer = setTimeout(() => {
             toast.show()
-        }, 2000)
+        }, 1000)
 
         try {
-            const items = await data.getSelection({
+            const items = this.needsSelection ? (await data.getSelection({
                 onProgress(count, total) {
                     toast.setProgress(total !== 0 ? (count / total) : 0)
                 }
-            });
+            })) : [];
+            toast.setProgress(1)
             toast.message = 'Actie uitvoeren...'
             await this.handler(items);
         } finally {

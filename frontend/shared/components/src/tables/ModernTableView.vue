@@ -376,6 +376,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
             name: "Selecteer",
             groupIndex: -1,
             priority: 10,
+            needsSelection: false,
             handler: () => {
                 showSelection.value = true
             }
@@ -388,6 +389,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
             name: "Selecteer alles",
             groupIndex: -1,
             priority: 9,
+            needsSelection: false,
             handler: () => {
                 showSelection.value = true
                 isAllSelected.value = true;
@@ -398,6 +400,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
             name: "Deselecteer alles",
             groupIndex: -1,
             priority: 9,
+            needsSelection: false,
             handler: () => {
                 isAllSelected.value = false;
             }

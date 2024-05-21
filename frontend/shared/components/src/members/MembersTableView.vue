@@ -5,7 +5,7 @@
         :filter-builders="memberWithRegistrationsBlobUIFilterBuilders" 
         :default-sort-direction="SortItemDirection.DESC" 
         :title="title" 
-        column-configuration-id="members" 
+        :column-configuration-id="configurationId" 
         :actions="actions"
         :all-columns="allColumns" 
         @click="showMember"
@@ -21,7 +21,7 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Ref, computed, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -61,6 +61,9 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform()
+const configurationId = computed(() => {
+    return 'members-'+app
+})
 
 function extendSort(list: SortList): SortList  {
     if (list.find(l => l.key === 'id')) {
@@ -71,10 +74,39 @@ function extendSort(list: SortList): SortList  {
     return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
 }
 
+function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
+    if (!props.group) {
+        return filter;
+    }
+
+    const requiredExtraFilter = {
+        'registrations': {
+            $elemMatch: {
+                waitingList: props.waitingList,
+                cycleOffset: props.cycleOffset ?? 0,
+                groupId: props.group.id
+            }
+        }
+    }
+
+
+    if (!filter) {
+        return requiredExtraFilter;
+    }
+
+    return {
+        $and: [
+            filter,
+            requiredExtraFilter
+        ]
+    }
+}
+
 const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
     async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
         console.log('Members.fetch', data);
         data.sort = extendSort(data.sort);
+        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -100,6 +132,8 @@ const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
 
     async fetchCount(data: CountFilteredRequest): Promise<number> {
         console.log('Members.fetchCount', data);
+
+        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",

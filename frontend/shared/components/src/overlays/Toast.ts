@@ -1,5 +1,6 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
+import { reactive } from "vue";
 
 export type ToastListener = (toast: Toast) => void
 
@@ -31,6 +32,11 @@ export class Toast {
     constructor(message: string, icon: string | null = null) {
         this.message = message
         this.icon = icon
+
+
+        // Constructor hack: we override Toast with a reactive toast
+        // this fixes issues with editing the toast, because otherwise it would not get updated
+        return reactive(this);
     }
 
     static success(message: string): Toast {
