@@ -22,7 +22,7 @@ export function useMemberManager() {
 export async function getScopedRegistrationRootFromUrl() {
     // UrlHelper.fixedPrefix = "beheerders";
     const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login'];
+    const ignoreUris = ['login', 'start'];
 
     let session: SessionContext|null = null;
 
@@ -54,6 +54,11 @@ export async function getScopedRegistrationRootFromUrl() {
     }
         
     if (!session || !session.organization) {
+        if (STAMHOOFD.userMode === 'platform' && parts[0] === 'leden') {
+            session = new SessionContext(null)
+            await session.loadFromStorage()
+            return await getRootView(session)
+        }
         const dashboard = await import('@stamhoofd/dashboard')
         return dashboard.getOrganizationSelectionRoot()
     }
