@@ -1,28 +1,35 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 
-import { Address } from "../addresses/Address"
-import { StamhoofdFilter } from "../filters/new/StamhoofdFilter"
 import { Group } from "../Group"
 import { Organization } from "../Organization"
+import { PermissionLevel, PermissionsResourceType } from "../Permissions"
 import { Platform } from "../Platform"
-import { RegisterCheckout, RegisterItem } from "./checkout/RegisterCheckout"
+import { UserPermissions } from "../UserPermissions"
+import { Address } from "../addresses/Address"
+import { PropertyFilter } from "../filters/PropertyFilter"
+import { StamhoofdFilter } from "../filters/new/StamhoofdFilter"
 import { EmergencyContact } from "./EmergencyContact"
 import { MemberDetails } from "./MemberDetails"
-import { MembersBlob, MemberWithRegistrationsBlob } from "./MemberWithRegistrationsBlob"
-import { ObjectWithRecords, PatchAnswers } from "./ObjectWithRecords"
+import { MemberWithRegistrationsBlob, MembersBlob } from "./MemberWithRegistrationsBlob"
+import { ObjectWithRecords } from "./ObjectWithRecords"
 import { Parent } from "./Parent"
+import { RegisterCheckout, RegisterItem } from "./checkout/RegisterCheckout"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
-import { PropertyFilter } from "../filters/PropertyFilter"
-import { LoadedPermissions, PermissionLevel, PermissionsResourceType } from "../Permissions"
-import { UserPermissions } from "../UserPermissions"
 
 export class PlatformFamily {
     members: PlatformMember[] = []
     
-    // Checkout is required for the member to know whether certain fields are required to get collected
+    /**
+     * Checkout is required for the member to know whether certain fields are required to get collected
+     */
     checkout = new RegisterCheckout()
+
+    /**
+     * Items that have not been added to the cart/checkout, but will be - and for which data has to be collected
+     */
+    pendingRegisterItems: RegisterItem[] = []
     
     platform: Platform
     organizations: Organization[] = []
@@ -120,6 +127,7 @@ export class PlatformFamily {
         })
         family.organizations = this.organizations;
         family.checkout = this.checkout;
+        family.pendingRegisterItems = this.pendingRegisterItems;
         family.members = this.members.map(m => m._cloneWithFamily(family))
         return family
     }
@@ -250,10 +258,11 @@ export class PlatformMember implements ObjectWithRecords {
     constructor(data: {
         member: MemberWithRegistrationsBlob, 
         family: PlatformFamily,
-        isNew?: boolean
+        isNew?: boolean,
+        patch?: AutoEncoderPatchType<MemberWithRegistrationsBlob>
     }) {
         this.member = data.member
-        this.patch = MemberWithRegistrationsBlob.patch({id: this.member.id})
+        this.patch = data.patch ?? MemberWithRegistrationsBlob.patch({id: this.member.id})
         this.family = data.family
         this.isNew = data.isNew ?? false
     }
@@ -265,9 +274,10 @@ export class PlatformMember implements ObjectWithRecords {
 
     _cloneWithFamily(family: PlatformFamily) {
         return new PlatformMember({
-            member: this.patchedMember.clone(),
+            member: this.member.clone(),
             family,
-            isNew: this.isNew
+            isNew: this.isNew,
+            patch: this.patch.clone()
         })
     }
 

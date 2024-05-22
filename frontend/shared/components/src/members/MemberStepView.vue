@@ -30,11 +30,13 @@ const props = withDefaults(
         member: PlatformMember,
         // Whether the member should be saved to the API
         doSave?: boolean,
+        markReviewed?: string[]
         saveHandler?: ((navigate: NavigationActions) => Promise<void>|void)|null
     }>(), {
         doSave: true,
         saveText: 'Opslaan',
-        saveHandler: null
+        saveHandler: null,
+        markReviewed: () => []
     }
 );
 
@@ -52,6 +54,20 @@ onActivated(() => {
     cloned.value = props.member.clone() 
 });
 
+function patchMemberWithReviewed(member: PlatformMember) {
+    if (props.markReviewed.length) {
+        const times = member.patchedMember.details.reviewTimes.clone();
+
+        for (const r of props.markReviewed) {
+            times.markReviewed(r as any, new Date())
+        }
+
+        member.addDetailsPatch({
+            reviewTimes: times
+        })
+    }
+}
+
 async function save() {
     if (loading.value) {
         return;
@@ -65,13 +81,27 @@ async function save() {
             return;
         }
 
+        if (props.markReviewed.length) {
+            const times = cloned.value.patchedMember.details.reviewTimes.clone();
+
+            for (const r of props.markReviewed) {
+                times.markReviewed(r as any, new Date())
+            }
+
+            cloned.value.addDetailsPatch({
+                reviewTimes: times
+            })
+        }
+
         if (props.doSave) {
             // Extra clone for saving, so the view doesn't change during saving
             const saveClone = cloned.value.clone();
+            patchMemberWithReviewed(saveClone)
             await manager.save(saveClone.family.members)
             props.member.family.copyFromClone(saveClone.family)
         } else {
             // Copy over clone
+            patchMemberWithReviewed(cloned.value)
             props.member.family.copyFromClone(cloned.value.family)
         }
     

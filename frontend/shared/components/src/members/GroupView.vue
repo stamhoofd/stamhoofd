@@ -76,6 +76,7 @@ import { ImageComponent, STToolbar } from '@stamhoofd/components';
 import { Group, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { useCheckoutRegisterItem } from './hooks/useCheckoutRegisterItem';
 
 const props = defineProps<{
     group: Group,
@@ -84,9 +85,10 @@ const props = defineProps<{
 const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group))
 const validationError = computed(() => registerItem.value.validationError )
 const infoDescription = computed(() => validationError.value ? null : registerItem.value.infoDescription);
+const checkoutRegisterItem = useCheckoutRegisterItem()
 
-function registerMember() {
-    // todo
+async function registerMember() {
+    await checkoutRegisterItem(registerItem.value)
 }
 
 const priceList = computed(() => {
