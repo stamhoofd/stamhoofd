@@ -100,6 +100,14 @@ async function save() {
             }))
         }
 
+        if (contactTitle.value.length < 2) {
+            se.addError(new SimpleError({
+                code: "invalid_field",
+                message: "Vul een relatie in",
+                field: "title"
+            }))
+        }
+
         if (!await errors.validator.validate()) {
             se.throwIfNotEmpty()
             loading.value = false;

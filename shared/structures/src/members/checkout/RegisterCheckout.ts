@@ -37,6 +37,10 @@ export class RegisterItem {
     member: PlatformMember
     group: Group
     waitingList = false
+
+    /**
+     * Does not contain any discounts
+     */
     calculatedPrice = 0
 
     constructor(data: {id?: string, member: PlatformMember, group: Group, waitingList: boolean}) {
@@ -243,6 +247,16 @@ export class RegisterItem {
     }
 
     validate() {
+        if (!this.checkout.cart.contains(this)) {
+            if (!this.checkout.cart.canAdd(this)) {
+                throw new SimpleError({
+                    code: "already_registered",
+                    message: "Already registered",
+                    human: `Reken jouw winkelmandje eerst af. Het is niet mogelijk om deze inschrijving samen af te rekenen omdat het inschrijvingsgeld aan een andere partij betaald moet worden.`
+                })
+            }
+        }
+
         // Already registered
         if (this.isAlreadyRegistered()) {
             throw new SimpleError({
@@ -394,6 +408,25 @@ export class RegisterItem {
             waitingList: idRegisterItem.waitingList
         })
     }
+
+    calculatePrice() {
+        if (this.waitingList) {
+            this.calculatedPrice = 0
+            return
+        }
+        this.calculatedPrice = this.group.settings.getGroupPrices(new Date())?.getPriceFor(
+            this.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
+            0
+        ) ?? 0
+    }
+
+    get paymentConfiguration() {
+        this.calculatePrice()
+        if (this.calculatedPrice === 0) {
+            return null;
+        }
+        return this.organization.meta.registrationPaymentConfiguration
+    }
 }
 
 export class RegisterCart {
@@ -401,14 +434,7 @@ export class RegisterCart {
 
     calculatePrices() {
         for (const item of this.items) {
-            if (item.waitingList) {
-                item.calculatedPrice = 0
-                continue
-            }
-            item.calculatedPrice = item.group.settings.getGroupPrices(new Date())?.getPriceFor(
-                item.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
-                0
-            ) ?? 0
+            item.calculatePrice()
         }
         // todo: apply discounts at a later stage
         
@@ -416,7 +442,29 @@ export class RegisterCart {
     }
 
     add(item: RegisterItem) {
+        if (this.contains(item)) {
+            return;
+        }
         this.items.push(item)
+    }
+
+    canAdd(item: RegisterItem) {
+        if (this.contains(item)) {
+            return false;
+        }
+        if (this.paymentConfiguration && item.paymentConfiguration && item.paymentConfiguration !== this.paymentConfiguration) {
+            return false;
+        }
+        return true;
+    }
+
+    contains(item: RegisterItem) {
+        for (const [i, otherItem] of this.items.entries()) {
+            if (otherItem.id === item.id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     remove(item: RegisterItem) {
@@ -439,6 +487,16 @@ export class RegisterCart {
     get price() {
         return this.items.reduce((total, item) => item.calculatedPrice + total, 0)
     }
+
+    get paymentConfiguration() {
+        for (const item of this.items) {
+            const organization = item.organization
+
+            return organization.meta.registrationPaymentConfiguration
+        }
+
+        return null;
+    }
 }
 
 export class RegisterCheckout{
@@ -446,13 +504,7 @@ export class RegisterCheckout{
     administrationFee = 0;
 
     get paymentConfiguration() {
-        for (const item of this.cart.items) {
-            const organization = item.organization
-
-            return organization.meta.registrationPaymentConfiguration
-        }
-
-        return null;
+        return this.cart.paymentConfiguration
     }
 
     updatePrices() {
