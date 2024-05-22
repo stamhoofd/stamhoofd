@@ -21,6 +21,7 @@ import { DiscountCode } from './DiscountCode';
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
+import { PriceBreakdown } from '../PriceBreakdown';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -135,7 +136,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return Math.max(0, this.cart.price - this.appliedPercentageDiscount - this.fixedDiscount) + this.deliveryPrice + this.administrationFee
     }
 
-    get priceBreakown() {
+    get priceBreakown(): PriceBreakdown {
         const all = [
             {
                 name: Formatter.percentage(this.percentageDiscount) + ' korting',

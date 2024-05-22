@@ -304,7 +304,7 @@
 
             <hr>
 
-            <CheckoutPriceBreakdown :checkout="order.data" />
+            <PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
         </main>
     </div>
 </template>
@@ -314,7 +314,7 @@ import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoE
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, CheckoutPriceBreakdown, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { CartItemRow, PriceBreakdownBox, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { AccessRight, BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -339,7 +339,7 @@ import TicketRow from "./TicketRow.vue";
         TicketRow,
         ViewRecordCategoryAnswersBox,
         CartItemRow,
-        CheckoutPriceBreakdown
+        PriceBreakdownBox
     },
     filters: {
         price: Formatter.price.bind(Formatter),

@@ -1,6 +1,8 @@
 // Latest version of the structures
 export { Version } from './src/Version'
 
+export * from "./src/PriceBreakdown"
+
 // General
 export * from "./src/addresses/Address"
 export * from "./src/addresses/City"

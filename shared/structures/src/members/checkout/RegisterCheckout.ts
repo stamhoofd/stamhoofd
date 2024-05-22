@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Group } from "../../Group";
 import { WaitingListType } from "../../GroupSettings";
 import { PlatformFamily, PlatformMember } from "../PlatformMember";
+import { PriceBreakdown } from "../../PriceBreakdown";
 
 
 export type RegisterContext = {
@@ -417,17 +418,78 @@ export class RegisterCart {
     add(item: RegisterItem) {
         this.items.push(item)
     }
+
+    remove(item: RegisterItem) {
+        for (const [i, otherItem] of this.items.entries()) {
+            if (otherItem.id === item.id) {
+                this.items.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    get isEmpty() {
+        return this.items.length === 0
+    }
+
+    get count() {
+        return this.items.length
+    }
+
+    get price() {
+        return this.items.reduce((total, item) => item.calculatedPrice + total, 0)
+    }
 }
 
 export class RegisterCheckout{
     cart = new RegisterCart()
+    administrationFee = 0;
+
+    get paymentConfiguration() {
+        for (const item of this.cart.items) {
+            const organization = item.organization
+
+            return organization.meta.registrationPaymentConfiguration
+        }
+
+        return null;
+    }
+
+    updatePrices() {
+        this.cart.calculatePrices()
+        this.administrationFee = this.paymentConfiguration?.administrationFee.calculate(this.cart.price) ?? 0
+    }
 
     validate() {
         // todo
     }
 
-
-    canRegister(member: PlatformMember, group: Group) {
-       
+    get totalPrice() {
+        return Math.max(0, this.cart.price + this.administrationFee)
     }
+
+    get priceBreakown(): PriceBreakdown {
+        const all = [
+            {
+                name: 'Administratiekost',
+                price: this.administrationFee
+            },
+        ].filter(a => a.price !== 0)
+
+        if (all.length > 0) {
+            all.unshift({
+                name: 'Subtotaal',
+                price: this.cart.price
+            })
+        }
+
+        return [
+            ...all,
+            {
+                name: 'Totaal',
+                price: this.totalPrice
+            }
+        ];
+    }
+
 }

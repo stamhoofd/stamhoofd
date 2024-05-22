@@ -324,7 +324,7 @@
 
                         <hr>
 
-                        <CheckoutPriceBreakdown :checkout="order.data" />
+                        <PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
                     </template>
                 </main>
                 <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || (!isPaid && isTransfer))" :sticky="false">
@@ -348,7 +348,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, CenteredMessage, CheckoutPriceBreakdown, DetailedTicketView, ErrorBox, LoadingButton, LoadingView, Logo, OrganizationLogo, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { CartItemRow, CenteredMessage, PriceBreakdownBox, DetailedTicketView, ErrorBox, LoadingButton, LoadingView, Logo, OrganizationLogo, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -372,7 +372,7 @@ import TicketListItem from '../products/TicketListItem.vue';
         ViewRecordCategoryAnswersBox,
         Logo,
         CartItemRow,
-        CheckoutPriceBreakdown
+        PriceBreakdownBox
     },
     filters: {
         price: Formatter.price.bind(Formatter),
