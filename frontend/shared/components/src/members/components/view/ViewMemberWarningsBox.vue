@@ -32,7 +32,13 @@ const auth = useAuth();
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
-    const recordCategories = props.member.getEnabledRecordCategories(auth.userPermissions, PermissionLevel.Read, organization.value);
+    const recordCategories = props.member.getEnabledRecordCategories({
+        checkPermissions: {
+            permissions: auth.userPermissions, 
+            level: PermissionLevel.Read
+        },
+        scopeOrganization: organization.value
+    });
     const allRecords = recordCategories.flatMap(category => category.getAllFilteredRecords(props.member));
     const answerClone = new Map(props.member.patchedMember.details.recordAnswers);
 

@@ -50,6 +50,7 @@ const titleSuffix = computed(() => {
 })
 
 function addPatch(patch: PatchAnswers) {
+    console.log('add patch', patch)
     props.member.addDetailsPatch({
         recordAnswers: patch
     })

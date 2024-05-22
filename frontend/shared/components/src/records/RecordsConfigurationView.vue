@@ -271,6 +271,7 @@ function buildPropertyRefs(property: PropertyName, title: string) {
     const configuration = computed(() => getFilterConfiguration(property))
 
     return ref({
+        name: property,
         title,
         enabled,
         locked,
@@ -433,6 +434,13 @@ async function save() {
     errors.errorBox = null;
 
     try {
+        // Clear locked properties
+        for (const property of properties) {
+            if (property.value.locked && patched.value[property.value.name]) {
+                addPatch({[property.value.name]: null})
+            }
+        }
+
         await props.saveHandler(patch.value);        
         await pop({force: true})
     } catch (e) {

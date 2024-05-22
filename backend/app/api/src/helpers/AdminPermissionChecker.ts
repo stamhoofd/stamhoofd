@@ -1,4 +1,4 @@
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
+import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
 import { AccessRight, GroupCategory, GroupStatus, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, Platform, RecordCategory, RecordSettings } from "@stamhoofd/structures"
@@ -692,14 +692,25 @@ export class AdminPermissionChecker {
         return !!organizationPermissions && organizationPermissions.hasFullAccess()
     }
 
+    isUserManager(member: MemberWithRegistrations) {
+        return !!member.users.find(u => u.id === this.user.id)
+    }
+
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
     async getAccessibleRecordCategories(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<RecordCategory[]> {
-        const isUserManager = member.users.find(u => u.id === this.user.id)
+        const isUserManager = this.isUserManager(member)
 
         // First list all organizations this member is part of
         const organizations: Organization[] = [];
+
+        if (member.organizationId) {
+            if (this.checkScope(member.organizationId)) {
+                organizations.push(await this.getOrganization(member.organizationId))
+            }
+        }
+
         for (const registration of member.registrations) {
             if (this.checkScope(registration.organizationId)) {
                 if (!organizations.find(o => o.id === registration.organizationId)) {
@@ -762,18 +773,19 @@ export class AdminPermissionChecker {
 
         // Platform data
         const platformPermissions = this.platformPermissions
-        if (platformPermissions) {
+        if (platformPermissions || isUserManager) {
             for (const category of this.platform.config.recordsConfiguration.recordCategories) {
                 if (recordCategories.find(c => c.id === category.id)) {
                     // Already added
                     continue;
                 }
 
-                if (platformPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
+                if (isUserManager || platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
                     recordCategories.push(category)
                 }
             }
         }
+        console.log('getAccessibleRecordCategories', member.details.name, isUserManager, recordCategories)
 
         return recordCategories
     }
@@ -798,6 +810,12 @@ export class AdminPermissionChecker {
      * Changes data inline
      */
     async filterMemberData(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob): Promise<MemberWithRegistrationsBlob> {
+        const isUserManager = this.isUserManager(member)
+        if (isUserManager) {
+            // For the user manager, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
+            return data;
+        }
+
         const records = await this.getAccessibleRecordSet(member, PermissionLevel.Read)
 
         const cloned = data.clone()
@@ -822,11 +840,20 @@ export class AdminPermissionChecker {
                 statusCode: 400
             })
         }
+
         if (!data.details.recordAnswers) {
             return data;
         }
 
-        const records = await this.getAccessibleRecordSet(member, PermissionLevel.Write)
+        if (!(data.details.recordAnswers instanceof PatchMap)) {
+            throw new SimpleError({
+                code: 'invalid_request',
+                message: 'Cannot PUT recordAnswers',
+                statusCode: 400
+            })
+        }
+        const isUserManager = this.isUserManager(member)
+        const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
 
         for (const [key, value] of data.details.recordAnswers.entries()) {
             let name: string | undefined = undefined
@@ -852,7 +879,7 @@ export class AdminPermissionChecker {
                 name = value.settings.name
             }
 
-            if (!records.has(key)) {
+            if (!isUserManager && !records.has(key)) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,

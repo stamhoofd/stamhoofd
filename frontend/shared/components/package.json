@@ -16,6 +16,7 @@
         "@tiptap/pm": "^2.3.1",
         "@tiptap/starter-kit": "^2.3.1",
         "@tiptap/vue-3": "^2.3.1",
-        "ibantools": "^3.1.0"
+        "ibantools": "^3.1.0",
+        "@stamhoofd/structures": "1.2.0"
     }
 }

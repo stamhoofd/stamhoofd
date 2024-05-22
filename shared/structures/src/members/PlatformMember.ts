@@ -586,28 +586,34 @@ export class PlatformMember implements ObjectWithRecords {
         return categories;
     }
 
-    getEnabledRecordCategories(permissions: UserPermissions|null, permissionLevel = PermissionLevel.Read, scopeOrganization?: Organization|null): RecordCategory[] {
-        if (!permissions) {
+    getEnabledRecordCategories(options: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}, scopeOrganization?: Organization|null}): RecordCategory[] {
+        const checkPermissions = options.checkPermissions
+        if (checkPermissions && !checkPermissions.permissions) {
             return []
         }
         
         // From organization
         const categories: RecordCategory[] = [];
         const inheritedFilters = new Map<string, PropertyFilter[]>()
-        const scopedOrganizations = scopeOrganization ? [scopeOrganization] : this.organizations;
+        const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.organizations;
 
         // First push all platform record categories, these should be first
         for (const organization of scopedOrganizations) {
+            if (checkPermissions && checkPermissions.permissions) {
+                const organizationPermissions = checkPermissions.permissions.forOrganization(organization, true);
 
-            const organizationPermissions = permissions.forOrganization(organization, true);
+                if (!organizationPermissions) {
+                    continue;
+                }
 
-            if (!organizationPermissions) {
-                continue;
-            }
-
-            // Any optional categories from the platform that have been enabled?
-            for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
-                if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, id, permissionLevel)) {
+                // Any optional categories from the platform that have been enabled?
+                for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
+                    if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, id, checkPermissions.level)) {
+                        inheritedFilters.set(id, [...(inheritedFilters.get(id) ?? []), filter])
+                    }
+                }
+            } else {
+                for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
                     inheritedFilters.set(id, [...(inheritedFilters.get(id) ?? []), filter])
                 }
             }
@@ -616,14 +622,14 @@ export class PlatformMember implements ObjectWithRecords {
         // All required categories of the platform
         for (const category of this.platform.config.recordsConfiguration.recordCategories) {
             if (category.isEnabled(this)) {
-                const hasAnyAccess = !!scopedOrganizations.find(o => {
-                    const organizationPermissions = permissions.forOrganization(o, true);
+                const hasAnyAccess = !checkPermissions || !checkPermissions.permissions || !!scopedOrganizations.find(o => {
+                    const organizationPermissions = checkPermissions.permissions!.forOrganization(o, true);
 
                     if (!organizationPermissions) {
                         return false;
                     }
 
-                    return organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, permissionLevel);
+                    return organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, checkPermissions.level);
                 });
 
                 if (hasAnyAccess) {
@@ -642,9 +648,9 @@ export class PlatformMember implements ObjectWithRecords {
 
         // All organization record categories
         for (const organization of scopedOrganizations) {
-            const organizationPermissions = permissions.forOrganization(organization, true);
+            const organizationPermissions = checkPermissions?.permissions ? checkPermissions.permissions.forOrganization(organization, true) : null;
 
-            if (!organizationPermissions) {
+            if (checkPermissions && !organizationPermissions) {
                 continue;
             }
 
@@ -653,7 +659,7 @@ export class PlatformMember implements ObjectWithRecords {
                     return false;
                 }
 
-                if (!organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, r.id, permissionLevel)) {
+                if (organizationPermissions && checkPermissions && !organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, r.id, checkPermissions.level)) {
                     return false;
                 }
 

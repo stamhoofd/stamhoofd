@@ -59,6 +59,14 @@ const props = withDefaults(
 const auth = useAuth()
 const organization = useOrganization()
 
-const recordCategories = computed(() => props.member.getEnabledRecordCategories(auth.userPermissions, PermissionLevel.Write, organization.value))
+const recordCategories = computed(() => 
+    props.member.getEnabledRecordCategories({
+        checkPermissions: {
+            permissions: auth.userPermissions, 
+            level: PermissionLevel.Write
+        },
+        scopeOrganization: organization.value
+    })
+)
 
 </script>

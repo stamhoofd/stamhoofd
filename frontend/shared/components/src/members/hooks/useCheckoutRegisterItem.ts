@@ -3,6 +3,7 @@ import { Toast } from "../../overlays/Toast";
 import { useNavigationActions } from "../../types/NavigationActions";
 import { MemberStepManager } from "../classes/MemberStepManager";
 import { allMemberSteps } from "../classes/steps";
+import { MemberRecordCategoryStep } from "../classes/steps/MemberRecordCategoryStep";
 
 export function useCheckoutRegisterItem() {
     const navigate = useNavigationActions();
@@ -14,7 +15,12 @@ export function useCheckoutRegisterItem() {
         member.family.pendingRegisterItems = [item];
 
         // Check which steps need a review or are not complete
-        const steps = allMemberSteps;
+        const steps = allMemberSteps.slice();
+
+        for (const recordCategory of member.getAllRecordCategories()) {
+            steps.push(new MemberRecordCategoryStep(recordCategory));
+        }
+        
         const manager = new MemberStepManager(member, steps, async (navigate) => {
             // Move the item to the cart
             member.family.checkout.cart.add(item);

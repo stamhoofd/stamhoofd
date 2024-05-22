@@ -110,9 +110,9 @@ const props = withDefaults(defineProps<{
     answers: Map<string, RecordAnswer>,
     validator: Validator,
     allOptional?: boolean,
-    forceCreation?: boolean
+    markReviewed?: boolean
 }>(), {
-    forceCreation: false,
+    markReviewed: false,
     allOptional: false
 });
 
@@ -138,6 +138,10 @@ const answer = computed({
 
     set: (value: RecordAnswer) => {
         const patch = new PatchMap() as PatchAnswers;
+
+        if (props.markReviewed) {
+            value.markReviewed()
+        }
         patch.set(props.record.id, value);
         emit('patch', patch)
     }
@@ -296,7 +300,7 @@ useValidation(props.validator, async () => {
     const valid = await isValid()
 
     if (valid) {
-        if (props.forceCreation) {
+        if (props.markReviewed) {
             answer.value = answer.value as any
             await nextTick();
         }

@@ -88,7 +88,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        for (const struct of request.body.getPatches()) {
+        for (let struct of request.body.getPatches()) {
             const member = members.find((m) => m.id == struct.id)
             if (!member) {
                 throw new SimpleError({
@@ -97,6 +97,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     human: "Je probeert een lid aan te passen die niet (meer) bestaat. Er ging ergens iets mis."
                 })
             }
+            struct = await Context.auth.filterMemberPatch(member, struct)
 
             if (struct.details) {
                 if (struct.details.isPut()) {

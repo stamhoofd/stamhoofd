@@ -22,7 +22,13 @@ const organization = useOrganization();
 const auth = useAuth();
 
 const recordCategories = computed(() => {
-    return props.member.getEnabledRecordCategories(auth.userPermissions, PermissionLevel.Read, organization.value);
+    return props.member.getEnabledRecordCategories({
+        checkPermissions: {
+            permissions: auth.userPermissions, 
+            level: PermissionLevel.Read
+        },
+        scopeOrganization: organization.value
+    });
 })
 
 </script>
