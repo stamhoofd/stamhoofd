@@ -1,23 +1,22 @@
-import { AutoEncoder, BooleanDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from "../../Group";
 import { WaitingListType } from "../../GroupSettings";
-import { PlatformFamily, PlatformMember } from "../PlatformMember";
 import { PriceBreakdown } from "../../PriceBreakdown";
+import { PlatformFamily, PlatformMember } from "../PlatformMember";
 import { OldRegisterCartPriceCalculator, RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator";
 
 
 export type RegisterContext = {
-    members: PlatformMember[],
-    checkout: RegisterCheckout
+    family: PlatformFamily
 }
 
 export class IDRegisterItem extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
+    @field({ decoder: StringDecoder })
+    id: string
 
     @field({ decoder: StringDecoder })
     memberId: string
@@ -29,9 +28,38 @@ export class IDRegisterItem extends AutoEncoder {
     organizationId: string
 
     @field({ decoder: BooleanDecoder })
-    waitingList = false
+    waitingList: boolean
+
+    hydrate(context: RegisterContext) {
+        return RegisterItem.fromId(this, context.family)
+    }
 }
 
+export class IDRegisterCart extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(IDRegisterItem) })
+    items: IDRegisterItem[] = []
+
+    hydrate(context: RegisterContext) {
+        const cart = new RegisterCart()
+        cart.items = this.items.map(i => i.hydrate(context))
+        return cart
+    }
+}
+
+export class IDRegisterCheckout extends AutoEncoder {
+    @field({ decoder: IDRegisterCart })
+    cart: IDRegisterCart = IDRegisterCart.create({})
+
+    @field({ decoder: IntegerDecoder })
+    administrationFee = 0
+
+    hydrate(context: RegisterContext) {
+        const checkout = new RegisterCheckout()
+        checkout.cart = this.cart.hydrate(context)
+        checkout.administrationFee = this.administrationFee
+        return checkout
+    }
+}
 
 export class RegisterItem implements RegisterItemWithPrice {
     id: string;
@@ -45,6 +73,16 @@ export class RegisterItem implements RegisterItemWithPrice {
         this.member = data.member
         this.group = data.group
         this.waitingList = data.waitingList
+    }
+
+    convert(): IDRegisterItem {
+        return IDRegisterItem.create({
+            id: this.id,
+            memberId: this.member.member.id,
+            groupId: this.group.id,
+            organizationId: this.group.organizationId,
+            waitingList: this.waitingList
+        })
     }
 
     get memberId() {
@@ -384,16 +422,6 @@ export class RegisterItem implements RegisterItemWithPrice {
 
     }
 
-    toId(): IDRegisterItem {
-        return IDRegisterItem.create({
-            id: this.id,
-            memberId: this.member.member.id,
-            groupId: this.group.id,
-            organizationId: this.group.organizationId,
-            waitingList: this.waitingList
-        })
-    }
-
     static fromId(idRegisterItem: IDRegisterItem, family: PlatformFamily) {
         const member = family.members.find(m => m.member.id === idRegisterItem.memberId)
         if (!member) {
@@ -436,6 +464,12 @@ export class RegisterCart {
             this.items.map(i => i.group), 
             this.items.flatMap(i => i.organization.meta.categories) 
         )
+    }
+
+    convert(): IDRegisterCart {
+        return IDRegisterCart.create({
+            items: this.items.map(i => i.convert())
+        })
     }
 
     add(item: RegisterItem) {
@@ -499,6 +533,13 @@ export class RegisterCart {
 export class RegisterCheckout{
     cart = new RegisterCart()
     administrationFee = 0;
+
+    convert(): IDRegisterCheckout {
+        return IDRegisterCheckout.create({
+            cart: this.cart.convert(),
+            administrationFee: this.administrationFee
+        })
+    }
 
     get paymentConfiguration() {
         return this.cart.paymentConfiguration

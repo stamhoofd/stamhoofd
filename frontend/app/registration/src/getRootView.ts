@@ -88,6 +88,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     //const $checkoutManager = new CheckoutManager($memberManager)
     const $memberManager = reactive(new MemberManager(reactiveSession, platformManager.$platform));
     await $memberManager.loadMembers()
+    await $memberManager.loadCheckout()
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
