@@ -3,10 +3,11 @@
         <figure>
             <div class="letter-logo" :data-length="letters.length">
                 {{ letters }}
+                <span class="icon user" v-if="!letters" />
             </div>
 
             <span>
-                <span class="hide-medium">{{ $user.name }}</span>
+                <span class="hide-medium">{{ $user.name || 'Account' }}</span>
                 <span class="icon arrow-down-small" />
             </span>
         </figure>

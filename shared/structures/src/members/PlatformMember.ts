@@ -134,10 +134,12 @@ export class PlatformFamily {
 
     copyFromClone(clone: PlatformFamily) {
         for (const member of this.members) {
-            const cloneMember = clone.members.find(m => m.id === member.id)
+            const cloneMember = clone.members.find(m => m.id === member.id || (m._oldId && m._oldId === member.id && member.isNew))
             if (cloneMember) {
                 member.member.set(cloneMember.member)
                 member.patch.set(cloneMember.patch)
+            } else {
+                console.warn('copyFromClone could not find member with id', member.id, 'in clone.')
             }
         }
 
@@ -247,6 +249,11 @@ export class PlatformMember implements ObjectWithRecords {
     // Save status data:
     _savingPatch: AutoEncoderPatchType<MemberWithRegistrationsBlob>|null = null
     _isCreating: boolean|null = null
+
+    /**
+     * In case this was a duplicate member, we need to keep track of the old id to merge changes
+     */
+    _oldId: string|null = null
 
     family: PlatformFamily
     isNew = false
