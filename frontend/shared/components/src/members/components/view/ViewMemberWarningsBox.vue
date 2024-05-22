@@ -61,7 +61,7 @@ const warnings = computed(() => {
         }
     }
     
-    if ((platform.value && platform.value.config.recordsConfiguration.financialSupport) || (organization.value && organization.value.meta.recordsConfiguration.dataPermission)) {
+    if ((platform.value && platform.value.config.recordsConfiguration.dataPermission) || (organization.value && organization.value.meta.recordsConfiguration.dataPermission)) {
         if (props.member.patchedMember.details.dataPermissions && !props.member.patchedMember.details.dataPermissions.value) {
             warnings.push(RecordWarning.create({
                 text: platform.value.config.recordsConfiguration.dataPermission?.warningText ?? organization.value?.meta.recordsConfiguration.dataPermission?.warningText ?? DataPermissionsSettings.defaultWarningText,
