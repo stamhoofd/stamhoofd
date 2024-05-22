@@ -7,6 +7,7 @@ import { Group } from "../../Group";
 import { WaitingListType } from "../../GroupSettings";
 import { PlatformFamily, PlatformMember } from "../PlatformMember";
 import { PriceBreakdown } from "../../PriceBreakdown";
+import { OldRegisterCartPriceCalculator, RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator";
 
 
 export type RegisterContext = {
@@ -32,15 +33,11 @@ export class IDRegisterItem extends AutoEncoder {
 }
 
 
-export class RegisterItem {
+export class RegisterItem implements RegisterItemWithPrice {
     id: string;
     member: PlatformMember
     group: Group
     waitingList = false
-
-    /**
-     * Does not contain any discounts
-     */
     calculatedPrice = 0
 
     constructor(data: {id?: string, member: PlatformMember, group: Group, waitingList: boolean}) {
@@ -48,6 +45,18 @@ export class RegisterItem {
         this.member = data.member
         this.group = data.group
         this.waitingList = data.waitingList
+    }
+
+    get memberId() {
+        return this.member.id
+    }
+
+    get groupId() {
+        return this.group.id
+    }
+
+    get reduced() {
+        return this.member.patchedMember.details.requiresFinancialSupport?.value ?? false
     }
 
     get family() {
@@ -409,19 +418,7 @@ export class RegisterItem {
         })
     }
 
-    calculatePrice() {
-        if (this.waitingList) {
-            this.calculatedPrice = 0
-            return
-        }
-        this.calculatedPrice = this.group.settings.getGroupPrices(new Date())?.getPriceFor(
-            this.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
-            0
-        ) ?? 0
-    }
-
     get paymentConfiguration() {
-        this.calculatePrice()
         if (this.calculatedPrice === 0) {
             return null;
         }
@@ -433,12 +430,12 @@ export class RegisterCart {
     items: RegisterItem[] = []
 
     calculatePrices() {
-        for (const item of this.items) {
-            item.calculatePrice()
-        }
-        // todo: apply discounts at a later stage
-        
-        // this.administrationFee = paymentConfiguration.administrationFee.calculate(this.priceWithoutFees)
+        OldRegisterCartPriceCalculator.calculatePrices(
+            this.items, 
+            this.items.map(i => i.member.patchedMember), 
+            this.items.map(i => i.group), 
+            this.items.flatMap(i => i.organization.meta.categories) 
+        )
     }
 
     add(item: RegisterItem) {
