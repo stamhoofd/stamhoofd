@@ -116,7 +116,7 @@ export class PlatformFamilyManager {
 
                         c._oldId = oldId
                     } else {
-                        console.error('Patched members but missing in response. This should not happen.', c)
+                        console.error('Patched members but missing in response. This should not happen.', savedMember, c)
                     }
                 }
             }

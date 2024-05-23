@@ -138,6 +138,12 @@ export class PlatformFamily {
             if (cloneMember) {
                 member.member.set(cloneMember.member)
                 member.patch.set(cloneMember.patch)
+                member.isNew = cloneMember.isNew
+                member._oldId = cloneMember._oldId
+
+                if (cloneMember._savingPatch || cloneMember._isCreating) {
+                    console.warn('Copying from member that is being saved')
+                }
             } else {
                 console.warn('copyFromClone could not find member with id', member.id, 'in clone.')
             }
