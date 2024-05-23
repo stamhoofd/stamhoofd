@@ -183,7 +183,7 @@ if (app == 'admin') {
             id: 'organization',
             allowSorting: false,
             name: $t('shared.organization.singular'), 
-            getValue: (member) => member.organizations, 
+            getValue: (member) => member.filterOrganizations({cycleOffset: 0}), 
             format: (organizations) => Formatter.joinLast(organizations.map(o => o.name), ', ', ' en ') || $t('shared.notRegistered'),
             getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
             minimumWidth: 100,
