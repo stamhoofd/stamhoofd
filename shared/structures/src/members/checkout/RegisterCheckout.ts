@@ -545,6 +545,21 @@ export class RegisterCart {
 
         return null;
     }
+
+    get singleOrganization() {
+        if (this.items.length === 0) {
+            return null;
+        }
+
+        const organization = this.items[0].organization
+        for (const item of this.items) {
+            if (item.organization.id !== organization.id) {
+                return null;
+            }
+        }
+
+        return organization
+    }
 }
 
 export class RegisterCheckout{
@@ -566,12 +581,16 @@ export class RegisterCheckout{
         return this.cart.paymentConfiguration
     }
 
+    get singleOrganization() {
+        return this.cart.singleOrganization
+    }
+
     updatePrices() {
         this.cart.calculatePrices()
         this.administrationFee = this.paymentConfiguration?.administrationFee.calculate(this.cart.price) ?? 0
     }
 
-    validate(data: {memberBalanceItems: MemberBalanceItem[]}) {
+    validate(data: {memberBalanceItems?: MemberBalanceItem[]}) {
         // todo
     }
 
