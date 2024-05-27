@@ -785,7 +785,6 @@ export class AdminPermissionChecker {
                 }
             }
         }
-        console.log('getAccessibleRecordCategories', member.details.name, isUserManager, recordCategories)
 
         return recordCategories
     }
