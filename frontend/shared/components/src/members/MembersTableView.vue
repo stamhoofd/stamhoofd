@@ -21,8 +21,8 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
 import RegisterMemberView from "./RegisterMemberView.vue";
@@ -33,11 +33,13 @@ const props = withDefaults(
     defineProps<{
         group?: Group | null,
         waitingList?: boolean,
-        cycleOffset?: number
+        cycleOffset?: number,
+        category?: GroupCategoryTree | null
     }>(), {
         group: null,
         waitingList: false,
-        cycleOffset: 0
+        cycleOffset: 0,
+        category: null
     }
 )
 
@@ -65,6 +67,18 @@ const configurationId = computed(() => {
     return 'members-'+app
 })
 
+const groups = (() => {
+    if (props.group) {
+        return [props.group]
+    }
+    if (props.category) {
+        return props.category.getAllGroups()
+    }
+    return []
+})()
+
+const groupIds = groups.map(g => g.id)
+
 function extendSort(list: SortList): SortList  {
     if (list.find(l => l.key === 'id')) {
         return list;
@@ -75,16 +89,18 @@ function extendSort(list: SortList): SortList  {
 }
 
 function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
-    if (!props.group) {
-        return filter;
-    }
-
     const requiredExtraFilter = {
         'registrations': {
-            $elemMatch: {
+            $elemMatch: props.group ? {
                 waitingList: props.waitingList,
                 cycleOffset: props.cycleOffset ?? 0,
                 groupId: props.group.id
+            } : {
+                waitingList: props.waitingList,
+                cycleOffset: props.cycleOffset ?? 0,
+                groupId: {
+                    $in: groups.map(g => g.id)
+                }
             }
         }
     }
@@ -190,6 +206,115 @@ if (app == 'admin') {
             recommendedWidth: 300,
         })
     )
+} else {
+    allColumns.push(
+        new Column<ObjectType, Date | null>({
+            name: props.waitingList ? "Sinds" : "Inschrijvingsdatum", 
+            allowSorting: false,
+            getValue: (v) => {
+                const registrations = v.filterRegistrations({groups, waitingList: props.waitingList, cycleOffset: props.cycleOffset})
+
+                if (registrations.length == 0) {
+                    return null
+                }
+
+                const filtered = !props.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.map(r => r.createdAt!.getTime())
+
+                if (filtered.length == 0) {
+                    return null
+                }
+                return new Date(Math.min(...filtered))
+            }, 
+            format: (v, width) => v ? (width < 160 ? (width < 120 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : "Onbekend",
+            getStyle: (v) => v === null ? "gray" : "",
+            minimumWidth: 80,
+            recommendedWidth: 160
+        })
+    )
+
+    if (!props.waitingList) {
+        allColumns.push(
+            new Column<ObjectType, number>({
+                name: "Openstaand saldo", 
+                allowSorting: false,
+                getValue: (v) => v.patchedMember.outstandingBalance,
+                format: (outstandingBalance) => {
+                    if (outstandingBalance < 0) {
+                        return Formatter.price(outstandingBalance)
+                    }
+                    if (outstandingBalance <= 0) {
+                        return "Betaald";
+                    }
+                    return Formatter.price(outstandingBalance)
+                }, 
+                getStyle: (v) => v <= 0 ? "gray" : "",
+                minimumWidth: 70,
+                recommendedWidth: 80
+            })
+        )
+    }
+
+    if (props.category) {
+        allColumns.push(
+            new Column<ObjectType, Group[]>({
+                id: 'category',
+                allowSorting: false,
+                name: props.waitingList ? 'Wachtlijst' : (props.category.settings.name || 'Groep'), 
+                getValue: (member) => {
+                    if (!props.category) {
+                        return [];
+                    }
+                    const groups = props.category.getAllGroups()
+                    const registrations = member.filterRegistrations({groups: groups, waitingList: props.waitingList, cycleOffset: props.cycleOffset})
+                    const memberGroups = registrations.flatMap(r => {
+                        const group = groups.find(g => g.id == r.groupId)
+                        if (!group) {
+                            return []
+                        }
+                        return [group]
+                    })
+                    const getIndex = (g) => groups.findIndex(_g => _g.id === g.id)
+                    return memberGroups.sort((a,b) => Sorter.byNumberValue(getIndex(b), getIndex(a)))
+                },
+                format: (groups) => {
+                    if (groups.length == 0) {
+                        return 'Geen'
+                    }
+                    return groups.map(g => g.settings.name).join(', ')
+                }, 
+                getStyle: (groups) => groups.length == 0 ? "gray" : "",
+                minimumWidth: 100,
+                recommendedWidth: 150
+            })
+        )
+    }
+
+    if (props.waitingList) {
+        allColumns.push(
+            new Column<ObjectType, boolean>({
+                name: "Status", 
+                allowSorting: false,
+                getValue: (member) => !!member.patchedMember.registrations.find(r => {
+                    if (groupIds.includes(r.groupId) && r.waitingList && r.canRegister) {
+                        const group = groups.find(g => g.id === r.groupId)
+                        if (group && r.cycle == group.cycle - props.cycleOffset) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }),
+                format: (canRegister) => {
+                    if (canRegister) {
+                        return "Uitgenodigd om in te schrijven";
+                    }
+                    return "Nog niet uitgenodigd"
+                }, 
+                getStyle: (canRegister) => !canRegister ? "gray" : "",
+                minimumWidth: 100,
+                recommendedWidth: 150
+            })
+        )
+    }
 }
 
 async function showMember(member: PlatformMember) {

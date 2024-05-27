@@ -1268,35 +1268,6 @@ async function editFilter() {
     })
 }
 
-// 
-//     get values() {
-//         return props.tableObjectFetcher.objects
-//     }
-// 
-//     /**
-//      * @deprecated
-//      */
-//     get sortedValues() {
-//         return values.value
-//     }
-// 
-//     toggleSort(column: Column<any, any>) {
-//         if (isColumnDragActive.value) {
-//             //console.log("Ignored sort toggle due to drag")
-//             return
-//         }
-//         if (this.sortBy === column) {
-//             if (this.sortDirection === SortItemDirection.ASC) {
-//                 this.sortDirection = SortItemDirection.DESC;
-//             } else {
-//                 this.sortDirection = SortItemDirection.ASC;
-//             }
-//         } else {
-//             this.sortBy = column;
-//         }
-//         saveColumnConfiguration()
-//     }
-// 
 function isValueSelected(value: Value) {
     const found = markedRows.value.has(value.id)
 
@@ -1315,34 +1286,6 @@ function getSelectionValue(row: VisibleRow<Value>) {
 
     return isValueSelected(value)
 }
-// 
-//     setSelectionValues(values: Value[], selected: boolean) {
-//         for (const value of values) {
-//             if (selected) {
-//                 if (markedRowsAreSelected.value) {
-//                     markedRows.value.set(value.id, value)
-//                 } else {
-//                     markedRows.value.delete(value.id)
-//                 }
-//             } else {
-//                 if (!markedRowsAreSelected.value) {
-//                     markedRows.value.set(value.id, value)
-//                 } else {
-//                     markedRows.value.delete(value.id)
-//                 }
-//             }
-// 
-//             // Update cached value of visible row
-//             const row = visibleRows.value.find(r => r.value?.id === value.id)
-//             if (row) {
-//                 row.cachedSelectionValue = selected
-//             }
-//         }
-// 
-//         // Update cached all selection
-//         this.updateHasSelection()
-//     }
-// 
 
 function setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
     const value = row.value
@@ -1366,58 +1309,6 @@ function setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
     row.cachedSelectionValue = selected
 }
 
-// 
-//     isAllSelected = false
-//     hasSelection = false;
-//     hasSingleSelection = false;
-// 
-//     /**
-//      * Cached because of usage of maps which are not reactive
-//      */
-//     updateHasSelection() {
-//         hasSelection.value = markedRowsAreSelected.value ? markedRows.value.size > 0 : (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0)
-//         this.isAllSelected = this.getSelectAll()
-//         this.hasSingleSelection = markedRowsAreSelected.value && markedRows.value.size === 1
-//     }
-// 
-//     /**
-//      * This is not reactive, due to the use of maps, which are not reactive in vue.
-//      * Thats why we need a cached value.
-//      */
-//     getSelectAll(): boolean {
-//         if (markedRowsAreSelected.value) {
-//             return markedRows.value.size === (props.tableObjectFetcher.totalFilteredCount ?? values.value.length)
-//         } else {
-//             return markedRows.value.size === 0
-//         }
-//     }
-// 
-//     setSelectAll(selected: boolean) {
-//         markedRowsAreSelected.value = !selected
-//         markedRows.value.clear()
-// 
-//         for (const visibleRow of visibleRows.value) {
-//             visibleRow.cachedSelectionValue = selected
-//         }
-//         this.updateHasSelection()
-//     }
-// 
-//     async getSelection(options?: FetchAllOptions): Promise<Value[]> {
-//         if (!showSelection.value || !hasSelection.value) {
-//             return await props.tableObjectFetcher.fetchAll(options)
-//         }
-// 
-//         // TODO: fix sorting
-// 
-//         if (markedRowsAreSelected.value) {
-//             // No async needed
-//             return Array.from(markedRows.value.values())
-//         } else {
-//             const all = await props.tableObjectFetcher.fetchAll(options);
-//             return Array.from(all).filter(val => !markedRows.value.has(val.id))
-//         }
-//     }
-// 
 function getExpectedSelectionLength(): number {
     if (!showSelection.value || !hasSelection.value) {
         return props.tableObjectFetcher.totalFilteredCount ?? values.value.length ?? 0
@@ -1480,13 +1371,6 @@ watch(values, () => {
     updateRecommendedWidths()
 }, { deep: true });
 
-// 
-//     /**
-//      * Cached offset between scroll and top of the table
-//      */
-//     cachedTableYPosition: number | null = 0
-//     cachedScrollElement: HTMLElement | null = null
-// 
 function getScrollElement(element: HTMLElement): HTMLElement {
     const style = window.getComputedStyle(element);
     if (
@@ -1545,10 +1429,6 @@ function updateVisibleRows() {
     const unBoundedLastVisibleItemIndex =  Math.max(0, Math.floor((topOffset + vh) / rowHeight.value) + extraItems)
 
     const lastVisibleItemIndex = Math.min(unBoundedLastVisibleItemIndex, totalItems - 1)
-
-    //console.log("First visible item index: " + firstVisibleItemIndex + " Last visible item index: " + lastVisibleItemIndex)
-    //console.log("vh: " + vh + " topOffset: " + topOffset + " rowHeight: " + rowHeight.value+" total: "+totalItems)
-    //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
 
     // Make all visible rows available if not visible any longer
     for (const visibleRow of visibleRows.value) {

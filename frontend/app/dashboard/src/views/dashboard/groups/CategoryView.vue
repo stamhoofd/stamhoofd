@@ -149,7 +149,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ContextMenu, ContextMenuItem, ErrorBox, GroupAvatar, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, ContextMenu, ContextMenuItem, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -158,7 +158,6 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
 
 import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
-import GroupMembersView from "./GroupMembersView.vue";
 import GroupOverview from "./GroupOverview.vue";
 
 @Component({
@@ -344,7 +343,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     openAll(animated = true, cycleOffset?: number) {
         this.show({
             components: [
-                new ComponentWithProperties(GroupMembersView, {
+                new ComponentWithProperties(MembersTableView, {
                     category: this.tree,
                     initialCycleOffset: cycleOffset
                 })
@@ -356,7 +355,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     openWaitingList(animated = true) {
         this.show({
             components: [
-                new ComponentWithProperties(GroupMembersView, {
+                new ComponentWithProperties(MembersTableView, {
                     category: this.tree,
                     waitingList: true
                 })
