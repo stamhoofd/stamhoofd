@@ -5,17 +5,18 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, RateLimiter, Registration } from '@stamhoofd/models';
-import { BalanceItemStatus, MemberBalanceItem, OldIDRegisterCheckout, OldIDRegisterItem, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, RegisterResponse, Version } from "@stamhoofd/structures";
+import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, Platform, RateLimiter, Registration } from '@stamhoofd/models';
+import { BalanceItemStatus, IDRegisterCheckout, MemberBalanceItem, MemberDetails, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PlatformFamily, RegisterItem, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = OldIDRegisterCheckout
+type Body = IDRegisterCheckout
 type ResponseBody = RegisterResponse
 
 export const demoLimiter = new RateLimiter({
@@ -39,7 +40,7 @@ export type RegistrationWithMemberAndGroup = Registration & { member: Member } &
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
  */
 export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = OldIDRegisterCheckout as Decoder<OldIDRegisterCheckout>
+    bodyDecoder = IDRegisterCheckout as Decoder<IDRegisterCheckout>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "POST") {
@@ -49,7 +50,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const params = Endpoint.parseParameters(request.url, "/members/register", {});
 
         if (params) {
-            if (request.getVersion() < 71) {
+            if (request.getVersion() < 257) {
                 throw new SimpleError({
                     code: "not_supported",
                     message: "This version is no longer supported",
@@ -89,11 +90,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const members = await Member.getMembersWithRegistrationForUser(user)
         const groups = await Group.getAll(organization.id)
+
+        const blob = await AuthenticatedStructures.membersBlob(members)
+        const family = PlatformFamily.create(blob, {platform: await Platform.getSharedStruct()})
+        const checkout = request.body.hydrate({family})
         
         const registrations: RegistrationWithMemberAndGroup[] = []
-        const payRegistrations: {registration: RegistrationWithMemberAndGroup, item: OldIDRegisterItem}[] = []
+        const payRegistrations: {registration: RegistrationWithMemberAndGroup, item: RegisterItem}[] = []
 
-        if (request.body.cart.isEmpty) {
+        if (checkout.cart.isEmpty) {
             throw new SimpleError({
                 code: "empty_data",
                 message: "Oeps, jouw mandje is leeg. Voeg eerst inschrijvingen toe voor je verder gaat."
@@ -109,12 +114,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // await group.save()
             }
         }
-
-        // Save the price that the client did calculate (to alert price changes before we continue)
-        const clientSidePrice = request.body.cart.price
-
-        // Should update the calculation methods to also accept a model by using interfaces
-        const groupsStructure = groups.map(g => g.getStructure())
 
         // Validate balance items (can only happen serverside)
         const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id)
@@ -132,24 +131,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Validate the cart
-        request.body.cart.validate(members, groupsStructure, organization.meta.categories, memberBalanceItems)
+        checkout.validate({memberBalanceItems})
 
         // Recalculate the price
-        request.body.cart.calculatePrices(
-            members, 
-            groupsStructure, 
-            organization.meta.categories,
-            organization.meta.registrationPaymentConfiguration,
-        )
+        checkout.updatePrices()
 
-        const totalPrice = request.body.cart.price
-        if (totalPrice !== clientSidePrice) {
-            throw new SimpleError({
-                code: "empty_data",
-                message: "Oeps! De prijs is gewijzigd terwijl je aan het inschrijven was. De totaalprijs kwam op "+Formatter.price(totalPrice)+", in plaats van "+Formatter.price(clientSidePrice)+". Herlaad je pagina en probeer opnieuw om de aanpassingen te zien doorkomen. Daarna kan je verder met inschrijven. Neem contact op met "+request.$t("shared.emails.general")+" als je dit probleem blijft krijgen."
-            })
-        }
-
+        const totalPrice = checkout.totalPrice
+        
         if (totalPrice < 0) {
             throw new SimpleError({
                 code: "empty_data",
@@ -163,7 +151,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const registrationMemberRelation = new ManyToOneRelation(Member, "member")
         registrationMemberRelation.foreignKey = "memberId"
 
-        mainLoop: for (const item of request.body.cart.items) {
+        mainLoop: for (const item of checkout.cart.items) {
             const member = members.find(m => m.id == item.memberId)
             if (!member) {
                 throw new SimpleError({
@@ -232,25 +220,25 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Validate payment method
         if (totalPrice > 0) {
-            const allowedPaymentMethods = organization.meta.paymentMethods
+            const allowedPaymentMethods = organization.meta.registrationPaymentConfiguration.paymentMethods
 
-            if (!allowedPaymentMethods.includes(request.body.paymentMethod)) {
+            if (!checkout.paymentMethod || !allowedPaymentMethods.includes(checkout.paymentMethod)) {
                 throw new SimpleError({
                     code: "invalid_payment_method",
                     message: "Oeps, je hebt geen geldige betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw. Herlaad de pagina indien nodig."
                 })
             }
         } else {
-            request.body.paymentMethod = PaymentMethod.Unknown
+            checkout.paymentMethod = PaymentMethod.Unknown
         }
 
         const payment = new Payment()
         payment.userId = user.id
         payment.organizationId = organization.id
-        payment.method = request.body.paymentMethod
+        payment.method = checkout.paymentMethod
         payment.status = PaymentStatus.Created
         payment.price = totalPrice
-        payment.freeContribution = request.body.cart.freeContribution
+        payment.freeContribution = checkout.freeContribution
 
         if (payment.method == PaymentMethod.Transfer) {
             // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
@@ -264,13 +252,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 })
             }
 
-            const m = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)]
+            const m = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)] as MemberDetails[]
             payment.generateDescription(
                 organization, 
-                Formatter.groupNamesByFamily(m as any),
+                Formatter.groupNamesByFamily(m),
                 {
-                    name: Formatter.groupNamesByFamily(m as any),
-                    naam:  Formatter.groupNamesByFamily(m as any),
+                    name: Formatter.groupNamesByFamily(m),
+                    naam:  Formatter.groupNamesByFamily(m),
                     email: user.email
                 }
             )
@@ -343,10 +331,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
         
         const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0]
-        if (request.body.cart.freeContribution) {
+        if (checkout.freeContribution) {
             // Create balance item
             const balanceItem = new BalanceItem();
-            balanceItem.price = request.body.cart.freeContribution
+            balanceItem.price = checkout.freeContribution
             balanceItem.description = `Vrije bijdrage`
             balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? balanceItem.price : 0;
             balanceItem.userId = user.id
@@ -372,10 +360,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             itemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
         }
 
-        if (request.body.cart.administrationFee) {
+        if (checkout.administrationFee) {
             // Create balance item
             const balanceItem = new BalanceItem();
-            balanceItem.price = request.body.cart.administrationFee
+            balanceItem.price = checkout.administrationFee
             balanceItem.description = `Administratiekosten`
             balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? balanceItem.price : 0;
             balanceItem.userId = user.id
@@ -402,7 +390,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Create a payment pending balance item
-        for (const item of request.body.cart.balanceItems) {
+        for (const item of checkout.cart.balanceItems) {
             // Create one balance item payment to pay it in one payment
             const balanceItemPayment = new BalanceItemPayment()
             balanceItemPayment.balanceItemId = item.item.id;

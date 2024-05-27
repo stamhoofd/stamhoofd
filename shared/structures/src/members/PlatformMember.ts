@@ -50,6 +50,12 @@ export class PlatformFamily {
         return this.organizations.find(o => o.id === id)
     }
 
+    static create(blob: MembersBlob, context: {contextOrganization?: Organization|null, platform: Platform}): PlatformFamily {
+        const family = new PlatformFamily(context)
+        family.insertFromBlob(blob)
+        return family
+    }
+
     insertFromBlob(blob: MembersBlob) {
         for (const organization of blob.organizations) {
             this.insertOrganization(organization)

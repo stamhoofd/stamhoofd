@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
@@ -8,6 +8,9 @@ import { WaitingListType } from "../../GroupSettings";
 import { PriceBreakdown } from "../../PriceBreakdown";
 import { PlatformFamily, PlatformMember } from "../PlatformMember";
 import { OldRegisterCartPriceCalculator, RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator";
+import { BalanceItemCartItem } from "./OldRegisterItem";
+import { MemberBalanceItem } from "../../BalanceItemDetailed";
+import { PaymentMethod } from "../../PaymentMethod";
 
 
 export type RegisterContext = {
@@ -39,9 +42,13 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
     items: IDRegisterItem[] = []
 
+    @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
+    balanceItems: BalanceItemCartItem[] = []
+
     hydrate(context: RegisterContext) {
         const cart = new RegisterCart()
         cart.items = this.items.map(i => i.hydrate(context))
+        cart.balanceItems = this.balanceItems
         return cart
     }
 }
@@ -53,10 +60,18 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     administrationFee = 0
 
+    @field({ decoder: IntegerDecoder })
+    freeContribution = 0
+
+    @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
+    paymentMethod: PaymentMethod | null = null
+
     hydrate(context: RegisterContext) {
         const checkout = new RegisterCheckout()
         checkout.cart = this.cart.hydrate(context)
         checkout.administrationFee = this.administrationFee
+        checkout.freeContribution = this.freeContribution
+        checkout.paymentMethod = this.paymentMethod
         return checkout
     }
 }
@@ -456,6 +471,7 @@ export class RegisterItem implements RegisterItemWithPrice {
 
 export class RegisterCart {
     items: RegisterItem[] = []
+    balanceItems: BalanceItemCartItem[] = []
 
     calculatePrices() {
         OldRegisterCartPriceCalculator.calculatePrices(
@@ -468,7 +484,8 @@ export class RegisterCart {
 
     convert(): IDRegisterCart {
         return IDRegisterCart.create({
-            items: this.items.map(i => i.convert())
+            items: this.items.map(i => i.convert()),
+            balanceItems: this.balanceItems
         })
     }
 
@@ -533,11 +550,15 @@ export class RegisterCart {
 export class RegisterCheckout{
     cart = new RegisterCart()
     administrationFee = 0;
+    freeContribution = 0
+    paymentMethod: PaymentMethod | null = null
 
     convert(): IDRegisterCheckout {
         return IDRegisterCheckout.create({
             cart: this.cart.convert(),
-            administrationFee: this.administrationFee
+            administrationFee: this.administrationFee,
+            freeContribution: this.freeContribution,
+            paymentMethod: this.paymentMethod
         })
     }
 
@@ -550,7 +571,7 @@ export class RegisterCheckout{
         this.administrationFee = this.paymentConfiguration?.administrationFee.calculate(this.cart.price) ?? 0
     }
 
-    validate() {
+    validate(data: {memberBalanceItems: MemberBalanceItem[]}) {
         // todo
     }
 
