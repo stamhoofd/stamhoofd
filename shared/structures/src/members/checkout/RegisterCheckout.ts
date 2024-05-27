@@ -440,17 +440,17 @@ export class RegisterItem implements RegisterItemWithPrice {
     static fromId(idRegisterItem: IDRegisterItem, family: PlatformFamily) {
         const member = family.members.find(m => m.member.id === idRegisterItem.memberId)
         if (!member) {
-            throw new Error("Member not found")
+            throw new Error("Member not found: " + idRegisterItem.memberId)
         }
 
         const organization = member.organizations.find(o => o.id === idRegisterItem.organizationId)
         if (!organization) {
-            throw new Error("Organization not found")
+            throw new Error("Organization not found: " + idRegisterItem.organizationId)
         }
 
         const group = organization.groups.find(g => g.id === idRegisterItem.groupId)
         if (!group) {
-            throw new Error("Group not found")
+            throw new Error("Group not found: " + idRegisterItem.groupId)
         }
 
         return new RegisterItem({
@@ -592,6 +592,12 @@ export class RegisterCheckout{
 
     validate(data: {memberBalanceItems?: MemberBalanceItem[]}) {
         // todo
+    }
+
+    clear() {
+        this.administrationFee = 0;
+        this.freeContribution = 0;
+        this.cart.items = []
     }
 
     get totalPrice() {

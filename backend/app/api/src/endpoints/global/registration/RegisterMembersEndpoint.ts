@@ -91,7 +91,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const members = await Member.getMembersWithRegistrationForUser(user)
         const groups = await Group.getAll(organization.id)
 
-        const blob = await AuthenticatedStructures.membersBlob(members)
+        const blob = await AuthenticatedStructures.membersBlob(members, true)
         const family = PlatformFamily.create(blob, {platform: await Platform.getSharedStruct()})
         const checkout = request.body.hydrate({family})
         
@@ -110,8 +110,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         for (const group of groups) {
             if (request.body.cart.items.find(i => i.groupId == group.id)) {
                 await group.updateOccupancy()
-                // no need to save yet
-                // await group.save()
             }
         }
 
@@ -517,7 +515,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         return new Response(RegisterResponse.create({
             payment: PaymentStruct.create(payment),
-            members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
+            members: await AuthenticatedStructures.membersBlob(members),
             registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
             paymentUrl
         }));

@@ -469,6 +469,15 @@ export class SessionContext implements RequestMiddleware {
         return server
     }
 
+    getAuthenticatedServerForOrganization(organizationId: string) {
+        if (!this.hasToken()) {
+            throw new Error("Could not get authenticated server without token")
+        }
+        const server = SessionContext.serverForOrganization(organizationId)
+        server.middlewares.push(this)
+        return server
+    }
+
     get optionalAuthenticatedServer() {
         if (this.hasToken()) {
             return this.authenticatedServer

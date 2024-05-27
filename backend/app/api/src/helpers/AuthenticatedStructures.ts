@@ -98,12 +98,12 @@ export class AuthenticatedStructures {
         return await organization.getStructure()
     }
 
-    static async membersBlob(members: MemberWithRegistrations[]): Promise<MembersBlob> {
+    static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false): Promise<MembersBlob> {
         const organizations = new Map<string, Organization>()
         const memberBlobs: MemberWithRegistrationsBlob[] = []
         for (const member of members) {
             for (const registration of member.registrations) {
-                if (registration.organizationId !== Context.auth.organization?.id) {
+                if (includeContextOrganization || registration.organizationId !== Context.auth.organization?.id) {
                     const found = organizations.get(registration.id);
                     if (!found) {
                         const organization = await Context.auth.getOrganization(registration.organizationId)

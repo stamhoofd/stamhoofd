@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, PriceBreakdownBox, useErrors, useOrganization } from '@stamhoofd/components';
 import { RegisterItem } from '@stamhoofd/structures';
 import { DefineComponent, computed, onActivated, onMounted, ref } from 'vue';
@@ -107,7 +107,9 @@ async function goToCheckout() {
 
         await present({
             components: [
-                new ComponentWithProperties(component, {}),
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(component, {}),
+                }),
             ],
             modalDisplayStyle: "popup"
         });
