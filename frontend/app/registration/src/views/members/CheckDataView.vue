@@ -112,7 +112,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditParentView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
+import { EditMemberAllBox, EditParentView, MemberStepView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useMemberManager } from '../../getRootView';
@@ -125,8 +125,17 @@ const members = computed(() => memberManager.family.members);
 const parents = computed(() => memberManager.family.parents);
 const addresses = computed(() => memberManager.family.addresses);
 
-function editMember(_member: PlatformMember) {
-    // todo
+async function editMember(member: PlatformMember) {
+    await present({
+        components: [
+            new ComponentWithProperties(MemberStepView, {
+                member,
+                title: 'Gegevens nakijken',
+                component: EditMemberAllBox
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
 }
 
 function editAddress(_address: Address) {
