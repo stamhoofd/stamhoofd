@@ -89,10 +89,16 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: BooleanStatus, version: 117, optional: true })
     @field({ 
         decoder: BooleanStatus, 
-        version: 257, 
-        optional: true, 
+        version: 258, 
+        optional: false, 
         nullable: true,
         downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
+        upgrade: (oldValue: BooleanStatus | undefined) => {
+            if (!oldValue) {
+                return null
+            }
+            return oldValue
+        }
     })
     requiresFinancialSupport: BooleanStatus|null = null
 
@@ -106,6 +112,12 @@ export class MemberDetails extends AutoEncoder {
         optional: true, 
         nullable: true,
         downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
+        upgrade: (oldValue: BooleanStatus | undefined) => {
+            if (!oldValue) {
+                return null
+            }
+            return oldValue
+        }
     })
     dataPermissions: BooleanStatus|null = null
 
