@@ -2,10 +2,12 @@
     <LoadingView v-if="loading" />
     <div v-else class="st-view background">
         <STNavigationBar title="Beheerders">
-            <template #right><button class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" type="button" @click="createAdmin">
-                <span class="icon add" />
-                <span>Beheerder</span>
-            </button></template>
+            <template #right>
+                <button class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" type="button" @click="createAdmin">
+                    <span class="icon add" />
+                    <span>Beheerder</span>
+                </button>
+            </template>
         </STNavigationBar>
 
     
@@ -15,7 +17,9 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="createAdmin">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/account-add.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/account-add.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Nieuwe beheerder
                     </h2>
@@ -28,7 +32,9 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="editRoles(true)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/admin-role.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Rollen beheren
                     </h2>
@@ -44,7 +50,7 @@
             <hr>
             <h2>Alle beheerders</h2>
 
-            <p class="info-box" v-if="sortedAdmins.length === 0">
+            <p v-if="sortedAdmins.length === 0" class="info-box">
                 Deze groep heeft nog geen beheerders. Nodig iemand uit om beheerder te worden.
             </p>
             <STList v-else>
