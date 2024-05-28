@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Address, Parent, ParentType, ParentTypeHelper, PlatformMember } from '@stamhoofd/structures';
+import { Address, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { usePatch } from '../../../hooks';
@@ -50,13 +50,21 @@ import EmailInput from '../../../inputs/EmailInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
+import { NavigationActions, useNavigationActions } from '../../../types/NavigationActions';
 
-const props = defineProps<{
-    member: PlatformMember,
+const props = withDefaults(defineProps<{
+    member?: PlatformMember|null,
+    family?: PlatformFamily|null
     parent: Parent,
-    isNew: boolean
-}>();
+    isNew: boolean,
+    saveHandler?: ((navigate: NavigationActions) => Promise<void>|void)|null
+}>(), {
+    member: null,
+    family: null,
+    saveHandler: null,
+});
 
+const family = props.family || props.member!.family;
 const {patched, addPatch, hasChanges} = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
@@ -64,6 +72,7 @@ const loading = ref(false);
 const saveText = ref("Opslaan");
 const parentTypes = Object.values(ParentType);
 const title = computed(() => !props.isNew ? `${patched.value.firstName || 'Ouder'} bewerken` : "Ouder toevoegen");
+const navigate = useNavigationActions();
 
 const firstName = computed({
     get: () => patched.value.firstName,
@@ -96,7 +105,7 @@ const address = computed({
 });
 
 const availableAddresses = computed(() => {
-    const list = props.member.family.addresses
+    const list = family.addresses
     
     if (patched.value.address !== null && !list.find(a => a.toString() === patched.value.address!.toString())) {
         list.push(patched.value.address)
@@ -144,8 +153,8 @@ async function save() {
             await modifyAddress(old, updated)
         }
 
-        if (props.isNew) {
-            const minorMembers = props.member.family.members.filter(m => m.id !== props.member.id && m.member.details.defaultAge < 30)
+        if (props.member && props.isNew) {
+            const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.member.details.defaultAge < 30)
 
             if (minorMembers.length > 0 && !await CenteredMessage.confirm("Wil je deze ouder bij alle gezinsleden toevoegen?", "Overal toevoegen", "Je kan deze ouder ook automatisch toevoegen bij " + Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' en ')+'.', 'Enkel hier', false)) {
                 props.member.addParent(patched.value)
@@ -156,10 +165,15 @@ async function save() {
                 }
             }
         } else {
-            props.member.family.updateParent(patched.value)
+            family.updateParent(patched.value)
         }
 
-        await pop({force: true})
+        if (props.saveHandler) {
+            await props.saveHandler(navigate);
+        } else {
+            await pop({force: true})
+        }
+
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
@@ -168,7 +182,7 @@ async function save() {
 
 async function modifyAddress(from: Address, to: Address) {
     // todo: Check if we find this address in other places...
-    const occurrences = props.member.family.getAddressOccurrences(from, {parentId: patched.value.id})
+    const occurrences = family.getAddressOccurrences(from, {parentId: patched.value.id})
 
     if (occurrences.length === 0) {
         return;
@@ -178,7 +192,7 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    props.member.family.updateAddress(from, to)
+    family.updateAddress(from, to)
 }
 
 async function shouldNavigateAway() {

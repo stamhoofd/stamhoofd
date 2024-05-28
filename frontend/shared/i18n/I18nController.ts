@@ -11,6 +11,12 @@ export function useTranslate(): typeof I18n.prototype.$t {
     return i18n ? i18n.$t.bind(i18n) : ((k) => k)
 }
 
+if (import.meta.hot) {
+    import.meta.hot.accept((newModule) => {
+       // noop
+    })
+}
+
 export class I18nController {
     static i18n: I18n
     static shared: I18nController

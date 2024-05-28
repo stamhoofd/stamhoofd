@@ -225,6 +225,20 @@ export class PlatformFamily {
         return Array.from(addresses.values())
     }
 
+    get parents() {
+        if (!this.members) {
+            return []
+        }
+        const parents = new Map<string, Parent>()
+        for (const member of this.members) {
+            for (const parent of member.patchedMember.details.parents) {
+                parents.set(parent.id, parent)
+            }
+        }
+
+        return Array.from(parents.values())
+    }
+
     updateAddress(oldValue: Address, newValue: Address) {
         for (const member of this.members) {
             const patch = member.patchedMember.details.updateAddressPatch(oldValue, newValue)

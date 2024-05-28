@@ -15,7 +15,7 @@
                 </button>
             </template>
 
-            <div class="container">
+            <div v-else class="container">
                 <hr>
                 <h2>
                     Algemeen
@@ -39,7 +39,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem class="left-center" :selectable="true" @click="registerMembers">
+                    <STListItem class="left-center" :selectable="true" @click="checkData">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/magnifier.svg" class="style-illustration-img">
                         </template>
@@ -68,12 +68,19 @@ import { computed } from 'vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
+    CheckData = 'checkData'
 }
 defineRoutes([
     {
         name: Routes.RegisterMembers,
         url: 'registreren',
         component: async () => (await import('../members/RegisterMembersView.vue')).default as any,
+        present: 'popup'
+    },
+    {
+        name: Routes.CheckData,
+        url: 'gegevens',
+        component: async () => (await import('../members/CheckDataView.vue')).default as any,
         present: 'popup'
     }
 ])
@@ -86,4 +93,9 @@ const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers
 async function registerMembers() {
     await $navigate(Routes.RegisterMembers);
 }
+
+async function checkData() {
+    await $navigate(Routes.CheckData);
+}
+
 </script>
