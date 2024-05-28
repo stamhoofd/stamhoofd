@@ -116,7 +116,7 @@
                 <h2>Ledenadministratie</h2>
 
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                         </template>
@@ -143,7 +143,6 @@
                             {{ $t('dashboard.settings.menu.paymentMethods.description') }}
                         </p>
                         <template #right>
-                            <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -153,19 +152,13 @@
                             <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Inschrijvingsgroepen<template v-if="enableActivities">
-                                en activiteiten
-                            </template>
+                            Inschrijvingsgroepen
                         </h2>
-                        <p v-if="enableActivities" class="style-description">
-                            Deel je leden op in groepen en activiteiten, wijzig de prijs en de inschrijvingsdatum
-                        </p>
-                        <p v-else class="style-description">
-                            Leeftijdsgroepen aanmaken en beheren
+                        <p class="style-description">
+                            Deel je leden op in groepen en categorieën
                         </p>
 
                         <template #right>
-                            <span v-if="!hasGroups" v-tooltip="'Je hebt nog geen inschrijvingsgroepen ingesteld'" class="icon warning yellow" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -220,7 +213,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="importMembers(true)">
+                    <STListItem v-if="false" :selectable="true" class="left-center right-stack" @click="importMembers(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
                         </template>
@@ -277,9 +270,9 @@
 
             <template v-if="!areSalesDisabled">
                 <hr>
-                <h2>Stamhoofd</h2>
+                <h2>{{ $t('shared.platformName') }}</h2>
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="openPackages(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
@@ -294,22 +287,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="false" :selectable="true" class="left-center" @click="openBilling(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Facturen en betalingen
-                        </h2>
-                        <p class="style-description">
-                            Download jouw facturen en bekijk jouw tegoed
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="openReferrals(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
@@ -340,11 +318,13 @@
                     </STListItem>
                 </STList>
 
-                <hr>
-                <h2>Functies gratis uitproberen</h2>
-                <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
+                <template v-if="!isPlatform">
+                    <hr>
+                    <h2>Functies gratis uitproberen</h2>
+                    <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
 
-                <ModuleSettingsBox />
+                    <ModuleSettingsBox />
+                </template>
             </template>
         </main>
     </div>
@@ -401,6 +381,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get isSGV() {
         return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
+    }
+
+    get isPlatform() {
+        return STAMHOOFD.userMode === 'platform'
     }
 
     get areSalesDisabled() {

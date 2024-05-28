@@ -4,6 +4,7 @@
         "transferTypes": {
             "structured": "Gestructureerde mededeling"
         },
+        "platformName": "Stamhoofd",
         "inputs": {
             "iban": {
                 "placeholder": "Bv. BE71 6316 1793 1960"

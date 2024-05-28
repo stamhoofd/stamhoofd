@@ -31,6 +31,7 @@ declare module 'vue' {
         readonly $platform: Platform;
         readonly $user: User|null;
         readonly $organizationManager: OrganizationManager;
+        readonly $app: ReturnType<typeof import('@stamhoofd/components').useAppContext>;
 
         // Global components
         readonly STList: typeof import('@stamhoofd/components').STList,
