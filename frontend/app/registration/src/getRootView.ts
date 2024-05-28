@@ -1,6 +1,6 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
-import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
 import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
@@ -87,8 +87,6 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
 
     //const $checkoutManager = new CheckoutManager($memberManager)
     const $memberManager = reactive(new MemberManager(reactiveSession, platformManager.$platform));
-    await $memberManager.loadMembers()
-    await $memberManager.loadCheckout()
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
@@ -111,20 +109,27 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         }),
         root: new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
-                new ComponentWithProperties(TabBarController, {
-                    tabs: [
-                        new TabBarItem({
-                            icon: 'home',
-                            name: 'Start',
-                            component: startView
-                        }),
-                        new TabBarItem({
-                            icon: 'basket',
-                            name: 'Mandje',
-                            component: cartRoot,
-                            badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0))
+                new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        await $memberManager.loadMembers()
+                        await $memberManager.loadCheckout()
+
+                        return new ComponentWithProperties(TabBarController, {
+                            tabs: [
+                                new TabBarItem({
+                                    icon: 'home',
+                                    name: 'Start',
+                                    component: startView
+                                }),
+                                new TabBarItem({
+                                    icon: 'basket',
+                                    name: 'Mandje',
+                                    component: cartRoot,
+                                    badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0))
+                                })
+                            ],
                         })
-                    ],
+                    }
                 })
             ),
             loginRoot: wrapWithModalStack(
