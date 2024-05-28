@@ -242,7 +242,7 @@ export class MemberManager extends MemberManagerBase {
             member.details.reviewTimes.removeReview("records")
 
             member.details.recordAnswers = new Map()
-            member.details.requiresFinancialSupport = undefined
+            member.details.requiresFinancialSupport = null
 
             member.details.emergencyContacts = []
             member.details.reviewTimes.removeReview("emergencyContacts")
@@ -270,7 +270,7 @@ export class MemberManager extends MemberManagerBase {
             member.details.reviewTimes.removeReview("records")
 
             member.details.recordAnswers = new Map()
-            member.details.requiresFinancialSupport = undefined
+            member.details.requiresFinancialSupport = null
 
             member.details.emergencyContacts = []
             member.details.reviewTimes.removeReview("emergencyContacts")

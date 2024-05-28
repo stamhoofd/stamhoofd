@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableA
 
 import { Group } from "../Group"
 import { Organization } from "../Organization"
-import { PermissionLevel, PermissionsResourceType } from "../Permissions"
+import { AccessRight, PermissionLevel, PermissionsResourceType } from "../Permissions"
 import { Platform } from "../Platform"
 import { UserPermissions } from "../UserPermissions"
 import { Address } from "../addresses/Address"
@@ -342,8 +342,8 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
-    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission') {
-        if (property === 'dataPermission') {
+    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport', options?: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}|null, scopeOrganization?: Organization|null}) {
+        if (property === 'dataPermission' || property === 'financialSupport') {
             if (this.platform.config.recordsConfiguration[property]) {
                 return true;
             }
@@ -357,15 +357,22 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isEnabled(this)
     }
 
-    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission') {
-        if (this.isPropertyEnabledForPlatform(property)) {
+    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport', options?: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}|null, scopeOrganization?: Organization|null}) {
+        if (this.isPropertyEnabledForPlatform(property, options)) {
             return true;
         }
 
         const organizations = this.filterOrganizations({cycleOffset: 0})
 
         for (const organization of organizations) {
-            if (property === 'dataPermission') {
+            if (property === 'dataPermission' || property === 'financialSupport') {
+                if (options?.checkPermissions && property === 'financialSupport') {
+                    if (!options.checkPermissions.permissions?.forOrganization(organization, true)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                        // No permission
+                        continue
+                    }
+                }
+
                 if (organization.meta.recordsConfiguration[property]) {
                     return true;
                 }
@@ -605,7 +612,7 @@ export class PlatformMember implements ObjectWithRecords {
         return categories;
     }
 
-    getEnabledRecordCategories(options: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}, scopeOrganization?: Organization|null}): RecordCategory[] {
+    getEnabledRecordCategories(options: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}|null, scopeOrganization?: Organization|null}): RecordCategory[] {
         const checkPermissions = options.checkPermissions
         if (checkPermissions && !checkPermissions.permissions) {
             return []

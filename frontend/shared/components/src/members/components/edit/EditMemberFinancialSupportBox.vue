@@ -5,8 +5,8 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="dataPermissions">
-            Er werd toestemming gegeven
+        <Checkbox v-model="requiresFinancialSupport">
+            {{ checkboxLabel }}
         </Checkbox>
 
         <p v-if="dataPermissionsChangeDate" class="style-description-small">
@@ -20,22 +20,22 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="dataPermissions">
+        <Checkbox v-model="requiresFinancialSupport">
             {{ checkboxLabel }}
         </Checkbox>
     </div>
 </template>
 
 <script setup lang="ts">
-import { BooleanStatus, DataPermissionsSettings, PlatformMember } from '@stamhoofd/structures';
+import { BooleanStatus, FinancialSupportSettings, PlatformMember } from '@stamhoofd/structures';
 
 import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context/appContext';
+import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
-import Title from './Title.vue';
-import { ErrorBox } from '../../../errors/ErrorBox';
 import { useValidation } from '../../../errors/useValidation';
+import Title from './Title.vue';
 
 defineOptions({
     inheritAttrs: false
@@ -53,36 +53,36 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 const markReviewed = app !== 'dashboard' && app !== 'admin';
 
 useValidation(props.validator, async () => {
-    if (markReviewed && props.member.patchedMember.details.dataPermissions === null) {
+    if (markReviewed && props.member.patchedMember.details.requiresFinancialSupport === null) {
         // Force saving
-        dataPermissions.value = dataPermissions.value as any
+        requiresFinancialSupport.value = requiresFinancialSupport.value as any
         await nextTick()
     }
     return true;
 });
 
-const dataPermissions = computed({
-    get: () => props.member.patchedMember.details.dataPermissions?.value ?? false,
-    set: (dataPermissions) => {
-        if (dataPermissions === (props.member.member.details.dataPermissions?.value ?? false) && !markReviewed) {
+const requiresFinancialSupport = computed({
+    get: () => props.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
+    set: (requiresFinancialSupport) => {
+        if (requiresFinancialSupport === (props.member.member.details.requiresFinancialSupport?.value ?? false) && !markReviewed) {
             return props.member.addDetailsPatch({
-                dataPermissions: props.member.member.details.dataPermissions ?? null
+                requiresFinancialSupport: props.member.member.details.requiresFinancialSupport ?? null
             })
         }
         return props.member.addDetailsPatch({
-            dataPermissions: BooleanStatus.create({
-                value: dataPermissions
+            requiresFinancialSupport: BooleanStatus.create({
+                value: requiresFinancialSupport
             })
         })
     }
 });
-const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.dataPermissions?.date ?? null);
+const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.date ?? null);
 
 const configuration = computed(() => {
-    return props.member.platform.config.recordsConfiguration.dataPermission ?? props.member.organizations.find(o => o.meta.recordsConfiguration.dataPermission)?.meta.recordsConfiguration.dataPermission ?? null
+    return props.member.platform.config.recordsConfiguration.financialSupport ?? props.member.organizations.find(o => o.meta.recordsConfiguration.dataPermission)?.meta.recordsConfiguration.financialSupport ?? null
 });
-const title = computed(() => configuration.value?.title ?? DataPermissionsSettings.defaultTitle);
-const description = computed(() => configuration.value?.description ?? DataPermissionsSettings.defaultDescription);
-const checkboxLabel = computed(() => configuration.value?.checkboxLabel ?? DataPermissionsSettings.defaultCheckboxLabel);
+const title = computed(() => configuration.value?.title ?? FinancialSupportSettings.defaultTitle);
+const description = computed(() => configuration.value?.description ?? FinancialSupportSettings.defaultDescription);
+const checkboxLabel = computed(() => configuration.value?.checkboxLabel ?? FinancialSupportSettings.defaultCheckboxLabel);
 
 </script>

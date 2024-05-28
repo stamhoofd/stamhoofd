@@ -161,7 +161,7 @@ export default class EditGroupRestrictionsView extends Mixins(EditGroupMixin) {
     }
 
     isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address" | "gender") {
-        return !!this.$organization.meta.recordsConfiguration[name]
+        return !!this.$organization.meta.recordsConfiguration[name] || this.$platform.config.recordsConfiguration[name]
     }
 
     getGroupName(id: string) {

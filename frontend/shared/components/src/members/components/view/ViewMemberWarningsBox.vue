@@ -18,6 +18,7 @@
 import { DataPermissionsSettings, FinancialSupportSettings, PermissionLevel, PlatformMember, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../../hooks';
+import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
     inheritAttrs: false
@@ -29,6 +30,7 @@ const props = defineProps<{
 const organization = useOrganization();
 const platform = usePlatform();
 const auth = useAuth();
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false)
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
@@ -58,7 +60,7 @@ const warnings = computed(() => {
         warnings.push(...answer.getWarnings())
     }
 
-    if ((platform.value && platform.value.config.recordsConfiguration.financialSupport) || (organization.value && organization.value.meta.recordsConfiguration.financialSupport)) {
+    if (isPropertyEnabled('financialSupport')) {
         if (props.member.patchedMember.details.requiresFinancialSupport && props.member.patchedMember.details.requiresFinancialSupport.value) {
             warnings.push(RecordWarning.create({
                 text: platform.value.config.recordsConfiguration.financialSupport?.warningText ?? organization.value?.meta.recordsConfiguration.financialSupport?.warningText ?? FinancialSupportSettings.defaultWarningText,
@@ -67,7 +69,7 @@ const warnings = computed(() => {
         }
     }
     
-    if ((platform.value && platform.value.config.recordsConfiguration.dataPermission) || (organization.value && organization.value.meta.recordsConfiguration.dataPermission)) {
+    if (isPropertyEnabled('dataPermission')) {
         if (props.member.patchedMember.details.dataPermissions && !props.member.patchedMember.details.dataPermissions.value) {
             warnings.push(RecordWarning.create({
                 text: platform.value.config.recordsConfiguration.dataPermission?.warningText ?? organization.value?.meta.recordsConfiguration.dataPermission?.warningText ?? DataPermissionsSettings.defaultWarningText,

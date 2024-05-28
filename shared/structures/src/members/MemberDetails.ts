@@ -87,7 +87,14 @@ export class MemberDetails extends AutoEncoder {
     recordAnswers: Map<string, RecordAnswer> = new Map()
 
     @field({ decoder: BooleanStatus, version: 117, optional: true })
-    requiresFinancialSupport?: BooleanStatus
+    @field({ 
+        decoder: BooleanStatus, 
+        version: 257, 
+        optional: true, 
+        nullable: true,
+        downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
+    })
+    requiresFinancialSupport: BooleanStatus|null = null
 
     /**
      * Gave permission to collect sensitive information

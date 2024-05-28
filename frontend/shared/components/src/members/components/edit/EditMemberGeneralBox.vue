@@ -17,9 +17,9 @@
                     </div>
                 </STInputBox>
 
-                <BirthDayInput v-if="member.isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
+                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
 
-                <STInputBox v-if="!member.isNew && member.isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
+                <STInputBox v-if="!member.isNew && isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
                     <RadioGroup>
                         <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
                             Man
@@ -35,9 +35,9 @@
             </div>
 
             <div v-if="!member.isNew">
-                <AddressInput v-if="member.isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
-                <EmailInput v-if="member.isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
-                <PhoneInput v-if="member.isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
+                <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
+                <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
             </div>
         </div>
     </div>
@@ -57,7 +57,7 @@ import BirthDayInput from '../../../inputs/BirthDayInput.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
-import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
+import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
 
 defineOptions({
@@ -71,6 +71,7 @@ const props = defineProps<{
 }>()
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true)
 const errors = useErrors({validator: props.validator});
 
 const title = computed(() => {

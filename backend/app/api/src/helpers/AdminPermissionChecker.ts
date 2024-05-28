@@ -792,6 +792,56 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
+    async hasFinancialMemberAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        const isUserManager = this.isUserManager(member)
+
+        if (isUserManager && level === PermissionLevel.Read) {
+            return true;
+        }
+
+        // First list all organizations this member is part of
+        const organizations: Organization[] = [];
+
+        if (member.organizationId) {
+            if (this.checkScope(member.organizationId)) {
+                organizations.push(await this.getOrganization(member.organizationId))
+            }
+        }
+
+        for (const registration of member.registrations) {
+            if (this.checkScope(registration.organizationId)) {
+                if (!organizations.find(o => o.id === registration.organizationId)) {
+                    organizations.push(await this.getOrganization(registration.organizationId))
+                }
+            }
+        }
+
+        // Loop all organizations.
+        for (const organization of organizations) {
+            const permissions = await this.getOrganizationPermissions(organization)
+            if (!permissions) {
+                continue;
+            }
+
+            if (permissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                return true;
+            }
+        }
+
+        // Platform data
+        const platformPermissions = this.platformPermissions
+        if (platformPermissions) {
+            if (platformPermissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                return true;
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Return a list of RecordSettings the current user can view or edit
+     */
     async getAccessibleRecordSet(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<Set<string>> {
         const categories = await this.getAccessibleRecordCategories(member, level)
         const set = new Set<string>()
@@ -825,6 +875,17 @@ export class AdminPermissionChecker {
             }
         }
 
+        // Has financial read access?
+        if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Read)) {
+            cloned.details.requiresFinancialSupport = null
+            cloned.outstandingBalance = 0
+
+            for (const registration of cloned.registrations) {
+                registration.price = 0
+                registration.pricePaid = 0
+            }
+        }
+
         return cloned;
     }
 
@@ -840,50 +901,85 @@ export class AdminPermissionChecker {
             })
         }
 
-        if (!data.details.recordAnswers) {
-            return data;
-        }
-
-        if (!(data.details.recordAnswers instanceof PatchMap)) {
-            throw new SimpleError({
-                code: 'invalid_request',
-                message: 'Cannot PUT recordAnswers',
-                statusCode: 400
-            })
-        }
-        const isUserManager = this.isUserManager(member)
-        const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
-
-        for (const [key, value] of data.details.recordAnswers.entries()) {
-            let name: string | undefined = undefined
-            if (value) {
-                if (value.isPatch()) {
-                    throw new SimpleError({
-                        code: 'invalid_request',
-                        message: 'Cannot PATCH a record answer object',
-                        statusCode: 400
-                    })
-                }
-
-                const id = value.settings.id
-
-                if (id !== key) {
-                    throw new SimpleError({
-                        code: 'invalid_request',
-                        message: 'Record answer key does not match record id',
-                        statusCode: 400
-                    })
-                }
-
-                name = value.settings.name
-            }
-
-            if (!isUserManager && !records.has(key)) {
+        if (data.details.recordAnswers) {
+            if (!(data.details.recordAnswers instanceof PatchMap)) {
                 throw new SimpleError({
-                    code: 'permission_denied',
-                    message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
+                    code: 'invalid_request',
+                    message: 'Cannot PUT recordAnswers',
                     statusCode: 400
                 })
+            }
+            const isUserManager = this.isUserManager(member)
+            const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
+
+            for (const [key, value] of data.details.recordAnswers.entries()) {
+                let name: string | undefined = undefined
+                if (value) {
+                    if (value.isPatch()) {
+                        throw new SimpleError({
+                            code: 'invalid_request',
+                            message: 'Cannot PATCH a record answer object',
+                            statusCode: 400
+                        })
+                    }
+
+                    const id = value.settings.id
+
+                    if (id !== key) {
+                        throw new SimpleError({
+                            code: 'invalid_request',
+                            message: 'Record answer key does not match record id',
+                            statusCode: 400
+                        })
+                    }
+
+                    name = value.settings.name
+                }
+
+                if (!isUserManager && !records.has(key)) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
+                        statusCode: 400
+                    })
+                }
+            }
+        }
+
+        // Has financial write access?
+        if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Write)) {
+            if (data.details.requiresFinancialSupport) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
+                    statusCode: 400
+                })
+            }
+
+            if (data.outstandingBalance) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om het openstaande saldo van dit lid aan te passen',
+                    statusCode: 400
+                })
+            }
+
+            for (const {put: registration} of data.registrations.getPuts()) {
+                if (registration.price) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om de prijs van een inschrijving te bepalen',
+                        statusCode: 400
+                    })
+                }
+
+                if (registration.pricePaid) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om het betaalde bedrag van een inschrijving te bepalen',
+                        statusCode: 400
+                    })
+                }
             }
         }
 
