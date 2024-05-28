@@ -28,6 +28,18 @@
                 </template>
             </STListItem>
 
+            <STListItem element-name="label" :selectable="!financialSupport.locked.value">
+                <template #left>
+                    <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="financialSupport.locked.value" />
+                </template>
+                <p class="style-title-list">
+                    Financiële ondersteuning
+                </p>
+                <template v-if="!financialSupport.locked.value && financialSupport.enabled.value" #right>
+                    <button class="button gray icon settings" type="button" @click.stop="financialSupport.edit" />
+                </template>
+            </STListItem>
+
             <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
                 <template #left>
                     <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? 'Verplicht op een hoger niveau' : ''" :disabled="property.value.locked" />
@@ -86,13 +98,14 @@ import { AutoEncoderPatchType, PatchMap, PatchableArray, PatchableArrayAutoEncod
 import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, NavigationActions, PropertyFilterView, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { BooleanStatus, DataPermissionsSettings, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordCategoryRow from './components/RecordCategoryRow.vue';
 import DataPermissionSettingsView from './DataPermissionSettingsView.vue';
+import FinancialSupportSettingsView from './FinancialSupportSettingsView.vue';
 type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
 
 const props = defineProps<{
@@ -104,7 +117,8 @@ const props = defineProps<{
 enum Routes {
     NewRecordCategory = "newRecordCategory",
     EditRecordCategory = "editRecordCategory",
-    DataPermissions = "dataPermissions"
+    DataPermissions = "dataPermissions",
+    FinancialSupport = "financialSupport"
 }
 defineRoutes([
     {
@@ -168,6 +182,20 @@ defineRoutes([
         name: Routes.DataPermissions,
         url: 'toestemming-gegevensverzameling',
         component: DataPermissionSettingsView as ComponentOptions,
+        paramsToProps() {
+            return {
+                recordsConfiguration: patched.value,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
+                    addPatch(patch)
+                }
+            }
+        },
+        present: 'popup'
+    },
+    {
+        name: Routes.FinancialSupport,
+        url: 'financiele-ondersteuning',
+        component: FinancialSupportSettingsView as ComponentOptions,
         paramsToProps() {
             return {
                 recordsConfiguration: patched.value,
@@ -260,6 +288,25 @@ const dataPermissions = {
     }),
     edit: async () => {
         await $navigate(Routes.DataPermissions)
+    }
+}
+
+const financialSupport = {
+    locked: computed(() => !!props.inheritedRecordsConfiguration?.financialSupport),
+    enabled: computed({
+        get: () => !!props.inheritedRecordsConfiguration?.financialSupport || patched.value.financialSupport !== null,
+        set: (value: boolean) => {
+            if (value) {
+                addPatch({
+                    financialSupport: props.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
+                });
+            } else {
+                addPatch({financialSupport: null});
+            }
+        }
+    }),
+    edit: async () => {
+        await $navigate(Routes.FinancialSupport)
     }
 }
 

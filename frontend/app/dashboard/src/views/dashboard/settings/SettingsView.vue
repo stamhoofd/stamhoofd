@@ -181,22 +181,6 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageFinancialSupport(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Financiële ondersteuning
-                        </h2>
-                        <p class="style-description">
-                            Steun kwetsbare gezinnen
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageFreeContribution(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
@@ -344,7 +328,6 @@ import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import LabsView from './LabsView.vue';
-import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
@@ -681,19 +664,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         })
     }
 
-    manageFinancialSupport(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(FinancialSupportSettingsView, {})
-                })
-            ]
-        })
-    }
-
     manageFreeContribution(animated = true) {
         this.present({
             animated,
@@ -822,10 +792,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (this.$url.match('free-contribution')) {
             this.manageFreeContribution(false)
-        }
-
-        if (this.$url.match('financial-support')) {
-            this.manageFinancialSupport(false)
         }
 
         UrlHelper.shared.clear()
