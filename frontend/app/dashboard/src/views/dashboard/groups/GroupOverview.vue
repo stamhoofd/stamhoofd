@@ -251,7 +251,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="hasMembers && !isArchive" :selectable="true" @click="newPeriod()">
+                    <STListItem v-if="!isPlatform && (hasMembers && !isArchive)" :selectable="true" @click="newPeriod()">
                         <h2 class="style-title-list">
                             Nieuwe inschrijvingsperiode
                         </h2>
@@ -267,7 +267,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!hasMembers && cycleOffsets.length && !isArchive" @click="undoPeriod()">
+                    <STListItem v-if="!isPlatform && (!hasMembers && cycleOffsets.length && !isArchive)" @click="undoPeriod()">
                         <h2 class="style-title-list">
                             Inschrijvingsperiode ongedaan maken
                         </h2>
@@ -360,6 +360,10 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
 
     doShowAllCycleOffsets() {
         this.showAllCycleOffsets = true
+    }
+
+    get isPlatform() {
+        return STAMHOOFD.userMode === 'platform'
     }
 
     get isStamhoofd() {
