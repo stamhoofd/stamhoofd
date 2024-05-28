@@ -58,6 +58,20 @@ useValidation(props.validator, async () => {
         requiresFinancialSupport.value = requiresFinancialSupport.value as any
         await nextTick()
     }
+
+    // Sync checkbox across family
+    for (const member of props.member.family.members) {
+        if (member.id !== props.member.member.id) {
+            const expectedValue = member.isPropertyEnabled("financialSupport") ? (props.member.patchedMember.details.requiresFinancialSupport ?? null) : null;
+
+            if (expectedValue?.value ?? null !== member.patchedMember.details.requiresFinancialSupport?.value ?? null) {
+                member.addDetailsPatch({
+                    requiresFinancialSupport: expectedValue
+                })
+            }
+        }
+    }
+
     return true;
 });
 
