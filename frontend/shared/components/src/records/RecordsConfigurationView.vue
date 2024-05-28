@@ -86,7 +86,7 @@ import { AutoEncoderPatchType, PatchMap, PatchableArray, PatchableArrayAutoEncod
 import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, NavigationActions, PropertyFilterView, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { DataPermissionsSettings, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, DataPermissionsSettings, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
@@ -215,6 +215,8 @@ const settings = new RecordEditorSettings({
             details: MemberDetails.create({
                 firstName: 'Voorbeeld',
                 lastName: 'Lid',
+                dataPermissions: BooleanStatus.create({value: true}),
+                birthDay: new Date('2020-01-01'),
             }),
             users: [],
             registrations: []
