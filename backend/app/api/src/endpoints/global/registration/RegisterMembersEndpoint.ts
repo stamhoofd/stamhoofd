@@ -92,7 +92,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const groups = await Group.getAll(organization.id)
 
         const blob = await AuthenticatedStructures.membersBlob(members, true)
-        const family = PlatformFamily.create(blob, {platform: await Platform.getSharedStruct()})
+        const family = PlatformFamily.create(blob, {platform: await Platform.getSharedStruct(), contextOrganization: await organization.getStructure()})
         const checkout = request.body.hydrate({family})
         
         const registrations: RegistrationWithMemberAndGroup[] = []
