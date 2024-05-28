@@ -21,7 +21,7 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -66,6 +66,7 @@ const platform = usePlatform()
 const configurationId = computed(() => {
     return 'members-'+app
 })
+const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false)
 
 const groups = (() => {
     if (props.group) {
@@ -235,7 +236,7 @@ if (app == 'admin') {
         })
     )
 
-    if (!props.waitingList) {
+    if (!props.waitingList && financialRead.value) {
         allColumns.push(
             new Column<ObjectType, number>({
                 name: "Openstaand saldo", 
