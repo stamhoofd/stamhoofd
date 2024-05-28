@@ -1,5 +1,5 @@
 import { OrganizationManager, SessionContext } from "@stamhoofd/networking";
-import { CountryHelper, Organization, User } from "@stamhoofd/structures";
+import { CountryHelper, Organization, Platform, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import Vue from "vue";
 
@@ -28,6 +28,7 @@ declare module 'vue' {
 
         readonly $context: SessionContext;
         readonly $organization: Organization;
+        readonly $platform: Platform;
         readonly $user: User|null;
         readonly $organizationManager: OrganizationManager;
 
