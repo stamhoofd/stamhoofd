@@ -43,7 +43,11 @@
 
             <hr>
             <h2>Alle beheerders</h2>
-            <STList>
+
+            <p class="info-box" v-if="sortedAdmins.length === 0">
+                Deze groep heeft nog geen beheerders. Nodig iemand uit om beheerder te worden.
+            </p>
+            <STList v-else>
                 <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
                     <template #left>
                         <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">

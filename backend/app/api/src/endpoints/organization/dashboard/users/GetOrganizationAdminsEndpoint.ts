@@ -33,12 +33,9 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
 
         // Get all admins
         let admins = await User.where({ organizationId: organization.id, permissions: { sign: "!=", value: null }})
-        const global = await User.where({ organizationId: null, permissions: { sign: "!=", value: null }})
+        const global = (await User.where({ organizationId: null, permissions: { sign: "!=", value: null }})).filter(u => !!u.permissions?.forOrganization(organization, false))
 
         admins.push(...global)
-
-        // Hide internal users
-        admins = STAMHOOFD.environment === 'production' ? admins.filter(a => a.id === user.id || !((a.email.endsWith('@stamhoofd.be') || a.email.endsWith('@stamhoofd.nl')) && a.firstName == 'Stamhoofd')) : admins
 
         // Hide api accounts
         admins = admins.filter(a => !a.isApiUser)
