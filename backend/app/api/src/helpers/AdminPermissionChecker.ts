@@ -795,7 +795,7 @@ export class AdminPermissionChecker {
     async hasFinancialMemberAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         const isUserManager = this.isUserManager(member)
 
-        if (isUserManager && level === PermissionLevel.Read) {
+        if (isUserManager) {
             return true;
         }
 
