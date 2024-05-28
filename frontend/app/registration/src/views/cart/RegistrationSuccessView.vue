@@ -22,15 +22,22 @@
 
 <script lang="ts" setup>
 import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { STToolbar } from '@stamhoofd/components';
 import { RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
-import { STToolbar } from '@stamhoofd/components';
+import { computed, onMounted } from 'vue';
+import { useMemberManager } from '../../getRootView';
 
 const props = defineProps<{
     registrations: RegistrationWithMember[]
 }>();
 const dismiss = useDismiss()
+const memberManager = useMemberManager();
+const checkout = computed(() => memberManager.family.checkout)
+
+onMounted(() => {
+    checkout.value.clear()
+})
 
 const title = computed(() => {
     let t = "Hoera! "

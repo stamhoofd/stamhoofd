@@ -533,7 +533,10 @@ export class RegisterCart {
     }
 
     get price() {
-        return this.items.reduce((total, item) => item.calculatedPrice + total, 0)
+        return this.items.reduce((total, item) => item.calculatedPrice + total, 0) 
+            + this.balanceItems.reduce((total, item) => {
+                return total + item.price
+            }, 0)
     }
 
     get paymentConfiguration() {
@@ -601,15 +604,19 @@ export class RegisterCheckout{
     }
 
     get totalPrice() {
-        return Math.max(0, this.cart.price + this.administrationFee)
+        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution)
     }
 
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
                 name: 'Administratiekost',
-                price: this.administrationFee
+                price: this.administrationFee,
             },
+            {
+                name: 'Vrije bijdrage',
+                price: this.freeContribution,
+            }
         ].filter(a => a.price !== 0)
 
         if (all.length > 0) {

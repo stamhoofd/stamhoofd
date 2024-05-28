@@ -3,9 +3,9 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController, Url
 import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, TabBarController, TabBarItem } from "@stamhoofd/components";
 import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
+import { NetworkManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
-import { inject, reactive, markRaw, computed } from "vue";
+import { computed, inject, markRaw, reactive } from "vue";
 
 import { MemberManager } from "./classes/MemberManager";
 import CartView from "./views/cart/CartView.vue";

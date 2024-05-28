@@ -41,7 +41,7 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, useNavigationController, useShow } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, STErrorsDefault, STNavigationBar, STToolbar, useContext, useErrors, useNavigationActions } from "@stamhoofd/components";
-import { Payment, PaymentStatus, RegisterResponse } from "@stamhoofd/structures";
+import { PaymentStatus, RegisterResponse } from "@stamhoofd/structures";
 import { computed, onMounted, ref } from "vue";
 import { useMemberManager } from "../../getRootView";
 import RegistrationSuccessView from "./RegistrationSuccessView.vue";

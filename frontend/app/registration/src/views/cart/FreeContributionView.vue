@@ -61,9 +61,12 @@ import { LoadingButton, PriceInput, Radio, STErrorsDefault, STNavigationBar, STT
 
 import { computed, ref, watchEffect } from "vue";
 import { useMemberManager } from "../../getRootView";
+import { ComponentWithProperties, useShow } from "@simonbackx/vue-app-navigation";
+import PaymentSelectionView from "./PaymentSelectionView.vue";
 
 const memberManager = useMemberManager();
 const errors = useErrors();
+const show = useShow();
 
 const checkout = computed(() => memberManager.family.checkout)
 const organization = computed(() => checkout.value.singleOrganization)
@@ -82,8 +85,8 @@ watchEffect(() => {
     }
 })
 
-function goNext() {
-    // todo
+async function goNext() {
+    await show(new ComponentWithProperties(PaymentSelectionView, {}))
 }
 
 </script>

@@ -1,6 +1,6 @@
 <template>
     <header class="st-navigation-bar-container">
-        <div v-if="!hasLeft && !hasRight" class="st-navigation-bar-background" :class="{ scrolled }">
+        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled }">
             <InheritComponent name="tabbar-replacement" />
         </div>
         <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
