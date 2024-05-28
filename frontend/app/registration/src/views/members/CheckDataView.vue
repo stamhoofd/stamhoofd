@@ -27,6 +27,15 @@
                         <p v-else class="style-description-small">
                             Nog niet ingeschreven
                         </p>
+                        <p v-if="member.patchedMember.details.email" class="style-description">
+                            {{ member.patchedMember.details.email }}
+                        </p>
+                        <p v-if="member.patchedMember.details.phone" class="style-description">
+                            {{ member.patchedMember.details.phone }}
+                        </p>
+                        <p v-if="member.patchedMember.details.address" class="style-description">
+                            {{ member.patchedMember.details.address }}
+                        </p>
 
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -56,6 +65,9 @@
                         </p>
                         <p class="style-description">
                             {{ parent.phone }}
+                        </p>
+                        <p class="style-description">
+                            {{ parent.address }}
                         </p>
 
                         <template #right>
@@ -99,11 +111,11 @@
 </template>
 
 <script lang="ts" setup>
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { EditParentView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useMemberManager } from '../../getRootView';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditParentView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
 
 const memberManager = useMemberManager();
 const present = usePresent()
@@ -126,9 +138,9 @@ async function editParent(parent: Parent) {
     await present({
         components: [
             new ComponentWithProperties(EditParentView, {
-                parent,
+                parent: parent.clone(),
                 isNew: false,
-                family:clone,
+                family: clone,
                 saveHandler: async (navigate: NavigationActions) => {
                     await platformFamilyManager.save(clone.members);
                     memberManager.family.copyFromClone(clone);
