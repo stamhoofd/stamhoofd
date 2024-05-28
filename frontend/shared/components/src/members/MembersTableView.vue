@@ -89,6 +89,10 @@ function extendSort(list: SortList): SortList  {
 }
 
 function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
+    if (app == 'admin') {
+        return filter;
+    }
+    
     const requiredExtraFilter = {
         'registrations': {
             $elemMatch: props.group ? {
@@ -104,7 +108,6 @@ function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
             }
         }
     }
-
 
     if (!filter) {
         return requiredExtraFilter;
