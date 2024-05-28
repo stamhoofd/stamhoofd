@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
@@ -192,40 +192,44 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
         ]
     }
 
+    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Organization>>) {
+        this.organizationPatch = this.organizationPatch.patch(Organization.patch(patch))
+    }
+
     get color() {
         return this.organization.meta.color
     }
 
     set color(color: string | null) {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-
-        this.$set(this.organizationPatch.meta!, "color", color)
+        this.addPatch({
+            meta: OrganizationMetaData.patch({
+                color: color
+            })
+        })
     }
 
     get squareLogo() {
         return this.organization.meta.squareLogo
     }
 
-    set squareLogo(image: Image | null) {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-
-        this.$set(this.organizationPatch.meta!, "squareLogo", image)
+    set squareLogo(squareLogo: Image | null) {
+        this.addPatch({
+            meta: OrganizationMetaData.patch({
+                squareLogo
+            })
+        })
     }
 
     get expandLogo() {
         return this.organization.meta.expandLogo
     }
 
-    set expandLogo(enable: boolean) {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-
-        this.$set(this.organizationPatch.meta!, "expandLogo", enable)
+    set expandLogo(expandLogo: boolean) {
+        this.addPatch({
+            meta: OrganizationMetaData.patch({
+                expandLogo
+            })
+        })
     }
 
 
@@ -233,12 +237,12 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
         return this.organization.meta.horizontalLogo
     }
 
-    set horizontalLogo(image: Image | null) {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-
-        this.$set(this.organizationPatch.meta!, "horizontalLogo", image)
+    set horizontalLogo(horizontalLogo: Image | null) {
+        this.addPatch({
+            meta: OrganizationMetaData.patch({
+                horizontalLogo
+            })
+        })
     }
 
     get isMailOk() {
