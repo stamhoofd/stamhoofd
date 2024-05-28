@@ -357,6 +357,10 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport', options?: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}|null, scopeOrganization?: Organization|null}) {
+        if (property === 'financialSupport' && !this.patchedMember.details.dataPermissions?.value) {
+            return false;
+        }
+        
         if (property === 'dataPermission' || property === 'financialSupport') {
             if (this.platform.config.recordsConfiguration[property]) {
                 return true;
@@ -376,6 +380,10 @@ export class PlatformMember implements ObjectWithRecords {
             return true;
         }
 
+        if (property === 'financialSupport' && !this.patchedMember.details.dataPermissions?.value) {
+            return false;
+        }
+
         const organizations = this.filterOrganizations({cycleOffset: 0})
 
         for (const organization of organizations) {
@@ -386,6 +394,7 @@ export class PlatformMember implements ObjectWithRecords {
                         continue
                     }
                 }
+
 
                 if (organization.meta.recordsConfiguration[property]) {
                     return true;

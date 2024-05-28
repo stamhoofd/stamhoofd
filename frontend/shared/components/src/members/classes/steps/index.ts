@@ -7,8 +7,8 @@ import { MemberParentsStep } from "./MemberParentsStep";
 
 export const allMemberSteps: EditMemberStep[] = [
     MemberGeneralStep,
-    MemberFinancialSupportStep,
     MemberDataPermissionStep,
+    MemberFinancialSupportStep,
     MemberParentsStep,
     MemberEmergencyContactsStep
 ]
