@@ -273,7 +273,7 @@ const properties = [
 ]
 
 const dataPermissions = {
-    locked: computed(() => !!props.inheritedRecordsConfiguration?.dataPermission),
+    locked: computed(() => !!props.inheritedRecordsConfiguration?.dataPermission && !patched.value.dataPermission),
     enabled: computed({
         get: () => !!props.inheritedRecordsConfiguration?.dataPermission || patched.value.dataPermission !== null,
         set: (value: boolean) => {
@@ -292,7 +292,7 @@ const dataPermissions = {
 }
 
 const financialSupport = {
-    locked: computed(() => !!props.inheritedRecordsConfiguration?.financialSupport),
+    locked: computed(() => !!props.inheritedRecordsConfiguration?.financialSupport && !patched.value.financialSupport),
     enabled: computed({
         get: () => !!props.inheritedRecordsConfiguration?.financialSupport || patched.value.financialSupport !== null,
         set: (value: boolean) => {
@@ -312,7 +312,7 @@ const financialSupport = {
 
 // Methods
 function buildPropertyRefs(property: PropertyName, title: string) {
-    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property])
+    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property])
     const enabled = computed({
         get: () => !!getFilterConfiguration(property),
         set: (value: boolean) => setEnableProperty(property, value)

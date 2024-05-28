@@ -110,7 +110,7 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
             let patch = this.patchOrganization
 
             // Check if reduced price is enabled
-            if (!this.patchedOrganization.meta.recordsConfiguration.financialSupport && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
+            if (!this.patchedOrganization.meta.recordsConfiguration.financialSupport && !this.$platform.config.recordsConfiguration.financialSupport && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
                 const patchOrganization = Organization.patch({
                     meta:  OrganizationMetaData.patch({
                         recordsConfiguration: OrganizationRecordsConfiguration.patch({

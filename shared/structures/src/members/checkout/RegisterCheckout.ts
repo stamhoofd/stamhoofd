@@ -601,6 +601,7 @@ export class RegisterCheckout{
         this.administrationFee = 0;
         this.freeContribution = 0;
         this.cart.items = []
+        this.cart.balanceItems = []
     }
 
     get totalPrice() {

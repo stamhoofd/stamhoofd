@@ -147,7 +147,7 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         patchedOrganization!: Organization | null
 
     get enableFinancialSupport() {
-        return (this.patchedOrganization ?? this.$organization).meta.recordsConfiguration.financialSupport !== null
+        return (this.patchedOrganization ?? this.$organization).meta.recordsConfiguration.financialSupport !== null || this.$platform.config.recordsConfiguration.financialSupport !== null
     }
 
     get canRegisterMultipleGroups() {
