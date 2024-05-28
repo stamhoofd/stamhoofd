@@ -118,6 +118,10 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 })
             }
 
+            if (f.$in.length === 0) {
+                return new SQLWhereEqual(new SQLSafeValue(1), SQLWhereSign.Equal, new SQLSafeValue(0));
+            }
+
             const v = f.$in.map(a => norm(a));
 
             if (isJSONObject) {
