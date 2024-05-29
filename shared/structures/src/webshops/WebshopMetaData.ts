@@ -604,7 +604,7 @@ export class WebshopPrivateMetaData extends AutoEncoder {
             DNSRecord.create({
                 type: DNSRecordType.CNAME,
                 name: domain+".",
-                value: "domains.stamhoofd.shop."
+                value: STAMHOOFD.domains.webshopCname + "."
             })
         ]
     }

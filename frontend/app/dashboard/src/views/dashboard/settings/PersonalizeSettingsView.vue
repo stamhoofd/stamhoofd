@@ -76,7 +76,7 @@
         </template>
 
         <template v-else>
-            <p v-if="enableMemberModule" class="st-list-description">
+            <p v-if="organization.registerUrl && enableMemberModule" class="st-list-description">
                 Jullie ledenportaal is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
             </p>
             <p v-else class="st-list-description">

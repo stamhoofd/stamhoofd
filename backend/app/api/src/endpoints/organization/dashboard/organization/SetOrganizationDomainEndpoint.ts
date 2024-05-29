@@ -109,18 +109,20 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 }
 
                 if (organization.privateMeta.mailFromDomain !== organization.privateMeta.pendingRegisterDomain) {
-                        organization.privateMeta.dnsRecords.push(DNSRecord.create({
+                        
+                    organization.privateMeta.dnsRecords.push(DNSRecord.create({
                             type: DNSRecordType.CNAME,
-                            name: organization.privateMeta.mailFromDomain+".",
+                            name: organization.privateMeta.mailFromDomain + ".",
                             // Use shops for mail domain, to allow reuse
-                            value: "domains.stamhoofd.shop."
+                            value: STAMHOOFD.domains.webshopCname + "."
                         }))
-                        if (organization.privateMeta.pendingRegisterDomain) {
+
+                        if (STAMHOOFD.domains.registration && organization.privateMeta.pendingRegisterDomain) {
                             organization.privateMeta.dnsRecords.push(DNSRecord.create({
                                 type: DNSRecordType.CNAME,
                                 name: organization.privateMeta.pendingRegisterDomain+".",
                                 // Use registration domain
-                                value: "domains." + (STAMHOOFD.domains.registration[organization.address.country] ?? STAMHOOFD.domains.registration[""]) + "."
+                                value: STAMHOOFD.domains.registrationCname + "."
                             }))
                         }
                 } else {
@@ -128,7 +130,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                         type: DNSRecordType.CNAME,
                         name: organization.privateMeta.mailFromDomain+".",
                         // Use registration domain
-                        value: "domains." + (STAMHOOFD.domains.registration[organization.address.country] ?? STAMHOOFD.domains.registration[""]) + "."
+                        value: STAMHOOFD.domains.registrationCname + "."
                     }))
                 }
             }

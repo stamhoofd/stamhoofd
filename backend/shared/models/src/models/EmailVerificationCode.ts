@@ -118,7 +118,7 @@ export class EmailVerificationCode extends Model {
 
     getEmailVerificationUrl(user: import('./User').User, organization: import('./Organization').Organization|null, i18n: I18n) {
         let host: string;
-        if (user.organizationPermissions || !organization) {
+        if (user.permissions || !organization || STAMHOOFD.userMode === 'platform') {
             host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
         } else {
             // Add language if different than default

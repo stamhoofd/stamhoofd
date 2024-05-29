@@ -41,7 +41,7 @@ export default class App extends Vue {
             })
 
             // Do we need to redirect?
-            if (window.location.hostname.toLowerCase() != response.data.resolvedRegisterDomain.toLowerCase()) {
+            if (response.data.resolvedRegisterDomain && window.location.hostname.toLowerCase() != response.data.resolvedRegisterDomain.toLowerCase()) {
                 // Redirect
                 window.location.href = UrlHelper.initial.getFullHref({ host: response.data.resolvedRegisterDomain })
                 return new ComponentWithProperties(LoadingView, {})
