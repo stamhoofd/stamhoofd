@@ -106,8 +106,8 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const dateTime = Formatter.dateTime(validUntil)
         const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(admin, organization, request.i18n, validUntil)
         
-        const name = organization?.name ?? STAMHOOFD.translationNamespace
-        const what = organization ? `de vereniging ${name} op ${STAMHOOFD.translationNamespace}` : `${STAMHOOFD.translationNamespace}`
+        const name = organization?.name ?? request.i18n.t("shared.platformName")
+        const what = organization ? `de vereniging ${name} op ${request.i18n.t("shared.platformName")}` : `${request.i18n.t("shared.platformName")}`
 
         if (admin.hasAccount()) {
             const url = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+request.i18n.locale;
@@ -118,7 +118,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 to: admin.getEmailTo(),
                 subject: "✉️ Beheerder van "+name,
                 type: "transactional",
-                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je toegevoegd als beheerder van ${what}. Je kan inloggen met je bestaande account (${admin.email}) door te surfen naar:\n${url}\n\nDaar kan je jouw vereniging zoeken en aanklikken.\n\n----\n\nWeet je jouw wachtwoord niet meer? Dan kan je een nieuw wachtwoord instellen via de onderstaande link:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+STAMHOOFD.translationNamespace+"\n"
+                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je toegevoegd als beheerder van ${what}. Je kan inloggen met je bestaande account (${admin.email}) door te surfen naar:\n${url}\n\nDaar kan je jouw vereniging zoeken en aanklikken.\n\n----\n\nWeet je jouw wachtwoord niet meer? Dan kan je een nieuw wachtwoord instellen via de onderstaande link:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+request.i18n.t("shared.platformName")+"\n"
             });
         } else {
             // Send email
@@ -128,7 +128,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 to: admin.getEmailTo(),
                 subject: "✉️ Uitnodiging beheerder van "+name,
                 type: "transactional",
-                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je uitgenodigd om beheerder te worden van ${what}. Je kan een account aanmaken door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+STAMHOOFD.translationNamespace+"\n"
+                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je uitgenodigd om beheerder te worden van ${what}. Je kan een account aanmaken door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+request.i18n.t("shared.platformName")+"\n"
             });
         }
 
