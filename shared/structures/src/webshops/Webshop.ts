@@ -73,7 +73,7 @@ export class WebshopPreview extends AutoEncoder {
     }
     
     getLegacyUrl(organization: Organization): string | null {
-        if (this.legacyUri === null) {
+        if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
             return null
         }
         return organization.uri+"."+STAMHOOFD.domains.legacyWebshop+(this.legacyUri ? "/"+this.legacyUri : "")
@@ -228,7 +228,7 @@ export class Webshop extends AutoEncoder {
     }
     
     getLegacyUrl(organization: Organization): string | null {
-        if (this.legacyUri === null) {
+        if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
             return null
         }
         return organization.uri+"."+STAMHOOFD.domains.legacyWebshop+(this.legacyUri ? "/"+this.legacyUri : "")

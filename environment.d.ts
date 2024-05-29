@@ -32,7 +32,7 @@ declare global {
         marketing: LocalizedDomain,         // main landing page
         webshopPrefix: string,              // Webshop prefix that is used on the marketing domain, e.g. 'shop', for stamhoofd.be/shop/my-webshop
         webshop: LocalizedDomain,           // E.g. shop.stamhoofd.be
-        legacyWebshop: string,              // E.g. stamhoofd.shop for *.stamhoofd.shop
+        legacyWebshop?: string,              // E.g. stamhoofd.shop for *.stamhoofd.shop
         api: string,                        // requires wildcard prefix DNS
         demoApi: string,                    // requires wildcard prefix DNS
         admin: string,
