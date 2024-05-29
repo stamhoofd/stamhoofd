@@ -181,7 +181,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
         .payconiq-logo {
             width: 150px;
             height: 150px;
-            background: url(~@stamhoofd/assets/images/partners/payconiq/app-shadow.svg) no-repeat center center;
+            background: url(@stamhoofd/assets/images/partners/payconiq/app-shadow.svg) no-repeat center center;
             background-size: contain;
         }
 

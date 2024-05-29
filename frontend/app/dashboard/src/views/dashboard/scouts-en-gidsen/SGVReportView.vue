@@ -114,14 +114,13 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { SGVSyncReport } from '../../../classes/SGVGroepsadministratieSync';
 import { SGVMemberError } from "../../../classes/SGVStructures";
-import MemberView from '../member/MemberView.vue';
 
 @Component({
     components: {
@@ -173,7 +172,7 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
 
     handleError(error) {
         if (error.member && error.member.details) {
-            this.present(new ComponentWithProperties(MemberView, { member: error.member }).setDisplayStyle("popup"))
+            //this.present(new ComponentWithProperties(MemberView, { member: error.member }).setDisplayStyle("popup"))
         }
     } 
 }

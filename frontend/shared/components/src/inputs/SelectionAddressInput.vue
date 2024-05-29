@@ -80,7 +80,7 @@ export default class SelectionAddressInput extends Vue {
 
     @Watch('modelValue')
     onValueChanged(val: Address | null) {
-        if (val === this.selectedAddress ?? this.customAddress ?? null) {
+        if (val === (this.selectedAddress ?? this.customAddress ?? null)) {
             // Not changed
             return
         }
