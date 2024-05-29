@@ -165,6 +165,7 @@ declare global {
 
         // Communication with other internal services
         readonly INTERNAL_SECRET_KEY: string
+        readonly translationNamespace: string
     }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment
