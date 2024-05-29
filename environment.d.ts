@@ -27,7 +27,7 @@ declare global {
     };
 
     type StamhoofdDomains = {
-        dashboard: string,
+        dashboard: string,                      // requires both www + non-www DNS record
         registration?: LocalizedDomain,         // Optional. Set to undefined for platforms. requires wildcard prefix DNS
         marketing: LocalizedDomain,             // main landing page (used for linking back to website, documentation...)
         webshop: LocalizedDomain,               // E.g. shop.stamhoofd.be
