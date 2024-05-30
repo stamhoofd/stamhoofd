@@ -348,8 +348,11 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         const iban = this.iban
         const creditor = this.creditor
 
+        // BUG in Fortis app -> need to fill in at least one character for the BIC/SWIFT field, otherwise it won't work
+        const bic = '_';
+
         // Note: structured reference still as normal description (the structured reference ISO is not supported)
-        return "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription?.substring(0, 140)+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
+        return "BCD\n001\n1\nSCT\n"+bic+"\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription?.substring(0, 140)+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
     }
 
     async generateQRCode() {
