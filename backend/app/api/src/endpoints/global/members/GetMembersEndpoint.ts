@@ -59,6 +59,12 @@ const filterCompilers: SQLFilterDefinitions = {
             SQL.column('lastName'),
         )
     ),
+    gender: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.gender'),
+        undefined,
+        true,
+        false
+    ),
     birthDay: createSQLColumnFilterCompiler('birthDay', (d) => {
         if (typeof d === 'number') {
             const date = new Date(d)
