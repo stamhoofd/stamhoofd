@@ -46,13 +46,6 @@
                     </div>
                 </div>
             </template>
-
-            <hr>
-
-            <button v-if="enableMemberModule && fullAccess" type="button" class="menu-button button" :class="{ selected: currentlySelected == 'member-archive'}" @click="$navigate('archive')"> 
-                <span class="icon archive" />
-                <span>Archief</span>
-            </button>
         </main>
     </div>
 </template>
