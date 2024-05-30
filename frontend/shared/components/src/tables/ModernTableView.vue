@@ -1245,7 +1245,34 @@ const canFilter = computed(() => {
     return !!props.filterBuilders
 });
 
-async function editFilter() {
+function calculateModalPosition(event: MouseEvent) {
+    const padding = 15;
+    let width = 400;
+    const button = event.currentTarget as HTMLElement
+    const bounds = button.getBoundingClientRect()
+    const win = window,
+        doc = document,
+        docElem = doc.documentElement,
+        body = doc.getElementsByTagName("body")[0],
+        clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
+
+    let left = bounds.left - padding;
+
+    if (left + width > clientWidth + padding) {
+        left = clientWidth - padding - width;
+
+        if (left < padding) {
+            left = padding;
+            width = clientWidth - padding * 2;
+        }
+    }
+
+    const top = bounds.top + bounds.height + padding;
+
+    return '--sheet-position-left: '+left.toFixed(1)+'px; --sheet-position-top: '+top.toFixed(1)+'px; --sheet-vertical-padding: 15px; --st-popup-width: ' + width.toFixed(1) + 'px; '
+}
+
+async function editFilter(event: MouseEvent) {
     if (!props.filterBuilders) {
         return
     }
@@ -1264,7 +1291,7 @@ async function editFilter() {
         ],
         modalDisplayStyle: 'popup',
         modalClass: 'positionable-sheet',
-        modalCssStyle: '--sheet-position-right: 40px;'
+        modalCssStyle: calculateModalPosition(event)
     })
 }
 
