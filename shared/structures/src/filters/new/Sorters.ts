@@ -12,9 +12,6 @@ function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<
         return null;
     }
 
-    // Always add id
-    //const sort = [...list, {key: 'id', order: 'ASC'}]
-
     const first = list[0];
     if (!first) {
         return null;

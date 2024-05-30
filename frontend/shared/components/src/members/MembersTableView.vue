@@ -81,6 +81,14 @@ const groups = (() => {
 const groupIds = groups.map(g => g.id)
 
 function extendSort(list: SortList): SortList  {
+    // Map 'age' to 'birthDay' + reverse direction
+    list = list.map(l => {
+        if (l.key === 'age') {
+            return {key: 'birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC}
+        }
+        return l;
+    })
+
     if (list.find(l => l.key === 'id')) {
         return list;
     }

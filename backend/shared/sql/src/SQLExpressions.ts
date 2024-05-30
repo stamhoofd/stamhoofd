@@ -106,6 +106,23 @@ export class SQLConcat implements SQLExpression {
     }
 }
 
+
+export class SQLAge implements SQLExpression {
+    expression: SQLExpression;
+
+    constructor(expression: SQLExpression) {
+        this.expression = expression
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'TIMESTAMPDIFF(YEAR, ',
+            this.expression.getSQL(options),
+            ', CURDATE())'
+        ])
+    }
+}
+
 export class SQLJSONValue implements SQLExpression {
     value: null|true|false;
 

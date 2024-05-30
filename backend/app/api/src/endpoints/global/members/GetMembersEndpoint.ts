@@ -3,8 +3,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, MemberWithRegistrations } from '@stamhoofd/models';
-import { baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler,joinSQLQuery,SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions } from "@stamhoofd/sql";
-import { AccessRight, CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
+import { CountFilteredRequest, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -58,6 +58,9 @@ const filterCompilers: SQLFilterDefinitions = {
             new SQLScalar(' '),
             SQL.column('lastName'),
         )
+    ),
+    age: createSQLExpressionFilterCompiler(
+        new SQLAge(SQL.column('birthDay'))
     ),
     gender: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.gender'),
@@ -167,7 +170,7 @@ const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
     },
     'birthDay': {
         getValue(a) {
-            return a.details.birthDay?.getTime()
+            return a.details.birthDay ? Formatter.dateIso(a.details.birthDay) : null
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -175,19 +178,8 @@ const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
                 direction
             })
         }
-    },
-    'age': {
-        getValue(a) {
-            return a.details.birthDay?.getTime()
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('birthDay'),
-                // Reverse direction
-                direction: direction === 'ASC' ? 'DESC' : 'ASC'
-            })
-        }
     }
+    // Note: never add mapped sortings, that should happen in the frontend -> e.g. map age to birthDay
 }
 
 export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
