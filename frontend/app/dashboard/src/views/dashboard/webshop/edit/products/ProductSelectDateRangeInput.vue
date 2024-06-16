@@ -69,7 +69,7 @@ export default class ProductSelectDateRangeInput extends Vue {
 
     @Watch('value')
     onValueChanged(val: ProductDateRange | null) {
-        if (val === this.selectedDateRange ?? this.customDateRange ?? null) {
+        if (val === (this.selectedDateRange ?? this.customDateRange ?? null)) {
             // Not changed
             return
         }

@@ -42,37 +42,7 @@ export class PropertyFilter implements Encodeable {
         }
         return object.doesMatchFilter(this.requiredWhen)
     }
-
-    getString(): string {
-        //const decodedEnabledWhen = this.enabledWhen.decode(definitions)
-        //const decodedRequiredWhen = this.requiredWhen === null ? null : this.requiredWhen.decode(definitions)
-
-        //if (decodedEnabledWhen.filters.length == 0) {
-        //    // Always enabled
-
-        //    if (decodedRequiredWhen === null) {
-        //        return "Stap kan worden overgeslagen"
-        //    }
-        //    if (decodedRequiredWhen.filters.length == 0) {
-        //        return "Stap kan niet worden overgeslagen"
-        //    }
-
-        //    return "Stap kan niet worden overgeslagen als: "+decodedRequiredWhen.toString()
-        //}
-
-        //if (decodedRequiredWhen === null) {
-        //    return "Ingeschakeld (kan altijd worden overgeslagen) als: "+decodedEnabledWhen.toString()
-        //}
-
-        //if (decodedRequiredWhen.filters.length == 0) {
-        //    return "Ingeschakeld als: "+decodedEnabledWhen.toString()
-        //}
-
-        //return "Ingeschakeld als: "+decodedEnabledWhen+", enkel verplicht invullen als: "+decodedRequiredWhen.toString()
-
-        return "TODO"
-    }
-
+    
     encode(context: EncodeContext): PlainObject {
         return {
             enabledWhen: this.enabledWhen as PlainObject,

@@ -1,21 +1,25 @@
-import { AutoEncoder, BooleanDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from "../../Group";
 import { WaitingListType } from "../../GroupSettings";
+import { PriceBreakdown } from "../../PriceBreakdown";
 import { PlatformFamily, PlatformMember } from "../PlatformMember";
+import { OldRegisterCartPriceCalculator, RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator";
+import { BalanceItemCartItem } from "./OldRegisterItem";
+import { MemberBalanceItem } from "../../BalanceItemDetailed";
+import { PaymentMethod } from "../../PaymentMethod";
 
 
 export type RegisterContext = {
-    members: PlatformMember[],
-    checkout: RegisterCheckout
+    family: PlatformFamily
 }
 
 export class IDRegisterItem extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
+    @field({ decoder: StringDecoder })
+    id: string
 
     @field({ decoder: StringDecoder })
     memberId: string
@@ -27,11 +31,52 @@ export class IDRegisterItem extends AutoEncoder {
     organizationId: string
 
     @field({ decoder: BooleanDecoder })
-    waitingList = false
+    waitingList: boolean
+
+    hydrate(context: RegisterContext) {
+        return RegisterItem.fromId(this, context.family)
+    }
 }
 
+export class IDRegisterCart extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(IDRegisterItem) })
+    items: IDRegisterItem[] = []
 
-export class RegisterItem {
+    @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
+    balanceItems: BalanceItemCartItem[] = []
+
+    hydrate(context: RegisterContext) {
+        const cart = new RegisterCart()
+        cart.items = this.items.map(i => i.hydrate(context))
+        cart.balanceItems = this.balanceItems
+        return cart
+    }
+}
+
+export class IDRegisterCheckout extends AutoEncoder {
+    @field({ decoder: IDRegisterCart })
+    cart: IDRegisterCart = IDRegisterCart.create({})
+
+    @field({ decoder: IntegerDecoder })
+    administrationFee = 0
+
+    @field({ decoder: IntegerDecoder })
+    freeContribution = 0
+
+    @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
+    paymentMethod: PaymentMethod | null = null
+
+    hydrate(context: RegisterContext) {
+        const checkout = new RegisterCheckout()
+        checkout.cart = this.cart.hydrate(context)
+        checkout.administrationFee = this.administrationFee
+        checkout.freeContribution = this.freeContribution
+        checkout.paymentMethod = this.paymentMethod
+        return checkout
+    }
+}
+
+export class RegisterItem implements RegisterItemWithPrice {
     id: string;
     member: PlatformMember
     group: Group
@@ -43,6 +88,28 @@ export class RegisterItem {
         this.member = data.member
         this.group = data.group
         this.waitingList = data.waitingList
+    }
+
+    convert(): IDRegisterItem {
+        return IDRegisterItem.create({
+            id: this.id,
+            memberId: this.member.member.id,
+            groupId: this.group.id,
+            organizationId: this.group.organizationId,
+            waitingList: this.waitingList
+        })
+    }
+
+    get memberId() {
+        return this.member.id
+    }
+
+    get groupId() {
+        return this.group.id
+    }
+
+    get reduced() {
+        return this.member.patchedMember.details.requiresFinancialSupport?.value ?? false
     }
 
     get family() {
@@ -242,6 +309,16 @@ export class RegisterItem {
     }
 
     validate() {
+        if (!this.checkout.cart.contains(this)) {
+            if (!this.checkout.cart.canAdd(this)) {
+                throw new SimpleError({
+                    code: "already_registered",
+                    message: "Already registered",
+                    human: `Reken jouw winkelmandje eerst af. Het is niet mogelijk om deze inschrijving samen af te rekenen omdat het inschrijvingsgeld aan een andere partij betaald moet worden.`
+                })
+            }
+        }
+
         // Already registered
         if (this.isAlreadyRegistered()) {
             throw new SimpleError({
@@ -360,30 +437,20 @@ export class RegisterItem {
 
     }
 
-    toId(): IDRegisterItem {
-        return IDRegisterItem.create({
-            id: this.id,
-            memberId: this.member.member.id,
-            groupId: this.group.id,
-            organizationId: this.group.organizationId,
-            waitingList: this.waitingList
-        })
-    }
-
     static fromId(idRegisterItem: IDRegisterItem, family: PlatformFamily) {
         const member = family.members.find(m => m.member.id === idRegisterItem.memberId)
         if (!member) {
-            throw new Error("Member not found")
+            throw new Error("Member not found: " + idRegisterItem.memberId)
         }
 
         const organization = member.organizations.find(o => o.id === idRegisterItem.organizationId)
         if (!organization) {
-            throw new Error("Organization not found")
+            throw new Error("Organization not found: " + idRegisterItem.organizationId)
         }
 
         const group = organization.groups.find(g => g.id === idRegisterItem.groupId)
         if (!group) {
-            throw new Error("Group not found")
+            throw new Error("Group not found: " + idRegisterItem.groupId)
         }
 
         return new RegisterItem({
@@ -393,41 +460,180 @@ export class RegisterItem {
             waitingList: idRegisterItem.waitingList
         })
     }
+
+    get paymentConfiguration() {
+        if (this.calculatedPrice === 0) {
+            return null;
+        }
+        return this.organization.meta.registrationPaymentConfiguration
+    }
 }
 
 export class RegisterCart {
     items: RegisterItem[] = []
+    balanceItems: BalanceItemCartItem[] = []
 
     calculatePrices() {
-        for (const item of this.items) {
-            if (item.waitingList) {
-                item.calculatedPrice = 0
-                continue
-            }
-            item.calculatedPrice = item.group.settings.getGroupPrices(new Date())?.getPriceFor(
-                item.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
-                0
-            ) ?? 0
-        }
-        // todo: apply discounts at a later stage
-        
-        // this.administrationFee = paymentConfiguration.administrationFee.calculate(this.priceWithoutFees)
+        OldRegisterCartPriceCalculator.calculatePrices(
+            this.items, 
+            this.items.map(i => i.member.patchedMember), 
+            this.items.map(i => i.group), 
+            this.items.flatMap(i => i.organization.meta.categories) 
+        )
+    }
+
+    convert(): IDRegisterCart {
+        return IDRegisterCart.create({
+            items: this.items.map(i => i.convert()),
+            balanceItems: this.balanceItems
+        })
     }
 
     add(item: RegisterItem) {
+        if (this.contains(item)) {
+            return;
+        }
         this.items.push(item)
+    }
+
+    canAdd(item: RegisterItem) {
+        if (this.contains(item)) {
+            return false;
+        }
+        if (this.paymentConfiguration && item.paymentConfiguration && item.paymentConfiguration !== this.paymentConfiguration) {
+            return false;
+        }
+        return true;
+    }
+
+    contains(item: RegisterItem) {
+        for (const [i, otherItem] of this.items.entries()) {
+            if (otherItem.id === item.id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    remove(item: RegisterItem) {
+        for (const [i, otherItem] of this.items.entries()) {
+            if (otherItem.id === item.id) {
+                this.items.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    get isEmpty() {
+        return this.items.length === 0
+    }
+
+    get count() {
+        return this.items.length
+    }
+
+    get price() {
+        return this.items.reduce((total, item) => item.calculatedPrice + total, 0) 
+            + this.balanceItems.reduce((total, item) => {
+                return total + item.price
+            }, 0)
+    }
+
+    get paymentConfiguration() {
+        for (const item of this.items) {
+            const organization = item.organization
+
+            return organization.meta.registrationPaymentConfiguration
+        }
+
+        return null;
+    }
+
+    get singleOrganization() {
+        if (this.items.length === 0) {
+            return null;
+        }
+
+        const organization = this.items[0].organization
+        for (const item of this.items) {
+            if (item.organization.id !== organization.id) {
+                return null;
+            }
+        }
+
+        return organization
     }
 }
 
 export class RegisterCheckout{
     cart = new RegisterCart()
+    administrationFee = 0;
+    freeContribution = 0
+    paymentMethod: PaymentMethod | null = null
 
-    validate() {
+    convert(): IDRegisterCheckout {
+        return IDRegisterCheckout.create({
+            cart: this.cart.convert(),
+            administrationFee: this.administrationFee,
+            freeContribution: this.freeContribution,
+            paymentMethod: this.paymentMethod
+        })
+    }
+
+    get paymentConfiguration() {
+        return this.cart.paymentConfiguration
+    }
+
+    get singleOrganization() {
+        return this.cart.singleOrganization
+    }
+
+    updatePrices() {
+        this.cart.calculatePrices()
+        this.administrationFee = this.paymentConfiguration?.administrationFee.calculate(this.cart.price) ?? 0
+    }
+
+    validate(data: {memberBalanceItems?: MemberBalanceItem[]}) {
         // todo
     }
 
-
-    canRegister(member: PlatformMember, group: Group) {
-       
+    clear() {
+        this.administrationFee = 0;
+        this.freeContribution = 0;
+        this.cart.items = []
+        this.cart.balanceItems = []
     }
+
+    get totalPrice() {
+        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution)
+    }
+
+    get priceBreakown(): PriceBreakdown {
+        const all = [
+            {
+                name: 'Administratiekost',
+                price: this.administrationFee,
+            },
+            {
+                name: 'Vrije bijdrage',
+                price: this.freeContribution,
+            }
+        ].filter(a => a.price !== 0)
+
+        if (all.length > 0) {
+            all.unshift({
+                name: 'Subtotaal',
+                price: this.cart.price
+            })
+        }
+
+        return [
+            ...all,
+            {
+                name: 'Totaal',
+                price: this.totalPrice
+            }
+        ];
+    }
+
 }

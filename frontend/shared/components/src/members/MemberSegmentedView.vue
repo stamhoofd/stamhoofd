@@ -17,7 +17,7 @@
                 <FemaleIcon v-if="member.member.details.gender == Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? 'Vrouw' : 'Meisje'" class="icon-spacer" />
             </h1>
 
-            <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
+            <SegmentedControl v-model="tab" :items="tabComponents" :labels="tabLabels" />
             <component :is="tab" :member="member" />
         </main>
     </div>
@@ -26,10 +26,12 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, useAuth, useKeyUpDown } from '@stamhoofd/components';
-import { Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
 import MemberStepView from './MemberStepView.vue';
+import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
+import MemberPlatformConnectionTab from './tabs/MemberPlatformConnectionTab.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -48,16 +50,45 @@ const props = withDefaults(
         waitingList: false
     }
 );
-
-const tabs: unknown[] = [markRaw(MemberDetailsTab)]; //[MemberViewDetails, MemberViewPayments];
-const tabLabels = ["Gegevens", "Rekening"];
-const tab = ref(tabs[props.initialTab && props.initialTab < tabs.length ? (props.initialTab) : 0]);
-const tabIndex = computed(() => {
-    return Math.max(0, tabs.findIndex(t => t === tab.value))
-});
+const auth = useAuth();
 const show = useShow();
 const present = usePresent();
-const auth = useAuth();
+
+const tabs = computed(() => {
+    const base: {name: string, component: unknown}[] = [{
+        name: "Gegevens",
+        component: markRaw(MemberDetailsTab)
+    }]; 
+
+    if (STAMHOOFD.userMode === 'platform') {
+        base.push({
+            name: 'Aansluiting',
+            component: markRaw(MemberPlatformConnectionTab)
+        });
+    }
+
+    if (auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
+        base.push({
+            name: 'Rekening',
+            component: markRaw(MemberPaymentsTab)
+        });
+    }
+
+    return base
+});
+
+const tabComponents = computed(() => {
+    return tabs.value.map(t => t.component)
+});
+const tabLabels = computed(() => {
+    return tabs.value.map(t => t.name)
+});
+
+const tab = ref(tabComponents.value[props.initialTab && props.initialTab < tabComponents.value.length ? (props.initialTab) : 0]);
+const tabIndex = computed(() => {
+    return Math.max(0, tabComponents.value.findIndex(t => t === tab.value))
+});
+
 const hasWrite = computed(() => {
     return auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
 })

@@ -3,8 +3,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, MemberWithRegistrations } from '@stamhoofd/models';
-import { baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler,SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions } from "@stamhoofd/sql";
-import { CountFilteredRequest, getSortFilter,GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
+import { CountFilteredRequest, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -15,6 +15,40 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<MembersBlob, LimitedFilteredRequest>
 
+const registrationFilterCompilers: SQLFilterDefinitions = {
+    ...baseSQLFilterCompilers,
+    "price": createSQLColumnFilterCompiler('price'),
+    "pricePaid": createSQLColumnFilterCompiler('pricePaid'),
+    "waitingList": createSQLColumnFilterCompiler('waitingList'),
+    "canRegister": createSQLColumnFilterCompiler('canRegister'),
+    "cycle": createSQLColumnFilterCompiler('cycle'),
+
+    "cycleOffset": createSQLExpressionFilterCompiler({
+        getSQL(options) {
+            return joinSQLQuery([
+                SQL.column('groups', 'cycle').getSQL(options),
+                ' - ',
+                SQL.column('registrations', 'cycle').getSQL(options)
+            ])
+        },
+    }),
+
+    "organizationId": createSQLColumnFilterCompiler('organizationId'),
+    "groupId": createSQLColumnFilterCompiler('groupId'),
+    "registeredAt": createSQLColumnFilterCompiler('registeredAt'),
+
+    "group": createSQLFilterNamespace({
+        ...baseSQLFilterCompilers,
+        id: createSQLColumnFilterCompiler('groupId'),
+        name: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name')
+        ),
+        status: createSQLExpressionFilterCompiler(
+            SQL.column('groups', 'status')
+        ),
+    })
+}
+
 const filterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
@@ -24,6 +58,15 @@ const filterCompilers: SQLFilterDefinitions = {
             new SQLScalar(' '),
             SQL.column('lastName'),
         )
+    ),
+    age: createSQLExpressionFilterCompiler(
+        new SQLAge(SQL.column('birthDay'))
+    ),
+    gender: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('details'), '$.value.gender'),
+        undefined,
+        true,
+        false
     ),
     birthDay: createSQLColumnFilterCompiler('birthDay', (d) => {
         if (typeof d === 'number') {
@@ -64,6 +107,24 @@ const filterCompilers: SQLFilterDefinitions = {
         ).where(
             SQL.column('memberId'),
             SQL.column('members', 'id'),
+        ),
+        registrationFilterCompilers
+    ),
+
+    activeRegistrations: createSQLRelationFilterCompiler(
+        SQL.select()
+        .from(
+            SQL.table('registrations')
+        ).join(
+            SQL.join(
+                SQL.table('groups')
+            ).where(
+                SQL.column('groups', 'id'),
+                SQL.column('registrations', 'groupId')
+            )
+        ).where(
+            SQL.column('memberId'),
+            SQL.column('members', 'id'),
         ).whereNot(
             SQL.column('registeredAt'),
             null,
@@ -74,28 +135,7 @@ const filterCompilers: SQLFilterDefinitions = {
             SQL.column('registrations', 'cycle'),
             SQL.column('groups', 'cycle'),
         ),
-
-        {
-            ...baseSQLFilterCompilers,
-            "price": createSQLColumnFilterCompiler('price'),
-            "pricePaid": createSQLColumnFilterCompiler('pricePaid'),
-            "waitingList": createSQLColumnFilterCompiler('waitingList'),
-            "canRegister": createSQLColumnFilterCompiler('canRegister'),
-            "cycle": createSQLColumnFilterCompiler('cycle'),
-            "organizationId": createSQLColumnFilterCompiler('organizationId'),
-            "groupId": createSQLColumnFilterCompiler('groupId'),
-
-            "group": createSQLFilterNamespace({
-                ...baseSQLFilterCompilers,
-                id: createSQLColumnFilterCompiler('groupId'),
-                name: createSQLExpressionFilterCompiler(
-                    SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name')
-                ),
-                status: createSQLExpressionFilterCompiler(
-                    SQL.column('groups', 'status')
-                ),
-            })
-        }
+        registrationFilterCompilers
     ),
 }
 
@@ -130,7 +170,7 @@ const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
     },
     'birthDay': {
         getValue(a) {
-            return a.details.birthDay?.getTime()
+            return a.details.birthDay ? Formatter.dateIso(a.details.birthDay) : null
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -138,19 +178,8 @@ const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
                 direction
             })
         }
-    },
-    'age': {
-        getValue(a) {
-            return a.details.birthDay?.getTime()
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('birthDay'),
-                // Reverse direction
-                direction: direction === 'ASC' ? 'DESC' : 'ASC'
-            })
-        }
     }
+    // Note: never add mapped sortings, that should happen in the frontend -> e.g. map age to birthDay
 }
 
 export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -172,7 +201,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
         const organization = Context.organization
 
-        if (!organization && !Context.auth.hasPlatformFullAccess()) {
+        if (!organization && !Context.auth.canAccessAllPlatformMembers()) {
             throw new SimpleError({
                 code: 'not_implemented',
                 message: 'Listing members platform wide without full permissions is not yet implemented'
@@ -184,7 +213,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (organization) {
             // Add organization scope filter
             scopeFilter = {
-                registrations: {
+                activeRegistrations: {
                     $elemMatch: {
                         organizationId: organization.id
                     }

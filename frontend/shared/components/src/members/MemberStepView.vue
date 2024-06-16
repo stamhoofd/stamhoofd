@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
-        <component :is="component" :validator="errors.validator" :member="cloned" v-bind="$attrs" :level="1" />
+        <component :is="component" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" v-bind="$attrs" :level="1" />
     </SaveView>
 </template>
 
@@ -10,6 +10,7 @@ import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-nav
 import { PlatformMember, Version } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
 
+import { onActivated } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
@@ -29,11 +30,13 @@ const props = withDefaults(
         member: PlatformMember,
         // Whether the member should be saved to the API
         doSave?: boolean,
+        markReviewed?: string[]
         saveHandler?: ((navigate: NavigationActions) => Promise<void>|void)|null
     }>(), {
         doSave: true,
         saveText: 'Opslaan',
-        saveHandler: null
+        saveHandler: null,
+        markReviewed: () => []
     }
 );
 
@@ -46,6 +49,24 @@ const pop = usePop();
 const loading = ref(false);
 const errors = useErrors()
 const manager = usePlatformFamilyManager();
+
+onActivated(() => {
+    cloned.value = props.member.clone() 
+});
+
+function patchMemberWithReviewed(member: PlatformMember) {
+    if (props.markReviewed.length) {
+        const times = member.patchedMember.details.reviewTimes.clone();
+
+        for (const r of props.markReviewed) {
+            times.markReviewed(r as any, new Date())
+        }
+
+        member.addDetailsPatch({
+            reviewTimes: times
+        })
+    }
+}
 
 async function save() {
     if (loading.value) {
@@ -60,13 +81,30 @@ async function save() {
             return;
         }
 
-        if (props.doSave) {
-            await manager.save(cloned.value.family.members)
-        }
-        
-        // Copy over clone
-        props.member.family.copyFromClone(cloned.value.family)
+        if (props.markReviewed.length) {
+            const times = cloned.value.patchedMember.details.reviewTimes.clone();
 
+            for (const r of props.markReviewed) {
+                times.markReviewed(r as any, new Date())
+            }
+
+            cloned.value.addDetailsPatch({
+                reviewTimes: times
+            })
+        }
+
+        if (props.doSave) {
+            // Extra clone for saving, so the view doesn't change during saving
+            const saveClone = cloned.value.clone();
+            patchMemberWithReviewed(saveClone)
+            await manager.save(saveClone.family.members)
+            props.member.family.copyFromClone(saveClone.family)
+        } else {
+            // Copy over clone
+            patchMemberWithReviewed(cloned.value)
+            props.member.family.copyFromClone(cloned.value.family)
+        }
+    
         if (props.saveHandler) {
             await props.saveHandler({
                 show, present, dismiss, pop

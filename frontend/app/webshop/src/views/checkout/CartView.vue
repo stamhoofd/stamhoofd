@@ -31,7 +31,7 @@
             </p>
 
             <AddDiscountCodeBox :applyCode="applyCode" v-if="webshop.meta.allowDiscountCodeEntry" />
-            <CheckoutPriceBreakdown :checkout="checkout" />
+            <PriceBreakdownBox :price-breakdown="checkout.priceBreakdown" />
         </main>
 
         <STToolbar v-if="cart.items.length > 0">
@@ -50,15 +50,14 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { AddDiscountCodeBox, CartItemRow, CartItemView, CheckoutPriceBreakdown, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { AddDiscountCodeBox, CartItemRow, CartItemView, ErrorBox, LoadingButton, PriceBreakdownBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, DiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { CheckoutStepsManager } from './CheckoutStepsManager';
-import {reactive} from 'vue';
 
 @Component({
     components: {
@@ -69,7 +68,7 @@ import {reactive} from 'vue';
         STErrorsDefault,
         LoadingButton,
         CartItemRow,
-        CheckoutPriceBreakdown,
+        PriceBreakdownBox,
         AddDiscountCodeBox
     },
     filters: {

@@ -71,9 +71,6 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
                 if (action.singleSelection && !this.selection.isSingle) {
                     return false;
                 }
-                if (!action.needsSelection && this.selection.hasSelection) {
-                    return false;
-                }
 
                 if ((this as any).$isMobile && this.isDisabled(action)) {
                     // On mobile, hide disabled actions, because we don't have enough room

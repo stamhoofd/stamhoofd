@@ -30,7 +30,8 @@
     "@stamhoofd/assets": "1.0.0",
     "@stamhoofd/components": "1.0.0",
     "@stamhoofd/scss": "1.0.0",
-    "capacitor-rate-app": "4.0.3"
+    "capacitor-rate-app": "4.0.3",
+    "@stamhoofd/structures": "1.2.0"
   },
   "devDependencies": {
     "@capacitor/cli": "5.7.0"

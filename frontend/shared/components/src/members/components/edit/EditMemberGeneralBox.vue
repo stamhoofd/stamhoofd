@@ -2,6 +2,7 @@
     <div class="container">
         <Title v-bind="$attrs" :title="title" />
 
+        <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
@@ -15,31 +16,30 @@
                         </div>
                     </div>
                 </STInputBox>
-                <p v-if="member.isNew" class="style-description-small">
-                    Let op dat je geen spelfouten maakt.
-                </p>
 
-                <BirthDayInput v-if="member.isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
-
-                <STInputBox v-if="!member.isNew && member.isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
-                    <RadioGroup>
-                        <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
-                            Man
-                        </Radio>
-                        <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">
-                            Vrouw
-                        </Radio>
-                        <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">
-                            Andere
-                        </Radio>
-                    </RadioGroup>
-                </STInputBox>
+                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
+                
+                <template v-if="!member.isNew">
+                    <STInputBox v-if="!member.isNew" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
+                        <RadioGroup>
+                            <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
+                                Man
+                            </Radio>
+                            <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">
+                                Vrouw
+                            </Radio>
+                            <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">
+                                Andere
+                            </Radio>
+                        </RadioGroup>
+                    </STInputBox>
+                    <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
+                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                </template>
             </div>
 
             <div v-if="!member.isNew">
-                <AddressInput v-if="member.isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
-                <EmailInput v-if="member.isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
-                <PhoneInput v-if="member.isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                <SelectionAddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
             </div>
         </div>
     </div>
@@ -54,12 +54,12 @@ import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
-import AddressInput from '../../../inputs/AddressInput.vue';
 import BirthDayInput from '../../../inputs/BirthDayInput.vue';
 import EmailInput from '../../../inputs/EmailInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
-import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
+import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
+import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
 
 defineOptions({
@@ -68,10 +68,12 @@ defineOptions({
 
 const props = defineProps<{
     member: PlatformMember,
-    validator: Validator
+    validator: Validator,
+    parentErrorBox?: ErrorBox | null
 }>()
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true)
 const errors = useErrors({validator: props.validator});
 
 const title = computed(() => {
@@ -109,12 +111,12 @@ useValidation(errors.validator, () => {
 
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
-        if (props.member.patchedMember.details.defaultAge < 18) {
+        if (props.member.patchedMember.details.defaultAge < 24) {
             return " van dit lid"
         }
         return ""
     }
-    if (props.member.patchedMember.details.defaultAge < 18) {
+    if (props.member.patchedMember.details.defaultAge < 24) {
         return " van "+firstName.value
     }
     return ""
@@ -154,4 +156,14 @@ const phone = computed({
     get: () => props.member.patchedMember.details.phone,
     set: (phone) => props.member.addDetailsPatch({phone})
 });
+
+const availableAddresses = computed(() => {
+    const list = props.member.family.addresses
+    
+    if (props.member.patchedMember.details.address !== null && !list.find(a => a.toString() === props.member.patchedMember.details.address!.toString())) {
+        list.push(props.member.patchedMember.details.address)
+    }
+    return list
+});
+
 </script>

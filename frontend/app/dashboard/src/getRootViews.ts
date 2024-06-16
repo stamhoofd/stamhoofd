@@ -252,7 +252,6 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
         icon: 'category',
         name: 'Meer',
         items: [
-            settingsTab,
             new TabBarItem({
                 icon: 'calculator',
                 name: 'Boekhouding',
@@ -336,7 +335,10 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
                                 tabs.push(webshopsTab)
                             }
 
-                            tabs.push(settingsTab)
+                            if (reactiveSession.auth.hasFullAccess()) {
+                                tabs.push(settingsTab)
+                            }
+
                             tabs.push(moreTab);
 
                             return tabs;

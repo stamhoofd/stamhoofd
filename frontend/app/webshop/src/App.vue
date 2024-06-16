@@ -10,19 +10,17 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { DarkMode, GetWebshopFromDomainResult, WebshopAuthType } from '@stamhoofd/structures';
+import { DarkMode, GetWebshopFromDomainResult } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
 
+import { getWebshopRootView } from './getRootView';
 import ChooseWebshopView from './views/ChooseWebshopView.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
 import PrerenderRedirectView from './views/errors/PrerenderRedirectView.vue';
-import RequiredLoginView from './views/RequiredLoginView.vue';
-import WebshopView from './views/WebshopView.vue';
-import { getWebshopRootView } from './getRootView';
 
 @Component({
     components: {
@@ -36,17 +34,10 @@ export default class App extends Vue {
             // get organization
             try {
                 // Check if we are on a global domain, and ignore /shops prefixes if needed
-                let prefix: string | null = null
-                const initialPath = UrlHelper.shared.getParts()
                 const hostname = window.location.hostname
 
-                if (Object.values(STAMHOOFD.domains.marketing).includes(hostname) && initialPath.length > 0 && initialPath[0] === STAMHOOFD.domains.webshopPrefix) {
-                    console.info("Currently on our main domain, using fixed prefix:", STAMHOOFD.domains.webshopPrefix)
-                    prefix = STAMHOOFD.domains.webshopPrefix
-                }
-
                 // Ignore this fixed prefix in our next lookup
-                UrlHelper.fixedPrefix = prefix
+                UrlHelper.fixedPrefix = null
 
                 const ignorePath = ["checkout", "order", "cart", "payment", "tickets", "code"];
                 const path = UrlHelper.shared.getParts()
@@ -128,7 +119,7 @@ export default class App extends Vue {
 
                 document.title = webshop.meta.name +" - "+organization.name
 
-                return getWebshopRootView(session, webshop)
+                return await getWebshopRootView(session, webshop)
             } catch (e) {
                 console.log(e)
                 // Check if we have an organization on this domain

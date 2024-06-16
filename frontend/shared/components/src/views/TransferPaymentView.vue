@@ -183,7 +183,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, CopyableDirective, LoadingView, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, CopyableDirective, LoadingView, NavigationActions, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
@@ -229,7 +229,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         isPopup: boolean
 
     @Prop({ default: null })
-        finishedHandler: ((payment: Payment | null, component: NavigationMixin) => void) | null
+        finishedHandler: ((payment: Payment | null, navigate: NavigationActions) => void) | null
 
     QRCodeUrl: string | null = null
 
@@ -348,8 +348,11 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         const iban = this.iban
         const creditor = this.creditor
 
+        // BUG in Fortis app -> need to fill in at least one character for the BIC/SWIFT field, otherwise it won't work
+        const bic = '_';
+
         // Note: structured reference still as normal description (the structured reference ISO is not supported)
-        return "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription?.substring(0, 140)+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
+        return "BCD\n001\n1\nSCT\n"+bic+"\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription?.substring(0, 140)+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
     }
 
     async generateQRCode() {

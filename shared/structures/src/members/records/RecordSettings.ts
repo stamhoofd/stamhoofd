@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { ResolutionRequest } from "../../files/ResolutionRequest";
-import { RecordAnswer } from "./RecordAnswer";
+import { RecordAnswer, RecordAnswerDecoder } from "./RecordAnswer";
 
 export enum RecordType {
     /**
@@ -226,5 +226,12 @@ export class RecordSettings extends AutoEncoder {
             ]
         }
         return [this.name]
+    }
+
+    createDefaultAnswer() {
+        const type = RecordAnswerDecoder.getClassForType(this.type)
+        return type.create({
+            settings: this
+        })
     }
 }

@@ -15,7 +15,7 @@ type ResponseBody = undefined;
 export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;
 
-    registrationDomains = [... new Set(Object.values(STAMHOOFD.domains.registration))]
+    registrationDomains = [... new Set(Object.values(STAMHOOFD.domains.registration ?? {}))]
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
@@ -57,7 +57,7 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
         
-        if (request.query.domain.endsWith("." + STAMHOOFD.domains.legacyWebshop)) {
+        if (STAMHOOFD.domains.legacyWebshop && request.query.domain.endsWith("." + STAMHOOFD.domains.legacyWebshop)) {
             const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.legacyWebshop).length )
             if (strippped.includes(".")) {
                 throw new SimpleError({

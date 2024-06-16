@@ -5,10 +5,10 @@ import { CountryHelper } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { type App } from "vue";
 
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, TooltipDirective } from "..";
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, TooltipDirective, useAppContext } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
-import { useContext, useOrganization, useUser } from "./hooks";
+import { useContext, useOrganization, usePlatform, useUser } from "./hooks";
 import STInputBox from "./inputs/STInputBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
@@ -189,7 +189,9 @@ export class VueGlobalHelper {
                     $url: useUrl(),
                     $user: useUser(),
                     $organization: useOrganization(),
-                    $context: useContext()
+                    $context: useContext(),
+                    $platform: usePlatform(),
+                    $app: useAppContext()
                 };
 
                 injectHooks(this, directives)

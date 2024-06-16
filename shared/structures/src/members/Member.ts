@@ -7,22 +7,6 @@ export class Member extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    /**
-     * @deprecated Marked for removal
-     * Slowly migrate towards a non-encrypted member in the future
-     */
-    @field({ decoder: StringDecoder, optional: true, field: 'firstName' })
-    @field({ decoder: StringDecoder, optional: true, version: 165 })
-    _f = ""
-
-    /**
-     * @deprecated Marked for removal
-     * Slowly migrate towards a non-encrypted member in the future
-     */
-    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true, field: 'encryptedDetails' })
-    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true, version: 165 })
-    _ed = []
-
     @field({ decoder: MemberDetails, field: 'nonEncryptedDetails' })
     @field({ decoder: MemberDetails, version: 165 })
     details: MemberDetails

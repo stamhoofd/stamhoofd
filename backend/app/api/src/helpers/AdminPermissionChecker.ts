@@ -1,7 +1,9 @@
+import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
-import { AccessRight, GroupCategory, GroupStatus, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, Platform } from "@stamhoofd/structures"
+import { AccessRight, GroupCategory, GroupStatus, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, Platform, RecordCategory, RecordSettings } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
+import { Platform as PlatformStruct } from "@stamhoofd/structures";
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -10,12 +12,14 @@ import { Formatter } from "@stamhoofd/utility"
 export class AdminPermissionChecker {
     organization: Organization|null
     user: User
+    platform: PlatformStruct
 
     organizationCache: Map<string, Organization|Promise<Organization|undefined>> = new Map()
     organizationGroupsCache: Map<string, Group[]|Promise<Group[]>> = new Map()
 
-    constructor(user: User, organization?: Organization) {
+    constructor(user: User, platform: PlatformStruct, organization?: Organization,) {
         this.user = user
+        this.platform = platform
 
         if (user.organizationId && (!organization || organization.id !== user.organizationId)) {
             throw new SimpleError({
@@ -93,13 +97,8 @@ export class AdminPermissionChecker {
         return [...(organization.privateMeta.roles ?? [])]
     }
 
-    getPlatformRoles() {
-        // todo
-        return Platform.create({}).getRoles()
-    }
-
     get platformPermissions() {
-        return this.user.permissions?.forPlatform(Platform.shared)
+        return this.user.permissions?.forPlatform(this.platform)
     }
     
     async getOrganizationPermissions(organization: string|Organization) {
@@ -108,7 +107,7 @@ export class AdminPermissionChecker {
         }
         return this.user.permissions.for(
             typeof organization === 'string' ? organization : organization.id, 
-            Platform.shared, 
+            this.platform, 
             await this.getOrganizationRoles(organization)
         )
     }
@@ -691,6 +690,304 @@ export class AdminPermissionChecker {
         }
 
         return !!organizationPermissions && organizationPermissions.hasFullAccess()
+    }
+
+    isUserManager(member: MemberWithRegistrations) {
+        return !!member.users.find(u => u.id === this.user.id)
+    }
+
+    /**
+     * Return a list of RecordSettings the current user can view or edit
+     */
+    async getAccessibleRecordCategories(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<RecordCategory[]> {
+        const isUserManager = this.isUserManager(member)
+
+        // First list all organizations this member is part of
+        const organizations: Organization[] = [];
+
+        if (member.organizationId) {
+            if (this.checkScope(member.organizationId)) {
+                organizations.push(await this.getOrganization(member.organizationId))
+            }
+        }
+
+        for (const registration of member.registrations) {
+            if (this.checkScope(registration.organizationId)) {
+                if (!organizations.find(o => o.id === registration.organizationId)) {
+                    organizations.push(await this.getOrganization(registration.organizationId))
+                }
+            }
+        }
+
+        // Loop all organizations.
+        // Check if we have access to their data
+        const recordCategories: RecordCategory[] = []
+        for (const organization of organizations) {
+            if (isUserManager) {
+                // If the user is a manager, we can always access all records
+                // if we ever add private records, we can exclude them here
+                for (const category of organization.meta.recordsConfiguration.recordCategories) {
+                    recordCategories.push(category)
+                }
+
+                for (const [id] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
+                    if (recordCategories.find(c => c.id === id)) {
+                        // Already added
+                        continue;
+                    }
+    
+                    const category = this.platform.config.recordsConfiguration.recordCategories.find(c => c.id === id)
+                    if (category) {
+                        recordCategories.push(category)
+                    }
+                }
+                continue;
+            }
+
+            const permissions = await this.getOrganizationPermissions(organization)
+            if (!permissions) {
+                continue;
+            }
+
+            // Now add all records of this organization
+            for (const category of organization.meta.recordsConfiguration.recordCategories) {
+                if (permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
+                    recordCategories.push(category)
+                }
+            }
+
+            for (const [id] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
+                if (recordCategories.find(c => c.id === id)) {
+                    // Already added
+                    continue;
+                }
+
+                if (permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, id, level)) {
+                    const category = this.platform.config.recordsConfiguration.recordCategories.find(c => c.id === id)
+                    if (category) {
+                        recordCategories.push(category)
+                    }
+                }
+            }
+        }
+
+        // Platform data
+        const platformPermissions = this.platformPermissions
+        if (platformPermissions || isUserManager) {
+            for (const category of this.platform.config.recordsConfiguration.recordCategories) {
+                if (recordCategories.find(c => c.id === category.id)) {
+                    // Already added
+                    continue;
+                }
+
+                if (isUserManager || platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
+                    recordCategories.push(category)
+                }
+            }
+        }
+
+        return recordCategories
+    }
+
+    /**
+     * Return a list of RecordSettings the current user can view or edit
+     */
+    async hasFinancialMemberAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        const isUserManager = this.isUserManager(member)
+
+        if (isUserManager) {
+            return true;
+        }
+
+        // First list all organizations this member is part of
+        const organizations: Organization[] = [];
+
+        if (member.organizationId) {
+            if (this.checkScope(member.organizationId)) {
+                organizations.push(await this.getOrganization(member.organizationId))
+            }
+        }
+
+        for (const registration of member.registrations) {
+            if (this.checkScope(registration.organizationId)) {
+                if (!organizations.find(o => o.id === registration.organizationId)) {
+                    organizations.push(await this.getOrganization(registration.organizationId))
+                }
+            }
+        }
+
+        // Loop all organizations.
+        for (const organization of organizations) {
+            const permissions = await this.getOrganizationPermissions(organization)
+            if (!permissions) {
+                continue;
+            }
+
+            if (permissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                return true;
+            }
+        }
+
+        // Platform data
+        const platformPermissions = this.platformPermissions
+        if (platformPermissions) {
+            if (platformPermissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                return true;
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Return a list of RecordSettings the current user can view or edit
+     */
+    async getAccessibleRecordSet(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<Set<string>> {
+        const categories = await this.getAccessibleRecordCategories(member, level)
+        const set = new Set<string>()
+
+        for (const category of categories) {
+            for (const record of category.getAllRecords()) {
+                set.add(record.id)
+            }
+        }
+
+        return set
+    }
+
+    /**
+     * Changes data inline
+     */
+    async filterMemberData(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob): Promise<MemberWithRegistrationsBlob> {
+        const isUserManager = this.isUserManager(member)
+        if (isUserManager) {
+            // For the user manager, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
+            return data;
+        }
+
+        const records = await this.getAccessibleRecordSet(member, PermissionLevel.Read)
+
+        const cloned = data.clone()
+
+        for (const [key, value] of cloned.details.recordAnswers.entries()) {
+            if (!records.has(value.settings.id)) {
+                cloned.details.recordAnswers.delete(key)
+            }
+        }
+
+        // Has financial read access?
+        if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Read)) {
+            cloned.details.requiresFinancialSupport = null
+            cloned.outstandingBalance = 0
+
+            for (const registration of cloned.registrations) {
+                registration.price = 0
+                registration.pricePaid = 0
+            }
+        }
+
+        return cloned;
+    }
+
+    async filterMemberPatch(member: MemberWithRegistrations, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
+        if (!data.details) {
+            return data;
+        }
+        if (data.details.isPut()) {
+            throw new SimpleError({
+                code: 'invalid_request',
+                message: 'Cannot PUT a full member details object',
+                statusCode: 400
+            })
+        }
+
+        if (data.details.recordAnswers) {
+            if (!(data.details.recordAnswers instanceof PatchMap)) {
+                throw new SimpleError({
+                    code: 'invalid_request',
+                    message: 'Cannot PUT recordAnswers',
+                    statusCode: 400
+                })
+            }
+            const isUserManager = this.isUserManager(member)
+            const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
+
+            for (const [key, value] of data.details.recordAnswers.entries()) {
+                let name: string | undefined = undefined
+                if (value) {
+                    if (value.isPatch()) {
+                        throw new SimpleError({
+                            code: 'invalid_request',
+                            message: 'Cannot PATCH a record answer object',
+                            statusCode: 400
+                        })
+                    }
+
+                    const id = value.settings.id
+
+                    if (id !== key) {
+                        throw new SimpleError({
+                            code: 'invalid_request',
+                            message: 'Record answer key does not match record id',
+                            statusCode: 400
+                        })
+                    }
+
+                    name = value.settings.name
+                }
+
+                if (!isUserManager && !records.has(key)) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
+                        statusCode: 400
+                    })
+                }
+            }
+        }
+
+        // Has financial write access?
+        if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Write)) {
+            if (data.details.requiresFinancialSupport) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
+                    statusCode: 400
+                })
+            }
+
+            if (data.outstandingBalance) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om het openstaande saldo van dit lid aan te passen',
+                    statusCode: 400
+                })
+            }
+
+            for (const {put: registration} of data.registrations.getPuts()) {
+                if (registration.price) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om de prijs van een inschrijving te bepalen',
+                        statusCode: 400
+                    })
+                }
+
+                if (registration.pricePaid) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om het betaalde bedrag van een inschrijving te bepalen',
+                        statusCode: 400
+                    })
+                }
+            }
+        }
+
+        return data
+    }
+
+    canAccessAllPlatformMembers(): boolean {
+        return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs)
     }
 
     hasPlatformFullAccess(): boolean {

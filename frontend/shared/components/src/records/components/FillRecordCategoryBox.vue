@@ -10,13 +10,13 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
             
-        <RecordAnswerInput v-for="record of filteredRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" @patch="addPatch" />
+        <RecordAnswerInput v-for="record of filteredRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="childCategory of childCategories" :key="childCategory.id" class="container">
             <hr>
             <h2>{{ childCategory.name }}</h2>
             <p v-if="childCategory.description" class="style-description pre-wrap" v-text="childCategory.description" />
 
-            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" @patch="addPatch" />
+            <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         </div>
 
 
@@ -58,7 +58,8 @@ const props = withDefaults(
         titleSuffix?: string
     }>(), {
         level: 1,
-        allOptional: false
+        allOptional: false,
+        titleSuffix: ""
     }
 )
 const errors = useErrors({validator: props.validator})
@@ -94,6 +95,10 @@ const filteredRecords = computed(() => {
     return props.category.filterRecords(props.value)
 });
 
+const deepFilteredRecords = computed(() => {
+    return props.category.getAllFilteredRecords(props.value)
+});
+
 const isOptional = computed(() => {
     return props.allOptional || (!!props.category.filter && (props.category.filter.requiredWhen === null || !props.value.doesMatchFilter(props.category.filter.requiredWhen)))
 });
@@ -105,7 +110,7 @@ const childCategories = computed(() => {
 function calculateLastReviewed() {
     let last: Date | null = null
 
-    for (const record of filteredRecords.value) {
+    for (const record of deepFilteredRecords.value) {
         const answer = answers.value.get(record.id)
         if (answer && answer.reviewedAt) {
             // Mark reviewed
@@ -122,7 +127,7 @@ function calculateLastReviewIncomplete(date: Date|null) {
         return false
     }
 
-    for (const record of filteredRecords.value) {
+    for (const record of deepFilteredRecords.value) {
         const answer = answers.value.get(record.id)
         if (!answer || !answer.reviewedAt || answer.reviewedAt < date) {
             return true;
@@ -134,7 +139,7 @@ function calculateLastReviewIncomplete(date: Date|null) {
 function doMarkReviewed() {
     const patch = new PatchMap() as PatchAnswers
     
-    for (const record of filteredRecords.value) {
+    for (const record of deepFilteredRecords.value) {
         const answer = answers.value.get(record.id)
         if (!answer) {
             continue

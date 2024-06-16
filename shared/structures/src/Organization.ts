@@ -196,13 +196,22 @@ export class Organization extends AutoEncoder {
     get resolvedRegisterDomain() {
         if (this.registerDomain) {
             return this.registerDomain
-        } 
+        }
+
+        if (!STAMHOOFD.domains.registration) {
+            return null;
+        }
 
         return this.uri+'.'+(STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""])
     }
 
     get registerUrl() {
-        return "https://"+this.resolvedRegisterDomain
+        const d = this.resolvedRegisterDomain;
+        if (!d) {
+            return "https://" + STAMHOOFD.domains.dashboard + '/leden/' + this.uri;
+        }
+
+        return "https://" + d
     }
 
     get dashboardDomain(): string {

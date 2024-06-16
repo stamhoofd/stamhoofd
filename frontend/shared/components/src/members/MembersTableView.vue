@@ -5,7 +5,7 @@
         :filter-builders="memberWithRegistrationsBlobUIFilterBuilders" 
         :default-sort-direction="SortItemDirection.DESC" 
         :title="title" 
-        column-configuration-id="members" 
+        :column-configuration-id="configurationId" 
         :actions="actions"
         :all-columns="allColumns" 
         @click="showMember"
@@ -17,31 +17,43 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
-import { CountFilteredRequest, CountResponse, Group, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, RegisterItem, Registration, SortItemDirection, SortList } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Ref, reactive, ref } from "vue";
-import MemberSegmentedView from './MemberSegmentedView.vue';
 import { useTranslate } from "@stamhoofd/frontend-i18n";
+import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Ref, computed, reactive, ref } from "vue";
+import MemberSegmentedView from './MemberSegmentedView.vue';
 import RegisterMemberView from "./RegisterMemberView.vue";
-import ConfigureNewRegistrationsView from "./ConfigureNewRegistrationsView.vue";
 
 type ObjectType = PlatformMember;
 
-const title = 'Leden';
 const props = withDefaults(
     defineProps<{
         group?: Group | null,
         waitingList?: boolean,
-        cycleOffset?: number
+        cycleOffset?: number,
+        category?: GroupCategoryTree | null
     }>(), {
         group: null,
         waitingList: false,
-        cycleOffset: 0
+        cycleOffset: 0,
+        category: null
     }
 )
+
+const title = computed(() => {
+    if (props.waitingList) {
+        return "Wachtlijst"
+    }
+
+    if (props.group) {
+        return props.group.settings.name
+    }
+
+    return 'Leden'
+})
 
 const context = useContext();
 const present = usePresent();
@@ -51,8 +63,32 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform()
+const configurationId = computed(() => {
+    return 'members-'+app
+})
+const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false)
+
+const groups = (() => {
+    if (props.group) {
+        return [props.group]
+    }
+    if (props.category) {
+        return props.category.getAllGroups()
+    }
+    return []
+})()
+
+const groupIds = groups.map(g => g.id)
 
 function extendSort(list: SortList): SortList  {
+    // Map 'age' to 'birthDay' + reverse direction
+    list = list.map(l => {
+        if (l.key === 'age') {
+            return {key: 'birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC}
+        }
+        return l;
+    })
+
     if (list.find(l => l.key === 'id')) {
         return list;
     }
@@ -61,10 +97,44 @@ function extendSort(list: SortList): SortList  {
     return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
 }
 
+function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
+    if (app == 'admin') {
+        return filter;
+    }
+    
+    const requiredExtraFilter = {
+        'registrations': {
+            $elemMatch: props.group ? {
+                waitingList: props.waitingList,
+                cycleOffset: props.cycleOffset ?? 0,
+                groupId: props.group.id
+            } : {
+                waitingList: props.waitingList,
+                cycleOffset: props.cycleOffset ?? 0,
+                groupId: {
+                    $in: groups.map(g => g.id)
+                }
+            }
+        }
+    }
+
+    if (!filter) {
+        return requiredExtraFilter;
+    }
+
+    return {
+        $and: [
+            filter,
+            requiredExtraFilter
+        ]
+    }
+}
+
 const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
     async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
         console.log('Members.fetch', data);
         data.sort = extendSort(data.sort);
+        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -90,6 +160,8 @@ const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
 
     async fetchCount(data: CountFilteredRequest): Promise<number> {
         console.log('Members.fetchCount', data);
+
+        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -139,13 +211,122 @@ if (app == 'admin') {
             id: 'organization',
             allowSorting: false,
             name: $t('shared.organization.singular'), 
-            getValue: (member) => member.organizations, 
+            getValue: (member) => member.filterOrganizations({cycleOffset: 0}), 
             format: (organizations) => Formatter.joinLast(organizations.map(o => o.name), ', ', ' en ') || $t('shared.notRegistered'),
             getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
         })
     )
+} else {
+    allColumns.push(
+        new Column<ObjectType, Date | null>({
+            name: props.waitingList ? "Sinds" : "Inschrijvingsdatum", 
+            allowSorting: false,
+            getValue: (v) => {
+                const registrations = v.filterRegistrations({groups, waitingList: props.waitingList, cycleOffset: props.cycleOffset})
+
+                if (registrations.length == 0) {
+                    return null
+                }
+
+                const filtered = !props.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.map(r => r.createdAt!.getTime())
+
+                if (filtered.length == 0) {
+                    return null
+                }
+                return new Date(Math.min(...filtered))
+            }, 
+            format: (v, width) => v ? (width < 160 ? (width < 120 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : "Onbekend",
+            getStyle: (v) => v === null ? "gray" : "",
+            minimumWidth: 80,
+            recommendedWidth: 160
+        })
+    )
+
+    if (!props.waitingList && financialRead.value) {
+        allColumns.push(
+            new Column<ObjectType, number>({
+                name: "Openstaand saldo", 
+                allowSorting: false,
+                getValue: (v) => v.patchedMember.outstandingBalance,
+                format: (outstandingBalance) => {
+                    if (outstandingBalance < 0) {
+                        return Formatter.price(outstandingBalance)
+                    }
+                    if (outstandingBalance <= 0) {
+                        return "Betaald";
+                    }
+                    return Formatter.price(outstandingBalance)
+                }, 
+                getStyle: (v) => v <= 0 ? "gray" : "",
+                minimumWidth: 70,
+                recommendedWidth: 80
+            })
+        )
+    }
+
+    if (props.category) {
+        allColumns.push(
+            new Column<ObjectType, Group[]>({
+                id: 'category',
+                allowSorting: false,
+                name: props.waitingList ? 'Wachtlijst' : (props.category.settings.name || 'Groep'), 
+                getValue: (member) => {
+                    if (!props.category) {
+                        return [];
+                    }
+                    const groups = props.category.getAllGroups()
+                    const registrations = member.filterRegistrations({groups: groups, waitingList: props.waitingList, cycleOffset: props.cycleOffset})
+                    const memberGroups = registrations.flatMap(r => {
+                        const group = groups.find(g => g.id == r.groupId)
+                        if (!group) {
+                            return []
+                        }
+                        return [group]
+                    })
+                    const getIndex = (g) => groups.findIndex(_g => _g.id === g.id)
+                    return memberGroups.sort((a,b) => Sorter.byNumberValue(getIndex(b), getIndex(a)))
+                },
+                format: (groups) => {
+                    if (groups.length == 0) {
+                        return 'Geen'
+                    }
+                    return groups.map(g => g.settings.name).join(', ')
+                }, 
+                getStyle: (groups) => groups.length == 0 ? "gray" : "",
+                minimumWidth: 100,
+                recommendedWidth: 150
+            })
+        )
+    }
+
+    if (props.waitingList) {
+        allColumns.push(
+            new Column<ObjectType, boolean>({
+                name: "Status", 
+                allowSorting: false,
+                getValue: (member) => !!member.patchedMember.registrations.find(r => {
+                    if (groupIds.includes(r.groupId) && r.waitingList && r.canRegister) {
+                        const group = groups.find(g => g.id === r.groupId)
+                        if (group && r.cycle == group.cycle - props.cycleOffset) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }),
+                format: (canRegister) => {
+                    if (canRegister) {
+                        return "Uitgenodigd om in te schrijven";
+                    }
+                    return "Nog niet uitgenodigd"
+                }, 
+                getStyle: (canRegister) => !canRegister ? "gray" : "",
+                minimumWidth: 100,
+                recommendedWidth: 150
+            })
+        )
+    }
 }
 
 async function showMember(member: PlatformMember) {
@@ -196,10 +377,7 @@ const actions: TableAction<PlatformMember>[] = [
                         await navigate.show({
                             components: [
                                 new ComponentWithProperties(RegisterMemberView, {
-                                    member,
-                                    choiceHandler: async (group: Group, navigate: NavigationActions) => {
-                                        
-                                    },
+                                    member
                                 })
                             ]
                         })

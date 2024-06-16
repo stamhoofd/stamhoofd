@@ -1,6 +1,6 @@
-import { ArrayDecoder,AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob';
+import { MembersBlob, MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob';
 import { Payment } from '../members/Payment';
 import { RegistrationWithMember } from '../members/RegistrationWithMember';
 
@@ -11,8 +11,8 @@ export class RegisterResponse extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 28 })
     paymentUrl: string | null = null
 
-    @field({ decoder: new ArrayDecoder(MemberWithRegistrationsBlob) })
-    members: MemberWithRegistrationsBlob[] = []
+    @field({ decoder: MembersBlob as Decoder<MembersBlob> })
+    members: MembersBlob
 
     @field({ decoder: new ArrayDecoder(RegistrationWithMember), version: 19 })
     registrations: RegistrationWithMember[] = []

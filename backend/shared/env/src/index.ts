@@ -15,8 +15,8 @@ export function load(settings?: { path?: string, service?: "redirecter" | "api" 
         return
     }
 
-    if (!STAMHOOFD.domains || !STAMHOOFD.domains.registration) {
-        throw new Error("Expected environment variable domains.registration")
+    if (!STAMHOOFD.domains) {
+        throw new Error("Expected environment variable domains")
     }
 
     if (!STAMHOOFD.userMode || !['platform', 'organization'].includes(STAMHOOFD.userMode)) {

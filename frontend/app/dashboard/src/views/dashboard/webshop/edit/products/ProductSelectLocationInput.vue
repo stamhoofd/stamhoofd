@@ -69,7 +69,7 @@ export default class ProductSelectLocationInput extends Vue {
 
     @Watch('value')
     onValueChanged(val: ProductLocation | null) {
-        if (val === this.selectedLocation ?? this.customLocation ?? null) {
+        if (val === (this.selectedLocation ?? this.customLocation ?? null)) {
             // Not changed
             return
         }

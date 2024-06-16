@@ -85,7 +85,7 @@
                 <h2>
                     {{ category.name }}
                 </h2>
-                <RecordCategoryAnswersBox :category="category" :answers="fieldAnswers" :data-permission="true" />
+                <ViewRecordCategoryAnswersBox :category="category" :value="document" />
             </div>
         </main>
     </div>
@@ -93,7 +93,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LongPressDirective,RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective } from "@stamhoofd/components";
+import { ErrorBox, LongPressDirective,ViewRecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective } from "@stamhoofd/components";
 import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
@@ -106,7 +106,7 @@ import { DocumentActionBuilder } from "./DocumentActionBuilder";
         STList,
         STListItem,
         STErrorsDefault,
-        RecordCategoryAnswersBox
+        ViewRecordCategoryAnswersBox
     },
     filters: {
         dateTime: Formatter.dateTimeWithDay.bind(Formatter),

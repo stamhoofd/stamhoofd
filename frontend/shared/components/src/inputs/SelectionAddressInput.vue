@@ -1,6 +1,6 @@
 <template>
     <div>
-        <STInputBox v-if="addresses.length > 0" title="Kies een adres" :error-box="errorBox" error-fields="selectedAddress">
+        <STInputBox v-if="addresses.length > 0" :title="title || 'Kies een adres'" :error-box="errorBox" error-fields="selectedAddress">
             <STList>
                 <STListItem v-for="_address in addresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
                     <template #left>
@@ -52,6 +52,9 @@ import STInputBox from "./STInputBox.vue";
     emits: ['update:modelValue', 'modify'],
 })
 export default class SelectionAddressInput extends Vue {
+    @Prop({ default: null }) 
+        title: string|null
+
     @Prop({ required: true }) 
         addresses: Address[];
 
@@ -77,7 +80,7 @@ export default class SelectionAddressInput extends Vue {
 
     @Watch('modelValue')
     onValueChanged(val: Address | null) {
-        if (val === this.selectedAddress ?? this.customAddress ?? null) {
+        if (val === (this.selectedAddress ?? this.customAddress ?? null)) {
             // Not changed
             return
         }

@@ -117,17 +117,12 @@ export class PasswordToken extends Model {
         const token = await PasswordToken.createToken(user, validUntil)
 
         let host: string;
-        if (user.permissions || !organization) {
-            host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
+        if (user.permissions || !organization || STAMHOOFD.userMode === "platform") {
+            host = "https://"+(STAMHOOFD.domains.dashboard)+"/"+i18n.locale
             return host+"/reset-password"+((user.organizationId || organization) ? ("/"+encodeURIComponent(user.organizationId ?? organization!.id)) : "")+"?token="+encodeURIComponent(token.token);
         }
 
-        host = "https://"+organization.getHost()
-
-        if (i18n.language != organization.i18n.language) {
-            host += "/"+i18n.language
-        }
-
+        host = "https://"+organization.getHost(i18n)
         return host+"/reset-password?token="+encodeURIComponent(token.token);
     }
 

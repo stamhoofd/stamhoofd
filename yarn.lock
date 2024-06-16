@@ -2423,10 +2423,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@2.10.4":
-  version "2.10.4"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.10.4.tgz#7762c41b9abb2573c20f4031c843e182faa9d2da"
-  integrity sha512-wx2WrAmOYZg3MrTYksQ1poTjm1RL6xXhzzt/CjkmXV2cz5j2vlMvvECPvoDa96DI3cEaCDSNo35JeTy8vX3mPg==
+"@simonbackx/simple-encoding@2.10.5":
+  version "2.10.5"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.10.5.tgz#58411ba13d0db595e64e3af324b78f7adb82e332"
+  integrity sha512-hq/IDk7vVJvtYOGr/8hXS+b13sMQb2lgPZkncHCzQ0olxQB4XW6Pfk52UGP1IPcsGJHZw5T/N23aDnOUQSmkRg==
 
 "@simonbackx/simple-endpoints@1.13.0":
   version "1.13.0"
@@ -2458,10 +2458,10 @@
     "@vusion/webfonts-generator" "^0.8.0"
     glob "^10.3.10"
 
-"@simonbackx/vue-app-navigation@2.0.0-alpha.14":
-  version "2.0.0-alpha.14"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0-alpha.14.tgz#76c561b5062a821f358989462b5e67e1d5ab8fd9"
-  integrity sha512-U/gXNXRvu91xdYNtucFo/+EhesonBVWulsZ5FT2tdqoB085W40v9bAGjPudl0wZ98pAF6/kUctI3Ajd6tzCOFg==
+"@simonbackx/vue-app-navigation@2.0.0-alpha.15":
+  version "2.0.0-alpha.15"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0-alpha.15.tgz#1275de1a328e49341ea79d41956deaedfe6a15c3"
+  integrity sha512-S5mEi+ijhNgLQdpq8D7p/dVynngg0jYm/nQLGWtJtzxW91ZOwaBGvuIWCVc1NrlsU9YnTLtQ5Axdd1flQXc7UA==
   dependencies:
     "@typescript-eslint/parser" "^7.7.1"
     "@vitejs/plugin-vue" "^5.0.4"

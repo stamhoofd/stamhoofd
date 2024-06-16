@@ -11,11 +11,14 @@ import { computed } from 'vue';
 import FillRecordCategoryBox from '../../../records/components/FillRecordCategoryBox.vue';
 import { useIsAllOptional } from '../../hooks/useIsPropertyRequired';
 import { useAppContext } from '../../../context/appContext';
+import { ErrorBox } from '../../../errors/ErrorBox';
+import { useOrganization } from '../../../hooks';
 
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
     category: RecordCategory,
+    parentErrorBox?: ErrorBox | null
     level?: number
 }>();
 
@@ -25,6 +28,7 @@ defineOptions({
 
 const allOptional = useIsAllOptional(computed(() => props.member));
 const app = useAppContext()
+const organization = useOrganization();
 
 const owningOrganization = computed(() => {
     return props.member.organizations.find(o => o.meta.recordsConfiguration.recordCategories.find(c => c.id == props.category.id))
@@ -33,12 +37,12 @@ const titleSuffix = computed(() => {
     if (allOptional.value && app == 'registration') {
         return " (optioneel)"
     }
-    if (app == 'registration' || app == 'dashboard') {
+    if (app == 'registration') {
         return ""
     }
 
     // Platform admins can see who owns the record category
-    if (owningOrganization.value) {
+    if (owningOrganization.value && (!organization.value || owningOrganization.value.id !== organization.value.id)) {
         return owningOrganization.value.name
     }
 
@@ -46,6 +50,7 @@ const titleSuffix = computed(() => {
 })
 
 function addPatch(patch: PatchAnswers) {
+    console.log('add patch', patch)
     props.member.addDetailsPatch({
         recordAnswers: patch
     })

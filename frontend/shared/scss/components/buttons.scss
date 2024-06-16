@@ -284,6 +284,12 @@
 
         &.small {
             font-size: 12px;
+
+            @media (max-width: 600px) {
+                &.column {
+                    font-size: 10px;
+                }
+            }
         }
 
         &.selected {
@@ -321,7 +327,7 @@
             overflow: visible;
 
             > span {
-                margin-bottom: 4px;
+                margin-bottom: 7px;
             }
 
             > .bubble, > .style-bubble {

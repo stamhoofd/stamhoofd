@@ -16,6 +16,22 @@ export function useIsPropertyRequired(member: Ref<PlatformMember>) {
     }
 }
 
+export function useIsPropertyEnabled(member: Ref<PlatformMember>, write: boolean) {
+    const app = useAppContext();
+    const isAdmin = app === 'dashboard' || app === 'admin';
+    const auth = useAuth();
+
+    return (property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport') => {
+        const m = member.value
+        return m.isPropertyEnabled(property, isAdmin ? {
+            checkPermissions: {
+                permissions: auth.userPermissions,
+                level: write ? PermissionLevel.Write : PermissionLevel.Read
+            }
+        } : {})
+    }
+}
+
 export function useIsAllOptional(member: Ref<PlatformMember>) {
     const auth = useAuth();
     const app = useAppContext();

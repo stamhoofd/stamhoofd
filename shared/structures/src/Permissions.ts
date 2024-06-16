@@ -38,6 +38,12 @@ export enum AccessRight {
     OrganizationFinanceDirector = "OrganizationFinanceDirector",
     OrganizationCreateGroups = "OrganizationCreateGroups",
 
+    // Member data access rights
+    // Note: in order to read or write any data at all, a user first needs to have normal resource access to a group, category or organization
+    // So general data (name, birthday, gender, address, email, parents, emergency contacts) access can be controlled in that way (this doesn't have a separate access right).
+    MemberReadFinancialData = "MemberReadFinancialData",
+    MemberWriteFinancialData = "MemberWriteFinancialData",
+
     // Webshop level permissions
     WebshopScanTickets = "WebshopScanTickets",
 }
@@ -51,6 +57,10 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateWebshops: return 'Webshops maken'
             case AccessRight.OrganizationCreateGroups: return 'Groepen maken'
             case AccessRight.WebshopScanTickets: return 'Tickets scannen'
+
+            // Member data
+            case AccessRight.MemberReadFinancialData: return 'Bekijk rekening leden'
+            case AccessRight.MemberWriteFinancialData: return 'Bewerk rekening leden'
         }
     }
 
@@ -62,6 +72,10 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateWebshops: return 'Maken'
             case AccessRight.OrganizationCreateGroups: return 'Maken'
             case AccessRight.WebshopScanTickets: return 'Scannen'
+
+            // Member data
+            case AccessRight.MemberReadFinancialData: return 'Lidgeld bekijken'
+            case AccessRight.MemberWriteFinancialData: return 'Lidgeld bewerken'
         }
     }
 
@@ -73,6 +87,10 @@ export class AccessRightHelper {
             case AccessRight.OrganizationCreateWebshops: return 'webshops maken'
             case AccessRight.OrganizationCreateGroups: return 'groepen maken'
             case AccessRight.WebshopScanTickets: return 'scannen van tickets'
+
+            // Member data
+            case AccessRight.MemberReadFinancialData: return 'Openstaande bedragen bekijken'
+            case AccessRight.MemberWriteFinancialData: return 'Openstaande bedragen bewerken'
         }
     }
 
@@ -96,6 +114,10 @@ export class AccessRightHelper {
         switch (right) {
             // Finance director also has manage payments permissions automatically
             case AccessRight.OrganizationManagePayments: return [AccessRight.OrganizationFinanceDirector]
+            
+            // Finance director also can view and edit member financial data
+            case AccessRight.MemberReadFinancialData: return [AccessRight.OrganizationFinanceDirector]
+            case AccessRight.MemberWriteFinancialData: return [AccessRight.OrganizationFinanceDirector]
         }
         return []
     }
@@ -143,7 +165,8 @@ export enum PermissionsResourceType {
     Webshops = "Webshops",
     Groups = "Groups",
     GroupCategories = "GroupCategories",
-    Organizations = "Organizations"
+    OrganizationCategories = "OrganizationCategories",
+    RecordCategories = "RecordCategory"
 }
 
 
@@ -152,7 +175,8 @@ export function getPermissionResourceTypeName(type: PermissionsResourceType, plu
         case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
         case PermissionsResourceType.Groups: return plural ? 'inschrijvingsgroepen' : 'inschrijvingsgroep';
         case PermissionsResourceType.GroupCategories: return plural ? 'categorieën' : 'categorie';
-        case PermissionsResourceType.Organizations: return plural ? 'verenigingen' : 'vereniging';
+        case PermissionsResourceType.OrganizationCategories: return plural ? 'verenigingcategorieën' : 'verenigingcategorie';
+        case PermissionsResourceType.RecordCategories: return plural ? 'vragenlijsten' : 'vragenlijst';
     }
 }
 
@@ -303,7 +327,18 @@ export class PermissionRoleDetailed extends PermissionRole {
 
     hasAccessRight(right: AccessRight): boolean {
         const gl = AccessRightHelper.autoGrantRightForLevel(right)
-        return (gl && this.hasAccess(gl)) || this.accessRights.includes(right)
+        if ((gl && this.hasAccess(gl)) || this.accessRights.includes(right)) {
+            return true;
+        }
+
+        const autoInherit = AccessRightHelper.autoInheritFrom(right)
+        for (const r of autoInherit) {
+            if (this.hasAccessRight(r)) {
+                return true
+            }
+        }
+
+        return false;
     }
 
     getResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions|null {

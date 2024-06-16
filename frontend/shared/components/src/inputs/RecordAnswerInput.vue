@@ -85,11 +85,12 @@
 import { Address, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
 
 import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding";
-import { computed, onMounted } from "vue";
+import { computed, nextTick, onMounted } from "vue";
 import { ErrorBox } from "../errors/ErrorBox";
 import STErrorsDefault from "../errors/STErrorsDefault.vue";
 import { Validator } from "../errors/Validator";
 import { useErrors } from "../errors/useErrors";
+import { useValidation } from "../errors/useValidation";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import AddressInput from "./AddressInput.vue";
@@ -102,15 +103,18 @@ import PhoneInput from "./PhoneInput.vue";
 import PriceInput from "./PriceInput.vue";
 import Radio from "./Radio.vue";
 import STInputBox from "./STInputBox.vue";
-import { useValidation } from "../errors/useValidation";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     record: RecordSettings,
     // Used to find the currently saved answer
     answers: Map<string, RecordAnswer>,
     validator: Validator,
-    allOptional: boolean,
-}>()
+    allOptional?: boolean,
+    markReviewed?: boolean
+}>(), {
+    markReviewed: false,
+    allOptional: false
+});
 
 const emit = defineEmits<{
     patch: [patch: PatchAnswers]
@@ -129,15 +133,15 @@ const answer = computed({
         }
  
         // Create a new one
-        const a = type.create({
-            settings: props.record
-        })
- 
-        return a
+        return props.record.createDefaultAnswer()
     },
 
     set: (value: RecordAnswer) => {
         const patch = new PatchMap() as PatchAnswers;
+
+        if (props.markReviewed) {
+            value.markReviewed()
+        }
         patch.set(props.record.id, value);
         emit('patch', patch)
     }
@@ -293,14 +297,23 @@ function setChoiceSelected(choice: RecordChoice, selected: boolean) {
 }
 
 useValidation(props.validator, async () => {
-    return await isValid()
+    const valid = await isValid()
+
+    if (valid) {
+        if (props.markReviewed) {
+            answer.value = answer.value as any
+            await nextTick();
+        }
+    }
+
+    return valid;
 })
 
 onMounted(() => {
     // Make sure the answer (updated one) is inside the recordAnswers
     const existing = props.answers.get(props.record.id)
     const readValue = answer.value
-    if (existing !== readValue) {
+    if (existing !== undefined && existing !== readValue) {
         answer.value = readValue
     }
     

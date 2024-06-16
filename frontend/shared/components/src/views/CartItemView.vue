@@ -112,7 +112,7 @@
             </template>
 
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || (pricedCheckout.totalPrice > 0 && cartItem.amount > 1))" class="pricing-box max">
-                <CheckoutPriceBreakdown :checkout="pricedCheckout" />
+                <PriceBreakdownBox :price-breakdown="pricedCheckout.priceBreakown" />
             </div>
         </main>
 
@@ -152,7 +152,7 @@ import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
-import CheckoutPriceBreakdown from './CheckoutPriceBreakdown.vue';
+import PriceBreakdownBox from './PriceBreakdownBox.vue';
 import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
@@ -170,7 +170,7 @@ import type {ErrorBox} from '../errors/ErrorBox'
         StepperInput,
         FieldBox,
         STErrorsDefault,
-        CheckoutPriceBreakdown
+        PriceBreakdownBox
     },
     filters: {
         price: Formatter.price.bind(Formatter),

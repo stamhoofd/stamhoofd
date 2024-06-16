@@ -8,7 +8,7 @@ import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations
 /**
  * Represents both OldRegisterItem's
  */
-interface RegisterItemWithPrice {
+export interface RegisterItemWithPrice {
     memberId: string
     groupId: string
     reduced: boolean
@@ -27,21 +27,6 @@ interface RegisterItemWithPriceAndGroupPrices extends RegisterItemWithPrice {
 }
 
 export class OldRegisterCartPriceCalculator {
-    /**
-     * Return an unique ID that is the same for all groups that should have equal family pricing (2nd, 3rd discount)
-     */
-    private static getFamilyDiscountIdFor(group: Group, all: GroupCategory[]) {
-        const parents = group.getParentCategories(all, false)
-        for (const parent of parents) {
-            if (parent.settings.maximumRegistrations === 1) {
-                return "category-"+parent.id
-            }
-        }
-
-        // Only registrations in same group are elegiable for family discount
-        return "group-"+group.id
-    }
-
     /**
      * Return an unique ID that is the same for all groups that should have equal family pricing (2nd, 3rd discount)
      */

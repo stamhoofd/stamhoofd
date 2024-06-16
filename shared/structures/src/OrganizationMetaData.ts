@@ -21,6 +21,10 @@ export class OrganizationPackages extends AutoEncoder {
     packages = new Map<STPackageType, STPackageStatus>()
 
     isActive(type: STPackageType) {
+        if (STAMHOOFD.userMode === 'platform') {
+            return true;
+        }
+        
         const status = this.packages.get(type)
         if (!status) {
             return false

@@ -53,6 +53,8 @@
             </STListItem>
         </STList>
 
+        <hr>
+
         <p v-if="records.length === 0 && categories.length === 0" class="info-box">
             Deze vragenlijst is leeg en zal nog niet getoond worden.
         </p>
@@ -89,7 +91,7 @@
                 </div>
             </h2>
             <p v-if="c.filter" class="info-box selectable with-icon" @click="editCategory(c)">
-                {{ c.filter.getString() }}
+                {{ propertyFilterToString(c.filter, filterBuilder) }}
                 <button type="button" class="button icon edit" />
             </p>
 
@@ -157,6 +159,7 @@ import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
 import { NavigationActions } from '../types/NavigationActions';
+import { propertyFilterToString } from '../filters/UIFilter';
 
 // Define
 const props = defineProps<{

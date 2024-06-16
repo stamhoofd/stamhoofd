@@ -86,6 +86,14 @@ export class TableObjectFetcher<O extends {id: string}> {
         const results: O[] = []
 
         while (next) {
+            // Override filter
+            // Because the filter could have been changed by the object fetcher, and we don't want to reapply any custom filters
+            // on the already custom filter that we got from the server
+            next.filter = this.filter;
+
+            // Same for sorting
+            next.sort = this.sort;
+            
             const data = await this.objectFetcher.fetch(next)
             next = data.next ?? null;
             results.push(...data.results)
@@ -304,6 +312,14 @@ export class TableObjectFetcher<O extends {id: string}> {
 
                 // Override limit
                 this.nextRequest.limit = limit;
+
+                // Override filter
+                // Because the filter could have been changed by the object fetcher, and we don't want to reapply any custom filters
+                // on the already custom filter that we got from the server
+                this.nextRequest.filter = this.filter;
+
+                // Same for sorting
+                this.nextRequest.sort = this.sort;
                 
                 const data = await this.objectFetcher.fetch(this.nextRequest)
                 if (currentClearIndex !== this._clearIndex) {

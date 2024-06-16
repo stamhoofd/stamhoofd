@@ -163,7 +163,7 @@
             <hr>
 
 
-            <CheckoutPriceBreakdown :checkout="patchedOrder.data" />
+            <PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
 
             <template v-if="isNew">
                 <hr>
@@ -177,7 +177,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CartItemRow, CartItemView, CenteredMessage, CheckoutPriceBreakdown, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
+import { AddressInput, CartItemRow, CartItemView, CenteredMessage, PriceBreakdownBox, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager } from "@stamhoofd/networking";
 import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
@@ -204,7 +204,7 @@ import AddItemView from "./AddItemView.vue";
         FieldBox,
         PaymentSelectionList,
         RecordAnswerInput,
-        CheckoutPriceBreakdown,
+        PriceBreakdownBox,
         CartItemRow
     },
     filters: {

@@ -20,7 +20,7 @@ type ResponseBody = OrganizationStruct;
 
 export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>
-    registrationDomains = [... new Set(Object.values(STAMHOOFD.domains.registration))]
+    registrationDomains = [... new Set(Object.values(STAMHOOFD.domains.registration ?? {}))]
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {

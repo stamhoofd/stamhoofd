@@ -1,10 +1,11 @@
 import { Server } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Organization, Payment, PaymentMethod, PaymentProvider, PaymentStatus, TransferSettings } from "@stamhoofd/structures";
 
-import PayconiqBannerView from "./PayconiqBannerView.vue"
-import PayconiqButtonView from "./PayconiqButtonView.vue"
-import TransferPaymentView from "./TransferPaymentView.vue"
+import { NavigationActions } from '../types/NavigationActions';
+import PayconiqBannerView from "./PayconiqBannerView.vue";
+import PayconiqButtonView from "./PayconiqButtonView.vue";
+import TransferPaymentView from "./TransferPaymentView.vue";
 
 export class PaymentHandler {
     static getOS(): string {
@@ -48,34 +49,38 @@ export class PaymentHandler {
         return "unknown"
     }
 
-    static handlePayment(settings: { 
-        server: Server; 
-        organization: Organization; 
-        payment: Payment; 
-        returnUrl: string | null;
-        paymentUrl: string | null; 
-        transferSettings: TransferSettings | null;
-        component: NavigationMixin; 
-        type: "order" | "registration";
-    }, successHandler: (payment: Payment, component: NavigationMixin) => void, failedHandler: (payment: Payment | null) => void, transferHandler?: (payment: Payment | null) => void) {
-        const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings } = settings;
+    static async handlePayment(
+        settings: { 
+            server: Server; 
+            organization: Organization; 
+            payment: Payment; 
+            paymentUrl: string | null; 
+            transferSettings: TransferSettings | null;
+            navigate: NavigationActions; 
+            type: "order" | "registration";
+        }, 
+        successHandler: (payment: Payment, navigate: NavigationActions) => void, 
+        failedHandler: (payment: Payment | null) => void, 
+        transferHandler?: (payment: Payment | null) => void
+    ) {
+        const { payment, organization, server, navigate, paymentUrl, transferSettings } = settings;
 
         if (payment.method == PaymentMethod.PointOfSale) {
-            successHandler(payment, component)
+            successHandler(payment, navigate)
         } else if (payment.method == PaymentMethod.Transfer) {
             if (transferHandler) {
                 transferHandler(payment)
             }
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            component.show(new ComponentWithProperties(TransferPaymentView, {
+            await navigate.show(new ComponentWithProperties(TransferPaymentView, {
                 created: true,
                 type: settings.type,
                 organization,
                 payment,
                 settings: transferSettings,
-                finishedHandler: (payment: Payment, component: NavigationMixin) => {
+                finishedHandler: (payment: Payment, navigate: NavigationActions) => {
                     // Always go to success
-                    successHandler(payment, component)
+                    successHandler(payment, navigate)
                 }
             }))
         } else if (payment.provider == PaymentProvider.Payconiq && paymentUrl) {
@@ -87,13 +92,13 @@ export class PaymentHandler {
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
                         if (payment && payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment, component) // use component because payconiq closed itself + was a sheet
+                            successHandler(payment, navigate) // use component because payconiq closed itself + was a sheet
                         } else {
                             failedHandler(payment)
                         }
                     }
                 }).setDisplayStyle("sheet")
-                component.present(buttonComponent)
+                await navigate.present(buttonComponent)
                 return;
                 
             } else {
@@ -110,13 +115,13 @@ export class PaymentHandler {
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
                         if (payment && payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment, component) // use component because payconiq closed itself + was a sheet
+                            successHandler(payment, navigate) // use component because payconiq closed itself + was a sheet
                         } else {
                             failedHandler(payment)
                         }
                     }
                 }).setDisplayStyle("sheet")
-                component.present(bannerComponent)
+                await navigate.present(bannerComponent)
                 return;
             }
         } else {

@@ -28,7 +28,7 @@ export class PlatformManager {
         const fromStorage = await PlatformManager.loadPlatform()
 
         if (fromStorage && (fromStorage.privateConfig || !requirePrivateConfig)) {
-            const manager = new PlatformManager($context, reactive(fromStorage))
+            const manager = new PlatformManager($context, reactive(fromStorage as Platform) as Platform)
 
             if (backgroundFetch) {
                 manager.forceUpdate().catch(console.error)
@@ -37,21 +37,13 @@ export class PlatformManager {
             return manager
         }
 
-        const platform = reactive(await PlatformManager.fetchPlatform($context))
+        const platform = reactive(await PlatformManager.fetchPlatform($context)) as Platform
         const platformManager = new PlatformManager($context, platform)
         await platformManager.savePlatform()
         return platformManager;
     }
 
     static async fetchPlatform($context: SessionContext) {
-        if ($context.organization) {
-            const pResponse = await $context.server.request({
-                method: 'GET',
-                path: '/platform',
-                decoder: Platform as Decoder<Platform>
-            })
-            return pResponse.data
-        }
         const pResponse = await $context.optionalAuthenticatedServer.request({
             method: 'GET',
             path: '/platform',

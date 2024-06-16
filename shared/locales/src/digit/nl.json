@@ -4,5 +4,11 @@
         "vereniging": "lokale groep",
         "Verenigingen": "Lokale groepen",
         "Vereniging": "Lokale groep"
+    },
+    "dashboard": {
+        "organization-selection": {
+            "welcome-title": "Zoek jouw vereniging",
+            "welcome-description": "Welkom op Digit. Zoek hieronder de lokale groep waar je wilt inschrijven of ga naar het algemene ledenportaal."
+        }
     }
 }

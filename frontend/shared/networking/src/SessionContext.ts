@@ -443,12 +443,6 @@ export class SessionContext implements RequestMiddleware {
             return server
         }
 
-        if (AppManager.shared.isNative && organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
-            // Use demo server for app reviews
-            server.host = "https://" + organizationId + "." + STAMHOOFD.domains.demoApi;
-            return server
-        }
-        
         server.host = "https://" + organizationId + "." + STAMHOOFD.domains.api;
         return server
     }
@@ -469,8 +463,17 @@ export class SessionContext implements RequestMiddleware {
         return server
     }
 
+    getAuthenticatedServerForOrganization(organizationId: string) {
+        if (!this.hasToken()) {
+            throw new Error("Could not get authenticated server without token")
+        }
+        const server = SessionContext.serverForOrganization(organizationId)
+        server.middlewares.push(this)
+        return server
+    }
+
     get optionalAuthenticatedServer() {
-        if (this.isComplete()) {
+        if (this.hasToken()) {
             return this.authenticatedServer
         }
         return this.server

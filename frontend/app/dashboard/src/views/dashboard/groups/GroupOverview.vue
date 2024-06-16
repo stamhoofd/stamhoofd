@@ -251,7 +251,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="hasMembers && !isArchive" :selectable="true" @click="newPeriod()">
+                    <STListItem v-if="!isPlatform && (hasMembers && !isArchive)" :selectable="true" @click="newPeriod()">
                         <h2 class="style-title-list">
                             Nieuwe inschrijvingsperiode
                         </h2>
@@ -267,7 +267,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!hasMembers && cycleOffsets.length && !isArchive" @click="undoPeriod()">
+                    <STListItem v-if="!isPlatform && (!hasMembers && cycleOffsets.length && !isArchive)" @click="undoPeriod()">
                         <h2 class="style-title-list">
                             Inschrijvingsperiode ongedaan maken
                         </h2>
@@ -325,7 +325,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective, MembersTableView } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -339,7 +339,6 @@ import EditGroupPricesView from './edit/EditGroupPricesView.vue';
 import EditGroupRestrictionsView from './edit/EditGroupRestrictionsView.vue';
 import EditGroupWaitinglistView from './edit/EditGroupWaitinglistView.vue';
 import GroupNewPeriodView from './edit/GroupNewPeriodView.vue';
-import GroupMembersView from './GroupMembersView.vue';
 
 @Component({
     components: {
@@ -361,6 +360,10 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
 
     doShowAllCycleOffsets() {
         this.showAllCycleOffsets = true
+    }
+
+    get isPlatform() {
+        return STAMHOOFD.userMode === 'platform'
     }
 
     get isStamhoofd() {
@@ -438,7 +441,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             animated,
             adjustHistory: animated,
             components: [
-                new ComponentWithProperties(GroupMembersView, {
+                new ComponentWithProperties(MembersTableView, {
                     group: this.group,
                     waitingList: true
                 })

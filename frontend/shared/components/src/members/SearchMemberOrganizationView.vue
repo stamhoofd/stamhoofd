@@ -48,7 +48,7 @@ defineProps<{
 
 const loadingResults = ref(false)
 const query = ref("");
-const results = ref<Organization[]>([]) as Ref<Organization[]>;
+const results = ref([]) as Ref<Organization[]>;
 const owner = useRequestOwner()
 const defaultCountry = I18nController.shared.country
 const pop = usePop()

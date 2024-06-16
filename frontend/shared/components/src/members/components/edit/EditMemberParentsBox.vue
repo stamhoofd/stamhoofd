@@ -1,6 +1,8 @@
 <template>
     <div class="container">
         <Title v-bind="$attrs" title="Ouders" />
+
+        <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
         
         <p v-if="visibleParents.length === 0" class="info-box">
@@ -70,7 +72,8 @@ defineOptions({
 })
 const props = defineProps<{
     member: PlatformMember,
-    validator: Validator
+    validator: Validator,
+    parentErrorBox?: ErrorBox | null
 }>();
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));

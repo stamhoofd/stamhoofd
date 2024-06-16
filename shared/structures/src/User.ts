@@ -68,6 +68,12 @@ export class User extends AutoEncoder {
     hasAccount = false
 
     get name() {
+        if (!this.lastName) {
+            if (!this.firstName) {
+                return '';
+            }
+            return this.firstName;
+        }
         return this.firstName + ' ' + this.lastName;
     }
 }

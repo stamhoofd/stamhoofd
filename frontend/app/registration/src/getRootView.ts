@@ -1,11 +1,11 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from "@simonbackx/vue-app-navigation";
-import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, TabBarController, TabBarItem } from "@stamhoofd/components";
+import { AccountSwitcher, AuthenticatedView, ColorHelper, ContextNavigationBar, ContextProvider, OrganizationLogo, OrganizationSwitcher, PromiseView, TabBarController, TabBarItem } from "@stamhoofd/components";
 import { getLoginRoot } from "@stamhoofd/dashboard";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { NetworkManager, OrganizationManager, SessionContext, SessionManager } from "@stamhoofd/networking";
+import { NetworkManager, PlatformManager, SessionContext, SessionManager } from "@stamhoofd/networking";
 import { Country, Organization } from "@stamhoofd/structures";
-import { inject, reactive, markRaw } from "vue";
+import { computed, inject, markRaw, reactive } from "vue";
 
 import { MemberManager } from "./classes/MemberManager";
 import { MemberManager as LegacyMemberManager } from "../../dashboard/src/classes/MemberManager";
@@ -31,7 +31,7 @@ export function useMemberManager() {
 export async function getScopedRegistrationRootFromUrl() {
     // UrlHelper.fixedPrefix = "beheerders";
     const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login'];
+    const ignoreUris = ['login', 'start'];
 
     let session: SessionContext|null = null;
 
@@ -63,6 +63,12 @@ export async function getScopedRegistrationRootFromUrl() {
     }
         
     if (!session || !session.organization) {
+        if (STAMHOOFD.userMode === 'platform' && parts[0] === 'leden') {
+            session = new SessionContext(null)
+            await session.loadFromStorage()
+            await SessionManager.prepareSessionForUsage(session, true);
+            return await getRootView(session)
+        }
         const dashboard = await import('@stamhoofd/dashboard')
         return dashboard.getOrganizationSelectionRoot()
     }
@@ -71,9 +77,10 @@ export async function getScopedRegistrationRootFromUrl() {
 }
 
 export async function getRootView(session: SessionContext, ownDomain = false) {
-    const reactiveSession = reactive(session) as SessionContext
+    const reactiveSession = reactive(session as any) as SessionContext
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
     await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country)
-    
+
     // Set color
     if (session.organization?.meta.color && ownDomain) {
         ColorHelper.setColor(session.organization?.meta.color)
@@ -88,17 +95,16 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     })
 
     //const $checkoutManager = new CheckoutManager($memberManager)
-
-    const $memberManager = reactive(new MemberManager(reactiveSession));
-    await $memberManager.loadMembers()
+    const $memberManager = reactive(new MemberManager(reactiveSession, platformManager.$platform));
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: reactiveSession,
-            $organizationManager: new OrganizationManager(reactiveSession),
             $memberManager,
-            //$checkoutManager,
-            reactive_navigation_url: ownDomain ? "" : "leden/" + session.organization!.uri,
+            $platformManager: platformManager,
+            reactive_navigation_url: ownDomain ? "" : (
+                session.organization ? ("leden/" + session.organization.uri) : 'leden'
+            ),
             reactive_components: {
                 "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
                     organization: reactiveSession.organization
@@ -112,20 +118,27 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         }),
         root: new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
-                new ComponentWithProperties(TabBarController, {
-                    tabs: [
-                        new TabBarItem({
-                            icon: 'home',
-                            name: 'Start',
-                            component: startView
-                        }),
-                        new TabBarItem({
-                            icon: 'basket',
-                            name: 'Mandje',
-                            component: cartRoot,
-                            badge: '' //computed(() => $checkoutManager.cart.count == 0 ? '' :$checkoutManager.cart.count.toFixed(0))
+                new ComponentWithProperties(PromiseView, {
+                    promise: async () => {
+                        await $memberManager.loadMembers()
+                        await $memberManager.loadCheckout()
+
+                        return new ComponentWithProperties(TabBarController, {
+                            tabs: [
+                                new TabBarItem({
+                                    icon: 'home',
+                                    name: 'Start',
+                                    component: startView
+                                }),
+                                new TabBarItem({
+                                    icon: 'basket',
+                                    name: 'Mandje',
+                                    component: cartRoot,
+                                    badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0))
+                                })
+                            ],
                         })
-                    ],
+                    }
                 })
             ),
             loginRoot: wrapWithModalStack(

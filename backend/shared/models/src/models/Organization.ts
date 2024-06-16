@@ -217,15 +217,32 @@ export class Organization extends Model {
         return organization;
     }
 
-    getHost(): string {
+    /**
+     * Potentially includes a path
+     */
+    getHost(i18n?: I18n): string {
         if (this.registerDomain) {
-            return this.registerDomain;
+            let d = this.registerDomain;
+
+            if (i18n && i18n.language != this.i18n.language) {
+                d += "/"+i18n.language
+            }
+
+            return d;
         }
-        return this.getDefaultHost()
+        return this.getDefaultHost(i18n)
     }
 
-    getDefaultHost(): string {
-        const defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""];
+    getDefaultHost(i18n?: I18n): string {
+        if (!STAMHOOFD.domains.registration) {
+            return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/leden/' + this.uri;
+        }
+        let defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""];
+
+        if (i18n && i18n.language != this.i18n.language) {
+            defaultDomain += "/"+i18n.language
+        }
+
         return this.uri + "." + defaultDomain;
     }
 

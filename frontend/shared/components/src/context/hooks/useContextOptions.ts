@@ -37,6 +37,18 @@ export function useContextOptions() {
             }
         }
 
+        if (STAMHOOFD.userMode === 'platform') {
+            const context = new SessionContext(null)
+            await context.loadFromStorage();
+
+            opts.push({
+                id: 'registration',
+                organization: null,
+                app: 'registration',
+                context
+            })
+        }
+
         for (const context of availableContexts) {
             if (!context.canGetCompleted()) {
                 continue;
@@ -72,7 +84,7 @@ export function useContextOptions() {
                 })
 
                 const membersEnabled = organization.meta.packages.useMembers
-                if (membersEnabled) {
+                if (STAMHOOFD.userMode !== 'platform' && membersEnabled) {
                     opts.push({
                         id: 'registration-'+organization.id,
                         organization,

@@ -149,16 +149,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection,ErrorBox, PriceInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { BalanceItem, BalanceItemDetailed, BalanceItemStatus } from '@stamhoofd/structures';
-import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, Version } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, SaveView, Validator } from "@stamhoofd/components";
+import { BalanceItem, BalanceItemDetailed, BalanceItemStatus, MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
 
 import PaymentView from '../../payments/PaymentView.vue';
-import MemberRegistrationBlock from '../MemberRegistrationBlock.vue';
 
 @Component({
     components: {
@@ -168,7 +166,6 @@ import MemberRegistrationBlock from '../MemberRegistrationBlock.vue';
         PriceInput,
         STListItem,
         STList,
-        MemberRegistrationBlock,
         RadioGroup,
         Radio,
         DateSelection

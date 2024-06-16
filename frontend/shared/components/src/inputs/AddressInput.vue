@@ -109,6 +109,12 @@ export default class AddressInput extends Vue {
         this.country = val.country
     }
 
+    @Watch('required', { deep: true })
+    onChangeRequired() {
+        // Revalidate, because the fields might be empty, and required goes false -> send null so any saved address gets cleared
+        this.isValid(false, true).catch(console.error)
+    }
+
     updateValues(val: Address | null) {
         if (!val) {
             if (!this.required && !this.pendingErrorBox && !this.errorBox) {
