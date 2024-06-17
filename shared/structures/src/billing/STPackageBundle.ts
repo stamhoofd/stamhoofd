@@ -21,8 +21,8 @@ export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
         switch(bundle) {
             case STPackageBundle.Members: return "Ledenadministratie voor één jaar"
-            case STPackageBundle.Webshops: return "Webshops (max. 10) voor één jaar"
-            case STPackageBundle.SingleWebshop: return "Eén webshop voor twee maanden"
+            case STPackageBundle.Webshops: return "Webshops voor één jaar"
+            case STPackageBundle.SingleWebshop: return "Eén webshop voor twee maanden (Starter)"
         }
         return "?"
     }

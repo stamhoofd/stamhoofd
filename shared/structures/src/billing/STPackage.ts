@@ -31,10 +31,10 @@ export class STPackageTypeHelper {
                 return "Ledenadministratie, per lid";
             }
             case STPackageType.Webshops: {
-                return "Webshop module. Maximaal 10 webshops";
+                return "Webshop module voor één jaar";
             }
             case STPackageType.SingleWebshop: {
-                return "Webshop module voor één webshop";
+                return "Webshop module voor één webshop (Starter)";
             }
             case STPackageType.TrialMembers: return "Demo ledenadministratie";
             case STPackageType.TrialWebshops: return "Demo webshops";

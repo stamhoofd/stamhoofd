@@ -17,7 +17,7 @@
 
                 <template v-else>
                     <p class="style-description-block">
-                        Selecteer alle functies die je wilt aankopen en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
+                        Selecteer alle functies die je wilt aankopen of verlengen en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
                     </p>
 
                     <STList>
@@ -51,7 +51,7 @@
                             Geldig tot {{ pack.validUntil | date }}
                         </p>
 
-                        <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
+                        <button v-if="false && pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
                             Verleng nu
                         </button>
                         <span slot="right" class="icon arrow-right-small gray" />
@@ -193,7 +193,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     updatePackages() {
         const packages: SelectablePackage[] = []
         const limit = new Date()
-        limit.setDate(limit.getDate() + 14)
+        limit.setDate(limit.getDate() + 3 * 31)
         for (const bundle of Object.values(STPackageBundle)) {
             if (!STPackageBundleHelper.isPublic(bundle)) {
                 continue
