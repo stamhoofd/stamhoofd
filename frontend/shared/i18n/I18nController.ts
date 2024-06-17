@@ -89,7 +89,7 @@ export class I18nController {
         const prefix = UrlHelper.fixedPrefix && addPrefix ? "/"+UrlHelper.fixedPrefix : ""
         const locale = language+"-"+country
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== locale)) {
-            if (I18nController.fixedCountry) {
+            if (I18nController.fixedCountry || STAMHOOFD.fixedCountry) {
                 return "/"+language+prefix+url
             } else {
                 return "/"+language+"-"+country+prefix+url
@@ -101,7 +101,7 @@ export class I18nController {
 
     updateUrl() {
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
-            if (I18nController.fixedCountry) {
+            if (I18nController.fixedCountry || STAMHOOFD.fixedCountry) {
                 UrlHelper.localePrefix = I18nController.shared.language
             } else {
                 UrlHelper.localePrefix = I18nController.shared.locale
@@ -346,6 +346,11 @@ export class I18nController {
         if (I18nController.shared) {
             // Remove listeners
             I18nController.shared.$context?.removeListener(I18nController.shared)
+        }
+
+        if (STAMHOOFD.fixedCountry) {
+            // Not allowed to change country locale
+            country = STAMHOOFD.fixedCountry
         }
 
         const def = new I18nController($context, language, country, namespace)
