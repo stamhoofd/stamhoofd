@@ -235,7 +235,7 @@ export class I18nController {
                     console.warn("[I18n] Ignored country from url", c)
                 }
             }
-        } else if (parts.length >= 1 && this.fixedCountry && parts[0].length == 2) {
+        } else if (parts.length >= 1 && (this.fixedCountry || STAMHOOFD.fixedCountry) && parts[0].length == 2) {
             const l = parts[0].substr(0, 2).toLowerCase()
 
             if (!language && languages.includes(l)) {
