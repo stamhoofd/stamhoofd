@@ -66,6 +66,12 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         component: membersTableView
     });
 
+    const groupsTab =  new TabBarItem({
+        icon: 'location',
+        name: 'Groepen',
+        component: membersTableView
+    });
+
     const settingsTab =  new TabBarItem({
         icon: 'settings',
         name: 'Instellingen',
@@ -91,7 +97,8 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                         tabs: computed(() => {
                             const tabs: (TabBarItem|TabBarItemGroup)[] = [
                                 startTab,
-                                membersTab
+                                membersTab,
+                                groupsTab
                             ]
 
                             if (reactiveSession.auth.hasFullPlatformAccess()) {
