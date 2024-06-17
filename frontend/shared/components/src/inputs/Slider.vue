@@ -49,12 +49,12 @@ export default class Slider extends Vue {
     animate = false;
 
     @Prop({ type: Number, default: 0 })
-    value!: number;
+    modelValue!: number;
 
     dragging = false;
 
     get internalValue() {
-        return this.value
+        return this.modelValue
     }
 
     set internalValue(val: number) {
@@ -162,7 +162,7 @@ export default class Slider extends Vue {
 
     // Set the percentage and value based on a manual entered value
     updateSlider() {
-        let _value = Math.round(this.value);
+        let _value = Math.round(this.modelValue);
         if (_value > this.max) {
             if (this.softBounds) {
                 this.max = _value;
@@ -173,20 +173,20 @@ export default class Slider extends Vue {
 
         if (_value < this.min) {
             if (this.softBounds) {
-                this.value = Math.max(0, _value);
+                this.modelValue = Math.max(0, _value);
                 this.min = _value;
             } else {
                 _value = this.min;
             }
         }
 
-        if (_value != this.value) {
+        if (_value != this.modelValue) {
             this.internalValue = _value
         }
 
         const handleWidth = this.getHandleWidth();
         const width = this.getWidth();
-        const percentage = (this.value - this.min) / (this.max - this.min);
+        const percentage = (this.modelValue - this.min) / (this.max - this.min);
         const relativeWidth = width - handleWidth;
         const percentageOffset = handleWidth / 2 / width;
 
@@ -208,7 +208,7 @@ export default class Slider extends Vue {
         // Convert the percentage to the handle percentage
         this.handlePercentage = ((percentage / width) * relativeWidth + percentageOffset) * 100;
 
-        const oldValue = this.value;
+        const oldValue = this.modelValue;
         const newValue = Math.round(percentage * (this.max - this.min)) + this.min;
         if (this.round) {
             this.internalValue = Math.round(newValue / this.round) * this.round;
