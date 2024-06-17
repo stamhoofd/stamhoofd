@@ -5,7 +5,7 @@ import { LoginProviderType, NewUser, Permissions, User as UserStruct,UserMeta, U
 import argon2 from "argon2";
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization } from "./";
+import { Organization, Platform } from "./";
 
 export class User extends Model {
     static table = "users";
@@ -92,6 +92,17 @@ export class User extends Model {
     static async getAdmins(organizationIds: string[], options?: {verified?: boolean}) {
         if (organizationIds.length == 0) {
             return []
+        }
+
+        if (STAMHOOFD.userMode === 'platform') {
+            // Custom implementation
+            let global = (await User.where({ organizationId: null, permissions: { sign: "!=", value: null }}))
+            global = global.filter(u => organizationIds.find(organizationId => u.permissions?.organizationPermissions.has(organizationId)))
+
+            // Hide api accounts
+            global = global.filter(a => !a.isApiUser)
+
+            return global
         }
 
         const query: any = {

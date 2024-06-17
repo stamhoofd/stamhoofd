@@ -4,13 +4,14 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
 import { computed, markRaw, reactive } from 'vue';
+import OrganizationsTableView from './views/organizations/OrganizationsTableView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
 }
 
 export async function getScopedAdminRootFromUrl() {
-    const session = reactive(new SessionContext(null)) as SessionContext
+    const session = reactive(new SessionContext(null) as any) as SessionContext
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
 
@@ -35,7 +36,7 @@ export function getNoPermissionsView() {
 
 export async function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    const reactiveSession = reactive(session) as SessionContext
+    const reactiveSession = reactive(session as any) as SessionContext
     I18nController.loadDefault(reactiveSession, Country.Belgium, "nl").catch(console.error)
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true, true)
@@ -50,6 +51,10 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
 
     const membersTableView = new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(MembersTableView, {})
+    })
+
+    const organizationsTableView = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(OrganizationsTableView, {})
     })
 
     setTitleSuffix('Administratie');
@@ -69,7 +74,7 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
     const groupsTab =  new TabBarItem({
         icon: 'location',
         name: 'Groepen',
-        component: membersTableView
+        component: organizationsTableView
     });
 
     const settingsTab =  new TabBarItem({

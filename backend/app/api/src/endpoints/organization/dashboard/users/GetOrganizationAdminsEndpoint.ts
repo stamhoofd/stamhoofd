@@ -24,7 +24,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        const {user} = await Context.authenticate()
+        await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.canManageAdmins(organization.id)) {
@@ -32,13 +32,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         }
 
         // Get all admins
-        let admins = await User.where({ organizationId: organization.id, permissions: { sign: "!=", value: null }})
-        const global = (await User.where({ organizationId: null, permissions: { sign: "!=", value: null }})).filter(u => !!u.permissions?.forOrganization(organization, false))
-
-        admins.push(...global)
-
-        // Hide api accounts
-        admins = admins.filter(a => !a.isApiUser)
+        const admins = await User.getAdmins([organization.id])
 
         return new Response(OrganizationAdmins.create({
             users: admins.map(a => UserStruct.create({...a, hasAccount: a.hasAccount()})),
