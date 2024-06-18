@@ -17,7 +17,7 @@
                     <h3 class="style-definition-label">
                         Adres
                     </h3>
-                    <p class="style-definition-text">
+                    <p v-copyable class="style-definition-text">
                         {{ organization.address }}
                     </p>
                     <p v-if="organization.meta.companyAddress && organization.meta.companyAddress != organization.address" class="style-description-small">
@@ -29,13 +29,13 @@
                     <h3 class="style-definition-label">
                         Facturatiegegevens
                     </h3>
-                    <p class="style-definition-text">
+                    <p v-copyable class="style-definition-text">
                         {{ organization.meta.companyName || organization.name }}
                     </p>
-                    <p v-if="organization.meta.companyAddress" class="style-description-small">
+                    <p v-if="organization.meta.companyAddress" v-copyable class="style-description-small">
                         {{ organization.meta.companyAddress }}
                     </p>
-                    <p class="style-description-small">
+                    <p v-copyable class="style-description-small">
                         {{ organization.meta.VATNumber || organization.meta.companyNumber || 'Geen ondernemingsnummer' }}
                     </p>
                 </STListItem>
@@ -49,7 +49,7 @@
                     </p>
 
                     <template #right>
-                        <button class="button icon external" type="button"/>
+                        <button class="button icon external" type="button" />
                     </template>
                 </STListItem>
 
@@ -75,7 +75,7 @@
                     <h3 class="style-definition-label">
                         Aantal leden
                     </h3>
-                    <p class="style-definition-text">
+                    <p v-copyable class="style-definition-text">
                         <MemberCountSpan :organization="organization" />
                     </p>
                 </STListItem>
