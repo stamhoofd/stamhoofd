@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './addresses/Address';
@@ -8,7 +8,6 @@ import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
 import { LoadedPermissions } from './Permissions';
 import { User } from './User';
-import { UserPermissions } from './UserPermissions';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
 
 export class Organization extends AutoEncoder {
@@ -42,6 +41,9 @@ export class Organization extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(Group), version: 2, upgrade: () => [], optional: true })
     groups: Group[] = []
+
+    @field({ decoder: DateDecoder, version: 259 })
+    createdAt = new Date()
 
     /**
      * Get all groups that are in a category

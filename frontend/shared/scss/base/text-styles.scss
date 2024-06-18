@@ -55,6 +55,14 @@
     }
 }
 
+.style-placeholder-skeleton {
+    display: block;
+    height: 1em;
+    width: 50px;
+    border-radius: 5px;
+    background: $color-background-shade-darker;
+}
+
 .style-title-semihuge {
     font-size: 36px;
     font-weight: $font-weight-bold;

@@ -208,7 +208,8 @@ export class VueGlobalHelper {
                 setUrl(url: string, title?: string) {
                     console.warn('old usage of this.setUrl, change to $url.setTitle and move url definitions to parent components')
                 },
-                formatCountry: CountryHelper.getName.bind(CountryHelper)
+                formatCountry: CountryHelper.getName.bind(CountryHelper),
+                formatInteger: Formatter.integer.bind(Formatter),
             }
         })
     }

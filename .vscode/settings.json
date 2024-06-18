@@ -60,5 +60,6 @@
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features"
     },
-    "typescript.preferences.importModuleSpecifier": "project-relative"
+    "typescript.preferences.importModuleSpecifier": "project-relative",
+    "i18n-ally.keystyle": "flat"
 }

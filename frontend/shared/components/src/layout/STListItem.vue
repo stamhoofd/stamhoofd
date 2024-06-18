@@ -9,6 +9,7 @@
             button: dynamicElementName === 'button'
         }, $attrs.class]"
         :type="dynamicElementName === 'button' ? 'button' : undefined"
+        v-bind="$attrs"
         @click="onClick"
         @contextmenu="$emit('contextmenu', $event)"
     >

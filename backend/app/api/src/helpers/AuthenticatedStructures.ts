@@ -91,7 +91,8 @@ export class AuthenticatedStructures {
                 website: organization.website,
                 groups: groupStructures.sort(GroupStruct.defaultSort),
                 privateMeta: organization.privateMeta,
-                webshops: webshopStructures
+                webshops: webshopStructures,
+                createdAt: organization.createdAt
             })
         }
         

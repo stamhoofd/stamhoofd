@@ -22,6 +22,8 @@ import { Column, ComponentExposed, ModernTableView, TableAction, organizationsUI
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Ref, computed, ref } from "vue";
+import OrganizationView from "./OrganizationView.vue";
+import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 
 type ObjectType = Organization;
 const $t = useTranslate();
@@ -36,6 +38,7 @@ const title = computed(() => {
 })
 
 const context = useContext();
+const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const configurationId = computed(() => {
     return 'organizations'
@@ -125,22 +128,19 @@ async function showOrganization(organization: Organization) {
     }
     
     // todo
-    // const table = modernTableView.value
-    // const component = new ComponentWithProperties(NavigationController, {
-    //     root: new ComponentWithProperties(MemberSegmentedView, {
-    //         member,
-    //         getNext: table.getNext,
-    //         getPrevious: table.getPrevious,
-    //         group: props.group,
-    //         cycleOffset: props.cycleOffset,
-    //         waitingList: props.waitingList
-    //     }),
-    // });
-    // 
-    // await present({
-    //     components: [component],
-    //     modalDisplayStyle: "popup"
-    // });
+    const table = modernTableView.value
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(OrganizationView, {
+            organization,
+            getNext: table.getNext,
+            getPrevious: table.getPrevious
+        }),
+    });
+    
+    await present({
+        components: [component],
+        modalDisplayStyle: "popup"
+    });
 }
 
 const actions: TableAction<Organization>[] = [

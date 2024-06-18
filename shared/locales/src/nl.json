@@ -138,5 +138,7 @@
     "admin.settings.records.description": "Bepaal welke gegevens van leden worden verzameld",
     "admin.organizations.emptyMessage": "Er zijn nog geen verenigingen",
     "admin.organizations.allTitle": "Alle verenigingen",
-    "admin.organizations.new": "Nieuwe vereniging"
+    "admin.organizations.new": "Nieuwe vereniging",
+    "admin.organizations.settings.description": "Beheer alle instellingen van deze vereniging",
+    "admin.organizations.login.description": "Log in als een beheerder van deze vereniging en beheer de leden, activiteiten en instellingen."
 }
