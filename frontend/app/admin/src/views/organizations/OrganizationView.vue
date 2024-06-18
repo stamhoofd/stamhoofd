@@ -99,6 +99,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/leden'" target="_blank">
+                    <template #left>
+                        <img src="~@stamhoofd/assets/images/illustrations/group.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Leden
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('admin.organizations.actions.members.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon external gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri" target="_blank">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/laptop-key.svg">

@@ -140,5 +140,6 @@
     "admin.organizations.allTitle": "Alle verenigingen",
     "admin.organizations.new": "Nieuwe vereniging",
     "admin.organizations.settings.description": "Beheer alle instellingen van deze vereniging",
-    "admin.organizations.login.description": "Log in als een beheerder van deze vereniging en beheer de leden, activiteiten en instellingen."
+    "admin.organizations.login.description": "Log in als een beheerder van deze vereniging en beheer de leden, activiteiten en instellingen.",
+    "admin.organizations.actions.members.description": "Bekijk alle leden van deze vereniging via het beheerdersportaal"
 }
