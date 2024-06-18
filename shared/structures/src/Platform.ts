@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { v4 as uuidv4 } from "uuid";
 
 import { PermissionRoleDetailed } from "./Permissions";
 import { User } from "./User";
@@ -9,9 +10,23 @@ export class PlatformPrivateConfig extends AutoEncoder {
     roles: PermissionRoleDetailed[] = []
 }
 
+export class OrganizationTag extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    /**
+     * Name of the organization you are creating
+     */
+    @field({ decoder: StringDecoder })
+    name: string;
+}
+
 export class PlatformConfig extends AutoEncoder {
     @field({ decoder: OrganizationRecordsConfiguration, version: 253 })
     recordsConfiguration = OrganizationRecordsConfiguration.create({})
+
+    @field({ decoder: new ArrayDecoder(OrganizationTag), version: 260 })
+    tags: OrganizationTag[] = []
 }
 
 

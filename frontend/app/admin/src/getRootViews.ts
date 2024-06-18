@@ -1,10 +1,10 @@
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
 import { computed, markRaw, reactive } from 'vue';
-import OrganizationsTableView from './views/organizations/OrganizationsTableView.vue';
+import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
@@ -53,8 +53,8 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         root: new ComponentWithProperties(MembersTableView, {})
     })
 
-    const organizationsTableView = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(OrganizationsTableView, {})
+    const organizationsTableView = new ComponentWithProperties(SplitViewController, {
+        root: new ComponentWithProperties(OrganizationsMenu, {})
     })
 
     setTitleSuffix('Administratie');
