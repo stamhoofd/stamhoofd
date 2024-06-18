@@ -8,7 +8,7 @@
             <template v-if="enableMemberModule && tree.categories.length">
                 <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                     <div class="grouped">
-                        <button class="menu-button button" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="$navigate('category', {properties: {category}})">
+                        <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category}}) }" @click="$navigate('category', {properties: {category}})">
                             <span :class="'icon ' + getCategoryIcon(category)" />
                             <span>{{ category.settings.name }}</span>
                             <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
@@ -20,9 +20,9 @@
                                 v-for="c in category.categories"
                                 :key="c.id"
                                 class="menu-button button sub-button"
-                                :class="{ selected: currentlySelected == 'category-'+c.id }"
+                                :class="{ selected: checkRoute(Routes.Category, {properties: {category: c}}) }"
                                 type="button"
-                                @click="$navigate('category', {properties: {category: c}})"
+                                @click="$navigate(Routes.Category, {properties: {category: c}})"
                             >
                                 <span class="icon" />
                                 <span>{{ c.settings.name }}</span>
@@ -32,9 +32,9 @@
                                 v-for="group in category.groups"
                                 :key="group.id"
                                 class="menu-button button sub-button"
-                                :class="{ selected: currentlySelected == 'group-'+group.id }"
+                                :class="{ selected: checkRoute(Routes.Group, {properties: {group}}) }"
                                 type="button"
-                                @click="$navigate('group', {properties: {group}})"
+                                @click="$navigate(Routes.Group, {properties: {group}})"
                             >
                                 <GroupAvatar :group="group" :allow-empty="true" />
                                 <span>{{ group.settings.name }}</span>
@@ -51,16 +51,15 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useCheckRoute, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
 import { GroupAvatar, useContext, useOrganization } from '@stamhoofd/components';
 import { Group, GroupCategory, GroupCategoryTree } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
+import { ComponentOptions, computed, onActivated } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 
 const $organization = useOrganization();
 const $context = useContext();
-const currentlySelected = ref(null) as Ref<string|null>
 const urlHelpers = useUrl();
 const $navigate = useNavigate()
 const collapsed = useCollapsed('leden');
@@ -75,7 +74,6 @@ onActivated(() => {
 });
 
 const enableMemberModule = computed(() => $organization.value?.meta.modules.useMembers ?? false)
-const fullAccess = computed(() => $context.value?.organizationAuth.hasFullAccess() ?? false)
 
 const getCategoryIcon = (category: GroupCategoryTree) => {
     if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {
@@ -101,10 +99,14 @@ const isCategoryDeactivated = (category: GroupCategoryTree) => {
     return $organization.value!.isCategoryDeactivated(category)
 }
 
+enum Routes {
+    Category = "category",
+    Group = "group"
+}
 defineRoutes([
     {
         url: 'categorie/@slug',
-        name: 'category',
+        name: Routes.Category,
         params: {
             slug: String
         },
@@ -115,7 +117,6 @@ defineRoutes([
             if (!category) {
                 throw new Error('Category not found')
             }
-            currentlySelected.value = 'category-'+category.id
             return {
                 category
             }
@@ -124,7 +125,6 @@ defineRoutes([
             if (!("category" in props)) {
                 throw new Error('Missing category')
             }
-            currentlySelected.value = 'category-'+(props.category as GroupCategory).id
             return {
                 params: {
                     slug: Formatter.slug((props.category as GroupCategory).settings.name)
@@ -134,7 +134,7 @@ defineRoutes([
     },
     {
         url: '@slug',
-        name: 'group',
+        name: Routes.Group,
         params: {
             slug: String
         },
@@ -145,7 +145,6 @@ defineRoutes([
             if (!group) {
                 throw new Error('Group not found')
             }
-            currentlySelected.value = 'group-'+group.id
             return {
                 group
             }
@@ -154,7 +153,6 @@ defineRoutes([
             if (!("group" in props)) {
                 throw new Error('Missing group')
             }
-            currentlySelected.value = 'group-'+(props.group as Group).id
             return {
                 params: {
                     slug: Formatter.slug((props.group as Group).settings.name)
@@ -168,5 +166,6 @@ defineRoutes([
         }
     }
 ])
+const checkRoute = useCheckRoute();
 
 </script>
