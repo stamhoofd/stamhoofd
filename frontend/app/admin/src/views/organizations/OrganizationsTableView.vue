@@ -20,7 +20,7 @@
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Column, ComponentExposed, ModernTableView, TableAction, organizationsUIFilterBuilders, useContext, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, OrganizationTag, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Ref, computed, ref } from "vue";
 import OrganizationView from "./OrganizationView.vue";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
@@ -29,11 +29,18 @@ type ObjectType = Organization;
 const $t = useTranslate();
 
 const props = withDefaults(
-    defineProps<{}>(), 
-    {}
+    defineProps<{
+        tag?: OrganizationTag|null
+    }>(), 
+    {
+        tag: null
+    }
 )
 
 const title = computed(() => {
+    if (props.tag) {
+        return props.tag.name
+    }
     return $t('admin.organizations.allTitle')
 })
 

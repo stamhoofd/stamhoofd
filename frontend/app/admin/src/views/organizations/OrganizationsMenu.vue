@@ -25,7 +25,7 @@
                     <span class="icon gray settings right-icon" />
                 </button>
 
-                <button v-for="tag of tags" :key="tag.id" type="button" class="button menu-button sub-button">
+                <button v-for="tag of tags" :key="tag.id" type="button" class="button menu-button sub-button" :class="{ selected: checkRoute(Routes.Tag, { properties: {tag} }) }" @click="navigate(Routes.Tag, { properties: {tag} })">
                     <span class="icon" />
                     <span>
                         {{ tag.name }}
@@ -42,6 +42,8 @@ import { ComponentOptions, computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 import EditOrganizationTagsView from './tags/EditOrganizationTagsView.vue';
 import { usePlatform } from '@stamhoofd/components';
+import { Formatter } from '@stamhoofd/utility';
+import { OrganizationTag } from '@stamhoofd/structures';
 
 enum Routes {
     All = 'all',
@@ -58,6 +60,35 @@ defineRoutes([
         isDefault: {
             properties: {}
         }
+    },
+    {
+        url: 'tag/@slug',
+        name: Routes.Tag,
+        show: 'detail',
+        component: OrganizationsTableView as unknown as ComponentOptions,
+        params: {
+            slug: String
+        },
+        paramsToProps(params: {slug: string}) {
+            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+            if (!tag) {
+                throw new Error('Tag not found');
+            }
+
+            return {
+                tag
+            }
+        },
+        propsToParams(props) {
+            if (!("tag" in props) || !(props.tag instanceof OrganizationTag)) {
+                throw new Error('Missing tag')
+            }
+            return {
+                params: {
+                    slug: Formatter.slug(props.tag.name)
+                }
+            }
+        },
     },
     {
         url: 'tags',
