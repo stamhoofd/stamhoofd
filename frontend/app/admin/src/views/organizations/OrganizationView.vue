@@ -15,19 +15,19 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Adres
+                        {{ $t('shared.address') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
                         {{ organization.address }}
                     </p>
                     <p v-if="organization.meta.companyAddress && organization.meta.companyAddress != organization.address" class="style-description-small">
-                        Facturatieadres: {{ organization.meta.companyAddress }}
+                        {{ $t('shared.invoiceAddress') }}: {{ organization.meta.companyAddress }}
                     </p>
                 </STListItem>
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        Facturatiegegevens
+                        {{ $t('shared.invoiceDetails') }}
                     </h3>
                     <p v-copyable class="style-definition-text">
                         {{ organization.meta.companyName || organization.name }}
@@ -42,7 +42,7 @@
 
                 <STListItem v-if="organization.website" element-name="a" :href="organization.website" :selectable="true" target="_blank">
                     <h3 class="style-definition-label">
-                        Website
+                        {{ $t('shared.website') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ organization.website }}
@@ -82,6 +82,10 @@
             </STList>
 
             <hr>
+
+            <h2>Navigatie</h2>
+
+            <p>Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.</p>
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/instellingen'" target="_blank">
@@ -129,16 +133,31 @@
                     </template>
                 </STListItem>
             </STList>
+
+            <hr>
+            <h2>
+                {{ $t('admin.organizations.actions.delete.title') }}
+            </h2>
+
+            <LoadingButton :loading="deleting">
+                <button class="button secundary danger" type="button" @click="deleteMe">
+                    <span class="icon trash" />
+                    <span>{{ $t('shared.delete') }}</span>
+                </button>
+            </LoadingButton>
         </main>
     </div>
 </template>
 
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { useKeyUpDown } from '@stamhoofd/components';
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Toast, useContext, useKeyUpDown } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { computed, getCurrentInstance } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 import MemberCountSpan from './components/MemberCountSpan.vue';
 
 const props = defineProps<{
@@ -149,6 +168,10 @@ const props = defineProps<{
 
 const show = useShow();
 const isPlatform = STAMHOOFD.userMode === 'platform'
+const $t = useTranslate();
+const context = useContext();
+const owner = useRequestOwner()
+const pop = usePop();
 
 useKeyUpDown({
     up: goBack,
@@ -198,6 +221,59 @@ async function goBack() {
 
 async function goNext() {
     await seek(false);
+}
+
+const deleting = ref(false);
+
+async function deleteMe() {
+    if (deleting.value) {
+        return;
+    }
+    deleting.value = true;
+
+    if (!await CenteredMessage.confirm($t('admin.organizations.deleteConfirmation.title'), $t('shared.confirmDelete'), $t('admin.organizations.deleteConfirmation.description'))) {
+        deleting.value = false;
+        return;
+    }
+
+    // Wait 3 seconds
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Second confirmation window
+
+    if (!await CenteredMessage.confirm($t('admin.organizations.deleteConfirmation2.title'), $t('shared.confirmDelete'), $t('admin.organizations.deleteConfirmation.description'))) {
+        deleting.value = false;
+        return;
+    }
+
+    // Wait 3 seconds
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    if (!await CenteredMessage.confirm($t('admin.organizations.deleteConfirmation3.title'), $t('shared.confirmDelete'), $t('admin.organizations.deleteConfirmation.description'))) {
+        deleting.value = false;
+        return;
+    }
+
+    // Verwijderen
+
+    const patch: PatchableArrayAutoEncoder<Organization> = new PatchableArray();
+    patch.addDelete(props.organization.id);
+    
+
+    try {
+        await context.value.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/admin/organizations',
+            body: patch,
+            shouldRetry: false,
+            owner
+        });
+        await pop({force: true})
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+
+    deleting.value = false;
 }
 
 </script>
