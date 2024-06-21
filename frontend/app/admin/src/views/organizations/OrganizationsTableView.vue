@@ -70,7 +70,26 @@ function extendSort(list: SortList): SortList  {
 }
 
 function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
-    return filter;
+    if (!props.tag) {
+        return filter;
+    }
+    
+    const requiredExtraFilter = {
+        'tags': {
+            $eq: props.tag.id
+        }
+    }
+
+    if (!filter) {
+        return requiredExtraFilter;
+    }
+
+    return {
+        $and: [
+            filter,
+            requiredExtraFilter
+        ]
+    }
 }
 
 const tableObjectFetcher = useTableObjectFetcher<Organization>({

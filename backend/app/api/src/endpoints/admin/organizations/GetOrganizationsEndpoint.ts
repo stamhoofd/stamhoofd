@@ -42,6 +42,12 @@ const filterCompilers: SQLFilterDefinitions = {
         true,
         false
     ),
+    tags: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('meta'), '$.value.tags'),
+        undefined,
+        true,
+        true
+    ),
     packages: createSQLRelationFilterCompiler(
         SQL.select().from(
             SQL.table('stamhoofd_packages')

@@ -53,8 +53,23 @@ function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
 
 function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
-        const a = normalizeValue(guardFilterCompareValue(val));
         const b = normalizeValue(guardFilterCompareValue(filter));
+
+        if (Array.isArray(val)) {
+            // To match backend logic where these things are required for optimizations
+            // + also match MongoDB behavior
+
+            for (const v of val) {
+                const a = normalizeValue(guardFilterCompareValue(v));
+
+                if (a === b) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        const a = normalizeValue(guardFilterCompareValue(val));
         return a === b
     };
 }
@@ -85,6 +100,24 @@ function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunne
         if (!Array.isArray(filter)) {
             throw new Error('Invalid filter: expected array as value for $in filter')
         }
+
+        if (Array.isArray(val)) {
+            // To match backend logic (JSON_OVERLAPS in MySQL) where these things are required for optimizations
+            // + also match MongoDB behavior 
+
+            for (const v of val) {
+                const a = normalizeValue(guardFilterCompareValue(v));
+
+                for (const element of filter) {
+                    const b = normalizeValue(guardFilterCompareValue(element));
+                    if (a === b) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         const a = normalizeValue(guardFilterCompareValue(val));
 
         for (const element of filter) {
