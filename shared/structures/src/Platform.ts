@@ -18,7 +18,7 @@ export class OrganizationTag extends AutoEncoder {
      * Name of the organization you are creating
      */
     @field({ decoder: StringDecoder })
-    name: string;
+    name = ''
 }
 
 export class PlatformConfig extends AutoEncoder {

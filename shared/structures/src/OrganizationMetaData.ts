@@ -191,8 +191,11 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type = OrganizationType.Other
 
-    @field({ decoder: new ArrayDecoder(OrganizationTag), version: 260 })
-    tags: OrganizationTag[] = []
+    /**
+     * Contains the ids of the tags
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 260 })
+    tags: string[] = []
 
     /**
      * Show beta features in this organization
