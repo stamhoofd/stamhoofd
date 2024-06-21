@@ -71,6 +71,19 @@
                     </p>
                 </STListItem>
 
+                <STListItem :selectable="true" @click="editTags">
+                    <h3 class="style-definition-label">
+                        Tags
+                    </h3>
+                    <p class="style-definition-text" :class="{placeholder: tagStringList.length === 0}">
+                        {{ tagStringList || 'Geen tags' }}
+                    </p>
+
+                    <template #right>
+                        <span class="icon edit gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem>
                     <h3 class="style-definition-label">
                         Aantal leden
@@ -153,12 +166,13 @@
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Toast, useContext, useKeyUpDown } from '@stamhoofd/components';
+import { CenteredMessage, Toast, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, ref } from 'vue';
 import MemberCountSpan from './components/MemberCountSpan.vue';
+import SelectOrganizationTagsView from './tags/SelectOrganizationTagsView.vue';
 
 const props = defineProps<{
     organization: Organization,
@@ -172,6 +186,7 @@ const $t = useTranslate();
 const context = useContext();
 const owner = useRequestOwner()
 const pop = usePop();
+const platform = usePlatform();
 
 useKeyUpDown({
     up: goBack,
@@ -196,7 +211,12 @@ const hasNext = computed(() => {
     return !!props.getNext(props.organization);
 });
 
+const tagStringList = computed(() => {
+    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? 'onbekend').join(', ');
+});
+
 const instance = getCurrentInstance()
+
 async function seek(previous = true) {
     const organization = previous ? props.getPrevious(props.organization) : props.getNext(props.organization)
     if (!organization) {
@@ -224,6 +244,16 @@ async function goNext() {
 }
 
 const deleting = ref(false);
+
+async function editTags() {
+    await show({
+        components: [
+            new ComponentWithProperties(SelectOrganizationTagsView, {
+                organization: props.organization
+            })
+        ]
+    });
+}
 
 async function deleteMe() {
     if (deleting.value) {

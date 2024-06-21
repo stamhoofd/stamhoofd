@@ -27,7 +27,7 @@ import { computed, ref } from 'vue';
 import EditOrganizationTagView from './EditOrganizationTagView.vue';
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { OrganizationTag, Platform, PlatformConfig } from '@stamhoofd/structures';
-import TagRow from './TagRow.vue';
+import TagRow from './components/TagRow.vue';
 import { usePlatformManager } from '@stamhoofd/networking';
 
 const platformManager = usePlatformManager();

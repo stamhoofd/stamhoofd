@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
-import { Column, ComponentExposed, ModernTableView, TableAction, organizationsUIFilterBuilders, useContext, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, ModernTableView, TableAction, organizationsUIFilterBuilders, useContext, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Ref, computed, ref } from "vue";
@@ -39,6 +39,7 @@ const title = computed(() => {
 
 const context = useContext();
 const present = usePresent();
+const platform = usePlatform();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const configurationId = computed(() => {
     return 'organizations'
@@ -119,6 +120,15 @@ const allColumns: Column<ObjectType, any>[] = [
         getValue: (organization) => organization.address.city, 
         minimumWidth: 100,
         recommendedWidth: 200
+    }),
+    new Column<ObjectType, string[]>({
+        id: 'tags',
+        name: "Tags", 
+        getValue: (organization) => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? 'Onbekend'),
+        format: (tags) => tags.length === 0 ? 'Geen' : tags.join(', '),
+        getStyle: (tags) => tags.length === 0 ? 'gray' : '',
+        minimumWidth: 100,
+        recommendedWidth: 300
     })
 ];
 
