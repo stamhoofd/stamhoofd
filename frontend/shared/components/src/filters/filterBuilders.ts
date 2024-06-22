@@ -2,6 +2,7 @@ import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Ge
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
+import { StringFilterBuilder } from "./StringUIFilter";
 import { UIFilterBuilders } from "./UIFilter";
 
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
@@ -34,6 +35,10 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
     })
 )
 
+//
+// CHECKOUT
+// 
+
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
 export const checkoutUIFilterBuilders: UIFilterBuilders = [
     // todo
@@ -43,5 +48,53 @@ export const checkoutUIFilterBuilders: UIFilterBuilders = [
 checkoutUIFilterBuilders.unshift(
     new GroupUIFilterBuilder({
         builders: checkoutUIFilterBuilders
+    })
+)
+
+//
+// ORGANIZATIONS
+// 
+
+const organizationMemberUIFilterBuilders: UIFilterBuilders = [
+    new StringFilterBuilder({
+        name: 'Naam',
+        key: 'name'
+    }),
+    new StringFilterBuilder({
+        name: 'Voornaam',
+        key: 'firstName'
+    }),
+    new StringFilterBuilder({
+        name: 'Achternaam',
+        key: 'lastName'
+    }),
+    new StringFilterBuilder({
+        name: 'E-mailadres',
+        key: 'email'
+    }),
+]
+
+export const organizationsUIFilterBuilders: UIFilterBuilders = [
+    new StringFilterBuilder({
+        name: 'Naam',
+        key: 'name'
+    }),
+    new GroupUIFilterBuilder({
+        name: 'Leden',
+        builders: organizationMemberUIFilterBuilders,
+        wrapFilter: (f) => {
+            return {
+                members: {
+                    $elemMatch: f
+                }
+            }
+        },
+    })
+];
+
+// Recursive: self referencing groups
+organizationsUIFilterBuilders.unshift(
+    new GroupUIFilterBuilder({
+        builders: organizationsUIFilterBuilders
     })
 )

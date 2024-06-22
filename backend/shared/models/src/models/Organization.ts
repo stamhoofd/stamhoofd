@@ -269,7 +269,8 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => g.getStructure())
+            groups: groups.map(g => g.getStructure()),
+            createdAt: this.createdAt
         })
 
         if (this.meta.modules.disableActivities) {

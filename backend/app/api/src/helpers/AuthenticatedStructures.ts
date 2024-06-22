@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, MemberWithRegistrations, Organization, Payment, Webshop } from "@stamhoofd/models";
-import { Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrations, Organization, Payment, User, Webshop } from "@stamhoofd/models";
+import { User as UserStruct, Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 
@@ -91,11 +91,25 @@ export class AuthenticatedStructures {
                 website: organization.website,
                 groups: groupStructures.sort(GroupStruct.defaultSort),
                 privateMeta: organization.privateMeta,
-                webshops: webshopStructures
+                webshops: webshopStructures,
+                createdAt: organization.createdAt
             })
         }
         
         return await organization.getStructure()
+    }
+
+    static async adminOrganizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
+        const structs: OrganizationStruct[] = [];
+        const admins = await User.getAdmins(organizations.map(o => o.id))
+
+        for (const organization of organizations) {
+            const base = await organization.getStructure({emptyGroups: true})
+            base.admins = admins.filter(a => a.permissions?.organizationPermissions.has(organization.id)).map(a => UserStruct.create({...a, hasAccount: a.hasAccount()}))
+            structs.push(base)
+        }
+        
+        return structs
     }
 
     static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false): Promise<MembersBlob> {

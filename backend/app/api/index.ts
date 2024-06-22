@@ -44,6 +44,7 @@ const start = async () => {
     await I18n.load()
     const router = new Router();
     await router.loadAllEndpoints(__dirname + "/src/endpoints/global/*");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/admin/*");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/auth");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/dashboard/*");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/organization/registration");

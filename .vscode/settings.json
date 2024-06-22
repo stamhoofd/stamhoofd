@@ -46,7 +46,7 @@
     "i18n-ally.sourceLanguage": "nl",
     "i18n-ally.displayLanguage": "nl",
     "i18n-ally.keepFulfilled": false,
-    "i18n-ally.keystyle": "nested",
+    "i18n-ally.extract.autoDetect": false,
     "typescript.tsdk": "node_modules/typescript/lib",
     "codeQL.githubDatabase.update": "never",
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
@@ -60,5 +60,6 @@
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features"
     },
-    "typescript.preferences.importModuleSpecifier": "project-relative"
+    "typescript.preferences.importModuleSpecifier": "project-relative",
+    "i18n-ally.keystyle": "flat"
 }

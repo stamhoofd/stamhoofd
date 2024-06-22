@@ -55,5 +55,6 @@ declare module 'vue' {
         formatDateWithDay: typeof Formatter.dateWithDay,
         formatTime: typeof Formatter.time,
         formatCountry: typeof CountryHelper.getName,
+        formatInteger: typeof Formatter.integer,
     }
 }

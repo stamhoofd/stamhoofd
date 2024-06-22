@@ -58,6 +58,7 @@ declare global {
          */
         readonly userMode: 'organization'|'platform'
         readonly translationNamespace: string
+        readonly fixedCountry?: Country
     }
 
     /** 

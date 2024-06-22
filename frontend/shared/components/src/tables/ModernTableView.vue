@@ -2022,11 +2022,8 @@ defineExpose({
         }
 
         .placeholder-skeleton {
-            display: block;
-            height: 1em;
+            @extend .style-placeholder-skeleton;
             width: 10px;
-            border-radius: 5px;
-            background: $color-background-shade-darker;
         }
 
         //&.selectable {

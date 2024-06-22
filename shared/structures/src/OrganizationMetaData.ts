@@ -15,6 +15,7 @@ import { PaymentConfiguration } from './PaymentConfiguration';
 import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 import { TransferSettings } from './webshops/TransferSettings';
+import { OrganizationTag } from './Platform';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
@@ -189,6 +190,12 @@ export class OrganizationMetaData extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type = OrganizationType.Other
+
+    /**
+     * Contains the ids of the tags
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 260 })
+    tags: string[] = []
 
     /**
      * Show beta features in this organization

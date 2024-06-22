@@ -1,16 +1,17 @@
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
 import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
 import { computed, markRaw, reactive } from 'vue';
+import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
 }
 
 export async function getScopedAdminRootFromUrl() {
-    const session = reactive(new SessionContext(null)) as SessionContext
+    const session = reactive(new SessionContext(null) as any) as SessionContext
     await session.loadFromStorage()
     await SessionManager.prepareSessionForUsage(session, false);
 
@@ -35,7 +36,7 @@ export function getNoPermissionsView() {
 
 export async function getScopedAdminRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
     // When switching between organizations, we allso need to load the right locale, which can happen async normally
-    const reactiveSession = reactive(session) as SessionContext
+    const reactiveSession = reactive(session as any) as SessionContext
     I18nController.loadDefault(reactiveSession, Country.Belgium, "nl").catch(console.error)
 
     const platformManager = await PlatformManager.createFromCache(reactiveSession, true, true)
@@ -52,6 +53,10 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         root: new ComponentWithProperties(MembersTableView, {})
     })
 
+    const organizationsTableView = new ComponentWithProperties(SplitViewController, {
+        root: new ComponentWithProperties(OrganizationsMenu, {})
+    })
+
     setTitleSuffix('Administratie');
 
     const startTab =  new TabBarItem({
@@ -64,6 +69,12 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         icon: 'group',
         name: 'Leden',
         component: membersTableView
+    });
+
+    const groupsTab =  new TabBarItem({
+        icon: 'location',
+        name: 'Groepen',
+        component: organizationsTableView
     });
 
     const settingsTab =  new TabBarItem({
@@ -91,7 +102,8 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                         tabs: computed(() => {
                             const tabs: (TabBarItem|TabBarItemGroup)[] = [
                                 startTab,
-                                membersTab
+                                membersTab,
+                                groupsTab
                             ]
 
                             if (reactiveSession.auth.hasFullPlatformAccess()) {
