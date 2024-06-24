@@ -19,23 +19,40 @@
         <template v-if="app === 'admin'">
             <hr>
             <h2>
-                Algemeen
+                Toegang tot verenigingen
             </h2>
-            <p>In de toekomst kan je dit per verenigingstag instellen. Voor diepgaandere toegang tot één specifieke vereniging moet je een persoon beheerder maken van die specifieke vereniging.</p>
+
+            <p>Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.</p>
 
             <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="platformLoginAs" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Inloggen als alle verenigingen
-                    </h3>
-                    <p class="style-description-small">
-                        Beheerders met deze rechten kunnen bij gelijk welke vereniging inloggen en hebben daar dezelfde rechten als een hoofdbeheerder van die vereniging. Deze beheerders krijgen dus toegang tot alle data van die vereniging, inclusief leden.
-                    </p>
-                </STListItem>
+                <ResourcePermissionRow 
+                    :role="patched" 
+                    :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" 
+                    :configurable-access-rights="[]"
+                    type="resource" 
+                    @patch:role="addPatch" 
+                />
+
+                <ResourcePermissionRow 
+                    v-for="tag in tags" 
+                    :key="tag.id" 
+                    :role="patched" 
+                    :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" 
+                    :configurable-access-rights="[]"
+                    type="resource" 
+                    @patch:role="addPatch" 
+                />
             </STList>
+        </template>
+
+        <template v-if="app === 'admin'">
+            <hr>
+            <h2>
+                Administratietools
+            </h2>
+
+            <p>Hier kan je in de toekomst toegang regelen tot tools zoals de facturatie.</p>
+
         </template>
 
         <template v-if="false">
@@ -291,6 +308,7 @@ const {patched, addPatch, hasChanges, patch} = usePatch(props.role);
 const groups: Ref<Group[]> = computed(() => organization.value?.adminAvailableGroups ?? [])
 const webshops: Ref<WebshopPreview[]> = computed(() => organization.value?.webshops ?? [])
 const categories: Ref<GroupCategory[]> = computed(() => organization.value?.getCategoryTree().categories ?? [])
+const tags = computed(() => platform.value.config.tags)
 const recordCategories = computed(() => {
     const base = organization.value?.meta.recordsConfiguration.recordCategories?.slice() ?? [];
 

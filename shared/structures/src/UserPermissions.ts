@@ -1,7 +1,7 @@
 
 import { AutoEncoder, AutoEncoderPatchType, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { AccessRight, LoadedPermissions, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType } from './Permissions';
+import { AccessRight, getPermissionLevelNumber, LoadedPermissions, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from './Permissions';
 import { Platform } from './Platform';
 
 export class UserPermissions extends AutoEncoder {
@@ -24,22 +24,52 @@ export class UserPermissions extends AutoEncoder {
         return LoadedPermissions.from(this.globalPermissions, platformRoles)
     }
 
-    forOrganization(organization: {id: string, privateMeta?: {roles: PermissionRoleDetailed[]}|null}, inherit = true): LoadedPermissions|null {
-        return this.for(organization.id, Platform.shared, organization?.privateMeta?.roles ?? [], inherit)
-    }
-
-    for(organizationId: string, platform: Platform, organizationRoles: PermissionRoleDetailed[], inherit = true): LoadedPermissions|null {
-        if (inherit) {
+    forOrganization(organization: {id: string, meta: {tags: string[]}, privateMeta?: {roles: PermissionRoleDetailed[]}|null}, platform?: Platform|null): LoadedPermissions|null {
+        let base: ResourcePermissions|null = null
+        const organizationRoles = organization?.privateMeta?.roles ?? []
+        if (platform) {
             const platformPermissions = this.forPlatform(platform);
 
-            // todo: op basis van categorieën van de vereniging
-            if (platformPermissions && platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs)) {
-                return LoadedPermissions.create({
-                    level: PermissionLevel.Full,
-                })
+            if (platformPermissions) {
+                const tags = organization.meta.tags.length === 0 ? [""] : organization.meta.tags
+
+                for (const tag of tags) {
+                    const rp = platformPermissions.getMergedResourcePermissions(PermissionsResourceType.OrganizationTags, tag);
+                    if (rp) {
+                        const pp = Permissions.create({
+                            level: rp.level,
+                        })
+
+                        if (rp.hasAccess(PermissionLevel.Full)) {
+                            return LoadedPermissions.from(pp, organizationRoles)
+                        }
+                        base = base ? base.merge(rp) : rp
+                    }
+                }
             }
         }
 
+        const specific = this.forWithoutInherit(organization.id, organizationRoles)
+
+        if (base) {
+            const p = LoadedPermissions.from(
+                Permissions.create({
+                    level: base.level,
+                }),
+                organizationRoles
+            )
+
+            if (!specific) {
+                return p
+            }
+            
+            return specific.merge(p)
+        }
+
+        return specific
+    }
+
+    forWithoutInherit(organizationId: string, organizationRoles: PermissionRoleDetailed[]): LoadedPermissions|null {
         const permissions = this.organizationPermissions.get(organizationId) ?? null
         if (!permissions) {
             return null;

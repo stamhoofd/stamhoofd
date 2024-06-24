@@ -4,11 +4,12 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, MemberWithRegistrations } from '@stamhoofd/models';
 import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
-import { CountFilteredRequest, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
+import { filterCompilers as organizationFilterCompilers } from '../../admin/organizations/GetOrganizationsEndpoint';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -137,6 +138,40 @@ const filterCompilers: SQLFilterDefinitions = {
         ),
         registrationFilterCompilers
     ),
+
+    organizations: createSQLRelationFilterCompiler(
+        SQL.select()
+        .from(
+            SQL.table('registrations')
+        ).join(
+            SQL.join(
+                SQL.table('groups')
+            ).where(
+                SQL.column('groups', 'id'),
+                SQL.column('registrations', 'groupId')
+            )
+        ).join(
+            SQL.join(
+                SQL.table('organizations')
+            ).where(
+                SQL.column('organizations', 'id'),
+                SQL.column('registrations', 'organizationId')
+            )
+        ).where(
+            SQL.column('memberId'),
+            SQL.column('members', 'id'),
+        ).whereNot(
+            SQL.column('registeredAt'),
+            null,
+        ).whereNot(
+            SQL.column('groups', 'status'),
+            GroupStatus.Archived
+        ).where(
+            SQL.column('registrations', 'cycle'),
+            SQL.column('groups', 'cycle'),
+        ),
+        organizationFilterCompilers
+    ),
 }
 
 const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
@@ -200,15 +235,27 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
         const organization = Context.organization
+        let scopeFilter: StamhoofdFilter|undefined = undefined;
 
         if (!organization && !Context.auth.canAccessAllPlatformMembers()) {
-            throw new SimpleError({
-                code: 'not_implemented',
-                message: 'Listing members platform wide without full permissions is not yet implemented'
-            })
+            const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read)
+            if (tags != 'all' && tags.length === 0) {
+                throw Context.auth.error()
+            }
+        
+            if (tags !== 'all') {
+                // Add organization scope filter
+                scopeFilter = {
+                    organizations: {
+                        $elemMatch: {
+                            tags: {
+                                $in: tags
+                            }
+                        }
+                    }
+                };
+            }
         }
-
-        let scopeFilter: StamhoofdFilter|undefined = undefined;
 
         if (organization) {
             // Add organization scope filter

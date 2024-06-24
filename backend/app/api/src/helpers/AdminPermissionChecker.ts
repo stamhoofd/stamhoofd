@@ -1,9 +1,8 @@
 import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
-import { AccessRight, GroupCategory, GroupStatus, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionRoleDetailed, PermissionsResourceType, Platform, RecordCategory, RecordSettings } from "@stamhoofd/structures"
+import { AccessRight, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
-import { Platform as PlatformStruct } from "@stamhoofd/structures";
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -89,27 +88,21 @@ export class AdminPermissionChecker {
         })
     }
 
-    async getOrganizationRoles(organization: string|Organization): Promise<PermissionRoleDetailed[]> {
-        if (typeof organization === 'string') {
-            const loadedOrg = await this.getOrganization(organization)
-            return this.getOrganizationRoles(loadedOrg)
-        }
-        return [...(organization.privateMeta.roles ?? [])]
-    }
-
     get platformPermissions() {
         return this.user.permissions?.forPlatform(this.platform)
     }
     
-    async getOrganizationPermissions(organization: string|Organization) {
+    async getOrganizationPermissions(organizationOrId: string|Organization) {
         if (!this.user.permissions) {
             return null;
         }
-        return this.user.permissions.for(
-            typeof organization === 'string' ? organization : organization.id, 
-            this.platform, 
-            await this.getOrganizationRoles(organization)
+        const organization = await this.getOrganization(organizationOrId)
+
+        const p = this.user.permissions.forOrganization(
+            organization,
+            this.platform
         )
+        return p
     }
 
     async canAccessPrivateOrganizationData(organization: Organization) {
@@ -194,7 +187,7 @@ export class AdminPermissionChecker {
             return true
         }
 
-        if (member.organizationId && await this.hasFullAccess(member.organizationId)) {
+        if (member.organizationId && await this.hasFullAccess(member.organizationId, permissionLevel)) {
             return true
         }
 
@@ -682,14 +675,14 @@ export class AdminPermissionChecker {
         return !this.user.isApiUser && (await this.hasFullAccess(organizationId))
     }
 
-    async hasFullAccess(organizationId: string): Promise<boolean> {
+    async hasFullAccess(organizationId: string, level = PermissionLevel.Full): Promise<boolean> {
         const organizationPermissions = await this.getOrganizationPermissions(organizationId)
 
         if (!organizationPermissions) {
             return false;
         }
 
-        return !!organizationPermissions && organizationPermissions.hasFullAccess()
+        return !!organizationPermissions && organizationPermissions.hasAccess(level)
     }
 
     isUserManager(member: MemberWithRegistrations) {
@@ -992,6 +985,35 @@ export class AdminPermissionChecker {
 
     hasPlatformFullAccess(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess()
+    }
+
+    getPlatformAccessibleOrganizationTags(level: PermissionLevel): string[] | 'all' {
+        if (!this.hasSomePlatformAccess()) {
+            return [];
+        }
+
+        if (this.hasPlatformFullAccess()) {
+            return 'all'
+        }
+
+        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, '', level)) {
+            return 'all'
+        }
+
+        const allTags = this.platform.config.tags
+        const tags: string[] = []
+
+        for (const tag of allTags) {
+            if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, tag.id, level)) {
+                tags.push(tag.id)
+            }
+        }
+
+        if (tags.length === allTags.length) {
+            return 'all'
+        }
+
+        return tags
     }
 
     hasSomePlatformAccess(): boolean {

@@ -389,7 +389,7 @@ export class PlatformMember implements ObjectWithRecords {
         for (const organization of organizations) {
             if (property === 'dataPermission' || property === 'financialSupport') {
                 if (options?.checkPermissions && property === 'financialSupport') {
-                    if (!options.checkPermissions.permissions?.forOrganization(organization, true)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                    if (!options.checkPermissions.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
                         // No permission
                         continue
                     }
@@ -649,7 +649,7 @@ export class PlatformMember implements ObjectWithRecords {
         // First push all platform record categories, these should be first
         for (const organization of scopedOrganizations) {
             if (checkPermissions && checkPermissions.permissions) {
-                const organizationPermissions = checkPermissions.permissions.forOrganization(organization, true);
+                const organizationPermissions = checkPermissions.permissions.forOrganization(organization, Platform.shared);
 
                 if (!organizationPermissions) {
                     continue;
@@ -672,7 +672,7 @@ export class PlatformMember implements ObjectWithRecords {
         for (const category of this.platform.config.recordsConfiguration.recordCategories) {
             if (category.isEnabled(this)) {
                 const hasAnyAccess = !checkPermissions || !checkPermissions.permissions || !!scopedOrganizations.find(o => {
-                    const organizationPermissions = checkPermissions.permissions!.forOrganization(o, true);
+                    const organizationPermissions = checkPermissions.permissions!.forOrganization(o, Platform.shared);
 
                     if (!organizationPermissions) {
                         return false;
@@ -697,7 +697,7 @@ export class PlatformMember implements ObjectWithRecords {
 
         // All organization record categories
         for (const organization of scopedOrganizations) {
-            const organizationPermissions = checkPermissions?.permissions ? checkPermissions.permissions.forOrganization(organization, true) : null;
+            const organizationPermissions = checkPermissions?.permissions ? checkPermissions.permissions.forOrganization(organization, Platform.shared) : null;
 
             if (checkPermissions && !organizationPermissions) {
                 continue;

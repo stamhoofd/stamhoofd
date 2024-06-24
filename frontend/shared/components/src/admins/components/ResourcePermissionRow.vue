@@ -61,7 +61,13 @@ const isMe = computed(() => {
 const resourcePermissions = computed(() => role.value.resources.get(props.resource.type)?.get(props.resource.id))
 
 const lockedMinimumLevel = computed(() => {
-    return props.role.level
+    const a = props.role.level
+    const b = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None
+
+    if (getPermissionLevelNumber(a) > getPermissionLevelNumber(b)) {
+        return a
+    }
+    return b
 })
 
 const permissionLevel = computed({

@@ -82,7 +82,7 @@ export class SessionContext implements RequestMiddleware {
         if (!this.organization) {
             return null
         }
-        return this.user?.permissions?.forOrganization(this.organization) ?? null
+        return this.user?.permissions?.forOrganization(this.organization, Platform.shared) ?? null
     }
 
     /**

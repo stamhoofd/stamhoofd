@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { SQL, SQLConcat, SQLFilterDefinitions, SQLNow, SQLNull, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, SQLWhereEqual, SQLWhereOr, SQLWhereSign, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
-import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
@@ -14,7 +14,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>
 
-const filterCompilers: SQLFilterDefinitions = {
+export const filterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
     name: createSQLColumnFilterCompiler('name'),
@@ -43,7 +43,7 @@ const filterCompilers: SQLFilterDefinitions = {
         false
     ),
     tags: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.tags'),
+        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
         undefined,
         true,
         true
@@ -205,26 +205,21 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
     }
 
     static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
-        if (!Context.auth.hasPlatformFullAccess()) {
-            throw new SimpleError({
-                code: 'not_implemented',
-                message: 'Listing organizations without full permissions is not yet implemented'
-            })
+        const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read)
+        if (tags != 'all' && tags.length === 0) {
+            throw Context.auth.error()
         }
 
-        const scopeFilter: StamhoofdFilter|undefined = undefined;
+        let scopeFilter: StamhoofdFilter|undefined = undefined;
 
-        // todo: add filter protection if no full access
-        // if (organization) {
-        //     // Add organization scope filter
-        //     scopeFilter = {
-        //         activeRegistrations: {
-        //             $elemMatch: {
-        //                 organizationId: organization.id
-        //             }
-        //         }
-        //     };
-        // }
+        if (tags !== 'all') {
+            // Add organization scope filter
+            scopeFilter = {
+                tags: {
+                    $in: tags
+                }
+            };
+        }
         
         const query = SQL
             .select(

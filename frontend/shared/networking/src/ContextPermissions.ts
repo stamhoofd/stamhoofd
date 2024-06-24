@@ -1,4 +1,4 @@
-import { AccessRight, Group, Organization, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, User } from "@stamhoofd/structures";
+import { AccessRight, Group, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, User } from "@stamhoofd/structures";
 import { Ref, unref } from "vue";
 
 export class ContextPermissions {
@@ -50,11 +50,11 @@ export class ContextPermissions {
         if (!this.organization) {
             return this.platformPermissions
         }
-        return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions) ?? null
+        return unref(this.userPermissions)?.forOrganization(this.organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null
     }
 
     getPermissionsForOrganization(organization: Organization) {
-        return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions) ?? null
+        return unref(this.userPermissions)?.forOrganization(organization, this.allowInheritingPermissions ? Platform.shared : null) ?? null
     }
 
     get unloadedPermissions(): Permissions|null {
@@ -141,6 +141,42 @@ export class ContextPermissions {
             }
         }
         return false
+    }
 
+    hasSomePlatformAccess(): boolean {
+        return !!this.platformPermissions
+    }
+
+    hasPlatformFullAccess(): boolean {
+        return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess()
+    }
+
+    getPlatformAccessibleOrganizationTags(level: PermissionLevel): OrganizationTag[] | 'all' {
+        if (!this.hasSomePlatformAccess()) {
+            return [];
+        }
+
+        if (this.hasPlatformFullAccess()) {
+            return 'all'
+        }
+
+        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, '', level)) {
+            return 'all'
+        }
+
+        const allTags = this.platform.config.tags
+        const tags: OrganizationTag[] = []
+
+        for (const tag of allTags) {
+            if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, tag.id, level)) {
+                tags.push(tag)
+            }
+        }
+
+        if (tags.length === allTags.length) {
+            return 'all'
+        }
+
+        return tags
     }
 }

@@ -165,7 +165,7 @@ export enum PermissionsResourceType {
     Webshops = "Webshops",
     Groups = "Groups",
     GroupCategories = "GroupCategories",
-    OrganizationCategories = "OrganizationCategories",
+    OrganizationTags = "OrganizationTags",
     RecordCategories = "RecordCategory"
 }
 
@@ -175,7 +175,7 @@ export function getPermissionResourceTypeName(type: PermissionsResourceType, plu
         case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
         case PermissionsResourceType.Groups: return plural ? 'inschrijvingsgroepen' : 'inschrijvingsgroep';
         case PermissionsResourceType.GroupCategories: return plural ? 'categorieën' : 'categorie';
-        case PermissionsResourceType.OrganizationCategories: return plural ? 'verenigingcategorieën' : 'verenigingcategorie';
+        case PermissionsResourceType.OrganizationTags: return plural ? 'tags' : 'tag';
         case PermissionsResourceType.RecordCategories: return plural ? 'vragenlijsten' : 'vragenlijst';
     }
 }
@@ -232,6 +232,24 @@ export class ResourcePermissions extends AutoEncoder {
        
         return patch
 
+    }
+
+    merge(other: ResourcePermissions): ResourcePermissions {
+        const p = new ResourcePermissions()
+        p.level = this.level
+        p.accessRights = this.accessRights.slice()
+
+        if (getPermissionLevelNumber(other.level) > getPermissionLevelNumber(p.level)) {
+            p.level = other.level
+        }
+
+        for (const right of other.accessRights) {
+            if (!p.accessRights.includes(right)) {
+                p.accessRights.push(right)
+            }
+        }
+        return p
+    
     }
 }
 
@@ -303,6 +321,12 @@ export class PermissionRoleDetailed extends PermissionRole {
 
         for (const [type, resources] of this.resources) {
             let count = 0
+
+            if (resources.has('')) {
+                stack.push("alle "+getPermissionResourceTypeName(type, true))
+                continue;
+            }
+
             for (const resource of resources.values()) {
                 if (resource.hasAccess(PermissionLevel.Read) || resource.accessRights.length > 0) {
                     count += 1
@@ -347,9 +371,19 @@ export class PermissionRoleDetailed extends PermissionRole {
             return null
         }
         const rInstance = resource.get(id)
+        const allInstance = resource.get('')
+
         if (!rInstance) {
+            if (allInstance) {
+                return allInstance
+            }
             return null
         }
+
+        if (allInstance) {
+            return rInstance.merge(allInstance)
+        }
+
         return rInstance
     }
 
@@ -646,11 +680,38 @@ export class LoadedPermissions {
             return null
         }
         const rInstance = resource.get(id)
+        const allInstance = resource.get('')
         if (!rInstance) {
+            if (allInstance) {
+                return allInstance
+            }
             return null
         }
+
+        if (allInstance) {
+            return rInstance.merge(allInstance)
+        }
+        
         return rInstance
     }
+
+    getMergedResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions|null {
+        let base = this.getResourcePermissions(type, id)
+
+        for (const role of this.roles) {
+            const r = role.getResourcePermissions(type, id)
+            if (r) {
+                if (base) {
+                    base.merge(r)
+                } else {
+                    base = r
+                }
+            }
+        }
+
+        return base
+    }
+
 
     hasRole(role: PermissionRole): boolean {
         return this.roles.find(r => r.id === role.id) !== undefined
@@ -744,5 +805,40 @@ export class LoadedPermissions {
         }
 
         return false
+    }
+
+    merge(other: LoadedPermissions): LoadedPermissions {
+        const p = LoadedPermissions.create({})
+        p.level = this.level
+        p.roles =  this.roles.slice()
+        p.resources = new Map(this.resources)
+
+        if (getPermissionLevelNumber(other.level) > getPermissionLevelNumber(p.level)) {
+            p.level = other.level
+        }
+
+        for (const [type, r] of other.resources) {
+            for (const [id, resource] of r) {
+                if (!p.resources.has(type)) {
+                    p.resources.set(type, new Map())
+                }
+
+                const current = p.resources.get(type)!.get(id)
+                if (!current) {
+                    p.resources.get(type)!.set(id, resource)
+                } else {
+                    p.resources.get(type)!.set(id, current.merge(resource))
+                }
+            }
+        }
+
+        for (const role of other.roles) {
+            const current = p.roles.find(r => r.id === role.id)
+            if (!current) {
+                p.roles.push(role)
+            }
+        }
+        return p
+    
     }
 }
