@@ -167,5 +167,11 @@
     "admin.organizations.uriLabel": "URI",
     "admin.organizations.uri.label": "URI",
     "admin.organizations.uri.description": "De URI is een unieke en leesbare code voor deze vereniging, bestaande uit enkel kleine letters en koppeltekens. Deze wordt in de URL-balk van de browser gebruikt op enkele plaatsen, maar is anders niet zichtbaar.",
-    "admin.organizations.errors.nameRequired": "Vul de naam van de vereniging in"
+    "admin.organizations.errors.nameRequired": "Vul de naam van de vereniging in",
+    "admin.settings.defaultAgeGroups.title": "Standaard leeftijdsgroepen",
+    "admin.settings.defaultAgeGroups.description": "Stel de standaard leeftijdsgroepen in",
+    "admin.settings.membershipTypes.title": "Lidmaatschappen en verzekeringen",
+    "admin.settings.membershipTypes.description": "Bepaal de beschikbare lidmaatschappen (verzekeringen), bijhorende kostprijs en instellingen",
+    "admin.settings.responsibilities.title": "Functies en verantwoordelijkheden van leden",
+    "admin.settings.responsibilities.description": "Beheer de verantwoordelijkheden die gekoppeld kunnen worden aan leden"
 }

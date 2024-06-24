@@ -38,6 +38,7 @@ export * from "./src/StripeAccount"
 export * from "./src/Token"
 export * from "./src/UmbrellaOrganization"
 export * from "./src/User"
+export * from "./src/DefaultAgeGroup"
 
 // UserPermissions
 export * from "./src/UserPermissions"

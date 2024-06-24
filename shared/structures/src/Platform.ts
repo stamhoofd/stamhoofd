@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { PermissionRoleDetailed } from "./Permissions";
 import { User } from "./User";
 import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
+import { DefaultAgeGroup } from "./DefaultAgeGroup";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -27,8 +28,10 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(OrganizationTag), version: 260 })
     tags: OrganizationTag[] = []
-}
 
+    @field({ decoder: new ArrayDecoder(DefaultAgeGroup), version: 261 })
+    defaultAgeGroups: DefaultAgeGroup[] = []
+}
 
 export class Platform extends AutoEncoder {
     static instance: Platform|null = null

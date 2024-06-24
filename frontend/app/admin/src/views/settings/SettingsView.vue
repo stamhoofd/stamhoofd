@@ -35,6 +35,51 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('admin.settings.defaultAgeGroups.title') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('admin.settings.defaultAgeGroups.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('admin.settings.responsibilities.title') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('admin.settings.responsibilities.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/membership.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('admin.settings.membershipTypes.title') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('admin.settings.membershipTypes.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
         </main>
     </div>
@@ -47,10 +92,12 @@ import {AdminsView, RecordsConfigurationView, Toast, usePlatform} from '@stamhoo
 import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures'
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePlatformManager } from '@stamhoofd/networking';
+import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 
 enum Routes {
     Admins = 'beheerders',
     Records = 'records',
+    DefaultAgeGroups = 'standaard-leeftijdsgroepen'
 }
 
 const platform = usePlatform()
@@ -63,6 +110,7 @@ defineRoutes([
     },
     {
         url: Routes.Records,
+        present: 'popup',
         component: RecordsConfigurationView as ComponentOptions,
         paramsToProps() {
             return {
@@ -77,7 +125,12 @@ defineRoutes([
                 }
             }
         }
-    }
+    },
+    {
+        url: Routes.DefaultAgeGroups,
+        present: 'popup',
+        component: EditDefaultAgeGroupsView as ComponentOptions,
+    },
 ])
 const $navigate = useNavigate()
 </script>

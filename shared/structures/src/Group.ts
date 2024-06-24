@@ -41,7 +41,7 @@ export class Group extends AutoEncoder {
     @field({ decoder: GroupPrivateSettings, nullable: true, version: 10 })
     privateSettings: GroupPrivateSettings | null = null
 
-        /**
+    /**
      * Manually close a group
      */
     @field({ decoder: new EnumDecoder(GroupStatus), version: 192 })
