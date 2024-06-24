@@ -97,9 +97,6 @@ defineRoutes([
         name: Routes.Tags,
         present: 'popup',
         component: EditOrganizationTagsView as unknown as ComponentOptions,
-        isDefault: {
-            properties: {}
-        }
     } as Route<any, undefined>] : [])
 ])
 const checkRoute = useCheckRoute();
