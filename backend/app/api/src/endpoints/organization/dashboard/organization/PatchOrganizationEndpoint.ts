@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Group, Organization,PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions, PermissionsResourceType,ResourcePermissions, UserPermissions, Version } from "@stamhoofd/structures";
+import { Group, Organization,PayconiqPayment, Platform, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
+import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions, PermissionsResourceType,ResourcePermissions, UserPermissions, Version, OrganizationMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -257,6 +257,51 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (request.body.meta.categories) {
                     deleteUnreachable = true
                 }
+
+                if (request.body.meta?.tags) {
+                    if (!Context.auth.hasPlatformFullAccess()) {
+                        throw Context.auth.error()
+                    }
+
+                    const cleanedPatch = OrganizationMetaData.patch({
+                        tags: request.body.meta.tags as any
+                    })
+                    const platform = await Platform.getShared()
+                    const patchedMeta = organization.meta.patch(cleanedPatch);
+                    for (const tag of patchedMeta.tags) {
+                        if (!platform.config.tags.find(t => t.id === tag)) {
+                            throw new SimpleError({ code: "invalid_tag", message: "Invalid tag", statusCode: 400 });
+                        }
+                    }
+    
+                    // Sort tags based on platform config order
+                    patchedMeta.tags.sort((a, b) => {
+                        const aIndex = platform.config.tags.findIndex(t => t.id === a);
+                        const bIndex = platform.config.tags.findIndex(t => t.id === b);
+                        return aIndex - bIndex;
+                    })
+    
+                    organization.meta.tags = patchedMeta.tags;
+                }
+            }
+
+            if (request.body.uri) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error()
+                }
+                
+                const uriExists = await Organization.getByURI(request.body.uri);
+    
+                if (uriExists && uriExists.id !== organization.id) {
+                    throw new SimpleError({
+                        code: "name_taken",
+                        message: "An organization with the same name already exists",
+                        human: "Er bestaat al een vereniging met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze vereniging niet al bestaat.",
+                        field: "name",
+                    });
+                }
+
+                organization.uri = request.body.uri
             }
 
             // Save the organization

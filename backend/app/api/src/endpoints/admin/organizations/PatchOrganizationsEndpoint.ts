@@ -51,6 +51,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             await organization.delete();
         }
 
+        // Bulk tag editing
         for (const patch of request.body.getPatches()) {
             const organization = await Organization.getByID(patch.id);
             if (!organization) {
@@ -82,6 +83,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             result.push(organization);
         }
 
+        // Organization creation
         for (const {put} of request.body.getPuts()) {
             if (put.name.length < 4) {
                 if (put.name.length == 0) {

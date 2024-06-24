@@ -5,8 +5,6 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <h2>{{ $t('shared.general') }}</h2>
-
         <div class="split-inputs">
             <div>
                 <STInputBox :title="$t('admin.organizations.nameLabel')" error-fields="name" :error-box="errors.errorBox">

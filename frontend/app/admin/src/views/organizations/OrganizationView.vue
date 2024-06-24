@@ -2,6 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
+                <button v-if="hasWrite" v-tooltip="'Bewerken'" class="button icon navigation edit" type="button" @click="editOrganization" />
                 <button v-if="hasPrevious || hasNext" v-tooltip="'Ga naar vorige groep'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende groep'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goNext" />
             </template>
@@ -164,15 +165,17 @@
 
 
 <script lang="ts" setup>
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Toast, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, ref } from 'vue';
 import MemberCountSpan from './components/MemberCountSpan.vue';
 import SelectOrganizationTagsView from './tags/SelectOrganizationTagsView.vue';
+import EditOrganizationView from './EditOrganizationView.vue';
+import { save } from 'pdfkit';
 
 const props = defineProps<{
     organization: Organization,
@@ -187,6 +190,7 @@ const context = useContext();
 const owner = useRequestOwner()
 const pop = usePop();
 const platform = usePlatform();
+const present = usePresent();
 
 useKeyUpDown({
     up: goBack,
@@ -215,7 +219,8 @@ const tagStringList = computed(() => {
     return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? 'onbekend').join(', ');
 });
 
-const instance = getCurrentInstance()
+const instance = getCurrentInstance();
+const auth = useAuth();
 
 async function seek(previous = true) {
     const organization = previous ? props.getPrevious(props.organization) : props.getNext(props.organization)
@@ -244,12 +249,37 @@ async function goNext() {
 }
 
 const deleting = ref(false);
+const hasWrite = computed(() => auth.getPermissionsForOrganization(props.organization)?.hasFullAccess() ?? false);
 
 async function editTags() {
     await show({
         components: [
             new ComponentWithProperties(SelectOrganizationTagsView, {
                 organization: props.organization
+            })
+        ]
+    });
+}
+
+async function editOrganization() {
+    await present({
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditOrganizationView, {
+                organization: props.organization,
+                isNew: false,
+                saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {                    
+                    const response = await context.value.getAuthenticatedServerForOrganization(props.organization.id).request({
+                        method: 'PATCH',
+                        path: '/organization',
+                        body: patch,
+                        shouldRetry: false,
+                        owner,
+                        decoder: Organization as Decoder<Organization>
+                    });
+
+                    props.organization.set(response.data)
+                }
             })
         ]
     });
