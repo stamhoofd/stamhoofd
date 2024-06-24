@@ -387,6 +387,19 @@ export class PermissionRoleDetailed extends PermissionRole {
         return rInstance
     }
 
+    getMergedResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions|null {
+        let base = this.getResourcePermissions(type, id)
+
+        if (getPermissionLevelNumber(this.level) > getPermissionLevelNumber(base?.level ?? PermissionLevel.None)) {
+            if (!base) {
+                base = ResourcePermissions.create({level: this.level})
+            }
+            base.level = this.level
+        }
+
+        return base
+    }
+
     hasResourceAccess(type: PermissionsResourceType, id: string, level: PermissionLevel): boolean {
         if (this.hasAccess(level)) {
             return true;
@@ -699,7 +712,7 @@ export class LoadedPermissions {
         let base = this.getResourcePermissions(type, id)
 
         for (const role of this.roles) {
-            const r = role.getResourcePermissions(type, id)
+            const r = role.getMergedResourcePermissions(type, id)
             if (r) {
                 if (base) {
                     base.merge(r)
@@ -709,9 +722,15 @@ export class LoadedPermissions {
             }
         }
 
+        if (getPermissionLevelNumber(this.level) > getPermissionLevelNumber(base?.level ?? PermissionLevel.None)) {
+            if (!base) {
+                base = ResourcePermissions.create({level: this.level})
+            }
+            base.level = this.level
+        }
+
         return base
     }
-
 
     hasRole(role: PermissionRole): boolean {
         return this.roles.find(r => r.id === role.id) !== undefined
