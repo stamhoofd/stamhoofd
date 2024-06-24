@@ -19,7 +19,7 @@
             >
         </STInputBox>
 
-        <UrlInput v-model="url" :title="$t('shared.inputs.url.labelOptional')" :validator="validator" :required="false" />
+        <UrlInput v-model="url" :title="$t('shared.website.optional')" :validator="validator" :required="false" />
 
         <p class="style-description-small">
             Op plaatsen waar technisch mogelijk, kan men op het logo klikken om de website te bezoeken.

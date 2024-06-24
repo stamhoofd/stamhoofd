@@ -1,82 +1,53 @@
 {
-    "shared": {
-        "login": "Inloggen",
-        "transferTypes": {
-            "structured": "Gestructureerde mededeling"
-        },
-        "platformName": "Stamhoofd",
+    "admin.organizations.actions.delete.title": "Verwijder deze vereniging",
+    "admin.organizations.actions.members.description": "Bekijk alle leden van deze vereniging via het beheerdersportaal",
+    "admin.organizations.allTitle": "Alle verenigingen",
+    "admin.organizations.deleteConfirmation.description": "Je kan dit niet ongedaan maken",
+    "admin.organizations.deleteConfirmation.title": "Ben je zeker dat je deze vereniging wil verwijderen?",
+    "admin.organizations.deleteConfirmation2.title": "Bevestiging 2/3. Ben je 100% zeker dat je deze vereniging wilt verwijderen?",
+    "admin.organizations.deleteConfirmation3.title": "Bevestiging 3/3. Ben je 100% zeker dat je deze vereniging wilt verwijderen?",
+    "admin.organizations.edit": "Vereniging bewerken",
+    "admin.organizations.emptyMessage": "Er zijn nog geen verenigingen",
+    "admin.organizations.login.description": "Log in als een beheerder van deze vereniging en beheer de leden, activiteiten en instellingen.",
+    "admin.organizations.new": "Nieuwe vereniging",
+    "admin.organizations.settings.description": "Beheer alle instellingen van deze vereniging",
+    "admin.organizations.tags": "Tags",
+    "admin.settings.admins.description": "Beheer de beheerders van het platform",
+    "admin.settings.admins.title": "Beheerders",
+    "admin.settings.records.description": "Bepaal welke gegevens van leden worden verzameld",
+    "admin.settings.records.title": "Gegevens van leden",
+    "backend": {},
+    "dasboard": {
+        "settings": {
+            "paymentMethods": {
+                "mollie": {}
+            }
+        }
+    },
+    "dashboard": {
         "inputs": {
-            "iban": {
-                "placeholder": "Bv. BE71 6316 1793 1960"
+            "parentPhone": {
+                "placeholder": "Mobiel nummer van ouder"
             },
-            "companyNumber": {
-                "label": "Ondernemingsnummer"
+            "privacyUrl": {
+                "placeholder": "bv. https://www.vereniging.be/privacy"
             },
-            "mobile": {
-                "label": "Mobiel nummer",
-                "invalidMessage": "Ongeldig GSM-nummer",
-                "invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31."
+            "shopUrl": {
+                "placeholder": "bv. shop.domeinnaam.be/wafelbak"
             },
-            "url": {
-                "labelOptional": "Website (optioneel)",
-                "invalidMessage": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens."
+            "website": {
+                "placeholder": "bv. https://www.vereniging.be"
             }
         },
-        "domains": {
-            "marketing": "www.stamhoofd.be",
-            "email": "stamhoofd.be"
-        },
-        "emails": {
-            "general": "hallo@stamhoofd.be",
-            "complaints": "klachten@stamhoofd.be",
-            "personal": "simon@stamhoofd.be"
-        },
-        "exampleData": {
-            "phone": "+32 470 12 34 56",
-            "email": "voorbeeld@gmail.com",
-            "name": "Jan Janssens",
-            "names": "Lies en Jan Janssens"
-        },
-        "organization": {
-            "singular": "Vereniging",
-            "plural": "Verenigingen"
-        },
-        "notRegistered": "Niet ingeschreven"
-    },
-    "backend": {},
-    "dashboard": {
-        "start": {
-            "title": "Beheerdersportaal",
-            "title-description": "Welkom op het beheerdersportaal. Hier kan je jouw vereniging beheren en instellingen aanpassen."
-        },
-        "organization-selection": {
-            "welcome-title": "Zoek jouw vereniging",
-            "welcome-description": "Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.",
-            "search-placeholder": "Zoek op naam of postcode"
-        },
         "join": "Aansluiten",
+        "organization-selection": {
+            "search-placeholder": "Zoek op naam of postcode",
+            "welcome-description": "Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.",
+            "welcome-title": "Zoek jouw vereniging"
+        },
         "settings": {
             "billing": {
                 "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid"
-            },
-            "menu": {
-                "paymentMethods": {
-                    "description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",
-                    "title": "Betaalmethodes voor inschrijvingen"
-                },
-                "paymentAccounts": {
-                    "title": "Betaalaccounts",
-                    "description": "Sluit aan bij een online betaalprovider zodat je online geld kan ontvangen."
-                }
-            },
-            "paymentMethods": {
-                "mollie": {
-                    "activeDescription": "Online betalingen (via o.a. Bancontact, iDEAL of kredietkaart) zijn mogelijk. Vink de betaalmethodes die je wilt activeren aan, en zorg dat ze ook in Mollie geactiveerd staan.",
-                    "description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner."
-                },
-                "buckaroo": {
-                    "description": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft."
-                }
             },
             "domain": {
                 "domainPlaceholder": "bv. jouwvereniging.be"
@@ -84,27 +55,36 @@
             "email": {
                 "description": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen."
             },
+            "menu": {
+                "paymentAccounts": {
+                    "description": "Sluit aan bij een online betaalprovider zodat je online geld kan ontvangen.",
+                    "title": "Betaalaccounts"
+                },
+                "paymentMethods": {
+                    "description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",
+                    "title": "Betaalmethodes voor inschrijvingen"
+                }
+            },
+            "paymentMethods": {
+                "buckaroo": {
+                    "description": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft."
+                },
+                "mollie": {
+                    "activeDescription": "Online betalingen (via o.a. Bancontact, iDEAL of kredietkaart) zijn mogelijk. Vink de betaalmethodes die je wilt activeren aan, en zorg dat ze ook in Mollie geactiveerd staan.",
+                    "description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner."
+                }
+            },
             "personalize": {
-                "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
-                "domainDescription": "{'Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.'}"
+                "domainDescription": "{'Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.'}",
+                "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt."
             },
             "registrationPage": {
                 "linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be"
             }
         },
-        "inputs": {
-            "parentPhone": {
-                "placeholder": "Mobiel nummer van ouder"
-            },
-            "website": {
-                "placeholder": "bv. https://www.vereniging.be"
-            },
-            "privacyUrl": {
-                "placeholder": "bv. https://www.vereniging.be/privacy"
-            },
-            "shopUrl": {
-                "placeholder": "bv. shop.domeinnaam.be/wafelbak"
-            }
+        "start": {
+            "title": "Beheerdersportaal",
+            "title-description": "Welkom op het beheerdersportaal. Hier kan je jouw vereniging beheren en instellingen aanpassen."
         },
         "webshop": {
             "customDomain": {
@@ -117,7 +97,6 @@
             }
         }
     },
-    "webshop": {},
     "registration": {
         "inputs": {
             "parentPhone": {
@@ -125,32 +104,68 @@
             }
         }
     },
-    "dasboard": {
-        "settings": {
-            "paymentMethods": {
-                "mollie": {}
+    "shared": {
+        "domains": {
+            "email": "stamhoofd.be",
+            "marketing": "www.stamhoofd.be"
+        },
+        "emails": {
+            "complaints": "klachten@stamhoofd.be",
+            "general": "hallo@stamhoofd.be",
+            "personal": "simon@stamhoofd.be"
+        },
+        "exampleData": {
+            "email": "voorbeeld@gmail.com",
+            "name": "Jan Janssens",
+            "names": "Lies en Jan Janssens",
+            "phone": "+32 470 12 34 56"
+        },
+        "inputs": {
+            "companyNumber": {
+                "label": "Ondernemingsnummer"
+            },
+            "iban": {
+                "placeholder": "Bv. BE71 6316 1793 1960"
+            },
+            "mobile": {
+                "invalidMessage": "Ongeldig GSM-nummer",
+                "invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31.",
+                "label": "Mobiel nummer"
+            },
+            "url": {
+                "invalidMessage": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens.",
+                "labelOptional": "Website (optioneel)"
             }
+        },
+        "login": "Inloggen",
+        "notRegistered": "Niet ingeschreven",
+        "organization": {
+            "plural": "Verenigingen",
+            "singular": "Vereniging"
+        },
+        "platformName": "Stamhoofd",
+        "transferTypes": {
+            "structured": "Gestructureerde mededeling"
         }
     },
-    "admin.settings.admins.title": "Beheerders",
-    "admin.settings.admins.description": "Beheer de beheerders van het platform",
-    "admin.settings.records.title": "Gegevens van leden",
-    "admin.settings.records.description": "Bepaal welke gegevens van leden worden verzameld",
-    "admin.organizations.emptyMessage": "Er zijn nog geen verenigingen",
-    "admin.organizations.allTitle": "Alle verenigingen",
-    "admin.organizations.new": "Nieuwe vereniging",
-    "admin.organizations.settings.description": "Beheer alle instellingen van deze vereniging",
-    "admin.organizations.login.description": "Log in als een beheerder van deze vereniging en beheer de leden, activiteiten en instellingen.",
-    "admin.organizations.actions.members.description": "Bekijk alle leden van deze vereniging via het beheerdersportaal",
-    "admin.organizations.actions.delete.title": "Verwijder deze vereniging",
-    "shared.delete": "Verwijderen",
     "shared.address": "Adres",
-    "shared.invoiceDetails": "Facturatiegegevens",
-    "shared.invoiceAddress": "Facturatieadres",
-    "shared.website": "Website",
-    "admin.organizations.deleteConfirmation.title": "Ben je zeker dat je deze vereniging wil verwijderen?",
     "shared.confirmDelete": "Ja, verwijderen",
-    "admin.organizations.deleteConfirmation.description": "Je kan dit niet ongedaan maken",
-    "admin.organizations.deleteConfirmation2.title": "Bevestiging 2/3. Ben je 100% zeker dat je deze vereniging wilt verwijderen?",
-    "admin.organizations.deleteConfirmation3.title": "Bevestiging 3/3. Ben je 100% zeker dat je deze vereniging wilt verwijderen?"
+    "shared.delete": "Verwijderen",
+    "shared.invoiceAddress": "Facturatieadres",
+    "shared.invoiceDetails": "Facturatiegegevens",
+    "shared.save.shouldNavigateAway.confirm": "Niet opslaan",
+    "shared.save.shouldNavigateAway.title": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
+    "shared.website": "Website",
+    "shared.website.optional": "Website (optioneel)",
+    "shared.website.description": "De link naar de website van jouw vereniging.",
+    "admin.organizations.website.description": "De link naar de website van deze vereniging.",
+    "admin.organizations.nameLabel": "Naam van deze vereniging (kort)",
+    "admin.organizations.namePlaceholder": "De naam van deze vereniging",
+    "admin.organizations.addressLabel": "Adres van deze vereniging",
+    "shared.general": "Algemeen",
+    "admin.organizations.createSucceeded": "De vereniging is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
+    "admin.organizations.uriLabel": "URI",
+    "admin.organizations.uri.label": "URI",
+    "admin.organizations.uri.description": "De URI is een unieke en leesbare code voor deze vereniging, bestaande uit enkel kleine letters en koppeltekens. Deze wordt in de URL-balk van de browser gebruikt op enkele plaatsen, maar is anders niet zichtbaar.",
+    "admin.organizations.errors.nameRequired": "Vul de naam van de vereniging in"
 }

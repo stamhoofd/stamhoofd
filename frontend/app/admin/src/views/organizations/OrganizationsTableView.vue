@@ -17,16 +17,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
-import { Column, ComponentExposed, ModernTableView, TableAction, organizationsUIFilterBuilders, useContext, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
-import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, OrganizationTag, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { Ref, computed, ref } from "vue";
-import OrganizationView from "./OrganizationView.vue";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
+import { Column, ComponentExposed, ModernTableView, TableAction, Toast, organizationsUIFilterBuilders, useAuth, useContext, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { I18nController, useTranslate } from "@stamhoofd/frontend-i18n";
+import { useRequestOwner } from "@stamhoofd/networking";
+import { Address, CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, OrganizationTag, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { Ref, computed, ref } from "vue";
+import EditOrganizationView from "./EditOrganizationView.vue";
+import OrganizationView from "./OrganizationView.vue";
 
 type ObjectType = Organization;
 const $t = useTranslate();
+const owner = useRequestOwner();
 
 const props = withDefaults(
     defineProps<{
@@ -47,6 +50,7 @@ const title = computed(() => {
 const context = useContext();
 const present = usePresent();
 const platform = usePlatform();
+const auth = useAuth()
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const configurationId = computed(() => {
     return 'organizations'
@@ -179,17 +183,52 @@ async function showOrganization(organization: Organization) {
     });
 }
 
-const actions: TableAction<Organization>[] = [
-    new TableAction({
-        name: $t('admin.organizations.new'),
-        icon: "add",
-        priority: 0,
-        groupIndex: 1,
-        needsSelection: false,
-        enabled: true,
-        handler: async () => {
-            // todo
-        }
-    }),
-]
+const actions: TableAction<Organization>[] = []
+
+if (auth.hasPlatformFullAccess()) {
+    actions.push(
+        new TableAction({
+            name: $t('admin.organizations.new'),
+            icon: "add",
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            enabled: true,
+            handler: async () => {
+                const organization = Organization.create({
+                    address: Address.createDefault(I18nController.shared.country)
+                });
+
+                const component = new ComponentWithProperties(EditOrganizationView, {
+                    isNew: true,
+                    organization,
+                    saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
+                        const put = organization.patch(patch);
+
+                        const arr: PatchableArrayAutoEncoder<Organization> = new PatchableArray();
+                        arr.addPut(put);
+                    
+                        await context.value.authenticatedServer.request({
+                            method: 'PATCH',
+                            path: '/admin/organizations',
+                            body: arr,
+                            shouldRetry: false,
+                            owner,
+                            decoder: new ArrayDecoder(Organization as Decoder<Organization>)
+                        });
+                        new Toast($t('admin.organizations.createSucceeded'), "success green").show()
+
+                        // Reload table
+                        tableObjectFetcher.reset(true, true)
+                    }
+                })
+
+                await present({
+                    modalDisplayStyle: 'popup',
+                    components: [component]
+                })
+            }
+        })
+    )
+}
 </script>

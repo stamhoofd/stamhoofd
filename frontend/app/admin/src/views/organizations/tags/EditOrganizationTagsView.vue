@@ -29,12 +29,14 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from 
 import { OrganizationTag, Platform, PlatformConfig } from '@stamhoofd/structures';
 import TagRow from './components/TagRow.vue';
 import { usePlatformManager } from '@stamhoofd/networking';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
+const $t = useTranslate();
 
 const originalTags = computed(() => platform.value.config.tags)
 const {patched: tags, patch, addArrayPatch, hasChanges} = usePatchArray(originalTags)
@@ -113,7 +115,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
 }
 
 defineExpose({

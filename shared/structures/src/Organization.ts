@@ -18,7 +18,7 @@ export class Organization extends AutoEncoder {
      * Name of the organization you are creating
      */
     @field({ decoder: StringDecoder })
-    name: string;
+    name = ""
 
     @field({ decoder: StringDecoder, nullable: true, version: 3, upgrade: () => null })
     website: string | null = null;
@@ -27,7 +27,7 @@ export class Organization extends AutoEncoder {
     registerDomain: string | null = null;
 
     @field({ decoder: StringDecoder, version: 3, upgrade: () => "" })
-    uri: string;
+    uri = ""
 
     @field({ decoder: OrganizationMetaData, defaultValue: () => OrganizationMetaData.create({}) })
     meta: OrganizationMetaData;

@@ -6,6 +6,7 @@ import { OrganizationMetaData, Organization as OrganizationStruct } from "@stamh
 
 import { Context } from '../../../helpers/Context';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -78,6 +79,83 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             await organization.save();
+            result.push(organization);
+        }
+
+        for (const {put} of request.body.getPuts()) {
+            if (put.name.length < 4) {
+                if (put.name.length == 0) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Should not be empty",
+                        human: "Je bent de naam van je organisatie vergeten in te vullen",
+                        field: "organization.name"
+                    })
+                }
+    
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Field is too short",
+                    human: "Kijk de naam van je organisatie na, deze is te kort. Vul eventueel aan met de gemeente.",
+                    field: "organization.name"
+                })
+            }
+    
+            const uri = put.uri || Formatter.slug(put.name);
+    
+            if (uri.length > 100) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Field is too long",
+                    human: "De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
+                    field: "organization.name"
+                })
+            }
+            const uriExists = await Organization.getByURI(uri);
+    
+            if (uriExists) {
+                throw new SimpleError({
+                    code: "name_taken",
+                    message: "An organization with the same name already exists",
+                    human: "Er bestaat al een vereniging met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze vereniging niet al bestaat.",
+                    field: "name",
+                });
+            }
+
+            const alreadyExists = await Organization.getByURI(Formatter.slug(put.name));
+    
+            if (alreadyExists) {
+                throw new SimpleError({
+                    code: "name_taken",
+                    message: "An organization with the same name already exists",
+                    human: "Er bestaat al een vereniging met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
+                    field: "name",
+                });
+            }
+
+            const organization = new Organization();
+            organization.id = put.id;
+            organization.name = put.name;
+
+            organization.uri = put.uri;
+            organization.meta = put.meta
+            organization.address = put.address
+
+            if (put.privateMeta) {
+                organization.privateMeta = put.privateMeta
+            }
+
+            try {
+                await organization.save();
+            } catch (e) {
+                console.error(e);
+                throw new SimpleError({
+                    code: "creating_organization",
+                    message: "Something went wrong while creating the organization. Please try again later or contact us.",
+                    statusCode: 500
+                });
+            }
+
             result.push(organization);
         }
 

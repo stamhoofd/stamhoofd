@@ -20,13 +20,17 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
-@Component
+@Component({
+    emits: {
+        'update:modelValue': (_value: string) => true
+    }
+})
 export default class PrefixInput extends Vue {
     valid = true;
 
     /** Price in cents */
     @Prop({ default: "" })
-        value!: string
+        modelValue!: string
 
     @Prop({ default: "" })
         prefix!: string
@@ -53,7 +57,7 @@ export default class PrefixInput extends Vue {
     }
 
     get internalValue() {
-        return this.value
+        return this.modelValue
     }
 
     set internalValue(val: string) {
@@ -66,7 +70,7 @@ export default class PrefixInput extends Vue {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
-.prefix-input {
+.input.prefix-input {
     position: relative;
     display: grid;
     grid-template-columns: auto 1fr;

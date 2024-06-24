@@ -24,7 +24,7 @@
             </div>
 
             <div>
-                <UrlInput v-model="website" :title="$t('shared.inputs.url.labelOptional')" :placeholder="$t('dashboard.inputs.website.placeholder')" :validator="validator" :required="false" />
+                <UrlInput v-model="website" :title="$t('shared.website.optional')" :placeholder="$t('dashboard.inputs.website.placeholder')" :validator="validator" :required="false" />
 
                 <p class="style-description-small">
                     De link naar de website van jouw vereniging.
