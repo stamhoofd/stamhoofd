@@ -55,32 +55,7 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
-
-                <STListItem v-for="offset in limitedCycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/package-members.svg">
-                    </template>
-                    <h2 v-if="offset === 1" class="style-title-list">
-                        Vorige inschrijvingsperiode
-                    </h2>
-                    <h2 v-else class="style-title-list">
-                        {{ offset }} inschrijvingsperiodes geleden
-                    </h2>
-
-                    <p class="style-description">
-                        {{ group.getTimeRangeOffset(offset) }}
-                    </p>
-
-                    <template #right>
-                        <span v-if="group.getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
             </STList>
-
-            <button v-if="hasMoreCycleOffsets && !showAllCycleOffsets" type="button" class="button text" @click="doShowAllCycleOffsets">
-                <span>Toon vorige periodes</span>
-            </button>
 
             <template v-if="hasFullPermissions">
                 <hr>
