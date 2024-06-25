@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, MemberWithRegistrations, Organization, Payment, User, Webshop } from "@stamhoofd/models";
-import { User as UserStruct, Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { Group, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, User, Webshop } from "@stamhoofd/models";
+import { MemberResponsibilityRecord as MemberResponsibilityRecordStruct, User as UserStruct, Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 
@@ -130,6 +130,13 @@ export class AuthenticatedStructures {
             memberBlobs.push(
                 await Context.auth.filterMemberData(member, blob)
             )
+        }
+
+        // Load responsibilities
+        const responsibilities = await MemberResponsibilityRecord.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } })
+
+        for (const blob of memberBlobs) {
+            blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => MemberResponsibilityRecordStruct.create(r))
         }
 
         return MembersBlob.create({

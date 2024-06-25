@@ -51,7 +51,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center">
+                <STListItem :selectable="true" class="left-center"  @click="$navigate(Routes.Responsibilities)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
                     </template>
@@ -93,11 +93,13 @@ import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@sta
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePlatformManager } from '@stamhoofd/networking';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
+import EditMemberResponsibilitiesView from './responsibilities/EditMemberResponsibilitiesView.vue';
 
 enum Routes {
     Admins = 'beheerders',
     Records = 'records',
-    DefaultAgeGroups = 'standaard-leeftijdsgroepen'
+    DefaultAgeGroups = 'standaard-leeftijdsgroepen',
+    Responsibilities = 'functies'
 }
 
 const platform = usePlatform()
@@ -130,6 +132,11 @@ defineRoutes([
         url: Routes.DefaultAgeGroups,
         present: 'popup',
         component: EditDefaultAgeGroupsView as ComponentOptions,
+    },
+    {
+        url: Routes.Responsibilities,
+        present: 'popup',
+        component: EditMemberResponsibilitiesView as ComponentOptions,
     },
 ])
 const $navigate = useNavigate()

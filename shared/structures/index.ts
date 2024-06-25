@@ -39,6 +39,8 @@ export * from "./src/Token"
 export * from "./src/UmbrellaOrganization"
 export * from "./src/User"
 export * from "./src/DefaultAgeGroup"
+export * from "./src/MemberResponsibility"
+export * from "./src/members/MemberResponsibilityRecord"
 
 // UserPermissions
 export * from "./src/UserPermissions"

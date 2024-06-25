@@ -73,6 +73,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch, AgeInput } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { DefaultAgeGroup } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -88,6 +89,7 @@ const props = defineProps<{
 }>();
 const title = computed(() => props.isNew ? 'Nieuwe standaard leeftijdsgroep' : 'Standaard leeftijdsgroep bewerken');
 const pop = usePop();
+const $t = useTranslate();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.group);
 let startYear = new Date().getFullYear();
@@ -194,9 +196,8 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
 }
-
 
 defineExpose({
     shouldNavigateAway

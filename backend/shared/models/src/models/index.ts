@@ -43,3 +43,4 @@ export * from "./DocumentTemplate"
 export * from "./WebshopDiscountCode"
 
 export * from "./Platform"
+export * from "./MemberResponsibilityRecord"

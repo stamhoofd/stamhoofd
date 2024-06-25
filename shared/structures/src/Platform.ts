@@ -5,6 +5,7 @@ import { PermissionRoleDetailed } from "./Permissions";
 import { User } from "./User";
 import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
+import { MemberResponsibility } from "./MemberResponsibility";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -31,6 +32,9 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(DefaultAgeGroup), version: 261 })
     defaultAgeGroups: DefaultAgeGroup[] = []
+
+    @field({ decoder: new ArrayDecoder(MemberResponsibility), version: 262 })
+    responsibilities: MemberResponsibility[] = []
 }
 
 export class Platform extends AutoEncoder {
