@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, Platform, Registration, User } from '@stamhoofd/models';
 import { BalanceItemStatus, MemberWithRegistrationsBlob, MembersBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -363,6 +363,100 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 // We need to update this group occupancy because we moved one member away from it
                 updateGroups.set(group.id, group)
+            }
+
+            // Update responsibilities
+            for (const patchResponsibility of patch.responsibilities.getPatches()) {
+                if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden aan te passen")
+                }
+
+                const responsibilityRecord = await MemberResponsibilityRecord.getByID(patchResponsibility.id)
+                if (!responsibilityRecord || responsibilityRecord.memberId != member.id || (organization && responsibilityRecord.organizationId !== organization.id)) {
+                    throw new SimpleError({
+                        code: "permission_denied",
+                        message: "You don't have permissions to access this endpoint",
+                        human: "Je hebt geen toegang om deze functie te wijzigen"
+                    })
+                }
+
+                const platform = await Platform.getShared()
+                const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId)
+
+                if (responsibility && !responsibility.assignableByOrganizations && !Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om deze functie aan te passen")
+                }
+                
+                // Allow patching begin and end date
+                if (patchResponsibility.endDate !== undefined) {
+                    if (responsibilityRecord.endDate) {
+                        if (!Context.auth.hasPlatformFullAccess()) {
+                            throw Context.auth.error("Je hebt niet voldoende rechten om reeds beëindigde functies aan te passen")
+                        }
+                    }
+                    responsibilityRecord.endDate = patchResponsibility.endDate
+                }
+
+                if (patchResponsibility.startDate !== undefined) {
+
+                    if (patchResponsibility.startDate > new Date()) {
+                        throw Context.auth.error("Je kan de startdatum van een functie niet in de toekomst zetten")
+                    }
+                    const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24))
+
+                    if (daysDiff > 60 && !Context.auth.hasPlatformFullAccess()) {
+                        throw Context.auth.error("Je kan de startdatum van een functie niet zoveel verplaatsen")
+                    }
+                    responsibilityRecord.startDate = patchResponsibility.startDate
+                }
+
+                await responsibilityRecord.save()
+            }
+
+            // Update responsibilities
+            for (const {put} of patch.responsibilities.getPuts()) {
+                if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden aan te passen")
+                }
+
+                const platform = await Platform.getShared()
+                const responsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId)
+
+                if (!responsibility || (!responsibility.assignableByOrganizations && !Context.auth.hasPlatformFullAccess())) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om deze functie toe te kennen")
+                }
+
+                const model = new MemberResponsibilityRecord()
+                model.memberId = member.id
+                model.responsibilityId = responsibility.id
+
+                if (responsibility.assignableByOrganizations) {
+                    if (organization) {
+                        model.organizationId = organization.id
+                    } else {
+                        if (!put.organizationId) {
+                            if (!Context.auth.hasPlatformFullAccess()) {
+                                throw Context.auth.error("Je hebt niet voldoende rechten om deze functie toe te kennen")
+                            }
+                        } else if (!await Context.auth.hasFullAccess(put.organizationId)) {
+                            throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden toe te kennen voor deze vereniging")
+                        }
+                        model.organizationId = put.organizationId
+                    }
+                } else {
+                    model.organizationId = null
+                }
+                
+                // Allow patching begin and end date
+                model.endDate = put.endDate
+
+                if (put.startDate > new Date()) {
+                    throw Context.auth.error("Je kan de startdatum van een functie niet in de toekomst zetten")
+                }
+
+                model.startDate = put.startDate
+
+                await model.save()
             }
 
             // Link users

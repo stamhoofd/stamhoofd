@@ -182,5 +182,9 @@
     "shared.save.shouldNavigateAway.title": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
     "shared.website": "Website",
     "shared.website.description": "De link naar de website van jouw vereniging.",
-    "shared.website.optional": "Website (optioneel)"
+    "shared.website.optional": "Website (optioneel)",
+    "shared.searchMemberOrganizations.empty": "Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.",
+    "shared.searchMemberOrganizations.smallTitle": "Zoek een groep",
+    "shared.searchMemberOrganizations.defaultTitle": "Zoek een groep waar je {firstName} wilt inschrijven",
+    "shared.responsibilities.searchOrganizationTitle": "Zoek een vereniging"
 }

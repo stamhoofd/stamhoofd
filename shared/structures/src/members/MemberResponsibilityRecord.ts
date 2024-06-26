@@ -8,8 +8,8 @@ export class MemberResponsibilityRecord extends AutoEncoder {
     @field({ decoder: StringDecoder })
     memberId: string;
 
-    @field({ decoder: StringDecoder })
-    organizationId: string;
+    @field({ decoder: StringDecoder, nullable: true })
+    organizationId: string|null = null;
 
     @field({ decoder: StringDecoder })
     responsibilityId: string;

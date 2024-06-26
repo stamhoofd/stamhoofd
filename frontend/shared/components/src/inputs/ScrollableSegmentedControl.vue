@@ -6,7 +6,7 @@
             ref="elements"
             class="button item"
             type="button"
-            :class="{ selected: item == modelValue }"
+            :class="{ selected: item === modelValue }"
             @click="selectItem(index)"
         >
             <span>{{ labels ? labels[index] : item }}</span>
@@ -36,9 +36,6 @@ const rootElement = ref<HTMLElement | null>(null);
 
 const widths = ref<number[]>([]);
 const seekerXOffset = computed(() => {
-    if (modelValue.value == null) {
-        return 0;
-    }
     const index = props.items.indexOf(modelValue.value);
     if (index === -1) {
         return 0;
@@ -46,9 +43,6 @@ const seekerXOffset = computed(() => {
     return widths.value.slice(0, index).reduce((a, b) => a + b, 0) + (30 * index);
 });
 const seekerWidth = computed(() => {
-    if (modelValue.value == null) {
-        return 0;
-    }
     return widths.value[props.items.indexOf(modelValue.value)] ?? 0;
 });
 

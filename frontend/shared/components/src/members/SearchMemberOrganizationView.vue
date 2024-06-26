@@ -1,9 +1,9 @@
 <template>
     <div class="st-view search-member-organization-view">
-        <STNavigationBar title="Zoek een groep" />
+        <STNavigationBar :title="$t('shared.searchMemberOrganizations.smallTitle')" />
 
         <main>
-            <h1>Zoek een groep waar je {{ member.patchedMember.firstName }} wilt inschrijven</h1>
+            <h1>{{ title || defaultTitle }}</h1>
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
                 <input ref="input" v-model="query" :autofocus="true" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
@@ -24,7 +24,7 @@
                 </STListItem>
             </STList>
             <p v-if="!loadingResults && results.length == 0 && query" class="info-box">
-                Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.
+                {{ $t('shared.searchMemberOrganizations.empty') }}
             </p>
         </main>
     </div>
@@ -35,16 +35,22 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { PopOptions, usePop } from '@simonbackx/vue-app-navigation';
 import { OrganizationAvatar, Spinner,Toast } from '@stamhoofd/components';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization, PlatformMember } from '@stamhoofd/structures';
 import {throttle} from "@stamhoofd/utility"
-import { Ref, ref, watch } from 'vue';
+import { Ref, computed, ref, watch } from 'vue';
 
-defineProps<{
-    member: PlatformMember;
-    selectOrganization: (organization: Organization, pop: (options?: PopOptions) => Promise<void>|undefined) => Promise<void>|void;
-}>();
+const props = withDefaults(
+    defineProps<{
+        title?: string
+        member: PlatformMember;
+        selectOrganization: (organization: Organization, pop: (options?: PopOptions) => Promise<void>|undefined) => Promise<void>|void;
+    }>(), {
+        title: ''
+    }
+);
+
 
 const loadingResults = ref(false)
 const query = ref("");
@@ -52,6 +58,8 @@ const results = ref([]) as Ref<Organization[]>;
 const owner = useRequestOwner()
 const defaultCountry = I18nController.shared.country
 const pop = usePop()
+const $t = useTranslate();
+const defaultTitle = computed(() => $t('shared.searchMemberOrganizations.defaultTitle', {firstName: props.member.patchedMember.firstName}))
 
 let lastQuery = '';
 let counter = 0;

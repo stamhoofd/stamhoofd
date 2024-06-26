@@ -69,10 +69,8 @@ export class I18n {
             return text
         }
         for (const key in replace) {
-            if ("key" in replace) {
-                const value = replace[key];
-                text = text.replace(new RegExp("{"+this.escapeRegex(key)+"}", "g"), value)
-            }
+            const value = replace[key];
+            text = text.replace(new RegExp("{"+this.escapeRegex(key)+"}", "g"), value)
         }
         return text
     }

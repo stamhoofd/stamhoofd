@@ -607,7 +607,6 @@
         user-select: contain;
         position: relative;
         z-index: 1;
-        cursor: default;
 
         transition: color 0.2s;
     }
@@ -623,7 +622,6 @@
         background: $color-primary-background;
         z-index: -1;
         opacity: 0;
-        transition: opacity 0.2s;
     }
 
 
@@ -657,7 +655,7 @@
         }
     }
 
-    dd.copied {
+    dd.copied, dd.button:active {
         color: $color-primary;
 
         &:before {
@@ -678,6 +676,14 @@
         grid-column: 1 / span 2;
         margin-top: -5px;
         font-size: 15px;
+    }
+
+    dd.with-icons {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 15px;
     }
 }
 

@@ -12,8 +12,8 @@ export class MemberResponsibilityRecord extends Model {
     })
     id!: string;
 
-    @column({ type: "string" })
-    organizationId: string;
+    @column({ type: "string", nullable: true })
+    organizationId: string|null = null;
 
     @column({ type: "string" })
     memberId: string

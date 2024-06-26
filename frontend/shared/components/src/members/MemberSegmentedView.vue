@@ -25,13 +25,14 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, useAuth, useKeyUpDown } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, useAuth, useKeyUpDown } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
 import MemberStepView from './MemberStepView.vue';
 import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
 import MemberPlatformConnectionTab from './tabs/MemberPlatformConnectionTab.vue';
+import EditMemberResponsibilitiesBox from './components/edit/EditMemberResponsibilitiesBox.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -156,8 +157,44 @@ async function editMember() {
     })
 }
 
-function showContextMenu() {
-    // todo
+async function editMemberResponsibilities() {
+    await present({
+        components: [
+            new ComponentWithProperties(MemberStepView, {
+                member: props.member,
+                title: 'Functies van ' + props.member.member.firstName,
+                component: EditMemberResponsibilitiesBox,
+                saveHandler: async ({dismiss}: NavigationActions) => {
+                    await dismiss({force: true});
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+async function showContextMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Bewerken',
+                icon: 'edit',
+                async action() {
+                    await editMember()
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Functies bewerken',
+                icon: 'star',
+                async action() {
+                    await editMemberResponsibilities()
+                },
+            })
+        ]
+    ])
+
+    await menu.show({
+        clickEvent: event
+    })
 }
 
 </script>

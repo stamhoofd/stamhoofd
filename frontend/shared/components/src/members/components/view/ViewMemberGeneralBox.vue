@@ -2,24 +2,10 @@
     <div class="hover-box container">
         <hr>
         <dl class="details-grid hover">
-            <template v-if="!member.isNew && app === 'admin'">
-                <dt>ID</dt>
+            <template v-if="member.patchedMember.details.name">
+                <dt>Naam</dt>
                 <dd v-copyable>
-                    {{ member.patchedMember.id }}
-                </dd>
-            </template>
-
-            <template v-if="member.patchedMember.details.firstName">
-                <dt>Voornaam</dt>
-                <dd v-copyable>
-                    {{ member.patchedMember.details.firstName }}
-                </dd>
-            </template>
-
-            <template v-if="member.patchedMember.details.lastName">
-                <dt>Achternaam</dt>
-                <dd v-copyable>
-                    {{ member.patchedMember.details.lastName }}
+                    {{ member.patchedMember.details.name }}
                 </dd>
             </template>
 
@@ -34,6 +20,15 @@
                 <dt>Verjaardag</dt>
                 <dd v-copyable>
                     {{ member.patchedMember.details.birthDayFormatted }} ({{ member.patchedMember.details.age }} jaar)
+                </dd>
+            </template>
+
+            <template v-if="platformHasResponsibilities">
+                <dt>Functies</dt>
+                <dd class="with-icons button" @click="editResponsibilities">
+                    {{ responsibilitiesText }}
+
+                    <span class="icon edit gray" />
                 </dd>
             </template>
 
@@ -67,18 +62,35 @@
 
 <script setup lang="ts">
 import { PlatformMember } from '@stamhoofd/structures';
-import { useCountry } from '../../../hooks';
-import { useAppContext } from '../../../context/appContext';
+import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
+import { useCountry, useOrganization, usePlatform } from '../../../hooks';
 
 defineOptions({
     inheritAttrs: false
 })
 
-defineProps<{
+const props = defineProps<{
     member: PlatformMember
 }>()
 
-const app = useAppContext();
 const currentCountry = useCountry();
+const platform = usePlatform()
+const organization = useOrganization()
+const platformHasResponsibilities = computed(() => platform.value.config.responsibilities.length > 0 && (props.member.patchedMember.details.defaultAge >= 16 || responsibilities.value.length))
+const responsibilities = computed(() => {
+    return props.member.patchedMember.responsibilities.filter(r => r.endDate === null && (organization.value === null || r.organizationId === organization.value.id)).map(r => platform.value.config.responsibilities.find(rr => rr.id === r.responsibilityId)?.name ?? 'Onbekend');
+})
+
+const responsibilitiesText = computed(() => {
+    if (responsibilities.value.length === 0) {
+        return 'Geen'
+    }
+    return Formatter.joinLast(responsibilities.value, ', ', ' en ')
+})
+
+function editResponsibilities() {
+    // todo
+}
 
 </script>
