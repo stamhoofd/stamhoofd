@@ -23,7 +23,7 @@ import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernT
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Ref, computed, reactive, ref } from "vue";
+import { Ref, computed, markRaw, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
 import RegisterMemberView from "./RegisterMemberView.vue";
 
@@ -371,7 +371,7 @@ const actions: TableAction<PlatformMember>[] = [
                 root: new ComponentWithProperties(MemberStepView, {
                     title: 'Nieuw lid',
                     member,
-                    component: EditMemberGeneralBox,
+                    component: markRaw(EditMemberGeneralBox),
                     doSave: false,
                     saveHandler: async (navigate: NavigationActions) => {
                         await navigate.show({

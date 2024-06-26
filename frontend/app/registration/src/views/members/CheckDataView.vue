@@ -114,7 +114,7 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditMemberAllBox, EditParentView, MemberStepView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, markRaw } from 'vue';
 import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
@@ -131,7 +131,7 @@ async function editMember(member: PlatformMember) {
             new ComponentWithProperties(MemberStepView, {
                 member,
                 title: 'Gegevens nakijken',
-                component: EditMemberAllBox
+                component: markRaw(EditMemberAllBox)
             })
         ],
         modalDisplayStyle: "popup"

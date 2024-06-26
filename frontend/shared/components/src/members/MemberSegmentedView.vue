@@ -148,7 +148,7 @@ async function editMember() {
             new ComponentWithProperties(MemberStepView, {
                 member: props.member,
                 title: props.member.member.firstName + ' bewerken',
-                component: EditMemberAllBox,
+                component: markRaw(EditMemberAllBox),
                 saveHandler: async ({dismiss}: NavigationActions) => {
                     await dismiss({force: true});
                 }
@@ -164,7 +164,7 @@ async function editMemberResponsibilities() {
             new ComponentWithProperties(MemberStepView, {
                 member: props.member,
                 title: 'Functies van ' + props.member.member.firstName,
-                component: EditMemberResponsibilitiesBox,
+                component: markRaw(EditMemberResponsibilitiesBox),
                 saveHandler: async ({dismiss}: NavigationActions) => {
                     await dismiss({force: true});
                 }

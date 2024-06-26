@@ -34,7 +34,7 @@
 import { ComponentWithProperties, PopOptions, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, usePlatformFamilyManager, useUninheritedPermissions } from '@stamhoofd/components';
 import { Group, GroupCategoryTree, Organization, PlatformMember, RegisterCart, RegisterItem, Registration } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import { computed, markRaw, Ref, ref } from 'vue';
 
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import GroupView from './GroupView.vue';
@@ -127,7 +127,7 @@ async function registerAsAdmin(group: Group) {
                             new ComponentWithProperties(MemberStepView, {
                                 member: props.member,
                                 title: 'Gegevens aanvullen',
-                                component: EditMemberAllBox
+                                component: markRaw(EditMemberAllBox)
                             })
                         ],
                         modalDisplayStyle: "popup"
