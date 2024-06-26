@@ -314,13 +314,10 @@ import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoE
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, PriceBreakdownBox, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { PaymentView, EditPaymentView, CartItemRow, PriceBreakdownBox, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { AccessRight, BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-
-import EditPaymentView from "../../member/EditPaymentView.vue";
-import PaymentView from "../../payments/PaymentView.vue";
 import { WebshopManager } from "../WebshopManager";
 import { OrderActionBuilder } from "./OrderActionBuilder";
 import OrderTicketsView from "./OrderTicketsView.vue";
@@ -410,7 +407,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     get warnings(): RecordWarning[] {
         const warnings: RecordWarning[] = []
 
-        for (const answer of this.recordAnswers) {
+        for (const answer of this.recordAnswers.values()) {
             warnings.push(...answer.getWarnings())
         }
 
@@ -735,7 +732,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategoriesForAnswers(
             this.webshop.meta.recordCategories,
-            this.order.data.recordAnswers
+            [...this.order.data.recordAnswers.values()]
         )
     }
 

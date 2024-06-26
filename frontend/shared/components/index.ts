@@ -17,6 +17,9 @@ export * from "./src/ViewportHelper"
 // Members
 export * from "./src/members"
 
+// Payments
+export * from "./src/payments"
+
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"
 export { default as BackButton } from "./src/navigation/BackButton.vue"

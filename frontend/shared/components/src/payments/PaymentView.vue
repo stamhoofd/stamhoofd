@@ -256,14 +256,11 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { BalanceItemDetailed, calculateVATPercentage, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ErrorBox, GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Spinner, Toast } from "@stamhoofd/components";
+import { BalanceItemDetailed, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, calculateVATPercentage } from "@stamhoofd/structures";
 
-import EditBalanceItemView from "../member/balance/EditBalanceItemView.vue";
-
+import EditBalanceItemView from "./EditBalanceItemView.vue";
 
 @Component({
     components: {
@@ -272,10 +269,6 @@ import EditBalanceItemView from "../member/balance/EditBalanceItemView.vue";
         STListItem,
         STErrorsDefault,
         Spinner
-    },
-    directives: {
-        Copyable: CopyableDirective,
-        Tooltip: TooltipDirective
     }
 })
 export default class PaymentView extends Mixins(NavigationMixin) {

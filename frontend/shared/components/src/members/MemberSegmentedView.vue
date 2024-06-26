@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, useAuth, useKeyUpDown } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, useAuth, useKeyUpDown, useOrganization } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
@@ -54,6 +54,7 @@ const props = withDefaults(
 const auth = useAuth();
 const show = useShow();
 const present = usePresent();
+const organization = useOrganization();
 
 const tabs = computed(() => {
     const base: {name: string, component: unknown}[] = [{
@@ -68,7 +69,7 @@ const tabs = computed(() => {
         });
     }
 
-    if (auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
+    if (organization.value && auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         base.push({
             name: 'Rekening',
             component: markRaw(MemberPaymentsTab)

@@ -479,12 +479,8 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
         return RecordCategory.flattenCategoriesForAnswers(
             this.webshop.meta.recordCategories,
-            this.order.data.recordAnswers
+            [...this.order.data.recordAnswers.values()]
         )
-    }
-
-    get recordAnswers() {
-        return this.order?.data.recordAnswers ?? []
     }
 
     formatFreePrice(price: number) {

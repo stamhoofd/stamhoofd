@@ -333,7 +333,7 @@ export class BalanceItem extends Model {
         })
     }
 
-    static async balanceItemsForUsersAndMembers(userIds: string[], memberIds: string[]): Promise<BalanceItem[]> {
+    static async balanceItemsForUsersAndMembers(organizationId: string|null, userIds: string[], memberIds: string[]): Promise<BalanceItem[]> {
         if (memberIds.length == 0 && userIds.length == 0) {
             return []
         }
@@ -362,8 +362,15 @@ export class BalanceItem extends Model {
                 params.push(userIds);
             }
         }
+
+        const requiredWhere: string[] = [];
+
+        if (organizationId) {
+            requiredWhere.push('organizationId = ?')
+            params.push(organizationId);
+        }
         
-        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE (${where.join(" OR ")}) AND ${BalanceItem.table}.status != ?`;
+        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE (${where.join(" OR ")}) ${requiredWhere.length ? (' AND ' + requiredWhere.join(' AND ')) : ''} AND ${BalanceItem.table}.status != ?`;
         params.push(BalanceItemStatus.Hidden);
         
         const [rows] = await Database.select(query, params);

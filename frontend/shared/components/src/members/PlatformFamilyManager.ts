@@ -35,16 +35,21 @@ export class PlatformFamilyManager {
         Request.cancelAll(this)
     }
 
-    async loadFamilyMembers(member: PlatformMember, options?: {shouldRetry?: boolean}) {
+    async loadFamilyBlob(memberId: string, options?: {shouldRetry?: boolean}) {
         const response = await this.context.authenticatedServer.request({
             method: "GET",
-            path: `/organization/members/${member.id}/family`,
+            path: `/organization/members/${memberId}/family`,
             decoder: MembersBlob as Decoder<MembersBlob>,
             owner: this,
             shouldRetry: options?.shouldRetry ?? false
         });
 
-        member.family.insertFromBlob(response.data)
+        return response.data
+    }
+
+    async loadFamilyMembers(member: PlatformMember, options?: {shouldRetry?: boolean}) {
+        const response = await this.loadFamilyBlob(member.id, options)
+        member.family.insertFromBlob(response)
     }
 
     async save(members: PlatformMember[], shouldRetry: boolean = false) {

@@ -24,13 +24,13 @@ export class GetUserBalanceEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
-        await Context.setUserOrganizationScope();
+        const organization = await Context.setUserOrganizationScope();
         const {user} = await Context.authenticate()
 
         const members = await Member.getMembersWithRegistrationForUser(user)
 
         // Get all balance items for this member or users
-        const balanceItems = await BalanceItem.balanceItemsForUsersAndMembers([user.id], members.map(m => m.id))
+        const balanceItems = await BalanceItem.balanceItemsForUsersAndMembers(organization?.id ?? null, [user.id], members.map(m => m.id))
 
         return new Response(
             await BalanceItem.getMemberStructure(balanceItems)

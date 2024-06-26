@@ -546,7 +546,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (await this.canAccessMember(member, PermissionLevel.Write)) {
+        if (await this.hasFinancialMemberAccess(member, PermissionLevel.Write)) {
             return true;
         }
 
@@ -790,6 +790,10 @@ export class AdminPermissionChecker {
 
         if (isUserManager) {
             return true;
+        }
+
+        if (!await this.canAccessMember(member, level)) {
+            return false;
         }
 
         // First list all organizations this member is part of

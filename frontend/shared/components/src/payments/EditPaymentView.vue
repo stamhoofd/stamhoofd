@@ -37,7 +37,9 @@
                     </template>
                 </p>
 
-                <template #right><PriceInput v-if="isItemSelected(item)" :value="getItemPrice(item)" placeholder="Geen" :min="null" @input="setItemPrice(item, $event)" /></template>
+                <template #right>
+                    <PriceInput v-if="isItemSelected(item)" :modelValue="getItemPrice(item)" placeholder="0 euro" :min="null" @update:modelValue="setItemPrice(item, $event)" />
+                </template>
             </STListItem>
         </STList>
 
@@ -90,7 +92,7 @@
         </STInputBox>
 
         <p v-if="status !== 'Succeeded' && price >= 0" class="info-box">
-            We raden aan enkel betalingen aan te maken die je hebt ontvangen. <template v-if="familyManager">
+            We raden aan enkel betalingen aan te maken die je hebt ontvangen. <template v-if="family">
                 Een lid kan zelf namelijk ook altijd het openstaande bedrag betalen via het ledenportaal.
             </template>
         </p>
@@ -137,15 +139,23 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, Dropdown,ErrorBox, IBANInput,PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentStatusHelper, TransferSettings } from '@stamhoofd/structures';
-import { PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PlatformFamily, TransferSettings, Version } from '@stamhoofd/structures';
 
-import { FamilyManager } from '../../../classes/FamilyManager';
-
+import SaveView from "../navigation/SaveView.vue";
+import STInputBox from '../inputs/STInputBox.vue';
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import PriceInput from '../inputs/PriceInput.vue';
+import STListItem from '../layout/STListItem.vue';
+import STList from '../layout/STList.vue';
+import Checkbox from '../inputs/Checkbox.vue';
+import DateSelection from '../inputs/DateSelection.vue';
+import Dropdown from '../inputs/Dropdown.vue';
+import IBANInput from '../inputs/IBANInput.vue';
+import { Validator } from '../errors/Validator';
+import { ErrorBox } from '../errors/ErrorBox';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 @Component({
     components: {
@@ -175,7 +185,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         isNew!: boolean
 
     @Prop({default: null})
-        familyManager!: FamilyManager|null;
+        family!: PlatformFamily|null;
     
     patchPayment: AutoEncoderPatchType<PaymentGeneral> = PaymentGeneral.patch({})
 
@@ -193,12 +203,8 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         PaymentStatus.Failed,
     ];
 
-    getMember(id: string) {
-        return this.familyManager?.members.find(m => m.id == id)
-    }
-
     get multipleMembers() {
-        return (this.familyManager?.members.length ?? 0) > 1
+        return (this.family?.members.length ?? 0) > 1
     }
 
     get organization() {
@@ -367,14 +373,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         }
         this.recalculateTotal()
     }
-  
-    formatDate(date: Date) {
-        return Formatter.date(date, true)
-    }
 
-    formatPrice(price: number) {
-        return Formatter.price(price)
-    }
 
     getPaymentMethodName(method: PaymentMethod) {
         return PaymentMethodHelper.getNameCapitalized(method);

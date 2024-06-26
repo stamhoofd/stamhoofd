@@ -100,13 +100,11 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, SessionManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking';
 import { EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-
-import { MemberManager } from '../../../classes/MemberManager';
 
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import MissingFirstNameView from './MissingFirstNameView.vue';
@@ -946,16 +944,11 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
 
             // Check if all the parents + members already have access (and an account) when they should have access
-            this.$memberManager.updateMembersAccess(this.members).then(() => {
-                // We created some users, so we might check the button again
-                if (this.hasAllUsers && !this.didInsertButton) {
-                    this.insertSignInButton()
-                } else {
-                    console.info("doent insert button")
-                }
-            }).catch(e => {
-                Toast.fromError(e).show()
-            })
+            if (this.hasAllUsers && !this.didInsertButton) {
+                this.insertSignInButton()
+            } else {
+                console.info("doent insert button")
+            }
         } else if (this.orders.length > 0 && !this.didInsertButton) {
             this.insertOrderButton()
         }

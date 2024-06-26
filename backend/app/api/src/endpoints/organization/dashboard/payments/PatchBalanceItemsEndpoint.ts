@@ -77,7 +77,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (put.registration) {
                     const registration = await Registration.getByID(put.registration.id)
-                    if (!registration || registration.memberId !== model.memberId) {
+                    if (!registration || registration.memberId !== model.memberId || registration.organizationId !== organization.id) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Registration not found',
@@ -125,7 +125,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (patch.registration) {
                     const registration = await Registration.getByID(patch.registration.id)
-                    if (!registration || registration.memberId !== model.memberId) {
+                    if (!registration || registration.memberId !== model.memberId || registration.organizationId !== organization.id) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Registration not found',

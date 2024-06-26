@@ -13,14 +13,11 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Column, GlobalEventBus, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
-import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
-
-import PaymentView from "./PaymentView.vue";
+import { CenteredMessage, Column, GlobalEventBus, LoadComponent, PaymentView, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
+import { Filter, FilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { Formatter, Sorter } from "@stamhoofd/utility";
 
 @Component({
     components: {

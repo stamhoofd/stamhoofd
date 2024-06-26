@@ -614,7 +614,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategoriesForAnswers(
             this.webshop.meta.recordCategories,
-            this.order.data.recordAnswers
+            [...this.order.data.recordAnswers.values()]
         )
     }
 

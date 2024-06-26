@@ -244,12 +244,12 @@ if (app == 'admin') {
         })
     )
 
-    if (!props.waitingList && financialRead.value) {
+    if (!props.waitingList && financialRead.value && organization.value) {
         allColumns.push(
             new Column<ObjectType, number>({
                 name: "Openstaand saldo", 
                 allowSorting: false,
-                getValue: (v) => v.patchedMember.outstandingBalance,
+                getValue: (v) => v.patchedMember.outstandingBalanceFor(organization.value!.id),
                 format: (outstandingBalance) => {
                     if (outstandingBalance < 0) {
                         return Formatter.price(outstandingBalance)

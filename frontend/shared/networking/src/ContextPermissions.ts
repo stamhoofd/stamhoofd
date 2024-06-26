@@ -143,6 +143,18 @@ export class ContextPermissions {
         return false
     }
 
+    canAccessMemberPayments(member: PlatformMember, level: PermissionLevel) {
+        if (this.canManagePayments()) {
+            return true;
+        }
+
+        if (this.canAccessPlatformMember(member, level)) {
+            return true;
+        }
+
+        return false;
+    }
+
     hasSomePlatformAccess(): boolean {
         return !!this.platformPermissions
     }
