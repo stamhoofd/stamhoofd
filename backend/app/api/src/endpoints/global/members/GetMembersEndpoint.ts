@@ -132,9 +132,6 @@ const filterCompilers: SQLFilterDefinitions = {
         ).whereNot(
             SQL.column('groups', 'status'),
             GroupStatus.Archived
-        ).where(
-            SQL.column('registrations', 'cycle'),
-            SQL.column('groups', 'cycle'),
         ),
         registrationFilterCompilers
     ),
