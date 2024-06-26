@@ -212,22 +212,6 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-
-                    <STListItem v-if="isSGV" :selectable="true" class="left-center right-stack" @click="openSyncScoutsEnGidsen(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/sync-scouts.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Synchroniseer met de groepsadministratie
-                        </h2>
-                        <p class="style-description">
-                            Neem alle gegevens uit Stamhoofd over in de groepsadministratie
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
                 </STList>
             </template>
 
@@ -360,10 +344,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return this.$organization
-    }
-
-    get isSGV() {
-        return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
     }
 
     get isPlatform() {
@@ -585,19 +565,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         })
     }
 
-    openSyncScoutsEnGidsen(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: AsyncComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */ "./SGVGroepsadministratieView.vue"))
-                })
-            ]
-        })
-    }
-
     openBilling(animated = true) {
         this.present({
             animated,
@@ -729,11 +696,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             // Open mollie settings
             this.openPayment(false)
             return
-        }
-
-        if (this.$url.match('scouts-en-gidsen-vlaanderen') || this.$url.match('oauth/sgv')) {
-            this.openSyncScoutsEnGidsen(false)
-            return; // (don't clear)
         }
 
         if (this.$url.match('admins')) {
