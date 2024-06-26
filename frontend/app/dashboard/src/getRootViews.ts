@@ -7,7 +7,6 @@ import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, S
 import { Country, Organization } from '@stamhoofd/structures';
 import { computed, markRaw, reactive, ref } from 'vue';
 
-import { MemberManager } from './classes/MemberManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
@@ -307,7 +306,6 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
             $context: reactiveSession,
             $platformManager: platformManager,
             $organizationManager: new OrganizationManager(reactiveSession),
-            $memberManager: new MemberManager(reactiveSession),
             reactive_navigation_url: "beheerders/" + session.organization!.uri,
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),

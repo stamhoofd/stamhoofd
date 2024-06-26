@@ -92,34 +92,8 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     set enableMemberModule(enable: boolean) {
-        /*if (!enable || this.organization.groups.length > 0) {
-            this.organization.meta.modules.useMembers = enable
-            this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld").catch(e => console.error(e))
-        } else {
-            if (enable && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
-                // We have an automated flow for these organizations
-                this.present(new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(MembersStructureSetupView, {})
-                }).setDisplayStyle("popup"))
-            } else {
-                // Activate + show groups
-                this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld").then(() => {
-                    // Wait for the backend to fill in all the default categories and groups
-                    this.manageGroups(true)
-                }).catch(e => console.error(e))
-            }
-            
-        }*/
-
         if (enable && !this.enableMemberModule) {
-            if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
-                // We have an automated flow for these organizations
-                this.present(new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(MembersStructureSetupView, {})
-                }).setDisplayStyle("popup"))
-            } else {
-                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").catch(e => console.error(e))
-            }
+            this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").catch(e => console.error(e))
         } else {
             if (!enable && this.enableMemberModule) {
                 this.deactivate(STPackageType.TrialMembers, "Het testen van de ledenadministratie is uitgeschakeld").catch(console.error)

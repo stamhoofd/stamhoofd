@@ -196,22 +196,6 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-
-                    <STListItem v-if="false" :selectable="true" class="left-center right-stack" @click="importMembers(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Leden importeren
-                        </h2>
-                        <p class="style-description">
-                            Importeer leden vanaf een Excel of CSV bestand
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
                 </STList>
             </template>
 
@@ -639,24 +623,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(FreeContributionSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    importMembers(animated = true) {
-        if (this.organization.groups.length == 0) {
-            new CenteredMessage("Voeg eerst inschrijvingsgroepen toe", "Je kan leden pas importeren nadat je jouw inschrijvingsgroepen hebt ingesteld.", "error").addCloseButton().show()
-            return
-        }
-
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue"))
                 })
             ]
         })
