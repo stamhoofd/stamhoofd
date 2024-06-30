@@ -89,7 +89,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        const groups = await Group.getAll(organization.id)
+        const groups = await Group.getAll(organization.id, organization.periodId)
 
         const blob = await AuthenticatedStructures.membersBlob(members, true)
         const family = PlatformFamily.create(blob, {platform: await Platform.getSharedStruct(), contextOrganization: await organization.getStructure()})
@@ -143,9 +143,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        const registrationGroupRelation = new ManyToOneRelation(Group, "group")
-        registrationGroupRelation.foreignKey = "groupId"
-
         const registrationMemberRelation = new ManyToOneRelation(Member, "member")
         registrationMemberRelation.foreignKey = "memberId"
 
@@ -173,7 +170,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             for (const existingRegistration of existingRegistrations) {
                 registration = existingRegistration
                     .setRelation(registrationMemberRelation, member as Member)
-                    .setRelation(registrationGroupRelation, group)
+                    .setRelation(Registration.group, group)
 
                 if (existingRegistration.waitingList && item.waitingList) {
                     // already on waiting list, no need to repeat it
@@ -192,8 +189,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!registration) {
                 registration = new Registration()
                     .setRelation(registrationMemberRelation, member as Member)
-                    .setRelation(registrationGroupRelation, group)
+                    .setRelation(Registration.group, group)
                 registration.organizationId = organization.id
+                registration.periodId = group.periodId
             }
 
             registration.memberId = member.id

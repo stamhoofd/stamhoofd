@@ -15,6 +15,7 @@ describe("Test register cart price calculations", () => {
     test("Family discount best combination", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -44,6 +45,7 @@ describe("Test register cart price calculations", () => {
         // 
         const group2 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -72,6 +74,7 @@ describe("Test register cart price calculations", () => {
 
         const group3 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -171,6 +174,7 @@ describe("Test register cart price calculations", () => {
     test("Family discount 4 members", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -200,6 +204,7 @@ describe("Test register cart price calculations", () => {
         // 
         const group2 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -227,6 +232,7 @@ describe("Test register cart price calculations", () => {
 
         const group3 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -255,6 +261,7 @@ describe("Test register cart price calculations", () => {
 
         const group4 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -362,6 +369,7 @@ describe("Test register cart price calculations", () => {
     test("With existing registration", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -391,6 +399,7 @@ describe("Test register cart price calculations", () => {
         // 
         const group2 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -418,6 +427,7 @@ describe("Test register cart price calculations", () => {
 
         const group3 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -457,7 +467,7 @@ describe("Test register cart price calculations", () => {
             registrations: [
                 Registration.create({
                     organizationId: group1.organizationId,
-                    groupId: group1.id,
+                    group: group1,
                     cycle: group1.cycle,
                     registeredAt: new Date()
                 })
@@ -512,6 +522,7 @@ describe("Test register cart price calculations", () => {
     test("With two existing registration", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -541,6 +552,7 @@ describe("Test register cart price calculations", () => {
         // 
         const group2 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -568,6 +580,7 @@ describe("Test register cart price calculations", () => {
 
         const group3 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -607,7 +620,7 @@ describe("Test register cart price calculations", () => {
             registrations: [
                 Registration.create({
                     organizationId: group1.organizationId,
-                    groupId: group1.id,
+                    group: group1,
                     cycle: group1.cycle,
                     registeredAt: new Date()
                 })
@@ -619,7 +632,7 @@ describe("Test register cart price calculations", () => {
             registrations: [
                 Registration.create({
                     organizationId: group1.organizationId,
-                    groupId: group1.id,
+                    group: group1,
                     cycle: group1.cycle,
                     registeredAt: new Date()
                 })
@@ -664,6 +677,7 @@ describe("Test register cart price calculations", () => {
     test("With reduced price", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -762,6 +776,7 @@ describe("Test register cart price calculations", () => {
     test("Group only discounts", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -792,6 +807,7 @@ describe("Test register cart price calculations", () => {
         // 
         const group2 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -831,7 +847,7 @@ describe("Test register cart price calculations", () => {
             registrations: [
                 Registration.create({
                     organizationId: group2.organizationId,
-                    groupId: group2.id,
+                    group: group2,
                     cycle: group2.cycle,
                     registeredAt: new Date()
                 })
@@ -898,6 +914,7 @@ describe("Test register cart price calculations", () => {
     test("Discount if same member registers for multiple groups", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -928,6 +945,7 @@ describe("Test register cart price calculations", () => {
         // 
         const group2 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -962,7 +980,7 @@ describe("Test register cart price calculations", () => {
             registrations: [
                 Registration.create({
                     organizationId: group2.organizationId,
-                    groupId: group2.id,
+                    group: group2,
                     cycle: group2.cycle,
                     registeredAt: new Date()
                 })
@@ -1024,6 +1042,7 @@ describe("Test register cart price calculations", () => {
     test("Combination of group and category based discounts", () => {
         const group1 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -1055,6 +1074,7 @@ describe("Test register cart price calculations", () => {
         // 
         const group2 = Group.create({
             organizationId: 'test',
+            periodId: 'test',
             settings: GroupSettings.create({
                 registrationStartDate: new Date(),
                 registrationEndDate: new Date(),
@@ -1093,7 +1113,7 @@ describe("Test register cart price calculations", () => {
             registrations: [
                 Registration.create({
                     organizationId: group2.organizationId,
-                    groupId: group2.id,
+                    group: group2,
                     cycle: group2.cycle,
                     registeredAt: new Date()
                 })

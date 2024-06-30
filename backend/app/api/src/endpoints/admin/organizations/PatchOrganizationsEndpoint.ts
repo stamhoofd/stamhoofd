@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Organization, Platform } from '@stamhoofd/models';
+import { Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
 import { OrganizationMetaData, Organization as OrganizationStruct } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
@@ -157,6 +157,11 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     statusCode: 500
                 });
             }
+
+            const organizationPeriod = new OrganizationRegistrationPeriod();
+            organizationPeriod.organizationId = organization.id;
+            organizationPeriod.periodId = (await Platform.getShared()).periodId
+            await organizationPeriod.save();
 
             result.push(organization);
         }

@@ -216,6 +216,7 @@ describe("Endpoint.PatchOrganization", () => {
             const put = Group.create({
                 cycle: 0,
                 organizationId: organization.id,
+                periodId: organization.periodId,
                 settings: GroupSettings.create({
                     name: "My crazy group name",
                     startDate: new Date(),
@@ -256,6 +257,7 @@ describe("Endpoint.PatchOrganization", () => {
             const put = Group.create({
                 cycle: 0,
                 organizationId: organization.id,
+                periodId: organization.periodId,
                 settings: GroupSettings.create({
                     name: "My crazy group name",
                     startDate: new Date(),

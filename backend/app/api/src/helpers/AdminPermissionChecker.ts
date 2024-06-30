@@ -63,7 +63,8 @@ export class AdminPermissionChecker {
         if (c) {
             return await c;
         }
-        const promise = Group.getAll(id, true)
+        const organization = await this.getOrganization(id)
+        const promise = Group.getAll(id, organization.periodId, true)
         this.organizationGroupsCache.set(id, promise)
         const result = await promise;
         this.organizationGroupsCache.set(id, result)
@@ -363,7 +364,7 @@ export class AdminPermissionChecker {
         }
 
         // Slight optimization possible here
-        const {registrations, orders, members} = data ?? (this.user.permissions || permissionLevel === PermissionLevel.Read) ? (await Payment.loadBalanceItemRelations(balanceItems)) : {registrations: [], members: [], orders: []}
+        const {registrations, orders, members} = data ?? (this.user.permissions || permissionLevel === PermissionLevel.Read) ? (await Payment.loadBalanceItemRelations(balanceItems)) : {registrations: [], members: [] as Member[], orders: []}
 
         if (this.user.permissions) {
             // We grant permission for a whole payment when the user has at least permission for a part of that payment.

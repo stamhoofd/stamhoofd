@@ -373,6 +373,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             const model = new Group()
             model.id = struct.id
             model.organizationId = organization.id
+            model.periodId = organization.periodId
             model.settings = struct.settings
             model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
             model.status = struct.status
@@ -478,7 +479,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (deleteUnreachable) {
             // Delete unreachable categories first
-            const allGroups = await Group.getAll(organization.id);
+            const allGroups = await Group.getAll(organization.id, organization.periodId);
             await organization.cleanCategories(allGroups);
             await Group.deleteUnreachable(organization.id, organization.meta, allGroups)
         }

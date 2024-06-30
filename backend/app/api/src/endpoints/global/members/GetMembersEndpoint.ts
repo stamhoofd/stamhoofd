@@ -2,7 +2,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, MemberWithRegistrations } from '@stamhoofd/models';
+import { Member, MemberWithRegistrations, Platform } from '@stamhoofd/models';
 import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
 import { CountFilteredRequest, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
@@ -37,6 +37,7 @@ const registrationFilterCompilers: SQLFilterDefinitions = {
     "organizationId": createSQLColumnFilterCompiler('organizationId'),
     "groupId": createSQLColumnFilterCompiler('groupId'),
     "registeredAt": createSQLColumnFilterCompiler('registeredAt'),
+    "periodId": createSQLColumnFilterCompiler(SQL.column('registrations', 'periodId')),
 
     "group": createSQLFilterNamespace({
         ...baseSQLFilterCompilers,
@@ -105,13 +106,28 @@ const filterCompilers: SQLFilterDefinitions = {
                 SQL.column('groups', 'id'),
                 SQL.column('registrations', 'groupId')
             )
-        ).where(
+        )
+        .join(
+            SQL.join(
+                SQL.table('organizations')
+            ).where(
+                SQL.column('organizations', 'id'),
+                SQL.column('registrations', 'organizationId')
+            )
+        )
+        .where(
             SQL.column('memberId'),
             SQL.column('members', 'id'),
         ),
-        registrationFilterCompilers
+        {
+            ...registrationFilterCompilers,
+            "organization": createSQLFilterNamespace(organizationFilterCompilers)
+        }
     ),
 
+    /**
+     * @deprecated?
+     */
     activeRegistrations: createSQLRelationFilterCompiler(
         SQL.select()
         .from(
@@ -123,7 +139,8 @@ const filterCompilers: SQLFilterDefinitions = {
                 SQL.column('groups', 'id'),
                 SQL.column('registrations', 'groupId')
             )
-        ).where(
+        )
+        .where(
             SQL.column('memberId'),
             SQL.column('members', 'id'),
         ).whereNot(
@@ -163,9 +180,6 @@ const filterCompilers: SQLFilterDefinitions = {
         ).whereNot(
             SQL.column('groups', 'status'),
             GroupStatus.Archived
-        ).where(
-            SQL.column('registrations', 'cycle'),
-            SQL.column('groups', 'cycle'),
         ),
         organizationFilterCompilers
     ),
@@ -230,7 +244,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         return [false];
     }
 
-    static buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
+    static async buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
         const organization = Context.organization
         let scopeFilter: StamhoofdFilter|undefined = undefined;
 
@@ -239,14 +253,23 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (tags != 'all' && tags.length === 0) {
                 throw Context.auth.error()
             }
+
         
             if (tags !== 'all') {
+                const platform = await Platform.getShared()
+
                 // Add organization scope filter
                 scopeFilter = {
-                    organizations: {
+                    registrations: {
                         $elemMatch: {
-                            tags: {
-                                $in: tags
+                            organization: {
+                                tags: {
+                                    $in: tags
+                                }
+                            },
+                            periodId: platform.periodId,
+                            registeredAt: {
+                                $neq: null
                             }
                         }
                     }
@@ -257,9 +280,13 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (organization) {
             // Add organization scope filter
             scopeFilter = {
-                activeRegistrations: {
+                registrations: {
                     $elemMatch: {
-                        organizationId: organization.id
+                        organizationId: organization.id,
+                        periodId: organization.periodId,
+                        registeredAt: {
+                            $neq: null
+                        }
                     }
                 }
             };
@@ -352,7 +379,8 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             })
         }
         
-        const data = await GetMembersEndpoint.buildQuery(request.query).fetch()
+        const query = await GetMembersEndpoint.buildQuery(request.query)
+        const data = await query.fetch()
         
         const memberIds = data.map((r) => {
             if (typeof r.members.id === 'string') {
@@ -364,6 +392,12 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const _members = await Member.getBlobByIds(...memberIds)
         // Make sure members is in same order as memberIds
         const members = memberIds.map(id => _members.find(m => m.id === id)!)
+
+        for (const member of members) {
+            if (!await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
+                throw Context.auth.error()
+            }
+        }
 
         let next: LimitedFilteredRequest|undefined;
 

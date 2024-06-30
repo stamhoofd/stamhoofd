@@ -1,7 +1,7 @@
 import { ManyToOneRelation } from "@simonbackx/simple-database";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Member, Payment } from '@stamhoofd/models';
+import { Group, Member, Payment, Registration } from '@stamhoofd/models';
 import { PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
@@ -49,9 +49,6 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
                 })
             }
         }
-
-        const registrationGroupRelation = new ManyToOneRelation(Group, "group")
-        registrationGroupRelation.foreignKey = "groupId"
                
         return new Response( 
             PaymentWithRegistrations.create({
@@ -64,7 +61,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
                 paidAt: payment.paidAt,
                 createdAt: payment.createdAt,
                 updatedAt: payment.updatedAt,
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r.setRelation(registrationGroupRelation, groups.find(g => g.id === r.groupId)!)))
+                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r.setRelation(Registration.group, groups.find(g => g.id === r.groupId)!)))
             })
         );
     }

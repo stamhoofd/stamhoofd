@@ -44,3 +44,6 @@ export * from "./WebshopDiscountCode"
 
 export * from "./Platform"
 export * from "./MemberResponsibilityRecord"
+
+export * from "./OrganizationRegistrationPeriod"
+export * from "./RegistrationPeriod"

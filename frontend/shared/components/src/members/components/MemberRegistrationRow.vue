@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PlatformMember, Registration } from '@stamhoofd/structures';
+import { Group, GroupSettings, PlatformMember, Registration } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
 import GroupIcon from './group/GroupIcon.vue';
 import { useOrganization } from '../../hooks';
@@ -44,7 +44,7 @@ const isEditable = computed(() => {
     return !!instance?.vnode.props?.onEdit
 })
 const group = computed(() => {
-    return props.member.allGroups.find(g => g.id === props.registration.groupId)!
+    return props.registration.group
 })
 const registrationOrganization = computed(() => {
     return props.member.organizations.find(o => o.id === group.value.organizationId)

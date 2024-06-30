@@ -90,8 +90,9 @@ async function registerAsAdmin(group: Group) {
 
     // Create a registration
     const registration = Registration.create({
-        groupId: group.id,
+        group,
         organizationId: group.organizationId,
+        periodId: group.periodId,
         registeredAt: new Date(),
         waitingList: cartItem.waitingList,
         price: cartItem.calculatedPrice,

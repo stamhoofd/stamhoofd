@@ -365,6 +365,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     createGroup() {
         const group = Group.create({
             organizationId: this.organization.id,
+            periodId: this.organization.period.period.id,
             settings: GroupSettings.create({
                 name: "",
                 startDate: this.organization.meta.defaultStartDate,

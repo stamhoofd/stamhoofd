@@ -7,6 +7,10 @@ import { OldIDRegisterItem, OldRegisterItem } from './checkout/OldRegisterItem';
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob';
 import { Registration } from './Registration';
 
+/**
+ * @deprecated
+ * Use PlatformMember instead
+ */
 export class MemberWithRegistrations extends MemberWithRegistrationsBlob {
     // Calculated properties for convenience
     @field({ decoder: new ArrayDecoder(Registration), optional: true })
@@ -39,17 +43,11 @@ export class MemberWithRegistrations extends MemberWithRegistrationsBlob {
     acceptedWaitingGroups: Group[] = []
 
     /**
+     * @deprecated
      * All groups of this organization (used for finding information of groups)
      */
     @field({ decoder: new ArrayDecoder(Group), optional: true })
     allGroups: Group[] = []
-
-    /**
-     * Return true if this member was registered in the previous year (current doesn't count)
-     */
-    get isExistingMember(): boolean {
-        return OldRegisterCartValidator.isExistingMember(this, this.allGroups)
-    }
 
     static fromMember(member: MemberWithRegistrationsBlob, groups: Group[]) {
         const m = MemberWithRegistrations.create(member)

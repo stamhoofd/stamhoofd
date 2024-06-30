@@ -21,13 +21,16 @@ export class Group extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder, version: 250 })
-    organizationId: string;
+    organizationId: string = ""
+
+    @field({ decoder: StringDecoder, version: 265 })
+    periodId: string = ""
 
     @field({ decoder: IntegerDecoder })
     cycle = 0
 
     @field({ decoder: GroupSettings })
-    settings: GroupSettings
+    settings: GroupSettings = GroupSettings.create({})
 
     @field({ decoder: DateDecoder, version: 187 })
     createdAt: Date = new Date()
@@ -181,7 +184,7 @@ export class Group extends AutoEncoder {
         return [...map.values()]
     }
 
-    hasAccess(permissions: LoadedPermissions|null, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    hasAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (!permissions) {
             return false
         }
@@ -191,7 +194,7 @@ export class Group extends AutoEncoder {
         }
 
         // Check parent categories
-        const parentCategories = this.getParentCategories(organization.meta.categories)
+        const parentCategories = this.getParentCategories(allCategories)
         for (const category of parentCategories) {
             if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
                 return true
@@ -210,16 +213,16 @@ export class Group extends AutoEncoder {
         return true;
     }
 
-    hasReadAccess(permissions: LoadedPermissions|null, organization: Organization): boolean {
-        return this.hasAccess(permissions, organization, PermissionLevel.Read)
+    hasReadAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
+        return this.hasAccess(permissions, allCategories, PermissionLevel.Read)
     }
 
-    hasWriteAccess(permissions: LoadedPermissions|null, organization: Organization): boolean {
-        return this.hasAccess(permissions, organization, PermissionLevel.Write)
+    hasWriteAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
+        return this.hasAccess(permissions, allCategories, PermissionLevel.Write)
     }
 
-    hasFullAccess(permissions: LoadedPermissions|null, organization: Organization): boolean {
-        return this.hasAccess(permissions, organization, PermissionLevel.Full)
+    hasFullAccess(permissions: LoadedPermissions|null, allCategories: GroupCategory[]): boolean {
+        return this.hasAccess(permissions, allCategories, PermissionLevel.Full)
     }
 
     get squareImage() {

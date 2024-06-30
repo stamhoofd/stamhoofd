@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { Platform, User, Version } from '@stamhoofd/structures';
+import { Platform, RegistrationPeriod, User, Version } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import { Ref, inject, reactive, toRef } from 'vue';
 
 export function usePlatformManager(): Ref<PlatformManager> {
@@ -94,6 +95,22 @@ export class PlatformManager {
         })
 
         this.$platform.admins = response.data
+    }
+
+    async loadPeriods(force = false, shouldRetry?: boolean, owner?: any) {
+        if (!force && this.$platform.periods) {
+            return this.$platform.periods
+        }
+
+        const response = await this.$context.optionalAuthenticatedServer.request({
+            method: 'GET',
+            path: '/registration-periods',
+            decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
+            owner,
+            shouldRetry: shouldRetry ?? false,
+        })
+        this.$platform.periods = response.data.sort((a, b) => Sorter.byDateValue(a.startDate, b.startDate))
+        return response.data
     }
 
     /**

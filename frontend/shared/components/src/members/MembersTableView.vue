@@ -34,12 +34,14 @@ const props = withDefaults(
         group?: Group | null,
         waitingList?: boolean,
         cycleOffset?: number,
-        category?: GroupCategoryTree | null
+        category?: GroupCategoryTree | null,
+        periodId?: string | null
     }>(), {
         group: null,
         waitingList: false,
         cycleOffset: 0,
-        category: null
+        category: null,
+        periodId: null
     }
 )
 

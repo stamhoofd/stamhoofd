@@ -306,6 +306,7 @@ export class BalanceItem extends Model {
 
         const {Registration} = await import("./Registration");
         const {Order} = await import("./Order");
+        const {Group} = await import("./Group");
 
         const {payments, balanceItemPayments} = await BalanceItem.loadPayments(items)
         
@@ -315,12 +316,18 @@ export class BalanceItem extends Model {
 
         const registrations = await Registration.getByIDs(...registrationIds)
         const orders = await Order.getByIDs(...orderIds)
+
+        const groupIds = Formatter.uniqueArray(registrations.map(r => r.groupId))
+        const groups = await Group.getByIDs(...groupIds)
     
         return items.map(item => {
             const thisBalanceItemPayments = balanceItemPayments.filter(p => p.balanceItemId === item.id)
+            const registration = registrations.find(r => r.id === item.registrationId)
+            const group = registration ? groups.find(g => g.id === registration.groupId) : null
+
             return MemberBalanceItem.create({
                 ...item,
-                registration: registrations.find(r => r.id === item.registrationId)?.getStructure() ?? null,
+                registration: registration && group ? registration.setRelation(Registration.group, group).getStructure() : null,
                 order: orders.find(o => o.id === item.orderId)?.getStructureWithoutPayment() ?? null,
                 payments: thisBalanceItemPayments.map(p => {
                     const payment = payments.find(pp => pp.id === p.paymentId)!

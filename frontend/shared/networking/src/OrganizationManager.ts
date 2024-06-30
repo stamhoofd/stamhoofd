@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures';
+import { Group, Organization, OrganizationAdmins, OrganizationPatch, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -87,6 +87,22 @@ export class OrganizationManager {
         this.save().catch(console.error)
 
         return this.organization as any
+    }
+
+    async loadPeriods(force = false, shouldRetry?: boolean, owner?: any) {
+        if (!force && this.organization.periods) {
+            return this.organization.periods
+        }
+
+        const response = await this.$context.authenticatedServer.request({
+            method: 'GET',
+            path: '/organization/registration-periods',
+            decoder: RegistrationPeriodList as Decoder<RegistrationPeriodList>,
+            owner,
+            shouldRetry: shouldRetry ?? false,
+        })
+        this.organization.periods = response.data
+        return response.data
     }
 
     async loadArchivedGroups({owner}: {owner?: any}) {

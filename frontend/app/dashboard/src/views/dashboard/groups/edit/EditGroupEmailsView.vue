@@ -212,8 +212,6 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                             lastName: 'Doe'
                         })
                     }),
-                    group: this.group,
-                    groupId: '',
                     cycle: 0,
                 }),
                 RegistrationWithMember.create({
@@ -223,8 +221,6 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                             lastName: 'Doe'
                         })
                     }),
-                    group: this.group,
-                    groupId: '',
                     cycle: 0,
                 })
             ]

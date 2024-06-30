@@ -10,7 +10,7 @@ export class GroupBuilder {
     }
 
     async build() {
-        const oldGroups = await Group.getAll(this.organization.id)
+        const oldGroups = await Group.getAll(this.organization.id, this.organization.periodId)
 
         if (oldGroups.length === 0) {
             // Setup default groups if possible
@@ -22,7 +22,7 @@ export class GroupBuilder {
         }
 
         // Reload
-        const groups = await Group.getAll(this.organization.id)
+        const groups = await Group.getAll(this.organization.id, this.organization.periodId)
         
         // Setup default root groups
         if (this.organization.meta.categories.length <= 2) {
@@ -81,6 +81,7 @@ export class GroupBuilder {
 
         const kapoenen = new Group()
         kapoenen.organizationId = this.organization.id
+        kapoenen.periodId = this.organization.periodId
         kapoenen.settings = GroupSettings.create({
             name: "Kapoenen",
             genderType: mixedType,
@@ -95,6 +96,7 @@ export class GroupBuilder {
 
         const jin = new Group()
         jin.organizationId = this.organization.id
+        jin.periodId = this.organization.periodId
         jin.settings = GroupSettings.create({
             name: "Jin",
             genderType: mixedType,
@@ -110,6 +112,7 @@ export class GroupBuilder {
         if (this.organization.meta.genderType == OrganizationGenderType.Mixed) {
             const wouters = new Group()
             wouters.organizationId = this.organization.id
+            wouters.periodId = this.organization.periodId
             wouters.settings = GroupSettings.create({
                 name: "Wouters",
                 genderType: GroupGenderType.Mixed,
@@ -124,6 +127,7 @@ export class GroupBuilder {
 
             const jonggivers = new Group()
             jonggivers.organizationId = this.organization.id
+            jonggivers.periodId = this.organization.periodId
             jonggivers.settings = GroupSettings.create({
                 name: "Jonggivers",
                 genderType: GroupGenderType.Mixed,
@@ -138,6 +142,7 @@ export class GroupBuilder {
 
             const givers = new Group()
             givers.organizationId = this.organization.id
+            givers.periodId = this.organization.periodId
             givers.settings = GroupSettings.create({
                 name: "Givers",
                 genderType: GroupGenderType.Mixed,
@@ -154,6 +159,7 @@ export class GroupBuilder {
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
             const wouters = new Group()
             wouters.organizationId = this.organization.id
+            wouters.periodId = this.organization.periodId
             wouters.settings = GroupSettings.create({
                 name: "Kabouters",
                 genderType: GroupGenderType.OnlyFemale,
@@ -168,6 +174,7 @@ export class GroupBuilder {
 
             const jonggivers = new Group()
             jonggivers.organizationId = this.organization.id
+            jonggivers.periodId = this.organization.periodId
             jonggivers.settings = GroupSettings.create({
                 name: "Jonggidsen",
                 genderType: GroupGenderType.OnlyFemale,
@@ -182,6 +189,7 @@ export class GroupBuilder {
 
             const givers = new Group()
             givers.organizationId = this.organization.id
+            givers.periodId = this.organization.periodId
             givers.settings = GroupSettings.create({
                 name: "Gidsen",
                 genderType: GroupGenderType.OnlyFemale,
@@ -198,6 +206,7 @@ export class GroupBuilder {
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyMale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
             const wouters = new Group()
             wouters.organizationId = this.organization.id
+            wouters.periodId = this.organization.periodId
             wouters.settings = GroupSettings.create({
                 name: "Welpen",
                 genderType: GroupGenderType.OnlyMale,
@@ -212,6 +221,7 @@ export class GroupBuilder {
 
             const jonggivers = new Group()
             jonggivers.organizationId = this.organization.id
+            jonggivers.periodId = this.organization.periodId
             jonggivers.settings = GroupSettings.create({
                 name: "Jongverkenners",
                 genderType: GroupGenderType.OnlyMale,
@@ -226,6 +236,7 @@ export class GroupBuilder {
 
             const givers = new Group()
             givers.organizationId = this.organization.id
+            givers.periodId = this.organization.periodId
             givers.settings = GroupSettings.create({
                 name: "Verkenners",
                 genderType: GroupGenderType.OnlyMale,
@@ -251,6 +262,7 @@ export class GroupBuilder {
 
         const ribbels = new Group()
         ribbels.organizationId = this.organization.id
+        ribbels.periodId = this.organization.periodId
         ribbels.settings = GroupSettings.create({
             name: "Ribbels",
             genderType: mixedType,
@@ -264,6 +276,7 @@ export class GroupBuilder {
 
         const speelclub = new Group()
         speelclub.organizationId = this.organization.id
+        speelclub.periodId = this.organization.periodId
         speelclub.settings = GroupSettings.create({
             name: "Speelclub",
             genderType: mixedType,
@@ -278,6 +291,7 @@ export class GroupBuilder {
 
         const aspis = new Group()
         aspis.organizationId = this.organization.id
+        aspis.periodId = this.organization.periodId
         aspis.settings = GroupSettings.create({
             name: "Aspi's",
             genderType: mixedType,
@@ -292,6 +306,7 @@ export class GroupBuilder {
         if (this.organization.meta.genderType == OrganizationGenderType.Mixed) {
             const rakwis = new Group()
             rakwis.organizationId = this.organization.id
+            rakwis.periodId = this.organization.periodId
             rakwis.settings = GroupSettings.create({
                 name: "Rakwi's",
                 genderType: GroupGenderType.Mixed,
@@ -305,6 +320,7 @@ export class GroupBuilder {
 
             const titos = new Group()
             titos.organizationId = this.organization.id
+            titos.periodId = this.organization.periodId
             titos.settings = GroupSettings.create({
                 name: "Tito's",
                 genderType: GroupGenderType.Mixed,
@@ -318,6 +334,7 @@ export class GroupBuilder {
 
             const ketis = new Group()
             ketis.organizationId = this.organization.id
+            ketis.periodId = this.organization.periodId
             ketis.settings = GroupSettings.create({
                 name: "Keti's",
                 genderType: GroupGenderType.Mixed,
@@ -333,6 +350,7 @@ export class GroupBuilder {
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
             const rakwis = new Group()
             rakwis.organizationId = this.organization.id
+            rakwis.periodId = this.organization.periodId
             rakwis.settings = GroupSettings.create({
                 name: "Kwiks",
                 genderType: GroupGenderType.OnlyFemale,
@@ -346,6 +364,7 @@ export class GroupBuilder {
 
             const titos = new Group()
             titos.organizationId = this.organization.id
+            titos.periodId = this.organization.periodId
             titos.settings = GroupSettings.create({
                 name: "Toppers",
                 genderType: GroupGenderType.OnlyFemale,
@@ -359,6 +378,7 @@ export class GroupBuilder {
 
             const ketis = new Group()
             ketis.organizationId = this.organization.id
+            ketis.periodId = this.organization.periodId
             ketis.settings = GroupSettings.create({
                 name: "Tiptiens",
                 genderType: GroupGenderType.OnlyFemale,
@@ -374,6 +394,7 @@ export class GroupBuilder {
         if (this.organization.meta.genderType == OrganizationGenderType.OnlyMale || this.organization.meta.genderType == OrganizationGenderType.Separated) {
             const rakwis = new Group()
             rakwis.organizationId = this.organization.id
+            rakwis.periodId = this.organization.periodId
             rakwis.settings = GroupSettings.create({
                 name: "Rakkers",
                 genderType: GroupGenderType.OnlyMale,
@@ -387,6 +408,7 @@ export class GroupBuilder {
 
             const titos = new Group()
             titos.organizationId = this.organization.id
+            titos.periodId = this.organization.periodId
             titos.settings = GroupSettings.create({
                 name: "Tippers",
                 genderType: GroupGenderType.OnlyMale,
@@ -400,6 +422,7 @@ export class GroupBuilder {
 
             const ketis = new Group()
             ketis.organizationId = this.organization.id
+            ketis.periodId = this.organization.periodId
             ketis.settings = GroupSettings.create({
                 name: "Kerels",
                 genderType: GroupGenderType.OnlyMale,

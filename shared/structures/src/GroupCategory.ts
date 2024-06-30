@@ -7,6 +7,7 @@ import { Organization } from './Organization';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AccessRight, LoadedPermissions, PermissionLevel, PermissionRole, PermissionsByRole, PermissionsResourceType } from './Permissions';
 import { UserPermissions } from './UserPermissions';
+import { OrganizationRegistrationPeriod } from './RegistrationPeriod';
 /**
  * Give access to a given resouce based by the roles of a user
  */
@@ -175,9 +176,9 @@ export class GroupCategoryTree extends GroupCategory {
         return count
     }
 
-    static build(root: GroupCategory, organization: Organization, options: {permissions?: LoadedPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
-        const categories = organization.meta.categories
-        const groups = options?.groups ?? organization.groups
+    static build(root: GroupCategory, organizationPeriod: OrganizationRegistrationPeriod, options: {permissions?: LoadedPermissions | null, maxDepth?: number | null, smartCombine?: boolean, groups?: Group[]} = {}): GroupCategoryTree {
+        const categories = organizationPeriod.settings.categories
+        const groups = options?.groups ?? organizationPeriod.groups
 
         const permissions = options.permissions ?? null
         const maxDepth = options.maxDepth ?? null
@@ -188,7 +189,7 @@ export class GroupCategoryTree extends GroupCategory {
             categories: root.categoryIds.flatMap(id => {
                 const f = categories.find(c => c.id === id)
                 if (f) {
-                    const t = GroupCategoryTree.build(f, organization, {
+                    const t = GroupCategoryTree.build(f, organizationPeriod, {
                         ...options,
                         maxDepth: maxDepth !== null ? maxDepth - 1 : null
                     })
@@ -227,7 +228,7 @@ export class GroupCategoryTree extends GroupCategory {
                 const g = groups.find(c => c.id === id)
                 if (g) {
                     // Hide groups we don't have permissions for
-                    if (permissions && (!organization || !g.hasReadAccess(permissions, organization))) {
+                    if (permissions && (!g.hasReadAccess(permissions, categories))) {
                         return []
                     }
                     return [g]

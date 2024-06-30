@@ -23,6 +23,7 @@ export class GroupFactory extends Factory<Options, Group> {
         
         const group = new Group()
         group.organizationId = organization.id
+        group.periodId = organization.periodId
         group.settings = GroupSettings.create({
             name: "Group name",
             startDate: new Date(new Date().getTime() - 10 * 1000),

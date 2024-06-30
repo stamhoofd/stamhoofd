@@ -486,10 +486,7 @@ export class PlatformMember implements ObjectWithRecords {
 
             let cycle = filters.cycle
             if (filters.cycle === undefined) {
-                const group = (filters.groups ?? this.allGroups).find(g => g.id === r.groupId)
-                if (group) {
-                    cycle = group.cycle - (filters.cycleOffset ?? 0)
-                }
+                cycle = r.group.cycle - (filters.cycleOffset ?? 0)
             }
 
             if (
@@ -515,13 +512,7 @@ export class PlatformMember implements ObjectWithRecords {
                 continue;
             }
 
-            const organization = this.organizations.find(o => o.id === registration.organizationId);
-            if (organization) {
-                const group = organization.groups.find(g => g.id === registration.groupId);
-                if (group) {
-                    base.push(group)
-                }
-            }
+            base.push(registration.group)
         }
 
         // Loop checkout
@@ -730,19 +721,9 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        const groups = organization.groups;
-
         // Check if no year was skipped
         for (const registration of member.registrations) {
-            const group = groups.find(g => g.id === registration.groupId)
-            if (group === undefined) {
-                // Archived or deleted. Use the registeredAt date (should be in the last 1.5 years)
-                if (registration.registeredAt !== null && registration.deactivatedAt === null && registration.waitingList === false && registration.registeredAt > new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 365 * 1.5)) {
-                    return true
-                }
-                continue;
-            }
-            if (!registration.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && group && registration.cycle === group.cycle - 1) {
+            if (!registration.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && registration.cycle === registration.group.cycle - 1) {
                 // This was the previous year
                 return true
             }

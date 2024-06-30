@@ -93,7 +93,7 @@ export class GroupSettings extends AutoEncoder {
         d2.setUTCHours(-2, 0, 0, 0) // brussels time
         return d2
     } })
-    startDate: Date
+    startDate: Date = new Date()
 
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
@@ -101,7 +101,7 @@ export class GroupSettings extends AutoEncoder {
         d2.setUTCHours(23-2, 59, 0, 0) // brussels time
         return d2
     } })
-    endDate: Date
+    endDate: Date = new Date()
 
     /**
      * Dispay start and end date times

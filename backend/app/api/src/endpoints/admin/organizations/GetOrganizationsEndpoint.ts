@@ -16,28 +16,32 @@ type ResponseBody = PaginatedResponse<OrganizationStruct[], LimitedFilteredReque
 
 export const filterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    name: createSQLColumnFilterCompiler('name'),
+    id: createSQLExpressionFilterCompiler(
+        SQL.column('organizations', 'id')
+    ),
+    name: createSQLExpressionFilterCompiler(
+        SQL.column('organizations', 'name')
+    ),
     city: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('address'), '$.value.city'),
+        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
         undefined,
         true,
         false
     ),
     country: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('address'), '$.value.country'),
+        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.country'),
         undefined,
         true,
         false
     ),
     umbrellaOrganization: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.umbrellaOrganization'),
+        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.umbrellaOrganization'),
         undefined,
         true,
         false
     ),
     type: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.type'),
+        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.type'),
         undefined,
         true,
         false

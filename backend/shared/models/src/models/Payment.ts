@@ -1,9 +1,9 @@
-import { column, Model } from '@simonbackx/simple-database';
+import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, Member as MemberStruct, Order as OrderStruct, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization } from './';
+import { Organization, Registration } from './';
 
 export class Payment extends Model {
     static table = "payments"
@@ -110,7 +110,7 @@ export class Payment extends Model {
         }
 
         const {balanceItemPayments, balanceItems} = await Payment.loadBalanceItems(payments)
-        const {registrations, orders, members} = await Payment.loadBalanceItemRelations(balanceItems);
+        const {registrations, orders, members, groups} = await Payment.loadBalanceItemRelations(balanceItems);
         
         return this.getGeneralStructureFromRelations({
             payments,
@@ -118,22 +118,24 @@ export class Payment extends Model {
             orders,
             members,
             balanceItemPayments,
-            balanceItems
+            balanceItems,
+            groups
         }, includeSettlements)
     }
 
-    static getGeneralStructureFromRelations({payments, registrations, orders, members, balanceItemPayments, balanceItems}: {
+    static getGeneralStructureFromRelations({payments, registrations, orders, members, balanceItemPayments, balanceItems, groups}: {
         payments: Payment[];
         registrations: import("./Registration").Registration[];
         orders: import("./Order").Order[];
         members: import("./Member").Member[];
         balanceItemPayments: import("./BalanceItemPayment").BalanceItemPayment[];
         balanceItems: import("./BalanceItem").BalanceItem[];
+        groups: import("./Group").Group[];
     }, includeSettlements = false): PaymentGeneral[] {
         if (payments.length === 0) {
             return []
         }
-        
+
         return payments.map(payment => {
             return PaymentGeneral.create({
                 ...payment,
@@ -142,12 +144,17 @@ export class Payment extends Model {
                     const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
                     const member = balanceItem?.memberId ? members.find(r => r.id === balanceItem.memberId) : undefined
                     const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
+                    const group = registration && groups.find(g => g.id === registration.groupId)
+
+                    if (!group) {
+                        throw new Error("Group not found")
+                    }
 
                     return BalanceItemPaymentDetailed.create({
                         ...item,
                         balanceItem: BalanceItemDetailed.create({
                             ...balanceItem,
-                            registration: registration ? registration.getStructure() : null,
+                            registration: registration ? registration.setRelation(Registration.group, group).getStructure() : null,
                             member: member ? MemberStruct.create(member) : null,
                             order: order ? OrderStruct.create({...order, payment: null}) : null
                         })
@@ -201,6 +208,9 @@ export class Payment extends Model {
         const orders = await Order.getByIDs(...orderIds)
         const members = await Member.getByIDs(...memberIds)
 
-        return {registrations, orders, members}
+        const groupIds = Formatter.uniqueArray(registrations.map(r => r.groupId))
+        const groups = await (await import("./Group")).Group.getByIDs(...groupIds)
+
+        return {registrations, orders, members, groups}
     }
 }

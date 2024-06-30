@@ -41,6 +41,7 @@ export * from "./src/User"
 export * from "./src/DefaultAgeGroup"
 export * from "./src/MemberResponsibility"
 export * from "./src/members/MemberResponsibilityRecord"
+export * from "./src/RegistrationPeriod"
 
 // UserPermissions
 export * from "./src/UserPermissions"

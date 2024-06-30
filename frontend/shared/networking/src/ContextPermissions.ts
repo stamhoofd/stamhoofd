@@ -89,7 +89,7 @@ export class ContextPermissions {
             return false
         }
 
-        return group.hasAccess(this.permissions, this.organization, permissionLevel)
+        return group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel)
     }
 
     canAccessPlatformMember(member: PlatformMember, permissionLevel: PermissionLevel = PermissionLevel.Read) {
@@ -100,15 +100,8 @@ export class ContextPermissions {
         for (const registration of member.member.registrations) {
             const organization = member.family.getOrganization(registration.organizationId);
             if (organization) {
-                const group = organization.groups.find(g => g.id === registration.groupId);
-                if (group) {
-                    if (group.hasAccess(this.getPermissionsForOrganization(organization), organization, permissionLevel)) {
-                        return true;
-                    }
-                } else {
-                    if (this.getPermissionsForOrganization(organization)?.hasAccess(permissionLevel)) {
-                        return true;
-                    }
+                if (registration.group.hasAccess(this.getPermissionsForOrganization(organization), organization.period.settings.categories, permissionLevel)) {
+                    return true;
                 }
             }
         }

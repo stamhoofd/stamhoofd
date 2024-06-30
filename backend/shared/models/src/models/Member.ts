@@ -4,10 +4,10 @@ import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, Reg
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Payment, Registration, User } from './';
+import { Group, Payment, Registration, User } from './';
 export type MemberWithRegistrations = Member & { 
     users: User[], 
-    registrations: Registration[] 
+    registrations: (Registration & {group: Group})[] 
 }
 
 // Defined here to prevent cycles
@@ -269,13 +269,20 @@ export class Member extends Model {
         const [results] = await Database.select(query, [ids])
         const members: MemberWithRegistrations[] = []
 
+        // Load groups
+        const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[]
+        const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds))
+
         for (const row of results) {
             const foundMember = Member.fromRow(row[Member.table])
             if (!foundMember) {
                 throw new Error("Expected member in every row")
             }
-            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
-            // Seach if we already got this member?
+            const _f = foundMember
+                .setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration & {group: Group}>, [])
+                .setManyRelation(Member.users, [])
+            
+                // Seach if we already got this member?
             const existingMember = members.find(m => m.id == _f.id)
 
             const member: MemberWithRegistrations = (existingMember ?? _f)
@@ -288,7 +295,11 @@ export class Member extends Model {
             if (registration) {
                 // Check if we already have this registration
                 if (!member.registrations.find(r => r.id == registration.id)) {
-                    member.registrations.push(registration)
+                    const g = groups.find(g => g.id == registration.groupId)
+                    if (!g) {
+                        throw new Error("Group not found")
+                    }
+                    member.registrations.push(registration.setRelation(Registration.group, g))
                 }
             }
 
@@ -368,7 +379,6 @@ export class Member extends Model {
     static getRegistrationWithMemberStructure(registration: RegistrationWithMember & {group: import('./Group').Group}): RegistrationWithMemberStruct {
         return RegistrationWithMemberStruct.create({
             ...registration.getStructure(),
-            group: registration.group.getStructure(),
             cycle: registration.cycle,
             member: MemberStruct.create(registration.member),
         })

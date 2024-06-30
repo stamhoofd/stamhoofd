@@ -1,13 +1,18 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
+import { Group } from '../Group';
 
 export class Registration extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4()  })
     id: string
 
     /// You need to look up the group yourself in the organization
-    @field({ decoder: StringDecoder })
-    groupId: string
+    @field({ decoder: Group, version: 266 })
+    group = Group.create({})
+
+    get groupId() {
+        return this.group.id
+    }
 
     @field({ decoder: StringDecoder, version: 250 })
     organizationId: string

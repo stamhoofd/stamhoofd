@@ -3,10 +3,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './addresses/Address';
 import { Group } from './Group';
-import { GroupCategorySettings, GroupCategoryTree } from './GroupCategory';
+import { GroupCategoryTree } from './GroupCategory';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
 import { LoadedPermissions } from './Permissions';
+import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod';
 import { User } from './User';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
 
@@ -36,11 +37,14 @@ export class Organization extends AutoEncoder {
     address: Address;
 
     /**
-     * All the available groups are listed here. They are only 'active' and visible when inside a category. Please remove them here if they are inactive.
-     * Deleting a group will also trigger database deletion.
+     * @deprecated
+     * Please use period instead now
      */
     @field({ decoder: new ArrayDecoder(Group), version: 2, upgrade: () => [], optional: true })
     groups: Group[] = []
+
+    @field({ decoder: OrganizationRegistrationPeriod, version: 264, defaultValue: () => OrganizationRegistrationPeriod.create({ period: RegistrationPeriod.create({}) }) })
+    period: OrganizationRegistrationPeriod
 
     @field({ decoder: DateDecoder, version: 259 })
     createdAt = new Date()
@@ -126,36 +130,7 @@ export class Organization extends AutoEncoder {
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
     getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: LoadedPermissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
-        const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
-        if (root) {
-            let tree = GroupCategoryTree.build(root, this, {
-                groups: options?.filterGroups ? this.groups.filter(options.filterGroups) : undefined,
-                permissions: options?.permissions, 
-                maxDepth: options?.maxDepth, 
-                smartCombine: options?.smartCombine
-            })
-
-            if (!options?.permissions) {
-                // Hide non public items
-                tree = tree.filterForDisplay(options?.admin ?? false, this.meta.packages.useActivities || options?.admin, options?.smartCombine)
-            }
-
-            if (tree.categories.length == 0 && tree.groups.length > 0) {
-                tree.settings.name = "Inschrijvingsgroepen"
-                return GroupCategoryTree.create({
-                    settings: GroupCategorySettings.create({
-                        name: ""
-                    }),
-                    categories: [tree]
-                })
-            }
-
-            return tree
-        }
-
-        // Broken setup here
-        console.warn("Root category ID is missing in categories. Migration might be needed")
-        return GroupCategoryTree.create({ })
+        return this.period.getCategoryTree(options ? {...options, organization: this} : {organization: this});
     }
 
     /**
@@ -194,6 +169,11 @@ export class Organization extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(User), optional: true, version: 60 })
     admins?: User[]
+
+    /**
+     * Keep admins accessible and in memory
+     */
+    periods?: RegistrationPeriodList
 
     get resolvedRegisterDomain() {
         if (this.registerDomain) {

@@ -11,7 +11,7 @@
             </div>
         </h2>
 
-        <p v-if="visibleRegistrations.length == 0 && cycleOffset == 0" class="info-box">
+        <p v-if="visibleRegistrations.length == 0 && period.id === defaultPeriod.id" class="info-box">
             {{ member.patchedMember.firstName }} is niet ingeschreven
         </p>
         <p v-else-if="visibleRegistrations.length == 0" class="info-box">
@@ -29,32 +29,32 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { PermissionLevel, PlatformMember, Registration } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
-import { useAuth, useOrganization } from '../../hooks';
+import { PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
+import { Ref, computed, ref } from 'vue';
+import { useAuth, useOrganization, usePlatform } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import RegisterMemberView from '../RegisterMemberView.vue';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 
 const props = defineProps<{
     member: PlatformMember
 }>();
 
 const visibleRegistrationsTitle = computed(() => {
-    if (cycleOffset.value === 0) {
-        return 'Inschrijvingen';
-    }
-    if (cycleOffset.value === 1) {
-        return 'Vorige inschrijvingsperiode';
-    }
-
-    return 'Inschrijvingen '+cycleOffset.value+' periodes geleden';
+    return period.value.name
 });
 
-const cycleOffset = ref(0);
 const auth = useAuth();
 const present = usePresent();
 const organization = useOrganization();
+const platform = usePlatform();
+const defaultPeriod = organization.value?.period?.period ?? platform.value.period
+const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
+const platformManager = usePlatformManager();
+const owner = useRequestOwner();
+
+platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
 const visibleRegistrations = computed(() => {
@@ -62,11 +62,10 @@ const visibleRegistrations = computed(() => {
         if (organization.value && r.organizationId !== organization.value.id) {
             return false;
         }
-        const group = props.member.allGroups.find(g => g.id === r.groupId);
-        if (!group) {
+        if (r.group.periodId !== period.value.id) {
             return false;
         }
-        return group.cycle === r.cycle + cycleOffset.value;
+        return true
     });
 });
 
@@ -89,37 +88,17 @@ function editRegistration(registration: Registration, event: MouseEvent) {
 }
 
 function switchCycle(event: MouseEvent) {
-    let maxCycle = 1;
-    for (const registration of props.member.patchedMember.registrations) {
-        const group = props.member.allGroups.find(g => g.id === registration.groupId)
-        if (group) {
-            const offset = group.cycle - registration.cycle;
-            if (offset > maxCycle) {
-                maxCycle = offset;
-            }
-        }
-    }
-
     const menu = new ContextMenu([
-        [
-            new ContextMenuItem({
-                name: "Huidige inschrijvingsperiode",
-                selected: cycleOffset.value === 0,
+        (platform.value.periods ?? []).map(p => {
+            return new ContextMenuItem({
+                name: p.name,
+                selected: p.id === period.value.id,
                 action: () => {
-                    cycleOffset.value = 0;
+                    period.value = p
                     return true;
                 }
-            }),
-            // Repeat maxCycle times
-            ...Array.from({ length: maxCycle }, (_, i) => i + 1).map(i => new ContextMenuItem({
-                name: `${i === 1 ? 'Vorige' : i} inschrijvingsperiode${i >= 2 ? 's geleden' : ''}`,
-                selected: cycleOffset.value === i,
-                action: () => {
-                    cycleOffset.value = i;
-                    return true;
-                }
-            }))
-        ],
+            });
+        })
     ])
     menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error)
 }

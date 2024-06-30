@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, User, Webshop } from "@stamhoofd/models";
-import { MemberResponsibilityRecord as MemberResponsibilityRecordStruct, User as UserStruct, Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { Group, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
+import { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, User as UserStruct, Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 
@@ -24,7 +24,7 @@ export class AuthenticatedStructures {
         }
 
         const {balanceItemPayments, balanceItems} = await Payment.loadBalanceItems(payments)
-        const {registrations, orders, members} = await Payment.loadBalanceItemRelations(balanceItems);
+        const {registrations, orders, members, groups} = await Payment.loadBalanceItemRelations(balanceItems);
 
         if (checkPermissions) {
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
@@ -45,7 +45,8 @@ export class AuthenticatedStructures {
             balanceItems,
             registrations,
             orders,
-            members
+            members,
+            groups
         }, includeSettlements)
     }
 
@@ -65,10 +66,9 @@ export class AuthenticatedStructures {
 
     static async organization(organization: Organization): Promise<OrganizationStruct> {
         if (await Context.optionalAuth?.canAccessPrivateOrganizationData(organization)) {
-            const groups = await Group.getAll(organization.id)
+            const groups = await Group.getAll(organization.id, organization.periodId)
             const webshops = await Webshop.where({ organizationId: organization.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
             const webshopStructures: WebshopPreview[] = [] 
-            const groupStructures: GroupStruct[] = []
 
             for (const w of webshops) {
                 if (!await Context.auth.canAccessWebshop(w)) {
@@ -77,8 +77,19 @@ export class AuthenticatedStructures {
                 webshopStructures.push(WebshopPreview.create(w))
             }
 
-            for (const g of groups) {
-                groupStructures.push(await this.group(g))
+            const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: organization.periodId }, {limit: 1})
+            let oPeriod = oPeriods[0];
+            const period = (await RegistrationPeriod.getByID(organization.periodId))!
+
+            if (!oPeriod) {
+                const organizationPeriod = new OrganizationRegistrationPeriod();
+                organizationPeriod.organizationId = organization.id;
+                organizationPeriod.periodId = period.id
+                organizationPeriod.settings.categories = organization.meta.categories
+                organizationPeriod.settings.rootCategoryId = organization.meta.rootCategoryId
+                await organizationPeriod.save();
+
+                oPeriod = organizationPeriod
             }
 
             return OrganizationStruct.create({
@@ -89,10 +100,10 @@ export class AuthenticatedStructures {
                 registerDomain: organization.registerDomain,
                 uri: organization.uri,
                 website: organization.website,
-                groups: groupStructures.sort(GroupStruct.defaultSort),
                 privateMeta: organization.privateMeta,
                 webshops: webshopStructures,
-                createdAt: organization.createdAt
+                createdAt: organization.createdAt,
+                period: oPeriod.getStructure(period, groups)
             })
         }
         

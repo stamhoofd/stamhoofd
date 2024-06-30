@@ -1,8 +1,9 @@
-import { column, Database, Model, OneToManyRelation } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Member, MemberWithRegistrations, Payment, Registration, User } from './';
+import { Formatter } from '@stamhoofd/utility';
 
 if (Member === undefined) {
     throw new Error("Import Member is undefined")
@@ -16,6 +17,7 @@ if (Payment === undefined) {
 if (Registration === undefined) {
     throw new Error("Import Registration is undefined")
 }
+
 export class Group extends Model {
     static table = "groups";
 
@@ -36,6 +38,9 @@ export class Group extends Model {
 
     @column({ type: "string" })
     organizationId: string;
+
+    @column({ type: "string" })
+    periodId: string;
 
     /**
      * Every time a new registration period starts, this number increases. This is used to mark all older registrations as 'out of date' automatically
@@ -77,11 +82,14 @@ export class Group extends Model {
     @column({ type: "string" })
     status = GroupStatus.Open;
 
-    static async getAll(organizationId: string, active = true) {
+    static async getAll(organizationId: string, periodId: string|null, active = true) {
+        const w: any = periodId ? {periodId} : {}
         if (active) {
-            return await Group.where({ organizationId, deletedAt: null, status: {sign: '!=', value: GroupStatus.Archived} })
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            return await Group.where({ organizationId, deletedAt: null, ...w, status: {sign: '!=', value: GroupStatus.Archived} })
         }
-        return await Group.where({ organizationId })
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        return await Group.where({ organizationId, ...w })
     }
 
     /**
@@ -127,12 +135,15 @@ export class Group extends Model {
         const [results] = await Database.select(query, [this.id, this.cycle - cycleOffset])
         const members: MemberWithRegistrations[] = []
 
+        const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[]
+        const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds))
+
         for (const row of results) {
             const foundMember = Member.fromRow(row[Member.table])
             if (!foundMember) {
                 throw new Error("Expected member in every row")
             }
-            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
+            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration & {group: Group}>, []).setManyRelation(Member.users, [])
 
             // Seach if we already got this member?
             const existingMember = members.find(m => m.id == _f.id)
@@ -147,7 +158,11 @@ export class Group extends Model {
             if (registration) {
                 // Check if we already have this registration
                 if (!member.registrations.find(r => r.id == registration.id)) {
-                    member.registrations.push(registration)
+                    const group = groups.find(g => g.id == registration.groupId)
+                    if (!group) {
+                        throw new Error("Expected group")
+                    }
+                    member.registrations.push(registration.setRelation(Registration.group, group))
                 }
             }
 
@@ -273,3 +288,6 @@ export class Group extends Model {
     }
 
 }
+
+Registration.group = new ManyToOneRelation(Group, "group")
+Registration.group.foreignKey = "groupId"

@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { Address, Country, DNSRecordStatus, EmailTemplateType, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
+import { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Address, Country, DNSRecordStatus, EmailTemplateType, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { EmailTemplate, Group, StripeAccount } from "./";
+import { EmailTemplate, Group, OrganizationRegistrationPeriod, RegistrationPeriod, StripeAccount } from "./";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -41,6 +41,9 @@ export class Organization extends Model {
     // in uri.stamhoofd.be
     @column({ type: "string" })
     uri: string;
+
+    @column({ type: "string" })
+    periodId: string;
 
     /**
      * Public meta data
@@ -259,7 +262,10 @@ export class Organization extends Model {
     }
 
     async getStructure({emptyGroups} = {emptyGroups: false}): Promise<OrganizationStruct> {
-        const groups = emptyGroups ? [] : (await (await import("./Group")).Group.getAll(this.id))
+        const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId }, {limit: 1})
+        const oPeriod = oPeriods[0];
+        const period = await RegistrationPeriod.getByID(this.periodId)
+        const groups = emptyGroups ? [] : (await (await import("./Group")).Group.getAll(this.id, this.periodId))
 
         const struct = OrganizationStruct.create({
             id: this.id,
@@ -270,7 +276,11 @@ export class Organization extends Model {
             uri: this.uri,
             website: this.website,
             groups: groups.map(g => g.getStructure()),
-            createdAt: this.createdAt
+            createdAt: this.createdAt,
+            period: OrganizationRegistrationPeriodStruct.create({
+                ...oPeriod,
+                period: period!.getStructure()
+            })
         })
 
         if (this.meta.modules.disableActivities) {

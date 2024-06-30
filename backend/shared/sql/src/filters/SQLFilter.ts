@@ -2,7 +2,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { StamhoofdFilter, StamhoofdKeyFilterValue } from "@stamhoofd/structures";
 import { SQL } from "../SQL";
 import { SQLExpression } from "../SQLExpression";
-import { SQLArray, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
+import { SQLArray, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
 import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch } from "../SQLJsonExpressions";
 import { SQLSelect } from "../SQLSelect";
 import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from "../SQLWhere";
@@ -49,7 +49,7 @@ export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof 
         const f = filter as any;
 
         if ('$elemMatch' in f) {
-             const w = compileToSQLFilter(f['$elemMatch'], definitions)
+            const w = compileToSQLFilter(f['$elemMatch'], definitions)
             const q = baseSelect.clone().where(w);
             return new SQLWhereExists(q)
         }
@@ -218,12 +218,12 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             );
         }
 
-        throw new Error('Invalid filter')
+        throw new Error('Invalid filter ' + JSON.stringify(f))
     }
 }
 
-export function createSQLColumnFilterCompiler(name: string, normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null): SQLFilterCompiler {
-    const column = SQL.column(name);
+export function createSQLColumnFilterCompiler(name: string | SQLColumnExpression, normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null): SQLFilterCompiler {
+    const column = name instanceof SQLColumnExpression ? name : SQL.column(name);
     return createSQLExpressionFilterCompiler(column, normalizeValue)
 }
 

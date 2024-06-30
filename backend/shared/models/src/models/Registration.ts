@@ -24,6 +24,9 @@ export class Registration extends Model {
     organizationId: string
 
     @column({ type: "string" })
+    periodId: string;
+
+    @column({ type: "string", foreignKey: Registration.group})
     groupId: string;
 
     /**
@@ -85,9 +88,12 @@ export class Registration extends Model {
     @column({ type: "integer" })
     pricePaid = 0
 
-    getStructure() {
+    static group: ManyToOneRelation<"group", import('./Group').Group>
+
+    getStructure(this: Registration & {group: import('./Group').Group}) {
         return RegistrationStructure.create({
             ...this,
+            group: this.group.getStructure(),
             price: this.price ?? 0
         })
     }

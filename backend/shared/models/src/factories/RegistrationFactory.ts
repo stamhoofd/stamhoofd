@@ -15,6 +15,7 @@ export class RegistrationFactory extends Factory<Options, Registration> {
         const registration = new Registration()
         registration.memberId = this.options.member.id
         registration.groupId = this.options.group.id
+        registration.periodId = this.options.group.periodId
         registration.organizationId = this.options.group.organizationId
         registration.cycle = this.options.group.cycle
 

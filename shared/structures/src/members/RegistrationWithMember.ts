@@ -7,7 +7,4 @@ import { Registration } from "./Registration"
 export class RegistrationWithMember extends Registration {
     @field({ decoder: Member })
     member: Member
-
-    @field({ decoder: Group })
-    group: Group
 }

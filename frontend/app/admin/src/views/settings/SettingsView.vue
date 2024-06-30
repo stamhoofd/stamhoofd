@@ -36,6 +36,22 @@
                     </template>
                 </STListItem>
 
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.RegistrationPeriods)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('admin.settings.registrationPeriods.title') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('admin.settings.registrationPeriods.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
@@ -94,12 +110,14 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePlatformManager } from '@stamhoofd/networking';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditMemberResponsibilitiesView from './responsibilities/EditMemberResponsibilitiesView.vue';
+import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
 enum Routes {
     Admins = 'beheerders',
     Records = 'records',
     DefaultAgeGroups = 'standaard-leeftijdsgroepen',
-    Responsibilities = 'functies'
+    Responsibilities = 'functies',
+    RegistrationPeriods = 'werkjaren',
 }
 
 const platform = usePlatform()
@@ -137,6 +155,11 @@ defineRoutes([
         url: Routes.Responsibilities,
         present: 'popup',
         component: EditMemberResponsibilitiesView as ComponentOptions,
+    },
+    {
+        url: Routes.RegistrationPeriods,
+        present: 'popup',
+        component: EditRegistrationPeriodsView as ComponentOptions,
     },
 ])
 const $navigate = useNavigate()

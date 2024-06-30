@@ -84,7 +84,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
             const struct = put.put
-            let member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
+            let member = new Member()
+                .setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration & {group: Group}>, [])
+                .setManyRelation(Member.users, [])
             member.id = struct.id
 
             if (organization && STAMHOOFD.userMode !== 'platform') {
@@ -546,7 +548,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    async addRegistration(member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, group: Group) {
+    async addRegistration(member: Member & Record<"registrations", (Registration & {group: Group})[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, group: Group) {
         // Check if this member has this registration already.
         // Note: we cannot use the relation here, because invalid ones or reserved ones are not loaded in there
         const existings = await Registration.where({ 
@@ -581,6 +583,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         const registration = new Registration()
         registration.groupId = registrationStruct.groupId
         registration.organizationId = group.organizationId
+        registration.periodId = group.periodId
         registration.cycle = registrationStruct.cycle
         registration.memberId = member.id
         registration.registeredAt = registrationStruct.registeredAt
@@ -598,7 +601,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         registration.deactivatedAt = registrationStruct.deactivatedAt
 
         await registration.save()
-        member.registrations.push(registration)
+        member.registrations.push(registration.setRelation(Registration.group, group))
 
         if (registrationStruct.price) {
             // Create balance item
@@ -653,6 +656,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             registration.organizationId = organization.id
             registration.memberId = member.id
             registration.groupId = group.id
+            registration.periodId = group.periodId
             registration.cycle = group.cycle
             registration.registeredAt = d
 

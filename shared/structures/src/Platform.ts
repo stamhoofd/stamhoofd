@@ -6,6 +6,7 @@ import { User } from "./User";
 import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
 import { MemberResponsibility } from "./MemberResponsibility";
+import { RegistrationPeriod } from "./RegistrationPeriod";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -46,10 +47,18 @@ export class Platform extends AutoEncoder {
     @field({ decoder: PlatformPrivateConfig, nullable: true })
     privateConfig: PlatformPrivateConfig|null = null;
 
+    @field({ decoder: RegistrationPeriod })
+    period: RegistrationPeriod = RegistrationPeriod.create({})
+
     /**
      * Keep admins accessible and in memory
      */
     admins?: User[]
+
+    /**
+     * Keep admins accessible and in memory
+     */
+    periods?: RegistrationPeriod[]
 
     /**
      * If you don't have permissions, privateConfig will be null, so there won't be any roles either
