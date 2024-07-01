@@ -9,7 +9,7 @@
         </STNavigationBar>
 
         <main>
-            <p class="stamhoofd-header" v-if="!webshop.meta.reduceBranding">
+            <p v-if="!webshop.meta.reduceBranding" class="stamhoofd-header">
                 <a :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw je betaalbare webshop via</span>  <Logo /></a>
             </p>
             <div class="box">
@@ -311,11 +311,11 @@
                         <hr>
 
                         <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                            <span>Kortingscode <span class="style-discount-code">{{code.code}}</span></span>
+                            <span>Kortingscode <span class="style-discount-code">{{ code.code }}</span></span>
                         </p>
 
                         <STList>
-                            <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cartItem="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="false" />
+                            <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="false" />
                         </STList>
 
                         <hr>
@@ -343,9 +343,9 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CheckoutPriceBreakdown, CartItemRow, CenteredMessage, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
+import { CartItemRow, CenteredMessage, CheckoutPriceBreakdown, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Payment, RecordCategory } from '@stamhoofd/structures';
+import { BalanceItemStatus, Payment, RecordCategory } from '@stamhoofd/structures';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -420,7 +420,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get isPaid() {
-        return this.order && (this.order.payment === null || this.order.payment.status === PaymentStatus.Succeeded)
+        return this.order && (this.order.balanceItems.every(item => item.status === BalanceItemStatus.Paid))
     }
 
     get isTransfer() {
