@@ -75,21 +75,22 @@ export class OrganizationManager {
         this.save().catch(console.error)
     }
 
-    async patchPeriods(patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>, shouldRetry = false) {
+    async patchPeriods(patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean, owner?: any } = {}) {
         const response = await this.$context.authenticatedServer.request({
             method: "PATCH",
             path: "/organization/registration-periods",
             body: patch,
             decoder: new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
-            shouldRetry
+            shouldRetry: options.shouldRetry ?? false,
+            owner: options.owner
         })
 
         // Update in memory
         for (const period of this.organization.periods?.organizationPeriods ?? []) {
-            const updated = response.data.find(p => p.id == period.id)
+            const updated = response.data.find(p => p.id === period.id)
             if (updated) {
                 for (const group of period.groups) {
-                    const updatedGroup = updated.groups.find(g => g.id == group.id)
+                    const updatedGroup = updated.groups.find(g => g.id === group.id)
                     if (updatedGroup) {
                         group.set(updatedGroup)
                     }
@@ -98,11 +99,11 @@ export class OrganizationManager {
             }
         }
 
-        const updated = response.data.find(p => p.id == this.organization.period.id)
+        const updated = response.data.find(p => p.id === this.organization.period.id)
         if (updated) {
             console.log('Updated period', updated, this.organization.period)
             for (const group of this.organization.period.groups) {
-                const updatedGroup = updated.groups.find(g => g.id == group.id)
+                const updatedGroup = updated.groups.find(g => g.id === group.id)
                 if (updatedGroup) {
                     console.log('Updated group', updatedGroup, group)
                     group.set(updatedGroup)
@@ -114,13 +115,20 @@ export class OrganizationManager {
         }
     }
 
-    async patchPeriod(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>, shouldRetry = false) {
+    async patchPeriod(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean, owner?: any } = {}) {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>
         arr.addPatch(patch)
 
-        await this.patchPeriods(arr, shouldRetry)
+        await this.patchPeriods(arr, options)
     }
 
+    async patchGroup(organizationPeriod: OrganizationRegistrationPeriod, patch: AutoEncoderPatchType<Group>, options: { shouldRetry?: boolean, owner?: any } = {}) {
+        const periodPatch = OrganizationRegistrationPeriod.patch({
+            id: organizationPeriod.id
+        })
+        periodPatch.groups.addPatch(patch)
+        await this.patchPeriod(periodPatch, options)
+    }
 
     async loadAdmins(force = false, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         if (!force && this.organization.admins) {

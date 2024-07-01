@@ -88,7 +88,7 @@ const tree = computed(() => {
         organization: $organization.value!
     })
 })
-const period = ref($organization.value?.period) as Ref<OrganizationRegistrationPeriod>
+const period = computed(() => $organization.value?.period) as Ref<OrganizationRegistrationPeriod>
 const newestPeriod = computed(() => {
     return platform.value.period
 })
