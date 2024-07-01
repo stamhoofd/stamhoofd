@@ -18,7 +18,7 @@
 
             <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                 <div class="grouped">
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category}}) }" @click="$navigate('category', {properties: {category}})">
+                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
                         <span :class="'icon ' + getCategoryIcon(category)" />
                         <span>{{ category.settings.name }}</span>
                         <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
@@ -30,9 +30,9 @@
                             v-for="c in category.categories"
                             :key="c.id"
                             class="menu-button button sub-button"
-                            :class="{ selected: checkRoute(Routes.Category, {properties: {category: c}}) }"
+                            :class="{ selected: checkRoute(Routes.Category, {properties: {category: c, period}}) }"
                             type="button"
-                            @click="$navigate(Routes.Category, {properties: {category: c}})"
+                            @click="$navigate(Routes.Category, {properties: {category: c, period}})"
                         >
                             <span class="icon" />
                             <span>{{ c.settings.name }}</span>
@@ -42,9 +42,9 @@
                             v-for="group in category.groups"
                             :key="group.id"
                             class="menu-button button sub-button"
-                            :class="{ selected: checkRoute(Routes.Group, {properties: {group}}) }"
+                            :class="{ selected: checkRoute(Routes.Group, {properties: {group, period}}) }"
                             type="button"
-                            @click="$navigate(Routes.Group, {properties: {group}})"
+                            @click="$navigate(Routes.Group, {properties: {group, period}})"
                         >
                             <GroupAvatar :group="group" :allow-empty="true" />
                             <span>{{ group.settings.name }}</span>
@@ -133,12 +133,13 @@ defineRoutes([
         show: 'detail',
         component: async () => ((await import( "../dashboard/groups/CategoryView.vue")).default) as unknown as ComponentOptions,
         paramsToProps: (params: {slug: string}) => {
-            const category = $organization.value?.categoryTree.categories.find(g => Formatter.slug(g.settings.name) === params.slug);
+            const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
             if (!category) {
                 throw new Error('Category not found')
             }
             return {
-                category
+                category,
+                period: period.value
             }
         },
         propsToParams(props) {
@@ -166,7 +167,8 @@ defineRoutes([
                 throw new Error('Group not found')
             }
             return {
-                group
+                group,
+                period: period.value
             }
         },
         propsToParams(props) {
@@ -181,7 +183,8 @@ defineRoutes([
         },
         isDefault: tree.value.getAllGroups().length ? {
             properties: {
-                group: tree.value.getAllGroups()[0]
+                group: tree.value.getAllGroups()[0],
+                period: period.value
             }
         } : undefined
     }

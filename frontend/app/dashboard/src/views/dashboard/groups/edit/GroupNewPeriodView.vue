@@ -110,7 +110,7 @@ export default class GroupNewPeriodView extends Mixins(EditGroupMixin) {
     }
 
     get duplicateName() {
-        return !!this.patchedOrganization.groups.find(g => StringCompare.typoCount(g.settings.name, this.patchedGroup.settings.name) === 0 && g.id !== this.patchedGroup.id)
+        return !!this.patchedPeriod.groups.find(g => StringCompare.typoCount(g.settings.name, this.patchedGroup.settings.name) === 0 && g.id !== this.patchedGroup.id)
     }
 
     mounted() {
@@ -137,10 +137,6 @@ export default class GroupNewPeriodView extends Mixins(EditGroupMixin) {
 
     get hasWaitingList() {
         return !!this.patchedGroup.settings.waitingListSize
-    }
-
-    get roles() {
-        return this.patchedOrganization.privateMeta?.roles ?? []
     }
 
     get name() {

@@ -105,7 +105,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Group, GroupPrice, GroupPrices, Organization } from "@stamhoofd/structures";
+import { Group, GroupPrice, GroupPrices, Organization, OrganizationRegistrationPeriod } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -144,17 +144,20 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         group!: Group | null
 
     @Prop({ default: null })
-        patchedOrganization!: Organization | null
+        organization!: Organization | null
+
+    @Prop({ required: true })
+        period: OrganizationRegistrationPeriod
 
     get enableFinancialSupport() {
-        return (this.patchedOrganization ?? this.$organization).meta.recordsConfiguration.financialSupport !== null || this.$platform.config.recordsConfiguration.financialSupport !== null
+        return (this.organization ?? this.$organization).meta.recordsConfiguration.financialSupport !== null || this.$platform.config.recordsConfiguration.financialSupport !== null
     }
 
     get canRegisterMultipleGroups() {
         if (!this.group) {
             return true
         }
-        const parents = this.group.getParentCategories((this.patchedOrganization ?? this.$organization).meta.categories, false)
+        const parents = this.group.getParentCategories(this.period.settings.categories, false)
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== 1) {
                 return true
@@ -174,18 +177,6 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
             // Add default price
             this.addGroup()
         }
-    }
-
-    formatPrice(price: number) {
-        return Formatter.price(price)
-    }
-
-    formatDate(date: Date) {
-        const time = Formatter.time(date)
-        if (time == "0:00") {
-            return Formatter.date(date)
-        }
-        return Formatter.dateTime(date)
     }
 
     ordinalNumber(price: GroupPrices, num: number, total: number) {
@@ -251,7 +242,7 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         if (!this.group) {
             return null
         }
-        const parents = this.group.getParentCategories((this.patchedOrganization ?? this.$organization).meta.categories, false)
+        const parents = this.group.getParentCategories(this.period.settings.categories, false)
         return parents[0] ?? null
     }
 

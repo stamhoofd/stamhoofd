@@ -33,3 +33,36 @@ export function usePatchMoveUpDown<T extends AutoEncoder & NonScalarIdentifiable
         }
     }
 }
+
+export function usePatchMoveUpDownIds<T extends string|number>(
+    movingItemId: T,
+    inList: Ref<T[]>|T[],
+    addPatch: (arrPatch: PatchableArray<T, T, T>) => void,
+) {
+    return {
+        up: () => {
+            const list = unref(inList)
+            const index = list.findIndex(c => c === movingItemId)
+            if (index == -1 || index == 0) {
+                return;
+            }
+    
+            const moveTo = index - 2 
+            const p = new PatchableArray() as  PatchableArray<T, T, T>
+            p.addMove(movingItemId, list[moveTo] ?? null)
+            addPatch(p)
+        }, 
+        down: () => {
+            const list = unref(inList)
+            const index = list.findIndex(c => c === movingItemId)
+            if (index == -1 || index >= list.length - 1) {
+                return;
+            }
+    
+            const moveTo = index + 1
+            const p = new PatchableArray() as  PatchableArray<T, T, T>
+            p.addMove(movingItemId, list[moveTo] ?? null)
+            addPatch(p)
+        }
+    }
+}

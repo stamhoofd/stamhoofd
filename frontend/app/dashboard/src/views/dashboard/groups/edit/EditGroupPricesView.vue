@@ -5,13 +5,13 @@
         </h1>
         
         <STErrorsDefault :error-box="errorBox" />
-        <EditGroupPriceBox :validator="validator" :prices="getPrices()" :group="patchedGroup" :patched-organization="patchedOrganization" @patch="addPricesPatch" />
+        <EditGroupPriceBox :validator="validator" :prices="getPrices()" :group="patchedGroup" :organization="organization" :period="patchedPeriod" @patch="addPricesPatch" />
     </SaveView>
 </template>
 
 <script lang="ts">
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { SaveView, STErrorsDefault } from "@stamhoofd/components";
+import { STErrorsDefault, SaveView } from "@stamhoofd/components";
 
 import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import EditGroupMixin from './EditGroupMixin';

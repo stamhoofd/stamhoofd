@@ -68,7 +68,6 @@ import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveV
 import { WaitingListType } from '@stamhoofd/structures';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
-import EditGroupPriceBox from "../EditGroupPriceBox.vue";
 import EditGroupMixin from './EditGroupMixin';
 
 @Component({
@@ -85,7 +84,6 @@ import EditGroupMixin from './EditGroupMixin';
         AgeInput,
         Slider,
         TimeInput,
-        EditGroupPriceBox,
         STList,
         UploadButton,
         STListItem

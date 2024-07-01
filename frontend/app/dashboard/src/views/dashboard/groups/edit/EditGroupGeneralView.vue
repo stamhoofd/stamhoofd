@@ -102,13 +102,13 @@ import EditGroupMixin from './EditGroupMixin';
 })
 export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
     get duplicateName() {
-        return !!this.patchedOrganization.groups.find(g => StringCompare.typoCount(g.settings.name, this.patchedGroup.settings.name) === 0 && g.id !== this.patchedGroup.id)
+        return !!this.patchedPeriod.groups.find(g => StringCompare.typoCount(g.settings.name, this.patchedGroup.settings.name) === 0 && g.id !== this.patchedGroup.id)
     }
 
     mounted() {
         // Auto assign roles
         if (this.isNew && this.$organizationManager.user.permissions && !this.group.privateSettings!.permissions.hasFullAccess(this.$context.organizationPermissions)) {
-            const categories = this.patchedOrganization.meta.categories.filter(c => c.groupIds.includes(this.group.id))
+            const categories = this.patchedPeriod.settings.categories.filter(c => c.groupIds.includes(this.group.id))
             for (const cat of categories) {
                 // Get all roles that have create permissions in the categories that this group will get added into
                 const roles = cat.settings.permissions.create.flatMap(r => {
@@ -132,11 +132,6 @@ export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
                 
             }
         }
-    }
-    
-
-    get roles() {
-        return this.patchedOrganization.privateMeta?.roles ?? []
     }
 
     get name() {

@@ -1,8 +1,8 @@
 import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationMetaData } from '@stamhoofd/structures';
+import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { Member, MemberWithRegistrations, Payment, Registration, User } from './';
+import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
 import { Formatter } from '@stamhoofd/utility';
 
 if (Member === undefined) {
@@ -248,12 +248,12 @@ export class Group extends Model {
         }
     }
 
-    static async deleteUnreachable(organizationId: string, organizationMetaData: OrganizationMetaData, allGroups: Group[]) {
+    static async deleteUnreachable(organizationId: string, period: OrganizationRegistrationPeriod, allGroups: Group[]) {
         const reachable = new Map<string, boolean>()
 
         const visited = new Map<string, boolean>()
-        const queue = [organizationMetaData.rootCategoryId]
-        visited.set(organizationMetaData.rootCategoryId, true)
+        const queue = [period.settings.rootCategoryId]
+        visited.set(period.settings.rootCategoryId, true)
 
         while (queue.length > 0) {
             const id = queue.shift()
@@ -261,7 +261,7 @@ export class Group extends Model {
                 break
             }
 
-            const category = organizationMetaData.categories.find(c => c.id === id)
+            const category = period.settings.categories.find(c => c.id === id)
             if (!category) {
                 continue
             }
@@ -280,7 +280,7 @@ export class Group extends Model {
 
         for (const group of allGroups) {
             if (!reachable.get(group.id) && group.status !== GroupStatus.Archived) {
-                console.log("Archiving unreachable group "+group.id+" from organization "+organizationId)
+                console.log("Archiving unreachable group "+group.id+" from organization "+organizationId + " org period "+period.id)
                 group.status = GroupStatus.Archived
                 await group.save()
             }

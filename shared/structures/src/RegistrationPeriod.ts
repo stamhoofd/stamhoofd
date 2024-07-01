@@ -61,6 +61,28 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Group) })
     groups: Group[] = []
+
+    /**
+     * Get all groups that are in a category
+     */
+    get availableCategories() {
+        return this.adminCategoryTree.getAllCategories()
+    }
+    
+    /**
+     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     */
+    get categoryTree(): GroupCategoryTree {
+        return this.getCategoryTree()
+    }
+
+    get publicCategoryTree(): GroupCategoryTree {
+        return this.getCategoryTree({smartCombine: true})
+    }
+
+    get adminCategoryTree(): GroupCategoryTree {
+        return this.getCategoryTree({admin: true})
+    }
     
     /**
      * Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
@@ -69,7 +91,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
     getCategoryTree(options?: {
-        organization: Organization,
+        organization?: Organization,
         maxDepth?: number, 
         filterGroups?: (group: Group) => boolean, 
         permissions?: LoadedPermissions | null, 

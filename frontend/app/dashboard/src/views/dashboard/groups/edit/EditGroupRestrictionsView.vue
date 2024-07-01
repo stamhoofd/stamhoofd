@@ -173,7 +173,7 @@ export default class EditGroupRestrictionsView extends Mixins(EditGroupMixin) {
     }
 
     getGroupName(id: string) {
-        const group = this.patchedOrganization.groups.find(g => g.id === id)
+        const group = this.patchedPeriod.groups.find(g => g.id === id)
         if (!group) {
             // Search deleted groups (in non patched one)
             const deleted = this.$organization.groups.find(g => g.id === id)

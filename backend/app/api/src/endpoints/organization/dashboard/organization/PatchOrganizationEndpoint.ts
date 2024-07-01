@@ -51,10 +51,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        let deleteUnreachable = false
-
         const errors = new SimpleErrors()
-        const allowedIds: string[] = []
 
         if (await Context.auth.hasFullAccess(organization.id)) {
             organization.name = request.body.name ?? organization.name
@@ -254,10 +251,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
 
-                if (request.body.meta.categories) {
-                    deleteUnreachable = true
-                }
-
                 if (request.body.meta?.tags) {
                     if (!Context.auth.hasPlatformFullAccess()) {
                         throw Context.auth.error()
@@ -307,33 +300,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             // Save the organization
             await organization.save()
         } else {
-            if (request.body.meta) {
-                // Only allow adding groups if we have create permissions in a given category group
-                if (request.body.meta.categories && !Array.isArray(request.body.meta.categories)) {
-                    for (const patch of request.body.meta.categories.getPatches()) {
-                        const category = organization.meta.categories.find(c => c.id === patch.id)
-                        if (!category) {
-                            // Fail silently
-                            continue
-                        }
-
-                        if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
-                            throw Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen in deze categorie')
-                        }
-                            
-                        // Only process puts
-                        const ids = patch.groupIds.getPuts().map(p => p.put)
-                        allowedIds.push(...ids)
-                        category.groupIds.push(...ids)
-                    }
-
-                    if (allowedIds.length > 0) {
-                        deleteUnreachable = true
-                        await organization.save()
-                    }
-                }
-            }
-
             if (request.body.name || request.body.address) {
                 throw new SimpleError({
                     code: "permission_denied",
@@ -341,118 +307,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     statusCode: 403
                 })
             }
-        }
-
-        // Check changes to groups
-        const deleteGroups = request.body.groups.getDeletes()
-        if (deleteGroups.length > 0) {
-            for (const id of deleteGroups) {
-                const model = await Group.getByID(id)
-                if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-                    errors.addError(
-                        Context.auth.error('Je hebt geen toegangsrechten om deze groep te verwijderen')
-                    )
-                    continue;
-                }
-
-                model.deletedAt = new Date()
-                await model.save()
-                deleteUnreachable = true
-            }
-        }
-
-        for (const groupPut of request.body.groups.getPuts()) {
-            if (!await Context.auth.hasFullAccess(organization.id) && !allowedIds.includes(groupPut.put.id)) {
-                errors.addError(
-                    Context.auth.error('Je hebt geen toegangsrechten om groepen toe te voegen')
-                )
-                continue;
-            }
-
-            const struct = groupPut.put
-            const model = new Group()
-            model.id = struct.id
-            model.organizationId = organization.id
-            model.periodId = organization.periodId
-            model.settings = struct.settings
-            model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
-            model.status = struct.status
-
-            if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-                // Create a temporary permission role for this user
-                const organizationPermissions = user.permissions?.organizationPermissions?.get(organization.id)
-                if (!organizationPermissions) {
-                    throw new Error('Unexpected missing permissions')
-                }
-                const resourcePermissions = ResourcePermissions.create({
-                    resourceName: model.settings.name,
-                    level: PermissionLevel.Full
-                })
-                const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Groups, model.id, organizationPermissions)
-                user.permissions!.organizationPermissions.set(organization.id, organizationPermissions.patch(patch))
-                console.log('Automatically granted author full permissions to resource', 'group', model.id, 'user', user.id, 'patch', patch.encode({version: Version}))
-                await user.save()
-            }
-
-            // Check if current user has permissions to this new group -> else fail with error
-            if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-                errors.addError(
-                    new SimpleError({
-                        code: "missing_permissions",
-                        message: "You cannot restrict your own permissions",
-                        human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep"
-                    })
-                )
-                continue;
-            }
-
-            await model.updateOccupancy()
-            await model.save();
-        }
-
-        for (const struct of request.body.groups.getPatches()) {
-            const model = await Group.getByID(struct.id)
-
-            if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-                errors.addError(
-                    Context.auth.error('Je hebt geen toegangsrechten om deze groep te wijzigen')
-                )
-                continue;
-            }
-
-            if (struct.settings) {
-                model.settings.patchOrPut(struct.settings)
-            }
-
-            if (struct.status) {
-                model.status = struct.status
-            }
-            
-            if (struct.privateSettings) {
-                model.privateSettings.patchOrPut(struct.privateSettings)
-
-                if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
-                    errors.addError(
-                        new SimpleError({
-                            code: "missing_permissions",
-                            message: "You cannot restrict your own permissions",
-                            human: "Je kan je eigen volledige toegang tot deze inschrijvingsgroep niet verwijderen. Vraag aan een hoofdbeheerder om jouw toegang te verwijderen."
-                        })
-                    )
-                    continue;
-                }
-            }
-
-            if (struct.cycle !== undefined) {
-                model.cycle = struct.cycle
-            }
-
-            if (struct.deletedAt !== undefined) {
-                model.deletedAt = struct.deletedAt
-            }
-            
-            await model.updateOccupancy()
-            await model.save();
         }
 
         // Only needed for permissions atm, so no put or delete here
@@ -475,14 +329,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
             
             await model.save();
-        }
-
-        if (deleteUnreachable) {
-            // Delete unreachable categories first
-            const allGroups = await Group.getAll(organization.id, organization.periodId);
-            await organization.cleanCategories(allGroups);
-            await Group.deleteUnreachable(organization.id, organization.meta, allGroups)
-        }
+        }    
 
         errors.throwIfNotEmpty()
         return new Response(await AuthenticatedStructures.organization(organization));

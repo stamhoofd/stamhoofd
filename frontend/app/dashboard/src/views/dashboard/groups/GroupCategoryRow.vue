@@ -14,234 +14,236 @@
     </STListItem>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
-import { GroupCategory, Organization, OrganizationMetaData } from "@stamhoofd/structures"
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
-
+<script lang="ts" setup>
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ContextMenu, ContextMenuItem, useEmitPatch, usePatchMoveUpDownIds } from '@stamhoofd/components';
+import { GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import EditCategoryGroupsView from './EditCategoryGroupsView.vue';
 
-@Component({
-    components: {
-        STListItem
-    },
-    directives: {
-        LongPress: LongPressDirective
-    }
+const props = defineProps<{
+    category: GroupCategory,
+    organization: Organization,
+    period: OrganizationRegistrationPeriod
+}>()
+
+const present = usePresent();
+const emit = defineEmits(['patch:period'])
+const {addPatch} = useEmitPatch(props, emit, 'period')
+const parentCategory = computed(() => props.category.getParentCategories(props.period.settings.categories)[0])
+const grandParentCategory = computed(() => parentCategory.value?.getParentCategories(props.period.settings.categories)[0])
+const subCategories = computed(() => parentCategory.value.categoryIds.map(id => props.period.settings.categories.find(c => c.id == id)!).filter(c => c && c.id !== props.category.id))
+const childCategories = computed(() => props.category.categoryIds.map(id => props.period.settings.categories.find(c => c.id == id)!).filter(c => c))
+const childGroups = computed(() => props.category.groupIds.map(id => props.period.groups.find(g => g.id == id)!).filter(g => g))
+const {up, down} = usePatchMoveUpDownIds(props.category.id, computed(() => parentCategory.value.categoryIds), (categoryIds) => {
+    const patchCategory = GroupCategory.patch({id: parentCategory.value.id, categoryIds})
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<GroupCategory>
+    arr.addPatch(patchCategory)
+    addPatch(OrganizationRegistrationPeriod.patch({
+        settings: OrganizationRegistrationPeriodSettings.patch({
+            categories: arr
+        })
+    }))
 })
-export default class GroupCategoryRow extends Mixins(NavigationMixin) {
-    @Prop({})
-    category: GroupCategory
 
-    @Prop({})
-    organization: Organization
-
-    editCategory() {
-        this.present(new ComponentWithProperties(EditCategoryGroupsView, { 
-            category: this.category, 
-            organization: this.organization, 
-            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
-                this.$emit("patch", patch)
-            }
-        }).setDisplayStyle("popup"))
+const description = computed(() => {
+    if (props.category.groupIds.length == 0 && props.category.categoryIds.length == 0) {
+        return "Leeg"
     }
 
-    moveUp() {
-        this.$emit("move-up")
-    }
-
-    moveDown() {
-        this.$emit("move-down")
-    }
-
-    get parentCategory() {
-        return this.category.getParentCategories(this.organization.meta.categories)[0]
-    }
-
-    get grandParentCategory() {
-        return this.parentCategory?.getParentCategories(this.organization.meta.categories)[0]
-    }
-
-    get subCategories() {
-        return this.parentCategory.categoryIds.map(id => this.organization.meta.categories.find(c => c.id == id)!).filter(c => c && c.id !== this.category.id)
-    }
-
-    get childCategories() {
-        return this.category.categoryIds.map(id => this.organization.meta.categories.find(c => c.id == id)!).filter(c => c)
-    }
-
-    get childGroups() {
-        return this.category.groupIds.map(id => this.organization.groups.find(g => g.id == id)!).filter(g => g)
-    }
-
-    get description() {
-        if (this.category.groupIds.length == 0 && this.category.categoryIds.length == 0) {
-            return "Leeg"
+    if (childGroups.value.length > 0) {
+        if (childGroups.value.length > 4) {
+            return `${childGroups.value.length} groepen (${childGroups.value.slice(0, 2).map(g => g.settings.name).join(", ")}...)`
         }
 
-        const childGroups = this.childGroups;
-
-        if (childGroups.length > 0) {
-            if (childGroups.length > 4) {
-                return `${childGroups.length} groepen (${childGroups.slice(0, 2).map(g => g.settings.name).join(", ")}...)`
-            }
-
-            return `${childGroups.length} groepen (${Formatter.joinLast(childGroups.map(g => g.settings.name), ", ", " en ")})`
-        }
-
-        const childCategories = this.childCategories;
-
-        if (childCategories.length > 4) {
-            return `${childCategories.length} categorieën (${childCategories.slice(0, 2).map(g => g.settings.name).join(", ")}...)`
-        }
-
-        return `${childCategories.length} categorieën (${Formatter.joinLast(childCategories.map(g => g.settings.name), ", ", " en ")})`
+        return `${childGroups.value.length} groepen (${childGroups.value.map(g => g.settings.name).join(", ")})`
     }
 
-    moveTo(category: GroupCategory) {
-        const p = GroupCategory.patch({id: category.id})
-        p.categoryIds.addPut(this.category.id)
-
-        const meta = OrganizationMetaData.patch({})
-        meta.categories.addPatch(p)
-
-        this.$emit('patch', Organization.patch({
-            meta
-        }))
-        this.$emit("delete")
+    if (childCategories.value.length > 4) {
+        return `${childCategories.value.length} categorieën (${childCategories.value.slice(0, 2).map(g => g.settings.name).join(", ")}...)`
     }
 
-    mergeDisabledWith(category: GroupCategory): boolean | string {
-        if (this.category.groupIds.length == 0 && this.category.categoryIds.length == 0) {
-            return "Een lege categorie kan je niet samenvoegen met een andere. Dat is hetzelfde als verwijderen."
-        }
+    return `${childCategories.value.length} categorieën (${childCategories.value.map(g => g.settings.name).join(", ")})`
+})
 
-        // Ignore own category id
-        const filteredCategoryIds = category.categoryIds.filter(id => id !== this.category.id)
+async function editCategory() {
+    await present({
+        components: [
+            new ComponentWithProperties(EditCategoryGroupsView, { 
+                category: props.category, 
+                organization: props.organization,
+                period: props.period,
+                isNew: false,
+                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPatch(patch)
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
 
-        if (category.groupIds.length == 0 && filteredCategoryIds.length == 0) {
-            return false;
-        }
+function moveTo(category: GroupCategory) {
+    const p = GroupCategory.patch({id: category.id})
+    p.categoryIds.addPut(props.category.id)
 
-        if (category.groupIds.length > 0) {
-            if (this.category.categoryIds.length > 0) {
-                return `${category.settings.name || 'De hoofdcategorie'} bevat groepen, daarbij kan je de subcategorieën van ${this.category.settings.name} niet samenvoegen.`;
-            }
-            return false;
-        }
+    const settings = OrganizationRegistrationPeriodSettings.patch({})
+    settings.categories.addPatch(p)
 
-        if (this.category.groupIds.length > 0) {
-            return `${category.settings.name || 'De hoofdcategorie'} bevat al categorieën, daarbij kan je de groepen van ${this.category.settings.name} niet samenvoegen.`;
+    // Delete
+    const pp = GroupCategory.patch({id: parentCategory.value.id})
+    pp.categoryIds.addDelete(props.category.id)
+
+    settings.categories.addPatch(pp)
+
+    addPatch(OrganizationRegistrationPeriod.patch({
+        settings
+    }))
+}
+
+function mergeDisabledWith(category: GroupCategory): boolean | string {
+    if (props.category.groupIds.length == 0 && props.category.categoryIds.length == 0) {
+        return "Een lege categorie kan je niet samenvoegen met een andere. Dat is hetzelfde als verwijderen."
+    }
+
+    // Ignore own category id
+    const filteredCategoryIds = category.categoryIds.filter(id => id !== props.category.id)
+
+    if (category.groupIds.length == 0 && filteredCategoryIds.length == 0) {
+        return false;
+    }
+
+    if (category.groupIds.length > 0) {
+        if (props.category.categoryIds.length > 0) {
+            return `${category.settings.name || 'De hoofdcategorie'} bevat groepen, daarbij kan je de subcategorieën van ${props.category.settings.name} niet samenvoegen.`;
         }
         return false;
     }
 
-    mergeWith(category: GroupCategory) {
-        const p = GroupCategory.patch({id: category.id})
-        for (const childCatId of this.category.categoryIds) {
-            p.categoryIds.addPut(childCatId)
-        }
+    if (props.category.groupIds.length > 0) {
+        return `${category.settings.name || 'De hoofdcategorie'} bevat al categorieën, daarbij kan je de groepen van ${props.category.settings.name} niet samenvoegen.`;
+    }
+    return false;
+}
 
-        for (const childGroupId of this.category.groupIds) {
-            p.groupIds.addPut(childGroupId)
-        }
-
-        const meta = OrganizationMetaData.patch({})
-        meta.categories.addPatch(p)
-
-        this.$emit('patch', Organization.patch({
-            meta
-        }))
-        this.$emit("delete")
+function mergeWith(category: GroupCategory) {
+    const p = GroupCategory.patch({id: category.id})
+    for (const childCatId of props.category.categoryIds) {
+        p.categoryIds.addPut(childCatId)
     }
 
-    showContextMenu(event) {
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: "Verplaats omhoog",
-                    icon: "arrow-up",
-                    action: () => {
-                        this.moveUp()
-                        return true;
-                    }
-                }),
-                new ContextMenuItem({
-                    name: "Verplaats omlaag",
-                    icon: "arrow-down",
-                    action: () => {
-                        this.moveDown()
-                        return true;
-                    }
-                }),
-            ],
-
-            [
-                new ContextMenuItem({
-                    name: "Verplaats naar",
-                    childMenu: new ContextMenu([
-                        [
-                            new ContextMenuItem({
-                                name: "Bovenliggende categorie",
-                                disabled: !this.grandParentCategory,
-                                action: () => {
-                                    this.moveTo(this.grandParentCategory!)
-                                    return true
-                                }
-                            })
-                        ],
-                        this.subCategories.map(cat => 
-                            new ContextMenuItem({
-                                name: cat.settings.name,
-                                disabled: cat.groupIds.length > 0,
-                                action: () => {
-                                    this.moveTo(cat)
-                                    return true
-                                }
-                            })
-                        )
-                    ])
-                }),
-                new ContextMenuItem({
-                    name: "Verwijder en verplaats inhoud naar",
-                    disabled: this.category.groupIds.length == 0 && this.category.categoryIds.length == 0,
-                    childMenu: new ContextMenu([
-                        [
-                            new ContextMenuItem({
-                                name: this.grandParentCategory ? this.parentCategory.settings.name : "Hoofdcategorie",
-                                disabled: this.mergeDisabledWith(this.parentCategory),
-                                action: () => {
-                                    this.mergeWith(this.parentCategory)
-                                    return true
-                                }
-                            })
-                        ],
-                        this.subCategories.map(cat => 
-                            new ContextMenuItem({
-                                name: cat.settings.name,
-                                disabled: this.mergeDisabledWith(cat),
-                                action: () => {
-                                    this.mergeWith(cat)
-                                    return true
-                                }
-                            })
-                        )
-                    ])
-                }),
-                new ContextMenuItem({
-                    name: "Verwijderen",
-                    icon: "trash",
-                    action: () => {
-                        this.$emit("delete")
-                        return true;
-                    }
-                }),
-            ]
-        ])
-        menu.show({ clickEvent: event }).catch(console.error)
+    for (const childGroupId of props.category.groupIds) {
+        p.groupIds.addPut(childGroupId)
     }
+
+    const settings = OrganizationRegistrationPeriodSettings.patch({})
+    settings.categories.addPatch(p)
+
+    // Delete
+    const pp = GroupCategory.patch({id: parentCategory.value.id})
+    pp.categoryIds.addDelete(props.category.id)
+    settings.categories.addPatch(pp)
+
+    addPatch(OrganizationRegistrationPeriod.patch({
+        settings
+    }))
+}
+
+function deleteMe() {
+    const settings = OrganizationRegistrationPeriodSettings.patch({})
+    const pp = GroupCategory.patch({id: parentCategory.value.id})
+    pp.categoryIds.addDelete(props.category.id)
+    settings.categories.addPatch(pp)
+
+    addPatch(OrganizationRegistrationPeriod.patch({
+        settings
+    }))
+}
+
+async function showContextMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: "Verplaats omhoog",
+                icon: "arrow-up",
+                action: () => {
+                    up()
+                    return true;
+                }
+            }),
+            new ContextMenuItem({
+                name: "Verplaats omlaag",
+                icon: "arrow-down",
+                action: () => {
+                    down()
+                    return true;
+                }
+            }),
+        ],
+
+        [
+            new ContextMenuItem({
+                name: "Verplaats naar",
+                childMenu: new ContextMenu([
+                    [
+                        new ContextMenuItem({
+                            name: "Bovenliggende categorie",
+                            disabled: !grandParentCategory.value,
+                            action: () => {
+                                moveTo(grandParentCategory.value!)
+                                return true
+                            }
+                        })
+                    ],
+                    subCategories.value.map(cat => 
+                        new ContextMenuItem({
+                            name: cat.settings.name,
+                            disabled: cat.groupIds.length > 0,
+                            action: () => {
+                                moveTo(cat)
+                                return true
+                            }
+                        })
+                    )
+                ])
+            }),
+            new ContextMenuItem({
+                name: "Verwijder en verplaats inhoud naar",
+                disabled: props.category.groupIds.length == 0 && props.category.categoryIds.length == 0,
+                childMenu: new ContextMenu([
+                    [
+                        new ContextMenuItem({
+                            name: grandParentCategory.value ? parentCategory.value.settings.name : "Hoofdcategorie",
+                            disabled: mergeDisabledWith(parentCategory.value),
+                            action: () => {
+                                mergeWith(parentCategory.value)
+                                return true
+                            }
+                        })
+                    ],
+                    subCategories.value.map(cat => 
+                        new ContextMenuItem({
+                            name: cat.settings.name,
+                            disabled: mergeDisabledWith(cat),
+                            action: () => {
+                                mergeWith(cat)
+                                return true
+                            }
+                        })
+                    )
+                ])
+            }),
+            new ContextMenuItem({
+                name: "Verwijderen",
+                icon: "trash",
+                action: () => {
+                    deleteMe();
+                    return true;
+                }
+            }),
+        ]
+    ])
+    await menu.show({ clickEvent: event })
 }
 </script>

@@ -1,6 +1,8 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
-        <GroupAvatar #left :group="group" />
+        <template #left>
+            <GroupAvatar :group="group" />
+        </template>
         
         <h2 class="style-title-list">
             {{ group.settings.name }}
@@ -19,10 +21,10 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, GroupAvatar,LongPressDirective, STListItem } from "@stamhoofd/components";
-import { Group, GroupCategory, Organization, OrganizationMetaData } from "@stamhoofd/structures"
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ContextMenu, ContextMenuItem, GroupAvatar, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { Group, GroupCategory, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 
@@ -42,6 +44,9 @@ export default class GroupRow extends Mixins(NavigationMixin) {
     @Prop({})
         organization: Organization
 
+    @Prop({})
+        period: OrganizationRegistrationPeriod
+
     get imageSrc() {
         return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(50, 50)
     }
@@ -50,8 +55,9 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditGroupGeneralView, { 
             group: this.group, 
             organization: this.organization, 
-            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
-                this.$emit("patch", patch)
+            period: this.period,
+            saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                this.$emit("patch:period", patch)
 
                 // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
             }
@@ -67,27 +73,27 @@ export default class GroupRow extends Mixins(NavigationMixin) {
     }
 
     get parentCategory() {
-        return this.group.getParentCategories(this.organization.meta.categories)[0]
+        return this.group.getParentCategories(this.period.settings.categories)[0]
     }
 
     get subGroups() {
-        return this.parentCategory.groupIds.map(id => this.organization.groups.find(g => g.id === id)!).filter(g => !!g)
+        return this.parentCategory.groupIds.map(id => this.period.groups.find(g => g.id === id)!).filter(g => !!g)
     }
 
     get allCategories() {
         const parentCategory = this.parentCategory;
-        return this.organization.availableCategories.filter(c => c.categories.length == 0 && c.id !== parentCategory?.id)
+        return this.period.availableCategories.filter(c => c.categories.length == 0 && c.id !== parentCategory?.id)
     }
 
     moveTo(category: GroupCategory) {
         const p = GroupCategory.patch({id: category.id})
         p.groupIds.addPut(this.group.id)
 
-        const meta = OrganizationMetaData.patch({})
-        meta.categories.addPatch(p)
+        const settings = OrganizationRegistrationPeriodSettings.patch({})
+        settings.categories.addPatch(p)
 
-        this.$emit('patch', Organization.patch({
-            meta
+        this.$emit('patch', OrganizationRegistrationPeriod.patch({
+            settings
         }))
         this.$emit("delete")
     }
@@ -130,7 +136,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         this.$emit('patch', organizationPatch)
     }
 
-    showContextMenu(event) {
+    showContextMenu(event: MouseEvent) {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
@@ -203,7 +209,3 @@ export default class GroupRow extends Mixins(NavigationMixin) {
     border-radius: $border-radius;
 }
 </style>
-
-function uuidv4(): string {
-  throw new Error('Function not implemented.');
-}

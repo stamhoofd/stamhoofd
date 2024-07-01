@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, Toast, Validator } from "@stamhoofd/components";
-import { FinancialSupportSettings, Group, GroupPrices, GroupPrivateSettings, GroupSettings, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, ErrorBox, Validator } from "@stamhoofd/components";
+import { Group, GroupPrices, GroupPrivateSettings, GroupSettings, Organization, OrganizationRegistrationPeriod, Version } from '@stamhoofd/structures';
 
 @Component
 export default class EditGroupMixin extends Mixins(NavigationMixin) {
@@ -16,43 +16,48 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
         organization: Organization
 
     /**
+     *  == patched organization <-> $organization (= unpatched)
+     */
+    @Prop({ required: true })
+        period: OrganizationRegistrationPeriod
+
+    @Prop({ default: false })
+        isNew: boolean
+
+    /**
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>);
     
-    patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
-
-    get isNew() {
-        return !this.$organization.groups.find(g => g.id === this.group.id)
-    }
+    patchPeriod: AutoEncoderPatchType<OrganizationRegistrationPeriod> = OrganizationRegistrationPeriod.patch({})
 
     saving = false
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
-    get patchedOrganization() {
-        return this.organization.patch(this.patchOrganization)
+    get patchedPeriod() {
+        return this.period.patch(this.patchPeriod)
     }
 
     get patchedGroup() {
-        const c = this.patchedOrganization.groups.find(c => c.id == this.group.id)
+        const c = this.patchedPeriod.groups.find(c => c.id == this.group.id)
         if (c) {
             return c
         }
         return this.group
     }
 
-    addOrganizationPatch(patch: AutoEncoderPatchType<Organization>) {
-        this.patchOrganization = this.patchOrganization.patch(patch)
+    addPeriodPatch(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
+        this.patchPeriod = this.patchPeriod.patch(patch)
     }
 
     addPatch(patch: AutoEncoderPatchType<Group>) {
         patch.id = this.group.id
-        const p = Organization.patch({});
+        const p = OrganizationRegistrationPeriod.patch({});
         p.groups.addPatch(patch)
-        this.addOrganizationPatch(p)
+        this.addPeriodPatch(p)
     }
 
     addPricesPatch(patch: PatchableArrayAutoEncoder<GroupPrices>) {
@@ -74,7 +79,7 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
+        return patchContainsChanges(this.patchPeriod, this.period, { version: Version })
     }
 
     async shouldNavigateAway() {
@@ -107,24 +112,7 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
 
             await this.validate()
 
-            let patch = this.patchOrganization
-
-            // Check if reduced price is enabled
-            if (!this.patchedOrganization.meta.recordsConfiguration.financialSupport && !this.$platform.config.recordsConfiguration.financialSupport && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
-                const patchOrganization = Organization.patch({
-                    meta:  OrganizationMetaData.patch({
-                        recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                            financialSupport: FinancialSupportSettings.create({})
-                        })
-                    })
-                })
-
-                patch = patch.patch(patchOrganization)
-
-                new Toast("Kijk zeker de instellingen voor 'Financiële ondersteuning' na bij de instellingen. We vragen nu bij het inschrijven of een lid financiële ondersteuning nodig heeft, zodat we de verminderde prijzen kunnen toepassen.", "warning yellow").setHide(15*1000).show()
-            }
-
-            await this.saveHandler(patch)
+            await this.saveHandler(this.patchPeriod)
            
             const dis = await this.shouldDismiss()
             if (dis) {

@@ -151,7 +151,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, ContextMenu, ContextMenuItem, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationMetaData } from "@stamhoofd/structures";
+import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -179,6 +179,9 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
         category: GroupCategory
+
+    @Prop({ required: true })
+        period: OrganizationRegistrationPeriod
 
     mounted() {
         UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
@@ -293,7 +296,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get tree() {
-        return GroupCategoryTree.build(this.reactiveCategory, this.organization, {permissions: this.$context.organizationPermissions})
+        return GroupCategoryTree.build(this.reactiveCategory, this.period, {permissions: this.$context.auth.permissions})
     }
 
     get organization() {
@@ -336,7 +339,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
     openGroup(group: Group) {
         this.show(new ComponentWithProperties(GroupOverview, {
-            group
+            group,
+            period: this.period
         }))
     }
 
@@ -367,34 +371,34 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     createGroup() {
         const group = Group.create({
             organizationId: this.organization.id,
-            periodId: this.organization.period.period.id,
+            periodId: this.period.period.id,
             settings: GroupSettings.create({
                 name: "",
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: new Date(),
+                endDate: new Date(),
                 prices: [],
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
             }),
             privateSettings: GroupPrivateSettings.create({})
         })
-        const meta = OrganizationMetaData.patch({})
+        const settings = OrganizationRegistrationPeriodSettings.patch({})
 
         const me = GroupCategory.patch({ id: this.category.id })
         me.groupIds.addPut(group.id)
-        meta.categories.addPatch(me)
+        settings.categories.addPatch(me)
 
-        const p = Organization.patch({
-            id: this.organization.id,
-            meta
+        const p = OrganizationRegistrationPeriod.patch({
+            id: this.period.id,
+            settings
         })
-
         p.groups.addPut(group)
         
         this.present(new ComponentWithProperties(EditGroupGeneralView, { 
             group, 
             organization: this.organization.patch(p), 
-            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                await this.$organizationManager.patch(p.patch(patch))
+            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                const merged = p.patch(patch)
+                await this.$organizationManager.patchPeriod(merged)
             }
         }).setDisplayStyle("popup"))
     }
@@ -403,10 +407,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(EditCategoryGroupsView, { 
                 category: this.category, 
+                period: this.period,
                 organization: this.organization, 
-                saveHandler: async (patch) => {
-                    patch.id = this.organization.id
-                    await this.$organizationManager.patch(patch)
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    patch.id = this.period.id
+                    await this.$organizationManager.patchPeriod(patch)
                 }
             })
         }).setDisplayStyle("popup"))

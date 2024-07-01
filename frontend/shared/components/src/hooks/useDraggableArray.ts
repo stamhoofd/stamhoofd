@@ -20,6 +20,41 @@ export function useDraggableArray<T extends AutoEncoder & NonScalarIdentifiable<
                     recordsPatch.addMove(record.id, null)
                 } else {
                     // This is a new one (happens when dragging between lists)
+                    recordsPatch.addPut(record, null)
+                }
+            }
+
+            // Check deleted
+            for (const r of original) {
+                if (!records.find(rr => rr.id === r.id)) {
+                    recordsPatch.addDelete(r.id)
+                }
+            }
+
+            addPatch(recordsPatch)
+        }
+    });
+}
+
+export function useDraggableArrayIds<T extends AutoEncoder & NonScalarIdentifiable<any>>(getter: () => T[], addPatch: (newPatch: PatchableArray<string, string, string>) => void) {
+    return computed({
+        get: getter,
+        set: (records: T[]) => {
+            // Create move patch
+            const recordsPatch = new PatchableArray<string, string, string>()
+            const original = getter()
+            
+            for (const record of records.slice().reverse()) {
+                if (!record) {
+                    console.warn('Received undefined value in draggable patch')
+                    continue;
+                }
+
+                // Check if records exists
+                if (original.find(o => o.id === record.id)) {
+                    recordsPatch.addMove(record.id, null)
+                } else {
+                    // This is a new one (happens when dragging between lists)
                     recordsPatch.addPut(record.id, null)
                 }
             }

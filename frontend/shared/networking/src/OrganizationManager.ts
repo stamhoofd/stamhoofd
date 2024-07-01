@@ -1,7 +1,7 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, Organization, OrganizationAdmins, OrganizationPatch, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
+import { Group, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -74,6 +74,53 @@ export class OrganizationManager {
         // Save organization in localstorage
         this.save().catch(console.error)
     }
+
+    async patchPeriods(patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>, shouldRetry = false) {
+        const response = await this.$context.authenticatedServer.request({
+            method: "PATCH",
+            path: "/organization/registration-periods",
+            body: patch,
+            decoder: new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
+            shouldRetry
+        })
+
+        // Update in memory
+        for (const period of this.organization.periods?.organizationPeriods ?? []) {
+            const updated = response.data.find(p => p.id == period.id)
+            if (updated) {
+                for (const group of period.groups) {
+                    const updatedGroup = updated.groups.find(g => g.id == group.id)
+                    if (updatedGroup) {
+                        group.set(updatedGroup)
+                    }
+                }
+                period.set(updated)
+            }
+        }
+
+        const updated = response.data.find(p => p.id == this.organization.period.id)
+        if (updated) {
+            console.log('Updated period', updated, this.organization.period)
+            for (const group of this.organization.period.groups) {
+                const updatedGroup = updated.groups.find(g => g.id == group.id)
+                if (updatedGroup) {
+                    console.log('Updated group', updatedGroup, group)
+                    group.set(updatedGroup)
+                }
+            }
+            this.organization.period.set(updated)
+
+            console.log('Updated period', this.organization.period)
+        }
+    }
+
+    async patchPeriod(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>, shouldRetry = false) {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>
+        arr.addPatch(patch)
+
+        await this.patchPeriods(arr, shouldRetry)
+    }
+
 
     async loadAdmins(force = false, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         if (!force && this.organization.admins) {

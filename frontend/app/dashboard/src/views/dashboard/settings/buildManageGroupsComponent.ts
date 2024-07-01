@@ -1,7 +1,7 @@
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, } from "@simonbackx/vue-app-navigation";
 import { OrganizationManager } from "@stamhoofd/networking";
-import { GroupCategory, GroupCategorySettings, GroupCategoryTree, Organization, OrganizationMetaData, OrganizationTypeHelper } from "@stamhoofd/structures";
+import { GroupCategory, GroupCategorySettings, GroupCategoryTree, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, OrganizationTypeHelper } from "@stamhoofd/structures";
 
 import EditCategoryGroupsView from '../groups/EditCategoryGroupsView.vue';
 
@@ -9,38 +9,41 @@ import EditCategoryGroupsView from '../groups/EditCategoryGroupsView.vue';
 export function buildManageGroupsComponent($organizationManager: OrganizationManager) {
     const organization = $organizationManager.organization
     const enableActivities = organization.meta.modules.useActivities
+    const period = organization.period
 
-    if (!organization.meta.rootCategory) {
+    if (!period.settings.rootCategory) {
         // Auto restore missing root category
         const category = GroupCategory.create({})
-        const meta = OrganizationMetaData.patch({
+        const settings = OrganizationRegistrationPeriodSettings.patch({
             rootCategoryId: category.id
         })
-        meta.categories.addPut(category)
+        settings.categories.addPut(category)
 
-        const p = Organization.patch({
-            id: organization.id,
-            meta
+        const p = OrganizationRegistrationPeriod.patch({
+            id: period.id,
+            settings
         })
         
         return new ComponentWithProperties(EditCategoryGroupsView, { 
+            period: period.patch(p),
             category: category, 
-            organization: organization.patch(p), 
-            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                patch.id = organization.id
-                await $organizationManager.patch(p.patch(patch))
+            organization, 
+            isNew: false,
+            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {     
+                patch.id = period.id           
+                // todo
             }
         })
     }
 
-    let cat = organization.meta.rootCategory
+    let cat = period.settings.rootCategory
 
-    let p = Organization.patch({
-        id: organization.id
+    let p = OrganizationRegistrationPeriod.patch({
+        id: period.id
     })
 
     if (!enableActivities) {
-        const full = GroupCategoryTree.build(cat, organization)
+        const full = GroupCategoryTree.build(cat, period)
         if (full.categories.length === 0) {
 
             // Create a new one and open that one instead
@@ -51,17 +54,17 @@ export function buildManageGroupsComponent($organizationManager: OrganizationMan
                     
                 })
             })
-            category.groupIds = organization.groups.map(g => g.id)
+            category.groupIds = period.groups.map(g => g.id)
             
-            const meta = OrganizationMetaData.patch({})
-            meta.categories.addPut(category)
+            const settings = OrganizationRegistrationPeriodSettings.patch({})
+            settings.categories.addPut(category)
 
             const me = GroupCategory.patch({ id: cat.id })
             me.categoryIds.addPut(category.id)
-            meta.categories.addPatch(me)
+            settings.categories.addPatch(me)
 
             p = p.patch({
-                meta
+                settings
             })
 
             cat = category
@@ -71,11 +74,13 @@ export function buildManageGroupsComponent($organizationManager: OrganizationMan
         }
     }
     return new ComponentWithProperties(EditCategoryGroupsView, {
+        period: period.patch(p),
         category: cat,
-        organization: organization.patch(p),
-        saveHandler: async (patch) => {
-            patch.id = organization.id
-            await $organizationManager.patch(p.patch(patch))
+        organization,
+        isNew: false,
+        saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+            patch.id = period.id
+            await $organizationManager.patchPeriods(patch)
         }
     })
 }

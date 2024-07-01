@@ -3,14 +3,17 @@
         <h1>
             {{ title }}
         </h1>
+        <p v-if="organization && period.id !== organization.period.id">
+            {{ period.period.name }}
+        </p>
             
         <p v-if="isRoot && enableActivities">
             Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen. Als je geen onderverdeling wilt, kan je gewoon één groep toevoegen. Leden kunnen dan inschrijven voor één of meerdere inschrijvingsgroepen. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
         </p>
           
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="!isRoot" title="Naam" error-fields="name" :error-box="errorBox">
+        <STInputBox v-if="!isRoot" title="Naam" error-fields="name" :error-box="errors.errorBox">
             <input
                 ref="firstInput"
                 v-model="name"
@@ -40,7 +43,7 @@
             <h2>Categorieën</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
-                    <GroupCategoryRow :category="category" :organization="patchedOrganization" @patch="addPatch" @delete="deleteCategory(category)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+                    <GroupCategoryRow :category="category" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" />
                 </template>
             </STList>
         </template>
@@ -50,7 +53,7 @@
             <h2>Groepen</h2>
             <STList v-model="draggableGroups" :draggable="true">
                 <template #item="{item: group}">
-                    <GroupRow :group="group" :organization="patchedOrganization" @patch="addPatch" @delete="deleteGroup(group)" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
+                    <GroupRow :group="group" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" />
                 </template>
             </STList>
         </template>
@@ -69,7 +72,7 @@
             </button>
         </p>
 
-        <div v-if="isRoot && fullAccess" class="container">
+        <div v-if="isRoot && auth.hasFullAccess()" class="container">
             <hr>
             <h2>Prullenmand inschrijvingsgroepen</h2>
             <p>Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.</p>
@@ -92,18 +95,256 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Version } from "@stamhoofd/structures";
+<script lang="ts" setup>
+import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, SaveView, useAuth, useDraggableArrayIds, useErrors, usePatch } from "@stamhoofd/components";
+import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 
-import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue";
 import GroupRow from "./GroupRow.vue";
 import GroupTrashView from './GroupTrashView.vue';
+import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 
+// Self reference
+const instance = getCurrentInstance()
+const EditCategoryGroupsView = instance!.type
+
+const props = defineProps<{
+    organization: Organization
+    category: GroupCategory
+    isNew: boolean
+    period: OrganizationRegistrationPeriod
+    saveHandler: ((patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>);
+}>()
+
+const {patched: patchedPeriod, hasChanges, patch, addPatch} = usePatch(props.period)
+const enableActivities = computed(() => props.organization.meta.modules.useActivities);
+const saving = ref(false)
+const pop = usePop()
+const errors = useErrors()
+const present = usePresent()
+const auth = useAuth();
+
+const patchedCategory = computed(() => {
+    const c = patchedPeriod.value.settings.categories.find(c => c.id == props.category.id)
+    if (c) {
+        return c
+    }
+    return props.category
+})
+
+const isRoot = computed(() => props.category.id === patchedPeriod.value.settings.rootCategoryId)
+const title = computed(() => isRoot.value ? 'Inschrijvingsgroepen'+(enableActivities.value ? " en activiteiten" : "") : (props.isNew ? "Nieuwe categorie" : name.value))
+const name = computed({
+    get: () => patchedCategory.value.settings.name,
+    set: (name: string) => {
+        addCategoryPatch(GroupCategory.patch({ 
+            settings: GroupCategorySettings.patch({
+                name
+            })
+        }))
+    }
+})
+const limitRegistrations = computed({
+    get: () => patchedCategory.value.settings.maximumRegistrations !== null,
+    set: (limitRegistrations: boolean) => {
+        addCategoryPatch(
+            GroupCategory.patch({ 
+                settings: GroupCategorySettings.patch({
+                    maximumRegistrations: limitRegistrations ? 1 : null
+                })
+            })
+        )
+    }
+})
+const isHidden = computed({
+    get: () => !patchedCategory.value.settings.public,
+    set: (isHidden: boolean) => {
+        addCategoryPatch(
+            GroupCategory.patch({ 
+                settings: GroupCategorySettings.patch({
+                    public: !isHidden
+                })
+            })
+        )
+    }
+})
+const isPublic = computed(() => patchedCategory.value.isPublic(patchedPeriod.value.settings.categories))
+
+const categories = computed(() => {
+    return patchedCategory.value.categoryIds.flatMap(id => {
+        const category = patchedPeriod.value.settings.categories.find(c => c.id === id)
+        if (category) {
+            return [category]
+        }
+        return []
+    })
+})
+
+const draggableCategories = useDraggableArrayIds(() => {
+    return categories.value
+}, (patch: PatchableArray<string, string, string>) => {
+    addCategoryPatch(GroupCategory.patch({
+        categoryIds: patch
+    }))
+})
+
+const groups = computed(() => {
+    return patchedCategory.value.groupIds.flatMap(id => {
+        const group = patchedPeriod.value.groups.find(g => g.id === id)
+        if (group) {
+            return [group]
+        }
+        return []
+    })
+})
+
+const draggableGroups = useDraggableArrayIds(() => {
+    return groups.value
+}, (patch: PatchableArray<string, string, string>) => {
+    addCategoryPatch(GroupCategory.patch({
+        groupIds: patch
+    }))
+})
+
+function addCategoryPatch(patch: AutoEncoderPatchType<GroupCategory>) {
+    const settings = OrganizationRegistrationPeriodSettings.patch({})
+    patch.id = props.category.id
+    settings.categories.addPatch(patch)
+
+    addPatch(OrganizationRegistrationPeriod.patch({
+        settings
+    }))
+}
+
+async function save() {
+    if (saving.value) {
+        return
+    }
+
+    saving.value = true
+
+    try {
+        await props.saveHandler(patch.value)
+        await pop({ force: true })
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    }
+    saving.value = false
+}
+
+async function createGroup() {
+    const group = Group.create({
+        organizationId: props.organization.id,
+        periodId: props.organization.period.period.id,
+        settings: GroupSettings.create({
+            name: "",
+            startDate: new Date(),
+            endDate: new Date(),
+            prices: [],
+            genderType: props.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
+        }),
+        privateSettings: GroupPrivateSettings.create({})
+    })
+    const settings = OrganizationRegistrationPeriodSettings.patch({})
+
+    const me = GroupCategory.patch({ id: props.category.id })
+    me.groupIds.addPut(group.id)
+    settings.categories.addPatch(me)
+
+    const p = OrganizationRegistrationPeriod.patch({
+        settings
+    })
+
+    p.groups.addPut(group)
+    
+    await present({
+        components: [
+            new ComponentWithProperties(EditGroupGeneralView, { 
+                group, 
+                period: patchedPeriod.value,
+                organization: props.organization, 
+                isNew: true,
+                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPatch(p.patch(patch))
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+
+async function createCategory() {
+    const category = GroupCategory.create({})
+    category.groupIds = patchedCategory.value.categoryIds.length == 0 ? patchedCategory.value.groupIds : []
+    
+    const settings = OrganizationRegistrationPeriodSettings.patch({})
+    settings.categories.addPut(category)
+
+    const me = GroupCategory.patch({ 
+        id: props.category.id,
+        groupIds: [] as any
+    })
+
+    me.categoryIds.addPut(category.id)
+    settings.categories.addPatch(me)
+
+    const p = OrganizationRegistrationPeriod.patch({
+        settings
+    })
+    
+    await present({
+        components: [
+            new ComponentWithProperties(EditCategoryGroupsView, { 
+                category: category, 
+                organization: props.organization,
+                period: patchedPeriod.value,
+                isNew: true,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                    addPatch(p.patch(patch))
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+
+async function openGroupTrash() {
+    await present({
+        components: [
+            new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle("popup")
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+
+async function deleteMe() {
+    if (!await CenteredMessage.confirm(groups.value.length ? "Ben je zeker dat je deze categorie en groepen wilt verwijderen?" : "Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
+        return
+    }
+    const settings = OrganizationRegistrationPeriodSettings.patch({})
+    settings.categories.addDelete(props.category.id)
+    const p = OrganizationRegistrationPeriod.patch({
+        settings
+    })
+    await props.saveHandler(p)
+    await pop({ force: true })
+}
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+}
+
+defineExpose({
+    shouldNavigateAway
+})
+
+/*
 @Component({
     components: {
         SaveView,
@@ -131,12 +372,13 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
         organization: Organization
+
+    @Prop({ required: true })
+        period: OrganizationRegistrationPeriod
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
+    patchPeriod: AutoEncoderPatchType<OrganizationRegistrationPeriod> = OrganizationRegistrationPeriod.patch({})
 
-    /**
-     * Pass all the changes we made back when we save this category
-     */
     @Prop({ required: true })
         saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
@@ -152,8 +394,12 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         return this.organization.patch(this.patchOrganization)
     }
 
+    get patchedPeriod() {
+        return this.period.patch(this.patchPeriod)
+    }
+
     get patchedCategory() {
-        const c = this.patchedOrganization.meta.categories.find(c => c.id == this.category.id)
+        const c = this.patchedPeriod.settings.categories.find(c => c.id == this.category.id)
         if (c) {
             return c
         }
@@ -161,15 +407,11 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     get isRoot() {
-        return this.category.id === this.organization.meta.rootCategoryId
+        return this.category.id === this.patchedPeriod.settings.rootCategoryId
     }
 
     get fullAccess() {
         return this.$context.organizationAuth.hasFullAccess()
-    }
-
-    get roles() {
-        return this.patchedOrganization.privateMeta?.roles ?? []
     }
 
     get title() {
@@ -220,7 +462,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     get groups() {
         return this.patchedCategory.groupIds.flatMap(id => {
-            const group = this.patchedOrganization.groups.find(g => g.id === id)
+            const group = this.patchedPeriod.groups.find(g => g.id === id)
             if (group) {
                 return [group]
             }
@@ -230,7 +472,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     get categories() {
         return this.patchedCategory.categoryIds.flatMap(id => {
-            const category = this.patchedOrganization.meta.categories.find(c => c.id === id)
+            const category = this.patchedPeriod.settings.categories.find(c => c.id === id)
             if (category) {
                 return [category]
             }
@@ -362,93 +604,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
-    createGroup() {
-        const group = Group.create({
-            organizationId: this.organization.id,
-            periodId: this.organization.period.period.id,
-            settings: GroupSettings.create({
-                name: "",
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
-                prices: [],
-                genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
-            }),
-            privateSettings: GroupPrivateSettings.create({})
-        })
-        const meta = OrganizationMetaData.patch({})
-
-        const me = GroupCategory.patch({ id: this.category.id })
-        me.groupIds.addPut(group.id)
-        meta.categories.addPatch(me)
-
-        const p = Organization.patch({
-            id: this.organization.id,
-            meta
-        })
-
-        p.groups.addPut(group)
-        
-        this.present(new ComponentWithProperties(EditGroupGeneralView, { 
-            group, 
-            organization: this.patchedOrganization.patch(p), 
-            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
-                this.addPatch(p.patch(patch))
-            }
-        }).setDisplayStyle("popup"))
-    }
-
-    createCategory() {
-        const category = GroupCategory.create({})
-        category.groupIds = this.patchedCategory.categoryIds.length == 0 ? this.patchedCategory.groupIds : []
-        
-        const meta = OrganizationMetaData.patch({})
-        meta.categories.addPut(category)
-
-        const me = GroupCategory.patch({ 
-            id: this.category.id,
-            groupIds: [] as any
-        })
-
-        me.categoryIds.addPut(category.id)
-        meta.categories.addPatch(me)
-
-        const p = Organization.patch({
-            id: this.organization.id,
-            meta
-        })
-        
-        this.present(new ComponentWithProperties(EditCategoryGroupsView, { 
-            category: category, 
-            organization: this.patchedOrganization.patch(p), 
-            isNew: true,
-            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                this.addPatch(p.patch(patch))
-            }
-        }).setDisplayStyle("popup"))
-    }
-
-    openGroupTrash() {
-        this.show({
-            components: [
-                new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle("popup")
-            ],
-            replace: 1
-        })
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm(this.groups.length ? "Ben je zeker dat je deze categorie en groepen wilt verwijderen?" : "Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
-            return
-        }
-        const meta = OrganizationMetaData.patch({})
-        meta.categories.addDelete(this.category.id)
-        const p = Organization.patch({
-            meta
-        })
-        this.saveHandler(p)
-        this.pop({ force: true })
-    }
-
+    
     cancel() {
         this.pop()
     }
@@ -464,4 +620,5 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 }
+*/
 </script>

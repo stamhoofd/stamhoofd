@@ -296,13 +296,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData, PermissionsResourceType } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
@@ -330,6 +330,9 @@ import GroupNewPeriodView from './edit/GroupNewPeriodView.vue';
 export default class GroupOverview extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         group!: Group;
+
+    @Prop({ required: true })
+        period!: OrganizationRegistrationPeriod;
 
     showAllCycleOffsets = false;
 
@@ -391,11 +394,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get hasFullPermissions() {
-        return this.group.hasFullAccess(this.$context.organizationPermissions, this.organization)
+        return this.group.hasFullAccess(this.$context.organizationPermissions, this.period.settings.categories)
     }
 
     get hasWritePermissions() {
-        return this.group.hasWriteAccess(this.$context.organizationPermissions, this.organization)
+        return this.group.hasWriteAccess(this.$context.organizationPermissions, this.period.settings.categories)
     }
    
     openMembers(animated = true, cycleOffset = 0) {
@@ -476,10 +479,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
                         await this.$organizationManager.forceUpdate()
                         return new ComponentWithProperties(component, {
                             group: this.group, 
+                            period: this.period,
                             organization: this.$organization, 
-                            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                                patch.id = this.$organization.id
-                                await this.$organizationManager.patch(patch)
+                            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                                patch.id = this.period.id
+                                await this.$organizationManager.patchPeriod(patch)
                             }
                         })
                     } catch (e) {
@@ -519,8 +523,8 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
 
     get parentCategories() {
         return [
-            ...(this.organization.meta.rootCategory ? [this.organization.meta.rootCategory] : []),
-            ...this.group.getParentCategories(this.organization.availableCategories),
+            ...(this.period.settings.rootCategory ? [this.period.settings.rootCategory] : []),
+            ...this.group.getParentCategories(this.period.availableCategories),
         ]
     }
 
@@ -529,7 +533,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
 
         for (const parent of this.parentCategories) {
             actions.unshift(new ContextMenuItem({
-                name: parent.id === this.organization.meta.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
+                name: parent.id === this.period.settings.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
                 icon: 'category',
                 action: () => {
                     this.swapCategory(parent)
@@ -556,7 +560,8 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     swapCategory(category: GroupCategory) {
         this.show({
             components: [new ComponentWithProperties(CategoryView, {
-                category
+                category,
+                period: this.period
             })],
             replace: this.navigationController?.components?.length ?? 1,
             animated: false
@@ -637,27 +642,26 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         }
 
         try {
-            const metaPatch = OrganizationMetaData.patch({})
+            const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
 
-            for (const category of this.organization.meta.categories) {
+            for (const category of this.period.settings.categories) {
                 if (category.groupIds.includes(this.group.id)) {
                     const catPatch = GroupCategory.patch({id: category.id})
                     catPatch.groupIds.addDelete(this.group.id)
-                    metaPatch.categories.addPatch(catPatch)
+                    settingsPatch.categories.addPatch(catPatch)
                 }
             }
 
-            const patch = Organization.patch({
-                id: this.$organization.id,
-                meta: metaPatch
+            const patch = OrganizationRegistrationPeriod.patch({
+                id: this.period.id,
+                settings: settingsPatch
             })
             patch.groups.addPatch(Group.patch({
                 id: this.group.id,
                 status: GroupStatus.Archived
             }))
 
-           
-            await this.$organizationManager.patch(patch)
+            await this.$organizationManager.patchPeriod(patch)
 
             // Force update because the patch won't get the group in the response
             this.group.status = GroupStatus.Archived
@@ -673,22 +677,23 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         }
 
         try {
-            const metaPatch = OrganizationMetaData.patch({})
+            const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
 
-            for (const category of this.organization.meta.categories) {
+            for (const category of this.period.settings.categories) {
                 if (category.groupIds.includes(this.group.id)) {
                     const catPatch = GroupCategory.patch({id: category.id})
                     catPatch.groupIds.addDelete(this.group.id)
-                    metaPatch.categories.addPatch(catPatch)
+                    settingsPatch.categories.addPatch(catPatch)
                 }
             }
 
-            const patch = Organization.patch({
-                id: this.$organization.id,
-                meta: metaPatch
+            const patch = OrganizationRegistrationPeriod.patch({
+                id: this.period.id,
+                settings: settingsPatch
             })
             patch.groups.addDelete(this.group.id)
-            await this.$organizationManager.patch(patch)
+
+            await this.$organizationManager.patchPeriod(patch)
             new Toast("De groep is verwijderd", "success green").show()
             this.pop({force: true})
         } catch (e) {
@@ -729,7 +734,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         const wasArchive = this.isArchive
 
         try {
-            const metaPatch = OrganizationMetaData.patch({})
+            const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
             const catPatch = GroupCategory.patch({id: cat.id})
 
             if (cat.groupIds.filter(id => id == group.id).length > 1) {
@@ -743,11 +748,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
                 catPatch.groupIds.addPut(group.id)
             }
 
-            metaPatch.categories.addPatch(catPatch)
+            settingsPatch.categories.addPatch(catPatch)
 
-            const patch = Organization.patch({
-                id: this.organization.id,
-                meta: metaPatch
+            const patch = OrganizationRegistrationPeriod.patch({
+                id: this.period.id,
+                settings: settingsPatch
             })
 
             patch.groups.addPatch(Group.patch({
@@ -756,12 +761,13 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             }))
 
             try {
-                await this.$organizationManager.patch(patch)
+                await this.$organizationManager.patchPeriod(patch)
+                
                 // Manually update this group
-                const foundGroup = this.$organization.groups.find(g => g.id == group.id)
+                const foundGroup = this.period.groups.find(g => g.id == group.id)
                 if (foundGroup) {
                     // Bit ugly, but only reliable way
-                    this.group = foundGroup
+                    this.group.set(foundGroup)
                 }
             } catch (e) {
                 Toast.fromError(e).show()
@@ -780,14 +786,15 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         const wasArchive = this.isArchive
 
         try {
-            const patch = Organization.patch({
-                id: this.$organization.id
+            const patch = OrganizationRegistrationPeriod.patch({
+                id: this.period.id
             })
             patch.groups.addPatch(Group.patch({
                 id: this.group.id,
                 status: GroupStatus.Closed
             }))
-            await this.$organizationManager.patch(patch)
+
+            await this.$organizationManager.patchPeriod(patch)
             new Toast(wasArchive ? "De inschrijvingsgroep is teruggezet" : "De inschrijvingen zijn gesloten", "success green").show()
         } catch (e) {
             Toast.fromError(e).show()
