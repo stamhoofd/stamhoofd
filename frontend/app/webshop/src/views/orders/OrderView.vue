@@ -343,9 +343,9 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CheckoutPriceBreakdown, CartItemRow, CenteredMessage, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
+import { CartItemRow, CenteredMessage, CheckoutPriceBreakdown, DetailedTicketView,ErrorBox, LoadingButton, LoadingView, Logo,OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Payment, RecordCategory } from '@stamhoofd/structures';
+import { BalanceItemStatus, Payment, RecordCategory } from '@stamhoofd/structures';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -420,7 +420,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get isPaid() {
-        return this.order && (this.order.payment === null || this.order.payment.status === PaymentStatus.Succeeded)
+        return this.order && (this.order.balanceItems.every(item => item.status === BalanceItemStatus.Paid))
     }
 
     get isTransfer() {
