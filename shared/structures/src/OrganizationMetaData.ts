@@ -377,6 +377,9 @@ export class OrganizationMetaData extends AutoEncoder {
     companyAddress: Address | null = null;
 
     /**
+     * @deprecated
+     * Use OrganizationRegistrationPeriod instead
+     * 
      * All the available categories
      */
     @field({ 
@@ -386,6 +389,9 @@ export class OrganizationMetaData extends AutoEncoder {
     categories: GroupCategory[] = [GroupCategory.create({ id: "root" })] // we use ID root here because this ID needs to stay the same since it won't be saved
 
     /**
+     * @deprecated
+     * Use OrganizationRegistrationPeriod instead
+     * 
      * We use one invisible root category to simplify the difference between non-root and root category
      */
     @field({ 
@@ -395,6 +401,9 @@ export class OrganizationMetaData extends AutoEncoder {
     rootCategoryId = this.categories[0]?.id ?? ""
 
     /**
+     * @deprecated
+     * Use OrganizationRegistrationPeriod instead
+     * 
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     get rootCategory(): GroupCategory | undefined {

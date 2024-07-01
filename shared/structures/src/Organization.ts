@@ -53,7 +53,7 @@ export class Organization extends AutoEncoder {
      * Get all groups that are in a category
      */
     get availableGroups() {
-        return this.categoryTree.getAllGroups()
+        return this.period.categoryTree.getAllGroups()
     }
 
     getGroupsForPermissions(permissions?: LoadedPermissions | null) {
@@ -61,27 +61,35 @@ export class Organization extends AutoEncoder {
     }
 
     get adminAvailableGroups() {
-        return this.adminCategoryTree.getAllGroups()
+        return this.period.adminCategoryTree.getAllGroups()
     }
 
     /**
+     * @deprecated
+     * 
      * Get all groups that are in a category
      */
     get availableCategories() {
-        return this.adminCategoryTree.getAllCategories()
+        return this.period.availableCategories
     }
     
     /**
-     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     * @deprecated
      */
     get categoryTree(): GroupCategoryTree {
-        return this.getCategoryTree()
+        return this.period.categoryTree
     }
 
+    /**
+     * @deprecated
+     */
     get publicCategoryTree(): GroupCategoryTree {
-        return this.getCategoryTree({smartCombine: true})
+        return this.period.publicCategoryTree
     }
 
+    /**
+     * @deprecated
+     */
     get adminCategoryTree(): GroupCategoryTree {
         return this.getCategoryTree({admin: true})
     }

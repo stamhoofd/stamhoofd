@@ -146,7 +146,7 @@ export class RegisterItem implements RegisterItemWithPrice {
     }
     
     hasReachedCategoryMaximum(): boolean {
-        const parents = this.group.getParentCategories(this.organization.meta.categories, false)
+        const parents = this.group.getParentCategories(this.organization.period.settings.categories, false)
     
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {
@@ -478,7 +478,7 @@ export class RegisterCart {
             this.items, 
             this.items.map(i => i.member.patchedMember), 
             this.items.map(i => i.group), 
-            this.items.flatMap(i => i.organization.meta.categories) 
+            this.items.flatMap(i => i.organization.period.settings.categories) 
         )
     }
 

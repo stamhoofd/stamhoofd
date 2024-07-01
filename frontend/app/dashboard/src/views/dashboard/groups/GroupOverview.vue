@@ -35,7 +35,7 @@
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
                     <template #right>
-                        <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
+                        <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -579,8 +579,8 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         }
 
         try {
-            const patch = Organization.patch({
-                id: this.$organization.id
+            const patch = OrganizationRegistrationPeriod.patch({
+                id: this.period.id
             })
             const p = Group.patch({
                 id: this.group.id,
@@ -599,7 +599,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
                 })
             }
             patch.groups.addPatch(p)
-            await this.$organizationManager.patch(patch)
+            await this.$organizationManager.patchPeriod(patch)
             new Toast("De inschrijvingen zijn terug open", "success green").show()
         } catch (e) {
             Toast.fromError(e).show()
@@ -616,8 +616,8 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         }
 
         try {
-            const patch = Organization.patch({
-                id: this.$organization.id
+            const patch = OrganizationRegistrationPeriod.patch({
+                id: this.period.id
             })
 
             const cycleInformation = this.group.settings.cycleSettings.get(this.group.cycle - 1)
@@ -629,7 +629,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
                     endDate: cycleInformation?.endDate ?? undefined,
                 })
             }))
-            await this.$organizationManager.patch(patch)
+            await this.$organizationManager.patchPeriod(patch)
             new Toast("De inschrijvingsperiode is ongedaan gemaakt", "success green").show()
         } catch (e) {
             Toast.fromError(e).show()

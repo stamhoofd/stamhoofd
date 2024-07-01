@@ -3,11 +3,7 @@
         <STNavigationBar title="Leden" />
 
         <main>
-            <h1 class="style-navigation-title with-icons button" @click="switchPeriod">
-                <span>{{ period.period.name }}</span>
-                <span class="button icon arrow-swap" />
-            </h1>
-
+            <h1>Leden</h1>
 
             <button v-if="canUpgradePeriod" type="button" class="menu-button button cta">
                 <span class="icon flag" />
@@ -48,12 +44,21 @@
                         >
                             <GroupAvatar :group="group" :allow-empty="true" />
                             <span>{{ group.settings.name }}</span>
-                            <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
+                            <span v-if="group.settings.registeredMembers !== null" class="count">{{ formatInteger(group.settings.registeredMembers) }}</span>
                         </button>
 
                         <hr v-if="index < tree.categories.length - 1">
                     </div>
                 </div>
+            </div>
+
+            <div class="grouped footer">
+                <hr>
+
+                <button class="menu-button button" type="button" @click="switchPeriod">
+                    <span>{{ period.period.name }}</span>
+                    <span class="icon gray arrow-swap right-icon" />
+                </button>
             </div>
         </main>
     </div>
@@ -192,6 +197,8 @@ defineRoutes([
 const checkRoute = useCheckRoute();
 
 async function switchPeriod(event: MouseEvent) {
+    const button = event.currentTarget as HTMLElement;
+
     // Load groups
     const list = await organizationManager.value.loadPeriods(false, false, owner);
 
@@ -200,7 +207,7 @@ async function switchPeriod(event: MouseEvent) {
             return new ContextMenuItem({
                 name: p.name,
                 selected: p.id === period.value.period.id,
-                icon: p.id === platform.value.period.id ? 'star' : '',
+                icon: p.id === platform.value.period.id && p.id !== period.value.period.id ? 'dot' : '',
                 action: () => {
                     if (!list.organizationPeriods.find(o => o.period.id === p.id)) {
                         // Can not start if ended, or if not stargin withing 2 months
@@ -221,6 +228,6 @@ async function switchPeriod(event: MouseEvent) {
             });
         })
     ])
-    menu.show({ button: event.currentTarget as HTMLElement, yOffset: -10 }).catch(console.error)
+    menu.show({ button, yOffset: -10 }).catch(console.error)
 }
 </script>

@@ -190,16 +190,16 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
     get parentCategories() {
         return [
-            ...(!this.isRoot && this.organization.meta.rootCategory ? [this.organization.meta.rootCategory] : []),
-            ...this.category.getParentCategories(this.organization.availableCategories),
+            ...(!this.isRoot && this.period.settings.rootCategory ? [this.period.settings.rootCategory] : []),
+            ...this.category.getParentCategories(this.period.availableCategories),
         ]
     }
 
     get isPublic() {
-        return this.tree.isPublic(this.organization.availableCategories)
+        return this.tree.isPublic(this.period.availableCategories)
     }
 
-    openCategorySelector(event) {
+    openCategorySelector(event: MouseEvent) {
         if (this.parentCategories.length === 0) {
             return
         }
@@ -208,7 +208,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
         for (const parent of this.parentCategories) {
             actions.unshift(new ContextMenuItem({
-                name: parent.id === this.organization.meta.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
+                name: parent.id === this.period.settings.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
                 icon: 'category',
                 action: () => {
                     this.swapCategory(parent)
@@ -271,7 +271,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get reactiveCategory() {
-        const c = this.organization.meta.categories.find(c => c.id === this.category.id)
+        const c = this.period.settings.categories.find(c => c.id === this.category.id)
         if (c) {
             return c
         }
@@ -316,11 +316,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get canEdit() {
-        return this.$organizationManager.user.permissions ? this.category.canEdit(this.$context.organizationPermissions) : false
+        return this.$organizationManager.user.permissions ? this.category.canEdit(this.$context.auth.permissions) : false
     }
 
     get canCreate() {
-        return this.$organizationManager.user.permissions ? this.category.canCreate(this.$context.organizationPermissions, this.organization.meta.categories) : false
+        return this.$organizationManager.user.permissions ? this.category.canCreate(this.$context.auth.permissions, this.organization.period.settings.categories) : false
     }
 
     get groups() {
