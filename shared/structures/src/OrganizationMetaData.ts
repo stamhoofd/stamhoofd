@@ -22,7 +22,7 @@ export class OrganizationPackages extends AutoEncoder {
     packages = new Map<STPackageType, STPackageStatus>()
 
     isActive(type: STPackageType) {
-        if (STAMHOOFD.userMode === 'platform') {
+        if (STAMHOOFD.userMode === 'platform' && type === STPackageType.Members) {
             return true;
         }
         
