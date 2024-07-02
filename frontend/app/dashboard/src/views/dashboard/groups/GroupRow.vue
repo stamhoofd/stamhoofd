@@ -92,7 +92,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         const settings = OrganizationRegistrationPeriodSettings.patch({})
         settings.categories.addPatch(p)
 
-        this.$emit('patch', OrganizationRegistrationPeriod.patch({
+        this.$emit('patch:period', OrganizationRegistrationPeriod.patch({
             settings
         }))
         this.$emit("delete")
@@ -125,15 +125,15 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         const p = GroupCategory.patch({id: this.parentCategory.id})
         p.groupIds.addPut(duplicated.id, this.group.id)
 
-        const meta = OrganizationMetaData.patch({})
-        meta.categories.addPatch(p)
+        const settings = OrganizationRegistrationPeriodSettings.patch({})
+        settings.categories.addPatch(p)
 
-        const organizationPatch = Organization.patch({
-            meta,
+        const organizationPatch = OrganizationRegistrationPeriod.patch({
+            settings,
         });
 
         organizationPatch.groups.addPut(duplicated)
-        this.$emit('patch', organizationPatch)
+        this.$emit('patch:period', organizationPatch)
     }
 
     showContextMenu(event: MouseEvent) {

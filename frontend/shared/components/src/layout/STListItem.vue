@@ -34,7 +34,7 @@
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 @Component({
-    emits: ["click"],
+    emits: ["click", "contextmenu"],
     inheritAttrs: false,
 })
 export default class STListItem extends Vue {

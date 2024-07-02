@@ -29,6 +29,10 @@ export class RegistrationPeriod extends AutoEncoder {
     get name() {
         return 'Werkjaar ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
+
+    get nameShort() {
+        return Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
+    }
 }
 
 export class OrganizationRegistrationPeriodSettings extends AutoEncoder {

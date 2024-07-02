@@ -1,7 +1,7 @@
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, } from "@simonbackx/vue-app-navigation";
 import { OrganizationManager } from "@stamhoofd/networking";
-import { GroupCategory, GroupCategorySettings, GroupCategoryTree, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, OrganizationTypeHelper } from "@stamhoofd/structures";
+import { GroupCategory, GroupCategorySettings, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, OrganizationTypeHelper } from "@stamhoofd/structures";
 
 import EditCategoryGroupsView from '../groups/EditCategoryGroupsView.vue';
 
@@ -80,7 +80,7 @@ export function buildManageGroupsComponent($organizationManager: OrganizationMan
         isNew: false,
         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
             patch.id = period.id
-            await $organizationManager.patchPeriods(patch)
+            await $organizationManager.patchPeriod(patch)
         }
     })
 }

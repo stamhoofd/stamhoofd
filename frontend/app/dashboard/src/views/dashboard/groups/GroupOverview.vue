@@ -3,21 +3,16 @@
         <STNavigationBar :title="title" />
 
         <main>
-            <h1 class="style-navigation-title with-icons button" @click="openCategorySelector">
-                <span>{{ title }}</span>
+            <h1 class="style-navigation-title">
+                {{ title }}
 
                 <span v-if="period" class="title-suffix">
-                    {{ period.period.name }}
+                    {{ period.period.nameShort }}
                 </span>
-                
-                <span v-if="!isPublic" v-tooltip="'Deze groep staat in een categorie die enkel zichtbaar is voor beheerders'" class="icon lock small" />
-                <template v-else>
-                    <span v-if="isArchive" key="archive" class="icon archive" />
-                    <span v-else-if="isOpen" key="open" v-tooltip="'Inschrijven is mogelijk via het ledenportaal'" class="icon dot green" />
-                    <span v-else key="closed" v-tooltip="'Inschrijvingen zijn gesloten'" class="icon dot red" />
-                </template>
-                <span v-if="parentCategories.length" class="button icon arrow-swap" />
             </h1>
+
+            <p v-if="!isPublic" class="info-box">Deze groep staat in een categorie die enkel zichtbaar is voor beheerders</p>
+            <p v-if="!isArchive && !isOpen" class="info-box">Inschrijvingen zijn momenteel gesloten via het ledenportaal.</p>
 
             <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
@@ -276,7 +271,6 @@ import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Or
 
 import { computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import CategoryView from './CategoryView.vue';
 import EditGroupEmailsView from './edit/EditGroupEmailsView.vue';
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
@@ -391,52 +385,6 @@ async function editPage(animated = true) {
 async function editEmails(animated = true) {
     await displayEditComponent(EditGroupEmailsView, animated)
 }
-
-const parentCategories = computed(() => [
-    ...(props.period.settings.rootCategory ? [props.period.settings.rootCategory] : []),
-    ...props.group.getParentCategories(props.period.availableCategories),
-])
-
-function openCategorySelector(event: MouseEvent) {
-    const actions: ContextMenuItem[] = [];
-
-    for (const parent of parentCategories.value) {
-        actions.unshift(new ContextMenuItem({
-            name: parent.id === props.period.settings.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
-            icon: 'category',
-            action: async () => {
-                await swapCategory(parent)
-                return true;
-            }
-        }));
-    }
-    const menu = new ContextMenu([
-        [
-            new ContextMenuItem({
-                name: title.value,
-                icon: 'group',
-                disabled: true,
-                action: () => {
-                    return true;
-                }
-            }),
-            ...actions
-        ]
-    ])
-    menu.show({ clickEvent: event, xPlacement: "right", yPlacement: "bottom" }).catch(console.error)
-}
-
-async function swapCategory(category: GroupCategory) {
-    await show({
-        components: [new ComponentWithProperties(CategoryView, {
-            category,
-            period: props.period
-        })],
-        replace: navigationController.value?.components?.length ?? 1,
-        animated: false
-    })
-}
-
 
 async function openGroup() {
     if (!await CenteredMessage.confirm("Ben je zeker dat je de inschrijvingen wilt openen?", "Ja, openen")) {

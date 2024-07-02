@@ -235,7 +235,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     swapCategory(category: GroupCategory) {
         this.show({
             components: [new ComponentWithProperties(CategoryView, {
-                category
+                category,
+                period: this.period
             })],
             replace: this.navigationController?.components?.length ?? 1,
             animated: false
@@ -333,7 +334,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
     openCategory(category: GroupCategory) {
         this.show(new ComponentWithProperties(CategoryView, {
-            category
+            category,
+            period: this.period
         }))
     }
 
