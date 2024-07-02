@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-renderer",
-    "version": "1.0.0",
+    "version": "2.1.1",
     "main": "index.ts",
     "license": "UNLICENCED",
     "scripts": {
@@ -12,18 +12,18 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
+        "@types/formidable": "3.4.5",
         "@types/luxon": "^2.0.8",
         "@types/mysql": "^2.15.20",
-        "@types/node": "^18.11.17",
-        "@types/formidable": "3.4.5"
+        "@types/node": "^18.11.17"
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1",
+        "formidable": "3.5.1",
         "luxon": "^2.2.0",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
-        "puppeteer": "22.12.0",
-        "formidable": "3.5.1"
+        "puppeteer": "22.12.0"
     }
 }
