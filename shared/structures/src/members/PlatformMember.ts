@@ -384,7 +384,7 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        const organizations = this.filterOrganizations({cycleOffset: 0})
+        const organizations = this.filterOrganizations({currentPeriod: true})
 
         for (const organization of organizations) {
             if (property === 'dataPermission' || property === 'financialSupport') {
@@ -437,7 +437,7 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        const organizations = this.filterOrganizations({cycleOffset: 0})
+        const organizations = this.filterOrganizations({currentPeriod: true})
 
         for (const organization of organizations) {
             const def = organization.meta.recordsConfiguration[property];
@@ -478,21 +478,26 @@ export class PlatformMember implements ObjectWithRecords {
         }
     }
 
-    filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
+    filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
         return this.patchedMember.registrations.filter(r => {
             if (filters.groups && !filters.groups.find(g => g.id === r.groupId)) {
                 return false
             }
 
-            let cycle = filters.cycle
-            if (filters.cycle === undefined) {
-                cycle = r.group.cycle - (filters.cycleOffset ?? 0)
+            if (filters.currentPeriod !== undefined) {
+                const organization = this.organizations.find(o => o.id === r.organizationId)
+                const isCurrentPeriod = !!organization && r.group.periodId === organization.period.period.id
+
+                if (isCurrentPeriod !== filters.currentPeriod) {
+                    return false
+                }
             }
 
-            if (
-                cycle !== undefined 
-                && (filters.waitingList === undefined || r.waitingList === filters.waitingList) 
-                && r.cycle === cycle
+            if (filters.periodId && r.group.periodId !== filters.periodId) {
+                return false
+            }
+
+            if ((filters.waitingList === undefined || r.waitingList === filters.waitingList) 
             ) {
                 if (filters.canRegister !== undefined && r.waitingList) {
                     return r.canRegister === filters.canRegister
@@ -503,7 +508,7 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
-    filterGroups(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
+    filterGroups(filters: {groups?: Group[] | null, waitingList?: boolean, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
         const registrations =  this.filterRegistrations(filters);
         const base: Group[] = [];
 
@@ -522,11 +527,11 @@ export class PlatformMember implements ObjectWithRecords {
                     continue
                 }
 
-                if (filters.cycle !== undefined && item.group.cycle !== filters.cycle) {
+                if (filters.currentPeriod === false) {
                     continue
                 }
 
-                if (filters.cycleOffset !== undefined && filters.cycleOffset !== 0) {
+                if (filters.periodId && item.group.periodId !== filters.periodId) {
                     continue
                 }
 
@@ -543,7 +548,7 @@ export class PlatformMember implements ObjectWithRecords {
         return base;
     }
 
-    filterOrganizations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
+    filterOrganizations(filters: {groups?: Group[] | null, waitingList?: boolean, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
         const registrations =  this.filterRegistrations(filters);
         const base: Organization[] = [];
 
@@ -565,11 +570,11 @@ export class PlatformMember implements ObjectWithRecords {
                     continue
                 }
 
-                if (filters.cycle !== undefined && item.group.cycle !== filters.cycle) {
+                if (filters.currentPeriod === false) {
                     continue
                 }
 
-                if (filters.cycleOffset !== undefined && filters.cycleOffset !== 0) {
+                if (filters.periodId && item.group.periodId !== filters.periodId) {
                     continue
                 }
 
@@ -587,7 +592,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get groups() {
-        return this.filterGroups({waitingList: false, cycleOffset: 0});
+        return this.filterGroups({waitingList: false, currentPeriod: true});
     }
 
     insertOrganization(organization: Organization) {

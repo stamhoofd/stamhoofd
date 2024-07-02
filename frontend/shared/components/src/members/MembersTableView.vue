@@ -218,7 +218,7 @@ if (app == 'admin') {
             id: 'organization',
             allowSorting: false,
             name: $t('shared.organization.singular'), 
-            getValue: (member) => member.filterOrganizations({cycleOffset: 0}), 
+            getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? ''}), 
             format: (organizations) => Formatter.joinLast(organizations.map(o => o.name), ', ', ' en ') || $t('shared.notRegistered'),
             getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
             minimumWidth: 100,
@@ -231,7 +231,7 @@ if (app == 'admin') {
             name: props.waitingList ? "Sinds" : "Inschrijvingsdatum", 
             allowSorting: false,
             getValue: (v) => {
-                const registrations = v.filterRegistrations({groups, waitingList: props.waitingList, cycleOffset: props.cycleOffset})
+                const registrations = v.filterRegistrations({groups, waitingList: props.waitingList, periodId: props.periodId ?? props.group?.periodId ?? ''})
 
                 if (registrations.length == 0) {
                     return null
@@ -284,7 +284,7 @@ if (app == 'admin') {
                         return [];
                     }
                     const groups = props.category.getAllGroups()
-                    const registrations = member.filterRegistrations({groups: groups, waitingList: props.waitingList, cycleOffset: props.cycleOffset})
+                    const registrations = member.filterRegistrations({groups: groups, waitingList: props.waitingList, periodId: props.periodId ?? props.group?.periodId ?? ''})
                     const memberGroups = registrations.flatMap(r => {
                         const group = groups.find(g => g.id == r.groupId)
                         if (!group) {
