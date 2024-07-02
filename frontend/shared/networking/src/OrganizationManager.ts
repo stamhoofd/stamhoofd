@@ -89,29 +89,13 @@ export class OrganizationManager {
         for (const period of this.organization.periods?.organizationPeriods ?? []) {
             const updated = response.data.find(p => p.id === period.id)
             if (updated) {
-                for (const group of period.groups) {
-                    const updatedGroup = updated.groups.find(g => g.id === group.id)
-                    if (updatedGroup) {
-                        group.set(updatedGroup)
-                    }
-                }
-                period.set(updated)
+                period.deepSet(updated)
             }
         }
 
         const updated = response.data.find(p => p.id === this.organization.period.id)
         if (updated) {
-            console.log('Updated period', updated, this.organization.period)
-            for (const group of this.organization.period.groups) {
-                const updatedGroup = updated.groups.find(g => g.id === group.id)
-                if (updatedGroup) {
-                    console.log('Updated group', updatedGroup, group)
-                    group.set(updatedGroup)
-                }
-            }
-            this.organization.period.set(updated)
-
-            console.log('Updated period', this.organization.period)
+            this.organization.period.deepSet(updated)
         }
     }
 

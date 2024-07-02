@@ -552,35 +552,9 @@ export class SessionContext implements RequestMiddleware {
         if (!this.organization) {
             this.setOrganization(organization)
         } else {
-            const oldGroups = this.organization.groups
-            const oldWebshopPreviews = this.organization.webshops
             const oldAdmins = this.organization.admins
 
-            this.organization.set(organization)
-
-            for (const group of oldGroups) {
-                const newGroupIndex = this.organization.groups.findIndex(g => g.id === group.id)
-                if (newGroupIndex != -1) {
-                    const newGroup = this.organization.groups[newGroupIndex]
-                    
-                    // Update old group, so we can keep the same
-                    // group reference, in instead of a new one
-                    group.set(newGroup)
-                    this.organization.groups[newGroupIndex] = group
-                }
-            }
-
-            for (const preview of oldWebshopPreviews) {
-                const newWebshopIndex = this.organization.webshops.findIndex(w => w.id === preview.id)
-                if (newWebshopIndex != -1) {
-                    const newWebshop = this.organization.webshops[newWebshopIndex]
-                    
-                    // Update old group, so we can keep the same
-                    // group reference, in instead of a new one
-                    preview.set(newWebshop)
-                    this.organization.webshops[newWebshopIndex] = preview
-                }
-            }
+            this.organization.deepSet(organization)
 
             if (oldAdmins && !this.organization.admins) {
                 this.organization.admins = oldAdmins
