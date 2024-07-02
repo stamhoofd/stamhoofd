@@ -38,7 +38,7 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
 
 export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform: Platform, options: {user?: User|null} = {}) {
     const all = [
-        ...memberWithRegistrationsBlobUIFilterBuilders.slice(0, memberWithRegistrationsBlobUIFilterBuilders.length - 1),
+        ...memberWithRegistrationsBlobUIFilterBuilders.slice(1),
     ]
 
     if (options.user?.permissions?.platform !== null) {
@@ -56,7 +56,29 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                                     defaultAgeGroupId: {
                                         $in: choices.map(c => c)
                                     }
-                                }
+                                },
+                                periodId: platform.period.id
+                            }
+                        }
+                    }
+                }
+            })
+        )
+
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: 'Functies',
+                options: platform.config.responsibilities.map(responsibility => {
+                    return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
+                }),
+                buildFilter: (choices) => {
+                    return {
+                        responsibilities: {
+                            $elemMatch: {
+                                responsibilityId: {
+                                    $in: choices.map(c => c)
+                                },
+                                endDate: null
                             }
                         }
                     }

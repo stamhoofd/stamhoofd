@@ -126,6 +126,25 @@ const filterCompilers: SQLFilterDefinitions = {
         }
     ),
 
+    responsibilities: createSQLRelationFilterCompiler(
+        SQL.select()
+        .from(
+            SQL.table('member_responsibility_records')
+        )
+        .where(
+            SQL.column('memberId'),
+            SQL.column('members', 'id'),
+        ),
+        {
+            // Alias for responsibilityId
+            "id": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
+            "responsibilityId": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
+            "organizationId": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'organizationId')),
+            "startDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'startDate')),
+            "endDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'endDate')),
+        }
+    ),
+
     /**
      * @deprecated?
      */
