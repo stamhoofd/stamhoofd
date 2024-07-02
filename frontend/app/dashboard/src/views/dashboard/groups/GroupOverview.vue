@@ -17,7 +17,7 @@
                 Deze groep staat in een categorie die enkel zichtbaar is voor beheerders
             </p>
             <p v-if="!isArchive && !isOpen" class="info-box">
-                Inschrijvingen zijn momenteel gesloten via het ledenportaal.
+                Inschrijvingen zijn momenteel gesloten via het ledenportaal. Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.
             </p>
 
             <BillingWarningBox filter-types="members" class="data-table-prefix" />
