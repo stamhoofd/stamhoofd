@@ -193,5 +193,6 @@
     "admin.settings.registrationPeriods.edit.title": "Werkjaar bewerken",
     "admin.settings.registrationPeriods.delete.confirmation.title": "Ben je zeker dat je dit werkjaar wilt verwijderen?",
     "admin.settings.registrationPeriods.delete.confirmation.description": "Dit verwijdert ook alle daarbij horende gegevens, zoals inschrijvingsgroepen. Je kan dit niet ongedaan maken.",
-    "admin.settings.registrationPeriods.new.button": "Nieuw werkjaar"
+    "admin.settings.registrationPeriods.new.button": "Nieuw werkjaar",
+    "admin.settings.registrationPeriods.delete.title": "Verwijder werkjaar"
 }

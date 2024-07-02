@@ -1,9 +1,10 @@
 import { AutoEncoderPatchType, Decoder, patchObject } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Platform } from "@stamhoofd/models";
+import { Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { Platform as PlatformStruct } from "@stamhoofd/structures";
 
 import { Context } from "../../../helpers/Context";
+import { SimpleError } from "@simonbackx/simple-errors";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -55,6 +56,17 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Update config
             platform.config = patchObject(platform.config, request.body.config)
+        }
+
+        if (request.body.period && request.body.period.id !== platform.periodId) {
+            const period = await RegistrationPeriod.getByID(request.body.period.id)
+            if (!period || period.organizationId) {
+                throw new SimpleError({
+                    code: "invalid_period",
+                    message: "Invalid period"
+                })
+            }
+            platform.periodId = period.id
         }
 
         await platform.save()

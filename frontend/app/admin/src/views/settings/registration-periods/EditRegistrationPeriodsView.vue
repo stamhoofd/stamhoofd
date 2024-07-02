@@ -4,11 +4,12 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        
+        <p>Gebruik je rechtermuisknop om het huidige werkjaar te wijzigingen.</p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
-            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" @click="editPeriod(period)" />
+            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :platform="patchedPlatform" @click="editPeriod(period)" @activate="setCurrent(period)" />
         </STList>
 
         <p>
@@ -23,11 +24,10 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useContext, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { RegistrationPeriod } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
 import RegistrationPeriodRow from './components/RegistrationPeriodRow.vue';
@@ -40,13 +40,16 @@ const context = useContext();
 const platform = usePlatform();
 const platformManager = usePlatformManager()
 
-const originalResponsibilities = ref([]) as Ref<RegistrationPeriod[]>;
+const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
 const loading = ref(true);
 const owner = useRequestOwner();
 
 loadData().catch(console.error);
 
-const {patched, patch, addArrayPatch, hasChanges} = usePatchArray(originalResponsibilities)
+const {patched, patch, addArrayPatch, hasChanges: hasChangesPeriods} = usePatchArray(originalPeriods)
+const {patched: patchedPlatform, patch: platformPatch, addPatch: addPlatformPatch, hasChanges: hasChangesPlatform} = usePatch(platform)
+const hasChanges = computed(() => hasChangesPeriods.value || hasChangesPlatform.value)
+
 const saving = ref(false);
 
 const sortedPeriods = computed(() => {
@@ -107,14 +110,21 @@ async function save() {
     saving.value = true;
 
     try {
-        await context.value.authenticatedServer.request({
-            method: 'PATCH',
-            body: patch.value,
-            path: '/registration-periods',
-            decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
-            owner,
-            shouldRetry: false
-        })
+        if (hasChangesPeriods.value) {
+            await context.value.authenticatedServer.request({
+                method: 'PATCH',
+                body: patch.value,
+                path: '/registration-periods',
+                decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
+                owner,
+                shouldRetry: false
+            })
+        }
+
+        if (hasChangesPlatform.value) {
+            await platformManager.value.patch(platformPatch.value, false)
+        }
+
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
         await pop({ force: true });
     } catch (e) {
@@ -125,11 +135,15 @@ async function save() {
 
 }
 
+function setCurrent(period: RegistrationPeriod) {
+    addPlatformPatch({period})
+}
+
 async function loadData() {
     loading.value = true;
     
     try {
-        originalResponsibilities.value = await platformManager.value.loadPeriods(true, true, owner)
+        originalPeriods.value = await platformManager.value.loadPeriods(true, true, owner)
         loading.value = false;
     } catch (e) {
         Toast.fromError(e).show();
