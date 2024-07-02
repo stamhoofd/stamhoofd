@@ -243,7 +243,10 @@ async function switchPeriod(event: MouseEvent) {
                         await present({
                             components: [
                                 new ComponentWithProperties(StartNewRegistrationPeriodView, {
-                                    period: p
+                                    period: p,
+                                    callback: () => {
+                                        period.value = organizationManager.value.organization.period
+                                    }
                                 })
                             ],
                             modalDisplayStyle: "popup"
@@ -289,13 +292,17 @@ async function upgradePeriod() {
 
     if (organizationPeriod) {
         // We can just set the default
+        period.value = organizationPeriod
         return await setDefaultPeriod()
     }
 
     await present({
         components: [
             new ComponentWithProperties(StartNewRegistrationPeriodView, {
-                period: platform.value.period
+                period: platform.value.period,
+                callback: () => {
+                    period.value = organizationManager.value.organization.period
+                }
             })
         ],
         modalDisplayStyle: "popup"

@@ -29,8 +29,8 @@
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, useErrors, useOrganization } from '@stamhoofd/components';
-import { Group, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
+import { ErrorBox, Toast, useErrors, useOrganization } from '@stamhoofd/components';
+import { Group, Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import { v4 as uuidv4 } from "uuid";
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
@@ -38,7 +38,8 @@ import { useOrganizationManager } from '@stamhoofd/networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 
 const props = defineProps<{
-    period: RegistrationPeriod
+    period: RegistrationPeriod,
+    callback: () => void
 }>();
 
 const loading = ref(false);
@@ -108,6 +109,14 @@ async function start() {
         arr.addPut(newOrganizationPeriod);
 
         await organizationManager.value.patchPeriods(arr);
+
+        await organizationManager.value.patch(
+            Organization.patch({
+                period: newOrganizationPeriod
+            })
+        )
+        props.callback()
+        new Toast(newOrganizationPeriod.period.name + ' is nu ingesteld als het huidige werkjaar', 'success').show()
         await pop({force: true})
     } catch (e) {
         errors.errorBox = new ErrorBox(e)
