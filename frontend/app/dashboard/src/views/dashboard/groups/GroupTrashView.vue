@@ -14,7 +14,9 @@
             <Spinner v-if="loadingGroups" />
             <STList v-else-if="groups.length">
                 <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="restoreGroup($event, group)">
-                    <GroupAvatar #left :group="group" />
+                    <template #left>
+                        <GroupAvatar #left :group="group" />
+                    </template>
                     
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
@@ -22,7 +24,7 @@
                     <p class="style-description-small">
                         {{ group.settings.dateRangeDescription }}
                     </p>
-                    <p class="style-description-small">
+                    <p class="style-description-small" v-if="group.deletedAt">
                         Verwijderd op {{ formatDate(group.deletedAt) }}
                     </p>
 
@@ -42,12 +44,10 @@
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner,STList, STListItem, STNavigationBar, Toast } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationMetaData } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-
+import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, STList, STListItem, STNavigationBar, Spinner, Toast } from "@stamhoofd/components";
+import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
 
 @Component({
@@ -85,7 +85,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
                 owner: this
             })
 
-            this.groups = response.data
+            this.groups = response.data.filter(g => g.periodId === this.organization.period.period.id)
         } catch (e) {
             Toast.fromError(e).show()
         }
@@ -102,7 +102,10 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
     }
 
     get allCategories() {
-        return this.organization.getCategoryTree({admin: true, permissions: this.$context.organizationPermissions}).getAllCategories().filter(c => c.categories.length == 0)
+        return this.organization.getCategoryTree({
+            admin: true, 
+            permissions: this.$context.auth.permissions
+        }).getAllCategories().filter(c => c.categories.length == 0)
     }
 
     async restoreGroup(event, group: Group) {
@@ -131,7 +134,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
             return
         }
 
-        const metaPatch = OrganizationMetaData.patch({})
+        const settings = OrganizationRegistrationPeriodSettings.patch({})
         const catPatch = GroupCategory.patch({id: cat.id})
         
         if (cat.groupIds.filter(id => id == group.id).length > 1) {
@@ -145,11 +148,11 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
             catPatch.groupIds.addPut(group.id)
         }
 
-        metaPatch.categories.addPatch(catPatch)
+        settings.categories.addPatch(catPatch)
 
-        const patch = Organization.patch({
-            id: this.organization.id,
-            meta: metaPatch
+        const patch = OrganizationRegistrationPeriod.patch({
+            id: this.organization.period.id,
+            settings
         })
 
         patch.groups.addPatch(Group.patch({
@@ -158,7 +161,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
         }))
 
         try {
-            await this.$organizationManager.patch(patch)
+            await this.$organizationManager.patchPeriod(patch)
         } catch (e) {
             Toast.fromError(e).show()
         }

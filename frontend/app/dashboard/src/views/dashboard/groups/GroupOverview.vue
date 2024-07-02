@@ -209,39 +209,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="isArchive" :selectable="true" @click="restoreGroup($event)">
-                        <h2 class="style-title-list">
-                            Terughalen uit archief
-                        </h2>
-                        <p class="style-description">
-                            Zet de inschrijvingsgroep terug.
-                        </p>
-                        <template #right>
-                            <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon undo" />
-                                <span>Terugzetten</span>
-                            </button>
-                            <button type="button" class="button icon undo only-smartphone" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveGroup()">
-                        <h2 class="style-title-list">
-                            Groep archiveren
-                        </h2>
-                        <p class="style-description">
-                            Verplaats de groep naar het archief, maar behoud alle gegevens zodat je ze later nog kan raadplegen. 
-                        </p>
-                        <template #right>
-                            <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon archive" />
-                                <span>Archiveren</span>
-                            </button>
-                            <button type="button" class="button icon archive only-smartphone" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="isArchive" :selectable="true" @click="deleteGroup()">
+                    <STListItem :selectable="true" @click="deleteGroup()">
                         <h2 class="style-title-list">
                             Groep definitief verwijderen
                         </h2>
@@ -452,6 +420,10 @@ async function deleteGroup() {
         return;
     }
 
+    if (!await CenteredMessage.confirm("Je kan dit niet ongedaan maken en verliest gegevens van alle bijhorende leden?", "Ja, verwijderen")) {
+        return;
+    }
+
     try {
         const settingsPatch = OrganizationRegistrationPeriodSettings.patch({})
 
@@ -471,7 +443,7 @@ async function deleteGroup() {
 
         await organizationManager.value.patchPeriod(patch)
         new Toast("De groep is verwijderd", "success green").show()
-        navigationController.value?.pop({force: true})
+        await navigationController.value?.pop({force: true})
     } catch (e) {
         Toast.fromError(e).show()
     }
