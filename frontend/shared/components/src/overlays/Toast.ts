@@ -43,7 +43,7 @@ export class Toast {
         return new Toast(message, "success green")
     }
 
-    static fromError(errors: Error): Toast {
+    static fromError(errors: unknown): Toast {
         let simpleErrors!: SimpleErrors
         if (isSimpleError(errors)) {
             simpleErrors = new SimpleErrors(errors)
@@ -52,11 +52,11 @@ export class Toast {
         } else {
             simpleErrors = new SimpleErrors(new SimpleError({
                 code: "unknown_error",
-                message: errors.message
+                message: (errors as Error).message
             }))
         }
 
-        if (Request.isNetworkError(errors)) {
+        if (Request.isNetworkError((errors as Error))) {
             return new Toast("Geen of slechte internetverbinding", "error red")
         }
         return new Toast(simpleErrors.getHuman(), "error red")

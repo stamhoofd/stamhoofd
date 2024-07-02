@@ -5,10 +5,18 @@
         <main>
             <h1>Leden</h1>
 
-            <button v-if="canUpgradePeriod" type="button" class="menu-button button cta">
-                <span class="icon flag" />
-                <span>Schakel over naar {{ newestPeriod.name }}</span>
-            </button>
+            <template v-if="auth.hasFullAccess()">
+                <button v-if="canUpgradePeriod" type="button" class="menu-button button cta" @click="upgradePeriod">
+                    <span class="icon flag" />
+                    <span>Schakel over naar {{ newestPeriod.name }}</span>
+                </button>
+                <button v-else-if="canSetDefaultPeriod" type="button" class="menu-button button cta" @click="setDefaultPeriod">
+                    <span class="icon flag" />
+                    <span>Instellen als huidig werkjaar</span>
+                </button>
+
+                <hr v-if="canUpgradePeriod || canSetDefaultPeriod">
+            </template>
 
             <p class="info-box" v-if="tree.categories.length === 0">Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.</p>
 
@@ -66,12 +74,12 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, useCheckRoute, useNavigate, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Toast, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
 
 const $organization = useOrganization();
@@ -83,6 +91,7 @@ const platform = usePlatform();
 const organizationManager = useOrganizationManager()
 const owner = useRequestOwner();
 const present = usePresent();
+const auth = useAuth();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({
@@ -95,7 +104,12 @@ const newestPeriod = computed(() => {
     return platform.value.period
 })
 const canUpgradePeriod = computed(() => {
-    return $organization.value?.period.period.id !== platform.value.period.id
+    return $organization.value?.period.period.id !== platform.value.period.id && $organization.value!.period.period.startDate < platform.value.period.startDate
+})
+
+const canSetDefaultPeriod = computed(() => {
+    return (period.value.period.id === platform.value.period.id && $organization.value!.period.period.id !== platform.value.period.id) 
+        || (period.value.period.startDate > $organization.value!.period.period.startDate && !period.value.period.locked)
 })
 
 onActivated(() => {
@@ -254,4 +268,38 @@ async function switchPeriod(event: MouseEvent) {
     ])
     menu.show({ button, yOffset: -10 }).catch(console.error)
 }
+
+async function setDefaultPeriod() {
+    // Patch organization period id
+    try {
+        await organizationManager.value.patch(
+            Organization.patch({
+                period: period.value
+            })
+        )
+        new Toast(period.value.period.name + ' is nu ingesteld als het huidige werkjaar', 'success').show()
+    } catch (e) {
+        Toast.fromError(e).show()
+    }
+}
+
+async function upgradePeriod() {
+    const list = await organizationManager.value.loadPeriods(false, false, owner);
+    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === platform.value.period.id)
+
+    if (organizationPeriod) {
+        // We can just set the default
+        return await setDefaultPeriod()
+    }
+
+    await present({
+        components: [
+            new ComponentWithProperties(StartNewRegistrationPeriodView, {
+                period: platform.value.period
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+
 </script>

@@ -49,6 +49,8 @@ export class OrganizationManager {
             })
         }
 
+        patch.id = this.$context.organization.id
+
         const response = await this.$context.authenticatedServer.request({
             method: "PATCH",
             path: "/organization",

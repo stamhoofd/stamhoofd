@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Group, Organization,PayconiqPayment, Platform, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions, PermissionsResourceType,ResourcePermissions, UserPermissions, Version, OrganizationMetaData } from "@stamhoofd/structures";
+import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, User, Webshop } from '@stamhoofd/models';
+import { BuckarooSettings, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, UserPermissions } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -295,6 +295,36 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 organization.uri = request.body.uri
+            }
+
+            if (request.body.period && request.body.period.id !== organization.periodId) {
+                const organizationPeriod = await OrganizationRegistrationPeriod.getByID(request.body.period.id)
+                if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "De periode die je wilt instellen bestaat niet (meer)",
+                        field: "period"
+                    })
+                }
+
+                const period = await RegistrationPeriod.getByID(organizationPeriod.periodId)
+                if (!period || (period.organizationId && period.organizationId !== organization.id)) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "De periode die je wilt instellen bestaat niet (meer)",
+                        field: "period"
+                    })
+                }
+
+                if (period.locked) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "De periode die je wilt instellen is reeds afgesloten",
+                        field: "period"
+                    })
+                }
+
+                organization.periodId = period.id
             }
 
             // Save the organization
