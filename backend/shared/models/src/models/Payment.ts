@@ -144,17 +144,17 @@ export class Payment extends Model {
                     const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
                     const member = balanceItem?.memberId ? members.find(r => r.id === balanceItem.memberId) : undefined
                     const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
-                    const group = registration && groups.find(g => g.id === registration.groupId)
+                    const group = registration ? groups.find(g => g.id === registration.groupId) : null
 
-                    if (!group) {
-                        throw new Error("Group not found")
+                    if (registration && !group) {
+                        throw new Error("Group "+registration.groupId+" not found")
                     }
 
                     return BalanceItemPaymentDetailed.create({
                         ...item,
                         balanceItem: BalanceItemDetailed.create({
                             ...balanceItem,
-                            registration: registration ? registration.setRelation(Registration.group, group).getStructure() : null,
+                            registration: registration ? registration.setRelation(Registration.group, group!).getStructure() : null,
                             member: member ? MemberStruct.create(member) : null,
                             order: order ? OrderStruct.create({...order, payment: null}) : null
                         })
