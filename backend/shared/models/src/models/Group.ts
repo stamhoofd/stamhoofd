@@ -42,6 +42,9 @@ export class Group extends Model {
     @column({ type: "string" })
     periodId: string;
 
+    @column({ type: "string", nullable: true })
+    defaultAgeGroupId: string | null = null
+
     /**
      * Every time a new registration period starts, this number increases. This is used to mark all older registrations as 'out of date' automatically
      */

@@ -3,7 +3,7 @@ import { GroupPrivateSettings, OrganizationRegistrationPeriod as OrganizationReg
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Context } from "../../../../helpers/Context";
-import { Group, OrganizationRegistrationPeriod, RegistrationPeriod } from "@stamhoofd/models";
+import { Group, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { SimpleError } from "@simonbackx/simple-errors";
 
 type Params = Record<string, never>;
@@ -37,7 +37,26 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
         if (!await Context.auth.hasFullAccess(organization.id)) {
             throw Context.auth.error()
-        } 
+        }
+
+        const platform = await Platform.getShared()
+
+        function validateDefaultGroupId(id: string|null): string|null {
+            if (id === null) {
+                return id;
+            }
+
+            if (platform.config.defaultAgeGroups.find(g => g.id === id)) {
+                return id;
+            }
+
+            throw new SimpleError({
+                code: "invalid_default_age_group",
+                message: "Invalid default age group",
+                human: "De standaard leeftijdsgroep is ongeldig",
+                statusCode: 400
+            })
+        }
 
         const structs: OrganizationRegistrationPeriodStruct[] = [];
 
@@ -66,6 +85,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 const model = new Group()
                 model.id = struct.id
                 model.organizationId = organization.id
+                model.defaultAgeGroupId = validateDefaultGroupId(struct.defaultAgeGroupId)
                 model.periodId = organizationPeriod.periodId
                 model.settings = struct.settings
                 model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
@@ -152,6 +172,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 const model = new Group()
                 model.id = struct.id
                 model.organizationId = organization.id
+                model.defaultAgeGroupId = validateDefaultGroupId(struct.defaultAgeGroupId)
                 model.periodId = organizationPeriod.periodId
                 model.settings = struct.settings
                 model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
@@ -220,6 +241,10 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
                 if (struct.deletedAt !== undefined) {
                     model.deletedAt = struct.deletedAt
+                }
+
+                if (struct.defaultAgeGroupId !== undefined) {
+                    model.defaultAgeGroupId = validateDefaultGroupId(struct.defaultAgeGroupId)
                 }
                 
                 await model.updateOccupancy()

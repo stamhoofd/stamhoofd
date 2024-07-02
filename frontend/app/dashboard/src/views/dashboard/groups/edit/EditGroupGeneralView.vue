@@ -7,45 +7,41 @@
             Algemene instellingen
         </h1>
 
-        
         <STErrorsDefault :error-box="errorBox" />
-
-        <STInputBox title="Naam" error-fields="settings.name" :error-box="errorBox">
-            <input
-                ref="firstInput"
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Naam van deze groep"
-                autocomplete=""
-            >
-        </STInputBox>
+        
         <p v-if="duplicateName" class="warning-box">
             Er bestaat al een andere inschrijvingsgroep met dezelfde naam. Dit kan voor onduidelijkheid zorgen aangezien de categorie niet altijd zichtbaar is.
         </p>
-
-        <div class="split-inputs">
-            <STInputBox title="Startdatum" error-fields="settings.startDate" :error-box="errorBox">
-                <DateSelection v-model="startDate" />
-            </STInputBox>
-            <TimeInput v-if="displayStartEndTime" v-model="startDate" title="Vanaf welk tijdstip" :validator="validator" /> 
-        </div>
-                
-
-        <div class="split-inputs">
-            <STInputBox title="Einddatum" error-fields="settings.endDate" :error-box="errorBox">
-                <DateSelection v-model="endDate" />
-            </STInputBox>
-            <TimeInput v-if="displayStartEndTime" v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
-        </div>
-
-        <Checkbox v-model="displayStartEndTime">
-            Start- en eindtijdstip toevoegen
-        </Checkbox>
-
-        <p class="st-list-description">
-            De start- en einddatum is zichtbaar bij het inschrijven en is puur informatief.
+        <p class="warning-box" v-if="!defaultAgeGroupId && defaultAgeGroups.length">
+            Leden die in deze groep inschrijven zullen niet automatisch worden aangesloten bij KSA Nationaal, en zijn dus ook niet verzekerd (tenzij je manueel een verzekering aanvraagt voor het lid). Dit is normaal gezien enkel voor uitzonderingen, bijvoorbeeld voor oud-leiding, een wachtzone, kampouders of helpende handen. Kies een standaard inschrijvingsgroep om de aansluiting bij KSA Nationaal te garanderen.
         </p>
+
+        <div class="split-inputs">
+            <STInputBox title="Naam" error-fields="settings.name" :error-box="errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    placeholder="Naam van deze groep"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <STInputBox v-if="defaultAgeGroups.length" title="Aansluiting KSA-Nationaal*" error-fields="settings.defaultAgeGroupId" :error-box="errorBox">
+                <Dropdown v-model="defaultAgeGroupId">
+                    <option :value="null">
+                        Geen automatische aansluiting of verzekeringen (!)
+                    </option>
+                    <option v-for="ageGroup of defaultAgeGroups" :key="ageGroup.id" :value="ageGroup.id">
+                        {{ ageGroup.name }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+        </div>
+        <p class="style-description-small" v-if="defaultAgeGroups.length">* Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.</p>
+
+
 
         <hr>
 
@@ -75,7 +71,7 @@
 
 <script lang="ts">
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, SaveView, SegmentedControl, Slider, TimeInput, UploadButton } from "@stamhoofd/components";
+import { Dropdown, AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, SaveView, SegmentedControl, Slider, TimeInput, UploadButton } from "@stamhoofd/components";
 import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Image, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, WaitingListType } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
 
@@ -97,10 +93,13 @@ import EditGroupMixin from './EditGroupMixin';
         TimeInput,
         STList,
         UploadButton,
-        STListItem
+        STListItem,
+        Dropdown
     },
 })
 export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
+    didSetAutomaticGroup = false
+
     get duplicateName() {
         return !!this.patchedPeriod.groups.find(g => StringCompare.typoCount(g.settings.name, this.patchedGroup.settings.name) === 0 && g.id !== this.patchedGroup.id)
     }
@@ -140,6 +139,31 @@ export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
 
     set name(name: string) {
         this.addSettingsPatch({ name })
+
+        if ((!this.defaultAgeGroupId || this.didSetAutomaticGroup)) {
+            const match = this.defaultAgeGroups.find(g => g.names.find(nn => StringCompare.typoCount(nn, name) === 0))
+            if (match) {
+                this.defaultAgeGroupId = match.id
+                this.didSetAutomaticGroup = true
+            } else {
+                this.defaultAgeGroupId = null
+            }
+        }
+    }
+
+    get defaultAgeGroupId() {
+        return this.patchedGroup.defaultAgeGroupId
+    }
+
+    set defaultAgeGroupId(defaultAgeGroupId: string | null) {
+        this.addPatch(Group.patch({
+            defaultAgeGroupId
+        }))
+        this.didSetAutomaticGroup = false
+    }
+
+    get defaultAgeGroups() {
+        return this.$platform.config.defaultAgeGroups
     }
 
     get location() {
@@ -436,38 +460,3 @@ export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-.group-edit-view {
-    .cover-photo {
-        height: 0;
-        position: relative;
-        padding-bottom: calc(750 / 1800 * 100%);
-        background: $color-gray-3;
-        border-radius: $border-radius;
-        margin-top: 20px;
-
-        img {
-            border-radius: $border-radius;
-            height: 100%;
-            width: 100%;
-            object-fit: cover;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-    }
-
-    .square-photo {
-        img {
-            height: 200px;
-            width: 200px;
-            border-radius: $border-radius;
-            object-fit: contain;
-        }
-    }
-
-}
-</style>

@@ -188,7 +188,15 @@ export default class GroupRow extends Mixins(NavigationMixin) {
                     name: "Verwijderen",
                     icon: "trash",
                     action: () => {
-                        this.$emit("delete")
+                        const settings = OrganizationRegistrationPeriodSettings.patch({})
+                        const pp = GroupCategory.patch({id:this.parentCategory.id})
+                        pp.groupIds.addDelete(this.group.id)
+                        settings.categories.addPatch(pp)
+
+                        this.$emit('patch:period', OrganizationRegistrationPeriod.patch({
+                            settings
+                        }))
+
                         return true;
                     }
                 }),

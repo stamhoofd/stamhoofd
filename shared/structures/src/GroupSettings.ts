@@ -87,6 +87,11 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193 })
     cycleSettings: Map<number, CycleInformation> = new Map()
 
+    /**
+     * @deprecated
+     * Use registration periods instead
+     * + replaced by activities
+     */
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
         const d2 = new Date(d)
@@ -95,6 +100,11 @@ export class GroupSettings extends AutoEncoder {
     } })
     startDate: Date = new Date()
 
+    /**
+     * @deprecated
+     * Use registration periods instead
+     * + replaced by activities
+     */
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
         const d2 = new Date(d)
@@ -104,6 +114,7 @@ export class GroupSettings extends AutoEncoder {
     endDate: Date = new Date()
 
     /**
+     * @deprecated
      * Dispay start and end date times
      */
     @field({ decoder: BooleanDecoder, version: 78 })
