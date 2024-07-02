@@ -3,7 +3,6 @@
     "version": "1.0.0",
     "main": "index.ts",
     "license": "UNLICENCED",
-    "private": true,
     "scripts": {
         "dev": "concurrently -r 'rm -rf ./dist && wait-on ./dist/index.js && nodemon --quiet --inspect=5860 --watch dist --exec node --enable-source-maps ./dist/index.js --signal SIGTERM' 'yarn build --watch --preserveWatchOutput > /dev/null'",
         "build": "tsc -b",
