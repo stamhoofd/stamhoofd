@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/utility",
-    "version": "1.0.0",
+    "version": "2.1.1",
     "main": "./dist/index.js",
     "module": "./esm/dist/index.js",
     "types": "./dist/index.d.ts",
@@ -15,7 +15,5 @@
         "build:full": "rm -rf ./dist && rm -rf ./esm/dist && tsc -b . esm",
         "test": "jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
-    },
-    "devDependencies": {},
-    "dependencies": {}
+    }
 }

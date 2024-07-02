@@ -1,7 +1,6 @@
 {
     "name": "@stamhoofd/models",
-    "version": "1.0.0",
-    "private": true,
+    "version": "2.1.1",
     "main": "./dist/src/index.js",
     "types": "./dist/src/index.d.ts",
     "license": "UNLICENCED",
@@ -17,13 +16,13 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "peerDependencies": {
+        "@simonbackx/simple-database": "*",
         "@stamhoofd/email": "*",
-        "@stamhoofd/queues": "*",
-        "@simonbackx/simple-database": "*"
+        "@stamhoofd/queues": "*"
     },
     "dependencies": {
-        "base-x": "^3.0.9",
-        "aws-sdk": "^2.885.0"
+        "aws-sdk": "^2.885.0",
+        "base-x": "^3.0.9"
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.24.0"

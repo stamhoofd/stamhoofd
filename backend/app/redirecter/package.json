@@ -1,9 +1,8 @@
 {
     "name": "@stamhoofd/redirecter",
-    "version": "1.0.0",
+    "version": "2.1.1",
     "main": "index.ts",
     "license": "UNLICENCED",
-    "private": true,
     "scripts": {
         "build": "rm -rf ./dist/src/data && tsc -b && mkdir -p ./dist/src/data && cp ./src/data/* ./dist/src/data",
         "build:full": "rm -rf ./dist && yarn build",
