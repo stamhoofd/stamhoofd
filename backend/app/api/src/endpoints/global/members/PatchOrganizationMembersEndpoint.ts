@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, Platform, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, Platform, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
 import { BalanceItemStatus, MemberWithRegistrationsBlob, MembersBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -119,6 +119,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const group = await getGroup(registrationStruct.groupId)
                 if (!group || group.organizationId !== registrationStruct.organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                     throw Context.auth.notFoundOrNoAccess("Je hebt niet voldoende rechten om leden toe te voegen in deze groep")
+                }
+
+                const period = await RegistrationPeriod.getByID(group.periodId)
+                if (!period || period.locked) {
+                    throw new SimpleError({
+                        code: "period_locked",
+                        message: "Deze inschrijvingsperiode is afgesloten en staat geen wijzigingen meer toe.",
+                    })
                 }
 
                 // Set organization id of member based on registrations
@@ -263,6 +271,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
+                const period = await RegistrationPeriod.getByID(group.periodId)
+                if (!period || period.locked) {
+                    throw new SimpleError({
+                        code: "period_locked",
+                        message: "Deze inschrijvingsperiode is afgesloten en staat geen wijzigingen meer toe.",
+                    })
+                }
+
                 // TODO: allow group changes
                 registration.waitingList = patchRegistration.waitingList ?? registration.waitingList
 
@@ -337,13 +353,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (!await Context.auth.canAccessRegistration(registration, PermissionLevel.Write)) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om deze inschrijving te verwijderen")
                 }
+                const oldGroup = await getGroup(registration.groupId)
+                const period = oldGroup && await RegistrationPeriod.getByID(oldGroup.periodId)
+                if (!period || period.locked) {
+                    throw new SimpleError({
+                        code: "period_locked",
+                        message: "Deze inschrijvingsperiode is afgesloten en staat geen wijzigingen meer toe.",
+                    })
+                }
 
                 balanceItemMemberIds.push(member.id)                
                 await BalanceItem.deleteForDeletedRegistration(registration.id)
                 await registration.delete()
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
 
-                const oldGroup = await getGroup(registration.groupId)
                 if (oldGroup) {
                     // We need to update this group occupancy because we moved one member away from it
                     updateGroups.set(oldGroup.id, oldGroup)
@@ -357,6 +380,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 if (!group || group.organizationId !== struct.organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om inschrijvingen in deze groep te maken")
+                }
+                const period = await RegistrationPeriod.getByID(group.periodId)
+                if (!period || period.locked) {
+                    throw new SimpleError({
+                        code: "period_locked",
+                        message: "Deze inschrijvingsperiode is afgesloten en staat geen wijzigingen meer toe.",
+                    })
                 }
 
                 const reg = await this.addRegistration(member, struct, group)
