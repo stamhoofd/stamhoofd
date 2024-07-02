@@ -1,7 +1,12 @@
 {
     "name": "@stamhoofd/backend-renderer",
     "version": "2.1.1",
-    "main": "index.ts",
+    "main": "./dist/index.js",
+    "exports": {
+        ".": {
+            "require": "./dist/index.js"
+        }
+    },
     "license": "UNLICENCED",
     "scripts": {
         "dev": "concurrently -r 'rm -rf ./dist && wait-on ./dist/index.js && nodemon --quiet --inspect=5860 --watch dist --exec node --enable-source-maps ./dist/index.js --signal SIGTERM' 'yarn build --watch --preserveWatchOutput > /dev/null'",
