@@ -2,7 +2,7 @@
     <ModernTableView
         ref="modernTableView" 
         :table-object-fetcher="tableObjectFetcher" 
-        :filter-builders="memberWithRegistrationsBlobUIFilterBuilders" 
+        :filter-builders="filterBuilders" 
         :default-sort-direction="SortItemDirection.DESC" 
         :title="title" 
         :column-configuration-id="configurationId" 
@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -45,6 +45,11 @@ const props = withDefaults(
     }
 )
 
+const filterBuilders = computed(() => {
+    return getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform.value, {
+        user: auth.user,
+    })
+})
 const title = computed(() => {
     if (props.waitingList) {
         return "Wachtlijst"

@@ -48,6 +48,7 @@ const registrationFilterCompilers: SQLFilterDefinitions = {
         status: createSQLExpressionFilterCompiler(
             SQL.column('groups', 'status')
         ),
+        defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId')),
     })
 }
 
@@ -270,6 +271,11 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             periodId: platform.periodId,
                             registeredAt: {
                                 $neq: null
+                            },
+                            group: {
+                                defaultAgeGroupId: {
+                                    $neq: null
+                                }
                             }
                         }
                     }

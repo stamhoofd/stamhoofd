@@ -1,3 +1,4 @@
+import { Platform, User } from "@stamhoofd/structures";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
@@ -34,6 +35,44 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
         builders: memberWithRegistrationsBlobUIFilterBuilders
     })
 )
+
+export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform: Platform, options: {user?: User|null} = {}) {
+    const all = [
+        ...memberWithRegistrationsBlobUIFilterBuilders.slice(0, memberWithRegistrationsBlobUIFilterBuilders.length - 1),
+    ]
+
+    if (options.user?.permissions?.platform !== null) {
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: 'Standaard leeftijdsgroep',
+                options: platform.config.defaultAgeGroups.map(group => {
+                    return new MultipleChoiceUIFilterOption(group.name, group.id);
+                }),
+                buildFilter: (choices) => {
+                    return {
+                        registrations: {
+                            $elemMatch: {
+                                group: {
+                                    defaultAgeGroupId: {
+                                        $in: choices.map(c => c)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+        )
+    }
+
+    all.unshift(
+        new GroupUIFilterBuilder({
+            builders: all
+        })
+    )
+
+    return all
+}
 
 //
 // CHECKOUT
