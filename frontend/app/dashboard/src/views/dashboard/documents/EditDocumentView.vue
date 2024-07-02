@@ -166,7 +166,7 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
             if (updatedDocument) {
                 this.editingAnswers = this.document.data.fieldAnswers.map(a => a.clone())
                 this.patchDocument = Document.patch({})
-                this.document.set(updatedDocument)
+                this.document.deepSet(updatedDocument)
             }
             
             this.dismiss({ force: true })

@@ -750,7 +750,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                             decoder: StripeAccount as Decoder<StripeAccount>,
                             owner: this
                         })
-                        account.set(response.data)
+                        account.deepSet(response.data)
                     } catch (e) {
                         console.error(e)
                     }

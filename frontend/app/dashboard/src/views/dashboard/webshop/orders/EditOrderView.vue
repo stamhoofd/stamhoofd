@@ -568,7 +568,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             // Move all data to original order
             for (const order of orders) {
                 if (order.id === this.order.id) {
-                    this.order.set(order)
+                    this.order.deepSet(order)
                 }
             }
             this.patchOrder = PrivateOrder.patch({})

@@ -278,7 +278,7 @@ async function editOrganization() {
                         decoder: Organization as Decoder<Organization>
                     });
 
-                    props.organization.set(response.data)
+                    props.organization.deepSet(response.data)
                 }
             })
         ]

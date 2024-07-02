@@ -276,7 +276,7 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
         for (const d of response.data) {
             const existing = this.discountCodes.find(dd => dd.id === d.id)
             if (existing) {
-                existing.set(d)
+                existing.deepSet(d)
             } else {
                 this.discountCodes.push(d)
             }

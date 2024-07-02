@@ -331,7 +331,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
             await this.webshopManager.streamTicketPatches((patch) => {
                 const ticket = ticketBuffer.find(o => o.id === patch.id)
                 if (ticket) {
-                    ticket.set(ticket.patch(patch))
+                    ticket.deepSet(ticket.patch(patch))
                 }
             })
 

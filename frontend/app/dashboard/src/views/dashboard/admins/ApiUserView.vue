@@ -165,7 +165,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
             }
 
             // Copy all data
-            this.user.set(user);
+            this.user.deepSet(user);
             this.patchUser = ApiUser.patch({ id: this.user.id });
 
             this.callback()

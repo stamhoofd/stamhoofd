@@ -54,7 +54,7 @@ export class PlatformManager {
     }
 
     async forceUpdate() {
-        this.$platform.set(await PlatformManager.fetchPlatform(this.$context))
+        this.$platform.deepSet(await PlatformManager.fetchPlatform(this.$context))
     }
 
     async patch(patch: AutoEncoderPatchType<Platform>, shouldRetry = false) {
@@ -69,7 +69,7 @@ export class PlatformManager {
         // Keep admins
         const admins = this.$platform.admins
 
-        this.$platform.set(response.data)
+        this.$platform.deepSet(response.data)
 
         if (admins && !response.data.admins && patch.admins) {
             this.$platform.admins = patch.admins.applyTo(admins)

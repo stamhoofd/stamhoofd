@@ -73,8 +73,8 @@ export class WebshopManager {
         })
 
         // Clone data and keep references
-        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(response.data)
-        this.preview.set(response.data)
+        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.deepSet(response.data)
+        this.preview.deepSet(response.data)
 
         // Save async (could fail in some unsupported browsers)
         this.storeWebshop(response.data).catch(console.error)

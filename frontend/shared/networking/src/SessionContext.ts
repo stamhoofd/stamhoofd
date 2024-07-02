@@ -522,7 +522,7 @@ export class SessionContext implements RequestMiddleware {
             shouldRetry
         })
         if (this.user) {
-            this.user.set(response.data)
+            this.user.deepSet(response.data)
         } else {
             this.user = response.data
         }

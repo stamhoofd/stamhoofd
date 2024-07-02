@@ -96,7 +96,7 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
                 decoder: Organization as Decoder<Organization>
             })
 
-            this.$organization.set(response.data)
+            this.$organization.deepSet(response.data)
             this.saving = false
 
             if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null && response.data.privateMeta.pendingRegisterDomain === null) {

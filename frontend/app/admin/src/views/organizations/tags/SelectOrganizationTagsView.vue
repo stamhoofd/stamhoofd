@@ -63,7 +63,7 @@ async function save() {
         const updatedData = response.data.find(d => d.id === props.organization.id)
         
         if (updatedData) {
-            props.organization.set(updatedData)
+            props.organization.deepSet(updatedData)
         }
         await pop({ force: true });
     } catch (e) {

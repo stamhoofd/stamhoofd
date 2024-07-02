@@ -120,7 +120,7 @@ export class DocumentActionBuilder {
             for (const d of response.data) {
                 const originalDocument = documents.find(d2 => d2.id == d.id)
                 if (originalDocument) {
-                    originalDocument.set(d)
+                    originalDocument.deepSet(d)
                 }
             }
             new Toast(documents.length === 1 ? "Document verwijderd" : `${documents.length} documenten verwijderd`, 'success').show()
@@ -152,7 +152,7 @@ export class DocumentActionBuilder {
             for (const d of response.data) {
                 const originalDocument = documents.find(d2 => d2.id == d.id)
                 if (originalDocument) {
-                    originalDocument.set(d)
+                    originalDocument.deepSet(d)
                 }
             }
             new Toast(documents.length === 1 ? "Document teruggezet" : `${documents.length} documenten teruggezet`, 'success').show()
@@ -235,7 +235,7 @@ export class DocumentActionBuilder {
             for (const d of response.data) {
                 const originalDocument = documents.find(d2 => d2.id == d.id)
                 if (originalDocument) {
-                    originalDocument.set(d)
+                    originalDocument.deepSet(d)
                 }
             }
         } catch (e) {

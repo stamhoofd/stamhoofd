@@ -296,7 +296,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 const pp = this.payments.find(p => p.id == payment.id)
                 if (pp) {
                     // Keep reference
-                    pp.set(payment)
+                    pp.deepSet(payment)
                 } else {
                     // Append
                     payments.push(payment)

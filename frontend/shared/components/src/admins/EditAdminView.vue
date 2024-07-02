@@ -184,7 +184,7 @@ const save = async () => {
         }
 
         // Copy all data
-        props.user.set(user);
+        props.user.deepSet(user);
 
         // Push user to admins
         if (props.isNew) {
@@ -226,7 +226,7 @@ const doDelete = async () => {
         })
 
         // Copy all data
-        props.user.set(response.data);
+        props.user.deepSet(response.data);
         dropFromMemory(props.user)
 
         await pop({ force: true })

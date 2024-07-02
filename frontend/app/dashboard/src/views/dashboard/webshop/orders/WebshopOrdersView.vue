@@ -499,7 +499,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         for (const _order of this.orders) {
             if (order.id === _order.id) {
                 // replace data without affecting reference or tickets
-                _order.set(order)
+                _order.deepSet(order)
                 return
             }
         }
@@ -624,7 +624,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             await this.webshopManager.streamTicketPatches((patch) => {
                 const ticket = ticketBuffer.find(o => o.id === patch.id)
                 if (ticket) {
-                    ticket.set(ticket.patch(patch))
+                    ticket.deepSet(ticket.patch(patch))
                 }
             })
 

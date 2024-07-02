@@ -207,7 +207,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
             const documentTemplates = response.data
             const template = documentTemplates.find(t => t.id == this.template.id)
             if (template) {
-                this.template.set(template)
+                this.template.deepSet(template)
             }
         } catch (e) {
             Toast.fromError(e).show()

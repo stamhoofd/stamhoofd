@@ -643,7 +643,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         this.webshopManager.ordersEventBus.addListener(this, "fetched", (orders: PrivateOrder[]) => {
             for (const order of orders) {
                 if (order.id === this.order.id) {
-                    this.order.set(order)
+                    this.order.deepSet(order)
                 }
             }
             return Promise.resolve()

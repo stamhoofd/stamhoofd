@@ -185,7 +185,7 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                 if (!existing) {
                     this.templates.push(template)
                 } else {
-                    existing.set(template)
+                    existing.deepSet(template)
                 }
             }
             this.dismiss({ force: true })

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Group, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
@@ -122,6 +122,12 @@ export class OrganizationManager {
         const loaded = await LoginHelper.loadAdmins(this.$context, shouldRetry, owner)
         this.organization.admins = loaded.users
 
+        if (this.organization.admins !== undefined) {
+            deepSetArray(this.organization.admins, loaded.users)
+        } else {
+            this.organization.admins = loaded.users
+        }
+
         // Save organization in localstorage
         this.save().catch(console.error)
 
@@ -140,7 +146,11 @@ export class OrganizationManager {
             owner,
             shouldRetry: shouldRetry ?? false,
         })
-        this.organization.periods = response.data
+        if (this.organization.periods) {
+            this.organization.periods?.deepSet(response.data)
+        } else {
+            this.organization.periods = response.data
+        }
         return response.data
     }
 

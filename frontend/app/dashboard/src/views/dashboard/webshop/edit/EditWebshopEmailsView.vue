@@ -260,7 +260,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                 if (!existing) {
                     this.templates.push(template)
                 } else {
-                    existing.set(template)
+                    existing.deepSet(template)
                 }
             }
             this.dismiss({ force: true })
