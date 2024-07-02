@@ -1055,3 +1055,26 @@
         color: $color-gray-1;
     }
 }
+
+
+ul.style-list {
+    list-style: none; 
+    @extend .style-normal;
+    padding-left: 30px;
+
+    li {
+        padding: 8px 0;
+    }
+
+    li::before {
+        content: ""; 
+        background: $color-primary;
+        display: inline-block; 
+        vertical-align: middle;
+        width: 5px;
+        height: 5px;
+        margin-right: 15px;
+        border-radius: 2.5px;
+        margin-left: -20px;
+    }
+}

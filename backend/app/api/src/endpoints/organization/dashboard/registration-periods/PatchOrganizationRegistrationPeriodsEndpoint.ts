@@ -41,6 +41,46 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
         const structs: OrganizationRegistrationPeriodStruct[] = [];
 
+        for (const {put} of request.body.getPuts()) {
+            if (!await Context.auth.hasFullAccess(organization.id)) {
+                throw Context.auth.error()
+            }
+            const period = await RegistrationPeriod.getByID(put.period.id);
+
+            if (!period) {
+                throw new SimpleError({
+                    code: "not_found",
+                    message: "Period not found",
+                    statusCode: 404
+                })
+            }
+
+            const organizationPeriod = new OrganizationRegistrationPeriod();
+            organizationPeriod.id = put.id;
+            organizationPeriod.organizationId = organization.id;
+            organizationPeriod.periodId = put.period.id;
+            organizationPeriod.settings = put.settings;
+            await organizationPeriod.save();
+
+            for (const struct of put.groups) {
+                const model = new Group()
+                model.id = struct.id
+                model.organizationId = organization.id
+                model.periodId = organizationPeriod.periodId
+                model.settings = struct.settings
+                model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({})
+                model.status = struct.status
+                await model.updateOccupancy()
+                await model.save();
+            }
+            const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
+
+            // Delete unreachable categories first
+            await organizationPeriod.cleanCategories(groups);
+            await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
+            structs.push(organizationPeriod.getStructure(period, groups));
+        }
+
         for (const patch of request.body.getPatches()) {
             const organizationPeriod = await OrganizationRegistrationPeriod.getByID(patch.id);
             if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
@@ -191,15 +231,13 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             if (deleteUnreachable) {
                 // Delete unreachable categories first
-                await organization.cleanCategories(groups);
+                await organizationPeriod.cleanCategories(groups);
                 await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
             }
 
             if (period) {
-
                 structs.push(organizationPeriod.getStructure(period, groups));
             }
-
         }
 
         return new Response(

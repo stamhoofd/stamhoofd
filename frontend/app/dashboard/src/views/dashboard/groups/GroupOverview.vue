@@ -5,6 +5,10 @@
         <main>
             <h1 class="style-navigation-title with-icons button" @click="openCategorySelector">
                 <span>{{ title }}</span>
+
+                <span v-if="period" class="title-suffix">
+                    {{ period.period.name }}
+                </span>
                 
                 <span v-if="!isPublic" v-tooltip="'Deze groep staat in een categorie die enkel zichtbaar is voor beheerders'" class="icon lock small" />
                 <template v-else>

@@ -5,7 +5,7 @@ import { CountryHelper } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { type App } from "vue";
 
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, TooltipDirective, useAppContext } from "..";
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, STList, STToolbar, TooltipDirective, useAppContext } from "..";
 import PromiseView from "./containers/PromiseView.vue";
 import STErrorsDefault from "./errors/STErrorsDefault.vue";
 import { useContext, useOrganization, usePlatform, useUser } from "./hooks";
@@ -109,6 +109,7 @@ export class VueGlobalHelper {
         app.component('Radio', Radio)
         app.component('LoadingView', LoadingView)
         app.component('LoadingButton', LoadingButton)
+        app.component('STToolbar', STToolbar)
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

@@ -299,65 +299,6 @@ export class Organization extends Model {
         return struct
     }
 
-    async cleanCategories(groups: {id: string}[]) {
-        const reachable = new Map<string, boolean>()
-        const queue = [this.meta.rootCategoryId]
-        reachable.set(this.meta.rootCategoryId, true)
-        let shouldSave = false;
-
-        const usedGroupIds = new Set<string>()
-
-        while (queue.length > 0) {
-            const id = queue.shift()
-            if (!id) {
-                break
-            }
-
-            const category = this.meta.categories.find(c => c.id === id)
-            if (!category) {
-                continue
-            }
-
-            for (const i of category.categoryIds) {
-                if (!reachable.get(i)) {
-                    reachable.set(i, true)
-                    queue.push(i)
-                }
-            }
-
-            // Remove groupIds that no longer exist or are in a different category already
-            let filtered = category.groupIds.filter(id => !!groups.find(g => g.id === id) && !usedGroupIds.has(id))
-
-            // Remove duplicate groups
-            filtered = Formatter.uniqueArray(filtered)
-
-            if (filtered.length !== category.groupIds.length) {
-                shouldSave = true;
-                console.log("Deleted "+ (category.groupIds.length - filtered.length) +" group ids from category " + category.id + ", in organization "+this.id)
-                category.groupIds = filtered
-            }
-
-            for (const groupId of category.groupIds) {
-                usedGroupIds.add(groupId)
-            }
-        }
-
-        const reachableCategoryIds = [...reachable.keys()]
-
-        // Delete all categories that are not reachable anymore
-        const beforeCount = this.meta.categories.length;
-        this.meta.categories = this.meta.categories.filter(c => reachableCategoryIds.includes(c.id))
-
-        if (this.meta.categories.length !== beforeCount) {
-            console.log("Deleted "+ (beforeCount - this.meta.categories.length) +" categories from organization "+this.id)
-            await this.save()
-        } else {
-            if (shouldSave) {
-                await this.save()
-            }
-        }
-    }
-
     async updateDNSRecords() {
         const organization = this;
 

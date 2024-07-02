@@ -144,7 +144,7 @@ export class AuthenticatedStructures {
         }
 
         // Load responsibilities
-        const responsibilities = await MemberResponsibilityRecord.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } })
+        const responsibilities = members.length > 0 ? await MemberResponsibilityRecord.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
 
         for (const blob of memberBlobs) {
             blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => MemberResponsibilityRecordStruct.create(r))

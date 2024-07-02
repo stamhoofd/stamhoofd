@@ -10,7 +10,7 @@ export class ErrorBox {
     scrollToElements: [any[], HTMLElement][] = []
     scrollTimer?: number
 
-    constructor(errors: Error) {
+    constructor(errors: unknown) {
         if (isSimpleError(errors)) {
             this.errors = new SimpleErrors(errors)
         } else if (isSimpleErrors(errors)) {
@@ -18,7 +18,7 @@ export class ErrorBox {
         } else {
             this.errors = new SimpleErrors(new SimpleError({
                 code: "unknown_error",
-                message: errors.message
+                message: (errors as Error).message
             }))
         }
     }

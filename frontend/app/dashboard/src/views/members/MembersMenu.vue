@@ -65,13 +65,14 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useCheckRoute, useNavigate, useUrl } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import { ComponentWithProperties, defineRoutes, useCheckRoute, useNavigate, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Toast, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, Ref, computed, onActivated, ref } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
 
 const $organization = useOrganization();
 const $context = useContext();
@@ -81,6 +82,7 @@ const collapsed = useCollapsed('leden');
 const platform = usePlatform();
 const organizationManager = useOrganizationManager()
 const owner = useRequestOwner();
+const present = usePresent();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({
@@ -88,7 +90,7 @@ const tree = computed(() => {
         organization: $organization.value!
     })
 })
-const period = computed(() => $organization.value?.period) as Ref<OrganizationRegistrationPeriod>
+const period = ref($organization.value?.period) as Ref<OrganizationRegistrationPeriod>
 const newestPeriod = computed(() => {
     return platform.value.period
 })
@@ -126,7 +128,8 @@ const isCategoryDeactivated = (category: GroupCategoryTree) => {
 
 enum Routes {
     Category = "category",
-    Group = "group"
+    Group = "group",
+    GroupWithPeriod = "groupWithPeriod"
 }
 defineRoutes([
     {
@@ -201,6 +204,7 @@ async function switchPeriod(event: MouseEvent) {
 
     // Load groups
     const list = await organizationManager.value.loadPeriods(false, false, owner);
+    const organization = $organization.value!;
 
     const menu = new ContextMenu([
         (list.periods ?? []).map(p => {
@@ -208,10 +212,11 @@ async function switchPeriod(event: MouseEvent) {
                 name: p.name,
                 selected: p.id === period.value.period.id,
                 icon: p.id === platform.value.period.id && p.id !== period.value.period.id ? 'dot' : '',
-                action: () => {
-                    if (!list.organizationPeriods.find(o => o.period.id === p.id)) {
-                        // Can not start if ended, or if not stargin withing 2 months
-                        if (p.endDate < new Date()) {
+                action: async () => {
+                    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === p.id)
+                    if (!organizationPeriod) {
+                        // Can not start if ended, or if not starging withing 2 months
+                        if (p.endDate < new Date() || p.startDate < organization.period.period.startDate) {
                             new CenteredMessage('Niet beschikbaar', 'Deze periode is niet beschikbaar voor jouw organisatie.').addCloseButton().show()
                             return false;
                         }
@@ -221,8 +226,27 @@ async function switchPeriod(event: MouseEvent) {
                             return false;
                         }
 
-                        new CenteredMessage('Start nieuw werkjaar', 'Je hebt dit werkjaar nog niet geconfigureerd. Ga naar de instellingen om dit te doen.').addCloseButton().show()
+                        await present({
+                            components: [
+                                new ComponentWithProperties(StartNewRegistrationPeriodView, {
+                                    period: p
+                                })
+                            ],
+                            modalDisplayStyle: "popup"
+                        })
+                        return true;
                     }
+
+                    new Toast('Je bekijkt nu ' + p.name, 'success').show()
+                    period.value = organizationPeriod
+
+                    // Make sure we open the first group again
+                    await $navigate(Routes.Group, {
+                        properties: {
+                            group: tree.value.getAllGroups()[0],
+                            period: period.value
+                        }
+                    })
                     return true;
                 }
             });
