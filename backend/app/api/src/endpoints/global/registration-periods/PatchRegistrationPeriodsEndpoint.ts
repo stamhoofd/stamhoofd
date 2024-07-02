@@ -4,7 +4,7 @@ import { RegistrationPeriod as RegistrationPeriodStruct } from "@stamhoofd/struc
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
-import { RegistrationPeriod } from '@stamhoofd/models';
+import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
@@ -106,6 +106,9 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             await model.delete();
         }
+
+        // Clear platform cache
+        Platform.clearCache()
 
         return new Response(
             periods.map(p => p.getStructure())

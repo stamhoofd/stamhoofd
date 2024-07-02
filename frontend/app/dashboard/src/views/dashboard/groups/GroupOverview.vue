@@ -10,9 +10,15 @@
                     {{ period.period.nameShort }}
                 </span>
             </h1>
-
-            <p v-if="!isPublic" class="info-box">Deze groep staat in een categorie die enkel zichtbaar is voor beheerders</p>
-            <p v-if="!isArchive && !isOpen" class="info-box">Inschrijvingen zijn momenteel gesloten via het ledenportaal.</p>
+            <p v-if="isLocked" class="warning-box">
+                Dit werkjaar is vergrendeld. Je kan geen wijzigingen meer aanbrengen aan inschrijvingen.
+            </p>
+            <p v-if="!isPublic" class="info-box">
+                Deze groep staat in een categorie die enkel zichtbaar is voor beheerders
+            </p>
+            <p v-if="!isArchive && !isOpen" class="info-box">
+                Inschrijvingen zijn momenteel gesloten via het ledenportaal.
+            </p>
 
             <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
@@ -262,6 +268,7 @@ const organizationManager = useOrganizationManager()
 const organization = useOrganization()
 const navigationController = useNavigationController()
 const present = usePresent()
+const isLocked = computed(() => props.period.period.locked)
 
 async function openMembers(animated = true, options: { waitingList?: boolean } = {}) {
     await show({

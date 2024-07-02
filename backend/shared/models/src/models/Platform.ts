@@ -69,6 +69,10 @@ export class Platform extends Model {
         });
     }
 
+    static clearCache() {
+        this.sharedStruct = null;
+    }
+
     async save() {
         Platform.sharedStruct = null
         return await super.save()

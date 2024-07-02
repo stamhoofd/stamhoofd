@@ -16,6 +16,21 @@
             </STInputBox>
         </div>
 
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="locked" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Vergrendel inschrijvingen
+                </h3>
+                <p v-if="locked" class="style-description-small">
+                    Lokale groepen kunnen niet langer wijzigingen aanbrengen aan inschrijvingen in dit werkjaar.
+                </p>
+            </STListItem>
+        </STList>
+
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
             <h2>
@@ -101,6 +116,11 @@ const startDate = computed({
 const endDate = computed({
     get: () => patched.value.endDate,
     set: (endDate) => addPatch({endDate}),
+});
+
+const locked = computed({
+    get: () => patched.value.locked,
+    set: (locked) => addPatch({locked}),
 });
 
 const shouldNavigateAway = async () => {
