@@ -33,7 +33,8 @@
         "caddy": "caddy run --config .development/caddy.json",
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
         "mail": "maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password",
-        "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules"
+        "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules",
+        "ship": "yarn build:shared && lerna publish --no-private"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",
