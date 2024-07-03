@@ -12,8 +12,13 @@
         <p v-if="duplicateName" class="warning-box">
             Er bestaat al een andere inschrijvingsgroep met dezelfde naam. Dit kan voor onduidelijkheid zorgen aangezien de categorie niet altijd zichtbaar is.
         </p>
-        <p class="warning-box" v-if="!defaultAgeGroupId && defaultAgeGroups.length">
+
+        <p v-if="(!defaultAgeGroupId) && defaultAgeGroups.length" class="warning-box">
             Leden die in deze groep inschrijven zullen niet automatisch worden aangesloten bij KSA Nationaal, en zijn dus ook niet verzekerd (tenzij je manueel een verzekering aanvraagt voor het lid). Dit is normaal gezien enkel voor uitzonderingen, bijvoorbeeld voor oud-leiding, een wachtzone, kampouders of helpende handen. Kies een standaard inschrijvingsgroep om de aansluiting bij KSA Nationaal te garanderen.
+        </p>
+
+        <p v-if="defaultAgeGroup && !defaultAgeGroup.defaultMembershipTypeId" class="warning-box">
+            Leden die in deze groep inschrijven zullen niet automatisch worden aangesloten bij KSA Nationaal. Je kan wel een aansluiting op individuele basis per lid toevoegen.
         </p>
 
         <div class="split-inputs">
@@ -34,14 +39,14 @@
                         Geen automatische aansluiting of verzekeringen (!)
                     </option>
                     <option v-for="ageGroup of defaultAgeGroups" :key="ageGroup.id" :value="ageGroup.id">
-                        {{ ageGroup.name }}
+                        {{ ageGroup.name }}<template v-if="!ageGroup.defaultMembershipTypeId"> (niet automatisch)</template>
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
-        <p class="style-description-small" v-if="defaultAgeGroups.length">* Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.</p>
-
-
+        <p v-if="defaultAgeGroups.length" class="style-description-small">
+            * Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.
+        </p>
 
         <hr>
 
@@ -71,7 +76,7 @@
 
 <script lang="ts">
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { Dropdown, AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, SaveView, SegmentedControl, Slider, TimeInput, UploadButton } from "@stamhoofd/components";
+import { AgeInput, Checkbox, DateSelection, Dropdown, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, SaveView, SegmentedControl, Slider, TimeInput, UploadButton } from "@stamhoofd/components";
 import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Image, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, WaitingListType } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
 
@@ -160,6 +165,10 @@ export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
             defaultAgeGroupId
         }))
         this.didSetAutomaticGroup = false
+    }
+
+    get defaultAgeGroup() {
+        return this.defaultAgeGroups.find(g => g.id === this.defaultAgeGroupId)
     }
 
     get defaultAgeGroups() {
