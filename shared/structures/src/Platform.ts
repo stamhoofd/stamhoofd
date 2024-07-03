@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { PermissionRoleDetailed } from "./Permissions";
@@ -21,13 +21,24 @@ export class OrganizationTag extends AutoEncoder {
     name = ''
 }
 
-export class MembershipTypeConfig extends AutoEncoder {
-    /**
-     * Custom name for this period
-     */
-    @field({ decoder: StringDecoder })
-    name = ''
+export class MembershipTypeConfigPrice extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+    
+    @field({ decoder: DateDecoder, nullable: true })
+    startDate: Date|null = null
 
+    @field({ decoder: IntegerDecoder })
+    price = 0
+    
+    /**
+     * If you set this, it will be possible to choose a custom start and end date within the startDate - endDate period
+     */
+    @field({ decoder: IntegerDecoder })
+    pricePerDay = 0
+}
+
+export class MembershipTypeConfig extends AutoEncoder {
     @field({ decoder: DateDecoder })
     startDate = new Date()
 
@@ -35,16 +46,26 @@ export class MembershipTypeConfig extends AutoEncoder {
     endDate = new Date()
 
     @field({ decoder: DateDecoder, nullable: true })
-    visibleEndDate: Date|null = null
+    expireDate: Date|null = null
 
     @field({ decoder: IntegerDecoder })
-    price = 0
+    amountFree = 0
+
+    @field({ decoder: new ArrayDecoder(MembershipTypeConfigPrice) })
+    prices: MembershipTypeConfigPrice[] = [MembershipTypeConfigPrice.create({})]
+    
+}
+
+export enum MembershipTypeBehaviour {
+    /**
+     * A membership that is valid for a certain period
+     */
+    Period = "Period",
 
     /**
-     * If you set this, it will be possible to choose a custom start and end date within the startDate - endDate period
+     * A membership that is valid for a certain number of days
      */
-    @field({ decoder: IntegerDecoder, nullable: true })
-    pricePerDay: number|null = null
+    Days = "Days"
 }
 
 export class MembershipType extends AutoEncoder {
@@ -56,6 +77,9 @@ export class MembershipType extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     description = ''
+
+    @field({ decoder: new EnumDecoder(MembershipTypeBehaviour) })
+    behaviour = MembershipTypeBehaviour.Period
 
     /**
      * Settings per period

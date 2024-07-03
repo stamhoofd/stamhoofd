@@ -4,12 +4,13 @@
             <div>{{ dateText }}</div>
         </div>
         <div v-else class="input selectable" :class="{placeholder: modelValue === null}" @click="focusFirst()" @mousedown.prevent>
+            <span v-if="modelValue === null" class="placeholder">{{ placeholder }}</span>
             <div @click.prevent @mouseup.prevent>
                 <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @input="onTyping();">
                 <span>{{ dayText }}</span>
             </div>
 
-            <span :class="{hide: !hasFocus}">/</span>
+            <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
                 <input ref="monthInput" v-model="monthText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(1)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(1)" @input="onTyping();">
@@ -17,7 +18,7 @@
                 <span v-else>{{ monthTextLong }}</span>
             </div>
 
-            <span :class="{hide: !hasFocus}">/</span>
+            <span :class="{sep: true, hide: !hasFocus}">/</span>
 
             <div @click.prevent @mouseup.prevent>
                 <input ref="yearInput" v-model="yearText" inputmode="numeric" autocomplete="off" @change="updateDate" @focus.prevent="onFocus(2)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(2)" @input="onTyping();">
@@ -435,6 +436,10 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         color: $color-gray-5;
     }
 
+    .input:focus-within > span.placeholder {
+        display: none;
+    }
+
     .input {
         padding: 5px 0;
         padding-right: 40px;
@@ -445,7 +450,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         align-items: start;
         justify-content: start;
 
-        > span {
+        > span.sep {
             color: $color-gray-5;
             pointer-events: none;
             width: 10px;

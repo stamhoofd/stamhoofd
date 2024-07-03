@@ -6,24 +6,65 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('shared.name') ">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                :placeholder="$t('shared.name') "
-            >
-        </STInputBox>
-
         <div class="split-inputs">
-            <STInputBox :title="$t('shared.startDate')" error-fields="settings.minAge" :error-box="errors.errorBox">
+            <STInputBox :title="$t('shared.startDate')" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
 
-            <STInputBox :title="$t('shared.endDate')" error-fields="settings.maxAge" :error-box="errors.errorBox">
+            <STInputBox :title="$t('shared.endDate')" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" />
             </STInputBox>
         </div>
+        <p v-if="type.behaviour === MembershipTypeBehaviour.Days" class="style-description-small">
+            Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.
+        </p>
+
+        <STInputBox v-if="type.behaviour === MembershipTypeBehaviour.Period" :title="$t('admin.settings.membershipTypes.expireDate.title')" error-fields="endDate" :error-box="errors.errorBox">
+            <DateSelection v-model="expireDate" :required="false" :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')" />
+        </STInputBox>
+        <p v-if="type.behaviour === MembershipTypeBehaviour.Period" class="style-description-small">
+            {{ $t('admin.settings.membershipTypes.expireDate.description') }}
+        </p>
+
+        <div v-for="(price, index) of prices" :key="price.id" class="container">
+            <hr>
+
+            <template v-if="prices.length > 1">
+                <h2 v-if="index === 0 || !price.startDate">
+                    Standaardprijs
+                </h2>
+                <h2 v-else>
+                    Prijs vanaf {{ formatDate(price.startDate) }}
+                </h2>
+            </template>
+
+            <STInputBox v-if="index > 0 || price.startDate" :title="$t('admin.settings.membershipTypes.period.priceDate')" :error-box="errors.errorBox">
+                <DateSelection :model-value="price.startDate" :required="false" :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')" @update:model-value="patchPrice(price, {startDate: $event})" />
+            </STInputBox>
+
+            <div class="split-inputs">
+                <STInputBox v-if="type.behaviour === MembershipTypeBehaviour.Days" title="Prijs per dag" :error-box="errors.errorBox">
+                    <PriceInput :model-value="price.pricePerDay" placeholder="Prijs per dag" @update:model-value="patchPrice(price, {pricePerDay: $event})" />
+                </STInputBox>
+
+                <STInputBox :title="type.behaviour === MembershipTypeBehaviour.Days ? 'Vaste prijs' : 'Prijs'" :error-box="errors.errorBox">
+                    <PriceInput :model-value="price.price" placeholder="Gratis" @update:model-value="patchPrice(price, {price: $event})" />
+                </STInputBox>
+            </div>
+        </div>
+
+        <p>
+            <button class="button text" type="button" @click="addPrice">
+                <span class="icon add" />
+                <span>{{ $t('admin.settings.membershipTypes.period.addPrice') }}</span>
+            </button>
+        </p>
+
+        <hr>
+
+        <STInputBox title="Gratis per lokale groep" error-fields="price" :error-box="errors.errorBox">
+            <NumberInput v-model="amountFree" placeholder="Geen" :suffix="type.behaviour === MembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === MembershipTypeBehaviour.Days ? 'dag' : 'lid'" />
+        </STInputBox>
 
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
@@ -41,12 +82,12 @@
 
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch, DateSelection } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceInput, SaveView, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import { MembershipType, MembershipTypeBehaviour, MembershipTypeConfig, MembershipTypeConfigPrice, RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
@@ -55,6 +96,7 @@ const deleting = ref(false);
 const $t = useTranslate();
 
 const props = defineProps<{
+    type: MembershipType;
     config: MembershipTypeConfig;
     period: RegistrationPeriod
     isNew: boolean;
@@ -72,14 +114,6 @@ const save = async () => {
     }
     saving.value = true;
     try {
-        if (name.value.length < 2) {
-            throw new SimpleError({
-                code: "invalid_field",
-                message: $t('shared.errors.name.empty'),
-                field: "name"
-            })
-        }
-
         await props.saveHandler(patch.value)
         await pop({ force: true }) 
     } catch (e) {
@@ -112,11 +146,6 @@ const doDelete = async () => {
     deleting.value = false;
 };
 
-const name = computed({
-    get: () => patched.value.name,
-    set: (name) => addPatch({name}),
-});
-
 const startDate = computed({
     get: () => patched.value.startDate,
     set: (startDate) => addPatch({startDate}),
@@ -127,12 +156,58 @@ const endDate = computed({
     set: (endDate) => addPatch({endDate}),
 });
 
+const expireDate = computed({
+    get: () => patched.value.expireDate,
+    set: (expireDate) => addPatch({expireDate}),
+});
+
+const prices = computed({
+    get: () => patched.value.prices,
+    set: (prices) => addPatch({prices: prices as any}),
+});
+
+const amountFree = computed({
+    get: () => patched.value.amountFree,
+    set: (amountFree) => addPatch({amountFree}),
+});
+
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
     
     return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
+}
+
+function patchPrice(configPrice: MembershipTypeConfigPrice, patch: PartialWithoutMethods<AutoEncoderPatchType<MembershipTypeConfigPrice>>) {
+    prices.value = prices.value.map(p => {
+        if (p.id === configPrice.id) {
+            return p.patch(patch)
+        }
+        return p
+    }).sort((a, b) => {
+        if (!a.startDate) {
+            return -1
+        }
+        if (!b.startDate) {
+            return 1
+        }
+        return a.startDate.getTime() - b.startDate.getTime()
+    })
+}
+
+function addPrice() {
+    prices.value = [...prices.value, MembershipTypeConfigPrice.create({
+        startDate: new Date(),
+    })].sort((a, b) => {
+        if (!a.startDate) {
+            return -1
+        }
+        if (!b.startDate) {
+            return 1
+        }
+        return a.startDate.getTime() - b.startDate.getTime()
+    })
 }
 
 defineExpose({

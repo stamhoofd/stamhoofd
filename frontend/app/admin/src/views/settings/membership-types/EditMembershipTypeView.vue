@@ -7,14 +7,26 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('shared.name') ">
-            <input
-                v-model="name"
-                class="input"
-                type="text"
-                :placeholder="$t('shared.name') "
-            >
-        </STInputBox>
+        <div class="split-inputs">
+            <STInputBox :title="$t('shared.name') ">
+                <input
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    :placeholder="$t('shared.name') "
+                >
+            </STInputBox>
+            <STInputBox title="Type" error-fields="behaviour" :error-box="errors.errorBox">
+                <Dropdown v-model="behaviour">
+                    <option :value="MembershipTypeBehaviour.Period">
+                        Vaste periode
+                    </option>
+                    <option :value="MembershipTypeBehaviour.Days">
+                        Per dag
+                    </option>
+                </Dropdown>
+            </STInputBox>
+        </div>
 
         <STInputBox :title="$t('shared.description')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
             <textarea
@@ -25,6 +37,8 @@
                 autocomplete=""
             />
         </STInputBox>
+
+        
 
         <hr>
         <h2>Instellingen per werkjaar</h2>
@@ -63,10 +77,10 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, SaveView, Toast, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, SaveView, Toast, useErrors, usePatch, Dropdown } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { MembershipType, MembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import { MembershipType, MembershipTypeBehaviour, MembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditMembershipTypeConfigView from './EditMembershipTypeConfigView.vue';
@@ -173,10 +187,16 @@ const description = computed({
     set: (description) => addPatch({description}),
 });
 
+const behaviour = computed({
+    get: () => patched.value.behaviour,
+    set: (behaviour) => addPatch({behaviour}),
+});
+
 async function editPeriod(config: MembershipTypeConfig, period: RegistrationPeriod) {
     await present({
         components: [
             new ComponentWithProperties(EditMembershipTypeConfigView, {
+                type: patched.value,
                 period,
                 config,
                 isNew: false,
@@ -224,11 +244,39 @@ async function addConfig(event: MouseEvent) {
 }
 
 async function addConfigForPeriod(period: RegistrationPeriod) {
-    const config = MembershipTypeConfig.create({})
+    const {config: previousConfig, period: previousPeriod} = sortedPeriods.value[0] ?? {config: null, period: null}
+    const config = previousConfig ? previousConfig.clone() : MembershipTypeConfig.create({})
+
+    if (previousConfig && previousPeriod) {
+        const yearDifference = period.startDate.getFullYear() - previousPeriod.startDate.getFullYear()
+
+        // Change all dates
+        config.startDate = new Date(config.startDate)
+        config.startDate.setFullYear(config.startDate.getFullYear() + yearDifference)
+
+        config.endDate = new Date(config.endDate)
+        config.endDate.setFullYear(config.endDate.getFullYear() + yearDifference)
+
+        if (config.expireDate) {
+            config.expireDate = new Date(config.expireDate)
+            config.expireDate.setFullYear(config.expireDate.getFullYear() + yearDifference)
+        }
+
+        for (const price of config.prices) {
+            if (price.startDate) {
+                price.startDate = new Date(price.startDate)
+                price.startDate.setFullYear(price.startDate.getFullYear() + yearDifference)
+            }
+        }
+    } else {
+        config.startDate = period.startDate
+        config.endDate = period.endDate
+    }
 
     await present({
         components: [
             new ComponentWithProperties(EditMembershipTypeConfigView, {
+                type: patched.value,
                 period,
                 config,
                 isNew: true,
