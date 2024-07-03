@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { PermissionRoleDetailed } from "./Permissions";
@@ -17,11 +17,57 @@ export class OrganizationTag extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    @field({ decoder: StringDecoder })
+    name = ''
+}
+
+export class MembershipTypeConfig extends AutoEncoder {
     /**
-     * Name of the organization you are creating
+     * Custom name for this period
      */
     @field({ decoder: StringDecoder })
     name = ''
+
+    @field({ decoder: DateDecoder })
+    startDate = new Date()
+
+    @field({ decoder: DateDecoder })
+    endDate = new Date()
+
+    @field({ decoder: DateDecoder, nullable: true })
+    visibleEndDate: Date|null = null
+
+    @field({ decoder: IntegerDecoder })
+    price = 0
+
+    /**
+     * If you set this, it will be possible to choose a custom start and end date within the startDate - endDate period
+     */
+    @field({ decoder: IntegerDecoder, nullable: true })
+    pricePerDay: number|null = null
+}
+
+export class MembershipType extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ''
+
+    @field({ decoder: StringDecoder })
+    description = ''
+
+    /**
+     * Settings per period
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, MembershipTypeConfig) })
+    periods: Map<string, MembershipTypeConfig> = new Map()
+
+    /**
+     * Only allow organizations with these tags to use this membership type
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
+    requiredTagIds: string[]|null = null;
 }
 
 export class PlatformConfig extends AutoEncoder {
@@ -36,6 +82,9 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(MemberResponsibility), version: 262 })
     responsibilities: MemberResponsibility[] = []
+
+    @field({ decoder: new ArrayDecoder(MembershipType), version: 268 })
+    membershipTypes: MembershipType[] = []
 }
 
 export class Platform extends AutoEncoder {

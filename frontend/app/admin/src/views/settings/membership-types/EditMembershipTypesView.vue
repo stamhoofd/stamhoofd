@@ -6,16 +6,16 @@
         
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STList v-model="draggableResponsibilities" :draggable="true">
-            <template #item="{item: responsibility}">
-                <ResponsibilityRow :responsibility="responsibility" @click="editResponsibility(responsibility)" />
+        <STList v-model="draggableTypes" :draggable="true">
+            <template #item="{item: type}">
+                <MembershipTypeRow :type="type" @click="editType(type)" />
             </template>
         </STList>
 
         <p>
-            <button class="button text" type="button" @click="addResponsibility">
+            <button class="button text" type="button" @click="addType">
                 <span class="icon add" />
-                <span>Functie toevoegen</span>
+                <span>{{ $t('admin.settings.membershipTypes.add') }}</span>
             </button>
         </p>
     </SaveView>
@@ -27,10 +27,10 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { MemberResponsibility, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { MembershipType, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import ResponsibilityRow from './components/ResponsibilityRow.vue';
-import EditResponsibilityView from './EditResponsibilityView.vue';
+import MembershipTypeRow from './components/MembershipTypeRow.vue';
+import EditMembershipTypeView from './EditMembershipTypeView.vue';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
@@ -39,26 +39,26 @@ const pop = usePop();
 const present = usePresent();
 const $t = useTranslate();
 
-const originalResponsibilities = computed(() => platform.value.config.responsibilities)
-const {patched: responsibilities, patch, addArrayPatch, hasChanges} = usePatchArray(originalResponsibilities)
-const draggableResponsibilities = useDraggableArray(() => responsibilities.value, addArrayPatch)
+const originalTypes = computed(() => platform.value.config.membershipTypes)
+const {patched: types, patch, addArrayPatch, hasChanges} = usePatchArray(originalTypes)
+const draggableTypes = useDraggableArray(() => types.value, addArrayPatch)
 const saving = ref(false);
 
-const title = $t('admin.settings.responsibilities.title')
+const title = $t('admin.settings.membershipTypes.title')
 
-async function addResponsibility() {
-    const arr: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray()
-    const responsibility = MemberResponsibility.create({});
-    arr.addPut(responsibility)
+async function addType() {
+    const arr: PatchableArrayAutoEncoder<MembershipType> = new PatchableArray()
+    const type = MembershipType.create({});
+    arr.addPut(type)
 
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditResponsibilityView, {
-                responsibility,
+            new ComponentWithProperties(EditMembershipTypeView, {
+                type,
                 isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<MemberResponsibility>) => {
-                    patch.id = responsibility.id
+                saveHandler: (patch: AutoEncoderPatchType<MembershipType>) => {
+                    patch.id = type.id
                     arr.addPatch(patch)
                     addArrayPatch(arr)
                 }
@@ -67,21 +67,21 @@ async function addResponsibility() {
     })
 }
 
-async function editResponsibility(responsibility: MemberResponsibility) {
+async function editType(type: MembershipType) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditResponsibilityView, {
-                responsibility,
+            new ComponentWithProperties(EditMembershipTypeView, {
+                type,
                 isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<MemberResponsibility>) => {
-                    const arr: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray()
+                saveHandler: (patch: AutoEncoderPatchType<MembershipType>) => {
+                    const arr: PatchableArrayAutoEncoder<MembershipType> = new PatchableArray()
                     arr.addPatch(patch)
                     addArrayPatch(arr)
                 },
                 deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray()
-                    arr.addDelete(responsibility.id)
+                    const arr: PatchableArrayAutoEncoder<MembershipType> = new PatchableArray()
+                    arr.addDelete(type.id)
                     addArrayPatch(arr)
                 }
             })
@@ -99,7 +99,7 @@ async function save() {
     try {
         await platformManager.value.patch(Platform.patch({
             config: PlatformConfig.patch({
-                responsibilities: patch.value
+                membershipTypes: patch.value
             })
         }))
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()

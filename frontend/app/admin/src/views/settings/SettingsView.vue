@@ -67,7 +67,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center"  @click="$navigate(Routes.Responsibilities)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
                     </template>
@@ -82,7 +82,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.MembershipTypes)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/membership.svg">
                     </template>
@@ -111,6 +111,7 @@ import { usePlatformManager } from '@stamhoofd/networking';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditMemberResponsibilitiesView from './responsibilities/EditMemberResponsibilitiesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
+import EditMembershipTypesView from './membership-types/EditMembershipTypesView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -118,6 +119,7 @@ enum Routes {
     DefaultAgeGroups = 'standaard-leeftijdsgroepen',
     Responsibilities = 'functies',
     RegistrationPeriods = 'werkjaren',
+    MembershipTypes = 'lidmaatschappen',
 }
 
 const platform = usePlatform()
@@ -161,6 +163,11 @@ defineRoutes([
         present: 'popup',
         component: EditRegistrationPeriodsView as ComponentOptions,
     },
+    {
+        url: Routes.MembershipTypes,
+        present: 'popup',
+        component: EditMembershipTypesView as ComponentOptions,
+    }
 ])
 const $navigate = useNavigate()
 </script>
