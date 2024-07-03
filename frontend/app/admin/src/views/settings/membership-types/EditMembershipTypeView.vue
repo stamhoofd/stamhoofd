@@ -48,7 +48,7 @@
             Je hebt nog geen instellingen toegevoegd.
         </p>
         <STList v-else>
-            <MembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" @click="editPeriod(config, period)" />
+            <MembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" :type="type" @click="editPeriod(config, period)" />
         </STList>
 
         <p>
