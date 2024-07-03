@@ -200,5 +200,11 @@
     "admin.settings.membershipTypes.new.title": "Nieuw lidmaatschaptype",
     "admin.settings.membershipTypes.edit.title": "Wijzig lidmaatschap",
     "admin.settings.membershipTypes.delete.confirmation.title": "Ben je zeker dat je dit type lidmaatschap wilt verwijderen?",
-    "admin.settings.membershipTypes.delete.confirmation.description": "Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie."
+    "admin.settings.membershipTypes.delete.confirmation.description": "Je kan dit niet ongedaan maken en verliest hierdoor alle bijhorende informatie.",
+    "admin.settings.membershipTypes.new.period": "Instellen voor werkjaar",
+    "admin.settings.membershipTypes.period.delete.confirmation.title": "Ben je zeker dat je deze instellingen wilt verwijderen?",
+    "admin.settings.membershipTypes.period.noPeriodsAvailable": "Je hebt al voor elk werkjaar instellingen toegevoegd",
+    "admin.settings.membershipTypes.period.title": "Instellingen voor {periodName}",
+    "shared.startDate": "Startdatum",
+    "shared.endDate": "Einddatum"
 }

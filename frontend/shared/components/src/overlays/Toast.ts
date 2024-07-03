@@ -43,6 +43,10 @@ export class Toast {
         return new Toast(message, "success green")
     }
 
+    static info(message: string): Toast {
+        return new Toast(message, "info")
+    }
+
     static fromError(errors: unknown): Toast {
         let simpleErrors!: SimpleErrors
         if (isSimpleError(errors)) {

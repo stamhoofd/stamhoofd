@@ -1,5 +1,6 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+    <LoadingView v-if="loading" />
+    <SaveView v-else :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -25,6 +26,24 @@
             />
         </STInputBox>
 
+        <hr>
+        <h2>Instellingen per werkjaar</h2>
+        <p>Per werkjaar kan je een prijs bepalen voor deze aansluiting, inclusief de start- en einddata.</p>
+
+        <p v-if="sortedPeriods.length === 0" class="info-box">
+            Je hebt nog geen instellingen toegevoegd.
+        </p>
+        <STList v-else>
+            <MembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" @click="editPeriod(config, period)" />
+        </STList>
+
+        <p>
+            <button class="button text" type="button" @click="addConfig">
+                <span class="icon add" />
+                <span>{{ $t('admin.settings.membershipTypes.new.period') }}</span>
+            </button>
+        </p>
+
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
             <h2>
@@ -41,18 +60,29 @@
 
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, SaveView, Toast, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MembershipType } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { MembershipType, MembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
+import { Ref, computed, ref } from 'vue';
+import EditMembershipTypeConfigView from './EditMembershipTypeConfigView.vue';
+import MembershipTypeConfigRow from './components/MembershipTypeConfigRow.vue';
 
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 const $t = useTranslate();
+const platformManager = usePlatformManager()
+const owner = useRequestOwner()
+const loading = ref(false);
+const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
+const present = usePresent()
+
+loadData().catch(console.error);
 
 const props = defineProps<{
     type: MembershipType;
@@ -64,6 +94,28 @@ const title = computed(() => props.isNew ? $t('admin.settings.membershipTypes.ne
 const pop = usePop();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
+
+const sortedPeriods = computed(() => {
+    const result: {period: RegistrationPeriod, config: MembershipTypeConfig}[] = Array.from(patched.value.periods.entries())
+        .map(([periodId, config]) => ({ config, period: originalPeriods.value.find(p => p.id == periodId)! }))
+        .filter(p => !!p.period);
+
+    result.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate))
+    return result
+})
+
+async function loadData() {
+    loading.value = true;
+    
+    try {
+        originalPeriods.value = await platformManager.value.loadPeriods(true, true, owner)
+        loading.value = false;
+    } catch (e) {
+        Toast.fromError(e).show();
+        await pop({force: true})
+        return;
+    }
+}
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -120,6 +172,78 @@ const description = computed({
     get: () => patched.value.description,
     set: (description) => addPatch({description}),
 });
+
+async function editPeriod(config: MembershipTypeConfig, period: RegistrationPeriod) {
+    await present({
+        components: [
+            new ComponentWithProperties(EditMembershipTypeConfigView, {
+                period,
+                config,
+                isNew: false,
+                saveHandler: (patch: AutoEncoderPatchType<MembershipTypeConfig>) => {
+                    const periods = new PatchMap<string, AutoEncoderPatchType<MembershipTypeConfig>>()
+                    periods.set(period.id, patch)
+                    addPatch({
+                        periods
+                    })
+                },
+                deleteHandler: () => {
+                    const periods = new PatchMap<string, AutoEncoderPatchType<MembershipTypeConfig>|null>()
+                    periods.set(period.id, null)
+                    addPatch({
+                        periods
+                    })
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+
+async function addConfig(event: MouseEvent) {
+    const availablePeriods = originalPeriods.value.filter(p => !patched.value.periods.has(p.id))
+
+    if (availablePeriods.length === 0) {
+        Toast.info($t('admin.settings.membershipTypes.period.noPeriodsAvailable')).show()
+        return
+    }
+
+    const menu = new ContextMenu([
+        availablePeriods.map(period => {
+            return new ContextMenuItem({
+                name: period.name,
+                icon: period.id === platformManager.value.$platform.period.id ? "dot" : undefined,
+                action: () => addConfigForPeriod(period)
+            })
+        })
+    ])
+
+    await menu.show({
+        button: event.currentTarget as HTMLElement
+    })
+}
+
+async function addConfigForPeriod(period: RegistrationPeriod) {
+    const config = MembershipTypeConfig.create({})
+
+    await present({
+        components: [
+            new ComponentWithProperties(EditMembershipTypeConfigView, {
+                period,
+                config,
+                isNew: true,
+                saveHandler: (patch: AutoEncoderPatchType<MembershipTypeConfig>) => {
+                    const periods = new PatchMap<string, MembershipTypeConfig>()
+                    periods.set(period.id, config.patch(patch))
+                    addPatch({
+                        periods
+                    })
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
