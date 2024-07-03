@@ -11,6 +11,10 @@
         <p v-if="group.minAge && group.maxAge" class="style-description">
             {{ group.minAge }} - {{ group.maxAge }} jaar
         </p>
+
+        <p v-if="!group.defaultMembershipTypeId" class="style-description">
+            Geen automatische aansluiting
+        </p>
        
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />

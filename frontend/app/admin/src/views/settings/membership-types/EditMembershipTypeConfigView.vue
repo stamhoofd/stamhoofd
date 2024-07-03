@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save">
         <h1>
             {{ title }}
         </h1>

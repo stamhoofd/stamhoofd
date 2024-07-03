@@ -25,7 +25,7 @@
             <span>Synoniem</span>
         </button>
 
-        <STInputBox title="Beschrijving" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
@@ -34,18 +34,35 @@
                 autocomplete=""
             />
         </STInputBox>
-        <p class="style-description-small">Enkel zichtbaar voor leiding of beheerders</p>
+        <p class="style-description-small">
+            Enkel zichtbaar voor leiding of beheerders
+        </p>
+
+        <hr>
+        <h2>Automatische aansluiting</h2>
+        <p>Leden die in deze leeftijdsgroep inschrijven, kan je automatisch laten aansluiten bij de koepel. Op die manier is de verzekering meteen in orde en hoeft de leiding dit niet per lid individueel te doen.</p>
+
+        <STInputBox title="Aansluiting KSA-Nationaal" error-fields="defaultMembershipTypeId" :error-box="errors.errorBox">
+            <Dropdown v-model="defaultMembershipTypeId">
+                <option :value="null">
+                    Geen automatische aansluiting
+                </option>
+                <option v-for="membershipType of membershipTypes" :key="membershipType.id" :value="membershipType.id">
+                    {{ membershipType.name }}
+                </option>
+            </Dropdown>
+        </STInputBox>
 
         <hr>
         <h2>Leeftijd</h2>
         <p>Dit is een standaardinstelling. Een lokale groep kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting groepen.</p>
 
         <div class="split-inputs">
-            <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
+            <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="minAge" :error-box="errors.errorBox">
                 <AgeInput v-model="minAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
             </STInputBox>
 
-            <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
+            <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="maxAge" :error-box="errors.errorBox">
                 <AgeInput v-model="maxAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
             </STInputBox>
         </div>
@@ -72,9 +89,9 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch, AgeInput } from '@stamhoofd/components';
+import { AgeInput, CenteredMessage, Dropdown, ErrorBox, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { DefaultAgeGroup } from '@stamhoofd/structures';
+import { DefaultAgeGroup, MembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
@@ -90,6 +107,8 @@ const props = defineProps<{
 const title = computed(() => props.isNew ? 'Nieuwe standaard leeftijdsgroep' : 'Standaard leeftijdsgroep bewerken');
 const pop = usePop();
 const $t = useTranslate();
+const platform = usePlatform();
+const membershipTypes = computed(() => platform.value.config.membershipTypes.filter(t => t.behaviour === MembershipTypeBehaviour.Period))
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.group);
 let startYear = new Date().getFullYear();
@@ -170,6 +189,11 @@ const minAge = computed({
 const maxAge = computed({
     get: () => patched.value.maxAge,
     set: (maxAge) => addPatch({maxAge}),
+});
+
+const defaultMembershipTypeId = computed({
+    get: () => patched.value.defaultMembershipTypeId,
+    set: (defaultMembershipTypeId) => addPatch({defaultMembershipTypeId}),
 });
 
 function getName(index: number) {

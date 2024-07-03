@@ -18,6 +18,12 @@ export class DefaultAgeGroup extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     maxAge: number | null = null
 
+    /**
+     * Members registered in this age group, will be assigned to this membership type by default
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 269 })
+    defaultMembershipTypeId: string | null = null
+
     get name() {
         return Formatter.joinLast(this.names, ', ', ' of ')
     }
