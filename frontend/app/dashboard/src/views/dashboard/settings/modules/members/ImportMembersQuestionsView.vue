@@ -678,6 +678,10 @@ function getOverrideRegistrations(registration: Registration, member: ImportingM
     return list;
 }
 
+// todo:
+//  * - check which members are new => save (see MemberStepView)
+//  * - check which members already exist => patch member and registration? + delete conflicting registrations?
+
 async function goNext() {
     if (saving.value) {
         return

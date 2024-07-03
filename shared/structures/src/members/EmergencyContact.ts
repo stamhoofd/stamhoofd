@@ -1,5 +1,5 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter,StringCompare } from '@stamhoofd/utility';
+import { Formatter,MergeHelper,OnlyWritabelKeys,StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 export class EmergencyContact extends AutoEncoder {
@@ -35,5 +35,20 @@ export class EmergencyContact extends AutoEncoder {
         this.cleanData();
         other.cleanData();
         return this.name === other.name && this.phone === other.phone && this.title === other.title
+    }
+
+    mergeChanges(other: EmergencyContact) {
+        const changes: Partial<OnlyWritabelKeys<EmergencyContact>> = {};
+        const merge = (key: keyof OnlyWritabelKeys<EmergencyContact>, checkEmpty = false) => MergeHelper.mergeChange(this, other, changes, key, checkEmpty);
+
+        const requiredDetails: (keyof OnlyWritabelKeys<EmergencyContact>)[] = ['name', 'title'];
+
+        requiredDetails.forEach(detail => merge(detail, true));
+
+        const compulsoryDetails: (keyof OnlyWritabelKeys<EmergencyContact>)[] = ['phone'];
+
+        compulsoryDetails.forEach((detail) => merge(detail));
+
+        return changes as Partial<EmergencyContact>;
     }
 }

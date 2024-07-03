@@ -53,6 +53,12 @@ export class ReviewTimes extends AutoEncoder {
         }
     }
 
+    // mergeChanges(other: ReviewTimes) {
+    //     for (const time of other.times) {
+    //         this.markReviewed(time.name as any, time.reviewedAt)
+    //     }
+    // }
+
     merge(other: ReviewTimes) {
         for (const time of other.times) {
             this.markReviewed(time.name as any, time.reviewedAt)

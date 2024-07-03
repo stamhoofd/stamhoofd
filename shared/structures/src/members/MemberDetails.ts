@@ -1,6 +1,5 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-
 import { Address } from '../addresses/Address';
 import { Replacement } from '../endpoints/EmailRequest';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -11,6 +10,7 @@ import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
 import { ReviewTimes } from './ReviewTime';
+import {MergeHelper, OnlyWritabelKeys} from '@stamhoofd/utility';
 
 /**
  * Keep track of date nad time of an edited boolean value
@@ -423,65 +423,75 @@ export class MemberDetails extends AutoEncoder {
         return null;
     }
 
+    findParentMatch(parent: Parent): Parent | null {
+        const findMatch = (isMatch: (p1: Parent, p2: Parent) => boolean | string, property?: string) => {
+            for (const [index, _parent] of this.parents.entries()) {
+                const result = isMatch(_parent, parent);
+                if (result) {
+                    if(property) {
+                        console.log(`Found parent match on ${property}.`);
+                    } else if (typeof result === 'string') {
+                        console.log(`Found parent match on ${result}.`);
+                    } else {
+                        console.log('Found parent match.');
+                    }
+
+                    return this.parents[index];
+                }
+            }
+        };
+
+         // Multiple loops to mangage priority
+        let match = findMatch((p1, p2) => p1.id == p2.id, 'id');
+        if(match) return match;
+
+        // clean data
+        parent.cleanData();
+        for(const parent of this.parents) {
+            parent.cleanData();
+        }
+
+        match = findMatch((p1, p2) => !!(p1.name && p2.name && (StringCompare.typoCount(p1.name, p2.name) === 0)), 'name');
+        if(match) return match;
+
+
+        match = findMatch((p1, p2) => !!(p1.name && p2.name && (StringCompare.typoCount(p1.name, p2.name) < 2)), 'name typo');
+        if(match) return match;
+
+        match = findMatch((p1, p2) => {
+            if (!p1.name || !p2.name) {
+                if (p1.email && p2.email) {
+                    // Compare on email address
+                    if (p1.email == p2.email) {
+                        return 'email';
+                    }
+                }
+                if (p1.phone && p2.phone) {
+                    if (p1.phone == p2.phone) {
+                        return 'phone';
+                    }
+                }
+            }
+            return false;
+        });
+        if(match) return match;
+        return null;
+    }
+
     /**
      * This will add or update the parent (possibily partially if not all data is present)
      */
     addParent(parent: Parent) {
         console.log('adding parent to ', this.name)
-        
-        // Multiple loops to mangage priority
-        for (const [index, _parent] of this.parents.entries()) {
-            if (_parent.id == parent.id) {
-                console.log('Merging parent on id', index, parent)
-                this.parents[index].merge(parent)
-                return
-            }
+
+        const match = this.findParentMatch(parent);
+
+        if(match) {
+            match.merge(parent);
+            return;
         }
 
-        for (const [index, _parent] of this.parents.entries()) {
-            // clean both parents before checking
-            parent.cleanData();
-            _parent.cleanData();
-
-            if (_parent.name && parent.name) {
-                if (StringCompare.typoCount(_parent.name, parent.name) === 0) {
-                    console.log('Merging parent on name', index, parent)
-                    this.parents[index].merge(parent)
-                    return
-                }
-            }
-        }
-
-        for (const [index, _parent] of this.parents.entries()) {
-            if (_parent.name && parent.name) {
-                if (StringCompare.typoCount(_parent.name, parent.name) < 2) {
-                    console.log('Merging parent on name typo', index, parent)
-                    this.parents[index].merge(parent)
-                    return
-                }
-            }
-        }
-
-        for (const [index, _parent] of this.parents.entries()) {
-            if (!_parent.name || !parent.name) {
-                if (_parent.email && parent.email) {
-                    // Compare on email address
-                    if (_parent.email == parent.email) {
-                        console.log('Merging parent on email', index, parent)
-                        this.parents[index].merge(parent)
-                        return
-                    }
-                }
-                if (_parent.phone && parent.phone) {
-                    if (_parent.phone == parent.phone) {
-                        console.log('Merging parent on phone', index, parent)
-                        this.parents[index].merge(parent)
-                        return
-                    }
-                }
-            }
-        }
-        this.parents.push(parent)
+        this.parents.push(parent);
     }
 
     get parentsHaveAccess() {
@@ -522,6 +532,113 @@ export class MemberDetails extends AutoEncoder {
             }
         }
         return [...emails]
+    }
+
+
+    /**
+     * Apply newer details without deleting data or replacing filled in data with empty data
+     */
+    mergeChanges(other: MemberDetails) {
+        console.log('merge member details', this, other)
+        const changes: Partial<OnlyWritabelKeys<MemberDetails>> = {};
+        const parentChanges = new Map<string, Partial<OnlyWritabelKeys<Parent>>>();
+        const newParents: Parent[] = [];
+
+
+        const merge = (key: keyof OnlyWritabelKeys<MemberDetails>, checkEmpty = false) => MergeHelper.mergeChange(this, other, changes, key, checkEmpty);
+        const forceMerge = (key: keyof OnlyWritabelKeys<MemberDetails>) => MergeHelper.forceChange(this, other, changes, key);
+
+        const requiredDetails: (keyof OnlyWritabelKeys<MemberDetails>)[] = ['firstName', 'lastName'];
+
+        requiredDetails.forEach(detail => merge(detail, true));
+
+        const compulsoryDetails: (keyof OnlyWritabelKeys<MemberDetails>)[] = ['email', 'birthDay', 'phone', 'memberNumber'];
+
+        compulsoryDetails.forEach((detail) => merge(detail));
+
+        if (other.gender !== Gender.Other) {
+            // Always copy gender
+            forceMerge('gender');
+        }
+
+        const mergeParentChange = <P extends keyof OnlyWritabelKeys<Parent>>(parent: Parent, property: P, newValue: Parent[P]) => {
+            const id = parent.id;
+            const parentValue = parent[property];
+
+            if(newValue !== parentValue) {
+                parent[property] = newValue;
+
+                if(parentChanges.has(id)) {
+                    const changes = parentChanges.get(id);
+                    changes![property] = newValue;
+                } else {
+                    parentChanges.set(id, {[property]: newValue});
+                }
+            }
+        }
+
+        const mergeAddress = () => {
+            const thisAddress = this.address;
+            const otherAddress = other.address;
+            if(otherAddress) {
+                if(thisAddress) {
+                    const currentAddressString = thisAddress.toString();
+                    if(currentAddressString !== otherAddress.toString()) {
+                        forceMerge('address');
+                    }
+
+                    this.parents.filter(p => p.address && p.address.toString() === currentAddressString).forEach(parent => {
+                        mergeParentChange(parent, 'address', otherAddress);
+                    });
+                } else {
+                    forceMerge('address')
+                }
+            }
+        }
+
+        mergeAddress();
+
+        if (other.parents.length > 0) {
+            for (const parent of other.parents) {
+                // Will override existing parent if possible
+                const match = this.findParentMatch(parent);
+                if(match) {
+                    // todo: create parent changes?
+                } else {
+                    this.parents.push(parent);
+                    newParents.push(parent);
+                }
+            }
+        }
+
+        if (other.emergencyContacts.length > 0) {
+            this.emergencyContacts = other.emergencyContacts
+        }
+
+        this.reviewTimes.merge(other.reviewTimes)
+
+        if (other.requiresFinancialSupport && (!this.requiresFinancialSupport || this.requiresFinancialSupport.date < other.requiresFinancialSupport.date)) {
+            this.requiresFinancialSupport = other.requiresFinancialSupport
+        }
+
+        if (other.dataPermissions && (!this.dataPermissions || this.dataPermissions.date < other.dataPermissions.date)) {
+            this.dataPermissions = other.dataPermissions
+        }
+
+        // Merge answers
+        const newAnswers: Map<string, RecordAnswer> = new Map(this.recordAnswers);
+        for (const answer of other.recordAnswers.values()) {
+            const existing = newAnswers.get(answer.settings.id)
+
+            if (!existing) {
+                newAnswers.set(answer.settings.id, answer)
+            } else if (answer.date >= existing.date) {
+                newAnswers.set(answer.settings.id, answer)
+            } else {
+                // keep existing, this one is more up-to-date, don't add the other answer
+            }
+        }
+        this.recordAnswers = newAnswers
     }
 
     /**

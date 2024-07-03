@@ -197,7 +197,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="false" :selectable="true" class="left-center right-stack" @click="importMembers(true)">
+                    <STListItem v-if="true" :selectable="true" class="left-center right-stack" @click="importMembers(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
                         </template>

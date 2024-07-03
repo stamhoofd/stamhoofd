@@ -6,3 +6,4 @@ export * from "./src/Sleep"
 export * from "./src/Sorter"
 export * from "./src/StringCompare"
 export * from "./src/Throttle"
+export * from './src/MergeHelper';

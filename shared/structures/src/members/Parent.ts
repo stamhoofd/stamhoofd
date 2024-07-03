@@ -1,5 +1,5 @@
 import { AutoEncoder, EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter,StringCompare } from '@stamhoofd/utility';
+import { Formatter,MergeHelper,OnlyWritabelKeys,StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
@@ -83,6 +83,33 @@ export class Parent extends AutoEncoder {
         this.cleanData();
         other.cleanData();
         return this.firstName === other.firstName && this.lastName === other.lastName && this.email === other.email && this.phone === other.phone && this.address?.toString() === other.address?.toString()
+    }
+
+    mergeChanges(other: Parent) {
+        const changes: Partial<OnlyWritabelKeys<Parent>> = {};
+        const merge = (key: keyof OnlyWritabelKeys<Parent>, checkEmpty = false) => MergeHelper.mergeChange(this, other, changes, key, checkEmpty);
+        const forceMerge = (key: keyof OnlyWritabelKeys<Parent>) => MergeHelper.forceChange(this, other, changes, key);
+
+        const requiredDetails: (keyof OnlyWritabelKeys<Parent>)[] = ['firstName', 'lastName'];
+
+        requiredDetails.forEach(detail => merge(detail, true));
+
+        const compulsoryDetails: (keyof OnlyWritabelKeys<Parent>)[] = ['email', 'address', 'phone'];
+
+        compulsoryDetails.forEach((detail) => merge(detail));
+
+        if (other.type) {
+            if (other.type === ParentType.Parent1 || other.type === ParentType.Parent2) {
+                // Ignore if current type is also not one of those
+                if (this.type === ParentType.Parent1 || this.type === ParentType.Parent2) {
+                    forceMerge('type');
+                }
+            } else {
+                forceMerge('type');
+            }
+        }
+
+        return changes as Partial<Parent>;
     }
 
     merge(other: Parent) {

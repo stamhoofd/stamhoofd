@@ -131,7 +131,7 @@
 <script lang="ts" setup>
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin, useShow } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useOrganization } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useOrganization, usePlatformFamilyManager } from "@stamhoofd/components";
 import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordDateAnswer, RecordSettings, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
 import XLSX from "xlsx";
 import { allMatchers } from "../../../../../classes/import/defaultMatchers";
@@ -146,6 +146,7 @@ import { onMounted, ref, computed, Ref } from 'vue'
 import { useLegacyMemberManager } from '@stamhoofd/registration';
 
 const organization = useOrganization();
+const platformFamily = usePlatformFamilyManager();
 const memberManager = useLegacyMemberManager();
 const show = useShow();
 const errorBox: Ref<ErrorBox | null> = ref(null);
@@ -469,7 +470,7 @@ async function goNext() {
 
     try {
 
-        const result = await ImportingMember.importAll(sheet.value, columns.value, memberManager, organization.value)
+        const result = await ImportingMember.importAll(sheet.value, columns.value, platformFamily, organization.value)
 
         if (result.errors.length > 0) {
             await show(new ComponentWithProperties(ImportMembersErrorsView, {

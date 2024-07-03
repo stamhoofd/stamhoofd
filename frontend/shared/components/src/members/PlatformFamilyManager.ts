@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors"
 import { Request, RequestResult } from "@simonbackx/simple-networking"
 import { AppType, useAppContext, useContext } from "@stamhoofd/components"
 import { SessionContext } from "@stamhoofd/networking"
-import { MemberWithRegistrationsBlob, MembersBlob, PlatformMember, Version } from "@stamhoofd/structures"
+import { LimitedFilteredRequest, MemberWithRegistrationsBlob, MembersBlob, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, Version } from "@stamhoofd/structures"
 import { onBeforeUnmount, unref } from "vue"
 
 export function usePlatformFamilyManager() {
@@ -121,5 +121,47 @@ export class PlatformFamilyManager {
                 }
             }
         }
+    }
+
+    async getAll() {
+        const firstQuery = new LimitedFilteredRequest({sort: [], limit: 100});
+        let allMembers: PlatformMember[] = [];
+        let next: LimitedFilteredRequest | undefined;
+
+        const firstResult = await this.query(firstQuery);
+        allMembers = firstResult.results;
+        next = firstResult.next;
+
+        while(next) {
+            const result = await this.query(next);
+            next = result.next;
+            allMembers = allMembers.concat(result.results);
+        }
+
+        return allMembers;
+    }
+
+    private async query(query: LimitedFilteredRequest) {
+        const response = await this.context.authenticatedServer.request({
+            method: "GET",
+            path: "/members",
+            decoder: new PaginatedResponseDecoder(MembersBlob as Decoder<MembersBlob>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+            shouldRetry: false,
+            // owner: this,
+            query
+        });
+
+        const {results, next} = response.data;
+        
+        const members = PlatformFamily.createSingles(results, {
+                contextOrganization: this.context.organization,
+                // Todo: is patform correct?
+                platform: Platform.shared
+            });
+
+            return {
+                results: members,
+                next
+            }
     }
 }

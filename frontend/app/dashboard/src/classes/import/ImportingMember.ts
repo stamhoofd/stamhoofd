@@ -1,10 +1,11 @@
 import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
-import { Group, MemberDetails, MemberWithRegistrations, Organization, PaymentMethod } from "@stamhoofd/structures";
+import { Group, MemberDetails, MemberWithRegistrations, Organization, PaymentMethod, PlatformMember } from "@stamhoofd/structures";
 import { Formatter,StringCompare } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
 import { MemberManager } from "../MemberManager";
 import { MatchedColumn } from "./MatchedColumn";
+import { PlatformFamilyManager } from "@stamhoofd/components";
 
 export class ImportingRegistration {
     group: Group | null = null
@@ -43,8 +44,8 @@ export class ImportingMember {
     registration = new ImportingRegistration()
     organization: Organization
 
-    equal: MemberWithRegistrations | null = null
-    probablyEqual: MemberWithRegistrations | null = null
+    equal: PlatformMember | null = null
+    probablyEqual: PlatformMember | null = null
 
     /**
      * Whether probablyEqual is equal
@@ -63,36 +64,38 @@ export class ImportingMember {
     }
 
 
-    isEqual(member: MemberWithRegistrations) {
-        if (!member.details?.birthDay) {
+    isEqual(member: PlatformMember) {
+        const details = member.member.details;
+        if (!details?.birthDay) {
             return false
         }
         if (!this.details?.birthDay) {
             return false
         }
-        return StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.details.firstName+" "+this.details.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.details.birthDay)) == 0 
+        return StringCompare.typoCount(details.firstName+" "+details.lastName, this.details.firstName+" "+this.details.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(details.birthDay), Formatter.dateNumber(details.birthDay)) == 0 
     }
 
-    isProbablyEqual(member: MemberWithRegistrations) {
-        if (!member.details?.birthDay || !this.details?.birthDay) {
-            return StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.details.firstName+" "+this.details.lastName) == 0
+    isProbablyEqual(member: PlatformMember) {
+        const details = member.member.details;
+        if (!details?.birthDay || !this.details?.birthDay) {
+            return StringCompare.typoCount(details.firstName+" "+details.lastName, this.details.firstName+" "+this.details.lastName) == 0
         }
-        const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.details.firstName+" "+this.details.lastName)
-        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.details.birthDay))
+        const t = StringCompare.typoCount(details.firstName+" "+details.lastName, this.details.firstName+" "+this.details.lastName)
+        const y = StringCompare.typoCount(Formatter.dateNumber(details.birthDay), Formatter.dateNumber(this.details.birthDay))
 
-        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.details.firstName.length + this.details.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
+        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.details.firstName.length + this.details.lastName.length, details.firstName.length+details.lastName.length)) {
             return true;
         }
         return false;
     }
 
-    static async importAll(sheet: XLSX.WorkSheet, columns: MatchedColumn[], $memberManager: MemberManager, organization: Organization): Promise<ImportResult> {
+    static async importAll(sheet: XLSX.WorkSheet, columns: MatchedColumn[], platformFamilyManager: PlatformFamilyManager, organization: Organization): Promise<ImportResult> {
         if (!sheet['!ref']) {
             throw new Error("Missing ref in sheet")
         }
 
         // Start! :D
-        const allMembers = await $memberManager.loadMembers([], null, null)
+        const allMembers = await platformFamilyManager.getAll();
 
         const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
         const result = new ImportResult()
