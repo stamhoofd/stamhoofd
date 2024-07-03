@@ -33,8 +33,16 @@
                 <h2 v-if="index === 0 || !price.startDate">
                     Standaardprijs
                 </h2>
-                <h2 v-else>
-                    Prijs vanaf {{ formatDate(price.startDate) }}
+                <h2 v-else class="style-with-button">
+                    <div>
+                        Prijs vanaf {{ formatDate(price.startDate) }}
+                    </div>
+                    <div>
+                        <button class="button text" type="button" @click="deletePrice(price)">
+                            <span class="icon trash" />
+                            <span class="hide-smartphone">{{ $t('shared.delete') }}</span>
+                        </button>
+                    </div>
                 </h2>
             </template>
 
@@ -43,7 +51,7 @@
             </STInputBox>
 
             <div class="split-inputs">
-                <STInputBox v-if="type.behaviour === MembershipTypeBehaviour.Days" title="Prijs per dag" :error-box="errors.errorBox">
+                <STInputBox v-if="type.behaviour === MembershipTypeBehaviour.Days || price.pricePerDay" title="Prijs per dag" :error-box="errors.errorBox">
                     <PriceInput :model-value="price.pricePerDay" placeholder="Prijs per dag" @update:model-value="patchPrice(price, {pricePerDay: $event})" />
                 </STInputBox>
 
@@ -208,6 +216,10 @@ function addPrice() {
         }
         return a.startDate.getTime() - b.startDate.getTime()
     })
+}
+
+function deletePrice(price: MembershipTypeConfigPrice) {
+    prices.value = prices.value.filter(p => p.id !== price.id)
 }
 
 defineExpose({
