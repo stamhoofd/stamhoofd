@@ -6,7 +6,8 @@
     "license": "UNLICENCED",
     "sideEffects": false,
     "files": [
-        "src"
+        "src",
+        "dist"
     ],
     "scripts": {
         "build": "tsc -b && mkdir -p ./dist/migrations && cp ./src/migrations/*.sql ./dist/migrations",
