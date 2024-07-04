@@ -21,7 +21,7 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, markRaw, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -208,6 +208,37 @@ const allColumns: Column<ObjectType, any>[] = [
         getValue: (member) => member.member.details.age, 
         format: (age) => age ? Formatter.integer(age) + ' jaar' : 'onbekend',
         minimumWidth: 30,
+        recommendedWidth: 120,
+    }),
+    new Column<ObjectType, MembershipStatus>({
+        id: 'membership',
+        name: "Aansluiting", 
+        getValue: (member) => member.membershipStatus, 
+        format: (status) => {
+            switch (status) {
+                case MembershipStatus.Active:
+                    return "Actief";
+                case MembershipStatus.Expiring:
+                    return "Verlopen";
+                case MembershipStatus.Temporary:
+                    return "Tijdelijk";
+                case MembershipStatus.Inactive:
+                    return "Niet verzekerd";
+            }
+        },
+        getStyle: (status) => {
+            switch (status) {
+                case MembershipStatus.Active:
+                    return "success";
+                case MembershipStatus.Expiring:
+                    return "warn";
+                case MembershipStatus.Temporary:
+                    return "secundary";
+                case MembershipStatus.Inactive:
+                    return "error";
+            }
+        },
+        minimumWidth: 100,
         recommendedWidth: 120,
     })
 ];

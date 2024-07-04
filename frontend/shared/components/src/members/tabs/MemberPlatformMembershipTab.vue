@@ -1,12 +1,28 @@
 <template>
     <div class="member-payments-view">
         <main class="container">
-            <p class="info-box" v-if="memberships.length === 0">{{ $t('shared.noMembershipWarning') }}</p>
+            <p v-if="memberships.length === 0" class="info-box">
+                {{ $t('shared.noMembershipWarning') }}
+            </p>
             <STList v-else>
-                <STListItem v-for="membership of memberships" :key="membership.id">
-                    todo
+                <STListItem v-for="membership of memberships" :key="membership.id" class="right-stack">
+                    <template #left>
+                        <span class="icon clock" v-if="membership.startDate > now" />
+                        <span class="icon warning" v-else-if="membership.expireDate && membership.expireDate < now" />
+                        <span class="icon success" v-else />
+                    </template>
+                    <h3 class="style-title-list">{{ getMembershipType(membership).name }}</h3>
+                    <p class="style-description-small">
+                        {{ formatDate(membership.startDate, true) }} - {{ formatDate(membership.expireDate ?? membership.endDate, true) }}
+                    </p>
+                    <p class="style-description-small" v-if="membership.expireDate && membership.expireDate < now">
+                        Verlopen op {{ membership.expireDate ? formatDate(membership.expireDate, true) : 'n.v.t.' }}
+                    </p>
+
+                    <p class="style-description-small">{{ getMembershipType(membership).description }}</p>
 
                     <template #right>
+                        <span>{{ formatPrice(membership.price) }}</span>
                         <LoadingButton :loading="deletingMemberships.has(membership.id)">
                             <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
                         </LoadingButton>
@@ -25,14 +41,15 @@
 </template>
 
 <script lang="ts" setup>
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
+import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import SelectPlatformMembershipView from '../components/platform-membership/SelectPlatformMembershipView.vue';
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import { Toast } from '../../overlays/Toast';
+import { usePlatformFamilyManager } from '../PlatformFamilyManager';
+import SelectPlatformMembershipView from '../components/platform-membership/SelectPlatformMembershipView.vue';
+import { usePlatform } from '../../hooks';
 
 const props = defineProps<{
     member: PlatformMember
@@ -41,9 +58,11 @@ const $t = useTranslate();
 const present = usePresent()
 const platformFamilyManager = usePlatformFamilyManager()
 const deletingMemberships = ref(new Set());
+const platform = usePlatform();
+const now = new Date();
 
 const memberships = computed(() => {
-    return props.member.member.platformMemberships
+    return props.member.member.platformMemberships.filter(m => m.endDate >= now);
 });
 
 async function addMembership() {
@@ -82,5 +101,12 @@ async function deleteMembership(membership: MemberPlatformMembership) {
         Toast.fromError(e).show();
     }
     deletingMemberships.value.delete(membership.id);
+}
+
+function getMembershipType(membership: MemberPlatformMembership) {
+    return platform.value.config.membershipTypes.find(t => t.id === membership.membershipTypeId) ?? PlatformMembershipType.create({
+        id: membership.membershipTypeId,
+        name: 'Onbekend'
+    });
 }
 </script>

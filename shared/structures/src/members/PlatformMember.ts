@@ -268,6 +268,13 @@ export class PlatformFamily {
     }
 }
 
+export enum MembershipStatus {
+    Active = "Active",
+    Expiring = "Expiring",
+    Inactive = "Inactive",
+    Temporary = "Temporary"
+}
+
 export class PlatformMember implements ObjectWithRecords {
     member: MemberWithRegistrationsBlob
     patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>
@@ -328,6 +335,45 @@ export class PlatformMember implements ObjectWithRecords {
 
     get isSaving() {
         return this._savingPatch !== null || this._isCreating !== null
+    }
+
+    get membershipStatus() {
+        let status = MembershipStatus.Inactive
+        const now = new Date()
+
+        for (const t of this.patchedMember.platformMemberships) {
+            const organization = this.organizations.find(o => o.id === t.organizationId)
+            if (!organization) {
+                continue
+            }
+
+            if (t.endDate && t.endDate < now) {
+                continue
+            }
+
+            if (t.startDate > now) {
+                continue
+            }
+
+            if (t.expireDate && t.expireDate < now) {
+                if (status === MembershipStatus.Inactive) {
+                    status = MembershipStatus.Expiring
+                }
+                continue
+            }
+
+            const isTemporary = t.endDate.getTime() - t.startDate.getTime() < 1000 * 60 * 60 * 24 * 31
+
+            if (status === MembershipStatus.Inactive || ((status === MembershipStatus.Expiring || status === MembershipStatus.Temporary) && !isTemporary)) {
+                if (isTemporary) {
+                    status = MembershipStatus.Temporary
+                } else {
+                    status = MembershipStatus.Active
+                }
+            }
+        }
+
+        return status
     }
 
     addPatch(p: PartialWithoutMethods<AutoEncoderPatchType<MemberWithRegistrationsBlob>>) {

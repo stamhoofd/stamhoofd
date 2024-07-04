@@ -1,48 +1,54 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
+    <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save" :disabled="!selectedOrganization">
         <h1>{{ title }}</h1>
 
-        <ScrollableSegmentedControl v-if="availableOrganizations.length > 1" v-model="selectedOrganization" :items="availableOrganizations" :labels="availableOrganizations.map(o => o.name)" />
-        
-        <p class="style-description-block">{{ $t('dashboard.platformMemberhip.add.description') }}</p>        
+        <p v-if="availableOrganizations.length === 0" class="warning-box">
+            {{ $t('dashboard.platformMemberhip.add.noOrganizations') }}
+        </p>
+        <template v-else>
+            <ScrollableSegmentedControl v-if="availableOrganizations.length > 1" v-model="selectedOrganization" :items="availableOrganizations" :labels="availableOrganizations.map(o => o.name)" />
+            
+            <p class="style-description-block">{{ $t('dashboard.platformMemberhip.add.description') }}</p>        
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-        
-        <STList>
-            <STListItem v-for="type of availableMembershipTypes" :key="type.id" :disabled="!getTypeAvailable(type)" :selectable="true" element-name="label">
-                <template #left>
-                    <Radio v-model="selectedMembershipType" :value="type" :disabled="!getTypeAvailable(type)" />
-                </template>
-                <h2 class="style-title-list">
-                    {{ type.name }}
-                </h2>
-                <p v-if="getTypeDateDescription(type) " class="style-description-small">
-                    {{ getTypeDateDescription(type) }}
-                </p>
-
-                <p class="style-description-small">
-                    {{ type.description }}
-                </p>
-
-                <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days">
-                    <STInputBox :title="$t('dashboard.platformMemberhip.add.startDate')" :error-box="errors.errorBox" error-fields="startDate">
-                        <DateSelection v-model="customStartDate" class="option" />
-                    </STInputBox>
-
-                    <STInputBox :title="$t('dashboard.platformMemberhip.add.endDate')" :error-box="errors.errorBox" error-fields="endDate">
-                        <DateSelection v-model="customEndDate" class="option" />
-                    </STInputBox>
-                </div>
-
-                <template #right>
-                    <span v-if="getTypePriceNormalPrice(type) === getTypePriceDescription(type)">{{ getTypePriceDescription(type) }}</span>
-                    <template v-else>
-                        <span class="style-discount-old-price">{{ getTypePriceNormalPrice(type) }}</span>
-                        <span class="style-discount-price">{{ getTypePriceDescription(type) }}</span>
+            <STErrorsDefault :error-box="errors.errorBox" />
+            
+            <STList>
+                <STListItem v-for="type of availableMembershipTypes" :key="type.id" :disabled="!getTypeAvailable(type)" :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="selectedMembershipType" :value="type" :disabled="!getTypeAvailable(type)" />
                     </template>
-                </template>
-            </STListItem>
-        </STList>
+                    <h2 class="style-title-list">
+                        {{ type.name }}
+                    </h2>
+                    <p v-if="getTypeDateDescription(type) " class="style-description-small">
+                        {{ getTypeDateDescription(type) }}
+                    </p>
+
+                    <p class="style-description-small">
+                        {{ type.description }}
+                    </p>
+
+                    <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days">
+                        <STInputBox :title="$t('dashboard.platformMemberhip.add.startDate')" :error-box="errors.errorBox" error-fields="startDate">
+                            <DateSelection v-model="customStartDate" class="option" />
+                        </STInputBox>
+
+                        <STInputBox :title="$t('dashboard.platformMemberhip.add.endDate')" :error-box="errors.errorBox" error-fields="endDate">
+                            <DateSelection v-model="customEndDate" class="option" />
+                        </STInputBox>
+                    </div>
+
+                    <template #right>
+                        <span v-if="getTypePriceNormalPrice(type) === getTypePriceDescription(type)">{{ getTypePriceDescription(type) }}</span>
+                        <template v-else>
+                            <span class="style-discount-old-price">{{ getTypePriceNormalPrice(type) }}</span>
+                            <span class="style-discount-price">{{ getTypePriceDescription(type) }}</span>
+                        </template>
+                    </template>
+                </STListItem>
+            </STList>
+
+        </template>
     </SaveView>
 </template>
 
@@ -165,7 +171,8 @@ async function save() {
                 organizationId: selectedOrganization.value!.id,
                 periodId: platform.value.period.id,
                 startDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customStartDate.value : periodConfig.startDate,
-                endDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customEndDate.value : periodConfig.endDate
+                endDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? customEndDate.value : periodConfig.endDate,
+                expireDate: selectedMembershipType.value.behaviour === PlatformMembershipTypeBehaviour.Days ? null : periodConfig.expireDate,
             })
         );
 

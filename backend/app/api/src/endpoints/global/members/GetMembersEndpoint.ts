@@ -136,12 +136,36 @@ const filterCompilers: SQLFilterDefinitions = {
             SQL.column('members', 'id'),
         ),
         {
+            ...baseSQLFilterCompilers,
             // Alias for responsibilityId
             "id": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
             "responsibilityId": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
             "organizationId": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'organizationId')),
             "startDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'startDate')),
             "endDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'endDate')),
+        }
+    ),
+
+    platformMemberships: createSQLRelationFilterCompiler(
+        SQL.select()
+        .from(
+            SQL.table('member_platform_memberships')
+        )
+        .where(
+            SQL.column('memberId'),
+            SQL.column('members', 'id'),
+        ),
+        {
+            ...baseSQLFilterCompilers,
+            "id": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'id')),
+            "membershipTypeId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'membershipTypeId')),
+            "organizationId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'organizationId')),
+            "periodId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'periodId')),
+            "price": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'price')),
+            "invoiceId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'invoiceId')),
+            "startDate": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'startDate')),
+            "endDate": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'endDate')),
+            "expireDate": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'expireDate')),
         }
     ),
 

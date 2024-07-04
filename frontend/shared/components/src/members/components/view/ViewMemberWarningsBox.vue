@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { DataPermissionsSettings, FinancialSupportSettings, PermissionLevel, PlatformMember, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, MembershipStatus, PermissionLevel, PlatformMember, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
@@ -80,10 +80,17 @@ const warnings = computed(() => {
         }
     }
 
-    if (props.member.member.platformMemberships.length === 0) {
+    if (props.member.membershipStatus === MembershipStatus.Inactive) {
         warnings.push(RecordWarning.create({
             text: $t('shared.noMembershipWarning'),
             type: RecordWarningType.Error
+        }))
+    }
+
+    if (props.member.membershipStatus === MembershipStatus.Expiring) {
+        warnings.push(RecordWarning.create({
+            text: $t('shared.membershipExpiringWarning'),
+            type: RecordWarningType.Warning
         }))
     }
 

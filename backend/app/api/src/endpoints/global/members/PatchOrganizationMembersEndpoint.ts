@@ -556,6 +556,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 membership.startDate = put.startDate
                 membership.endDate = put.endDate
+                membership.expireDate = put.expireDate
 
                 await membership.save()
             }

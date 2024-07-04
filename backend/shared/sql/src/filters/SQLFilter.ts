@@ -244,6 +244,15 @@ function compileSQLFilter(filter: StamhoofdFilter, definitions: SQLFilterDefinit
         if (!f) {
             continue;
         }
+        if (Object.keys(f).length > 1) {
+            // Multiple keys in the same object should always be combined with AND
+            const splitted: StamhoofdFilter[] = [];
+            for (const key of Object.keys(f)) {
+                splitted.push({ [key]: f[key] })
+            }
+            runners.push(andSQLFilterCompiler(splitted, definitions));
+            continue;
+        }
         for (const key of Object.keys(f)) {
             const filter = definitions[key];
             if (!filter) {

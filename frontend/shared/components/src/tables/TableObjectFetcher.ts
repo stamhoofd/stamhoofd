@@ -135,6 +135,10 @@ export class TableObjectFetcher<O extends {id: string}> {
         this.retryCount += 1;
 
         const waitTime = Math.min(this.retryCount * 5 * 1000, 20000)
+        const shorterWaitTime = Math.min(this.retryCount * 200, 20000)
+
+        // Require mininmum wait time, if a reset happens before the wait time
+        this.delayFetchUntil = new Date(new Date().getTime() + shorterWaitTime)
 
         this.retryTimer = setTimeout(() => {
             console.info('Retrying fetching after '+waitTime/1000+'s: now')
@@ -194,8 +198,10 @@ export class TableObjectFetcher<O extends {id: string}> {
     
     setFilter(filter: StamhoofdFilter|null) {
         if (JSON.stringify(this.filter ?? {}) == JSON.stringify(filter ?? {})) {
+            console.log('setFilter unchanged')
             return;
         }
+        console.log('setFilter', this.filter)
 
         this.filter = filter;
         this.reset(false, true);
@@ -205,6 +211,7 @@ export class TableObjectFetcher<O extends {id: string}> {
         if (JSON.stringify(this.sort) == JSON.stringify(sort)) {
             return;
         }
+        console.log('setSort', this.sort)
 
         this.sort = sort;
         this.reset(false, false);
@@ -367,7 +374,8 @@ export class TableObjectFetcher<O extends {id: string}> {
             }
         } catch (e) {
             if (currentClearIndex === this._clearIndex) {
-                console.info('Stopped fetching due to error')
+                console.error('Stopped fetching due to error')
+                console.error(e)
                 this.fetchingData = false;
                 this.scheduleRetry(e as Error)
             }

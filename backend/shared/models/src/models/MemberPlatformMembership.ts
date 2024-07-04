@@ -31,6 +31,9 @@ export class MemberPlatformMembership extends Model {
     @column({ type: "date" })
     endDate: Date;
 
+    @column({ type: "date", nullable: true})
+    expireDate: Date | null = null;
+
     @column({ type: "string", nullable: true })
     invoiceItemDetailId: string | null = null;
 

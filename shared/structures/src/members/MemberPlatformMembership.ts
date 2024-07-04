@@ -23,6 +23,9 @@ export class MemberPlatformMembership extends AutoEncoder {
     @field({ decoder: DateDecoder })
     endDate = new Date()
 
+    @field({ decoder: DateDecoder, nullable: true })
+    expireDate: Date|null = null
+
     @field({ decoder: StringDecoder, nullable: true })
     invoiceItemDetailId: string | null = null;
 

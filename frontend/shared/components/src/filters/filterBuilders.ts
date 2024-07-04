@@ -1,10 +1,11 @@
-import { Platform, User } from "@stamhoofd/structures";
+import { Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
 import { StringFilterBuilder } from "./StringUIFilter";
 import { UIFilterBuilders } from "./UIFilter";
+import { Formatter } from "@stamhoofd/utility";
 
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
 export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
@@ -86,6 +87,112 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             })
         )
     }
+
+    all.push(
+        new MultipleChoiceFilterBuilder({
+            name: 'Aansluiting',
+            options: [
+                new MultipleChoiceUIFilterOption('Actief', 'Active'),
+                new MultipleChoiceUIFilterOption('Verlopen', 'Expiring'),
+                new MultipleChoiceUIFilterOption('Inactief', 'Inactive'),
+            ],
+            buildFilter: (choices) => {
+                const d = new Date()
+                d.setHours(12);
+                d.setMinutes(0);
+                d.setSeconds(0);
+                d.setMilliseconds(0);
+
+                const filters: StamhoofdFilter[] = []
+                const invertedFilters: StamhoofdFilter[] = []
+
+                if (choices.includes('Active') && choices.includes('Expiring')) {
+                    filters.push(...[
+                        {
+                            endDate: {
+                                $gt: Formatter.dateIso(d)
+                            },
+                        }
+                    ])
+                }
+
+                if (choices.includes('Active') && !choices.includes('Expiring')) {
+                    filters.push(...[
+                        {
+                            expireDate: null,
+                            endDate: {
+                                $gt: Formatter.dateIso(d)
+                            },
+                        },
+                        {
+                            expireDate: {
+                                $gt: Formatter.dateIso(d)
+                            },
+                        }
+                    ])
+                }
+
+                if (!choices.includes('Active') && choices.includes('Expiring')) {
+                    filters.push(...[
+                        {
+                            expireDate: {
+                                $lt: Formatter.dateIso(d)
+                            },
+                            endDate: {
+                                $gt: Formatter.dateIso(d)
+                            },
+                        }
+                    ])
+                }
+
+                if (choices.includes('Inactive')) {
+                    invertedFilters.push(...[
+                        {
+                            endDate: {
+                                $gt: Formatter.dateIso(d)
+                            },
+                        }
+                    ])
+                }
+
+                const filter: StamhoofdFilter = []
+
+                if (filters.length > 0) {
+                    filter.push({
+                        platformMemberships: {
+                            $elemMatch: {
+                                $or: filters
+                            }
+                        }
+                    })
+                }
+
+                if (invertedFilters.length > 0) {
+                    filter.push({
+                        $not: {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    $or: invertedFilters
+                                }
+                            }
+                        }
+                    })
+                }
+
+                if (filter.length == 1) {
+                    return filter[0]
+                }
+
+                if (filter.length === 0) {
+                    return []
+                }
+
+                return {
+                    $or: filter
+                }
+            }
+        })
+    )
 
     all.unshift(
         new GroupUIFilterBuilder({
