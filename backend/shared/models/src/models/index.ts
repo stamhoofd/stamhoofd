@@ -47,3 +47,4 @@ export * from "./MemberResponsibilityRecord"
 
 export * from "./OrganizationRegistrationPeriod"
 export * from "./RegistrationPeriod"
+export * from "./MemberPlatformMembership"

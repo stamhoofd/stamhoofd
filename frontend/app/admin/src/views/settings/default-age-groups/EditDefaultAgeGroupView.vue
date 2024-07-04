@@ -91,7 +91,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { AgeInput, CenteredMessage, Dropdown, ErrorBox, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { DefaultAgeGroup, MembershipTypeBehaviour } from '@stamhoofd/structures';
+import { DefaultAgeGroup, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
@@ -108,7 +108,7 @@ const title = computed(() => props.isNew ? 'Nieuwe standaard leeftijdsgroep' : '
 const pop = usePop();
 const $t = useTranslate();
 const platform = usePlatform();
-const membershipTypes = computed(() => platform.value.config.membershipTypes.filter(t => t.behaviour === MembershipTypeBehaviour.Period))
+const membershipTypes = computed(() => platform.value.config.membershipTypes.filter(t => t.behaviour === PlatformMembershipTypeBehaviour.Period))
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.group);
 let startYear = new Date().getFullYear();

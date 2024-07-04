@@ -15,14 +15,14 @@
                 <DateSelection v-model="endDate" />
             </STInputBox>
         </div>
-        <p v-if="type.behaviour === MembershipTypeBehaviour.Days" class="style-description-small">
+        <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">
             Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.
         </p>
 
-        <STInputBox v-if="type.behaviour === MembershipTypeBehaviour.Period" :title="$t('admin.settings.membershipTypes.expireDate.title')" error-fields="endDate" :error-box="errors.errorBox">
+        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('admin.settings.membershipTypes.expireDate.title')" error-fields="endDate" :error-box="errors.errorBox">
             <DateSelection v-model="expireDate" :required="false" :placeholder="$t('admin.settings.membershipTypes.expireDate.placeholder')" />
         </STInputBox>
-        <p v-if="type.behaviour === MembershipTypeBehaviour.Period" class="style-description-small">
+        <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
             {{ $t('admin.settings.membershipTypes.expireDate.description') }}
         </p>
 
@@ -51,11 +51,11 @@
             </STInputBox>
 
             <div class="split-inputs">
-                <STInputBox v-if="type.behaviour === MembershipTypeBehaviour.Days || price.pricePerDay" title="Prijs per dag" :error-box="errors.errorBox">
+                <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days || price.pricePerDay" title="Prijs per dag" :error-box="errors.errorBox">
                     <PriceInput :model-value="price.pricePerDay" placeholder="Prijs per dag" @update:model-value="patchPrice(price, {pricePerDay: $event})" />
                 </STInputBox>
 
-                <STInputBox :title="type.behaviour === MembershipTypeBehaviour.Days ? 'Vaste prijs' : 'Prijs'" :error-box="errors.errorBox">
+                <STInputBox :title="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'Vaste prijs' : 'Prijs'" :error-box="errors.errorBox">
                     <PriceInput :model-value="price.price" placeholder="Gratis" @update:model-value="patchPrice(price, {price: $event})" />
                 </STInputBox>
             </div>
@@ -71,7 +71,7 @@
         <hr>
 
         <STInputBox title="Gratis per lokale groep" error-fields="price" :error-box="errors.errorBox">
-            <NumberInput v-model="amountFree" placeholder="Geen" :suffix="type.behaviour === MembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === MembershipTypeBehaviour.Days ? 'dag' : 'lid'" />
+            <NumberInput v-model="amountFree" placeholder="Geen" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" />
         </STInputBox>
 
         <div v-if="!isNew && deleteHandler" class="container">
@@ -95,7 +95,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceInput, SaveView, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MembershipType, MembershipTypeBehaviour, MembershipTypeConfig, MembershipTypeConfigPrice, RegistrationPeriod } from '@stamhoofd/structures';
+import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice, RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
@@ -104,11 +104,11 @@ const deleting = ref(false);
 const $t = useTranslate();
 
 const props = defineProps<{
-    type: MembershipType;
-    config: MembershipTypeConfig;
+    type: PlatformMembershipType;
+    config: PlatformMembershipTypeConfig;
     period: RegistrationPeriod
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<MembershipTypeConfig>) => Promise<void>,
+    saveHandler: (p: AutoEncoderPatchType<PlatformMembershipTypeConfig>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
 const title = computed(() => $t('admin.settings.membershipTypes.period.title', {periodName: props.period.name}));
@@ -187,7 +187,7 @@ const shouldNavigateAway = async () => {
     return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
 }
 
-function patchPrice(configPrice: MembershipTypeConfigPrice, patch: PartialWithoutMethods<AutoEncoderPatchType<MembershipTypeConfigPrice>>) {
+function patchPrice(configPrice: PlatformMembershipTypeConfigPrice, patch: PartialWithoutMethods<AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>>) {
     prices.value = prices.value.map(p => {
         if (p.id === configPrice.id) {
             return p.patch(patch)
@@ -205,7 +205,7 @@ function patchPrice(configPrice: MembershipTypeConfigPrice, patch: PartialWithou
 }
 
 function addPrice() {
-    prices.value = [...prices.value, MembershipTypeConfigPrice.create({
+    prices.value = [...prices.value, PlatformMembershipTypeConfigPrice.create({
         startDate: new Date(),
     })].sort((a, b) => {
         if (!a.startDate) {
@@ -218,7 +218,7 @@ function addPrice() {
     })
 }
 
-function deletePrice(price: MembershipTypeConfigPrice) {
+function deletePrice(price: PlatformMembershipTypeConfigPrice) {
     prices.value = prices.value.filter(p => p.id !== price.id)
 }
 

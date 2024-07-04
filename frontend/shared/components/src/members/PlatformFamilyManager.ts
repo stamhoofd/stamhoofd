@@ -52,6 +52,27 @@ export class PlatformFamilyManager {
         member.family.insertFromBlob(response)
     }
 
+    async isolatedPatch(members: PlatformMember[], patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>, shouldRetry: boolean = false) {
+        if (patches.changes.length) {
+            const response = await this.context.authenticatedServer.request({
+                method: "PATCH",
+                path: this.app == 'registration' ? '/members' : "/organization/members",
+                decoder: MembersBlob as Decoder<MembersBlob>,
+                body: patches,
+                shouldRetry,
+                owner: this
+            });
+
+            for (const c of members) {
+                // Check in response
+                const updatedMember = response.data.members.find(m => m.id === c.id);
+                if (updatedMember) {
+                    c.member.deepSet(updatedMember)
+                }
+            }
+        }
+    }
+
     async save(members: PlatformMember[], shouldRetry: boolean = false) {
         // Load all members that have patches
         const patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray();
@@ -109,14 +130,14 @@ export class PlatformFamilyManager {
                 // Check in response
                 const updatedMember = response.data.members.find(m => m.id === c.id);
                 if (updatedMember) {
-                    c.member.set(updatedMember)
+                    c.member.deepSet(updatedMember)
                 } else {
                     // Probably duplicate member, so we have a different id
                     const updatedMember = createdMembers.find(m => m.details.isEqual(savedMember.details));
                     if (updatedMember) {
                         // We have an id change here
                         const oldId = c.id
-                        c.member.set(updatedMember)
+                        c.member.deepSet(updatedMember)
                         c.patch.id = updatedMember.id
 
                         c._oldId = oldId

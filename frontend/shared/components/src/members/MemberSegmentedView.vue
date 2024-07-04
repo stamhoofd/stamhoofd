@@ -31,7 +31,7 @@ import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
 import MemberStepView from './MemberStepView.vue';
 import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
-import MemberPlatformConnectionTab from './tabs/MemberPlatformConnectionTab.vue';
+import MemberPlatformMembershipTab from './tabs/MemberPlatformMembershipTab.vue';
 import EditMemberResponsibilitiesBox from './components/edit/EditMemberResponsibilitiesBox.vue';
 
 const props = withDefaults(
@@ -65,7 +65,7 @@ const tabs = computed(() => {
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
             name: 'Aansluiting',
-            component: markRaw(MemberPlatformConnectionTab)
+            component: markRaw(MemberPlatformMembershipTab)
         });
     }
 

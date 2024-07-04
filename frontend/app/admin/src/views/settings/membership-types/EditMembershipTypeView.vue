@@ -18,10 +18,10 @@
             </STInputBox>
             <STInputBox title="Type" error-fields="behaviour" :error-box="errors.errorBox">
                 <Dropdown v-model="behaviour">
-                    <option :value="MembershipTypeBehaviour.Period">
+                    <option :value="PlatformMembershipTypeBehaviour.Period">
                         Vaste periode
                     </option>
-                    <option :value="MembershipTypeBehaviour.Days">
+                    <option :value="PlatformMembershipTypeBehaviour.Days">
                         Per dag
                     </option>
                 </Dropdown>
@@ -46,7 +46,7 @@
             Je hebt nog geen instellingen toegevoegd.
         </p>
         <STList v-else>
-            <MembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" :type="type" @click="editPeriod(config, period)" />
+            <PlatformMembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" :type="type" @click="editPeriod(config, period)" />
         </STList>
 
         <p>
@@ -87,11 +87,11 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, SaveView, Toast, useErrors, usePatch, Dropdown } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { MembershipType, MembershipTypeBehaviour, MembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditMembershipTypeConfigView from './EditMembershipTypeConfigView.vue';
-import MembershipTypeConfigRow from './components/MembershipTypeConfigRow.vue';
+import PlatformMembershipTypeConfigRow from './components/PlatformMembershipTypeConfigRow.vue';
 import TagIdsInput from '../components/TagIdsInput.vue';
 
 const errors = useErrors();
@@ -107,9 +107,9 @@ const present = usePresent()
 loadData().catch(console.error);
 
 const props = defineProps<{
-    type: MembershipType;
+    type: PlatformMembershipType;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<MembershipType>) => Promise<void>,
+    saveHandler: (p: AutoEncoderPatchType<PlatformMembershipType>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
 const title = computed(() => props.isNew ? $t('admin.settings.membershipTypes.new.title') : $t('admin.settings.membershipTypes.edit.title'));
@@ -118,7 +118,7 @@ const pop = usePop();
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
 
 const sortedPeriods = computed(() => {
-    const result: {period: RegistrationPeriod, config: MembershipTypeConfig}[] = Array.from(patched.value.periods.entries())
+    const result: {period: RegistrationPeriod, config: PlatformMembershipTypeConfig}[] = Array.from(patched.value.periods.entries())
         .map(([periodId, config]) => ({ config, period: originalPeriods.value.find(p => p.id == periodId)! }))
         .filter(p => !!p.period);
 
@@ -210,7 +210,7 @@ const requiredTagIds = computed({
     set: (requiredTagIds) => addPatch({requiredTagIds: requiredTagIds as any}),
 });
 
-async function editPeriod(config: MembershipTypeConfig, period: RegistrationPeriod) {
+async function editPeriod(config: PlatformMembershipTypeConfig, period: RegistrationPeriod) {
     await present({
         components: [
             new ComponentWithProperties(EditMembershipTypeConfigView, {
@@ -218,15 +218,15 @@ async function editPeriod(config: MembershipTypeConfig, period: RegistrationPeri
                 period,
                 config,
                 isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<MembershipTypeConfig>) => {
-                    const periods = new PatchMap<string, AutoEncoderPatchType<MembershipTypeConfig>>()
+                saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipTypeConfig>) => {
+                    const periods = new PatchMap<string, AutoEncoderPatchType<PlatformMembershipTypeConfig>>()
                     periods.set(period.id, patch)
                     addPatch({
                         periods
                     })
                 },
                 deleteHandler: () => {
-                    const periods = new PatchMap<string, AutoEncoderPatchType<MembershipTypeConfig>|null>()
+                    const periods = new PatchMap<string, AutoEncoderPatchType<PlatformMembershipTypeConfig>|null>()
                     periods.set(period.id, null)
                     addPatch({
                         periods
@@ -263,7 +263,7 @@ async function addConfig(event: MouseEvent) {
 
 async function addConfigForPeriod(period: RegistrationPeriod) {
     const {config: previousConfig, period: previousPeriod} = sortedPeriods.value[0] ?? {config: null, period: null}
-    const config = previousConfig ? previousConfig.clone() : MembershipTypeConfig.create({})
+    const config = previousConfig ? previousConfig.clone() : PlatformMembershipTypeConfig.create({})
 
     if (previousConfig && previousPeriod) {
         const yearDifference = period.startDate.getFullYear() - previousPeriod.startDate.getFullYear()
@@ -298,8 +298,8 @@ async function addConfigForPeriod(period: RegistrationPeriod) {
                 period,
                 config,
                 isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<MembershipTypeConfig>) => {
-                    const periods = new PatchMap<string, MembershipTypeConfig>()
+                saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipTypeConfig>) => {
+                    const periods = new PatchMap<string, PlatformMembershipTypeConfig>()
                     periods.set(period.id, config.patch(patch))
                     addPatch({
                         periods

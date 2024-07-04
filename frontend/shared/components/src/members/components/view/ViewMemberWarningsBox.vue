@@ -19,6 +19,7 @@ import { DataPermissionsSettings, FinancialSupportSettings, PermissionLevel, Pla
 import { computed } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 defineOptions({
     inheritAttrs: false
@@ -30,7 +31,8 @@ const props = defineProps<{
 const organization = useOrganization();
 const platform = usePlatform();
 const auth = useAuth();
-const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false)
+const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
+const $t = useTranslate()
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
@@ -76,6 +78,13 @@ const warnings = computed(() => {
                 type: RecordWarningType.Error
             }))
         }
+    }
+
+    if (props.member.member.platformMemberships.length === 0) {
+        warnings.push(RecordWarning.create({
+            text: $t('shared.noMembershipWarning'),
+            type: RecordWarningType.Error
+        }))
     }
 
     return warnings

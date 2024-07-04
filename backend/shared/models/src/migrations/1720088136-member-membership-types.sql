@@ -1,0 +1,23 @@
+CREATE TABLE `member_platform_memberships` (
+  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
+  `memberId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `membershipTypeId` varchar(36) NOT NULL,
+  `organizationId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `periodId` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `startDate` datetime NOT NULL,
+  `endDate` datetime NOT NULL,
+  `invoiceItemDetailId` varchar(36) DEFAULT '',
+  `invoiceId` varchar(36) DEFAULT '',
+  `price` int NOT NULL DEFAULT '0',
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `memberId` (`memberId`),
+  KEY `organizationId` (`organizationId`),
+  KEY `periodId` (`periodId`),
+  KEY `invoiceId` (`invoiceId`),
+  CONSTRAINT `member_platform_memberships_ibfk_1` FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_platform_memberships_ibfk_2` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_platform_memberships_ibfk_3` FOREIGN KEY (`periodId`) REFERENCES `registration_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `member_platform_memberships_ibfk_4` FOREIGN KEY (`invoiceId`) REFERENCES `stamhoofd_invoices` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

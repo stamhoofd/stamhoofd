@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
-import { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, User as UserStruct, Group as GroupStruct, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, Webshop as WebshopStruct,WebshopPreview, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { Group, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
+import { MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, User as UserStruct, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 
@@ -145,9 +145,11 @@ export class AuthenticatedStructures {
 
         // Load responsibilities
         const responsibilities = members.length > 0 ? await MemberResponsibilityRecord.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
+        const platformMemberships = members.length > 0 ? await MemberPlatformMembership.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
 
         for (const blob of memberBlobs) {
             blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => MemberResponsibilityRecordStruct.create(r))
+            blob.platformMemberships = platformMemberships.filter(r => r.memberId == blob.id).map(r => MemberPlatformMembershipStruct.create(r))
         }
 
         return MembersBlob.create({

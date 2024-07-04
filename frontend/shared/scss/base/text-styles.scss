@@ -265,6 +265,25 @@
     }
 }
 
+.style-price {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 600;
+    color: $color-primary;
+}
+
+.style-discount-old-price {
+    @extend .style-price;
+    text-decoration: line-through;
+    color: $color-gray-4;
+}
+
+.style-discount-price {
+    @extend .style-price;
+    color: $color-discount;
+    margin-left: 5px;
+}
+
 .style-normal {
     font-size: 15px;
     line-height: 1.5;

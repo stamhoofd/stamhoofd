@@ -9,6 +9,7 @@ import { Member } from './Member';
 import { Registration } from './Registration';
 import { Filterable } from './records/RecordCategory';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord';
+import { MemberPlatformMembership } from './MemberPlatformMembership';
 
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
@@ -20,6 +21,9 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
     @field({ decoder: new ArrayDecoder(MemberResponsibilityRecord), version: 263 })
     responsibilities: MemberResponsibilityRecord[] = []
+
+    @field({ decoder: new ArrayDecoder(MemberPlatformMembership), version: 270 })
+    platformMemberships: MemberPlatformMembership[] = []
 
     doesMatchFilter(filter: StamhoofdFilter)  {
         try {

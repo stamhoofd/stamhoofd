@@ -305,6 +305,8 @@ export class STInvoice extends Model {
                 await code.reward()
             }
         }
+
+        // todo: link member_membership items to this newly created invoice
     }
 
     async assignNextNumber() {

@@ -82,7 +82,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.MembershipTypes)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PlatformMembershipTypes)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/membership.svg">
                     </template>
@@ -111,7 +111,7 @@ import { usePlatformManager } from '@stamhoofd/networking';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditMemberResponsibilitiesView from './responsibilities/EditMemberResponsibilitiesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
-import EditMembershipTypesView from './membership-types/EditMembershipTypesView.vue';
+import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -119,7 +119,7 @@ enum Routes {
     DefaultAgeGroups = 'standaard-leeftijdsgroepen',
     Responsibilities = 'functies',
     RegistrationPeriods = 'werkjaren',
-    MembershipTypes = 'lidmaatschappen',
+    PlatformMembershipTypes = 'lidmaatschappen',
 }
 
 const platform = usePlatform()
@@ -164,9 +164,9 @@ defineRoutes([
         component: EditRegistrationPeriodsView as ComponentOptions,
     },
     {
-        url: Routes.MembershipTypes,
+        url: Routes.PlatformMembershipTypes,
         present: 'popup',
-        component: EditMembershipTypesView as ComponentOptions,
+        component: EditPlatformMembershipTypesView as ComponentOptions,
     }
 ])
 const $navigate = useNavigate()

@@ -15,6 +15,14 @@ export enum STInvoiceStatus {
     Canceled = "Canceled",
 }
 
+export class STInvoiceItemDetail extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ""
+}
+
 export class STInvoiceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -24,6 +32,12 @@ export class STInvoiceItem extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     description = ""
+
+    /**
+     * Allow to add a very detailed list of included items
+     */
+    @field({ decoder: new ArrayDecoder(STInvoiceItemDetail) })
+    details: STInvoiceItemDetail[] = []
 
     @field({ decoder: IntegerDecoder })
     amount = 1
@@ -138,6 +152,11 @@ export class STInvoiceItem extends AutoEncoder {
 
         // Other package will be more up to date
         this.package = other.package
+
+        // Copy details
+        for (const detail of other.details) {
+            this.details.push(detail.clone())
+        }
     }
 
     /// Only compress an invoice when it is marked as paid and for a pending invoice when it doesn't has an invoice

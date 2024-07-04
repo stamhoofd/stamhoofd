@@ -2,8 +2,8 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, Platform, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { BalanceItemStatus, MemberWithRegistrationsBlob, MembersBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItem, MemberPlatformMembership, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, Platform, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
+import { BalanceItemStatus, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -51,6 +51,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         const members: MemberWithRegistrations[] = []
+
+        const platform = await Platform.getShared()
 
         // Cache
         const groups: Group[] = []
@@ -504,6 +506,95 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Auto link users based on data
             if (patch.users.changes.length || patch.details) {
                 await PatchOrganizationMembersEndpoint.updateManagers(member)
+            }
+
+            // Add platform memberships
+            for (const {put} of patch.platformMemberships.getPuts()) {
+                if (put.periodId !== platform.periodId) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid period",
+                        human: "Je kan geen aansluitingen maken voor een andere werkjaar dan het actieve werkjaar",
+                        field: "periodId"
+                    })
+                }
+
+                if (organization && put.organizationId !== organization.id) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid organization",
+                        human: "Je kan geen aansluitingen maken voor een andere vereniging",
+                        field: "organizationId"
+                    })
+                }
+
+                if (!await Context.auth.hasFullAccess(put.organizationId)) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om deze aansluiting toe te voegen")
+                }
+
+                if (!platform.config.membershipTypes.find(t => t.id === put.membershipTypeId)) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        field: "membershipTypeId",
+                        message: "Invalid membership type",
+                        human: "Dit aansluitingstype bestaat niet"
+                    })
+                }
+                
+                // Check duplicate memberships
+
+                // Check dates
+
+                // Calculate prices
+
+                const membership = new MemberPlatformMembership()
+                membership.id = put.id
+                membership.memberId = member.id
+                membership.membershipTypeId = put.membershipTypeId
+                membership.organizationId = put.organizationId
+                membership.periodId = put.periodId
+
+                membership.startDate = put.startDate
+                membership.endDate = put.endDate
+
+                await membership.save()
+            }
+
+            // Delete platform memberships
+            for (const id of patch.platformMemberships.getDeletes()) {
+                const membership = await MemberPlatformMembership.getByID(id)
+
+                if (!membership || membership.memberId !== member.id) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        field: "id",
+                        message: "Invalid id",
+                        human: "Deze aansluiting bestaat niet"
+                    })
+                }
+
+                if (!await Context.auth.hasFullAccess(membership.organizationId)) {
+                    throw Context.auth.error("Je hebt niet voldoende rechten om deze aansluiting te verwijderen")
+                }
+
+                if (membership.periodId !== platform.periodId) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid period",
+                        human: "Je kan geen aansluitingen meer verwijderen voor een ander werkjaar dan het actieve werkjaar",
+                        field: "periodId"
+                    })
+                }
+
+                if (membership.invoiceId || membership.invoiceItemDetailId) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid invoice",
+                        human: "Je kan geen aansluiting verwijderen die al werd gefactureerd",
+                    })
+                }
+
+                await membership.delete()
             }
 
             if (!members.find(m => m.id === member.id)) {

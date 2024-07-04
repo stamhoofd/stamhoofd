@@ -162,16 +162,6 @@ export default class CartItemRow extends VueComponent {
         }
     }
 
-    .style-discount-old-price {
-        text-decoration: line-through;
-        color: $color-gray-4;
-    }
-
-    .style-discount-price {
-        color: $color-discount;
-        margin-left: 5px;
-    }
-
     footer {
         display: flex;
         justify-content: space-between;

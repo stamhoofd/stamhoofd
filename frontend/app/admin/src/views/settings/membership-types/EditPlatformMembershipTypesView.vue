@@ -8,7 +8,7 @@
 
         <STList v-model="draggableTypes" :draggable="true">
             <template #item="{item: type}">
-                <MembershipTypeRow :type="type" @click="editType(type)" />
+                <PlatformMembershipTypeRow :type="type" @click="editType(type)" />
             </template>
         </STList>
 
@@ -27,9 +27,9 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { MembershipType, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { PlatformMembershipType, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import MembershipTypeRow from './components/MembershipTypeRow.vue';
+import PlatformMembershipTypeRow from './components/PlatformMembershipTypeRow.vue';
 import EditMembershipTypeView from './EditMembershipTypeView.vue';
 
 const platformManager = usePlatformManager();
@@ -47,8 +47,8 @@ const saving = ref(false);
 const title = $t('admin.settings.membershipTypes.title')
 
 async function addType() {
-    const arr: PatchableArrayAutoEncoder<MembershipType> = new PatchableArray()
-    const type = MembershipType.create({});
+    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray()
+    const type = PlatformMembershipType.create({});
     arr.addPut(type)
 
     await present({
@@ -57,7 +57,7 @@ async function addType() {
             new ComponentWithProperties(EditMembershipTypeView, {
                 type,
                 isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<MembershipType>) => {
+                saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipType>) => {
                     patch.id = type.id
                     arr.addPatch(patch)
                     addArrayPatch(arr)
@@ -67,20 +67,20 @@ async function addType() {
     })
 }
 
-async function editType(type: MembershipType) {
+async function editType(type: PlatformMembershipType) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditMembershipTypeView, {
                 type,
                 isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<MembershipType>) => {
-                    const arr: PatchableArrayAutoEncoder<MembershipType> = new PatchableArray()
+                saveHandler: (patch: AutoEncoderPatchType<PlatformMembershipType>) => {
+                    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray()
                     arr.addPatch(patch)
                     addArrayPatch(arr)
                 },
                 deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<MembershipType> = new PatchableArray()
+                    const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray()
                     arr.addDelete(type.id)
                     addArrayPatch(arr)
                 }

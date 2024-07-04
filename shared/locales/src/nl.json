@@ -211,5 +211,10 @@
     "admin.settings.membershipTypes.expireDate.description": "De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe werkjaar.",
     "admin.settings.membershipTypes.expireDate.placeholder": "Geen vervaldatum",
     "admin.settings.membershipTypes.period.priceDate": "Vanaf",
-    "admin.settings.membershipTypes.period.addPrice": "Prijs vanaf datum"
+    "admin.settings.membershipTypes.period.addPrice": "Prijs vanaf datum",
+    "shared.noMembershipWarning": "Dit lid is niet aangesloten bij KSA-Nationaal, en is daardoor ook niet verzekerd",
+    "dashboard.platformMemberhip.add.title": "Kies een aansluitingstype",
+    "dashboard.platformMemberhip.add.description": "Het bedrag wordt achteraf door KSA Nationaal aan je groep gefactureerd.",
+    "dashboard.platformMemberhip.add.startDate": "Vanaf",
+    "dashboard.platformMemberhip.add.endDate": "Tot en met"
 }

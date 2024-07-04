@@ -16,10 +16,10 @@
 </template>
 
 <script lang="ts" setup>
-import { MembershipType } from '@stamhoofd/structures';
+import { PlatformMembershipType } from '@stamhoofd/structures';
 
 defineProps<{
-    type: MembershipType;
+    type: PlatformMembershipType;
 }>();
 
 function showContextMenu() {

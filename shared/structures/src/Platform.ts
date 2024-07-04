@@ -21,7 +21,7 @@ export class OrganizationTag extends AutoEncoder {
     name = ''
 }
 
-export class MembershipTypeConfigPrice extends AutoEncoder {
+export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
     
@@ -38,7 +38,7 @@ export class MembershipTypeConfigPrice extends AutoEncoder {
     pricePerDay = 0
 }
 
-export class MembershipTypeConfig extends AutoEncoder {
+export class PlatformMembershipTypeConfig extends AutoEncoder {
     @field({ decoder: DateDecoder })
     startDate = new Date()
 
@@ -51,12 +51,24 @@ export class MembershipTypeConfig extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amountFree = 0
 
-    @field({ decoder: new ArrayDecoder(MembershipTypeConfigPrice) })
-    prices: MembershipTypeConfigPrice[] = [MembershipTypeConfigPrice.create({})]
+    @field({ decoder: new ArrayDecoder(PlatformMembershipTypeConfigPrice) })
+    prices: PlatformMembershipTypeConfigPrice[] = [PlatformMembershipTypeConfigPrice.create({})]
+
+    getPriceForDate(date: Date) {
+        const sorted = this.prices.slice().sort((a, b) => (a.startDate ?? new Date(0)).getTime() - (b.startDate ?? new Date(0)).getTime())
+        let price = sorted[0];
+        for (const p of sorted) {
+            if (p.startDate === null || date >= p.startDate) {
+                price = p
+            }
+        }
+        return price
+    
+    }
     
 }
 
-export enum MembershipTypeBehaviour {
+export enum PlatformMembershipTypeBehaviour {
     /**
      * A membership that is valid for a certain period
      */
@@ -68,7 +80,7 @@ export enum MembershipTypeBehaviour {
     Days = "Days"
 }
 
-export class MembershipType extends AutoEncoder {
+export class PlatformMembershipType extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
@@ -78,14 +90,14 @@ export class MembershipType extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = ''
 
-    @field({ decoder: new EnumDecoder(MembershipTypeBehaviour) })
-    behaviour = MembershipTypeBehaviour.Period
+    @field({ decoder: new EnumDecoder(PlatformMembershipTypeBehaviour) })
+    behaviour = PlatformMembershipTypeBehaviour.Period
 
     /**
      * Settings per period
      */
-    @field({ decoder: new MapDecoder(StringDecoder, MembershipTypeConfig) })
-    periods: Map<string, MembershipTypeConfig> = new Map()
+    @field({ decoder: new MapDecoder(StringDecoder, PlatformMembershipTypeConfig) })
+    periods: Map<string, PlatformMembershipTypeConfig> = new Map()
 
     /**
      * Only allow organizations with these tags to use this membership type
@@ -107,8 +119,8 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(MemberResponsibility), version: 262 })
     responsibilities: MemberResponsibility[] = []
 
-    @field({ decoder: new ArrayDecoder(MembershipType), version: 268 })
-    membershipTypes: MembershipType[] = []
+    @field({ decoder: new ArrayDecoder(PlatformMembershipType), version: 268 })
+    membershipTypes: PlatformMembershipType[] = []
 }
 
 export class Platform extends AutoEncoder {
