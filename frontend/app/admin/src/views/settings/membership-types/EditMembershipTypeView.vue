@@ -38,8 +38,6 @@
             />
         </STInputBox>
 
-        
-
         <hr>
         <h2>Instellingen per werkjaar</h2>
         <p>Per werkjaar kan je een prijs bepalen voor deze aansluiting, inclusief de start- en einddata.</p>
@@ -57,6 +55,15 @@
                 <span>{{ $t('admin.settings.membershipTypes.new.period') }}</span>
             </button>
         </p>
+
+        <hr>
+        <h2>Beschikbaarheid</h2>
+
+        <Checkbox v-model="requiredTagIdsEnabled">
+            Beperk welke verenigingen hun leden kunnen aansluiten met deze aansluiting.
+        </Checkbox>
+
+        <TagIdsInput v-if="requiredTagIds !== null" v-model="requiredTagIds" />
 
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
@@ -85,6 +92,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditMembershipTypeConfigView from './EditMembershipTypeConfigView.vue';
 import MembershipTypeConfigRow from './components/MembershipTypeConfigRow.vue';
+import TagIdsInput from '../components/TagIdsInput.vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -190,6 +198,16 @@ const description = computed({
 const behaviour = computed({
     get: () => patched.value.behaviour,
     set: (behaviour) => addPatch({behaviour}),
+});
+
+const requiredTagIdsEnabled = computed({
+    get: () => patched.value.requiredTagIds !== null,
+    set: (requiredTagIdsEnabled) => addPatch({requiredTagIds: requiredTagIdsEnabled ? (requiredTagIds.value ?? [] as any) : null}),
+});
+
+const requiredTagIds = computed({
+    get: () => patched.value.requiredTagIds,
+    set: (requiredTagIds) => addPatch({requiredTagIds: requiredTagIds as any}),
 });
 
 async function editPeriod(config: MembershipTypeConfig, period: RegistrationPeriod) {
