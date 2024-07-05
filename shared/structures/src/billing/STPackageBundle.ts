@@ -157,7 +157,7 @@ export class STPackageBundleHelper {
             case STPackageBundle.SingleWebshop: {
                 // Disable functions after two months
                 const validUntil = new Date(date)
-                validUntil.setMonth(validUntil.getMonth() + 2)
+                validUntil.setMonth(validUntil.getMonth() + 3)
 
                 // Remove if not valid anymore
                 const removeAt = new Date(validUntil)
