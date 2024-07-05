@@ -55,8 +55,12 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
     prices: PlatformMembershipTypeConfigPrice[] = [PlatformMembershipTypeConfigPrice.create({})]
 
     getPriceForDate(date: Date) {
+        if (date === undefined) {
+            throw new Error("Date is required")
+        }
         const sorted = this.prices.slice().sort((a, b) => (a.startDate ?? new Date(0)).getTime() - (b.startDate ?? new Date(0)).getTime())
         let price = sorted[0];
+
         for (const p of sorted) {
             if (p.startDate === null || date >= p.startDate) {
                 price = p

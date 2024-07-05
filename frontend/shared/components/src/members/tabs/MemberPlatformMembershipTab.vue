@@ -1,7 +1,8 @@
 <template>
     <div class="member-payments-view">
         <main class="container">
-            <p v-if="memberships.length === 0" class="info-box">
+            <p class="info-box">Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.</p>
+            <p v-if="memberships.length === 0" class="warning-box">
                 {{ $t('shared.noMembershipWarning') }}
             </p>
             <STList v-else>
@@ -13,10 +14,10 @@
                     </template>
                     <h3 class="style-title-list">{{ getMembershipType(membership).name }}</h3>
                     <p class="style-description-small">
-                        {{ formatDate(membership.startDate, true) }} - {{ formatDate(membership.expireDate ?? membership.endDate, true) }}
+                        {{ formatDate(membership.startDate, true) }} tot en met {{ formatDate(membership.expireDate ?? membership.endDate, true) }}
                     </p>
-                    <p class="style-description-small" v-if="membership.expireDate && membership.expireDate < now">
-                        Verlopen op {{ membership.expireDate ? formatDate(membership.expireDate, true) : 'n.v.t.' }}
+                    <p class="style-description-small" v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now">
+                        Verlopen. Verleng de aansluiting om de verzekering te behouden.
                     </p>
 
                     <p class="style-description-small">{{ getMembershipType(membership).description }}</p>
