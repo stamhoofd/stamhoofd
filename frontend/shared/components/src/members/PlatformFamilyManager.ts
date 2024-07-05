@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors"
 import { Request, RequestResult } from "@simonbackx/simple-networking"
 import { AppType, useAppContext, useContext } from "@stamhoofd/components"
 import { SessionContext } from "@stamhoofd/networking"
-import { MemberWithRegistrationsBlob, MembersBlob, PlatformMember, Version } from "@stamhoofd/structures"
+import { MemberWithRegistrationsBlob, MembersBlob, PlatformMember, Registration, Version } from "@stamhoofd/structures"
 import { onBeforeUnmount, unref } from "vue"
 
 export function usePlatformFamilyManager() {
@@ -50,6 +50,26 @@ export class PlatformFamilyManager {
     async loadFamilyMembers(member: PlatformMember, options?: {shouldRetry?: boolean}) {
         const response = await this.loadFamilyBlob(member.id, options)
         member.family.insertFromBlob(response)
+    }
+
+    async unregisterMembers(members: {member: PlatformMember, removeRegistrations: Registration[]}[], options?: {shouldRetry?: boolean}) {
+        const patches = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+        
+        for (const {member, removeRegistrations} of members) {
+            const registrations = new PatchableArray() as PatchableArrayAutoEncoder<Registration>;
+            for (const r of removeRegistrations) {
+                registrations.addDelete(r.id)
+            }
+
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                registrations
+            })
+
+            patches.addPatch(patch)
+        }
+
+        await this.isolatedPatch(members.map(m => m.member), patches, options?.shouldRetry ?? false)
     }
 
     async isolatedPatch(members: PlatformMember[], patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>, shouldRetry: boolean = false) {

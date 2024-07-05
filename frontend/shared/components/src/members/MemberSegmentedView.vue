@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, useAuth, useKeyUpDown, useOrganization } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
@@ -33,6 +33,7 @@ import MemberStepView from './MemberStepView.vue';
 import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
 import MemberPlatformMembershipTab from './tabs/MemberPlatformMembershipTab.vue';
 import EditMemberResponsibilitiesBox from './components/edit/EditMemberResponsibilitiesBox.vue';
+import { MemberActionBuilder } from './classes/MemberActionBuilder';
 
 const props = withDefaults(
     defineProps<{
@@ -55,6 +56,7 @@ const auth = useAuth();
 const show = useShow();
 const present = usePresent();
 const organization = useOrganization();
+const platformFamilyManager = usePlatformFamilyManager();
 
 const tabs = computed(() => {
     const base: {name: string, component: unknown}[] = [{
@@ -174,28 +176,54 @@ async function editMemberResponsibilities() {
     })
 }
 async function showContextMenu(event: MouseEvent) {
-    const menu = new ContextMenu([
-        [
-            new ContextMenuItem({
-                name: 'Bewerken',
-                icon: 'edit',
-                async action() {
-                    await editMember()
-                },
-            }),
-            new ContextMenuItem({
-                name: 'Functies bewerken',
-                icon: 'star',
-                async action() {
-                    await editMemberResponsibilities()
-                },
-            })
-        ]
-    ])
+    //const menu = new ContextMenu([
+    //    [
+    //        new ContextMenuItem({
+    //            name: 'Bewerken',
+    //            icon: 'edit',
+    //            async action() {
+    //                await editMember()
+    //            },
+    //        }),
+    //        new ContextMenuItem({
+    //            name: 'Functies bewerken',
+    //            icon: 'star',
+    //            async action() {
+    //                await editMemberResponsibilities()
+    //            },
+    //        })
+    //    ]
+    //])
 
-    await menu.show({
-        clickEvent: event
+    const builder = new MemberActionBuilder({
+        present,
+        groups: [],
+        organizations: organization.value ? [organization.value] : props.member.organizations,
+        inWaitingList: false,
+        hasWrite: hasWrite.value,
+        platformFamilyManager
     })
+
+    const actions = builder.getActions()
+
+    const el = event.currentTarget! as HTMLElement;
+    const bounds = el.getBoundingClientRect()
+
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+        x: bounds.left,
+        y: bounds.bottom,
+        xPlacement: "right",
+        yPlacement: "bottom",
+        actions,
+        selection: {
+            isSingle: true,
+            hasSelection: true,
+            getSelection: () => {
+                return [props.member]
+            }
+        }
+    });
+    await present(displayedComponent.setDisplayStyle("overlay"));
 }
 
 </script>

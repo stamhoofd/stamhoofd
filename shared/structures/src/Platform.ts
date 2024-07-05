@@ -108,6 +108,14 @@ export class PlatformMembershipType extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
     requiredTagIds: string[]|null = null;
+
+    getPrice(periodId: string, date: Date) {
+        const period = this.periods.get(periodId)
+        if (!period) {
+            return null
+        }
+        return period.getPriceForDate(date)
+    }
 }
 
 export class PlatformConfig extends AutoEncoder {

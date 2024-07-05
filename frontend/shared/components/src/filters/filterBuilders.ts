@@ -90,7 +90,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
 
     all.push(
         new MultipleChoiceFilterBuilder({
-            name: 'Aansluiting',
+            name: 'Aansluitingstatus',
             options: [
                 new MultipleChoiceUIFilterOption('Actief', 'Active'),
                 new MultipleChoiceUIFilterOption('Verlopen', 'Expiring'),

@@ -97,6 +97,7 @@ export class MemberPlatformMembership extends Model {
         }
 
         const priceConfig = periodConfig.getPriceForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
+        
 
         if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
             // Make sure time is equal between start and end date
@@ -104,9 +105,9 @@ export class MemberPlatformMembership extends Model {
             let endBrussels = Formatter.luxon(this.endDate);
             startBrussels = startBrussels.set({hour: 0, minute: 0, second: 0, millisecond: 0});
             endBrussels = endBrussels.set({hour: 23, minute: 59, second: 59, millisecond: 0});
-
             this.startDate = startBrussels.toJSDate();
             this.endDate = endBrussels.toJSDate();
+
             this.expireDate = null
 
             const days = Math.round((this.endDate.getTime() - this.startDate.getTime()) / (1000 * 60 * 60 * 24));

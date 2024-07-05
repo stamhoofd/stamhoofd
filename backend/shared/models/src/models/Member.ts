@@ -1,10 +1,11 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { SQL } from "@stamhoofd/sql";
 import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Group, Payment, Registration, User } from './';
+import { Group, MemberPlatformMembership, Payment, Platform, Registration, User } from './';
+import { QueueHandler } from '@stamhoofd/queues';
 export type MemberWithRegistrations = Member & { 
     users: User[], 
     registrations: (Registration & {group: Group})[] 
@@ -382,5 +383,88 @@ export class Member extends Model {
             cycle: registration.cycle,
             member: MemberStruct.create(registration.member),
         })
+    }
+
+    async updateMemberships(this: MemberWithRegistrations) {
+        console.log('Updating memberships for member: ' + this.id)
+        return await QueueHandler.schedule('updateMemberships-' + this.id, async () => {
+            const platform = await Platform.getShared()
+            const registrations = this.registrations.filter(r => r.group.periodId == platform.periodId && !r.waitingList && r.registeredAt && !r.deactivatedAt)
+
+            const defaultMemberships = registrations.flatMap(r => {
+                if (!r.group.defaultAgeGroupId) {
+                    return []
+                }
+                const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id == r.group.defaultAgeGroupId)
+                if (!defaultAgeGroup || !defaultAgeGroup.defaultMembershipTypeId) {
+                    return []
+                }
+
+                const defaultMembership  = platform.config.membershipTypes.find(m => m.id == defaultAgeGroup.defaultMembershipTypeId)
+                if (!defaultMembership) {
+                    return []
+                }
+
+                return [{
+                    registration: r,
+                    membership: defaultMembership,
+                }]
+            })
+            // Get active memberships for this member
+            const memberships = await MemberPlatformMembership.where({memberId: this.id, periodId: platform.periodId })
+            const now = new Date()
+            const activeMemberships = memberships.filter(m => m.startDate <= now && m.endDate >= now)
+
+            if (defaultMemberships.length == 0) {
+                // Stop all active memberships
+                for (const membership of activeMemberships) {
+                    if (!membership.invoiceId && !membership.invoiceItemDetailId) {
+                        console.log('Removing membership because no longer registered member and not yet invoiced for: ' + this.id + ' - membership ' + membership.id)
+                        await membership.delete()
+                    }
+                }
+
+                console.log('Skipping automatic membership for: ' + this.id, ' - no default memberships found')
+                return
+            }
+
+
+            if (activeMemberships.length) {
+                // Skip automatic additions
+                console.log('Skipping automatic membership for: ' + this.id, ' - already has active memberships')
+                return
+            }
+
+            // Add the cheapest available membership
+            const cheapestMembership = defaultMemberships.sort(({membership: a, registration: ar}, {membership: b, registration: br}) => {
+                const diff = a.getPrice(platform.periodId, now)!.price - b.getPrice(platform.periodId, now)!.price
+                if (diff == 0) {
+                    return Sorter.byDateValue(br.createdAt, ar.createdAt)
+                }
+                return diff
+            })[0]
+            if (!cheapestMembership) {
+                throw new Error("No membership found")
+            }
+
+            const periodConfig = cheapestMembership.membership.periods.get(platform.periodId)
+            if (!periodConfig) {
+                throw new Error("Period config not found")
+            }
+
+            console.log('Creating automatic membership for: ' + this.id + ' - membership type ' + cheapestMembership.membership.id)
+            const membership = new MemberPlatformMembership();
+            membership.memberId = this.id
+            membership.membershipTypeId = cheapestMembership.membership.id
+            membership.organizationId = cheapestMembership.registration.organizationId
+            membership.periodId = platform.periodId
+
+            membership.startDate = periodConfig.startDate
+            membership.endDate = periodConfig.endDate
+            membership.expireDate = periodConfig.expireDate
+
+            await membership.calculatePrice()
+            await membership.save()
+        });
     }
 }

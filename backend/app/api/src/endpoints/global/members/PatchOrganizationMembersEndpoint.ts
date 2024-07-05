@@ -73,6 +73,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         const balanceItemMemberIds: string[] = []
         const balanceItemRegistrationIdsPerOrganization: Map<string, string[]> = new Map()
+        const updateMembershipMemberIds = new Set<string>()
 
         function addBalanceItemRegistrationId(organizationId: string, registrationId: string) {
             const existing = balanceItemRegistrationIdsPerOrganization.get(organizationId);
@@ -171,6 +172,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await member.save()
             members.push(member)
             balanceItemMemberIds.push(member.id)
+            updateMembershipMemberIds.add(member.id)
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
@@ -234,7 +236,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 let group: Group | null = null
-                
 
                 if (patchRegistration.groupId) {
                     group = await getGroup(patchRegistration.groupId)
@@ -340,6 +341,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 await registration.save()
+                updateMembershipMemberIds.add(member.id)
             }
 
             for (const deleteId of patch.registrations.getDeletes()) {
@@ -364,7 +366,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                balanceItemMemberIds.push(member.id)                
+                balanceItemMemberIds.push(member.id)     
+                updateMembershipMemberIds.add(member.id)           
                 await BalanceItem.deleteForDeletedRegistration(registration.id)
                 await registration.delete()
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
@@ -393,6 +396,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 const reg = await this.addRegistration(member, struct, group)
                 balanceItemMemberIds.push(member.id)
+                updateMembershipMemberIds.add(member.id)
                 addBalanceItemRegistrationId(reg.organizationId, reg.id)
 
                 // We need to update this group occupancy because we moved one member away from it
@@ -643,6 +647,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const index = members.findIndex(m => m.id === member.id)
             if (index !== -1) {
                 members[index] = member
+            }
+        }
+
+        for (const member of members) {
+            if (updateMembershipMemberIds.has(member.id)) {
+                await member.updateMemberships()
             }
         }
 

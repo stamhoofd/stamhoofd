@@ -36,6 +36,8 @@ import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import RegisterMemberView from '../RegisterMemberView.vue';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformFamilyManager } from '../PlatformFamilyManager';
+import { Toast } from '../../overlays/Toast';
 
 const props = defineProps<{
     member: PlatformMember
@@ -53,6 +55,7 @@ const defaultPeriod = organization.value?.period?.period ?? platform.value.perio
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
+const platformFamilyManager = usePlatformFamilyManager()
 
 platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
@@ -84,7 +87,38 @@ async function addRegistration() {
 }
 
 function editRegistration(registration: Registration, event: MouseEvent) {
-    //todo
+    const contextMenu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Uitschrijven voor ' + registration.group.settings.name,
+                action: async () => {
+                    try {
+                        await platformFamilyManager.unregisterMembers([
+                            {
+                                member: props.member,
+                                removeRegistrations: [registration]
+                            }
+                        ], {
+                            shouldRetry: false
+                        })
+                        Toast.success(props.member.patchedMember.firstName + ' is uitgeschreven').show()
+                    } catch (e) {
+                        Toast.fromError(e).show()
+                    }
+                    return true;
+                }
+            }),
+
+            new ContextMenuItem({
+                name: 'Verplaatsen naar',
+                childMenu: new ContextMenu([
+
+                ])
+            })
+        ]
+    ])
+
+    contextMenu.show({ button: event.currentTarget as HTMLElement, yOffset: -10, xPlacement: 'left' }).catch(console.error)
 }
 
 function switchCycle(event: MouseEvent) {

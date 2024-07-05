@@ -8,7 +8,7 @@ export class Registration extends AutoEncoder {
 
     /// You need to look up the group yourself in the organization
     @field({ decoder: Group, version: 266 })
-    group = Group.create({})
+    group: Group
 
     get groupId() {
         return this.group.id
@@ -18,7 +18,7 @@ export class Registration extends AutoEncoder {
     organizationId: string
 
     @field({ decoder: IntegerDecoder })
-    cycle: number
+    cycle: number = 0
 
     /// Set registeredAt to null if the member is on the waiting list for now
     @field({ decoder: DateDecoder, nullable: true })
