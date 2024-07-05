@@ -29,15 +29,16 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import RegisterMemberView from '../RegisterMemberView.vue';
-import MemberRegistrationRow from './MemberRegistrationRow.vue';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import TableActionsContextMenu from '../../tables/TableActionsContextMenu.vue';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
-import { Toast } from '../../overlays/Toast';
+import RegisterMemberView from '../RegisterMemberView.vue';
+import { MemberActionBuilder } from '../classes/MemberActionBuilder';
+import MemberRegistrationRow from './MemberRegistrationRow.vue';
 
 const props = defineProps<{
     member: PlatformMember
@@ -86,39 +87,40 @@ async function addRegistration() {
     })
 }
 
-function editRegistration(registration: Registration, event: MouseEvent) {
-    const contextMenu = new ContextMenu([
-        [
-            new ContextMenuItem({
-                name: 'Uitschrijven voor ' + registration.group.settings.name,
-                action: async () => {
-                    try {
-                        await platformFamilyManager.unregisterMembers([
-                            {
-                                member: props.member,
-                                removeRegistrations: [registration]
-                            }
-                        ], {
-                            shouldRetry: false
-                        })
-                        Toast.success(props.member.patchedMember.firstName + ' is uitgeschreven').show()
-                    } catch (e) {
-                        Toast.fromError(e).show()
-                    }
-                    return true;
-                }
-            }),
+async function editRegistration(registration: Registration, event: MouseEvent) {
+    const builder = new MemberActionBuilder({
+        present,
+        groups: [registration.group],
+        organizations: props.member.organizations.filter(o => o.id === registration.group.organizationId),
+        inWaitingList: registration.waitingList,
+        hasWrite,
+        platformFamilyManager
+    })
 
-            new ContextMenuItem({
-                name: 'Verplaatsen naar',
-                childMenu: new ContextMenu([
+    const actions = [
+        ...builder.getUnsubscribeAction().map(a => a.setGroupIndex(0).setPriority(10)),
+        ...builder.getMoveAction().map(a => a.setGroupIndex(1).setPriority(5)),
+        ...builder.getWaitingListActions()
+    ]
 
-                ])
-            })
-        ]
-    ])
+    const el = event.currentTarget! as HTMLElement;
+    const bounds = el.getBoundingClientRect()
 
-    contextMenu.show({ button: event.currentTarget as HTMLElement, yOffset: -10, xPlacement: 'left' }).catch(console.error)
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+        x: bounds.right,
+        y: bounds.bottom,
+        xPlacement: "left",
+        yPlacement: "bottom",
+        actions,
+        selection: {
+            isSingle: true,
+            hasSelection: true,
+            getSelection: () => {
+                return [props.member]
+            }
+        }
+    });
+    await present(displayedComponent.setDisplayStyle("overlay"));
 }
 
 function switchCycle(event: MouseEvent) {

@@ -160,41 +160,7 @@ async function editMember() {
     })
 }
 
-async function editMemberResponsibilities() {
-    await present({
-        components: [
-            new ComponentWithProperties(MemberStepView, {
-                member: props.member,
-                title: 'Functies van ' + props.member.member.firstName,
-                component: markRaw(EditMemberResponsibilitiesBox),
-                saveHandler: async ({dismiss}: NavigationActions) => {
-                    await dismiss({force: true});
-                }
-            })
-        ],
-        modalDisplayStyle: "popup"
-    })
-}
 async function showContextMenu(event: MouseEvent) {
-    //const menu = new ContextMenu([
-    //    [
-    //        new ContextMenuItem({
-    //            name: 'Bewerken',
-    //            icon: 'edit',
-    //            async action() {
-    //                await editMember()
-    //            },
-    //        }),
-    //        new ContextMenuItem({
-    //            name: 'Functies bewerken',
-    //            icon: 'star',
-    //            async action() {
-    //                await editMemberResponsibilities()
-    //            },
-    //        })
-    //    ]
-    //])
-
     const builder = new MemberActionBuilder({
         present,
         groups: [],

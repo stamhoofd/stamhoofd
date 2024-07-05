@@ -237,6 +237,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 let group: Group | null = null
 
+                console.log('Patch registration', patchRegistration)
+
+                if (patchRegistration.group) {
+                    patchRegistration.groupId = patchRegistration.group.id
+                }
+
                 if (patchRegistration.groupId) {
                     group = await getGroup(patchRegistration.groupId)
                     if (group) {
@@ -294,6 +300,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
                 registration.cycle = patchRegistration.cycle ?? registration.cycle
                 registration.groupId = patchRegistration.groupId ?? registration.groupId
+                registration.group = group
                 registration.organizationId = patchRegistration.organizationId ?? registration.organizationId
 
                 // Check if we should create a placeholder payment?

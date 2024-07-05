@@ -1,11 +1,15 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
-import { usePresent } from '@simonbackx/vue-app-navigation'
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation'
 import { Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PlatformMember, RegisterCart, RegisterItem, Registration } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { CenteredMessage, CenteredMessageButton } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
 import { TableAction } from '../../tables/TableAction'
 import { PlatformFamilyManager } from '../PlatformFamilyManager'
+import { EditMemberAllBox, MemberStepView } from '..'
+import { markRaw } from 'vue'
+import { NavigationActions } from '../../types/NavigationActions'
+import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 
 export class MemberActionBuilder {
     present: ReturnType<typeof usePresent>
@@ -62,6 +66,10 @@ export class MemberActionBuilder {
             return []
         }
 
+        if (this.groups.length === 0) {
+            return []
+        }
+
         const organization = this.organizations[0]
         return [
             new TableAction({
@@ -86,8 +94,12 @@ export class MemberActionBuilder {
         ]
     }
 
-    getUnsubscribeAction(): TableAction<PlatformMember> {
-        return new TableAction({
+    getUnsubscribeAction(): TableAction<PlatformMember>[] {
+        if (this.groups.length === 0) {
+            return []
+        }
+
+        return [new TableAction({
             name: "Uitschrijven",
             priority: 0,
             groupIndex: 7,
@@ -97,7 +109,7 @@ export class MemberActionBuilder {
             handler: (members) => {
                 this.deleteRegistration(members)
             }
-        });
+        })];
     }
 
     getActionsForCategory(category: GroupCategoryTree, action: (members: PlatformMember[], group: Group) => void): TableAction<PlatformMember>[] {
@@ -137,6 +149,19 @@ export class MemberActionBuilder {
                 enabled: this.hasWrite,
                 handler: (members: PlatformMember[]) => {
                     this.editMember(members[0])
+                }
+            }),
+
+            new TableAction({
+                name: "Functies bewerken",
+                icon: "star",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: true,
+                singleSelection: true,
+                enabled: this.hasWrite,
+                handler: (members: PlatformMember[]) => {
+                    this.editResponsibilities(members[0])
                 }
             }),
         
@@ -199,7 +224,7 @@ export class MemberActionBuilder {
             // Waiting list actions
             ...this.getMoveAction(),
 
-            this.getUnsubscribeAction(),
+            ...this.getUnsubscribeAction(),
 
             new TableAction({
                 name: "Gegevens gedeeltelijk wissen",
@@ -298,13 +323,35 @@ export class MemberActionBuilder {
     }
 
     editMember(member: PlatformMember) {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-        //const displayedComponent = new ComponentWithProperties(NavigationController, {
-        //    root: new ComponentWithProperties(EditMemberView, {
-        //        member,
-        //    })
-        //});
-        //this.present(displayedComponent.setDisplayStyle("popup"));
+        this.present({
+            components: [
+                new ComponentWithProperties(MemberStepView, {
+                    member,
+                    title: member.member.firstName + ' bewerken',
+                    component: markRaw(EditMemberAllBox),
+                    saveHandler: async ({dismiss}: NavigationActions) => {
+                        await dismiss({force: true});
+                    }
+                })
+            ],
+            modalDisplayStyle: "popup"
+        }).catch(console.error)
+    }
+
+    editResponsibilities(member: PlatformMember) {
+        this.present({
+            components: [
+                new ComponentWithProperties(MemberStepView, {
+                    member,
+                    title: 'Functies van ' + member.member.firstName,
+                    component: markRaw(EditMemberResponsibilitiesBox),
+                    saveHandler: async ({dismiss}: NavigationActions) => {
+                        await dismiss({force: true});
+                    }
+                })
+            ],
+            modalDisplayStyle: "popup"
+        }).catch(console.error)
     }
 
     async exportToExcel(members: PlatformMember[]) {
@@ -568,7 +615,7 @@ export class MemberActionBuilder {
                             registrationsPatch.addPatch(
                                 Registration.patch({
                                     id: registration.id,
-                                    groupId: group.id,
+                                    group
                                 })
                             )
                         }
@@ -578,6 +625,8 @@ export class MemberActionBuilder {
                             registrations: registrationsPatch
                         }))
                     }
+
+                    console.log('patching', patches)
                     await this.platformFamilyManager.isolatedPatch(members, patches, false)
                     new Toast(members.length+` leden zijn naar ${group.settings.name} verplaatst`, "success green").show()
                 },
