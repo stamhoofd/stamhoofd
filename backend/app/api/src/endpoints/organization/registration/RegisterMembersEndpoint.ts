@@ -215,11 +215,17 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (item.waitingList) {
                 registration.waitingList = true
+                registration.canRegister = false
                 registration.reservedUntil = null
                 await registration.save()
             } else {
-                registration.waitingList = false
-                registration.canRegister = false
+                if (registration.waitingList && registration.canRegister) {
+                    // Keep data: otherwise people cannot retry if the payment fails
+                    // We'll mark the registration as valid after the payment
+                } else {
+                    registration.waitingList = false
+                    registration.canRegister = false
+                }
                 registration.price = item.calculatedPrice
                 payRegistrations.push({
                     registration,
@@ -301,6 +307,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // registration.paymentId = payment.id
 
                 registration.reservedUntil = null
+                registration.canRegister = false
 
                 if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
                     await registration.markValid()
