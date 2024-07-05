@@ -242,7 +242,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         if (date === null) {
             return false
         }
-        return (date.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 14
+        return (date.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 31
     }
 
     hasExpired(date: Date | null) {
