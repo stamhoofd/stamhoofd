@@ -167,8 +167,14 @@ export class Registration extends Model {
             await this.save();
             return false;
         }
+
+        if (this.waitingList && this.canRegister) {
+            this.waitingList = false
+        }
+        
         this.reservedUntil = null
         this.registeredAt = new Date()
+        this.canRegister = false
         await this.save();
 
         await this.sendEmailTemplate({
