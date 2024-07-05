@@ -5,6 +5,7 @@ import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/netw
 import { Country } from '@stamhoofd/structures';
 import { computed, markRaw, reactive } from 'vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
+import FinancesMenu from './views/finances/FinancesMenu.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, {root: component, initialPresents })
@@ -77,6 +78,14 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         component: organizationsTableView
     });
 
+    const financesTab =  new TabBarItem({
+        icon: 'calculator',
+        name: 'Boekhouding',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: new ComponentWithProperties(FinancesMenu, {})
+        })
+    });
+
     const settingsTab =  new TabBarItem({
         icon: 'settings',
         name: 'Instellingen',
@@ -107,6 +116,7 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                             ]
 
                             if (reactiveSession.auth.hasFullPlatformAccess()) {
+                                tabs.push(financesTab)
                                 tabs.push(settingsTab)
                             }
 
