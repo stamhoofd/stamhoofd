@@ -17,7 +17,7 @@
 
                 <template v-else>
                     <p class="style-description-block">
-                        Selecteer alle functies die je wilt aankopen of verlengen en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
+                        Selecteer alle functies die je wilt aankopen en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
                     </p>
 
                     <STList>
@@ -51,7 +51,7 @@
                             Geldig tot {{ pack.validUntil | date }}
                         </p>
 
-                        <button v-if="false && pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
+                        <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
                             Verleng nu
                         </button>
                         <span slot="right" class="icon arrow-right-small gray" />
@@ -201,7 +201,18 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
 
             let isCombineable = true
             for (const p of this.status!.packages) {
-                if (!STPackageBundleHelper.isCombineable(bundle, p) && (p.validUntil === null || p.validUntil > limit)) {
+                if (!STPackageBundleHelper.isCombineable(bundle, p)) {
+                    if (p.validUntil !== null) {
+                        if (p.validUntil < new Date()) {
+                            // Allow to buy this package because it is expired
+                            continue;
+                        }
+
+                        if (p.validUntil < limit && !p.meta.allowRenew) {
+                            // Allow to buy this package because it expires in less than 3 months, and it doesn't allow renewing
+                            continue;
+                        }
+                    }
                     isCombineable = false
                     break;
                 }
