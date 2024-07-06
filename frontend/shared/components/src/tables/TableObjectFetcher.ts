@@ -1,7 +1,7 @@
 import { Request } from "@simonbackx/simple-networking";
 import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from "@stamhoofd/structures";
 import { onBeforeUnmount, reactive } from "vue";
-
+import { useAuth } from "../hooks";
 
 export interface ObjectFetcher<O> {
     fetch(data: LimitedFilteredRequest): Promise<{results: O[], next?: LimitedFilteredRequest}>
@@ -16,7 +16,11 @@ export type FetchAllOptions = {
 }
 
 export function useTableObjectFetcher<O extends {id: string}, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {
-    const fetcher = reactive(new TableObjectFetcher<O>({objectFetcher})) as any
+    const auth = useAuth();
+    const fetcher = reactive(new TableObjectFetcher<O>({
+        objectFetcher,
+        maxLimit: auth.hasSomePlatformAccess() ? 1000 : 100
+    })) as any
 
     onBeforeUnmount(() => {
         fetcher.destroy()
@@ -59,8 +63,9 @@ export class TableObjectFetcher<O extends {id: string}> {
 
     nextRequest: LimitedFilteredRequest|null = null;
 
-    constructor({objectFetcher}: {objectFetcher: ObjectFetcher<O>}) {
+    constructor({objectFetcher, maxLimit}: {objectFetcher: ObjectFetcher<O>, maxLimit?: number}) {
         this.objectFetcher = objectFetcher
+        this.maxLimit = maxLimit ?? this.maxLimit
     }
 
     destroy() {
@@ -92,7 +97,7 @@ export class TableObjectFetcher<O extends {id: string}> {
             next.filter = this.filter;
 
             // Same for sorting
-            next.sort = this.sort;
+            next.sort = [];
             
             const data = await this.objectFetcher.fetch(next)
             next = data.next ?? null;

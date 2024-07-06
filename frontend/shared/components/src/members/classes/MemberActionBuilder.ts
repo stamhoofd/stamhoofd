@@ -226,6 +226,8 @@ export class MemberActionBuilder {
 
             ...this.getUnsubscribeAction(),
 
+            ...this.getWaitingListActions(),
+
             new TableAction({
                 name: "Gegevens gedeeltelijk wissen",
                 priority: 0,

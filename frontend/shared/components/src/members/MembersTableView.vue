@@ -19,13 +19,14 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, markRaw, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
 import RegisterMemberView from "./RegisterMemberView.vue";
+import { MemberActionBuilder } from "./classes/MemberActionBuilder";
 
 type ObjectType = PlatformMember;
 
@@ -70,6 +71,8 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform()
+const platformFamilyManager = usePlatformFamilyManager();
+
 const configurationId = computed(() => {
     return 'members-'+app
 })
@@ -390,6 +393,15 @@ async function showMember(member: PlatformMember) {
     });
 }
 
+const actionBuilder = new MemberActionBuilder({
+    present,
+    groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
+    organizations: organization.value ? [organization.value] : [],
+    inWaitingList: props.waitingList,
+    hasWrite: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value.period.settings.categories) : auth.permissions?.hasWriteAccess()) ?? false,
+    platformFamilyManager
+})
+
 const actions: TableAction<PlatformMember>[] = [
     new TableAction({
         name: "Nieuw lid",
@@ -397,7 +409,7 @@ const actions: TableAction<PlatformMember>[] = [
         priority: 0,
         groupIndex: 1,
         needsSelection: false,
-        enabled: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value) : auth.permissions?.hasWriteAccess()) && !props.waitingList,
+        enabled: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value.period.settings.categories) : auth.permissions?.hasWriteAccess()) && !props.waitingList,
         handler: async () => {
             const family = new PlatformFamily({
                 contextOrganization: organization.value,
@@ -429,5 +441,6 @@ const actions: TableAction<PlatformMember>[] = [
             });
         }
     }),
+    ...actionBuilder.getActions()
 ]
 </script>
