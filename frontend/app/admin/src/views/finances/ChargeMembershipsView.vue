@@ -15,7 +15,7 @@
 
             <div class="style-stats-grid">
                 <STInputBox title="Nieuwe aansluitingen">
-                    <p class="button style-price-big">
+                    <p class="style-price-big">
                         <span v-if="!summary" class="style-placeholder-skeleton" />
                         <span v-else>
                             {{ formatInteger(summary.memberships) }}
@@ -24,7 +24,7 @@
                 </STInputBox>
 
                 <STInputBox title="Unieke leden">
-                    <p class="button style-price-big">
+                    <p class="style-price-big">
                         <span v-if="!summary" class="style-placeholder-skeleton" />
                         <span v-else>
                             {{ formatInteger(summary.members) }}
@@ -33,7 +33,7 @@
                 </STInputBox>
                 
                 <STInputBox title="Totaal bedrag">
-                    <p class="button style-price-big">
+                    <p class="style-price-big">
                         <span v-if="!summary" class="style-placeholder-skeleton" />
                         <span v-else>
                             {{ formatPrice(summary.price) }}
@@ -43,7 +43,7 @@
 
 
                 <STInputBox title="Unieke groepen">
-                    <p class="button style-price-big">
+                    <p class="style-price-big">
                         <span v-if="!summary" class="style-placeholder-skeleton" />
                         <span v-else>
                             {{ formatInteger(summary.organizations) }}
@@ -65,12 +65,32 @@
 </template>
 
 <script lang="ts" setup>
-import { useErrors } from '@stamhoofd/components';
+import { Decoder } from '@simonbackx/simple-encoding';
+import { ErrorBox, useContext, useErrors } from '@stamhoofd/components';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { ChargeMembershipsSummary } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
 
 const errors = useErrors();
 const summary = ref(null) as Ref<null | ChargeMembershipsSummary>
+const context = useContext()
+const owner = useRequestOwner()
+
+reload().catch(console.error)
+
+async function reload() {
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/admin/charge-memberships/summary',
+            decoder: ChargeMembershipsSummary as Decoder<ChargeMembershipsSummary>,
+            owner
+        })
+        summary.value = response.data;
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    }
+}
 </script>
 
 <style lang="scss">

@@ -42,7 +42,20 @@ export function readDynamicSQLExpression(s: SQLDynamicExpression): SQLExpression
 
     return new SQLScalar(s)
 }
+export class SQLDistinct implements SQLExpression {
+    expression: SQLExpression
 
+    constructor(expression: SQLExpression) {
+        this.expression = expression
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'DISTINCT',
+            this.expression.getSQL(options),
+        ])
+    }
+}
 export class SQLCount implements SQLExpression {
     expression: SQLExpression|null
 
@@ -58,7 +71,21 @@ export class SQLCount implements SQLExpression {
         ])
     }
 }
+export class SQLSum implements SQLExpression {
+    expression: SQLExpression
 
+    constructor(expression: SQLExpression) {
+        this.expression = expression
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'SUM(',
+                this.expression.getSQL(options),
+            ')'
+        ])
+    }
+}
 export class SQLSelectAs implements SQLExpression {
     expression: SQLExpression
     as: SQLAlias
