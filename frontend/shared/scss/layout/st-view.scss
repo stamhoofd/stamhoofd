@@ -89,6 +89,11 @@ body.modern.web-iOS {
                     --st-horizontal-padding: 0px;
                     --st-view-center-padding: calc((100vw - var(--st-view-max-width, 800px)) / 2);
                     --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 800px)) / 2));     
+
+                    .split-view-controller > .detail & {
+                        --st-view-center-padding: calc((100vw - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2);
+                        --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2));     
+                    }
                 }
             }
 

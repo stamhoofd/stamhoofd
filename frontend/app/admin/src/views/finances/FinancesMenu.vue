@@ -7,14 +7,14 @@
 
             <div class="container">
                 <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Invoices) }" @click="navigate(Routes.Invoices)">
-                    <span class="icon file" />
+                    <span class="icon file-filled" />
                     <span>
                         Facturen
                     </span>
                 </button>
 
                 <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.PendingInvoices) }" @click="navigate(Routes.PendingInvoices)">
-                    <span class="icon card" />
+                    <span class="icon clock" />
                     <span>
                         Openstaande bedragen
                     </span>
@@ -39,6 +39,7 @@ import { usePlatform } from '@stamhoofd/components';
 import { ComponentOptions } from 'vue';
 import OrganizationsTableView from '../organizations/OrganizationsTableView.vue';
 import InvoicesTableView from './InvoicesTableView.vue';
+import ChargeMembershipsView from './ChargeMembershipsView.vue';
 
 enum Routes {
     Invoices = 'invoices',
@@ -69,7 +70,7 @@ defineRoutes([
         url: 'aansluitingen-aanrekenen',
         name: Routes.ChargeMemberships,
         show: 'detail',
-        component: OrganizationsTableView as unknown as ComponentOptions,
+        component: ChargeMembershipsView as unknown as ComponentOptions,
         isDefault: {
             properties: {}
         }

@@ -1097,3 +1097,9 @@ ul.style-list {
         margin-left: -20px;
     }
 }
+
+.style-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0px 15px;
+}
