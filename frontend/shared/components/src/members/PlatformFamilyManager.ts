@@ -44,6 +44,7 @@ export class PlatformFamilyManager {
             shouldRetry: options?.shouldRetry ?? false
         });
 
+        this.updateOrganizationFromMembers(response.data.members)
         return response.data
     }
 
@@ -90,6 +91,8 @@ export class PlatformFamilyManager {
                     c.member.deepSet(updatedMember)
                 }
             }
+
+            this.updateOrganizationFromMembers(response.data.members)
         }
     }
 
@@ -163,6 +166,26 @@ export class PlatformFamilyManager {
                         c._oldId = oldId
                     } else {
                         console.error('Patched members but missing in response. This should not happen.', savedMember, c)
+                    }
+                }
+            }
+
+            this.updateOrganizationFromMembers(response.data.members)
+        }
+    }
+
+    updateOrganizationFromMembers(members: MemberWithRegistrationsBlob[]) {
+        // Update organizations we received
+        // this updates the group cached counts
+        if (this.context.organization) {
+            // Update group data we received
+            const processedGroups = new Set<string>()
+            for (const member of members) {
+                for (const registration of member.registrations) {
+                    if (registration.organizationId === this.context.organization.id && !processedGroups.has(registration.groupId)) {
+                        const originalGroup = this.context.organization.period.groups.find(g => g.id === registration.groupId)
+                        originalGroup?.deepSet(registration.group)
+                        processedGroups.add(registration.groupId)
                     }
                 }
             }
