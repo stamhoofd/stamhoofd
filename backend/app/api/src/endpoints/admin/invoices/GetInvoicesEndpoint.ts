@@ -113,14 +113,16 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error()
         }
 
-        if (request.query.limit > 100) {
+        const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
+
+        if (request.query.limit > maxLimit) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'limit',
-                message: 'Limit can not be more than 100'
+                message: 'Limit can not be more than ' + maxLimit
             })
         }
-
+        
         if (request.query.limit < 1) {
             throw new SimpleError({
                 code: 'invalid_field',
