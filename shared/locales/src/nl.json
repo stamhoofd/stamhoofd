@@ -218,5 +218,7 @@
     "dashboard.platformMemberhip.add.startDate": "Vanaf",
     "dashboard.platformMemberhip.add.endDate": "Tot en met",
     "dashboard.platformMemberhip.add.noOrganizations": "Dit lid is bij geen enkele KSA groep aangesloten voor het huidige werkjaar en kan daardoor niet aangesloten worden",
-    "shared.membershipExpiringWarning": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af"
+    "shared.membershipExpiringWarning": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af",
+    "admin.invoices.title": "Facturen",
+    "admin.invoices.emptyMessage": "Er zijn nog geen facturen aangemaakt"
 }

@@ -38,6 +38,7 @@ import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-na
 import { usePlatform } from '@stamhoofd/components';
 import { ComponentOptions } from 'vue';
 import OrganizationsTableView from '../organizations/OrganizationsTableView.vue';
+import InvoicesTableView from './InvoicesTableView.vue';
 
 enum Routes {
     Invoices = 'invoices',
@@ -50,7 +51,7 @@ defineRoutes([
         url: 'facturen',
         name: Routes.Invoices,
         show: 'detail',
-        component: OrganizationsTableView as unknown as ComponentOptions,
+        component: InvoicesTableView as unknown as ComponentOptions,
         isDefault: {
             properties: {}
         }

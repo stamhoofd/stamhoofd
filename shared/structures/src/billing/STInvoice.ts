@@ -7,6 +7,7 @@ import { File } from "../files/File";
 import { Payment, Settlement } from "../members/Payment";
 import { OrganizationSimple } from "../OrganizationSimple";
 import { STPackage, STPackageTypeHelper, STPricingType } from "./STPackage";
+import { Organization } from "../Organization";
 
 export enum STInvoiceStatus {
     Created = "Created",
@@ -36,7 +37,7 @@ export class STInvoiceItem extends AutoEncoder {
     /**
      * Allow to add a very detailed list of included items
      */
-    @field({ decoder: new ArrayDecoder(STInvoiceItemDetail) })
+    @field({ decoder: new ArrayDecoder(STInvoiceItemDetail), version: 271 })
     details: STInvoiceItemDetail[] = []
 
     @field({ decoder: IntegerDecoder })
@@ -318,8 +319,8 @@ export class STInvoice extends AutoEncoder {
 }
 
 export class STInvoicePrivate extends STInvoice {
-    @field({ decoder: OrganizationSimple, optional: true })
-    organization?: OrganizationSimple
+    @field({ decoder: Organization, optional: true })
+    organization?: Organization
 
     @field({ decoder: Settlement, nullable: true })
     settlement: Settlement | null = null

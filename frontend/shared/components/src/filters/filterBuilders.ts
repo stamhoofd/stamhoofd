@@ -266,3 +266,17 @@ organizationsUIFilterBuilders.unshift(
         builders: organizationsUIFilterBuilders
     })
 )
+
+export const invoicesUIFilterBuilders: UIFilterBuilders = [
+    new NumberFilterBuilder({
+        name: 'Nummer',
+        key: 'number'
+    }),
+];
+
+// Recursive: self referencing groups
+invoicesUIFilterBuilders.unshift(
+    new GroupUIFilterBuilder({
+        builders: invoicesUIFilterBuilders
+    })
+)
