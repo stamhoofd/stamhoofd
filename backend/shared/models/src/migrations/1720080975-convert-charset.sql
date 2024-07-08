@@ -27,8 +27,6 @@ ALTER TABLE `groups` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `groups` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `images` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `images` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `member_responsibility_records` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `member_responsibility_records` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `members` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `members` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `migrations` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
