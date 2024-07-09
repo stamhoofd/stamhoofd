@@ -1,11 +1,11 @@
 import { Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
 import { StringFilterBuilder } from "./StringUIFilter";
 import { UIFilterBuilders } from "./UIFilter";
-import { Formatter } from "@stamhoofd/utility";
 
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
 export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
@@ -257,6 +257,20 @@ export const organizationsUIFilterBuilders: UIFilterBuilders = [
                 }
             }
         },
+    }),
+    new MultipleChoiceFilterBuilder({
+        name: 'Actief',
+        options: [
+            new MultipleChoiceUIFilterOption('Actief', 1),
+            new MultipleChoiceUIFilterOption('Inactief', 0)
+        ],
+        buildFilter: (choices) => {
+            return {
+                active: {
+                    $in: choices.map(c => c)
+                }
+            }
+        }
     })
 ];
 

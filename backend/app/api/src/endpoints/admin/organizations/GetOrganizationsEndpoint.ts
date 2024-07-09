@@ -22,6 +22,9 @@ export const filterCompilers: SQLFilterDefinitions = {
     name: createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'name')
     ),
+    active: createSQLExpressionFilterCompiler(
+        SQL.column('organizations', 'active')
+    ),
     city: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
         undefined,
