@@ -5,7 +5,15 @@ export enum Country {
     Netherlands = "NL",
     Luxembourg = "LU",
     France = "FR",
-    Germany = "DE"
+    Germany = "DE",
+    Sweden = "SE",
+    UnitedKingdom = "GB",
+    Switzerland = "CH",
+    Afghanistan = "AF",
+    CzechRepublic = "CZ",
+    UnitedStates = "US",
+    Austria = "AT",
+    Portugal = "PT"
 }
 
 // We export an instance to prevent creating a new instance every time we need to decode a number
@@ -19,6 +27,14 @@ export class CountryHelper {
         case Country.Luxembourg: return "Luxemburg"
         case Country.France: return "Frankrijk"
         case Country.Germany: return "Duitsland"
+        case Country.Sweden: return "Zweden"
+        case Country.UnitedKingdom: return "Verenigd Koninkrijk"
+        case Country.Switzerland: return "Zwitserland"
+        case Country.Afghanistan: return "Afghanistan"
+        case Country.CzechRepublic: return "Tsjechië"
+        case Country.UnitedStates: return "Verenigde Staten"
+        case Country.Austria: return "Oostenrijk"
+        case Country.Portugal: return "Portugal"
         }
     }
 
