@@ -2,7 +2,8 @@ import { SQLExpression } from "./SQLExpression";
 import { SQLSelect } from "./SQLSelect";
 import { SQLColumnExpression, SQLSafeValue, SQLTableExpression, SQLWildcardSelectExpression, scalarToSQLExpression } from "./SQLExpressions";
 import { SQLJoin, SQLJoinType } from "./SQLJoin";
-import { SQLJsonExtract } from "./SQLJsonExpressions";
+import { SQLJsonExtract, SQLJsonLength } from "./SQLJsonExpressions";
+import { SQLDelete } from "./SQLDelete";
 
 class StaticSQL {
     wildcard(namespace?: string) {
@@ -22,6 +23,10 @@ class StaticSQL {
         return new SQLJsonExtract(column, new SQLSafeValue(path))
     }
 
+    jsonLength(column: SQLExpression, path?: string): SQLJsonLength {
+        return new SQLJsonLength(column, path ? new SQLSafeValue(path) : undefined)
+    }
+
     table(namespace: string, table: string): SQLTableExpression;
     table(table: string): SQLTableExpression;
     table(namespaceOrTable: string, table?: string): SQLTableExpression {
@@ -36,6 +41,10 @@ class StaticSQL {
             return new SQLSelect(this.wildcard())
         }
         return new SQLSelect(...columns)
+    }
+
+    delete(): InstanceType<typeof SQLDelete> {
+        return new SQLDelete()
     }
 
     leftJoin(table: SQLExpression) {

@@ -14,7 +14,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Column, GlobalEventBus, LoadComponent, PaymentView, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Column, GlobalEventBus, InMemoryTableAction, LoadComponent, PaymentView, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
@@ -77,7 +77,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
 
     get actions(): TableAction<PaymentGeneral>[] {
         return [
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Markeer als betaald",
                 icon: "success",
                 priority: 2,
@@ -89,7 +89,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                     await this.markPaid(payments, true)
                 }
             }),
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Markeer als niet betaald",
                 icon: "canceled",
                 priority: 1,
@@ -102,7 +102,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "E-mailen",
                 icon: "email",
                 priority: 0,
@@ -114,7 +114,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Exporteren",
                 icon: "download",
                 priority: 0,
@@ -126,7 +126,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 }
             }),
         
-            new TableAction({
+            new InMemoryTableAction({
                 name: "SMS'en",
                 icon: "feedback-line",
                 priority: 0,

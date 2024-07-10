@@ -1,11 +1,11 @@
 <template>
     <form class="editor-view st-view" @submit.prevent="$emit('save')">
-        <STNavigationBar :title="title">
+        <STNavigationBar :title="title" :disableDismiss="true" :disablePop="true">
             <template #left>
                 <BackButton v-if="canPop" @click="pop" />
                 <template v-else-if="$isMobile || $isIOS || $isAndroid" >
-                    <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="pop" />
-                    <button v-else class="button text selected unbold" type="button" @click="pop">
+                    <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="pop()" />
+                    <button v-else class="button text selected unbold" type="button" @click="pop()">
                         {{ cancelText }}
                     </button>
                 </template>
@@ -16,7 +16,7 @@
                     {{ saveText }}
                 </button>
             </LoadingButton></template>
-            <template v-else-if="canDismiss" #right><button class="button navigation icon close" type="button" @click="dismiss" /></template>
+            <template v-else-if="canDismiss" #right><button class="button navigation icon close" type="button" @click="dismiss()" /></template>
         </STNavigationBar>
         <main ref="main" class="flex">
             <slot />
@@ -101,7 +101,7 @@
 
 
 <script lang="ts">
-import { Image, ResolutionRequest } from "@stamhoofd/structures"
+import { EditorSmartButton, EditorSmartVariable, Image, ResolutionRequest, Version } from "@stamhoofd/structures"
 import { Content, JSONContent } from '@tiptap/core'
 import { Image as ImageExtension } from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
@@ -123,10 +123,11 @@ import STToolbar from "../navigation/STToolbar.vue";
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { DescriptiveText } from "./EditorDescriptiveText";
-import { EditorSmartButton, SmartButtonInlineNode,SmartButtonNode } from './EditorSmartButton';
-import { EditorSmartVariable, SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
+import { SmartButtonInlineNode,SmartButtonNode } from './EditorSmartButton';
+import { SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { encodeObject } from "@simonbackx/simple-encoding";
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -386,6 +387,7 @@ export default class EditorView extends Mixins(NavigationMixin) {
     }
 
     buildEditor(content: Content = "") {
+        console.log('build editor')
         return new Editor({
             content,
             extensions: [
@@ -426,6 +428,10 @@ export default class EditorView extends Mixins(NavigationMixin) {
 
     @Watch('smartVariables')
     onSmartVariablesChanged(newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
+        if (JSON.stringify(encodeObject(newSmartVariables, {version: Version})) === JSON.stringify(encodeObject(oldSmartVariables, {version: Version}))) {
+            return
+        }
+        
         const content = this.editor.getJSON()
 
         // Loop all nodes with type smartButton or smartText and remove them if needed (when they are not in the smartVariables + list warning)

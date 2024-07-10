@@ -8,8 +8,6 @@ export * from "./src/errors/Validator"
 export * from "./src/errors/useValidation"
 
 // Classes
-export { EditorSmartButton } from "./src/editor/EditorSmartButton"
-export { EditorSmartVariable } from "./src/editor/EditorSmartVariable"
 export { EmailStyler } from "./src/editor/EmailStyler"
 export * from "./src/EventBus"
 export * from "./src/ViewportHelper"
@@ -31,6 +29,8 @@ export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.v
 export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue"
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"
 export { default as STToolbar } from "./src/navigation/STToolbar.vue"
+
+export { default as EmailView } from "./src/email/EmailView.vue"
 
 //
 export { default as EditEmailTemplateView } from "./src/editor/EditEmailTemplateView.vue"

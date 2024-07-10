@@ -101,9 +101,9 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager } from '@stamhoofd/networking';
-import { EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { EmailAttachment, EmailInformation, EmailRequest, Group, Member, EditorSmartButton, EditorSmartVariable, MemberWithRegistrations, Order, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
@@ -203,43 +203,43 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     get smartVariables() {
         const variables = [
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "firstName", 
                 name: "Voornaam", 
                 example: "", 
                 description: (this.members.length > 0) ? (this.parentFilter !== ParentFilter.None ? "'beste ouder' voor onbekende voornaam" : "'beste lid' voor onbekende voornaam") : "",
                 deleteMessage: "De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald."
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "lastName", 
                 name: "Achternaam", 
                 example: "", 
                 deleteMessage: "De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald."
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "email", 
                 name: "E-mailadres", 
                 example: "", 
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "firstNameMember", 
                 name: "Voornaam van lid", 
                 example: "", 
                 deleteMessage: "Je kan de voornaam van een lid enkel gebruiken als je één e-mail per lid verstuurt."
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "lastNameMember", 
                 name: "Achternaam van lid", 
                 example: "", 
                 deleteMessage: "Je kan de achternaam van een lid enkel gebruiken als je één e-mail per lid verstuurt."
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "outstandingBalance", 
                 name: "Openstaand bedrag", 
                 example: "", 
                 deleteMessage: "Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt."
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "loginDetails", 
                 name: "Inloggegevens", 
                 example: "",
@@ -248,43 +248,43 @@ export default class MailView extends Mixins(NavigationMixin) {
         ]
 
         //if (this.orders.length > 0) {
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "nr", 
             name: "Bestelnummer", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderPrice", 
             name: "Bestelbedrag", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderStatus", 
             name: "Bestelstatus", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderTime", 
             name: "Tijdstip", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderDate", 
             name: "Afhaal/leverdatum", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderMethod", 
             name: "Afhaalmethode (afhalen, leveren, ter plaatse)", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderLocation", 
             name: "Locatie of leveradres", 
             example: "", 
@@ -292,71 +292,71 @@ export default class MailView extends Mixins(NavigationMixin) {
 
         //}
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "paymentMethod", 
             name: "Betaalmethode", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "priceToPay", 
             name: "Te betalen bedrag", 
             example: "", 
         }))     
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "pricePaid", 
             name: "Betaald bedrag", 
             example: "", 
         }))      
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "transferDescription", 
             name: "Mededeling (overschrijving)", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "transferBankAccount", 
             name: "Rekeningnummer (overschrijving)", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "transferBankCreditor", 
             name: "Begunstigde (overschrijving)", 
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderTable", 
             name: "Tabel met bestelde artikels", 
             example: "order table", 
             html: ""
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "overviewTable", 
             name: "Overzichtstabel", 
             example: "overview table", 
             html: ""
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderDetailsTable", 
             name: "Tabel met bestelgegevens", 
             example: "order details table", 
             html: ""
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "paymentTable", 
             name: "Tabel met betaalinstructies", 
             example: "payment table", 
             html: ""
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "overviewContext", 
             name: "Betaalcontext", 
             example: "", 
@@ -386,7 +386,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     get smartButtons() {
         const buttons: EditorSmartButton[] = []
         if (this.hasAllUsers && this.members.length > 0) {
-            buttons.push(new EditorSmartButton({
+            buttons.push(EditorSmartButton.create({
                 id: "signInUrl",
                 name: "Knop om in te loggen",
                 text: "Open ledenportaal",
@@ -394,14 +394,14 @@ export default class MailView extends Mixins(NavigationMixin) {
             }))
         }
 
-        buttons.push(new EditorSmartButton({
+        buttons.push(EditorSmartButton.create({
             id: "orderUrl",
             name: "Knop naar bestelling",
             text: this.orderButtonText,
             hint: "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies."
         }))
 
-        buttons.push(new EditorSmartButton({
+        buttons.push(EditorSmartButton.create({
             id: "unsubscribeUrl",
             name: "Knop om uit te schrijven voor e-mails",
             text: "Uitschrijven",

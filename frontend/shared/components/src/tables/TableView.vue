@@ -135,7 +135,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { AsyncComponent, BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Organization, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
@@ -144,7 +144,7 @@ import { markRaw } from "vue";
 import { Column } from "./Column";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
-import { TableAction } from "./TableAction";
+import { AsyncTableAction, MenuTableAction, TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
 
 interface TableListable {
@@ -376,7 +376,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         // Also add select all actions
         if (!this.showSelection || row.cachedSelectionValue == false) {
             // Add select action
-            actions.push(new TableAction({
+            actions.push(new AsyncTableAction({
                 name: "Selecteer",
                 groupIndex: !this.showSelection ? -1 : 1,
                 priority: 10,
@@ -387,7 +387,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             }))
         } else {
             // Add select action
-            actions.push(new TableAction({
+            actions.push(new AsyncTableAction({
                 name: "Deselecteer",
                 groupIndex: 1,
                 priority: 10,
@@ -1290,7 +1290,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         // Also add select all actions
         if (!this.showSelection && !this.isIOS) {
             // Add select action
-            actions.push(new TableAction({
+            actions.push(new AsyncTableAction({
                 name: "Selecteer",
                 groupIndex: -1,
                 priority: 10,
@@ -1302,7 +1302,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         // Add select all action
         if (!this.cachedAllSelected) {
-            actions.push(new TableAction({
+            actions.push(new AsyncTableAction({
                 name: "Selecteer alles",
                 groupIndex: -1,
                 priority: 9,
@@ -1312,7 +1312,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 }
             }))
         } else {
-            actions.push(new TableAction({
+            actions.push(new AsyncTableAction({
                 name: "Deselecteer alles",
                 groupIndex: -1,
                 priority: 9,
@@ -1323,14 +1323,14 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         }
         
         // Add action to change visible columns
-        actions.push(new TableAction({
+        actions.push(new MenuTableAction({
             name: this.wrapColumns ? "Wijzig zichtbare gegevens" : "Wijzig kolommen",
             groupIndex: -1,
             priority: 8,
             childMenu: this.getColumnContextMenu()
         }))
 
-        actions.push(new TableAction({
+        actions.push(new MenuTableAction({
             name: "Sorteren",
             groupIndex: -1,
             priority: 7,

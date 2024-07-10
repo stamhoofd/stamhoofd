@@ -43,6 +43,10 @@ export class Toast {
         return new Toast(message, "success green")
     }
 
+    static warning(message: string): Toast {
+        return new Toast(message, "warning yellow")
+    }
+
     static info(message: string): Toast {
         return new Toast(message, "info")
     }

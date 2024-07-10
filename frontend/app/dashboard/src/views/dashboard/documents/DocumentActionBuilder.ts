@@ -1,5 +1,5 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
-import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
+import { CenteredMessage, InMemoryTableAction, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { downloadDocuments } from "@stamhoofd/document-helper"
 import { SessionContext } from "@stamhoofd/networking"
 import { Document, DocumentData, DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures"
@@ -23,9 +23,9 @@ export class DocumentActionBuilder {
         this.$context = settings.$context
     }
 
-    getActions() {
+    getActions(): TableAction<Document>[] {
         return [
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Downloaden",
                 icon: "download",
                 priority: 5,
@@ -37,7 +37,7 @@ export class DocumentActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Wijzig",
                 icon: "edit",
                 priority: 0,
@@ -49,7 +49,7 @@ export class DocumentActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Dupliceren",
                 icon: "copy",
                 priority: 1,
@@ -62,7 +62,7 @@ export class DocumentActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Verwijderen",
                 icon: "trash",
                 priority: 1,
@@ -74,7 +74,7 @@ export class DocumentActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Terugzetten",
                 icon: "undo",
                 priority: 1,

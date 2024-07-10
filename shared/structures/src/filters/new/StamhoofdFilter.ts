@@ -30,6 +30,10 @@ export type StamhoofdFilter = StamhoofdAndFilter | StamhoofdOrFilter | Stamhoofd
 
 
 export function isEmptyFilter(filter: StamhoofdFilter) {
+    if (filter === null) {
+        return true;
+    }
+    
     if (typeof filter === 'object' && filter !== null) {
         return Object.keys(filter).length === 0;
     }
@@ -39,4 +43,20 @@ export function isEmptyFilter(filter: StamhoofdFilter) {
     }
     
     return false;
+}
+
+export function mergeFilters(filters: (StamhoofdFilter|null)[], type: '$and' | '$or' = "$and"): StamhoofdFilter|null {
+    const filteredFilters = filters.filter(f => !isEmptyFilter(f));
+
+    if (filteredFilters.length === 0) {
+        return null;
+    }
+
+    if (filteredFilters.length === 1) {
+        return filteredFilters[0];
+    }
+
+    return {
+        [type]: filteredFilters
+    }
 }

@@ -86,7 +86,7 @@
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }"  v-long-press="(e) => onRightClickRow(row, e)" @click="onClickRow(row)" @contextmenu.prevent="(event) => onRightClickRow(row, event)" >
+                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :class="{focused: isRowFocused(row) }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row, $event)" @contextmenu.prevent="(event) => onRightClickRow(row, event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :model-value="isAllSelected" />
@@ -154,7 +154,7 @@ import UIFilterEditor from "../filters/UIFilterEditor.vue";
 import { Column } from "./Column";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
-import { TableAction } from "./TableAction";
+import { AsyncTableAction, MenuTableAction, TableAction, TableActionSelection } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
 import { FetchAllOptions, TableObjectFetcher } from "./TableObjectFetcher";
  
@@ -273,6 +273,8 @@ function blurFocus() {
 // If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows, 
 // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
 const markedRows = ref(new Map<string, Value>());
+const isRightClicking = ref(false);
+const customFocusedRows = ref(null) as Ref<null|Set<string>>;
 
 /**
  * When true: only the marked rows are selected.
@@ -316,7 +318,7 @@ const sortedActions = computed(() => {
         if (a.groupIndex !== b.groupIndex) {
             return a.groupIndex - b.groupIndex
         }
-        return a.priority - b.priority
+        return b.priority - a.priority
     })
 })
 
@@ -347,6 +349,11 @@ function getSortingContextMenu() {
         }
     })
 }
+
+async function getTableActionFilter() {
+    // todo
+}
+
 async function getSelection(options?: FetchAllOptions): Promise<Value[]> {
     if (!showSelection.value || !hasSelection.value) {
         return await props.tableObjectFetcher.fetchAll(options)
@@ -372,7 +379,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     // Also add select all actions
     if (!showSelection.value && !isIOS) {
         // Add select action
-        actions.push(new TableAction({
+        actions.push(new AsyncTableAction({
             name: "Selecteer",
             groupIndex: -1,
             priority: 10,
@@ -385,7 +392,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
 
     // Add select all action
     if (!isAllSelected.value) {
-        actions.push(new TableAction({
+        actions.push(new AsyncTableAction({
             name: "Selecteer alles",
             groupIndex: -1,
             priority: 9,
@@ -396,7 +403,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
             }
         }))
     } else {
-        actions.push(new TableAction({
+        actions.push(new AsyncTableAction({
             name: "Deselecteer alles",
             groupIndex: -1,
             priority: 9,
@@ -408,14 +415,14 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     }
      
     // Add action to change visible columns
-    actions.push(new TableAction({
+    actions.push(new MenuTableAction({
         name: wrapColumns.value ? "Wijzig zichtbare gegevens" : "Wijzig kolommen",
         groupIndex: -1,
         priority: 8,
         childMenu: getColumnContextMenu()
     }))
 
-    actions.push(new TableAction({
+    actions.push(new MenuTableAction({
         name: "Sorteren",
         groupIndex: -1,
         priority: 7,
@@ -555,69 +562,104 @@ const emit = defineEmits<{
     click: [value: Value]
 }>()
 
-function onClickRow(row: VisibleRow<Value>) {
-     if (!hasClickListener.value || (wrapColumns.value && showSelection.value)) {
+function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
+    if (event.metaKey || event.ctrlKey) {
+        // Multi select rows
+        setSelectionValue(row, !getSelectionValue(row))
+        return
+    }
+
+    if (!hasClickListener.value || (wrapColumns.value && showSelection.value)) {
         // On mobile, tapping a column means selecting it when we are in editing modus
         setSelectionValue(row, !getSelectionValue(row))
         return
-     }
+    }
 
-     if (hasClickListener.value && row.value) {
+    if (hasClickListener.value && row.value) {
         emit("click", row.value)
-     }
- }
+    }
+}
 
 async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent|TouchEvent) {
-         if (isMobile.value && !showSelection.value && !isIOS) {
-             // On Android, the default long press action is switching to editing mode
-             setSelectionValue(row, true)
-             setShowSelection(true)
-             return
-         }
+    if (!row.value) {
+        return;
+    }
 
-         // Show a context menu to select the available columns
+    if (isMobile.value && !showSelection.value && !isIOS) {
+        // On Android, the default long press action is switching to editing mode
+        setSelectionValue(row, true)
+        setShowSelection(true)
+        return
+    }
+
+    isRightClicking.value = true
+    const filteredActions = props.actions.filter(a => a.needsSelection);
+    let selection: TableActionSelection<Value>;
+
+    if (row.cachedSelectionValue && showSelection.value) {
+        // Use full selection
+        selection = {
+            isSingle: hasSingleSelection.value,
+            hasSelection: hasSelection.value,
+            getSelection: getSelection,
+            fetcher: props.tableObjectFetcher,
+            markedRows: new Map(markedRows.value as Map<string, Value>),
+            markedRowsAreSelected: markedRowsAreSelected.value
+        };
+
+        filteredActions.push(new AsyncTableAction({
+            name: "Deselecteer",
+            groupIndex: 1,
+            priority: 10,
+            handler: () => {
+                // Clear selection
+                isAllSelected.value = false
+            }
+        }))
+
+        customFocusedRows.value = null
+    } else {
+        const markedRows = new Map<string, Value>()
+        markedRows.set(row.value.id, row.value)
+        selection = {
+            isSingle: true,
+            hasSelection: true,
+            getSelection: () => {
+                return [row.value!]
+            },
+            fetcher: props.tableObjectFetcher,
+            markedRows,
+            markedRowsAreSelected: true
+        }
+
+        // Only focus this row
+        // Add select action
+        filteredActions.push(new AsyncTableAction({
+            name: "Selecteer",
+            groupIndex: !showSelection.value ? -1 : 1,
+            priority: 10,
+            handler: () => {
+                setSelectionValue(row, true)
+                setShowSelection(true)
+            }
+        }))
+
+        customFocusedRows.value = new Set([row.value.id])
+    }
+
+    // Show a context menu to select the available columns
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+        x: "changedTouches" in event ? event.changedTouches[0].pageX : event.clientX,
+        y: "changedTouches" in event ? event.changedTouches[0].pageY : event.clientY,
+        actions: filteredActions,
+        onDismiss: () => {
+            isRightClicking.value = false
+        },
+        selection
+    });
  
-         const filteredActions = props.actions.filter(a => a.needsSelection);
- 
-         // Also add select all actions
-         if (!showSelection.value || row.cachedSelectionValue == false) {
-             // Add select action
-             filteredActions.push(new TableAction({
-                 name: "Selecteer",
-                 groupIndex: !showSelection.value ? -1 : 1,
-                 priority: 10,
-                 handler: () => {
-                    setSelectionValue(row, true)
-                    setShowSelection(true)
-                 }
-             }))
-         } else {
-             // Add select action
-             filteredActions.push(new TableAction({
-                 name: "Deselecteer",
-                 groupIndex: 1,
-                 priority: 10,
-                 handler: () => {
-                    setSelectionValue(row, false)
-                 }
-             }))
-         }
- 
-         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-             x: "changedTouches" in event ? event.changedTouches[0].pageX : event.clientX,
-             y: "changedTouches" in event ? event.changedTouches[0].pageY : event.clientY,
-             actions: filteredActions,
-             selection: {
-                 isSingle: true,
-                 hasSelection: true,
-                 getSelection: () => {
-                     return [row.value!]
-                 }
-             }
-         });
- 
-         await present(displayedComponent.setDisplayStyle("overlay"));
-     }
+    await present(displayedComponent.setDisplayStyle("overlay"));
+}
  
  
 function columnDragStart(event: MouseEvent|TouchEvent, column: Column<any, any>) {
@@ -1305,6 +1347,21 @@ function isValueSelected(value: Value) {
     }
 }
 
+function isRowFocused(row: VisibleRow<Value>) {
+    if (!isRightClicking.value) {
+        return false
+    }
+
+    if (customFocusedRows.value !== null) {
+        if (!row.value) {
+            return false
+        }
+        return customFocusedRows.value.has(row.value.id)
+    }
+
+    return row.cachedSelectionValue
+}
+
 function getSelectionValue(row: VisibleRow<Value>) {
     const value = row.value
     if (!value) {
@@ -1353,10 +1410,13 @@ async function handleAction(action: TableAction<Value>, event: MouseEvent) {
         return
     }
 
-    const selection = {
+    const selection: TableActionSelection<Value> = {
         isSingle: hasSingleSelection.value,
         hasSelection: hasSelection.value,
-        getSelection
+        getSelection,
+        fetcher: props.tableObjectFetcher,
+        markedRows: new Map(markedRows.value as Map<string, Value>),
+        markedRowsAreSelected: markedRowsAreSelected.value
     };
 
     if (action.hasChildActions) {
@@ -2026,26 +2086,54 @@ defineExpose({
             width: 10px;
         }
 
-        //&.selectable {
-            will-change: transform, background-color;
-            transition: background-color 0.15s;
-            cursor: pointer;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            user-select: none;
+        will-change: transform, background-color;
+        transition: background-color 0.15s;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        user-select: none;
 
-            @media (hover: hover) {
-                &:hover {
-                    background-color: $color-primary-lighter;
+        @media (hover: hover) {
+            &:hover {
+                background-color: $color-primary-lighter;
+
+                &.focused {
+                    background-color: $color-primary-light;
                 }
             }
+        }
 
-            &:active {
-                background-color: $color-primary-light;
+        &:active {
+            background-color: $color-primary-light;
+        }
+
+        &.focused {
+            background-color: $color-primary-light;
+            
+            &:after {
+                content: '';
+                position: absolute;
+                top: 0px;
+                right: 0;
+                bottom: 0;
+                width: 2px;
+                background-color: $color-primary;
+                z-index: 5;
             }
-        //}
+
+            &:before {
+                content: '';
+                position: absolute;
+                top: 0px;
+                left: 0;
+                bottom: 0;
+                width: 2px;
+                background-color: $color-primary;
+                z-index: 5;
+            }
+        }
     }
 }
 </style>

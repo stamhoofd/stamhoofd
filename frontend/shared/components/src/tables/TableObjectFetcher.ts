@@ -1,9 +1,10 @@
 import { Request } from "@simonbackx/simple-networking";
-import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from "@stamhoofd/structures";
+import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter, mergeFilters } from "@stamhoofd/structures";
 import { onBeforeUnmount, reactive } from "vue";
 import { useAuth } from "../hooks";
 
 export interface ObjectFetcher<O> {
+    requiredFilter?: StamhoofdFilter|null|undefined
     fetch(data: LimitedFilteredRequest): Promise<{results: O[], next?: LimitedFilteredRequest}>
 
     fetchCount(data: CountFilteredRequest): Promise<number>
@@ -33,7 +34,7 @@ export class TableObjectFetcher<O extends {id: string}> {
     objectFetcher: ObjectFetcher<O>
     
     objects: O[] = []
-    filter: StamhoofdFilter|null = null
+    baseFilter: StamhoofdFilter|null = null
     searchQuery = ''
     
     currentStartIndex = 0;
@@ -66,6 +67,10 @@ export class TableObjectFetcher<O extends {id: string}> {
     constructor({objectFetcher, maxLimit}: {objectFetcher: ObjectFetcher<O>, maxLimit?: number}) {
         this.objectFetcher = objectFetcher
         this.maxLimit = maxLimit ?? this.maxLimit
+    }
+
+    get filter() {
+        return mergeFilters([this.baseFilter, this.objectFetcher.requiredFilter ?? null]);
     }
 
     destroy() {
@@ -202,13 +207,13 @@ export class TableObjectFetcher<O extends {id: string}> {
     }
     
     setFilter(filter: StamhoofdFilter|null) {
-        if (JSON.stringify(this.filter ?? {}) == JSON.stringify(filter ?? {})) {
+        if (JSON.stringify(this.baseFilter ?? {}) == JSON.stringify(filter ?? {})) {
             console.log('setFilter unchanged')
             return;
         }
-        console.log('setFilter', this.filter)
+        console.log('setFilter', filter)
 
-        this.filter = filter;
+        this.baseFilter = filter;
         this.reset(false, true);
     }
 
@@ -275,7 +280,7 @@ export class TableObjectFetcher<O extends {id: string}> {
         const currentClearIndex = this._clearIndex;
 
         try {
-            const hasFilter = !!this.filter || !!this.searchQuery;
+            const hasFilter = !!this.baseFilter || !!this.searchQuery;
             if ((!this.fetchingCount && this.totalCount === null) || (!hasFilter && !this.fetchingFilteredCount && this.totalFilteredCount === null)) {
                 this.fetchingCount = true;
 
@@ -284,7 +289,9 @@ export class TableObjectFetcher<O extends {id: string}> {
                 }
 
                 // Fetch count in parallel
-                this.objectFetcher.fetchCount(new CountFilteredRequest({})).then((c) => {
+                this.objectFetcher.fetchCount(new CountFilteredRequest({
+                    filter: this.objectFetcher.requiredFilter
+                })).then((c) => {
                     if (currentClearIndex !== this._clearIndex) {
                         // Discard old requests
                         return;

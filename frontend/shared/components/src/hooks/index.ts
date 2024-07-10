@@ -16,3 +16,4 @@ export * from "./useDeviceWidth";
 export * from "./useAuth";
 export * from "./useCountry";
 export * from "./useUninheritedPermissions";
+export * from "./useInterval";

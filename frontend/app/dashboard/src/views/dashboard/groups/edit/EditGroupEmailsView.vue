@@ -30,12 +30,11 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import editDataIllustration from "@stamhoofd/assets/images/illustrations/edit-data.svg";
-import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EmailTemplate, EmailTemplateType, Group, Member, MemberDetails, Order, OrderData, Organization, OrganizationMetaData, OrganizationType, Payment, PaymentDetailed, PaymentMethod, Product, ProductPrice, RegistrationWithMember, STPackageType, STPackageTypeHelper, ValidatedAddress, WebshopMetaData, WebshopPreview, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import editDataIllustration from "@stamhoofd/assets/images/illustrations/edit-data.svg";
+import { CenteredMessage, EditEmailTemplateView, ErrorBox, STErrorsDefault, STList, STListItem, SaveView, Toast } from "@stamhoofd/components";
+import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EditorSmartButton, EditorSmartVariable, EmailTemplate, EmailTemplateType, Group, Member, MemberDetails, Order, OrderData, Organization, OrganizationMetaData, OrganizationType, Payment, PaymentDetailed, PaymentMethod, Product, ProductPrice, RegistrationWithMember, STPackageType, STPackageTypeHelper, ValidatedAddress, WebshopMetaData, WebshopPreview, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
 
 
@@ -311,34 +310,34 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
 
     getSmartVariables(filter: string[]) {
         const variables = [
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "firstName", 
                 name: "Voornaam", 
                 example: "Brandon", 
                 deleteMessage: "De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald."
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "lastName", 
                 name: "Achternaam", 
                 example: "Stark", 
                 deleteMessage: "De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald."
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "email", 
                 name: "E-mailadres", 
                 example: "voorbeeld@email.com", 
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "registerUrl", 
                 name: "Inschrijvingsportaal link", 
                 example: "https://inschrijven.mijnvereniging.be", 
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "groupName", 
                 name: "Groepnaam", 
                 example: this.group.settings.name, 
             }),
-            new EditorSmartVariable({
+            EditorSmartVariable.create({
                 id: "loginDetails",
                 name: "Inloggegevens", 
                 example: 'text',
@@ -348,58 +347,58 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
         ]
 
         //if (this.orders.length > 0) {
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "nr", 
             name: "Bestelnummer", 
             example: "15", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderPrice", 
             name: "Bestelbedrag", 
             example: "€ 15,00", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderStatus", 
             name: "Bestelstatus", 
             example: "Nieuw", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderDetailsTable", 
             name: "Tabel met bestelgegevens", 
             example: "order details table", 
             html: ""
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "orderTable", 
             name: "Tabel met bestelde artikels", 
             example: "order table", 
             html: ""
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "overviewTable", 
             name: "Tabel met betaalde items", 
             example: "overview table", 
             html: this.exampleRegistrationPayment.getDetailsHTMLTable()
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "overviewContext", 
             name: "Context betaling", 
             example: "Inschrijving van John en Jane"
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "memberNames", 
             name: "Naam leden", 
             example: this.exampleRegistrationPayment.getMemberNames()
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "paymentTable", 
             name: "Tabel met betaalinstructies", 
             example: "payment table", 
@@ -407,61 +406,61 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
         }))
         //}
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "paymentMethod", 
             name: "Betaalmethode", 
             example: "Bancontact", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "priceToPay", 
             name: "Te betalen bedrag", 
             example: "€ 15,00", 
         }))     
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "transferDescription", 
             name: "Mededeling (overschrijving)", 
             example: "+++111/111/111+++", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "transferBankAccount", 
             name: "Rekeningnummer (overschrijving)", 
             example: "BE1234 1234 1234", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "transferBankCreditor", 
             name: "Begunstigde (overschrijving)", 
             example: "Demovereniging", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "organizationName", 
             name: "Naam vereniging", 
             example: "Demovereniging", 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "webshopName", 
             name: "Naam webshop", 
             example: ""
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "validUntil", 
             name: "Geldig tot", 
             example: Formatter.dateTime(new Date()), 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "validUntilDate", 
             name: "Geldig tot (datum)", 
             example: Formatter.date(new Date()), 
         }))
 
-        variables.push(new EditorSmartVariable({
+        variables.push(EditorSmartVariable.create({
             id: "packageName", 
             name: "Pakketnaam", 
             example: STPackageTypeHelper.getName(STPackageType.Members), 
@@ -501,21 +500,21 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
 
     getSmartButtons(filter: string[]) {
         const buttons: EditorSmartButton[] = []
-        buttons.push(new EditorSmartButton({
+        buttons.push(EditorSmartButton.create({
             id: "signInUrl",
             name: "Knop om in te loggen",
             text: "Open ledenportaal",
             hint: "Als gebruikers op deze knop klikken, zorgt het systeem ervoor dat ze inloggen of registreren op het juiste e-mailadres dat al in het systeem zit."
         }))
 
-        buttons.push(new EditorSmartButton({
+        buttons.push(EditorSmartButton.create({
             id: "renewUrl",
             name: "Knop naar pakketten",
             text: "Verlengen",
             hint: "Deze knop gaat naar het instellingen scherm van de pakketten."
         }))
 
-        buttons.push(new EditorSmartButton({
+        buttons.push(EditorSmartButton.create({
             id: "unsubscribeUrl",
             name: "Knop om uit te schrijven",
             text: "Uitschrijven",
@@ -523,7 +522,7 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
             type: 'inline'
         }))
 
-        buttons.push(new EditorSmartButton({
+        buttons.push(EditorSmartButton.create({
             id: "orderUrl",
             name: "Knop naar bestelling",
             text: "Bestelling openen",

@@ -55,7 +55,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/email", {});
+        const params = Endpoint.parseParameters(request.url, "/email/legacy", {});
 
         if (params) {
             return [true, params as Params];

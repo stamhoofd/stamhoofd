@@ -24,6 +24,27 @@ export class SQLJsonExtract implements SQLExpression {
     }
 }
 
+export class SQLJsonLength implements SQLExpression {
+    target: SQLExpression
+    path?: SQLExpression
+
+    constructor(target: SQLExpression, path?: SQLExpression) {
+        this.target = target;
+        this.path = path;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'JSON_LENGTH(',
+                this.target.getSQL(options),
+                ...(this.path ? [
+                    ',',
+                    this.path.getSQL(options),
+                ] : []),
+            ')'
+        ])
+    }
+}
 /**
  * JSON_SEARCH(json_doc, one_or_all, search_str[, escape_char[, path] ...])
  */
