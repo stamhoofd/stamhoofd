@@ -63,15 +63,11 @@ function extendSort(list: SortList): SortList  {
     return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
 }
 
-function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
-    return filter;
-}
 
 const tableObjectFetcher = useTableObjectFetcher<STInvoicePrivate>({
     async fetch(data: LimitedFilteredRequest) {
         console.log('Invoices.fetch', data);
         data.sort = extendSort(data.sort);
-        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -89,8 +85,6 @@ const tableObjectFetcher = useTableObjectFetcher<STInvoicePrivate>({
 
     async fetchCount(data: CountFilteredRequest): Promise<number> {
         console.log('Invoices.fetchCount', data);
-
-        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",

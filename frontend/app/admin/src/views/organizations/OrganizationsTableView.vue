@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, ModernTableView, TableAction, Toast, organizationsUIFilterBuilders, useAuth, useContext, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, Toast, organizationsUIFilterBuilders, useAuth, useContext, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { I18nController, useTranslate } from "@stamhoofd/frontend-i18n";
 import { useRequestOwner } from "@stamhoofd/networking";
 import { Address, CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, OrganizationTag, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
@@ -73,34 +73,24 @@ function extendSort(list: SortList): SortList  {
     return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
 }
 
-function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
+function getRequiredFilter(): StamhoofdFilter|null  {
     if (!props.tag) {
-        return filter;
+        return null;
     }
     
-    const requiredExtraFilter = {
+    return {
         'tags': {
             $eq: props.tag.id
         }
     }
-
-    if (!filter) {
-        return requiredExtraFilter;
-    }
-
-    return {
-        $and: [
-            filter,
-            requiredExtraFilter
-        ]
-    }
 }
 
+
 const tableObjectFetcher = useTableObjectFetcher<Organization>({
+    requiredFilter: getRequiredFilter(),
     async fetch(data: LimitedFilteredRequest) {
         console.log('Organizations.fetch', data);
         data.sort = extendSort(data.sort);
-        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -118,8 +108,6 @@ const tableObjectFetcher = useTableObjectFetcher<Organization>({
 
     async fetchCount(data: CountFilteredRequest): Promise<number> {
         console.log('Organizations.fetchCount', data);
-
-        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -187,7 +175,7 @@ const actions: TableAction<Organization>[] = []
 
 if (auth.hasPlatformFullAccess()) {
     actions.push(
-        new TableAction({
+        new InMemoryTableAction({
             name: $t('admin.organizations.new'),
             icon: "add",
             priority: 0,

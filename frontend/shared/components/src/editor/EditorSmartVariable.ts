@@ -1,29 +1,6 @@
+import { EditorSmartVariable } from '@stamhoofd/structures'
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'
-
-export class EditorSmartVariable {
-    id: string;
-    name: string;
-    description: string | null = null;
-    example: string;
-    html?: string;
-    deleteMessage?: string
-    hint?: string;
-
-    constructor(options: { id: string, name: string, description?: string, example?: string, deleteMessage?: string, html?: string, hint?: string }) {
-        this.id = options.id;
-        this.name = options.name;
-        this.description = options.description ?? null;
-        this.example = options.example ?? options.name;
-        this.html = options.html;
-        this.deleteMessage = options.deleteMessage;
-        this.hint = options.hint;
-    }
-
-    getJSONContent() {
-        return { type: this.html ? "smartVariableBlock" : "smartVariable", attrs: { id: this.id } }
-    }
-}
 
 
 export type SmartVariableNodeOptions = {

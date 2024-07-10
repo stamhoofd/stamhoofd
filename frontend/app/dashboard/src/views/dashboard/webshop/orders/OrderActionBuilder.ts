@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
-import { CenteredMessage, GlobalEventBus, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
+import { CenteredMessage, GlobalEventBus, InMemoryTableAction, LoadComponent, MenuTableAction, TableAction, Toast } from "@stamhoofd/components"
 import { OrganizationManager, SessionManager } from "@stamhoofd/networking"
 import { OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures"
 
@@ -20,9 +20,9 @@ export class OrderActionBuilder {
         this.organizationManager = settings.organizationManager
     }
 
-    getStatusActions() {
+    getStatusActions(): TableAction<PrivateOrder>[] {
         return Object.values(OrderStatus).filter(s => s !== OrderStatus.Deleted).map(status => {
-            return new TableAction({
+            return new InMemoryTableAction({
                 name: OrderStatusHelper.getName(status),
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -33,9 +33,9 @@ export class OrderActionBuilder {
         })
     }
 
-    getTicketStatusActions() {
+    getTicketStatusActions(): TableAction<PrivateOrderWithTickets>[] {
         return [
-            new TableAction({
+            new InMemoryTableAction({
                 name: 'Gescand',
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -57,7 +57,7 @@ export class OrderActionBuilder {
                     await this.webshopManager.addTicketPatches(patches)
                 }
             }),
-            new TableAction({
+            new InMemoryTableAction({
                 name: 'Niet gescand',
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -82,9 +82,9 @@ export class OrderActionBuilder {
         ]
     }
 
-    getPaymentActions() {
+    getPaymentActions(): TableAction<PrivateOrder>[] {
         return [
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Betaald",
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -92,7 +92,7 @@ export class OrderActionBuilder {
                     await this.markPaid(orders, true)
                 }
             }),
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Niet betaald",
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -103,9 +103,9 @@ export class OrderActionBuilder {
         ]
     }
 
-    getActions() {
+    getActions(): TableAction<PrivateOrderWithTickets>[] {
         return [
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Bestelling toevoegen",
                 enabled: this.webshopManager.hasWrite,
                 icon: "add",
@@ -117,7 +117,7 @@ export class OrderActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Wijzig...",
                 enabled: this.webshopManager.hasWrite,
                 icon: "edit",
@@ -130,7 +130,7 @@ export class OrderActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new MenuTableAction({
                 name: "Wijzig status",
                 enabled: this.webshopManager.hasWrite,
                 icon: "flag",
@@ -141,7 +141,7 @@ export class OrderActionBuilder {
                 childActions: this.getStatusActions()
             }),
 
-            new TableAction({
+            new MenuTableAction({
                 name: "Wijzig ticketstatus",
                 enabled: this.webshopManager.hasWrite && this.webshopManager.preview.hasTickets,
                 icon: "flag",
@@ -152,7 +152,7 @@ export class OrderActionBuilder {
                 childActions: this.getTicketStatusActions()
             }),
 
-            new TableAction({
+            new MenuTableAction({
                 name: "Wijzig betaalstatus",
                 enabled: this.webshopManager.hasWrite,
                 icon: "flag",
@@ -163,7 +163,7 @@ export class OrderActionBuilder {
                 childActions: this.getPaymentActions()
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Kopieer link naar bestelling",
                 icon: "copy",
                 priority: 0,
@@ -179,7 +179,7 @@ export class OrderActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "E-mailen",
                 enabled: this.webshopManager.hasRead,
                 icon: "email",
@@ -190,7 +190,7 @@ export class OrderActionBuilder {
                 }
             }),
         
-            ...(this.webshopManager.preview.meta.phoneEnabled ? [new TableAction({
+            ...(this.webshopManager.preview.meta.phoneEnabled ? [new InMemoryTableAction({
                 name: "SMS'en",
                 enabled: this.webshopManager.hasRead,
                 icon: "feedback-line",
@@ -202,7 +202,7 @@ export class OrderActionBuilder {
                 }
             })] : []),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Exporteer naar Excel",
                 enabled: this.webshopManager.hasRead,
                 icon: "download",
@@ -213,7 +213,7 @@ export class OrderActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Verwijderen",
                 icon: "trash",
                 enabled: this.webshopManager.hasWrite,

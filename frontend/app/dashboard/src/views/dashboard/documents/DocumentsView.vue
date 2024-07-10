@@ -10,7 +10,7 @@
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { Column, InMemoryTableAction, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { RecordWarning, RecordWarningType } from "@stamhoofd/structures";
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory } from "@stamhoofd/structures";
@@ -69,7 +69,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
         })
         return [
             ...builder.getActions(),
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Openen",
                 icon: "eye",
                 priority: 0,

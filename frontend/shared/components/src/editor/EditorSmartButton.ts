@@ -1,23 +1,5 @@
+import { EditorSmartButton } from '@stamhoofd/structures'
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core'
-
-export class EditorSmartButton {
-    id: string;
-    name: string;
-    text: string;
-    hint: string;
-    deleteMessage?: string
-    type: 'block' | 'inline'
-
-    constructor(options: { id: string, name: string, text: string, hint: string, deleteMessage?: string, type?: 'block' | 'inline' }) {
-        this.id = options.id;
-        this.name = options.name;
-        this.text = options.text;
-        this.hint = options.hint;
-        this.deleteMessage = options.deleteMessage;
-        this.type = options.type ?? 'block'
-    }
-}
-
 
 export type SmartButtonNodeOptions = {
     HTMLAttributes: Record<string, any>,

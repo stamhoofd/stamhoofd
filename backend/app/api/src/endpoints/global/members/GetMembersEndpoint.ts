@@ -2,9 +2,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, MemberWithRegistrations, Platform } from '@stamhoofd/models';
-import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
-import { CountFilteredRequest, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { Email, Member, MemberWithRegistrations, Platform } from '@stamhoofd/models';
+import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLJSONValue, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
+import { CountFilteredRequest, EmailRecipientFilterType, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter, mergeFilters } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -15,6 +15,44 @@ type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<MembersBlob, LimitedFilteredRequest>
+
+Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
+    fetch: async (query: LimitedFilteredRequest) => {
+        const result = await GetMembersEndpoint.buildData(query)
+
+        return new PaginatedResponse({
+            results: result.results.members.flatMap(m => m.getEmailRecipients(['member'])),
+            next: result.next
+        });
+    },
+
+    count: async (query: LimitedFilteredRequest) => {
+        query.filter = mergeFilters([query.filter, {
+            'email': {
+                $neq: null
+            }
+        }])
+        const q = await GetMembersEndpoint.buildQuery(query)
+        return await q.count();
+    }
+});
+Email.recipientLoaders.set(EmailRecipientFilterType.MemberParents, {
+    fetch: async (query: LimitedFilteredRequest) => {
+        const result = await GetMembersEndpoint.buildData(query)
+
+        return new PaginatedResponse({
+            results: result.results.members.flatMap(m => m.getEmailRecipients(['parents'])),
+            next: result.next
+        });
+    },
+
+    count: async (query: LimitedFilteredRequest) => {
+        const q = await GetMembersEndpoint.buildQuery(query)
+        return await q.sum(
+            SQL.jsonLength(SQL.column('details'), '$.value.parents[*].email')
+        );
+    }
+});
 
 const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -297,7 +335,6 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (tags != 'all' && tags.length === 0) {
                 throw Context.auth.error()
             }
-
         
             if (tags !== 'all') {
                 const platform = await Platform.getShared()
@@ -408,6 +445,53 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         return query
     }
 
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const query = await GetMembersEndpoint.buildQuery(requestQuery)
+        const data = await query.fetch()
+        
+        const memberIds = data.map((r) => {
+            if (typeof r.members.id === 'string') {
+                return r.members.id
+            }
+            throw new Error('Expected string')
+        });
+
+        const _members = await Member.getBlobByIds(...memberIds)
+        // Make sure members is in same order as memberIds
+        const members = memberIds.map(id => _members.find(m => m.id === id)!)
+
+        for (const member of members) {
+            if (!await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
+                throw Context.auth.error()
+            }
+        }
+
+        let next: LimitedFilteredRequest|undefined;
+
+        if (memberIds.length >= requestQuery.limit) {
+            const lastObject = members[members.length - 1];
+            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: requestQuery.filter,
+                pageFilter: nextFilter,
+                sort: requestQuery.sort,
+                limit: requestQuery.limit,
+                search: requestQuery.search
+            })
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
+                console.error('Found infinite loading loop for', requestQuery);
+                next = undefined;
+            }
+        }
+
+        return new PaginatedResponse<MembersBlob, LimitedFilteredRequest>({
+            results: await AuthenticatedStructures.membersBlob(members),
+            next
+        });
+    }
+
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
         await Context.authenticate()
@@ -430,51 +514,8 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             })
         }
         
-        const query = await GetMembersEndpoint.buildQuery(request.query)
-        const data = await query.fetch()
-        
-        const memberIds = data.map((r) => {
-            if (typeof r.members.id === 'string') {
-                return r.members.id
-            }
-            throw new Error('Expected string')
-        });
-
-        const _members = await Member.getBlobByIds(...memberIds)
-        // Make sure members is in same order as memberIds
-        const members = memberIds.map(id => _members.find(m => m.id === id)!)
-
-        for (const member of members) {
-            if (!await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
-                throw Context.auth.error()
-            }
-        }
-
-        let next: LimitedFilteredRequest|undefined;
-
-        if (memberIds.length >= request.query.limit) {
-            const lastObject = members[members.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters, request.query.sort);
-
-            next = new LimitedFilteredRequest({
-                filter: request.query.filter,
-                pageFilter: nextFilter,
-                sort: request.query.sort,
-                limit: request.query.limit,
-                search: request.query.search
-            })
-
-            if (JSON.stringify(nextFilter) === JSON.stringify(request.query.pageFilter)) {
-                console.error('Found infinite loading loop for', request.query);
-                next = undefined;
-            }
-        }
-
         return new Response(
-            new PaginatedResponse<MembersBlob, LimitedFilteredRequest>({
-                results: await AuthenticatedStructures.membersBlob(members),
-                next
-            })
+            await GetMembersEndpoint.buildData(request.query)
         );
     }
 }

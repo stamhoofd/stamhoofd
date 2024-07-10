@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, EditMemberGeneralBox, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, EditMemberGeneralBox, InMemoryTableAction, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -107,12 +107,12 @@ function extendSort(list: SortList): SortList  {
     return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
 }
 
-function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
+function getRequiredFilter(): StamhoofdFilter|null  {
     if (app == 'admin') {
-        return filter;
+        return null
     }
     
-    const requiredExtraFilter = {
+    return {
         'registrations': {
             $elemMatch: props.group ? {
                 waitingList: props.waitingList,
@@ -127,24 +127,13 @@ function extendFilter(filter: StamhoofdFilter|null): StamhoofdFilter|null  {
             }
         }
     }
-
-    if (!filter) {
-        return requiredExtraFilter;
-    }
-
-    return {
-        $and: [
-            filter,
-            requiredExtraFilter
-        ]
-    }
 }
 
 const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
+    requiredFilter: getRequiredFilter(),
     async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
         console.log('Members.fetch', data);
         data.sort = extendSort(data.sort);
-        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -170,8 +159,6 @@ const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
 
     async fetchCount(data: CountFilteredRequest): Promise<number> {
         console.log('Members.fetchCount', data);
-
-        data.filter = extendFilter(data.filter);
 
         const response = await context.value.authenticatedServer.request({
             method: "GET",
@@ -403,7 +390,7 @@ const actionBuilder = new MemberActionBuilder({
 })
 
 const actions: TableAction<PlatformMember>[] = [
-    new TableAction({
+    new InMemoryTableAction({
         name: "Nieuw lid",
         icon: "add",
         priority: 0,

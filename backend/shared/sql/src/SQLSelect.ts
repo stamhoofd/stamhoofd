@@ -3,7 +3,7 @@ import { SQLOrderBy, addOrderByHelpers } from "./SQLOrderBy";
 import { SQLWhere, addWhereHelpers } from "./SQLWhere";
 import {Database, SQLResultNamespacedRow} from "@simonbackx/simple-database"
 import {SQLJoin} from './SQLJoin'
-import { SQLAlias, SQLCount, SQLSelectAs, SQLWildcardSelectExpression } from "./SQLExpressions";
+import { SQLAlias, SQLCount, SQLSelectAs, SQLSum, SQLWildcardSelectExpression } from "./SQLExpressions";
 
 class SelectBase implements SQLExpression {
     _columns: SQLExpression[]
@@ -150,6 +150,37 @@ class SelectBase implements SQLExpression {
             }
         }
         console.warn('Invalid count SQL response', rows);
+        return 0;
+    }
+
+    async sum(expression: SQLExpression): Promise<number> {
+        this._columns = [
+            new SQLSelectAs(
+                new SQLSum(expression), 
+                new SQLAlias('c')
+            )
+        ]
+        this._offset = null;
+        this._limit = null;
+        this._orderBy = null;
+
+        const {query, params} = normalizeSQLQuery(this.getSQL());
+        console.log(query, params);
+
+        const [rows] = await Database.select(query, params, {nestTables: true});
+        if (rows.length === 1) {
+            const row = rows[0];
+            if ('' in row) {
+                const namespaced = row[''];
+                if ('c' in namespaced) {
+                    const value = namespaced['c'];
+                    if (typeof value === 'number' && Number.isInteger(value)) {
+                        return value;
+                    }
+                }
+            }
+        }
+        console.warn('Invalid sum SQL response', rows);
         return 0;
     }
 }

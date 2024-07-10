@@ -773,8 +773,8 @@ export default class ContextMenuView extends VueComponent {
         min-width: 70vw;
     }
 
-    max-width: 100vw;
-    max-width: calc(100vw - 30px);
+    max-width: min(600px, 100vw);
+    max-width: min(600px, calc(100vw - 30px));
     overflow: hidden;
     overflow-y: auto;
 
@@ -790,9 +790,9 @@ export default class ContextMenuView extends VueComponent {
         flex-direction: row;
         align-items: center;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        min-height: 32px;
+        min-height: 24px;
         margin: 0 -9px;
-        padding: 0 9px;
+        padding: 4px 9px;
         border-radius: $border-radius;
 
         // Fix for button width

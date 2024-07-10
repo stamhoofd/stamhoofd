@@ -1,15 +1,16 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation'
-import { Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PlatformMember, RegisterCart, RegisterItem, Registration } from '@stamhoofd/structures'
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
+import { EmailRecipientFilter, EmailRecipientFilterSubtype, EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { CenteredMessage, CenteredMessageButton } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
-import { TableAction } from '../../tables/TableAction'
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/TableAction'
 import { PlatformFamilyManager } from '../PlatformFamilyManager'
 import { EditMemberAllBox, MemberStepView } from '..'
 import { markRaw } from 'vue'
 import { NavigationActions } from '../../types/NavigationActions'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
+import EmailView from '../../email/EmailView.vue'
 
 export class MemberActionBuilder {
     present: ReturnType<typeof usePresent>
@@ -41,7 +42,7 @@ export class MemberActionBuilder {
                 return this.getRegisterActions(this.organizations[0])
             }
             return this.organizations.map(org => {
-                return new TableAction({
+                return new MenuTableAction({
                     name: "Inschrijven bij " + org.name,
                     groupIndex: 0,
                     childActions: () => this.getRegisterActions(org)
@@ -50,7 +51,7 @@ export class MemberActionBuilder {
         }
 
         return [
-            new TableAction({
+            new MenuTableAction({
                 name: "Wachtlijst van",
                 groupIndex: 0,
                 childActions: () => [
@@ -72,7 +73,7 @@ export class MemberActionBuilder {
 
         const organization = this.organizations[0]
         return [
-            new TableAction({
+            new MenuTableAction({
                 name: this.inWaitingList ? "Verplaats naar wachtlijst" : "Verplaatsen naar",
                 priority: 1,
                 groupIndex: 5,
@@ -80,7 +81,7 @@ export class MemberActionBuilder {
                 allowAutoSelectAll: false,
                 enabled: this.hasWrite,
                 childActions: () => [
-                    new TableAction({
+                    new InMemoryTableAction({
                         name: "Wachtlijst",
                         groupIndex: 0,
                         enabled: !this.inWaitingList,
@@ -99,7 +100,7 @@ export class MemberActionBuilder {
             return []
         }
 
-        return [new TableAction({
+        return [new InMemoryTableAction({
             name: "Uitschrijven",
             priority: 0,
             groupIndex: 7,
@@ -115,7 +116,7 @@ export class MemberActionBuilder {
     getActionsForCategory(category: GroupCategoryTree, action: (members: PlatformMember[], group: Group) => void): TableAction<PlatformMember>[] {
         return [
             ...category.categories.map(c => {
-                return new TableAction({
+                return new MenuTableAction({
                     name: c.settings.name,
                     groupIndex: 2,
                     needsSelection: true,
@@ -125,7 +126,7 @@ export class MemberActionBuilder {
                 })
             }),
             ...category.groups.map(g => {
-                return new TableAction({
+                return new InMemoryTableAction({
                     name: g.settings.name,
                     needsSelection: true,
                     allowAutoSelectAll: false,
@@ -139,7 +140,7 @@ export class MemberActionBuilder {
 
     getActions(): TableAction<PlatformMember>[] {
         return [
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Bewerk",
                 icon: "edit",
                 priority: 0,
@@ -152,7 +153,7 @@ export class MemberActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Functies bewerken",
                 icon: "star",
                 priority: 0,
@@ -165,17 +166,17 @@ export class MemberActionBuilder {
                 }
             }),
         
-            new TableAction({
+            new AsyncTableAction({
                 name: "E-mailen",
                 icon: "email",
                 priority: 10,
                 groupIndex: 3,
-                handler: (members: PlatformMember[]) => {
-                    this.openMail(members)
+                handler: async (selection: TableActionSelection<PlatformMember>) => {
+                    await this.openMail(selection)
                 }
             }),
         
-            new TableAction({
+            new InMemoryTableAction({
                 name: "SMS'en",
                 icon: "feedback-line",
                 priority: 9,
@@ -186,13 +187,13 @@ export class MemberActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new MenuTableAction({
                 name: "Exporteren naar",
                 icon: "download",
-                priority: 8,
+                priority: 11,
                 groupIndex: 3,
                 childActions: [
-                    new TableAction({
+                    new InMemoryTableAction({
                         name: "Excel...",
                         priority: 0,
                         groupIndex: 0,
@@ -201,7 +202,7 @@ export class MemberActionBuilder {
                             await this.exportToExcel(members)
                         }
                     }),
-                    new TableAction({
+                    new InMemoryTableAction({
                         name: "PDF...",
                         priority: 0,
                         groupIndex: 0,
@@ -212,7 +213,7 @@ export class MemberActionBuilder {
                     }),
                 ]
             }),
-            new TableAction({
+            new MenuTableAction({
                 name: "Inschrijven voor",
                 priority: 1,
                 groupIndex: 5,
@@ -228,7 +229,7 @@ export class MemberActionBuilder {
 
             ...this.getWaitingListActions(),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Gegevens gedeeltelijk wissen",
                 priority: 0,
                 groupIndex: 7,
@@ -240,7 +241,7 @@ export class MemberActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Overal verwijderen",
                 icon: "trash",
                 priority: 0,
@@ -261,7 +262,7 @@ export class MemberActionBuilder {
     getWaitingListActions(): TableAction<PlatformMember>[] {
         return [
             //
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Toelaten om in te schrijven",
                 icon: "success",
                 priority: 15,
@@ -274,7 +275,7 @@ export class MemberActionBuilder {
                 }
             }),
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Toelating intrekken",
                 icon: "canceled",
                 priority: 14,
@@ -288,7 +289,7 @@ export class MemberActionBuilder {
             }),
 
 
-            new TableAction({
+            new InMemoryTableAction({
                 name: "Verplaats naar ingeschreven leden",
                 priority: 1,
                 groupIndex: 5,
@@ -303,17 +304,113 @@ export class MemberActionBuilder {
     }
 
     // Action implementations
-    openMail(members: PlatformMember[], subject = "") {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-        //const displayedComponent = new ComponentWithProperties(NavigationController, {
-        //    root: new ComponentWithProperties(MailView, {
-        //        members,
-        //        group: this.groups.length === 1 ? this.groups[0] : undefined,
-        //        defaultSubject: subject,
-        //        defaultReplacements: OrganizationManager.organization.meta.getEmailReplacements()
-        //    })
-        //});
-        //this.present(displayedComponent.setDisplayStyle("popup"));
+    async openMail(selection: TableActionSelection<PlatformMember>) {
+        const filter = mergeFilters([
+            selection.fetcher.filter,
+            selection.markedRows.size === 0 ? null : (
+                selection.markedRowsAreSelected ? {
+                    id: {
+                        $in: [...selection.markedRows.values()].map(m => m.id)
+                    }
+                } : {
+                    $not: {
+                        id: {
+                            $in: [...selection.markedRows.values()].map(m => m.id)
+                        }
+                    }
+                }
+            )
+        ])
+        const search = selection.fetcher.searchQuery
+
+        const options: {
+            name: string,
+            value: EmailRecipientSubfilter[]
+        }[][] = [];
+
+        options.push([
+            {
+                name: "Alle leden",
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.Members,
+                        filter,
+                        search
+                    })
+                ]
+            },
+            {
+                name: "Geen leden",
+                value: []
+            },
+            {
+                name: "Alle volwassen leden",
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.Members,
+                        filter: mergeFilters([
+                            filter,
+                            {
+                                age: {
+                                    $gt: 17
+                                }
+                            }
+                        ]),
+                        search
+                    })
+                ]
+            }
+        ])
+
+        options.push([
+            {
+                name: "Ouders van minderjarige leden",
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.MemberParents,
+                        filter: mergeFilters([
+                            filter,
+                            {
+                                age: {
+                                    $lt: 18
+                                }
+                            }
+                        ]),
+                        search
+                    })
+                ]
+            },
+            {
+                name: "Alle ouders",
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.MemberParents,
+                        filter,
+                        search
+                    })
+                ]
+            },
+            {
+                name: "Geen ouders",
+                value: []
+            }
+        ])
+
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EmailView, {
+                emails: this.organizations.flatMap(o => o.privateMeta?.emails),
+                recipientFilterOptions: options,
+                manageEmails: () => {
+                    // todo
+                }
+            })
+        });
+        await this.present({
+            components: [
+                displayedComponent
+            ],
+            modalDisplayStyle: "popup"
+        });
     }
 
     openSMS(members: PlatformMember[]) {

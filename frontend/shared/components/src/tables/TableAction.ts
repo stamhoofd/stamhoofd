@@ -1,8 +1,25 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
-import { FetchAllOptions, Toast } from "../..";
+import { FetchAllOptions, TableObjectFetcher, Toast } from "../..";
 
-export class TableAction<T> {
+export interface TableActionSelection<T extends {id: string}> {
+    hasSelection: boolean,
+    isSingle: boolean,
+
+    /**
+     * For actions that handle on a full selection
+     */
+    getSelection(options?: FetchAllOptions): Promise<T[]>|T[],
+    
+    /**
+     * If you want to manually use the filter, or query data
+     */
+    fetcher: TableObjectFetcher<T>,
+    markedRows: Map<string, T>,
+    markedRowsAreSelected: boolean
+}
+
+export abstract class TableAction<T extends {id: string}> {
     name: string;
     icon: string;
     tooltip = ""
@@ -13,8 +30,6 @@ export class TableAction<T> {
 
     /// For grouping
     groupIndex: number
-
-    handler: (item: T[]) => Promise<void> | void
 
     /**
      * Whether this table action is on a whole selection. 
@@ -61,7 +76,6 @@ export class TableAction<T> {
         this.name = settings.name ?? "";
         this.icon = settings.icon ?? "";
         this.priority = settings.priority ?? 0;
-        this.handler = settings.handler ?? (() => { throw new Error("No handler defined") });
         this.groupIndex = settings.groupIndex ?? 0;
         this.needsSelection = settings.needsSelection ?? true;
         this.singleSelection = settings.singleSelection ?? false;
@@ -82,8 +96,39 @@ export class TableAction<T> {
         return this
     }
 
-    async handle(data: {getSelection(options?: FetchAllOptions): Promise<T[]>|T[]}) {
-        let toast: Toast = new Toast("Ophalen...", "spinner").setHide(null)
+    abstract handle(data: TableActionSelection<T>): Promise<void>
+}
+
+export class MenuTableAction<T extends {id: string}> extends TableAction<T> {
+    async handle(data: TableActionSelection<T>) {
+        // Do nothing
+    }
+}
+
+export class AsyncTableAction<T extends {id: string}> extends TableAction<T> {
+    handler: (selection: TableActionSelection<T>) => Promise<void> | void
+
+    constructor(settings: Partial<TableAction<T>> & { handler: (selection: TableActionSelection<T>) => Promise<void> | void } ) {
+        super(settings)
+        this.handler = settings.handler ?? (() => { throw new Error("No handler defined") });
+    }
+
+    async handle(selection: TableActionSelection<T>) {
+        // todo
+        await this.handler(selection)
+    }
+}
+
+export class InMemoryTableAction<T extends {id: string}> extends TableAction<T> {
+    handler: (item: T[]) => Promise<void> | void
+
+    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[]) => Promise<void> | void }) {
+        super(settings)
+        this.handler = settings.handler ?? (() => { throw new Error("No handler defined") });
+    }
+
+    async handle(data: TableActionSelection<T>) {
+        const toast: Toast = new Toast("Ophalen...", "spinner").setHide(null)
         const timer = setTimeout(() => {
             toast.show()
         }, 1000)

@@ -2,10 +2,14 @@
     <ContextMenuView v-bind="$attrs" ref="contextMenuView">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItemView v-for="(action, index) of actions" :contextMenuView="$refs.contextMenuView" :key="groupIndex+'-'+index" :class="{'disabled': isDisabled(action)}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
+            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="$refs.contextMenuView" :class="{'disabled': isDisabled(action)}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
                 {{ action.name }}
-                <template v-if="action.hasChildActions" #right><span class="icon arrow-right-small" /></template>
-                <template v-else-if="action.icon" #right><span :class="'icon '+action.icon" /></template>
+                <template v-if="action.hasChildActions" #right>
+                    <span class="icon arrow-right-small" />
+                </template>
+                <template v-else-if="action.icon" #right>
+                    <span :class="'icon '+action.icon" />
+                </template>
             </ContextMenuItemView>
         </template>
     </ContextMenuView>
@@ -13,10 +17,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, FetchAllOptions, Toast } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from "@stamhoofd/components";
 
-import { TableAction } from "./TableAction";
+import { TableAction, TableActionSelection } from "./TableAction";
 import TableView from "./TableView.vue";
 
 @Component({
@@ -28,26 +32,27 @@ import TableView from "./TableView.vue";
     },
 })
 export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
-    /**
-     * Act only on selection given here
-     */
-    //@Prop({ default: () => [] })
-    //focused!: any[];
-
-    @Prop({ required: false })
-    table?: TableView<any>;
-
     @Prop({ required: true })
-    actions: TableAction<any>[];
+        actions: TableAction<any>[];
+
+    @Prop({ default: () => {
+        // Required to return a default method
+        return () => {}
+    } })
+        onDismiss!: (() => void);
 
     /**
      * Act only on selection given here
      */
     @Prop({ default: () => [] })
-    selection!: {hasSelection: boolean, isSingle: boolean, getSelection(options?: FetchAllOptions): Promise<any[]>}
+        selection!: TableActionSelection<any>
 
     isDisabled(action: TableAction<any>) {
-        return action.isDisabled(this.hasSelection)//!this.hasSelection && action.needsSelection && (!this.table || !action.allowAutoSelectAll)
+        return action.isDisabled(this.hasSelection)
+    }
+
+    unmounted() {
+        this.onDismiss()
     }
 
     get hasSelection() {
@@ -78,7 +83,12 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
                 }
                 return true
             })
-            .sort((a, b) => a.groupIndex - b.groupIndex)
+            .sort((a, b) => {
+                if (a.groupIndex !== b.groupIndex) {
+                    return a.groupIndex - b.groupIndex
+                }
+                return b.priority - a.priority
+            })
             .reduce((acc, action) => {
                 const group = acc[acc.length - 1];
                 if (group && group[0].groupIndex == action.groupIndex) {
@@ -102,7 +112,6 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
 
         return new ComponentWithProperties(TableActionsContextMenu, {
             actions: action.getChildActions(),
-            table: this.table,
             selection: this.selection
         })
     }

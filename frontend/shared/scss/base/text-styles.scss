@@ -480,6 +480,8 @@
     font-weight: $font-weight-default;
     opacity: 0.5;
     font-variation-settings: 'opsz' 19;
+    white-space: wrap;
+    line-height: 1.5;
 }
 
 .style-definition-term {
