@@ -1,4 +1,4 @@
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, Data, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { EmailTemplate } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
@@ -8,12 +8,29 @@ import { Context } from '../../../../helpers/Context';
 type Params = Record<string, never>;
 type Body = undefined;
 
-class Query extends AutoEncoder {
-    @field({ decoder: StringDecoder, optional: true })
-    webshopId?: string
+export class StringNullableDecoder<T> implements Decoder<T | null> {
+    decoder: Decoder<T>;
 
-    @field({ decoder: StringDecoder, optional: true })
-    groupId?: string
+    constructor(decoder: Decoder<T>) {
+        this.decoder = decoder;
+    }
+
+    decode(data: Data): T | null {
+        if (data.value === 'null') {
+            return null;
+        }
+
+        return data.decode(this.decoder);
+    }
+}
+
+
+class Query extends AutoEncoder {
+    @field({ decoder: new StringNullableDecoder(StringDecoder), optional: true, nullable: true })
+    webshopId: string|null = null
+
+    @field({ decoder: new StringNullableDecoder(StringDecoder), optional: true, nullable: true})
+    groupId: string|null = null
 }
 
 type ResponseBody = EmailTemplateStruct[];
@@ -48,19 +65,15 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             } 
         }
 
-        const types = organization ? [
-            EmailTemplateType.OrderConfirmationOnline, 
-            EmailTemplateType.OrderConfirmationTransfer,
-            EmailTemplateType.OrderConfirmationPOS,
-            EmailTemplateType.OrderReceivedTransfer,
-            EmailTemplateType.TicketsConfirmation,
-            EmailTemplateType.TicketsConfirmationTransfer,
-            EmailTemplateType.TicketsConfirmationPOS,
-            EmailTemplateType.TicketsReceivedTransfer,
-            EmailTemplateType.RegistrationConfirmation
-        ] : [...Object.values(EmailTemplateType)]
+        const types = [...Object.values(EmailTemplateType)].filter(type => {
+            if (!organization) {
+                return true;
+            }
+            return EmailTemplateStruct.allowOrganizationLevel(type)
+        })
+
         
-        const templates = organization ? await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}}) : [];
+        const templates = organization ? (await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}})) : [];        
         const defaultTemplates = await EmailTemplate.where({ organizationId: null, type: {sign: 'IN', value: types} });
         return new Response([...templates, ...defaultTemplates].map(template => EmailTemplateStruct.create(template)))
     }
