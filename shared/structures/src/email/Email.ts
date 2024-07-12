@@ -2,11 +2,26 @@ import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Enu
 import { v4 as uuidv4 } from "uuid";
 import { StamhoofdFilterDecoder } from "../filters/new/FilteredRequest";
 import { StamhoofdFilter } from "../filters/new/StamhoofdFilter";
-import { EmailAttachment, Replacement } from "./EmailRequest";
+import { EmailAttachment, Replacement } from "../endpoints/EmailRequest";
+import { MemberWithRegistrationsBlob } from "../members/MemberWithRegistrationsBlob";
+import { MemberDetails } from "../members/MemberDetails";
+import { EditorSmartButton } from "../email/EditorSmartButton";
+import { EditorSmartVariable } from "../email/EditorSmartVariable";
+import { EmailTemplateType } from "./EmailTemplate";
 
 export enum EmailRecipientFilterType {
     "Members" = "Members",
     "MemberParents" = "MemberParents"
+}
+
+export function getExampleRecipient(type: EmailRecipientFilterType|null = null) {
+    return MemberWithRegistrationsBlob.create({
+        details: MemberDetails.create({
+            firstName: "Jan",
+            lastName: "Janssens",
+            email: "jan.janssens@voorbeeld-emailadres.com"
+        })
+    }).getEmailRecipients(['member'])[0]
 }
 
 export enum EmailStatus {
@@ -87,6 +102,16 @@ export class Email extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date()
+
+    getTemplateType() {
+        for (const filter of this.recipientFilter.filters) {
+            if (filter.type === EmailRecipientFilterType.Members) {
+                return EmailTemplateType.SavedMembersEmail
+            }
+        }
+
+        return null
+    }
 }
 
 export class EmailRecipient extends AutoEncoder {
@@ -131,52 +156,9 @@ export class EmailRecipient extends AutoEncoder {
 }
 
 
-export class EditorSmartVariable extends AutoEncoder {
-    @field({ decoder: StringDecoder})
-    id: string;
 
-    @field({ decoder: StringDecoder})
-    name: string;
 
-    @field({ decoder: StringDecoder, nullable: true})
-    description: string | null = null;
 
-    @field({ decoder: StringDecoder})
-    example: string;
-
-    @field({ decoder: StringDecoder, optional: true})
-    html?: string;
-
-    @field({ decoder: StringDecoder, optional: true})
-    deleteMessage?: string
-
-    @field({ decoder: StringDecoder, optional: true})
-    hint?: string;
-
-    getJSONContent() {
-        return { type: this.html ? "smartVariableBlock" : "smartVariable", attrs: { id: this.id } }
-    }
-}
-
-export class EditorSmartButton extends AutoEncoder {
-    @field({ decoder: StringDecoder})
-    id: string;
-
-    @field({ decoder: StringDecoder})
-    name: string;
-    
-    @field({ decoder: StringDecoder})
-    text: string;
-
-    @field({ decoder: StringDecoder})
-    hint: string;
-
-    @field({ decoder: StringDecoder, optional: true})
-    deleteMessage?: string
-
-    @field({ decoder: new EnumDecoder(['block', 'inline']) })
-    type: 'block' | 'inline' = 'block'
-}
 
 export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true})

@@ -1,26 +1,33 @@
 <template>
     <transition name="fade" appear>
         <div class="st-view">
-            <div class="loading-view">
+            <STNavigationBar v-if="errorBox" title="Fout" />
+
+            <div v-if="!errorBox" class="loading-view">
                 <Spinner class="center gray" />
             </div>
+            <main v-else>
+                <h1>Er ging iets fout</h1>
+                <STErrorsDefault :error-box="errorBox" />
+            </main>
         </div>
     </transition>
 </template>
 
 
-<script lang="ts">
-import { Component, Vue } from "@simonbackx/vue-app-navigation/classes";
-
+<script lang="ts" setup>
 import Spinner from "../Spinner.vue";
+import { ErrorBox } from "../errors/ErrorBox";
 
-@Component({
-    components: {
-        Spinner
+withDefaults(
+    defineProps<{
+        errorBox?: ErrorBox|null;
+    }>(),
+    {
+        errorBox: null
     }
-})
-export default class LoadingView extends Vue {
-}
+);
+
 </script>
 
 <style lang="scss">

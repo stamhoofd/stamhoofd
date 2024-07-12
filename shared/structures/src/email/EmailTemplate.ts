@@ -1,11 +1,14 @@
 import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
+import { EmailRecipientFilterType } from "./Email";
 
 export enum EmailTemplateType {
     /**
      * Template created by the user to send manually
      */
-    UserGenerated = "UserGenerated",
+    SavedMembersEmail = "SavedMembersEmail",
+
+    // 
     MembersExpirationReminder = "MembersExpirationReminder",
     WebshopsExpirationReminder = "WebshopsExpirationReminder",
     SingleWebshopExpirationReminder = "SingleWebshopExpirationReminder",
@@ -74,7 +77,7 @@ export class EmailTemplate extends AutoEncoder {
     subject = ""
 
     @field({ decoder: new EnumDecoder(EmailTemplateType) })
-    type: EmailTemplateType = EmailTemplateType.UserGenerated
+    type: EmailTemplateType = EmailTemplateType.SavedMembersEmail
 
     @field({ decoder: StringDecoder })
     html = ""
@@ -96,6 +99,106 @@ export class EmailTemplate extends AutoEncoder {
 
     @field({ decoder: DateDecoder, optional: true })
     updatedAt: Date = new Date();
+
+    static getRecipientType(type: EmailTemplateType): EmailRecipientFilterType|null {
+        if (type === EmailTemplateType.SavedMembersEmail) {
+            return EmailRecipientFilterType.Members
+        }
+        return null;
+    }
+
+    static getTypeTitle(type: EmailTemplateType): string {
+        switch (type) {
+            case EmailTemplateType.SavedMembersEmail: return 'Opgeslagen e-mail naar leden'
+            case EmailTemplateType.MembersExpirationReminder: return 'Herinnering verlopen pakket ledenadministratie'
+            case EmailTemplateType.WebshopsExpirationReminder: return 'Herinnering verlopen pakket webshops'
+            case EmailTemplateType.SingleWebshopExpirationReminder: return 'Herinnering verlopen pakket enkele webshop'
+            case EmailTemplateType.TrialWebshopsExpirationReminder: return 'Herinnering verlopen proefperiode pakket webshops'
+            case EmailTemplateType.TrialMembersExpirationReminder: return 'Herinnering verlopen proefperiode pakket ledenadministratie'
+            case EmailTemplateType.OrderNotification: return 'Bestelling notificatie'
+
+            case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingsbevestiging'
+            case EmailTemplateType.RegistrationTransferDetails: return 'Betaalinstructies voor inschrijving met overschrijving'
+
+            case EmailTemplateType.OrderConfirmationOnline: return 'Websbop: Bestelling bevestiging online betaling'
+            case EmailTemplateType.OrderConfirmationTransfer: return 'Websbop: Bestelling bevestiging overschrijving'
+            case EmailTemplateType.OrderConfirmationPOS: return 'Websbop: Bestelling bevestiging betaling aan de kassa'
+            case EmailTemplateType.OrderReceivedTransfer: return 'Websbop: Bestelling ontvangen overschrijving'
+            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Websbop: Online betaling mislukt'
+            case EmailTemplateType.TicketsConfirmation: return 'Websbop: Tickets bevestiging'
+            case EmailTemplateType.TicketsConfirmationTransfer: return 'Websbop: Tickets bevestiging overschrijving'
+            case EmailTemplateType.TicketsConfirmationPOS: return 'Websbop: Tickets bevestiging betaling aan de kassa'
+            case EmailTemplateType.TicketsReceivedTransfer: return 'Websbop: Tickets ontvangen overschrijving'
+
+            case EmailTemplateType.OrganizationUnstableDNS: return 'Organisatie: instabiele DNS'
+            case EmailTemplateType.OrganizationInvalidDNS: return 'Organisatie: ongeldige DNS'
+            case EmailTemplateType.OrganizationValidDNS: return 'Organisatie: geldige DNS'
+            case EmailTemplateType.OrganizationStableDNS: return 'Organisatie: stabiele DNS'
+            case EmailTemplateType.OrganizationDNSSetupComplete: return 'Organisatie: DNS setup compleet'
+
+            case EmailTemplateType.OrganizationDripWelcome: return 'Organisatie: drip welkom'
+            case EmailTemplateType.OrganizationDripWebshopTrialCheckin: return 'Organisatie: drip webshop proefperiode checkin'
+            case EmailTemplateType.OrganizationDripMembersTrialCheckin: return 'Organisatie: drip ledenadministratie proefperiode checkin'
+            case EmailTemplateType.OrganizationDripWebshopTrialExpired: return 'Organisatie: drip webshop proefperiode verlopen'
+            case EmailTemplateType.OrganizationDripMembersTrialExpired: return 'Organisatie: drip ledenadministratie proefperiode verlopen'
+            case EmailTemplateType.OrganizationDripTrialExpiredReminder: return 'Organisatie: drip proefperiode verlopen reminder'
+            case EmailTemplateType.OrganizationDripWebshopNotRenewed: return 'Organisatie: drip webshop niet verlengd'
+            case EmailTemplateType.OrganizationDripMembersNotRenewed: return 'Organisatie: drip ledenadministratie niet verlengd'
+        }
+    }
+
+    static allowOrganizationLevel(type: EmailTemplateType): boolean {
+        switch (type) {
+            case EmailTemplateType.RegistrationConfirmation: return true
+            case EmailTemplateType.RegistrationTransferDetails: return true
+
+            case EmailTemplateType.OrderConfirmationOnline: return true
+            case EmailTemplateType.OrderConfirmationTransfer: return true
+            case EmailTemplateType.OrderConfirmationPOS: return true
+            case EmailTemplateType.OrderReceivedTransfer: return true
+            case EmailTemplateType.TicketsConfirmation: return true
+            case EmailTemplateType.TicketsConfirmationTransfer: return true
+            case EmailTemplateType.TicketsConfirmationPOS: return true
+            case EmailTemplateType.TicketsReceivedTransfer: return true
+        }
+
+        return false
+    }
+
+    static getPlatformTypeDescription(type: EmailTemplateType): string|null {
+        switch (type) {
+            case EmailTemplateType.OrganizationUnstableDNS: return 'Organisatie: instabiele DNS'
+            case EmailTemplateType.OrganizationInvalidDNS: return 'Organisatie: ongeldige DNS'
+            case EmailTemplateType.OrganizationValidDNS: return 'Organisatie: geldige DNS'
+            case EmailTemplateType.OrganizationStableDNS: return 'Organisatie: stabiele DNS'
+            case EmailTemplateType.OrganizationDNSSetupComplete: return 'Organisatie: DNS setup compleet'
+
+            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Wanneer een online betaling bij een webshop mislukt na een lange tijd wachten - zou zelden mogen voorkomen'
+        }
+
+        return null
+    }
+
+
+    static getTypeDescription(type: EmailTemplateType): string {
+        switch (type) {
+            case EmailTemplateType.OrderNotification: return 'E-mail die webshop eigenaren ontvangen wanneer er een bestelling is geplaatst (indien ze die functie hebben ingeschakeld)'
+            case EmailTemplateType.RegistrationConfirmation: return 'Na het inschrijven ontvangen de leden deze e-mail'
+
+            case EmailTemplateType.OrderConfirmationOnline: return 'Wanneer een besteller online betaald (of totaalbedrag is 0 euro)'
+            case EmailTemplateType.OrderConfirmationTransfer: return 'Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd'
+            case EmailTemplateType.OrderConfirmationPOS: return 'Wanneer een besteller kiest voor betaling ter plaatse/bij levering'
+            case EmailTemplateType.OrderReceivedTransfer: return 'De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)'
+            
+            case EmailTemplateType.TicketsConfirmation: return 'Wanneer een besteller online betaald (of totaalbedrag is 0 euro)'
+            case EmailTemplateType.TicketsConfirmationTransfer: return 'Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd'
+            case EmailTemplateType.TicketsConfirmationPOS: return 'Wanneer een besteller kiest voor betaling ter plaatse/bij levering'
+            case EmailTemplateType.TicketsReceivedTransfer: return 'De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)'
+
+        }
+
+        return ''
+    }
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
         if (type === EmailTemplateType.RegistrationConfirmation) {

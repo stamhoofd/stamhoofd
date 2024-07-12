@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 
 import { Organization } from '../Organization';
 import { User } from '../User';
-import { EmailRecipient } from '../endpoints/Email';
+import { EmailRecipient } from '../email/Email';
 import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/filterDefinitions';
 import { compileToInMemoryFilter } from '../filters/new/InMemoryFilter';
 import { StamhoofdFilter } from '../filters/new/StamhoofdFilter';
@@ -17,10 +17,10 @@ import { Formatter } from '@stamhoofd/utility';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(Registration) })
-    registrations: Registration[]
+    registrations: Registration[] = []
 
     @field({ decoder: new ArrayDecoder(User), version: 32 })
-    users: User[]
+    users: User[] = []
 
     @field({ decoder: new ArrayDecoder(MemberResponsibilityRecord), version: 263 })
     responsibilities: MemberResponsibilityRecord[] = []

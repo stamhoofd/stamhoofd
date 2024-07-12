@@ -1,5 +1,5 @@
 <template>
-    <form class="editor-view st-view" @submit.prevent="$emit('save')">
+    <form class="editor-view st-view" @submit.prevent="$emit('save')" :style="{'--editor-primary-color': primaryColor, '--editor-primary-color-contrast': primaryColorContrast}">
         <STNavigationBar :title="title" :disableDismiss="true" :disablePop="true">
             <template #left>
                 <BackButton v-if="canPop" @click="pop" />
@@ -36,7 +36,7 @@
             </div>
             <TextStyleButtonsView v-if="!$isMobile && showTextStyles && !showLinkEditor" class="editor-button-bar sticky" :editor="editor" />
 
-            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartButton')" class="editor-button-bar hint sticky">
+            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartButton') && getSmartButton(editor.getAttributes('smartButton').id)" class="editor-button-bar hint sticky">
                 {{ getSmartButton(editor.getAttributes('smartButton').id).hint }}
             </div>
 
@@ -276,6 +276,14 @@ export default class EditorView extends Mixins(NavigationMixin) {
                 width: 600
             })
         ]
+    }
+
+    get primaryColor() {
+        return this.smartVariables.find(v => v.id === "primaryColor")?.example || "#0053ff"
+    }
+
+    get primaryColorContrast() {
+        return this.smartVariables.find(v => v.id === "primaryColorContrast")?.example || "#fff"
     }
 
     insertImage(image: Image | null) {

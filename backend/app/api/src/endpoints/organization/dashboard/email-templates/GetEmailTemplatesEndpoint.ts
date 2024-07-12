@@ -1,7 +1,6 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailTemplate, Token } from '@stamhoofd/models';
+import { EmailTemplate } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
@@ -36,14 +35,20 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate()
 
-        if (!await Context.auth.canReadEmailTemplates(organization.id)) {
-            throw Context.auth.error()
-        }  
+        if (organization) {
+            if (!await Context.auth.canReadEmailTemplates(organization.id)) {
+                throw Context.auth.error()
+            }  
+        } else {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error()
+            } 
+        }
 
-        const types = [
+        const types = organization ? [
             EmailTemplateType.OrderConfirmationOnline, 
             EmailTemplateType.OrderConfirmationTransfer,
             EmailTemplateType.OrderConfirmationPOS,
@@ -53,9 +58,9 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             EmailTemplateType.TicketsConfirmationPOS,
             EmailTemplateType.TicketsReceivedTransfer,
             EmailTemplateType.RegistrationConfirmation
-        ]
+        ] : [...Object.values(EmailTemplateType)]
         
-        const templates = await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}});
+        const templates = organization ? await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}}) : [];
         const defaultTemplates = await EmailTemplate.where({ organizationId: null, type: {sign: 'IN', value: types} });
         return new Response([...templates, ...defaultTemplates].map(template => EmailTemplateStruct.create(template)))
     }

@@ -9,12 +9,29 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Admins)">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/admin.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/admin.svg">
+                    </template>
                     <h2 class="style-title-list">
                         {{ $t('admin.settings.admins.title') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('admin.settings.admins.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
+                    <template #left>
+                        <img src="~@stamhoofd/assets/images/illustrations/email.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Automatische e-mails
+                    </h2>
+                    <p class="style-description">
+                        Wijzig de inhoud van (automatische) e-mails.
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -102,16 +119,16 @@
 </template>
 
 <script lang="ts" setup>
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ComponentOptions } from 'vue';
-import {AdminsView, RecordsConfigurationView, Toast, usePlatform} from '@stamhoofd/components';
-import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures'
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
+import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { ComponentOptions } from 'vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
-import EditMemberResponsibilitiesView from './responsibilities/EditMemberResponsibilitiesView.vue';
-import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
+import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
+import EditMemberResponsibilitiesView from './responsibilities/EditMemberResponsibilitiesView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -120,6 +137,7 @@ enum Routes {
     Responsibilities = 'functies',
     RegistrationPeriods = 'werkjaren',
     PlatformMembershipTypes = 'lidmaatschappen',
+    EmailTemplates = 'email-templates'
 }
 
 const platform = usePlatform()
@@ -167,6 +185,11 @@ defineRoutes([
         url: Routes.PlatformMembershipTypes,
         present: 'popup',
         component: EditPlatformMembershipTypesView as ComponentOptions,
+    },
+    {
+        url: Routes.EmailTemplates,
+        present: 'popup',
+        component: EditEmailTemplatesView as ComponentOptions,
     }
 ])
 const $navigate = useNavigate()
