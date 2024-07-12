@@ -1,6 +1,6 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { AnyDecoder } from "@simonbackx/simple-encoding";
-import { EmailTemplateType } from "@stamhoofd/structures";
+import { EmailRecipientFilterType, EmailTemplate as EmailTemplateStruct, EmailTemplateType } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 
@@ -61,4 +61,8 @@ export class EmailTemplate extends Model {
         skipUpdate: true
     })
     updatedAt: Date
+
+    getStructure() {
+        return EmailTemplateStruct.create(this)
+    }
 }

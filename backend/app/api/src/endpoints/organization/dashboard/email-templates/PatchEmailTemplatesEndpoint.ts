@@ -28,13 +28,18 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate()
 
-        // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canReadEmailTemplates(organization.id)) {
-            throw Context.auth.error()
-        }  
+        if (organization) {
+            if (!await Context.auth.canReadEmailTemplates(organization.id)) {
+                throw Context.auth.error()
+            }  
+        } else {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error()
+            } 
+        }
 
         const templates: EmailTemplate[] = []
 
@@ -57,9 +62,14 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
         for (const put of request.body.getPuts()) {
             const struct = put.put
+
+            if (!EmailTemplateStruct.allowOrganizationLevel(struct.type) && organization) {
+                throw Context.auth.error();
+            }
+
             const template = new EmailTemplate()
             template.id = struct.id
-            template.organizationId = organization.id
+            template.organizationId = organization?.id ?? null
             template.webshopId = struct.webshopId
             template.groupId = struct.groupId
 
@@ -78,6 +88,15 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             await template.save()
 
             templates.push(template)
+        }
+
+        for (const id of request.body.getDeletes()) {
+            const template = await EmailTemplate.getByID(id)
+            if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
+                throw Context.auth.notFoundOrNoAccess("Je hebt geen toegang om deze emailtemplate te verwijderen")
+            } 
+            
+            await template.delete()
         }
         
         return new Response(templates.map(template => EmailTemplateStruct.create(template)))

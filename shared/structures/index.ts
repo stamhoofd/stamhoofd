@@ -67,7 +67,11 @@ export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
 export * from "./src/endpoints/VerifyEmailRequest"
 export * from "./src/endpoints/WebshopUriAvailabilityResponse"
 export * from "./src/endpoints/ChargeMembershipsSummary"
-export * from "./src/endpoints/Email"
+
+// email
+export * from "./src/email/Email"
+export * from "./src/email/EditorSmartVariable"
+export * from "./src/email/EditorSmartButton"
 
 // Grouping
 export * from "./src/grouping/PaginatedResponse"

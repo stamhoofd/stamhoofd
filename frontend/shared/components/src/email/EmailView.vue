@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="creatingEmail || !email" />
-    <EditorView v-else ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor, '--editor-primary-color-contrast': primaryColorContrast}" @save="send">
+    <EditorView v-else ref="editorView" class="mail-view" :loading="sending" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
         <h1 class="style-navigation-title">
             Nieuwe e-mail
         </h1>
@@ -13,6 +13,9 @@
                 <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
             </label>
+
+            <hr v-if="canOpenTemplates">
+            <button v-if="canOpenTemplates" v-tooltip="'Templates'" class="button icon lightning" type="button" @click="openTemplates" />
         </template>
 
         <!-- List -->
@@ -96,9 +99,9 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, Decoder, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Email, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, OrganizationEmail, Version } from '@stamhoofd/structures';
+import { Email, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, OrganizationEmail, Version } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import EditorView from '../editor/EditorView.vue';
@@ -107,6 +110,8 @@ import { useErrors } from '../errors/useErrors';
 import { useAuth, useContext, useInterval, useIsMobile } from '../hooks';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
+import { EditEmailTemplatesView } from '.';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 const props = withDefaults(defineProps<{
     emails: OrganizationEmail[],
@@ -133,8 +138,6 @@ class TmpFile {
 }
 
 const creatingEmail = ref(true);
-const primaryColor = ref('#0053ff');
-const primaryColorContrast = ref('#fff');
 const smartVariables = computed(() => email.value ? email.value.smartVariables : []);
 const smartButtons = computed(() => email.value ? email.value.smartButtons : []);
 const errors = useErrors();
@@ -149,6 +152,7 @@ const groupByEmail = ref(false);
 const editorView = ref(null) as Ref<EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
+const present = usePresent();
 
 const patch = ref(null) as Ref<AutoEncoderPatchType<Email>|null>;
 const savingPatch = ref(null) as Ref<AutoEncoderPatchType<Email>|null>;
@@ -356,12 +360,16 @@ async function getHTML() {
         // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
         return {
             text: "",
-            html: ""
+            html: "",
+            JSON: {}
         }
     }
 
     const base: string = e.getHTML();
-    return await EmailStyler.format(base, subject.value)
+    return {
+        ...await EmailStyler.format(base, subject.value),
+        json: e.getJSON()
+    }
 }
 
 async function send() {
@@ -493,5 +501,46 @@ function changedFile(event: InputEvent & { target: HTMLInputElement & { files: F
     
     // Clear selection
     (event.target as any).value = null;
+}
+
+const canOpenTemplates = computed(() => {
+    return !!email.value?.getTemplateType()
+})
+async function openTemplates() {
+    const type = email.value?.getTemplateType()
+    if (!type) {
+        return;
+    }
+
+    const current = await getHTML()
+    const hasExistingContent = (current).text.length > 2 || subject.value.length > 0
+
+    await present({
+        components: [
+            new ComponentWithProperties(EditEmailTemplatesView, {
+                types: [type],
+                onSelect: async (template: EmailTemplate) => {
+                    if (hasExistingContent) {
+                        if (!await CenteredMessage.confirm('Ben je zeker dat je de huidige inhoud wilt overschrijven?', 'Overschrijven', 'De huidige inhoud van je e-mail gaat verloren')) {
+                            return false;
+                        }
+                    }
+                    // todo
+                    // set json and subject
+                    editor.value?.commands.setContent(template.json)
+                    subject.value = template.subject
+
+                    return true;
+                },
+                createOption: hasExistingContent ? EmailTemplate.create({
+                    id: '',
+                    ...current,
+                    subject: subject.value,
+                }) : null
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
+
 }
 </script>
