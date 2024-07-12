@@ -10,10 +10,10 @@
             <STListItem v-for="emailTemplate in editableList" :key="emailTemplate.type + ':' + emailTemplate.id" :selectable="true" class="right-stack" @click="doSelectItem(emailTemplate)">
                 
                 <h2 class="style-title-list">
-                    {{ onSelect ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
+                    {{ EmailTemplate.getRecipientType(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
                 </h2>
-                <p v-if="!onSelect && emailTemplate.subject" class="style-description-small">
-                    {{ emailTemplate.subject }}
+                <p v-if="!EmailTemplate.getRecipientType(emailTemplate.type) && emailTemplate.subject" class="style-description-small">
+                    "{{ emailTemplate.subject }}"
                 </p>
 
                 <p class="style-description-small">
@@ -67,6 +67,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Ref, computed, ref } from 'vue';
 import EditEmailTemplateView from './EditEmailTemplateView.vue';
 import { Sorter } from '@stamhoofd/utility';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 const props = withDefaults(
     defineProps<{
@@ -75,18 +76,20 @@ const props = withDefaults(
         webshopId?: string|null;
         onSelect?: ((template: EmailTemplate) => boolean|Promise<boolean>) | null;
         createOption?: EmailTemplate|null;
+        allowEditGenerated?: boolean;
     }>(), {
         groupId: null,
         webshopId: null,
         types: () => [...Object.values(EmailTemplateType)],
         onSelect: null,
-        createOption: null
+        createOption: null,
+        allowEditGenerated: true
     })
 
 const viewTitle = computed(() => props.onSelect ? 'Kies een emailtemplate' : 'Wijzig automatische e-mails');
 const templates = ref([]) as Ref<EmailTemplate[]>
 const errors = useErrors();
-const {patched, addPatch, addPut, addDelete, patch} = usePatchArray(templates);
+const {patched, addPatch, addPut, addDelete, patch, hasChanges} = usePatchArray(templates);
 const owner = useRequestOwner()
 const context = useContext();
 const loading = ref(true);
@@ -94,6 +97,7 @@ const organization = useOrganization();
 const present = usePresent();
 const pop = usePop();
 const saving = ref(false);
+const $t = useTranslate();
 loadTemplates().catch(console.error);
 
 const tabItems = props.onSelect ? [
@@ -101,16 +105,23 @@ const tabItems = props.onSelect ? [
         id: 'userGenerated',
         label: 'Opgeslagen'
     }
-] : [
-    {
-        id: 'auto',
-        label: 'Automatische'
-    },
-    {
-        id: 'userGenerated',
-        label: 'Opgeslagen'
-    },
-];
+] : (
+        props.allowEditGenerated ? [
+            {
+                id: 'auto',
+                label: 'Automatische'
+            },
+            {
+                id: 'userGenerated',
+                label: 'Opgeslagen'
+            },
+        ] : [
+            {
+                id: 'auto',
+                label: 'Automatische'
+            }
+        ]
+    );
 
 const tab = ref(tabItems[0].id);
 
@@ -121,7 +132,8 @@ const editableList = computed(() => {
     }
 
     // All auto
-    const base = patched.value.filter(t => !EmailTemplate.getRecipientType(t.type) && props.types.includes(t.type));
+    const org = organization.value;
+    const base = patched.value.filter(t => !EmailTemplate.getRecipientType(t.type) && props.types.includes(t.type) && (!org || t.organizationId === org.id));
 
     // Create missing ones
     for (const type of props.types) {
@@ -129,7 +141,6 @@ const editableList = computed(() => {
             let defaultTemplate: EmailTemplate | null = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === null) ?? null;
 
             if (organization.value) {
-                const org = organization.value;
                 defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === org.id) ?? defaultTemplate ?? null;
             }
             
@@ -283,4 +294,14 @@ async function save() {
     }
 }
 
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
+}
+
+defineExpose({
+    shouldNavigateAway
+})
 </script>

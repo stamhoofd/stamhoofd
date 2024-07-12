@@ -166,10 +166,26 @@ export class EditorSmartVariable extends AutoEncoder {
                 deleteMessage: "Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt."
             }),
             EditorSmartVariable.create({
+                id: "registerUrl", 
+                name: "Inschrijvingsportaal link", 
+                example: "https://inschrijven.mijnvereniging.be", 
+            }),
+            EditorSmartVariable.create({
                 id: "loginDetails", 
                 name: "Inloggegevens", 
                 example: "",
+                html: `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml('voorbeeld@email.com')}</strong></em></p>`,
                 hint: "Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen."
+            }),
+            EditorSmartVariable.create({
+                id: "groupName", 
+                name: "Groepnaam", 
+                example: "Kapoenen", 
+            }),
+            EditorSmartVariable.create({
+                id: "mailDomain", 
+                name: "E-maildomeinnaam", 
+                example: "vereniging.com", 
             }),
         ]
 

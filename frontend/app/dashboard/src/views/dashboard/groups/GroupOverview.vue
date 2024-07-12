@@ -239,9 +239,9 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useNavigationController, usePresent, useShow } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization } from "@stamhoofd/components";
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
@@ -358,7 +358,19 @@ async function editPage(animated = true) {
 }
 
 async function editEmails(animated = true) {
-    await displayEditComponent(EditGroupEmailsView, animated)
+    await present({
+        components: [
+            new ComponentWithProperties(EditEmailTemplatesView, {
+                groupId: props.group.id,
+                allowEditGenerated: false,
+                types: [
+                    EmailTemplateType.RegistrationConfirmation
+                ]
+            })
+        ],
+        modalDisplayStyle: "popup",
+        animated,
+    })
 }
 
 async function openGroup() {
