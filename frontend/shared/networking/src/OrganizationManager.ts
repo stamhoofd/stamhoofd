@@ -41,7 +41,7 @@ export class OrganizationManager {
         await this.$context.fetchOrganization(false)
     }
 
-    async patch(patch: AutoEncoderPatchType<Organization>, shouldRetry = false) {
+    async patch(patch: AutoEncoderPatchType<Organization>, options: { shouldRetry?: boolean, owner?: any } = {}) {
         if (!this.$context.organization) {
             throw new SimpleError({
                 code: "no_organization",
@@ -56,7 +56,8 @@ export class OrganizationManager {
             path: "/organization",
             body: patch,
             decoder: Organization as Decoder<Organization>,
-            shouldRetry
+            shouldRetry: options.shouldRetry ?? false,
+            owner: options.owner
         })
 
         // Keep admins

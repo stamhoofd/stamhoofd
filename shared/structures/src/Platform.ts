@@ -7,10 +7,14 @@ import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsC
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
 import { MemberResponsibility } from "./MemberResponsibility";
 import { RegistrationPeriod } from "./RegistrationPeriod";
+import { OrganizationEmail } from "./OrganizationEmail";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
     roles: PermissionRoleDetailed[] = []
+
+    @field({ decoder: new ArrayDecoder(OrganizationEmail), version: 272 })
+    emails: OrganizationEmail[] = []
 }
 
 export class OrganizationTag extends AutoEncoder {

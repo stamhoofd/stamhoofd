@@ -287,13 +287,12 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { AdminsView, AsyncComponent, BackButton, CenteredMessage, LoadComponent, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { AdminsView, BackButton, EmailSettingsView, LoadComponent, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, PaymentMethod, Platform, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
+import { Organization, OrganizationMetaData, OrganizationRecordsConfiguration, PaymentMethod, Platform, StripeAccount } from "@stamhoofd/structures";
 
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
-import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import LabsView from './LabsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
