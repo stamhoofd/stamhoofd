@@ -41,55 +41,43 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { OrganizationEmail, OrganizationPrivateMetaData } from "@stamhoofd/structures"
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { ComponentWithProperties, usePresent } from "@simonbackx/vue-app-navigation";
+import { STList, STListItem, STNavigationBar, STToolbar, useOrganization, usePlatform } from "@stamhoofd/components";
+import { OrganizationEmail } from "@stamhoofd/structures";
 
 
+import { computed } from "vue";
 import EditEmailView from './EditEmailView.vue';
 
-@Component({
-    components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        BackButton,
-        LoadingButton,
-        STList,
-        STListItem
-    },
-})
-export default class EmailSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
+const organization = useOrganization()
+const platform = usePlatform()
+const emails = computed(() => (organization.value ? organization.value.privateMeta?.emails : platform.value.privateConfig?.emails) ?? [])
 
-    // Make session (organization) reactive
-    reactiveSession = this.$context
+const present = usePresent()
 
-    get organization() {
-        return this.$organization
-    }
+async function editEmail(email: OrganizationEmail) {
+    await present({
+        components: [
+            new ComponentWithProperties(EditEmailView, {
+                email,
+                isNew: false
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
+}
 
-    get emails() {
-        return this.organization.privateMeta?.emails ?? []
-    }
-
-    editEmail(email: OrganizationEmail) {
-        this.present(new ComponentWithProperties(EditEmailView, { emailId: email.id }).setDisplayStyle('popup'))
-    }
-    
-    addEmail() {
-        const email = OrganizationEmail.create({ email: "" })
-        const patch = this.$organizationManager.getPatch()
-        patch.privateMeta = OrganizationPrivateMetaData.patchType().create({})
-        patch.privateMeta!.emails.addPut(email)
-        this.present(new ComponentWithProperties(EditEmailView, { initialPatch: patch, emailId: email.id, isNew: true }).setDisplayStyle('popup'))
-    }
+async function addEmail() {
+    const email = OrganizationEmail.create({ email: "" })
+    await present({
+        components: [
+            new ComponentWithProperties(EditEmailView, {
+                email,
+                isNew: true
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
 }
 </script>

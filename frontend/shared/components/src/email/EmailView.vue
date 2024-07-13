@@ -107,16 +107,15 @@ import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { useErrors } from '../errors/useErrors';
-import { useAuth, useContext, useInterval, useIsMobile } from '../hooks';
+import { useAuth, useContext, useInterval, useIsMobile, useOrganization, usePlatform } from '../hooks';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { EditEmailTemplatesView } from '.';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import EmailSettingsView from './EmailSettingsView.vue';
 
 const props = withDefaults(defineProps<{
-    emails: OrganizationEmail[],
     defaultSubject?: string,
-    manageEmails: () => void,
     recipientFilterOptions: {
         name: string,
         value: EmailRecipientSubfilter[]
@@ -153,6 +152,15 @@ const editorView = ref(null) as Ref<EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
 const present = usePresent();
+const organization = useOrganization();
+const platform = usePlatform();
+
+const emails = computed(() => {
+    if (organization.value) {
+        return organization.value.privateMeta?.emails ?? []
+    }
+    return platform.value?.privateConfig?.emails ?? []
+})
 
 const patch = ref(null) as Ref<AutoEncoderPatchType<Email>|null>;
 const savingPatch = ref(null) as Ref<AutoEncoderPatchType<Email>|null>;
@@ -215,7 +223,7 @@ const fromName = computed({
 })
 
 const selectedEmailAddress = computed({
-    get: () => props.emails.find(e => e.email === fromAddress.value && e.name === fromName.value) ?? props.emails.find(e => e.email === fromAddress.value) ?? props.emails.find(e => e.name && e.name === fromName.value) ?? null,
+    get: () => emails.value.find(e => e.email === fromAddress.value && e.name === fromName.value) ?? emails.value.find(e => e.email === fromAddress.value) ?? emails.value.find(e => e.name && e.name === fromName.value) ?? null,
     set: (email: OrganizationEmail|null) => {
         addPatch({
             fromAddress: email?.email ?? null,
@@ -265,8 +273,8 @@ async function createEmail() {
         path: '/email',
         body: Email.create({
             recipientFilter: recipientFilter.value,
-            fromAddress: props.emails.length > 0 ? props.emails[0].email : null,
-            fromName: props.emails.length > 0 ? props.emails[0].name : null,
+            fromAddress: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).email : null,
+            fromName: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).name : null,
             status: EmailStatus.Draft,
             subject: props.defaultSubject
         }),
@@ -349,9 +357,13 @@ async function updateEmail() {
     email.value = response.data
 }
 
-
-async function openPreview() {
-    // todo
+async function manageEmails() {
+    await present({
+        components: [
+            new ComponentWithProperties(EmailSettingsView, {})
+        ],
+        modalDisplayStyle: 'popup'
+    })
 }
 
 async function getHTML() {

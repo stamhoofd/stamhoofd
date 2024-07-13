@@ -23,6 +23,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
+                    <template #left>
+                        <img src="~@stamhoofd/assets/images/illustrations/email.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        E-mailadressen
+                    </h2>
+                    <p class="style-description">
+                        Wijzig de e-mailadressen waaruit e-mails verzonden kunnen worden.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/email.svg">
@@ -121,7 +136,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView } from '@stamhoofd/components';
+import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView, EmailSettingsView } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
@@ -137,7 +152,8 @@ enum Routes {
     Responsibilities = 'functies',
     RegistrationPeriods = 'werkjaren',
     PlatformMembershipTypes = 'lidmaatschappen',
-    EmailTemplates = 'email-templates'
+    EmailTemplates = 'email-templates',
+    EmailSettings = 'emailadressen',
 }
 
 const platform = usePlatform()
@@ -190,6 +206,11 @@ defineRoutes([
         url: Routes.EmailTemplates,
         present: 'popup',
         component: EditEmailTemplatesView as ComponentOptions,
+    },
+    {
+        url: Routes.EmailSettings,
+        present: 'popup',
+        component: EmailSettingsView as ComponentOptions,
     }
 ])
 const $navigate = useNavigate()

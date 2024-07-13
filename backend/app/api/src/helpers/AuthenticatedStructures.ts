@@ -103,7 +103,7 @@ export class AuthenticatedStructures {
                 privateMeta: organization.privateMeta,
                 webshops: webshopStructures,
                 createdAt: organization.createdAt,
-                period: oPeriod.getStructure(period, groups)
+                period: oPeriod.getPrivateStructure(period, groups)
             })
         }
         

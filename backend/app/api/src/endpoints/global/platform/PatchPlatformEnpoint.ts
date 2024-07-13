@@ -47,6 +47,15 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
                 // Update roles
                 platform.privateConfig.roles = patchObject(platform.privateConfig.roles, request.body.privateConfig.roles)
             }
+
+            if (request.body.privateConfig.emails) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error()
+                }
+
+                // Update roles
+                platform.privateConfig.emails = patchObject(platform.privateConfig.emails, request.body.privateConfig.emails)
+            }
         }
 
         if (request.body.config) {

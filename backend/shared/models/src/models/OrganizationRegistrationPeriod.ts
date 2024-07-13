@@ -53,6 +53,14 @@ export class OrganizationRegistrationPeriod extends Model {
         })
     }
 
+    getPrivateStructure(this: OrganizationRegistrationPeriod, period: RegistrationPeriod, groups: Group[]) {
+        return OrganizationRegistrationPeriodStruct.create({
+            ...this,
+            period: period.getStructure(),
+            groups: groups.map(g => g.getPrivateStructure()).sort(GroupStruct.defaultSort)
+        })
+    }
+
     async cleanCategories(groups: {id: string}[]) {
         const reachable = new Map<string, boolean>()
         const queue = [this.settings.rootCategoryId]

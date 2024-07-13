@@ -98,7 +98,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             // Delete unreachable categories first
             await organizationPeriod.cleanCategories(groups);
             await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
-            structs.push(organizationPeriod.getStructure(period, groups));
+            structs.push(organizationPeriod.getPrivateStructure(period, groups));
         }
 
         for (const patch of request.body.getPatches()) {
@@ -261,7 +261,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             }
 
             if (period) {
-                structs.push(organizationPeriod.getStructure(period, groups));
+                structs.push(organizationPeriod.getPrivateStructure(period, groups));
             }
         }
 
