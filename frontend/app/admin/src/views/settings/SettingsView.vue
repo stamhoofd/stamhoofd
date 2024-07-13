@@ -23,36 +23,6 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
-                    <template #left>
-                        <img src="~@stamhoofd/assets/images/illustrations/email.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        E-mailadressen
-                    </h2>
-                    <p class="style-description">
-                        Wijzig de e-mailadressen waaruit e-mails verzonden kunnen worden.
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
-                    <template #left>
-                        <img src="~@stamhoofd/assets/images/illustrations/email.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        Automatische e-mails
-                    </h2>
-                    <p class="style-description">
-                        Wijzig de inhoud van (automatische) e-mails.
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Records)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
@@ -123,6 +93,42 @@
                     </h2>
                     <p class="style-description">
                         {{ $t('admin.settings.membershipTypes.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+
+
+            <hr>
+            <h2>E-mails</h2>
+
+            <STList class="illustration-list">  
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
+                    <template #left>
+                        <img src="~@stamhoofd/assets/images/illustrations/email.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        E-mailadressen
+                    </h2>
+                    <p class="style-description">
+                        Wijzig de e-mailadressen waaruit e-mails verzonden kunnen worden.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
+                    <template #left>
+                        <img src="~@stamhoofd/assets/images/illustrations/email-template.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Automatische e-mails
+                    </h2>
+                    <p class="style-description">
+                        Wijzig de inhoud van (automatische) e-mails.
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
