@@ -178,6 +178,7 @@ export class EmailTemplate extends AutoEncoder {
 
     static allowOrganizationLevel(type: EmailTemplateType): boolean {
         switch (type) {
+            case EmailTemplateType.DefaultMembersEmail: return true
             case EmailTemplateType.SavedMembersEmail: return true
 
             case EmailTemplateType.RegistrationConfirmation: return true

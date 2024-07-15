@@ -18,7 +18,7 @@
             </p>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.General)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                     </template>
@@ -33,7 +33,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openPersonalize(true)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Personalization)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                     </template>
@@ -48,23 +48,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="setupEmail(true)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        E-mailadressen
-                    </h2>
-                    <p class="style-description">
-                        Verstuur e-mails vanaf je zelf gekozen e-mailadres
-                    </p>
-                    <template #right>
-                        <span v-if="!hasPolicy" v-tooltip="'We hebben zeker één e-mailadres nodig voor communicatie en indien leden antwoorden op automatische e-mails'" class="icon warning yellow" />
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem :selectable="true" class="left-center" @click="openAdmins(true)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Admins)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
@@ -79,7 +63,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openPrivacy(true)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Privacy)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     </template>
@@ -90,12 +74,11 @@
                         Stel je privacyvoorwaarden in
                     </p>
                     <template #right>
-                        <span v-if="!hasPolicy" v-tooltip="'Voeg je privacyvoorwaarden toe om in orde te zijn met GDPR'" class="icon warning yellow" />
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PaymentAccounts)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                     </template>
@@ -111,12 +94,49 @@
                 </STListItem>
             </STList>
 
-            <template v-if="enableMemberModule">
+            <hr>
+
+            <h2>E-mails</h2>
+
+            <STList class="illustration-list">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        E-mailadressen
+                    </h2>
+                    <p class="style-description">
+                        Verstuur e-mails vanaf je zelf gekozen e-mailadres
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Automatische e-mails
+                    </h2>
+                    <p class="style-description">
+                        Wijzig de inhoud van automatische e-mails naar leden.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+
+
+            <template v-if="membersPackage">
                 <hr>
                 <h2>Ledenadministratie</h2>
 
                 <STList class="illustration-list">    
-                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationPage)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                         </template>
@@ -132,7 +152,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="openRegistrationPayment(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.RegistrationPaymentMethods)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
@@ -147,7 +167,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationGroups)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
@@ -165,7 +185,7 @@
 
 
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords(true)">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationRecords)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                         </template>
@@ -181,7 +201,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageFreeContribution(true)">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationFreeContributions)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                         </template>
@@ -199,11 +219,11 @@
                 </STList>
             </template>
 
-            <template v-if="getFeatureFlag('sso')">
+            <template v-if="feature('sso')">
                 <hr>
                 <h2>Geavanceerd</h2>
                 <STList class="illustration-list">    
-                    <STListItem :selectable="true" class="left-center" @click="openSSO(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
@@ -220,11 +240,11 @@
                 </STList>
             </template>
 
-            <template v-if="!areSalesDisabled">
+            <template v-if="!salesDisabled">
                 <hr>
                 <h2>{{ $t('shared.platformName') }}</h2>
                 <STList class="illustration-list">    
-                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="openPackages(true)">
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
@@ -239,7 +259,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="openReferrals(true)">
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Referrals)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
@@ -254,7 +274,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="openLabs(true)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Labs)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
                         </template>
@@ -282,452 +302,218 @@
     </div>
 </template>
 
-<script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { AdminsView, BackButton, EmailSettingsView, LoadComponent, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, UrlHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationMetaData, OrganizationRecordsConfiguration, PaymentMethod, Platform, StripeAccount } from "@stamhoofd/structures";
+<script lang="ts" setup>
+import { AdminsView, EditEmailTemplatesView, EmailSettingsView, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from "@stamhoofd/components";
 
-import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
-import { buildManageGroupsComponent } from './buildManageGroupsComponent';
-import GeneralSettingsView from './GeneralSettingsView.vue';
-import LabsView from './LabsView.vue';
-import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
+import { defineRoutes, useNavigate, usePresent } from "@simonbackx/vue-app-navigation";
+import { useTranslate } from "@stamhoofd/frontend-i18n";
+import { useOrganizationManager, useRequestOwner } from "@stamhoofd/networking";
+import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from "@stamhoofd/structures";
+import { ComponentOptions, computed, ref, Ref } from "vue";
+import { buildManageGroupsComponent } from "./buildManageGroupsComponent";
+import GeneralSettingsView from "./GeneralSettingsView.vue";
+import LabsView from "./LabsView.vue";
+import FreeContributionSettingsView from "./modules/members/FreeContributionSettingsView.vue";
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
-import BillingSettingsView from './packages/BillingSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import PackageSettingsView from './packages/PackageSettingsView.vue';
-import PaymentSettingsView from './PaymentSettingsView.vue';
-import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
-import PrivacySettingsView from './PrivacySettingsView.vue';
-import ReferralView from './ReferralView.vue';
-import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
-import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
+import PackageSettingsView from "./packages/PackageSettingsView.vue";
+import PaymentSettingsView from "./PaymentSettingsView.vue";
+import PersonalizeSettingsView from "./PersonalizeSettingsView.vue";
+import PrivacySettingsView from "./PrivacySettingsView.vue";
+import ReferralView from "./ReferralView.vue";
+import RegistrationPageSettingsView from "./RegistrationPageSettingsView.vue";
+import RegistrationPaymentSettingsView from "./RegistrationPaymentSettingsView.vue";
+import SSOSettingsView from "./SSOSettingsView.vue";
 
-@Component({
-    components: {
-        STNavigationBar,
-        BackButton,
-        STList,
-        STListItem,
-        ModuleSettingsBox,
-        BillingWarningBox
+enum Routes {
+    General = 'algemeen',
+    Personalization = 'personaliseren',
+    Privacy = 'privacy',
+    PaymentAccounts = 'betaal-accounts',
+    Admins = 'beheerders',
+    EmailTemplates = 'email-templates',
+    EmailSettings = 'emailadressen',
+    RegistrationPaymentMethods = 'inschrijvingen/betaalmethodes',
+    RegistrationPage = 'inschrijvingen/pagina',
+    RegistrationGroups = 'inschrijvingen/groepen',
+    RegistrationRecords = 'inschrijvingen/vragenlijsten',
+    RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
+    SingleSignOn = 'sso',
+    Packages = 'pakketten',
+    Referrals = 'referrals',
+    Labs = 'experimenten'
+}
+
+const isPlatform = STAMHOOFD.userMode === 'platform';
+const $organizationManager = useOrganizationManager();
+const platform = usePlatform();
+const present = usePresent();
+
+defineRoutes([
+    {
+        url: Routes.General,
+        component: GeneralSettingsView as unknown as ComponentOptions,
+        present: 'popup'
     },
-    directives: {
-        tooltip: TooltipDirective
+    {
+        url: Routes.Personalization,
+        component: PersonalizeSettingsView as unknown as ComponentOptions,
+        present: 'popup'
+    },
+    {
+        url: Routes.Privacy,
+        component: PrivacySettingsView as unknown as ComponentOptions,
+        present: 'popup'
+    },
+    {
+        url: Routes.PaymentAccounts,
+        component: PaymentSettingsView as unknown as ComponentOptions,
+        present: 'popup'
+    },
+    {
+        url: Routes.Admins,
+        component: AdminsView as ComponentOptions,
+    },
+    {
+        url: Routes.EmailTemplates,
+        present: 'popup',
+        component: EditEmailTemplatesView as ComponentOptions,
+        paramsToProps() {
+            return {
+                types: [...Object.values(EmailTemplateType)].filter(t => EmailTemplate.allowOrganizationLevel(t))
+            }
+        }
+    },
+    {
+        url: Routes.EmailSettings,
+        present: 'popup',
+        component: EmailSettingsView as ComponentOptions,
+    },
+    {
+        url: Routes.RegistrationPaymentMethods,
+        present: 'popup',
+        component: RegistrationPaymentSettingsView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.RegistrationPage,
+        present: 'popup',
+        component: RegistrationPageSettingsView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.RegistrationGroups,
+        present: 'popup',
+        handler: async (options) => {
+            const component = buildManageGroupsComponent($organizationManager.value)
+
+            await present({
+                ...(options as any),
+                components: [component]
+            })
+        }
+    },
+    {
+        url: Routes.RegistrationRecords,
+        present: 'popup',
+        component: RecordsConfigurationView as ComponentOptions,
+        paramsToProps() {
+            return {
+                inheritedRecordsConfiguration: platform.value.config.recordsConfiguration,
+                recordsConfiguration: $organizationManager.value.organization.meta.recordsConfiguration,
+                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
+                    await $organizationManager.value.patch(Organization.patch({
+                        id: $organizationManager.value.organization.id,
+                        meta: OrganizationMetaData.patch({
+                            recordsConfiguration: patch
+                        })
+                    }))
+                    Toast.success("De aanpassingen zijn opgeslagen").show();
+                }
+            }
+        }
+    },
+    {
+        url: Routes.RegistrationFreeContributions,
+        present: 'popup',
+        component: FreeContributionSettingsView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.SingleSignOn,
+        present: 'popup',
+        component: SSOSettingsView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.Packages,
+        present: 'popup',
+        component: PackageSettingsView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.Referrals,
+        present: 'popup',
+        component: ReferralView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.Labs,
+        present: 'popup',
+        component: LabsView as unknown as ComponentOptions,
     }
+])
+const $navigate = useNavigate()
+const stripeAccounts = ref([]) as Ref<StripeAccount[]>
+const loadingStripeAccounts = ref(false)
+const context = useContext()
+const owner = useRequestOwner()
+const feature = useFeatureFlag();
+const stripeWarnings = computed(() => {
+    return stripeAccounts.value.flatMap(a => a.warning ? [a.warning] : [])
 })
-export default class SettingsView extends Mixins(NavigationMixin) {
-    temp_organization = this.$organization
-    loadingStripeAccounts = false;
-    stripeAccounts: StripeAccount[] = []
+const $t = useTranslate()
+const salesDisabled = useSalesDisabled()
+const membersPackage = useMembersPackage()
+loadStripeAccounts(null).catch(console.error)
 
-    get organization() {
-        return this.$organization
-    }
+async function loadStripeAccounts(recheckStripeAccount: string | null) {
+    try {
+        loadingStripeAccounts.value = true
+        if (recheckStripeAccount) {
+            try {
+                await context.value.authenticatedServer.request({
+                    method: "POST",
+                    path: "/stripe/accounts/" + encodeURIComponent(recheckStripeAccount),
+                    decoder: StripeAccount as Decoder<StripeAccount>,
+                    owner
+                })
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        const response = await context.value.authenticatedServer.request({
+            method: "GET",
+            path: "/stripe/accounts",
+            decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
+            owner
+        })
+        stripeAccounts.value = response.data
 
-    get isPlatform() {
-        return STAMHOOFD.userMode === 'platform'
-    }
-
-    get areSalesDisabled() {
-        return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
-    }
-
-    getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
-    }
-
-    get stripeWarnings() {
-        return this.stripeAccounts.flatMap(a => a.warning ? [a.warning] : [])
-    }
-
-    async loadStripeAccounts(recheckStripeAccount: string | null) {
-        try {
-            this.loadingStripeAccounts = true
-            if (recheckStripeAccount) {
+        if (!recheckStripeAccount) {
+            for (const account of stripeAccounts.value) {
                 try {
-                    await this.$context.authenticatedServer.request({
+                    const response = await context.value.authenticatedServer.request({
                         method: "POST",
-                        path: "/stripe/accounts/" + encodeURIComponent(recheckStripeAccount),
+                        path: "/stripe/accounts/" + encodeURIComponent(account.id),
                         decoder: StripeAccount as Decoder<StripeAccount>,
-                        owner: this
+                        owner
                     })
+                    account.deepSet(response.data)
                 } catch (e) {
                     console.error(e)
                 }
             }
-            const response = await this.$context.authenticatedServer.request({
-                method: "GET",
-                path: "/stripe/accounts",
-                decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
-                owner: this
-            })
-            this.stripeAccounts = response.data
-
-            if (!recheckStripeAccount) {
-                for (const account of this.stripeAccounts) {
-                    try {
-                        const response = await this.$context.authenticatedServer.request({
-                            method: "POST",
-                            path: "/stripe/accounts/" + encodeURIComponent(account.id),
-                            decoder: StripeAccount as Decoder<StripeAccount>,
-                            owner: this
-                        })
-                        account.deepSet(response.data)
-                    } catch (e) {
-                        console.error(e)
-                    }
-                }
-            }
-        } catch (e) {
-            console.error(e)
         }
-        this.loadingStripeAccounts = false
+    } catch (e) {
+        console.error(e)
     }
-
-    openReferrals(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(ReferralView, {})
-                })
-            ]
-        })
-    }
-
-    openGeneral(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(GeneralSettingsView, {})
-                })
-            ],
-            url: 'general'
-        })
-    }
-
-    openLabs(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(LabsView, {})
-                })
-            ],
-            url: 'labs'
-        })
-    }
-
-    openPersonalize(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(PersonalizeSettingsView, {})
-                })
-            ],
-            url: 'personalize'
-        })
-    }
-
-    openPrivacy(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(PrivacySettingsView, {})
-                })
-            ],
-            url: 'privacy'
-        })
-    }
-
-    openAdmins(animated = true) {
-        this.show({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(AdminsView, {})
-            ]
-        })
-    }
-
-    async openSSO(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "SSOSettingsView" */  "./SSOSettingsView.vue"), { }, { instant: !animated })
-                })
-            ]
-        })
-    }
-
-    setupEmail(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(EmailSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    openPayment(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(PaymentSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    openRegistrationPayment(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(RegistrationPaymentSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    openPackages(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(PackageSettingsView, {})
-                })
-            ],
-            url: 'packages'
-        })
-    }
-
-    openPayments(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(ConfigurePaymentExportView, {})
-                })
-            ]
-        })
-    }
-
-    openBilling(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(BillingSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    manageRegistrationPage(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(RegistrationPageSettingsView)
-                })
-            ]
-        })
-    }
-
-    manageGroups(animated = true) {
-        const component = buildManageGroupsComponent(this.$organizationManager)
-            
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: component
-                })
-            ]
-        })
-    }
-
-    manageRecords(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(RecordsConfigurationView, {
-                        inheritedRecordsConfiguration: Platform.shared.config.recordsConfiguration,
-                        recordsConfiguration: this.$organization.meta.recordsConfiguration,
-                        saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                            await this.$organizationManager.patch(Organization.patch({
-                                id: this.$organization.id,
-                                meta: OrganizationMetaData.patch({
-                                    recordsConfiguration: patch
-                                })
-                            }))
-                            Toast.success("De aanpassingen zijn opgeslagen").show();
-                        }
-                    })
-                })
-            ]
-        })
-    }
-
-    manageFreeContribution(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(FreeContributionSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    get hasPolicy() {
-        return this.organization.meta.privacyPolicyUrl !== null || this.organization.meta.privacyPolicyFile !== null
-    }
-
-    get hasPaymentMethod() {
-        return (this.organization.meta.transferSettings.iban && this.organization.meta.transferSettings.iban.length > 0) || !this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
-    } 
-
-    get hasGroups() {
-        return this.organization.groups.length > 0
-    } 
-
-    get enableMemberModule() {
-        return this.organization.meta.modules.useMembers
-    }
-
-    get enableWebshopModule() {
-        return this.organization.meta.modules.useWebshops
-    }
-
-    get enableActivities() {
-        return this.organization.meta.modules.useActivities
-    }
-
-    activated() {
-        this.$url.setTitle("Instellingen")
-    }
-
-    mounted() {
-        // First set current url already, to fix back
-        if (this.$url.match('oauth/mollie')) {
-            // Open mollie settings
-            this.openPayment(false)
-            return
-        }
-
-        if (this.$url.match('admins')) {
-            // Open mollie settings
-            this.openAdmins(false)
-            return; // (don't clear)
-        }
-
-        if (this.$url.match('general')) {
-            // Open mollie settings
-            this.openGeneral(false)
-        }
-
-        if (this.$url.match('payments')) {
-            // Open mollie settings
-            this.openPayment(false)
-        }
-
-        if (this.$url.match('labs')) {
-            // Open mollie settings
-            this.openLabs(false)
-        }
-
-        if (this.$url.match('registration-payments')) {
-            // Open mollie settings
-            this.openRegistrationPayment(false)
-        }
-
-        if (this.$url.match('privacy')) {
-            // Open mollie settings
-            this.openPrivacy(false)
-        }
-
-        if (this.$url.match('personalize')) {
-            // Open mollie settings
-            this.openPersonalize(false)
-        }
-
-        if (this.$url.match('sso')) {
-            // Open mollie settings
-            this.openSSO(false).catch(console.error)
-        }
-
-        if (this.$url.match('records')) {
-            // Open mollie settings
-            this.manageRecords(false)
-        }
-
-        if (this.$url.match('packages')) {
-            this.openPackages(false)
-        }
-
-        if (this.$url.match('referrals')) {
-            this.openReferrals(false)
-        }
-
-        if (this.$url.match('free-contribution')) {
-            this.manageFreeContribution(false)
-        }
-
-        UrlHelper.shared.clear()
-        this.loadStripeAccounts(null).catch(console.error);
-    }
-
-    beforeUnmount() {
-        // Clear all pending requests
-        Request.cancelAll(this)
-    }
+    loadingStripeAccounts.value = false
 }
+
 </script>

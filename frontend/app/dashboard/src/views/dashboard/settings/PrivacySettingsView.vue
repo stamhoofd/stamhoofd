@@ -42,7 +42,6 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, ErrorBox, FileInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
 
 
@@ -62,18 +61,12 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
 
-    // Make organization reactive
-    temp_organization = this.$organization
-
     // Keep track of selected option
-    defaultSelectedType = this.$organization.meta.privacyPolicyUrl ? "website" : (this.$organization.meta.privacyPolicyFile ? "file" : "none")
-    selectedPrivacyType = this.defaultSelectedType
+    defaultSelectedType = 'none'
+    selectedPrivacyType = 'none'
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({})
-    
-    created() {
-        this.organizationPatch.id = this.$organization.id
-    }
+
 
     get organization() {
         return this.$organization.patch(this.organizationPatch)
@@ -84,22 +77,23 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     }
 
     set privacyPolicyUrl(url: string | null) {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({ }))
-        }
-        this.$set(this.organizationPatch.meta!, 'privacyPolicyUrl', url)
+        this.organizationPatch = this.organizationPatch.patch({
+            meta: OrganizationMetaData.patch({
+                privacyPolicyUrl: url
+            })
+        })
     }
 
     get privacyPolicyFile() {
-        console.log(this.organization.meta.privacyPolicyFile)
         return this.organization.meta.privacyPolicyFile
     }
 
     set privacyPolicyFile(file: File | null) {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-        this.$set(this.organizationPatch.meta!, "privacyPolicyFile", file)
+        this.organizationPatch = this.organizationPatch.patch({
+            meta: OrganizationMetaData.patch({
+                privacyPolicyFile: file
+            })
+        })
     }
 
     async save() {
@@ -161,6 +155,10 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        this.defaultSelectedType = this.$organization.meta.privacyPolicyUrl ? "website" : (this.$organization.meta.privacyPolicyFile ? "file" : "none")
+        this.selectedPrivacyType = this.defaultSelectedType
+
+        this.organizationPatch.id = this.$organization.id
         this.setUrl("/privacy");
     }
 }

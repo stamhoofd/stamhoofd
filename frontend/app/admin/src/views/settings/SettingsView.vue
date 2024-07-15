@@ -153,7 +153,7 @@ import EditMemberResponsibilitiesView from './responsibilities/EditMemberRespons
 
 enum Routes {
     Admins = 'beheerders',
-    Records = 'records',
+    Records = 'vragenlijsten',
     DefaultAgeGroups = 'standaard-leeftijdsgroepen',
     Responsibilities = 'functies',
     RegistrationPeriods = 'werkjaren',
