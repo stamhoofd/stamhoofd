@@ -165,10 +165,10 @@
 
                     <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/email.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                         </template>
                         <h2 class="style-title-list">
-                            E-mails
+                            Automatische e-mails
                         </h2>
                         <p class="style-description">
                             Wijzig de inhoud van automatische e-mails naar leden.
