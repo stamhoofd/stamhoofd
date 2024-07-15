@@ -10,9 +10,9 @@
             <STListItem v-for="emailTemplate in editableList" :key="emailTemplate.type + ':' + emailTemplate.id" :selectable="true" class="right-stack" @click="doSelectItem(emailTemplate)">
                 
                 <h2 class="style-title-list">
-                    {{ EmailTemplate.getRecipientType(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
+                    {{ EmailTemplate.isSavedEmail(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
                 </h2>
-                <p v-if="!EmailTemplate.getRecipientType(emailTemplate.type) && emailTemplate.subject" class="style-description-small">
+                <p v-if="!EmailTemplate.isSavedEmail(emailTemplate.type) && emailTemplate.subject" class="style-description-small">
                     "{{ emailTemplate.subject }}"
                 </p>
 
@@ -128,12 +128,12 @@ const tab = ref(tabItems[0].id);
 const editableList = computed(() => {
     // All user generated
     if (tab.value === 'userGenerated') {
-        return patched.value.filter(t => !!EmailTemplate.getRecipientType(t.type)).sort((a, b) => Sorter.byDateValue(a.updatedAt, b.updatedAt));
+        return patched.value.filter(t => EmailTemplate.isSavedEmail(t.type)).sort((a, b) => Sorter.byDateValue(a.updatedAt, b.updatedAt));
     }
 
     // All auto
     const org = organization.value;
-    const base = patched.value.filter(t => !EmailTemplate.getRecipientType(t.type) && props.types.includes(t.type) && (!org || t.organizationId === org.id));
+    const base = patched.value.filter(t => !EmailTemplate.isSavedEmail(t.type) && props.types.includes(t.type) && (!org || t.organizationId === org.id));
 
     // Create missing ones
     for (const type of props.types) {

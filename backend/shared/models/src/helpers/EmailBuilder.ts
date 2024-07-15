@@ -1,14 +1,14 @@
 import { EmailAddress, EmailBuilder } from "@stamhoofd/email";
-import { EmailRecipient, Recipient, Replacement } from "@stamhoofd/structures";
+import { Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
-import { Organization, PasswordToken, User } from "../models";
+import { Organization, Platform, User } from "../models";
 
 export async function getEmailBuilder(organization: Organization|null, email: {
     defaultReplacements?: Replacement[],
     recipients: Recipient[], 
     from: string, 
-    replyTo?: string, 
+    replyTo?: string|null, 
     subject: string, 
     //text: string | null, 
     html: string | null,
@@ -24,6 +24,7 @@ export async function getEmailBuilder(organization: Organization|null, email: {
     singleBcc?: string,
     callback?: (error: Error|null) => void; // for each email
 }) {
+    const platform = await Platform.getSharedStruct()
     // Update recipients
     const cleaned: Recipient[] = []
     for (const recipient of email.recipients) {
@@ -76,6 +77,9 @@ export async function getEmailBuilder(organization: Organization|null, email: {
         if (organization) {
             const extra = organization.meta.getEmailReplacements()
             recipient.replacements.push(...extra)
+        } else {
+            const extra = platform.config.getEmailReplacements()
+            recipient.replacements.push(...extra)
         }
     }
 
@@ -108,7 +112,7 @@ export async function getEmailBuilder(organization: Organization|null, email: {
 
         return {
             from: email.from,
-            replyTo: email.replyTo,
+            replyTo: email.replyTo ?? undefined,
             bcc: emailIndex === 1 ? email.singleBcc : undefined,
             to: [
                 {
