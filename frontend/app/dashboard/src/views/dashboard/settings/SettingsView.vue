@@ -94,43 +94,6 @@
                 </STListItem>
             </STList>
 
-            <hr>
-
-            <h2>E-mails</h2>
-
-            <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        E-mailadressen
-                    </h2>
-                    <p class="style-description">
-                        Verstuur e-mails vanaf je zelf gekozen e-mailadres
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        Automatische e-mails
-                    </h2>
-                    <p class="style-description">
-                        Wijzig de inhoud van automatische e-mails naar leden.
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
-
-
             <template v-if="membersPackage">
                 <hr>
                 <h2>Ledenadministratie</h2>
@@ -218,6 +181,42 @@
                     </STListItem>
                 </STList>
             </template>
+
+            <hr>
+
+            <h2>E-mails</h2>
+
+            <STList class="illustration-list">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/email.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        E-mailadressen
+                    </h2>
+                    <p class="style-description">
+                        Verstuur e-mails vanaf je zelf gekozen e-mailadres
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Automatische e-mails
+                    </h2>
+                    <p class="style-description">
+                        Wijzig de inhoud van automatische e-mails naar leden.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
 
             <template v-if="feature('sso')">
                 <hr>
