@@ -10,6 +10,7 @@ import { sleep } from "@stamhoofd/utility";
 
 import { areCronsRunning, crons, stopCronScheduling } from './src/crons';
 import { ContextMiddleware } from "./src/middleware/ContextMiddleware";
+import { resumeEmails } from "./src/helpers/EmailResumer";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -80,6 +81,8 @@ const start = async () => {
     routerServer.addResponseMiddleware(CORSMiddleware)
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+
+    resumeEmails().catch(console.error);
 
     if (routerServer.server) {
         // Default timeout is a bit too short

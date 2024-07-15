@@ -3,6 +3,7 @@ import { Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import { Organization, Platform, User } from "../models";
+import { SimpleError } from "@simonbackx/simple-errors";
 
 export async function getEmailBuilder(organization: Organization|null, email: {
     defaultReplacements?: Replacement[],
@@ -33,6 +34,14 @@ export async function getEmailBuilder(organization: Organization|null, email: {
 
             if (unsubscribe.unsubscribedAll || unsubscribe.hardBounce || unsubscribe.markedAsSpam || !unsubscribe.token || (unsubscribe.unsubscribedMarketing && email.unsubscribeType === 'marketing')) {
                 // Ignore
+                if (email.callback) {
+                    email.callback(
+                        new SimpleError({
+                            code: 'email_unsubscribed',
+                            message: unsubscribe.unsubscribedAll ? "Recipient has unsubscribed" : (unsubscribe.hardBounce ? 'Recipient has hard bounced' : (unsubscribe.markedAsSpam ? 'Recipient has marked as spam' : 'Recipient has unsubscribed from marketing'))
+                        })
+                    )
+                }
                 continue
             }
             recipient.replacements.push(Replacement.create({

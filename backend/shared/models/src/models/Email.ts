@@ -314,6 +314,8 @@ export class Email extends Model {
                 await Promise.all(sendingPromises);
             }
 
+            console.log('Finished sending email', upToDate.id);
+
             // Mark email as sent
             upToDate.status = EmailStatus.Sent;
             await upToDate.save();
