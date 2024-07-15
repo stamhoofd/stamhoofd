@@ -279,10 +279,7 @@ export class Organization extends Model {
             website: this.website,
             groups: groups.map(g => g.getStructure()),
             createdAt: this.createdAt,
-            period: OrganizationRegistrationPeriodStruct.create({
-                ...oPeriod,
-                period: period!.getStructure()
-            })
+            period: oPeriod.getStructure(period!, groups)
         })
 
         if (this.meta.modules.disableActivities) {
