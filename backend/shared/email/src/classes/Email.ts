@@ -5,6 +5,7 @@ import { EmailAddress } from '../models/EmailAddress';
 import htmlToText from 'html-to-text';
 import { sleep } from '@stamhoofd/utility';
 import { I18n } from "@stamhoofd/backend-i18n"
+import { SimpleError } from '@simonbackx/simple-errors';
 
 export type EmailInterfaceRecipient = {
     name?: string|null;
@@ -21,7 +22,8 @@ export type EmailInterfaceBase = {
     attachments?: { filename: string; path?: string; href?: string; content?: string|Buffer; contentType?: string }[];
     retryCount?: number;
     type?: "transactional" | "broadcast",
-    headers?: Record<string, string>|null
+    headers?: Record<string, string>|null,
+    callback?: (error: Error|null) => void;
 }
 
 export type EmailInterface = EmailInterfaceBase & {
@@ -231,6 +233,18 @@ class EmailStatic {
         if (recipients.length === 0) {
             // Invalid string
             console.warn("Filtered all emails due hard bounce or spam '"+data.to+"'. E-mail skipped")
+
+            try {
+                data.callback?.(
+                    new SimpleError({
+                        code: 'all_filtered',
+                        message: "All recipients are filtered due to hard bounce or spam",
+                        human: 'Alle ontvangers zijn gefilterd wegens een hard bounce of spam'
+                    })
+                )
+            } catch (e) {
+                console.error("Error in email callback", e)
+            }
             return
         }
 
@@ -245,6 +259,18 @@ class EmailStatic {
         if (recipients.length === 0) {
             // Invalid string
             console.warn("Filtered all emails due to environment filter '"+data.to+"'. E-mail skipped")
+
+            try {
+                data.callback?.(
+                    new SimpleError({
+                        code: 'all_filtered',
+                        message: "All recipients are filtered due to environment",
+                        human: 'Alle ontvangers zijn gefilterd omwille van de demo-omgeving die het versturen van bepaalde e-mails limiteert'
+                    })
+                )
+            } catch (e) {
+                console.error("Error in email callback", e)
+            }
             return
         }
     
@@ -302,14 +328,16 @@ class EmailStatic {
             
             const info = await transporter.sendMail(mail);
             console.log("Message sent:", to, data.subject, info.messageId, data.type);
+
+            try {
+                data.callback?.(null)
+            } catch (e) {
+                console.error("Error in email callback", e)
+            }
         } catch (e) {
             console.error("Failed to send e-mail:")
             console.error(e);
             console.error(mail);
-
-            if (STAMHOOFD.environment === 'development') {
-                return;
-            }
 
             // Sleep 1 second to give servers some time to fix possible rate limits
             await sleep(1000);
@@ -320,14 +348,22 @@ class EmailStatic {
             if (data.retryCount <= 2) {
                 this.send(data);
             } else {
+                try {
+                    data.callback?.(e)
+                } catch (e2) {
+                    console.error("Error in email failure callback", e2, 'for original error', e)
+                }
+
                 // Email address is not verified.
-                if (!data.from.includes("hallo@stamhoofd.be")) {
-                    this.sendInternal({
-                        to: "hallo@stamhoofd.be",
-                        subject: "E-mail kon niet worden verzonden",
-                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? ""),
-                        type: (data.type === "transactional") ? "broadcast" : "transactional"
-                    }, new I18n("nl", "BE"))
+                if (STAMHOOFD.environment !== 'development') {
+                    if (!data.from.includes("hallo@stamhoofd.be")) {
+                        this.sendInternal({
+                            to: "hallo@stamhoofd.be",
+                            subject: "E-mail kon niet worden verzonden",
+                            text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? ""),
+                            type: (data.type === "transactional") ? "broadcast" : "transactional"
+                        }, new I18n("nl", "BE"))
+                    }
                 }
             }
         }
@@ -366,6 +402,11 @@ class EmailStatic {
     }
 
     schedule(builder: EmailBuilder) {
+        this.currentQueue.push(builder)
+        this.sendNextIfNeeded()
+    }
+
+    scheduleAndWait(builder: EmailBuilder) {
         this.currentQueue.push(builder)
         this.sendNextIfNeeded()
     }

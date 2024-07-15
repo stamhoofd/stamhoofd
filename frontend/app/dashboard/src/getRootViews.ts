@@ -51,7 +51,9 @@ export async function loadSessionFromUrl() {
 export function getLoginRoot() {
     if (STAMHOOFD.userMode === 'platform') {
         return new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(LoginView, {})
+            root: new ComponentWithProperties(LoginView, {
+                initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? ''
+            })
         })
     }
 
@@ -61,7 +63,9 @@ export function getLoginRoot() {
                 icon: 'key',
                 name: 'Inloggen',
                 component: new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(LoginView, {})
+                    root: new ComponentWithProperties(LoginView, {
+                        initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? ''
+                    })
                 })
             })
         ]

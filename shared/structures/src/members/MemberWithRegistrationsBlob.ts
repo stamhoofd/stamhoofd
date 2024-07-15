@@ -42,6 +42,10 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         return this.registrations.filter(r => r.organizationId == organizationId).reduce((sum, r) => sum + (r.price - r.pricePaid), 0)
     }
 
+    hasAccount(email: string) {
+        return !!this.users.find(u => u.hasAccount && u.email === email)
+    }
+
     getEmailRecipients(subtypes: ('member'|'parents')[]|null = null): EmailRecipient[] {
         const recipients: EmailRecipient[] = []
 
@@ -80,6 +84,11 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                             token: "email",
                             value: this.details.email
                         }),
+                        Replacement.create({
+                            token: "loginDetails",
+                            value: "",
+                            html: this.hasAccount(this.details.email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(this.details.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(this.details.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
+                        }),
                         ...shared
                     ]
                 })
@@ -106,6 +115,11 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                                 Replacement.create({
                                     token: "email",
                                     value: parent.email.toLowerCase()
+                                }),
+                                Replacement.create({
+                                    token: "loginDetails",
+                                    value: "",
+                                    html: this.hasAccount(parent.email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(parent.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(parent.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
                                 }),
                                 ...shared
                             ]
