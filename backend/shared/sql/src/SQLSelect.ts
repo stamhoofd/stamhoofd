@@ -14,6 +14,7 @@ class SelectBase implements SQLExpression {
 
     _where: SQLWhere|null = null;
     _orderBy: SQLOrderBy|null = null;
+    _groupBy: SQLExpression[] = [];
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
 
     constructor(...columns: SQLExpression[]) {
@@ -33,6 +34,11 @@ class SelectBase implements SQLExpression {
 
     join(join: InstanceType<typeof SQLJoin>): this {
         this._joins.push(join);
+        return this;
+    }
+
+    groupBy(...columns: SQLExpression[]): this {
+        this._groupBy.push(...columns);
         return this;
     }
 
@@ -62,11 +68,20 @@ class SelectBase implements SQLExpression {
             query.push(this._where.getSQL(options))
         }
 
+        if (this._groupBy.length > 0) {
+            query.push('GROUP BY')
+            query.push(
+                joinSQLQuery(
+                    this._groupBy.map(c => c.getSQL(options)), 
+                    ', '
+                )
+            )
+        }
+
         if (this._orderBy) {
             query.push(this._orderBy.getSQL(options))
         }
-
-
+        
         if (this._limit !== null) {
             query.push('LIMIT ' + this._limit)
             if (this._offset !== null && this._offset !== 0) {

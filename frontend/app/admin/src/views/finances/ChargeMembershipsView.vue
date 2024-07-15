@@ -60,21 +60,66 @@
             <p class="style-description-small">
                 Alle aansluitingen worden aan het openstaand bedrag toegevoegd. Hierna kunnen deze aansluitingen niet meer van een lid worden verwijderd.
             </p>
+
+            <div class="container" v-for="type of platform.config.membershipTypes" :key="type.id">
+                <hr>
+                <h2>Detail "{{ type.name }}"</h2>
+
+                <div class="style-stats-grid">
+                    <STInputBox title="Aantal">
+                        <p class="style-price-big">
+                            <span v-if="!summary" class="style-placeholder-skeleton" />
+                            <span v-else>
+                                {{ formatInteger(getSummaryForType(type).memberships) }}
+                            </span>
+                        </p>
+                    </STInputBox>
+
+                    <STInputBox title="Unieke leden">
+                        <p class="style-price-big">
+                            <span v-if="!summary" class="style-placeholder-skeleton" />
+                            <span v-else>
+                                {{ formatInteger(getSummaryForType(type).members) }}
+                            </span>
+                        </p>
+                    </STInputBox>
+                    
+                    <STInputBox title="Totaal bedrag">
+                        <p class="style-price-big">
+                            <span v-if="!summary" class="style-placeholder-skeleton" />
+                            <span v-else>
+                                {{ formatPrice(getSummaryForType(type).price) }}
+                            </span>
+                        </p>
+                    </STInputBox>
+
+
+                    <STInputBox title="Unieke groepen">
+                        <p class="style-price-big">
+                            <span v-if="!summary" class="style-placeholder-skeleton" />
+                            <span v-else>
+                                {{ formatInteger(getSummaryForType(type).organizations) }}
+                            </span>
+                        </p>
+                    </STInputBox>
+                </div>
+            </div>
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ErrorBox, useContext, useErrors } from '@stamhoofd/components';
+import { ErrorBox, useContext, useErrors, usePlatform } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { ChargeMembershipsSummary } from '@stamhoofd/structures';
+import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
 
 const errors = useErrors();
 const summary = ref(null) as Ref<null | ChargeMembershipsSummary>
 const context = useContext()
 const owner = useRequestOwner()
+const platform = usePlatform();
 
 reload().catch(console.error)
 
@@ -91,6 +136,14 @@ async function reload() {
         errors.errorBox = new ErrorBox(e)
     }
 }
+
+function getSummaryForType(type: PlatformMembershipType): ChargeMembershipsTypeSummary {
+    if (!summary.value) {
+        return ChargeMembershipsTypeSummary.create({});
+    }
+    return summary.value.membershipsPerType.get(type.id) ?? ChargeMembershipsTypeSummary.create({})
+}
+
 </script>
 
 <style lang="scss">

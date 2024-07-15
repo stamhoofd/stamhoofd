@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SQL, SQLAlias, SQLSum, SQLCount, SQLDistinct, SQLSelectAs } from '@stamhoofd/sql';
-import { ChargeMembershipsSummary } from '@stamhoofd/structures';
+import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context';
 
 
@@ -81,8 +81,69 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                 memberships: memberships ?? 0,
                 members: members ?? 0,
                 price: price ?? 0,
-                organizations: organizations ?? 0
+                organizations: organizations ?? 0,
+                membershipsPerType: await this.fetchPerType()
             })
         );
+    }
+
+    async fetchPerType() {
+        const query = SQL
+            .select(
+                SQL.column('member_platform_memberships', 'membershipTypeId'),
+                new SQLSelectAs(
+                    new SQLCount(
+                        new SQLDistinct(
+                            SQL.column('member_platform_memberships', 'id')
+                        )
+                    ),
+                    new SQLAlias('data__memberships')
+                ),
+                new SQLSelectAs(
+                    new SQLCount(
+                        new SQLDistinct(
+                            SQL.column('member_platform_memberships', 'memberId')
+                        )
+                    ),
+                    new SQLAlias('data__members')
+                ),
+                new SQLSelectAs(
+                    new SQLCount(
+                        new SQLDistinct(
+                            SQL.column('member_platform_memberships', 'organizationId')
+                        )
+                    ),
+                    new SQLAlias('data__organizations')
+                ),
+                new SQLSelectAs(
+                    new SQLSum(
+                        SQL.column('member_platform_memberships', 'price')
+                    ),
+                    new SQLAlias('data__price')
+                )
+            )
+            .from(
+                SQL.table('member_platform_memberships')
+            );
+        query.where(SQL.column('invoiceId'), null)
+        query.andWhere(SQL.column('invoiceItemDetailId'), null)
+        query.groupBy(SQL.column('member_platform_memberships', 'membershipTypeId'));
+
+
+        const result = await query.fetch();
+        console.log(result);
+
+        const membershipsPerType = new Map<string, ChargeMembershipsTypeSummary>();
+
+        for (const row of result) {
+            membershipsPerType.set(row['member_platform_memberships']['membershipTypeId'] as string, ChargeMembershipsTypeSummary.create({
+                memberships: row['data']['memberships'] as number,
+                members: row['data']['members'] as number,
+                price: row['data']['price'] as number,
+                organizations: row['data']['organizations'] as number
+            }));
+        }
+
+        return membershipsPerType;
     }
 }
