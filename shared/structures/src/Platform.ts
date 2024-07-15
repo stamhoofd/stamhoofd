@@ -8,6 +8,7 @@ import { DefaultAgeGroup } from "./DefaultAgeGroup";
 import { MemberResponsibility } from "./MemberResponsibility";
 import { RegistrationPeriod } from "./RegistrationPeriod";
 import { OrganizationEmail } from "./OrganizationEmail";
+import { Replacement } from "./endpoints/EmailRequest";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -137,6 +138,20 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PlatformMembershipType), version: 268 })
     membershipTypes: PlatformMembershipType[] = []
+
+    getEmailReplacements() {
+        // todo: implement real colors
+        return [
+            Replacement.create({
+                token: "primaryColor",
+                value: "#0053ff"
+            }),
+            Replacement.create({
+                token: "primaryColorContrast",
+                value: "#fff"
+            }),
+        ]
+    }
 }
 
 export class Platform extends AutoEncoder {

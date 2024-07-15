@@ -8,6 +8,11 @@ export enum EmailTemplateType {
      */
     SavedMembersEmail = "SavedMembersEmail",
 
+    /**
+     * Defaults
+     */
+    DefaultMembersEmail = "DefaultMembersEmail",
+
     // 
     MembersExpirationReminder = "MembersExpirationReminder",
     WebshopsExpirationReminder = "WebshopsExpirationReminder",
@@ -100,16 +105,40 @@ export class EmailTemplate extends AutoEncoder {
     @field({ decoder: DateDecoder, optional: true })
     updatedAt: Date = new Date();
 
+    static getDefaultForRecipient(type: EmailRecipientFilterType): EmailTemplateType|null {
+        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents) {
+            return EmailTemplateType.DefaultMembersEmail
+        }
+
+        return null;
+    }
+
+    static isSavedEmail(type: EmailTemplateType): boolean {
+        if (type === EmailTemplateType.SavedMembersEmail) {
+            return true
+        }
+
+        return false;
+    }
+
     static getRecipientType(type: EmailTemplateType): EmailRecipientFilterType|null {
         if (type === EmailTemplateType.SavedMembersEmail) {
             return EmailRecipientFilterType.Members
         }
+
+        if (type === EmailTemplateType.DefaultMembersEmail) {
+            return EmailRecipientFilterType.Members
+        }
+
+        // Use custom getSupportedReplacementsForType for this type
         return null;
     }
 
     static getTypeTitle(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail: return 'Opgeslagen e-mail naar leden'
+            case EmailTemplateType.DefaultMembersEmail: return 'Standaard e-mail naar leden'
+
             case EmailTemplateType.MembersExpirationReminder: return 'Herinnering verlopen pakket ledenadministratie'
             case EmailTemplateType.WebshopsExpirationReminder: return 'Herinnering verlopen pakket webshops'
             case EmailTemplateType.SingleWebshopExpirationReminder: return 'Herinnering verlopen pakket enkele webshop'
@@ -120,15 +149,15 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingsbevestiging'
             case EmailTemplateType.RegistrationTransferDetails: return 'Betaalinstructies voor inschrijving met overschrijving'
 
-            case EmailTemplateType.OrderConfirmationOnline: return 'Websbop: Bestelling bevestiging online betaling'
-            case EmailTemplateType.OrderConfirmationTransfer: return 'Websbop: Bestelling bevestiging overschrijving'
-            case EmailTemplateType.OrderConfirmationPOS: return 'Websbop: Bestelling bevestiging betaling aan de kassa'
-            case EmailTemplateType.OrderReceivedTransfer: return 'Websbop: Bestelling ontvangen overschrijving'
-            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Websbop: Online betaling mislukt'
-            case EmailTemplateType.TicketsConfirmation: return 'Websbop: Tickets bevestiging'
-            case EmailTemplateType.TicketsConfirmationTransfer: return 'Websbop: Tickets bevestiging overschrijving'
-            case EmailTemplateType.TicketsConfirmationPOS: return 'Websbop: Tickets bevestiging betaling aan de kassa'
-            case EmailTemplateType.TicketsReceivedTransfer: return 'Websbop: Tickets ontvangen overschrijving'
+            case EmailTemplateType.OrderConfirmationOnline: return 'Webshop: Bestelling bevestiging online betaling'
+            case EmailTemplateType.OrderConfirmationTransfer: return 'Webshop: Bestelling bevestiging overschrijving'
+            case EmailTemplateType.OrderConfirmationPOS: return 'Webshop: Bestelling bevestiging betaling aan de kassa'
+            case EmailTemplateType.OrderReceivedTransfer: return 'Webshop: Bestelling ontvangen overschrijving'
+            case EmailTemplateType.OrderOnlinePaymentFailed: return 'Webshop: Online betaling mislukt'
+            case EmailTemplateType.TicketsConfirmation: return 'Webshop: Tickets bevestiging'
+            case EmailTemplateType.TicketsConfirmationTransfer: return 'Webshop: Tickets bevestiging overschrijving'
+            case EmailTemplateType.TicketsConfirmationPOS: return 'Webshop: Tickets bevestiging betaling aan de kassa'
+            case EmailTemplateType.TicketsReceivedTransfer: return 'Webshop: Tickets ontvangen overschrijving'
 
             case EmailTemplateType.OrganizationUnstableDNS: return 'Organisatie: instabiele DNS'
             case EmailTemplateType.OrganizationInvalidDNS: return 'Organisatie: ongeldige DNS'
@@ -169,6 +198,7 @@ export class EmailTemplate extends AutoEncoder {
 
     static getPlatformTypeDescription(type: EmailTemplateType): string|null {
         switch (type) {
+
             case EmailTemplateType.OrganizationUnstableDNS: return 'Organisatie: instabiele DNS'
             case EmailTemplateType.OrganizationInvalidDNS: return 'Organisatie: ongeldige DNS'
             case EmailTemplateType.OrganizationValidDNS: return 'Organisatie: geldige DNS'
@@ -184,6 +214,8 @@ export class EmailTemplate extends AutoEncoder {
 
     static getTypeDescription(type: EmailTemplateType): string {
         switch (type) {
+            case EmailTemplateType.DefaultMembersEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.'
+
             case EmailTemplateType.OrderNotification: return 'E-mail die webshop eigenaren ontvangen wanneer er een bestelling is geplaatst (indien ze die functie hebben ingeschakeld)'
             case EmailTemplateType.RegistrationConfirmation: return 'Na het inschrijven ontvangen de leden deze e-mail'
 

@@ -127,14 +127,33 @@ export class Email extends Model {
 
     getFromAddress() {
         if (!this.fromName) {
-            return this.fromAddress
+            return this.fromAddress!
         }
 
         const cleanedName = Formatter.emailSenderName(this.fromName)
         if (cleanedName.length < 2) {
-            return this.fromAddress
+            return this.fromAddress!
         }
         return '"'+cleanedName+'" <'+this.fromAddress+'>'
+
+    }
+
+    getDefaultFromAddress(organization?: Organization|null): string {
+        let address = "noreply@stamhoofd.email";
+
+        if (organization) {
+            address = organization.uri+"@stamhoofd.email";
+        }
+
+        if (!this.fromName) {
+            return address
+        }
+
+        const cleanedName = Formatter.emailSenderName(this.fromName)
+        if (cleanedName.length < 2) {
+            return address
+        }
+        return '"'+cleanedName+'" <'+address+'>'
 
     }
 
@@ -160,7 +179,8 @@ export class Email extends Model {
             const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
             upToDate.throwIfNotReadyToSend()
 
-            const from = upToDate.getFromAddress();
+            let from = upToDate.getDefaultFromAddress(organization)
+            let replyTo: string | null = upToDate.getFromAddress();
 
             if (!from) {
                 throw new SimpleError({
@@ -168,6 +188,25 @@ export class Email extends Model {
                     message: 'Missing from',
                     human: 'Vul een afzender in voor je een e-mail verstuurt'
                 })
+            }
+
+            // Can we send from this e-mail or reply-to?
+            if (organization) {
+                if (organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && upToDate.fromAddress!.endsWith("@"+organization.privateMeta.mailDomain)) {
+                    from = upToDate.getFromAddress();
+                    replyTo = null;
+                }
+            } else {
+                // Platform
+                const domains = Object.values(STAMHOOFD.domains.marketing)
+
+                for (const domain of domains) {
+                    if (upToDate.fromAddress!.endsWith("@"+domain)) {
+                        from = upToDate.getFromAddress();
+                        replyTo = null;
+                        break;
+                    }
+                }
             }
 
             upToDate.status = EmailStatus.Sending
@@ -252,7 +291,7 @@ export class Email extends Model {
                     }
 
                     // Do send the email
-                        // Create e-mail builder
+                    // Create e-mail builder
                     const builder = await getEmailBuilder(organization ?? null, {
                         recipients: [
                             Recipient.create({
@@ -260,6 +299,7 @@ export class Email extends Model {
                             })
                         ],
                         from, 
+                        replyTo,
                         subject: upToDate.subject!, 
                         html: upToDate.html,
                         type: "broadcast",
@@ -312,11 +352,8 @@ export class Email extends Model {
                         search: subfilter.search,
                     })
 
-                    console.log('Loading count', subfilter.type)
                     const c = await loader.count(request);
                     
-                    console.log('Loaded count', subfilter.type, c)
-
                     count += c
                 }
 
@@ -400,6 +437,7 @@ export class Email extends Model {
                             recipient.firstName = item.firstName
                             recipient.lastName = item.lastName
                             recipient.replacements = item.replacements
+
                             await recipient.save();
                         }
 

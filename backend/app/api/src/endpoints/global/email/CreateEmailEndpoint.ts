@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Email, RateLimiter } from '@stamhoofd/models';
-import { EmailPreview, EmailStatus, Email as EmailStruct, Version } from "@stamhoofd/structures";
+import { Email, EmailTemplate, RateLimiter } from '@stamhoofd/models';
+import { EmailPreview, EmailStatus, Email as EmailStruct, Version, EmailTemplate as EmailTemplateStruct } from "@stamhoofd/structures";
 
 import { Context } from '../../../helpers/Context';
 import { SQL } from '@stamhoofd/sql';
@@ -77,10 +77,34 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.subject = request.body.subject;
         model.html = request.body.html;
         model.text = request.body.text;
+        model.json = request.body.json;
         model.status = request.body.status;
         model.attachments = request.body.attachments;
         model.fromAddress = request.body.fromAddress;
         model.fromName = request.body.fromName;
+
+        // Check default
+        if (JSON.stringify(model.json).length < 3 && model.recipientFilter.filters[0].type && EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)) {
+            const type = EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)
+             
+            // Most specific template: for specific group
+            let templates = (await EmailTemplate.where({ type, organizationId: organization?.id ?? null, groupId: null }))
+
+            // Then default
+            if (templates.length == 0 && organization) {
+                templates = (await EmailTemplate.where({ type, organizationId: null, groupId: null }))
+            }
+
+            if (templates.length == 0) {
+                // No default
+            } else {
+                const defaultTemplate = templates[0]
+                model.html = defaultTemplate.html;
+                model.text = defaultTemplate.text;
+                model.subject = defaultTemplate.subject;
+                model.json = defaultTemplate.json;
+            }
+        }
 
         await model.save();
         await model.buildExampleRecipient()
@@ -89,6 +113,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
             model.send().catch(console.error)
         }
+
 
         return new Response(await model.getPreviewStructure());
     }
