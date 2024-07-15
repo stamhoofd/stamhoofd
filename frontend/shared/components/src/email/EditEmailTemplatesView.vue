@@ -25,7 +25,8 @@
                 </p>
 
                 <p class="style-description-small">
-                    <span v-if="!emailTemplate.id" class="style-tag warn">Ontbreekt</span>
+                    <span v-if="!emailTemplate.id && organization && emailTemplate.html" class="style-tag">Standaard</span>
+                    <span v-else-if="!emailTemplate.id" class="style-tag warn">Ontbreekt</span>
                     <span v-else>Laatst gewijzigd op {{ formatDateTime(emailTemplate.updatedAt) }}</span>
                 </p>
 
@@ -137,10 +138,13 @@ const editableList = computed(() => {
 
     // Create missing ones
     for (const type of props.types) {
+        if (EmailTemplate.isSavedEmail(type)) {
+            continue;
+        }
         if (!base.find(t => t.type === type)) {
             let defaultTemplate: EmailTemplate | null = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === null) ?? null;
 
-            if (organization.value) {
+            if (org) {
                 defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === org.id) ?? defaultTemplate ?? null;
             }
             
