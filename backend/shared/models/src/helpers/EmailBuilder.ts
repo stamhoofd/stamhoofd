@@ -1,10 +1,10 @@
 import { EmailAddress, EmailBuilder } from "@stamhoofd/email";
-import { Recipient, Replacement } from "@stamhoofd/structures";
+import { EmailRecipient, Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import { Organization, PasswordToken, User } from "../models";
 
-export async function getEmailBuilder(organization: Organization, email: {
+export async function getEmailBuilder(organization: Organization|null, email: {
     defaultReplacements?: Replacement[],
     recipients: Recipient[], 
     from: string, 
@@ -21,13 +21,14 @@ export async function getEmailBuilder(organization: Organization, email: {
     type?: "transactional" | "broadcast",
     unsubscribeType?: 'all'|'marketing',
     fromStamhoofd?: boolean,
-    singleBcc?: string
+    singleBcc?: string,
+    callback?: (error: Error|null) => void; // for each email
 }) {
     // Update recipients
     const cleaned: Recipient[] = []
     for (const recipient of email.recipients) {
         try {
-            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, email.fromStamhoofd ? null : organization.id)
+            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, email.fromStamhoofd || !organization ? null : organization.id)
 
             if (unsubscribe.unsubscribedAll || unsubscribe.hardBounce || unsubscribe.markedAsSpam || !unsubscribe.token || (unsubscribe.unsubscribedMarketing && email.unsubscribeType === 'marketing')) {
                 // Ignore
@@ -35,7 +36,7 @@ export async function getEmailBuilder(organization: Organization, email: {
             }
             recipient.replacements.push(Replacement.create({
                 token: "unsubscribeUrl",
-                value: "https://"+STAMHOOFD.domains.dashboard+"/"+organization.i18n.locale+"/unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type="+encodeURIComponent(email.unsubscribeType ?? 'all')
+                value: "https://"+STAMHOOFD.domains.dashboard+"/"+(organization ? (organization.i18n.locale + '/') : '')+"unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type="+encodeURIComponent(email.unsubscribeType ?? 'all')
             }))
 
             // Override headers
@@ -55,14 +56,12 @@ export async function getEmailBuilder(organization: Organization, email: {
         recipient.replacements = recipient.replacements.slice()
 
         // Default signInUrl
-        let signInUrl = "https://"+organization.getHost()+"/login?email="+encodeURIComponent(recipient.email)
+        let signInUrl = "https://"+(organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard)+"/login?email="+encodeURIComponent(recipient.email)
 
-        if (recipient.userId) {
-            const recipientUser = await User.getByID(recipient.userId)
-            if (recipientUser && recipientUser.organizationId === organization.id && recipientUser.email === recipient.email) {
-                // We can create a special token
-                signInUrl = await PasswordToken.getMagicSignInUrl(recipientUser, organization)
-            }
+        const recipientUser = await User.getForAuthentication(organization?.id ?? null, recipient.email)
+        if (!recipientUser) {
+            // We can create a special token
+            signInUrl = "https://"+(organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard)+"/account-aanmaken?email="+encodeURIComponent(recipient.email)
         }
 
         recipient.replacements.push(Replacement.create({
@@ -74,8 +73,10 @@ export async function getEmailBuilder(organization: Organization, email: {
             recipient.replacements.push(...email.defaultReplacements)
         }
 
-        const extra = organization.meta.getEmailReplacements()
-        recipient.replacements.push(...extra)
+        if (organization) {
+            const extra = organization.meta.getEmailReplacements()
+            recipient.replacements.push(...extra)
+        }
     }
 
     const queue = email.recipients.slice()
@@ -120,7 +121,8 @@ export async function getEmailBuilder(organization: Organization, email: {
             html: replacedHtml ?? undefined,
             attachments: email.attachments,
             headers: recipient.headers,
-            type: email.type
+            type: email.type,
+            callback: email.callback
         }
     }
     return builder;

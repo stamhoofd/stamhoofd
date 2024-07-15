@@ -1,12 +1,16 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, LimitedFilteredRequest, PaginatedResponse, SortItemDirection } from '@stamhoofd/structures';
+import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, LimitedFilteredRequest, PaginatedResponse, Recipient, SortItemDirection } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL } from '@stamhoofd/sql';
+import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { EmailRecipient } from './EmailRecipient';
+import { getEmailBuilder } from '../helpers/EmailBuilder';
+import { Organization } from './Organization';
+import { Formatter } from '@stamhoofd/utility';
+import { Email as EmailClass } from "@stamhoofd/email";
 
 export class Email extends Model {
     static table = "emails";
@@ -121,6 +125,19 @@ export class Email extends Model {
         }
     }
 
+    getFromAddress() {
+        if (!this.fromName) {
+            return this.fromAddress
+        }
+
+        const cleanedName = Formatter.emailSenderName(this.fromName)
+        if (cleanedName.length < 2) {
+            return this.fromAddress
+        }
+        return '"'+cleanedName+'" <'+this.fromAddress+'>'
+
+    }
+
     async send() {
         this.throwIfNotReadyToSend()
         await this.save();
@@ -135,13 +152,32 @@ export class Email extends Model {
                     human: 'De e-mail die je probeert te versturen bestaat niet meer'
                 })
             }
-            if (upToDate.sentAt) {
-                // Race condition
+            if (upToDate.status === EmailStatus.Sent) {
+                // Already done
+                // In other cases -> queue has stopped and we can retry
                 return;
             }
+            const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
             upToDate.throwIfNotReadyToSend()
 
+            const from = upToDate.getFromAddress();
+
+            if (!from) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Missing from',
+                    human: 'Vul een afzender in voor je een e-mail verstuurt'
+                })
+            }
+
+            upToDate.status = EmailStatus.Sending
+            upToDate.sentAt = upToDate.sentAt ?? new Date()
+            await upToDate.save();
+
+            // Create recipients if not yet created
             await upToDate.buildRecipients()
+
+            // Refresh model
             upToDate = await Email.getByID(id);
             if (!upToDate) {
                 throw new SimpleError({
@@ -159,11 +195,88 @@ export class Email extends Model {
                 })
             }
 
-            upToDate.status = EmailStatus.Sending
-            upToDate.sentAt = new Date()
-            await upToDate.save();
+            // Start actually sending in batches of recipients that are not yet sent
+            let idPointer = '';
+            const batchSize = 100;
+            const recipientsSet = new Set<string>();
 
-            // todo: sends
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const q = SQL.select()
+                    .from(SQL.table('email_recipients'))
+                    .where(SQL.column('emailId'), upToDate.id)
+                    .where(SQL.column('sentAt'), null)
+                    .where(SQL.column('id'), SQLWhereSign.Greater, idPointer);
+
+                q.orderBy(SQL.column('id'), 'ASC')
+                q.limit(batchSize)
+                
+                const data = await q.fetch();
+
+                const recipients = EmailRecipient.fromRows(data, 'email_recipients');
+
+                if (recipients.length == 0) {
+                    break;
+                }
+
+                const sendingPromises: Promise<void>[] = [];
+
+                for (const recipient of recipients) {
+                    if (recipientsSet.has(recipient.id)) {
+                        console.error('Found duplicate recipient while sending email', recipient.id)
+                        continue;
+                    }
+
+                    recipientsSet.add(recipient.email);
+                    idPointer = recipient.id;
+
+                    let promiseResolve: (value: void | PromiseLike<void>) => void
+                    const promise = new Promise<void>((resolve) => {
+                        promiseResolve = resolve;
+                    });
+                    sendingPromises.push(promise)
+
+                    const callback = async (error: Error|null) => {
+                        if (error === null) {
+                            // Mark saved
+                            recipient.sentAt = new Date();
+                            await recipient.save()
+                        } else {
+                            recipient.failCount += 1;
+                            recipient.failErrorMessage = error.message;
+                            recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
+                            recipient.lastFailedAt = new Date();
+                            await recipient.save()
+                        }
+                        promiseResolve()
+                    }
+
+                    // Do send the email
+                        // Create e-mail builder
+                    const builder = await getEmailBuilder(organization ?? null, {
+                        recipients: [
+                            Recipient.create({
+                                ...recipient
+                            })
+                        ],
+                        from, 
+                        subject: upToDate.subject!, 
+                        html: upToDate.html,
+                        type: "broadcast",
+                        callback(error: Error|null ) {
+                            callback(error).catch(console.error)
+                        },
+                    })
+
+                    EmailClass.schedule(builder)
+                }
+
+                await Promise.all(sendingPromises);
+            }
+
+            // Mark email as sent
+            upToDate.status = EmailStatus.Sent;
+            await upToDate.save();
         });
     }
 
@@ -230,13 +343,19 @@ export class Email extends Model {
         await QueueHandler.schedule('email-build-recipients-'+this.id, async function () {
             const upToDate = await Email.getByID(id);
 
-            if (!upToDate || upToDate.sentAt || !upToDate.id) {
+            if (!upToDate || !upToDate.id) {
                 return;
             }
 
-            if (upToDate.recipientsStatus === EmailRecipientsStatus.Creating) {
+            if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
                 return;
             }
+
+            if (upToDate.status === EmailStatus.Sent) {
+                return;
+            }
+
+            // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
 
             upToDate.recipientsStatus = EmailRecipientsStatus.Creating;
             await upToDate.save();
