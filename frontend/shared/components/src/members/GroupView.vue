@@ -124,7 +124,7 @@ const priceList = computed(() => {
 const who = computed(() => {
     let who = props.group.settings.getAgeGenderDescription({includeAge: true, includeGender: true}) ?? '';
 
-    if (props.group.settings.requireGroupIds.length > 0 || props.group.settings.preventPreviousGroupIds.length > 0 || props.group.settings.requirePreviousGroupIds.length > 0) {
+    if (props.group.settings.requireGroupIds.length > 0) {
         const prefix = 'Afhankelijk van andere inschrijvingen'
         if (!who) {
             who += prefix

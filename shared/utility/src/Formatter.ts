@@ -154,6 +154,21 @@ export class Formatter {
     }
 
     /**
+     * 2020-01-31 00:00:00
+     */
+    static dateTimeIso(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
+
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const year = datetime.year
+        return year+"-"+(datetime.month+"").padStart(2, "0")+"-"+(datetime.day+"").padStart(2, "0") + " "+(datetime.hour+"").padStart(2, "0")+":"+(datetime.minute+"").padStart(2, "0")+":"+(datetime.second+"").padStart(2, "0")
+    }
+
+
+    /**
      * 12:00
      */
     static time(date: Date): string {

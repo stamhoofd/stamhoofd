@@ -191,40 +191,6 @@ export class RegisterItem implements RegisterItemWithPrice {
         return true;
     }
 
-    doesMeetRequirePreviousGroupIds() {
-        if (this.group.settings.requirePreviousGroupIds.length > 0) {
-            const hasGroup = this.member.member.registrations.find(r => {
-                const registrationGroup = this.organization.groups.find(g => g.id === r.groupId)
-                if (!registrationGroup) {
-                    return false
-                }
-                return this.group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
-            });
-
-            if (!hasGroup) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    doesMeetPreventPreviousGroupIds() {
-        if (this.group.settings.preventPreviousGroupIds.length > 0) {
-            const hasGroup = this.member.member.registrations.find(r => {
-                const registrationGroup = this.organization.groups.find(g => g.id === r.groupId)
-                if (!registrationGroup) {
-                    return false
-                }
-                return this.group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
-            });
-
-            if (hasGroup) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     isExistingMemberOrFamily() {
         return this.member.isExistingMember(this.group.organizationId) || (this.group.settings.priorityForFamily && !!this.family.members.find(f => f.isExistingMember(this.group.organizationId)))
     }
@@ -379,21 +345,6 @@ export class RegisterItem implements RegisterItemWithPrice {
             })
         }
 
-        if (!this.doesMeetPreventPreviousGroupIds()) {
-            throw new SimpleError({
-                code: "not_matching",
-                message: "Not matching",
-                human: `Je voldoet niet aan de voorwaarden om in te schrijven voor ${this.group.settings.name}.`
-            })
-        }
-
-        if (!this.doesMeetRequirePreviousGroupIds()) {
-            throw new SimpleError({
-                code: "not_matching",
-                message: "Not matching",
-                human: `Je voldoet niet aan de voorwaarden om in te schrijven voor ${this.group.settings.name}.`
-            })
-        }
         const existingMember = this.isExistingMemberOrFamily()
 
         // Pre registrations?

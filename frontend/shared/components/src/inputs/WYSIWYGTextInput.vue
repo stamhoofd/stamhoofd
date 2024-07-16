@@ -1,5 +1,5 @@
 <template>
-    <div class="wysiwyg-text-input">
+    <div class="wysiwyg-text-input" v-if="editor">
         <editor-content :editor="editor" class="editor-content" />
 
         <div class="tools">
@@ -15,9 +15,7 @@
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                        </template>
-                        <template v-if="editor.isActive('link')" #right>
-                            <button v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
@@ -43,6 +41,7 @@
 import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
 import { RichText } from "@stamhoofd/structures";
 import Link from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
 import Typography from "@tiptap/extension-typography";
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
@@ -75,11 +74,15 @@ function escapeHtml(unsafe: string ): string {
     },
     directives: {
         Tooltip: TooltipDirective
-    }
+    },
+    emits: ['update:modelValue']
 })
 export default class WYSIWYGTextInput extends Vue {
     @Prop({ required: true })
         modelValue!: RichText
+
+    @Prop({ default: '' })
+        placeholder!: string
 
     @Prop({ default: 2 })
         headingStartLevel!: number
@@ -89,8 +92,12 @@ export default class WYSIWYGTextInput extends Vue {
 
     showLinkEditor = false
     editLink = ""
-    editor = this.buildEditor()
+    editor: Editor|null = null
     showTextStyles = false
+
+    beforeMount() {
+        this.editor = this.buildEditor()
+    }
 
     mounted() {
         if (this.color) {
@@ -112,7 +119,7 @@ export default class WYSIWYGTextInput extends Vue {
     }
 
     beforeUnmount() {
-        this.editor.destroy()
+        this.editor?.destroy()
     }
 
     buildEditor() {
@@ -132,6 +139,9 @@ export default class WYSIWYGTextInput extends Vue {
                     heading:{
                         levels: [this.headingStartLevel as any, this.headingStartLevel + 1 as any],
                     }
+                }),
+                Placeholder.configure({
+                    placeholder: this.placeholder
                 }),
                 WarningBox.configure({}),
                 Typography.configure({}),
@@ -304,6 +314,14 @@ export default class WYSIWYGTextInput extends Vue {
         min-height: 100px;
 
         @extend .style-wysiwyg;
+    }
+
+    .tiptap p.is-editor-empty:first-child::before {
+        color: $color-gray-5;
+        content: attr(data-placeholder);
+        float: left;
+        height: 0;
+        pointer-events: none;
     }
 
     .tools {

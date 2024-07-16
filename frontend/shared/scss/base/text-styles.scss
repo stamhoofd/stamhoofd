@@ -930,11 +930,13 @@
         font-style: italic;
     }
 
-    p:not([class]) {
-        font-size: 16px;
+    p{
+        margin: 0;
+        padding: 0;
+        font-size: 15px;
         font-weight: $font-weight-default;
         line-height: 1.5;
-        color: $color-gray-text;
+        color: $color-dark;
     }
 
     p:empty::after {

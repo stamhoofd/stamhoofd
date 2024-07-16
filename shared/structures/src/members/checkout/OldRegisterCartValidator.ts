@@ -105,44 +105,6 @@ export class OldRegisterCartValidator {
             }
         }
 
-        // Check if registrations are limited
-        if (group.settings.preventPreviousGroupIds.length > 0) {
-            if (member.registrations.find(r => {
-                const registrationGroup = groups.find(g => g.id === r.groupId)
-                if (!registrationGroup) {
-                    return false
-                }
-                return group.settings.preventPreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
-            })) {
-                return {
-                    closed: true,
-                    waitingList: false,
-                    message: "Niet toegelaten",
-                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer niet was ingeschreven voor "+Formatter.joinLast(group.settings.preventPreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of "),
-                    invited: false
-                }
-            }
-        }
-
-        // Check if registrations are limited
-        if (group.settings.requirePreviousGroupIds.length > 0) {
-            if (!member.registrations.find(r => {
-                const registrationGroup = groups.find(g => g.id === r.groupId)
-                if (!registrationGroup) {
-                    return false
-                }
-                return group.settings.requirePreviousGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
-            })) {
-                return {
-                    closed: true,
-                    waitingList: false,
-                    message: "Niet toegelaten",
-                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer was ingeschreven voor "+Formatter.joinLast(group.settings.requirePreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of "),
-                    invited: false
-                }
-            }
-        }
-
         const existingMember = this.isExistingMember(member, groups) || (group.settings.priorityForFamily && !!family.find(f => this.isExistingMember(f, groups)))
 
         // Pre registrations?

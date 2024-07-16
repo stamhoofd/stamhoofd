@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix,SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, ManageEventsView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { PromiseView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -220,6 +220,12 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
         })
     });
 
+    const calendarTab = new TabBarItem({
+        icon: 'calendar',
+        name: 'Activiteiten',
+        component: new ComponentWithProperties(ManageEventsView, {})
+    });
+
     const webshopsTab = new TabBarItem({
         icon: 'basket',
         name: 'Verkoop',
@@ -331,6 +337,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
 
                             if (organization?.meta.packages.useMembers) {
                                 tabs.push(membersTab)
+                                tabs.push(calendarTab)
                             }
 
                             if (organization?.meta.packages.useWebshops) {

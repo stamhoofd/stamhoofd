@@ -266,12 +266,16 @@ export class GroupSettings extends AutoEncoder {
     requireGroupIds: string[] = []
 
     /**
+     * @deprecated
      * Require that the member is already registered for one of these groups before allowing to register for this group.
      * If it is empty, then it is not enforced
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 100 })
     requirePreviousGroupIds: string[] = []
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 102 })
     preventPreviousGroupIds: string[] = []
 

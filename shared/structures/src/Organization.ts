@@ -105,9 +105,7 @@ export class Organization extends AutoEncoder {
             if (group.settings.requireGroupIds.length > 0 && group.settings.requireGroupIds.find(id => !!allGroups.find(g => g.id === id))) {
                 continue;
             }
-            if (group.settings.requirePreviousGroupIds.length > 0 && group.settings.requirePreviousGroupIds.find(id => !!allGroups.find(g => g.id === id))) {
-                continue;
-            }
+
             if  (group.settings.availableMembers === 0 && !group.settings.waitingListIfFull) {
                 continue;
             }

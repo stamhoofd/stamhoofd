@@ -15,6 +15,7 @@ export * from "./src/ViewportHelper"
 export * from "./src/members"
 export * from "./src/email"
 export * from "./src/payments"
+export * from "./src/events"
 
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"
