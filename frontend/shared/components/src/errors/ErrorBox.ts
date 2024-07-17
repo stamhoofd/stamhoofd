@@ -46,30 +46,7 @@ export class ErrorBox {
 
 
     scrollIntoView(element: HTMLElement) {
-        // default scrollIntoView is broken on Safari and sometimes causes the scrollview to scroll too far and get stuck
-        const scrollElement = ViewportHelper.getScrollElement(element)
-        const elRect = element.getBoundingClientRect()
-        const scrollRect = scrollElement.getBoundingClientRect()
-
-        let scrollPosition = elRect.bottom - scrollRect.top - scrollElement.clientHeight + scrollElement.scrollTop
-        // TODO: add the bottom padding of scrollRect as an extra offset (e.g. for the keyboard of st-view)
-
-        let bottomPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'))
-        if (isNaN(bottomPadding)) {
-            bottomPadding = 25
-        }
-        let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'))
-        if (isNaN(elBottomPadding)) {
-            elBottomPadding = 0
-        }
-        scrollPosition += Math.max(0, bottomPadding - elBottomPadding)
-        scrollPosition = Math.max(0, Math.min(scrollPosition, scrollElement.scrollHeight - scrollElement.clientHeight))
-
-        const exponential = function(x: number): number {
-            return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
-        }
-
-        ViewportHelper.scrollTo(scrollElement, scrollPosition, Math.min(600, Math.max(300, Math.abs(element.scrollTop - scrollPosition) / 2)), exponential)
+        ViewportHelper.scrollIntoView(element)
     }
 
     private fireScroll() {

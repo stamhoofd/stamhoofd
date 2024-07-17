@@ -16,13 +16,13 @@ export class Event extends Model {
     name: string
 
     @column({ type: "string" })
-    organizationId: string
+    typeId: string
+
+    @column({ type: "string", nullable: true })
+    organizationId: string|null = null
 
     @column({ type: "string", nullable: true })
     groupId: string|null = null
-
-    @column({ type: "boolean" })
-    isGlobal = false
 
     @column({ type: "datetime" })
     startDate: Date

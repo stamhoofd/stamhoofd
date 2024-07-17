@@ -84,7 +84,7 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, SaveView, Toast, useErrors, usePatch, Dropdown } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, SaveView, Toast, useErrors, usePatch, Dropdown, TagIdsInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
@@ -92,7 +92,6 @@ import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditMembershipTypeConfigView from './EditMembershipTypeConfigView.vue';
 import PlatformMembershipTypeConfigRow from './components/PlatformMembershipTypeConfigRow.vue';
-import TagIdsInput from '../components/TagIdsInput.vue';
 
 const errors = useErrors();
 const saving = ref(false);

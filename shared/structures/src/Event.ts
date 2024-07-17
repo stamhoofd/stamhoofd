@@ -17,6 +17,9 @@ export class EventMeta extends AutoEncoder {
     @field({ decoder: RichText })
     description = RichText.create({})
 
+    @field({ decoder: BooleanDecoder })
+    visible = true
+
     @field({ decoder: EventLocation, nullable: true })
     location: EventLocation|null = null
 
@@ -57,10 +60,10 @@ export class Event extends AutoEncoder {
     name = ''
 
     @field({ decoder: StringDecoder })
-    organizationId = ''
+    typeId = ''
 
-    @field({ decoder: BooleanDecoder })
-    isGlobal = false
+    @field({ decoder: StringDecoder, nullable: true })
+    organizationId: string|null = null
 
     @field({ decoder: DateDecoder })
     startDate = new Date()

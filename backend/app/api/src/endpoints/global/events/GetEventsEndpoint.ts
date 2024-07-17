@@ -19,7 +19,6 @@ const filterCompilers: SQLFilterDefinitions = {
     id: createSQLColumnFilterCompiler('id'),
     name: createSQLColumnFilterCompiler('name'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),
-    isGlobal: createSQLColumnFilterCompiler('isGlobal')
 }
 
 const sorters: SQLSortDefinitions<Event> = {
@@ -96,7 +95,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                         organizationId: organization.id
                     },
                     {
-                        isGlobal: true
+                        organizationId: null
                     }
                 ]
             };
