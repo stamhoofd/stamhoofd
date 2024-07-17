@@ -8,6 +8,7 @@ import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, Pag
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -148,11 +149,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         const query = GetEventsEndpoint.buildQuery(requestQuery)
         const data = await query.fetch()
         
-        const events = await Event.fromRows(data, Event.table);
-
-        // Load groups
-        const groupIds = events.map(e => e.groupId).filter(id => id !== null) as string[]
-        const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : []
+        const events = Event.fromRows(data, Event.table);
 
         let next: LimitedFilteredRequest|undefined;
 
@@ -175,7 +172,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         return new PaginatedResponse<EventStruct[], LimitedFilteredRequest>({
-            results: events.map(e => e.getStructure(groups.find(g => g.id == e.groupId) ?? null)),
+            results: await AuthenticatedStructures.events(events),
             next
         });
     }

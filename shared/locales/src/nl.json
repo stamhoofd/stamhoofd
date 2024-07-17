@@ -222,5 +222,6 @@
     "admin.invoices.title": "Facturen",
     "admin.invoices.emptyMessage": "Er zijn nog geen facturen aangemaakt",
     "shared.allOrganizations": "Alle verenigingen",
-    "shared.allAgeGroups": "Alle leeftijdsgroepen"
+    "shared.allAgeGroups": "Alle leeftijdsgroepen",
+    "shared.saveConfirmation": "Wijzigingen zijn opgeslagen"
 }

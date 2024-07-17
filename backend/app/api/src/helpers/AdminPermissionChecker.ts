@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
-import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
+import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
 import { AccessRight, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
 
@@ -169,6 +169,28 @@ export class AdminPermissionChecker {
         }
 
         return false;
+    }
+
+    async canAccessEvent(event: Event, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        // Check permissions aren't scoped to a specific organization, and they mismatch
+        if (!this.checkScope(event.organizationId)) {
+            return false
+        }
+
+        if (permissionLevel !== PermissionLevel.Read) {
+            if (event.organizationId) {
+                // Need full access for now
+                if (!await this.hasFullAccess(event.organizationId)) {
+                    return false
+                }
+            } else {
+                if (!this.hasPlatformFullAccess()) {
+                    return false
+                }
+            }
+        }
+
+        return true;
     }
 
     async canAccessArchivedGroups(organizationId: string) {

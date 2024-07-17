@@ -1,6 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
-import { MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, User as UserStruct, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { Event, Group, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
+import { Event as EventStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, User as UserStruct, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 
@@ -156,5 +156,25 @@ export class AuthenticatedStructures {
             members: memberBlobs,
             organizations: await Promise.all([...organizations.values()].map(o => this.organization(o)))
         })
+    }
+
+    static async events(events: Event[]): Promise<EventStruct[]> {
+        // Load groups
+        const groupIds = events.map(e => e.groupId).filter(id => id !== null) as string[]
+        const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : []
+
+        const result: EventStruct[] = []
+
+        for (const event of events) {
+            const group = groups.find(g => g.id == event.groupId) ?? null
+
+            if (group && await Context.auth.canAccessGroup(group)) {
+                result.push(event.getPrivateStructure())
+            } else {
+                result.push(event.getStructure(group))
+            }
+        }
+        
+        return result
     }
 }

@@ -228,14 +228,17 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput, DateSelection, Dropdown, ErrorBox, ImageComponent, TagIdsInput, TimeInput, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
 import { Event, EventLocation, EventMeta, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { usePatch } from '../hooks';
+import { useContext, usePatch } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
 
 const props = defineProps<{
     isNew: boolean;
@@ -243,8 +246,12 @@ const props = defineProps<{
 }>();
 
 const errors = useErrors();
-const {hasChanges, patched, addPatch} = usePatch(props.event);
+const {hasChanges, patched, addPatch, patch} = usePatch(props.event);
 const title = computed(() => props.isNew ? 'Activiteit toevoegen' : 'Activiteit bewerken')
+const saving = ref(false)
+const $t = useTranslate()
+const context = useContext();
+const pop = usePop();
 
 const multipleDays = computed({
     get: () => {
@@ -421,6 +428,10 @@ function deleteTagRestriction() {
 
 
 async function save() {
+    if (saving.value) {
+        return;
+    }
+
     // todo
     if (endDate.value < startDate.value) {
         errors.errorBox = new ErrorBox(
@@ -433,10 +444,47 @@ async function save() {
         return ;
     }
     errors.errorBox = null;
+
+    saving.value = true;
+
+    try {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+
+        if (props.isNew) {
+            arr.addPut(patched.value)
+        } else {
+            arr.addPatch(patch.value)
+        }
+
+        await context.value.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/events',
+            body: arr
+        })
+
+        Toast.success($t('shared.saveConfirmation')).show()
+        await pop({force: true})
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    
+    }
+
+    saving.value = false;
 }
 
 function deleteMe() {
     // todo delete
 }
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
+}
+
+defineExpose({
+    shouldNavigateAway
+})
 
 </script>
