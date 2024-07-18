@@ -52,6 +52,14 @@ export class Formatter {
         return monthNames[index - 1]
     }
 
+    /**
+     * 1-31
+     */
+    static day(date: Date): string {
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return datetime.day.toFixed(0)
+    }
+
     static weekDay(date: Date): string {
         if (!date) {
             // Crash protection in case undefined get passed

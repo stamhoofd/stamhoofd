@@ -233,7 +233,7 @@ import { Event, EventLocation, EventMeta, ResolutionRequest } from '@stamhoofd/s
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { useContext, usePatch } from '../hooks';
+import { useContext, useOrganization, usePatch } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -258,6 +258,7 @@ const saving = ref(false)
 const $t = useTranslate()
 const context = useContext();
 const pop = usePop();
+const organization = useOrganization();
 
 const multipleDays = computed({
     get: () => {
@@ -372,7 +373,7 @@ const locationAddress = computed({
     }
 })
 
-const isNationalActivity = computed(() => patched.value.organizationId === null)
+const isNationalActivity = computed(() => (patched.value.organizationId === null && !props.isNew) || (!organization.value && props.isNew))
 
 const description = computed({
     get: () => patched.value.meta.description,

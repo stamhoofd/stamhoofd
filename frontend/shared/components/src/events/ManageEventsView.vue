@@ -10,7 +10,6 @@
             <h1>
                 Activiteiten
             </h1>
-            <p>Voeg evenementen of activiteiten toe aan je kalender waarvoor leden al dan niet kunnen inschrijven via het ledenportaal.</p>
 
             <div class="input-with-buttons">
                 <div>
@@ -27,20 +26,39 @@
                 </div>
             </div>
 
-            <STList>
-                <STListItem v-for="event of fetcher.objects" :key="event.id" class="" @click="editEvent(event)">
-                    <h3 class="style-title-list">
-                        {{ event.name }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ event.dateRange }}
-                    </p>
+            <div v-for="group of groupedEvents" :key="group.title" class="container">
+                <hr>
+                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
-                    <p class="style-description-small">
-                        {{ event.meta.description.text }}
-                    </p>
-                </STListItem>
-            </STList>
+                <STList>
+                    <STListItem v-for="event of group.events" :key="event.id" class="" :selectable="true" @click="editEvent(event)">
+                        <template #left>
+                            <div class="calendar-box">
+                                <div class="overlay">
+                                    <span class="day">{{ Formatter.day(event.startDate) }}</span>
+                                    <span class="month">{{ Formatter.capitalizeFirstLetter(Formatter.month(event.startDate)) }}</span>
+                                </div>
+                                <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" class="event-image" />
+                            </div>
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ event.name }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ Formatter.capitalizeFirstLetter(event.dateRange) }}
+                        </p>
+
+                        <p v-if="event.meta.location?.name" class="style-description-small">
+                            {{ event.meta.location.name }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon edit gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
 
             <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
         </main>
@@ -51,10 +69,12 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { ref, Ref, watchEffect } from 'vue';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, ref, Ref, watchEffect } from 'vue';
 import { UIFilter } from '../filters/UIFilter';
 import { useContext } from '../hooks';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher } from '../tables';
+import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 
 type ObjectType = Event;
@@ -88,6 +108,27 @@ const fetcher = useInfiniteObjectFetcher<ObjectType>({
         throw new Error("Method not implemented.");
     }
 })
+
+const groupedEvents = computed(() => {
+    const queue: {
+        title: string,
+        events: Event[]
+    }[] = [];
+    const currentYear = Formatter.year(new Date());
+
+    for (const event of fetcher.objects) {
+        const year = Formatter.year(event.startDate);
+        const title = Formatter.month(event.startDate) + (year !== currentYear ? ` ${year}` : '');
+
+        const group = queue[queue.length - 1];
+        if (group && group.title === title) {
+            group.events.push(event);
+        } else {
+            queue.push({title, events: [event]});
+        }
+    }
+    return queue
+});
 
 watchEffect(() => {
     fetcher.setSearchQuery(searchQuery.value)
@@ -147,3 +188,57 @@ function getRequiredFilter(): StamhoofdFilter|null  {
 }
 
 </script>
+
+<style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+.calendar-box {
+    width: 200px;
+    border-radius: $border-radius;
+    position: relative;
+    padding: 40px 0;
+    border-radius: 5px;
+    overflow: hidden;
+    background: $color-background-shade;
+    margin-right: 15px;
+    border: 1px solid $color-border;
+
+    @media (max-width: 500px) {
+        width: 100px;
+        margin-right: 0;
+        padding: 20px 0;
+    }
+
+    .overlay {
+        text-align: center;
+
+        .day {
+            display: block;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .month {
+            display: block;
+            font-size: 15px;
+            color: $color-gray-1;
+        }
+    }
+
+    .event-image {
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        touch-action: none;
+        pointer-events: none;
+
+        img {
+            object-fit: cover;
+        }
+    }
+}
+</style>
