@@ -11,6 +11,7 @@
                 Activiteiten
             </h1>
 
+
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
@@ -26,8 +27,14 @@
                 </div>
             </div>
 
-            <div v-for="group of groupedEvents" :key="group.title" class="container">
-                <hr>
+            <ScrollableSegmentedControl v-model="selectedYear" :items="years" :labels="yearLabels" />
+            
+            <Checkbox v-model="addSuggestions" v-if="selectedYear === null">Toon wekelijkse suggesties voor X</Checkbox>
+
+            <hr>
+
+            <div v-for="(group, index) of groupedEvents" :key="group.title" class="container">
+                <hr v-if="index > 0">
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
@@ -49,12 +56,13 @@
                             {{ Formatter.capitalizeFirstLetter(event.dateRange) }}
                         </p>
 
-                        <p v-if="event.meta.location?.name" class="style-description-small">
-                            {{ event.meta.location.name }}
+                        <p v-if="event.meta.location?.name || event.meta.location?.address?.city" class="style-description-small">
+                            {{ event.meta.location?.name || event.meta.location?.address?.city }}
                         </p>
 
                         <template #right>
-                            <span class="icon edit gray" />
+                            <span class="icon edit gray" v-if="event.id" />
+                            <span class="icon add gray" v-else />
                         </template>
                     </STListItem>
                 </STList>
@@ -68,7 +76,7 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref, watchEffect } from 'vue';
 import { UIFilter } from '../filters/UIFilter';
@@ -76,6 +84,7 @@ import { useContext } from '../hooks';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
+import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 
 type ObjectType = Event;
 
@@ -84,6 +93,22 @@ const filteredCount = ref(0);
 const present = usePresent()
 const context = useContext();
 const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
+const selectedYear = ref(null);
+const years = computed(() => {
+    const currentYear = Formatter.year(new Date());
+    return [null, currentYear, currentYear - 1, currentYear - 2]
+})
+
+const yearLabels = computed(() => {
+    return years.value.map(y => {
+        if (y === null) {
+            return 'Toekomstige'
+        }
+        return y.toString()
+    })
+})
+
+
 
 const fetcher = useInfiniteObjectFetcher<ObjectType>({
     requiredFilter: getRequiredFilter(),
@@ -109,6 +134,64 @@ const fetcher = useInfiniteObjectFetcher<ObjectType>({
     }
 })
 
+const addSuggestions = ref(false);
+const fillEventsUntil = computed(() => {
+    const fetcherLastDate = fetcher.objects[fetcher.objects.length - 1]?.startDate
+
+    if (fetcher.hasMoreObjects) {
+        return fetcherLastDate ?? new Date()
+    }
+
+    const fillUntil = Formatter.luxon(new Date()).plus({months: 2}).endOf('month').toJSDate()
+
+    return new Date(Math.max(fillUntil.getTime(), fetcherLastDate?.getTime() ?? 0))
+})
+
+const dayOfWeekSuggestion = 7 // Sunday
+
+const eventSuggestions = computed(() => {
+    if (!addSuggestions.value || selectedYear.value !== null) {
+        return []
+    }
+
+    let pointer = Formatter.luxon(new Date());
+    const end = Formatter.luxon(fillEventsUntil.value);
+    const suggestions: Event[] = [];
+
+    // Find next sunday (dayOfWeekSuggestion)
+    // eslint-disable-next-line no-constant-condition
+    while (pointer < end) {
+        pointer = pointer.plus({days: 1});
+
+        if (pointer.weekday === dayOfWeekSuggestion) {
+            // Found next sunday
+            suggestions.push(
+                Event.create({
+                    id: '',
+                    name: 'Suggestie',
+                    startDate: pointer.toJSDate(),
+                    endDate: pointer.toJSDate(),
+                })
+            );
+        }
+    }
+
+    return suggestions
+});
+
+const filledEvents = computed(() => {
+    const added = eventSuggestions.value.filter(e => {
+        for (const event of fetcher.objects) {
+            if (Formatter.dateIso(event.startDate) === Formatter.dateIso(e.startDate)) {
+                return false
+            }
+        }
+        return true
+    })
+
+    return [...fetcher.objects, ...added].sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+});
+
 const groupedEvents = computed(() => {
     const queue: {
         title: string,
@@ -116,7 +199,7 @@ const groupedEvents = computed(() => {
     }[] = [];
     const currentYear = Formatter.year(new Date());
 
-    for (const event of fetcher.objects) {
+    for (const event of filledEvents.value) {
         const year = Formatter.year(event.startDate);
         const title = Formatter.month(event.startDate) + (year !== currentYear ? ` ${year}` : '');
 
@@ -174,17 +257,19 @@ function editFilter() {
 }
 
 function extendSort(list: SortList): SortList  {
-    if (list.find(l => l.key === 'id')) {
-        return list;
-    }
-
-    // Always add id as an extra sort key for sorters that are not unique
-    return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
+    return assertSort(list, [
+        {key: "startDate", order: SortItemDirection.ASC},
+        {key: "id"}
+    ])
 }
 
 
 function getRequiredFilter(): StamhoofdFilter|null  {
-    return null
+    return {
+        startDate: {
+            $gt: new Date()
+        }
+    }
 }
 
 </script>

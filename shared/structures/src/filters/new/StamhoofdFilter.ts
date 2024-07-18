@@ -1,3 +1,5 @@
+import { AssertSortList, SortItemDirection, SortList } from "./SortList"
+
 export type StamhoofdAndFilter = {
     $and: StamhoofdFilter
 }
@@ -59,4 +61,17 @@ export function mergeFilters(filters: (StamhoofdFilter|null)[], type: '$and' | '
     return {
         [type]: filteredFilters
     }
+}
+
+export function assertSort(list: SortList, assert: AssertSortList): SortList  {
+    for (const a of assert) {
+        if (list.find(l => l.key === a.key)) {
+            continue;
+        }
+    
+        // Always add id as an extra sort key for sorters that are not unique
+        list = [...list, {key: a.key, order: a.order ?? list[0]?.order ?? SortItemDirection.ASC}]
+    }
+
+    return list;
 }

@@ -8,6 +8,9 @@ export enum SortItemDirection {
 export type SortItem = { key: string; order: SortItemDirection; }
 export type SortList = SortItem[]
 
+export type AssertSortItem = { key: string; order?: SortItemDirection; }
+export type AssertSortList = AssertSortItem[]
+
 export function encodeSortList(sort: SortList): string {
     return sort.map(s => `${s.key } ${s.order}`).join(',');
 }

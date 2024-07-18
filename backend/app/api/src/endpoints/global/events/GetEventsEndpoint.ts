@@ -2,13 +2,13 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Event, Group } from '@stamhoofd/models';
+import { Event } from '@stamhoofd/models';
 import { SQL, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler } from "@stamhoofd/sql";
 import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Context } from '../../../helpers/Context';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -20,6 +20,8 @@ const filterCompilers: SQLFilterDefinitions = {
     id: createSQLColumnFilterCompiler('id'),
     name: createSQLColumnFilterCompiler('name'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),
+    startDate: createSQLColumnFilterCompiler('startDate'),
+    endDate: createSQLColumnFilterCompiler('endDate'),
 }
 
 const sorters: SQLSortDefinitions<Event> = {

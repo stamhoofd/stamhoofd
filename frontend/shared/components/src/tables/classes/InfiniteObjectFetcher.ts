@@ -33,7 +33,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
     fetchingData = false;
     delayFetchUntil: Date|null = null;
 
-    limit = 10
+    limit = 1
     sort: SortList = []
 
     /**
@@ -70,7 +70,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
         if (this.objectFetcher.destroy) {
             this.objectFetcher.destroy()
         }
-        this.objects = [] // Fast memory cleanup
+        this.objects = reactive([]) // Fast memory cleanup
     }
 
     resetRetryCount() {
@@ -113,7 +113,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
         console.info('Reset')
 
         this._clearIndex += 1;
-        this.objects = []
+        this.objects = reactive([])
         this.hasMoreObjects = true;
         this.fetchingData = false;
         this.errorState = null;
