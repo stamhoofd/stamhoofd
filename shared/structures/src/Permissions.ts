@@ -522,12 +522,6 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PermissionLevel) })
     level: PermissionLevel = PermissionLevel.None
 
-    /**
-     * @deprecated
-     */
-    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true })
-    groups: never[] = []
-
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
     roles: PermissionRole[] = []
 
@@ -549,99 +543,6 @@ export class Permissions extends AutoEncoder {
 
     hasRole(role: PermissionRole): boolean {
         return this.roles.find(r => r.id === role.id) !== undefined
-    }
-
-    /**
-     * @deprecated
-     * Use LoadedPermissions
-     */
-    hasAccess(allRoles: PermissionRoleDetailed[], level: PermissionLevel): boolean {
-        if (getPermissionLevelNumber(this.level) >= getPermissionLevelNumber(level)) {
-            // Someone with read / write access for the whole organization, also the same access for each group
-            return true;
-        }
-
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(level)) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    /**
-     * @deprecated
-     * Use LoadedPermissions
-     */
-    hasReadAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccess(allRoles, PermissionLevel.Read)
-    }
-
-    /**
-     * @deprecated
-     * Use LoadedPermissions
-     */
-    hasWriteAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccess(allRoles, PermissionLevel.Write)
-    }
-
-    /**
-     * @deprecated
-     * Use LoadedPermissions
-     */
-    hasFullAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccess(allRoles, PermissionLevel.Full);
-    }
-
-    /**
-     * @deprecated
-     * Use LoadedPermissions
-     */
-    hasAccessRight(right: AccessRight, allRoles: PermissionRoleDetailed[]): boolean {
-        if (this.hasFullAccess(allRoles)) {
-            return true
-        }
-        for (const r of this.roles) {
-            const f = allRoles.find(rr => r.id === rr.id)
-            if (!f) {
-                // Deleted role
-                continue
-            }
-            if (f.hasAccessRight(right)) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    /**
-     * @deprecated
-     * @param roles All available roles of the organizatino (to query)
-     */
-    canCreateWebshops(allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccessRight(AccessRight.OrganizationCreateWebshops, allRoles)
-    }
-
-    /**
-     * @deprecated
-     * @param roles All available roles of the organizatino (to query)
-     */
-    canManagePayments(allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccessRight(AccessRight.OrganizationManagePayments, allRoles) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector, allRoles)
-    }
-
-    /**
-     * @deprecated
-     */
-    hasFinanceAccess(allRoles: PermissionRoleDetailed[]): boolean {
-        return this.hasAccessRight(AccessRight.OrganizationFinanceDirector, allRoles)
     }
 
     add(other: Permissions) {

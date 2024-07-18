@@ -134,10 +134,6 @@ export class OrganizationOverview extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), optional: true })
     acquisitionTypes: AcquisitionType[] = [];
 
-    get fullAccessAdmins() {
-        return this.admins.filter(a => a.permissions && a.permissions.globalPermissions?.hasFullAccess([]))
-    }
-
     matchQuery(q: string) {
         if (q === this.id) {
             return true;

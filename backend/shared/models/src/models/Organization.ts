@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
+import { AccessRight, Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
@@ -876,7 +876,7 @@ export class Organization extends Model {
         // Circular reference fix
         const User = (await import('./User')).User;
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
-        const filtered = admins.filter(a => a.organizationPermissions && (a.organizationPermissions.hasFullAccess(this.privateMeta.roles) || a.organizationPermissions.hasFinanceAccess(this.privateMeta.roles)))
+        const filtered = admins.filter(a => a.permissions?.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector))
 
         if (filtered.length > 0) {
             return filtered.map(f => f.getEmailTo() ).join(", ")
