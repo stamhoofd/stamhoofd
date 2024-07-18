@@ -77,7 +77,7 @@ export class AuthenticatedStructures {
                 webshopStructures.push(WebshopPreview.create(w))
             }
 
-            const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: organization.periodId }, {limit: 1})
+            const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: organization.periodId, organizationId: organization.id }, {limit: 1})
             let oPeriod = oPeriods[0];
             const period = (await RegistrationPeriod.getByID(organization.periodId))!
 

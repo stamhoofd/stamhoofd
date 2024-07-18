@@ -264,7 +264,7 @@ export class Organization extends Model {
     }
 
     async getStructure({emptyGroups} = {emptyGroups: false}): Promise<OrganizationStruct> {
-        const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId }, {limit: 1})
+        const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, {limit: 1})
         const oPeriod = oPeriods[0];
         const period = await RegistrationPeriod.getByID(this.periodId)
         const groups = emptyGroups ? [] : (await (await import("./Group")).Group.getAll(this.id, this.periodId))
