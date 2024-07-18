@@ -20,8 +20,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from "@stamhoofd/components";
 
-import { TableAction, TableActionSelection } from "./TableAction";
-import TableView from "./TableView.vue";
+import { TableAction, TableActionSelection } from "./classes";
 
 @Component({
     components: {

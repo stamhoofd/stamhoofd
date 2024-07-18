@@ -17,6 +17,7 @@ export * from "./src/email"
 export * from "./src/payments"
 export * from "./src/events"
 export * from "./src/containers"
+export * from "./src/tables"
 
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"
@@ -158,13 +159,6 @@ export * from "./src/filters/filterBuilders"
 export { default as PropertyFilterInput } from "./src/filters/PropertyFilterInput.vue"
 export { default as PropertyFilterView } from "./src/filters/PropertyFilterView.vue"
 
-// tables
-export * from "./src/tables/Column"
-export { default as ModernTableView } from "./src/tables/ModernTableView.vue"
-export * from "./src/tables/TableAction"
-export { default as TableActionsContextMenu } from "./src/tables/TableActionsContextMenu.vue"
-export * from "./src/tables/TableObjectFetcher"
-export { default as TableView } from "./src/tables/TableView.vue"
 export * from "./src/VueGlobalHelper"
 
 // Graphs

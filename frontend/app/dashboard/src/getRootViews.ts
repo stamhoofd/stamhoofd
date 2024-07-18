@@ -223,7 +223,9 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
     const calendarTab = new TabBarItem({
         icon: 'calendar',
         name: 'Activiteiten',
-        component: new ComponentWithProperties(ManageEventsView, {})
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(ManageEventsView, {})
+        })
     });
 
     const webshopsTab = new TabBarItem({

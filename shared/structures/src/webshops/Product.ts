@@ -152,17 +152,7 @@ export class ProductDateRange extends AutoEncoder {
     endDate = new Date()
 
     toString() {
-        if (Formatter.dateIso(this.startDate) === Formatter.dateIso(this.endDate)) {
-            return Formatter.dateWithDay(this.startDate)+", "+Formatter.time(this.startDate)+" - "+Formatter.time(this.endDate)
-        }
-        
-        // If start in evening and end on the next morning: only mention date once
-        if (Formatter.dateIso(this.startDate) === Formatter.dateIso(new Date(this.endDate.getTime() - 24*60*60*1000)) && Formatter.timeIso(this.endDate) <= "12:00" && Formatter.timeIso(this.startDate) >= "12:00") {
-            return Formatter.dateWithDay(this.startDate)+", "+Formatter.time(this.startDate)+" - "+Formatter.time(this.endDate)
-        }
-
-        return Formatter.dateTime(this.startDate)+" - "+Formatter.dateTime(this.endDate)
-
+        return Formatter.dateRange(this.startDate, this.endDate)
     }
 }
 

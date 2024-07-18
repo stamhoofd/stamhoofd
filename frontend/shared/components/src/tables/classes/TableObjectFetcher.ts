@@ -1,16 +1,8 @@
 import { Request } from "@simonbackx/simple-networking";
 import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter, mergeFilters } from "@stamhoofd/structures";
 import { onBeforeUnmount, reactive } from "vue";
-import { useAuth } from "../hooks";
-
-export interface ObjectFetcher<O> {
-    requiredFilter?: StamhoofdFilter|null|undefined
-    fetch(data: LimitedFilteredRequest): Promise<{results: O[], next?: LimitedFilteredRequest}>
-
-    fetchCount(data: CountFilteredRequest): Promise<number>
-
-    destroy?(): void
-}
+import { useAuth } from "../../hooks";
+import { ObjectFetcher } from "./ObjectFetcher";
 
 export type FetchAllOptions = {
     onProgress?: (count: number, total: number) => void

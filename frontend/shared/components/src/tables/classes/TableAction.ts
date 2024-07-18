@@ -1,6 +1,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
-import { FetchAllOptions, TableObjectFetcher, Toast } from "../..";
+import { FetchAllOptions, TableObjectFetcher } from ".";
+import { Toast } from "../../..";
 
 export interface TableActionSelection<T extends {id: string}> {
     hasSelection: boolean,

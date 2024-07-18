@@ -151,12 +151,10 @@ import { v4 as uuidv4 } from "uuid";
 import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from "vue";
 
 import UIFilterEditor from "../filters/UIFilterEditor.vue";
-import { Column } from "./Column";
+import { AsyncTableAction, Column, FetchAllOptions, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from "./classes";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
-import { AsyncTableAction, MenuTableAction, TableAction, TableActionSelection } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
-import { FetchAllOptions, TableObjectFetcher } from "./TableObjectFetcher";
  
 export interface TableListable {
     id: string

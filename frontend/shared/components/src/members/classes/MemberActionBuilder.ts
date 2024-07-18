@@ -1,16 +1,16 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
-import { EmailRecipientFilter, EmailRecipientFilterSubtype, EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
+import { markRaw } from 'vue'
+import { EditMemberAllBox, MemberStepView } from '..'
+import EmailView from '../../email/EmailView.vue'
 import { CenteredMessage, CenteredMessageButton } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
-import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/TableAction'
-import { PlatformFamilyManager } from '../PlatformFamilyManager'
-import { EditMemberAllBox, MemberStepView } from '..'
-import { markRaw } from 'vue'
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes'
 import { NavigationActions } from '../../types/NavigationActions'
-import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
-import EmailView from '../../email/EmailView.vue'
+import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
+import { PlatformFamilyManager } from '../PlatformFamilyManager'
 
 export class MemberActionBuilder {
     present: ReturnType<typeof usePresent>

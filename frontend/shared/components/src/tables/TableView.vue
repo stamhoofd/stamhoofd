@@ -135,16 +135,15 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { AsyncComponent, BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, FilterEditor, LongPressDirective, STButtonToolbar, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Organization, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 import { markRaw } from "vue";
 
-import { Column } from "./Column";
+import { AsyncTableAction, Column, MenuTableAction, TableAction } from "./classes";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
-import { AsyncTableAction, MenuTableAction, TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
 
 interface TableListable {

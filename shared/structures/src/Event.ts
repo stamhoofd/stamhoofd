@@ -4,6 +4,7 @@ import { Image } from "./files/Image";
 import { Group } from "./Group";
 import { RichText } from "./RichText";
 import { Address } from "./addresses/Address";
+import { Formatter } from "@stamhoofd/utility";
 
 export class EventLocation extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -82,6 +83,10 @@ export class Event extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date()
+
+    get dateRange() {
+        return Formatter.dateRange(this.startDate, this.endDate)
+    }
 }
 
 

@@ -237,13 +237,19 @@ import { useContext, usePatch } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 
-const props = defineProps<{
-    isNew: boolean;
-    event: Event;
-}>();
+const props = withDefaults(
+    defineProps<{
+        isNew: boolean;
+        event: Event;
+        callback?: (() => void)|null;
+    }>(),
+    {
+        callback: null
+    }
+);
 
 const errors = useErrors();
 const {hasChanges, patched, addPatch, patch} = usePatch(props.event);
@@ -456,13 +462,20 @@ async function save() {
             arr.addPatch(patch.value)
         }
 
-        await context.value.authenticatedServer.request({
+        const response = await context.value.authenticatedServer.request({
             method: 'PATCH',
             path: '/events',
-            body: arr
+            body: arr,
+            decoder: new ArrayDecoder(Event as Decoder<Event>),
         })
 
         Toast.success($t('shared.saveConfirmation')).show()
+
+        // Make sure original event is patched
+        deepSetArray([props.event], response.data)
+
+        props.callback?.()
+        
         await pop({force: true})
     } catch (e) {
         errors.errorBox = new ErrorBox(e)

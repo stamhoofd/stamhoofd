@@ -12,7 +12,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,ContextMenuItemView, ContextMenuLine,ContextMenuView } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
-import { Column } from "./Column";
+import { Column } from "./classes";
 
 @Component({
     components: {

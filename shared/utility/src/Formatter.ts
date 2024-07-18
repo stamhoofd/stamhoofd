@@ -167,6 +167,19 @@ export class Formatter {
         return year+"-"+(datetime.month+"").padStart(2, "0")+"-"+(datetime.day+"").padStart(2, "0") + " "+(datetime.hour+"").padStart(2, "0")+":"+(datetime.minute+"").padStart(2, "0")+":"+(datetime.second+"").padStart(2, "0")
     }
 
+    static dateRange(startDate: Date, endDate: Date): string {
+        if (Formatter.dateIso(startDate) === Formatter.dateIso(endDate)) {
+            return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)+" - "+Formatter.time(endDate)
+        }
+        
+        // If start in evening and end on the next morning: only mention date once
+        if (Formatter.dateIso(startDate) === Formatter.dateIso(new Date(endDate.getTime() - 24*60*60*1000)) && Formatter.timeIso(endDate) <= "07:00" && Formatter.timeIso(startDate) >= "12:00") {
+            return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)+" - "+Formatter.time(endDate)
+        }
+
+        return Formatter.dateTime(startDate)+" - "+Formatter.dateTime(endDate)
+    }
+
 
     /**
      * 12:00

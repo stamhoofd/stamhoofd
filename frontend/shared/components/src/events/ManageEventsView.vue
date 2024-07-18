@@ -26,20 +26,74 @@
                     </button>
                 </div>
             </div>
+
+            <STList>
+                <STListItem v-for="event of fetcher.objects" :key="event.id" class="" @click="editEvent(event)">
+                    <h3 class="style-title-list">
+                        {{ event.name }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ event.dateRange }}
+                    </p>
+
+                    <p class="style-description-small">
+                        {{ event.meta.description.text }}
+                    </p>
+                </STListItem>
+            </STList>
+
+            <InfiniteObjectFetcherEnd empty-message="Geen activiteiten gevonden" :fetcher="fetcher" />
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ref } from 'vue';
+import { Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { ref, Ref, watchEffect } from 'vue';
+import { UIFilter } from '../filters/UIFilter';
+import { useContext } from '../hooks';
+import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher } from '../tables';
 import EditEventView from './EditEventView.vue';
-import { Event } from '@stamhoofd/structures';
 
+type ObjectType = Event;
 
 const searchQuery = ref('');
 const filteredCount = ref(0);
 const present = usePresent()
+const context = useContext();
+const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
+
+const fetcher = useInfiniteObjectFetcher<ObjectType>({
+    requiredFilter: getRequiredFilter(),
+    async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
+        console.log('Events.fetch', data);
+        data.sort = extendSort(data.sort);
+
+        const response = await context.value.authenticatedServer.request({
+            method: "GET",
+            path: "/events",
+            decoder: new PaginatedResponseDecoder(new ArrayDecoder(Event as Decoder<Event>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+            query: data,
+            shouldRetry: false,
+            owner: this
+        });
+
+        console.log('[Done] Events.fetch', data, response.data);        
+        return response.data
+    },
+
+    async fetchCount(): Promise<number> {
+        throw new Error("Method not implemented.");
+    }
+})
+
+watchEffect(() => {
+    fetcher.setSearchQuery(searchQuery.value)
+    const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
+    fetcher.setFilter(filter)
+})
 
 function blurFocus() {
     (document.activeElement as HTMLElement)?.blur()
@@ -53,7 +107,22 @@ async function addEvent() {
         components: [
             new ComponentWithProperties(EditEventView, {
                 event,
-                isNew: true
+                isNew: true,
+                callback: () => {
+                    fetcher.reset()
+                }
+            })
+        ]
+    })
+}
+
+async function editEvent(event: Event) {
+    await present({
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditEventView, {
+                event,
+                isNew: false
             })
         ]
     })
@@ -61,6 +130,20 @@ async function addEvent() {
 
 function editFilter() {
     // todo
+}
+
+function extendSort(list: SortList): SortList  {
+    if (list.find(l => l.key === 'id')) {
+        return list;
+    }
+
+    // Always add id as an extra sort key for sorters that are not unique
+    return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
+}
+
+
+function getRequiredFilter(): StamhoofdFilter|null  {
+    return null
 }
 
 </script>
