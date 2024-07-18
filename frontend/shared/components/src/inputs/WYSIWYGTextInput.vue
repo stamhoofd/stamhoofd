@@ -119,6 +119,9 @@ export default class WYSIWYGTextInput extends Vue {
     }
 
     beforeUnmount() {
+        // This fixes a glitch that the editor content is wiped before the transition is finished
+        const content = (this.$el as HTMLElement).innerHTML;
+        (this.$el as HTMLElement).innerHTML = content;
         this.editor?.destroy()
     }
 
