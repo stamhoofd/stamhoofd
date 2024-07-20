@@ -40,9 +40,16 @@
             </template>
 
             <template v-if="member.patchedMember.details.email">
-                <dt>E-mailadres</dt>
+                <dt>E-mailadres {{ member.patchedMember.details.alternativeEmails.length ? '1' : ''}}</dt>
                 <dd v-copyable>
                     {{ member.patchedMember.details.email }}
+                </dd>
+            </template>
+
+            <template v-for="(email, index) of member.patchedMember.details.alternativeEmails" :key="index">
+                <dt>E-mailadres {{ index + 2 }}</dt>
+                <dd v-copyable>
+                    {{ email }}
                 </dd>
             </template>
 

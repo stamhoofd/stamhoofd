@@ -35,7 +35,7 @@
                 </EmailInput>
                 <EmailInput 
                     :model-value="getEmail(n - 1)" 
-                    @update:modelValue="setEmail(n - 1, ($event as any).target.value)" 
+                    @update:modelValue="setEmail(n - 1, $event)" 
                     :required="true" 
                     :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') " 
                     placeholder="E-mailadres van ouder" 

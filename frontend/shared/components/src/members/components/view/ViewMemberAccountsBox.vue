@@ -46,50 +46,18 @@
                 <p v-if="user.permissions" class="style-description-small">
                     Beheerder
                 </p>
-
-                <template #right>
-                    <button class="button icon trash hover-show" type="button" :disabled="member.isSaving" @click="unlinkUser(user)" />
-                </template>
             </STListItem>
         </STList>
     </div>
 </template>
 
 <script setup lang="ts">
-import { PlatformMember, User } from '@stamhoofd/structures';
-import { CenteredMessage } from '../../../overlays/CenteredMessage';
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
-import { Toast } from '../../../overlays/Toast';
+import { PlatformMember } from '@stamhoofd/structures';
 
 defineOptions({
     inheritAttrs: false
 })
-
-const props = defineProps<{
+defineProps<{
     member: PlatformMember
 }>()
-const platformFamilyManager = usePlatformFamilyManager();
-
-async function unlinkUser(user: User) {
-    if (!await CenteredMessage.confirm("Ben je zeker dat je de toegang tot dit lid wilt intrekken voor dit account?", "Ja, verwijderen", "Toegang intrekken van: "+user.email)) {
-        return
-    }
-
-    try {
-        const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
-        missing.addDelete(user.id)
-
-        props.member.addPatch({
-            users: missing
-        })
-
-        await platformFamilyManager.save([props.member])
-    } catch (e) {
-        // Reset
-        console.error(e)
-        Toast.fromError(e).show()
-    }
-}
-
 </script>

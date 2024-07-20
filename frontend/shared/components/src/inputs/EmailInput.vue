@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox" :class="class">
-        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event) => {emailRaw = event.target.value; onTyping();}">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event) => {emailRaw = event.currentTarget.value; onTyping();}">
         <template #right>
             <slot name="right" />
         </template>
@@ -121,7 +121,6 @@ export default class EmailInput extends Vue {
                     "field": "email"
                 }))
             }
-            this.$emit('update:modelValue', this.emailRaw)
             return false
 
         } else {

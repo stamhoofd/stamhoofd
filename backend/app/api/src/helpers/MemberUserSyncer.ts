@@ -1,7 +1,6 @@
-import { SimpleError } from "@simonbackx/simple-errors";
 import { Member, MemberResponsibilityRecord, MemberWithRegistrations, User } from "@stamhoofd/models";
 import { SQL } from "@stamhoofd/sql";
-import { Permissions, UserPermissions, User as UserStruct } from "@stamhoofd/structures";
+import { Permissions, UserPermissions } from "@stamhoofd/structures";
 
 export class MemberUserSyncerStatic {
     /**
@@ -16,7 +15,7 @@ export class MemberUserSyncerStatic {
             userEmails.push(member.details.email)
         }
 
-        const parentEmails = member.details.parentsHaveAccess ? member.details.parents.flatMap(p => p.email ? [p.email] : []) : []
+        const parentEmails = member.details.parentsHaveAccess ? member.details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails) : []
 
         // Make sure all these users have access to the member
         for (const email of userEmails) {
@@ -154,6 +153,12 @@ export class MemberUserSyncerStatic {
                         await user.save()
                     }
                 }
+
+                if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
+                    user.firstName = null;
+                    user.lastName = null;
+                    await user.save()
+                }
             }
         } else {
             // Create a new placeholder user
@@ -172,6 +177,12 @@ export class MemberUserSyncerStatic {
                     user.firstName = parents[0].firstName
                     user.lastName = parents[0].lastName
                 }
+
+                if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
+                    user.firstName = null;
+                    user.lastName = null;
+                }
+
                 await user.save()
             }
 
