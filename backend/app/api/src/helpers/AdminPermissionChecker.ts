@@ -11,6 +11,10 @@ import { Formatter } from "@stamhoofd/utility"
 export class AdminPermissionChecker {
     organization: Organization|null
     user: User
+    /**
+     * The member that is linked to this user = is this user
+     */
+    member: MemberWithRegistrations|null = null
     platform: PlatformStruct
 
     organizationCache: Map<string, Organization|Promise<Organization|undefined>> = new Map()
@@ -143,6 +147,13 @@ export class AdminPermissionChecker {
         if (!this.checkScope(group.organizationId)) {
             return false
         }
+        const organization = await this.getOrganization(group.organizationId)
+
+        if (group.periodId !== organization.periodId) {
+            if (!await this.hasFullAccess(group.organizationId)) {
+                return false
+            }
+        }
 
         if (group.deletedAt || group.status === GroupStatus.Archived) {
             return await this.canAccessArchivedGroups(group.organizationId);
@@ -160,7 +171,6 @@ export class AdminPermissionChecker {
         }
 
         // Check parent categories
-        const organization = await this.getOrganization(group.organizationId)
         const parentCategories = group.getParentCategories(organization.meta.categories)
         for (const category of parentCategories) {
             if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
@@ -243,7 +253,8 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (organizationPermissions.hasAccess(permissionLevel)) {
+        if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
+            // Only full permissions; because non-full doesn't have access to other periods
             return true;
         }
 
@@ -874,6 +885,24 @@ export class AdminPermissionChecker {
 
         return set
     }
+
+
+    async getAccessibleGroups(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<string[] | 'all'> {
+        if (await this.hasFullAccess(organizationId)) {
+            return 'all'
+        }
+
+        const groups = await this.getOrganizationGroups(organizationId)
+        const accessibleGroups: string[] = []
+
+        for (const group of groups) {
+            if (await this.canAccessGroup(group, level)) {
+                accessibleGroups.push(group.id)
+            }
+        }
+        return accessibleGroups
+    }
+
 
     /**
      * Changes data inline

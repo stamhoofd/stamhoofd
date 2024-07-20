@@ -69,6 +69,12 @@ export class MemberPlatformMembership extends Model {
     })
     updatedAt: Date
 
+    canDelete() {
+        if (this.invoiceId || this.invoiceItemDetailId) {
+            return false;
+        }
+        return true;
+    }
 
     async calculatePrice() {
         if (this.invoiceId || this.invoiceItemDetailId) {

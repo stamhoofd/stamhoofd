@@ -22,6 +22,9 @@ export class User extends Model {
     organizationId: string|null;
 
     @column({ type: "string", nullable: true })
+    memberId: string|null = null
+
+    @column({ type: "string", nullable: true })
     firstName: string | null = null;
 
     @column({ type: "string", nullable: true })
@@ -345,6 +348,11 @@ export class User extends Model {
 
         if (!organization && STAMHOOFD.userMode !== 'platform') {
             throw new Error("Missing organization")
+        }
+
+        if (await User.getForAuthentication(organization?.id ?? null, email, {allowWithoutAccount: true})) {
+            // Already exists
+            return;
         }
 
         const user = new User();

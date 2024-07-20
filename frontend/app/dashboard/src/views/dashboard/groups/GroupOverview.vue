@@ -27,16 +27,10 @@
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
-                    <h2 v-if="group.cycle > 0" class="style-title-list">
-                        Inschrijvingen
+                    <h2 class="style-title-list">
+                        Leden
                     </h2>
-                    <h2 v-else class="style-title-list">
-                        Inschrijvingen
-                    </h2>
-                    <p v-if="group.cycle > 0" class="style-description">
-                        {{ group.settings.dateRangeDescription }}
-                    </p>
-                    <p v-else class="style-description">
+                    <p class="style-description">
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
                     <template #right>
@@ -57,6 +51,18 @@
                     </p>
                     <template #right>
                         <span v-if="group.settings.waitingListSize !== null" class="style-description-small">{{ group.settings.waitingListSize }}</span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="openMembers(true)" v-for="responsibility of linkedResponsibilities" :key="responsibility.id">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ responsibility.name }}
+                    </h2>
+                    <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -239,13 +245,12 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useNavigationController, usePresent, useShow } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from "@stamhoofd/components";
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import EditGroupEmailsView from './edit/EditGroupEmailsView.vue';
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
 import EditGroupPricesView from './edit/EditGroupPricesView.vue';
@@ -269,6 +274,16 @@ const organization = useOrganization()
 const navigationController = useNavigationController()
 const present = usePresent()
 const isLocked = computed(() => props.period.period.locked)
+const platform = usePlatform();
+
+const linkedResponsibilities = computed(() => {
+    if (props.group.defaultAgeGroupId === null) {
+        return []
+    }
+
+    const id = props.group.defaultAgeGroupId
+    return platform.value.config.responsibilities.filter(r => r.defaultAgeGroupIds !== null && r.defaultAgeGroupIds.includes(id) && (r.organizationTagIds === null || organization.value?.meta.matchTags(r.organizationTagIds)))
+})
 
 async function openMembers(animated = true, options: { waitingList?: boolean } = {}) {
     await show({

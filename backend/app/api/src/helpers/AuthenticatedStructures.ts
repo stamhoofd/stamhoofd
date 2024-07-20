@@ -66,7 +66,6 @@ export class AuthenticatedStructures {
 
     static async organization(organization: Organization): Promise<OrganizationStruct> {
         if (await Context.optionalAuth?.canAccessPrivateOrganizationData(organization)) {
-            const groups = await Group.getAll(organization.id, organization.periodId)
             const webshops = await Webshop.where({ organizationId: organization.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
             const webshopStructures: WebshopPreview[] = [] 
 
@@ -77,20 +76,7 @@ export class AuthenticatedStructures {
                 webshopStructures.push(WebshopPreview.create(w))
             }
 
-            const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: organization.periodId, organizationId: organization.id }, {limit: 1})
-            let oPeriod = oPeriods[0];
-            const period = (await RegistrationPeriod.getByID(organization.periodId))!
-
-            if (!oPeriod) {
-                const organizationPeriod = new OrganizationRegistrationPeriod();
-                organizationPeriod.organizationId = organization.id;
-                organizationPeriod.periodId = period.id
-                organizationPeriod.settings.categories = organization.meta.categories
-                organizationPeriod.settings.rootCategoryId = organization.meta.rootCategoryId
-                await organizationPeriod.save();
-
-                oPeriod = organizationPeriod
-            }
+            const {groups, organizationPeriod, period} = await organization.getPeriod({emptyGroups: false})
 
             return OrganizationStruct.create({
                 id: organization.id,
@@ -103,7 +89,7 @@ export class AuthenticatedStructures {
                 privateMeta: organization.privateMeta,
                 webshops: webshopStructures,
                 createdAt: organization.createdAt,
-                period: oPeriod.getPrivateStructure(period, groups)
+                period: organizationPeriod.getPrivateStructure(period, groups)
             })
         }
         
@@ -148,7 +134,7 @@ export class AuthenticatedStructures {
         const platformMemberships = members.length > 0 ? await MemberPlatformMembership.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
 
         for (const blob of memberBlobs) {
-            blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => MemberResponsibilityRecordStruct.create(r))
+            blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => r.getStructure())
             blob.platformMemberships = platformMemberships.filter(r => r.memberId == blob.id).map(r => MemberPlatformMembershipStruct.create(r))
         }
 

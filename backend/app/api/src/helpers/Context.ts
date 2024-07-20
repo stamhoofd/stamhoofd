@@ -185,6 +185,10 @@ export class ContextInstance {
 
         const user = token.user
         this.user = user
+
+        // Load member of user
+        // todo
+
         this.#auth = new AdminPermissionChecker(user, await Platform.getSharedPrivateStruct(), this.organization);
 
         return {user, token};

@@ -1,6 +1,6 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { SQL } from "@stamhoofd/sql";
-import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
+import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct, GroupStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -300,7 +300,9 @@ export class Member extends Model {
                     if (!g) {
                         throw new Error("Group not found")
                     }
-                    member.registrations.push(registration.setRelation(Registration.group, g))
+                    if (g.deletedAt === null) {
+                        member.registrations.push(registration.setRelation(Registration.group, g))
+                    }
                 }
             }
 
@@ -414,6 +416,7 @@ export class Member extends Model {
             const memberships = await MemberPlatformMembership.where({memberId: this.id, periodId: platform.periodId })
             const now = new Date()
             const activeMemberships = memberships.filter(m => m.startDate <= now && m.endDate >= now)
+            const activeMembershipsUndeletable = activeMemberships.filter(m => !m.canDelete())
 
             if (defaultMemberships.length == 0) {
                 // Stop all active memberships
@@ -429,7 +432,7 @@ export class Member extends Model {
             }
 
 
-            if (activeMemberships.length) {
+            if (activeMembershipsUndeletable.length) {
                 // Skip automatic additions
                 console.log('Skipping automatic membership for: ' + this.id, ' - already has active memberships')
                 return
@@ -445,6 +448,12 @@ export class Member extends Model {
             })[0]
             if (!cheapestMembership) {
                 throw new Error("No membership found")
+            }
+
+            // Check if already have the same membership
+            if (activeMemberships.find(m => m.membershipTypeId == cheapestMembership.membership.id)) {
+                console.log('Skipping automatic membership for: ' + this.id, ' - already has this membership')
+                return
             }
 
             const periodConfig = cheapestMembership.membership.periods.get(platform.periodId)
@@ -465,6 +474,12 @@ export class Member extends Model {
 
             await membership.calculatePrice()
             await membership.save()
+
+            // This reasoning allows us to replace an existing membership with a cheaper one (not date based ones, but type based ones)
+            for (const toDelete of activeMemberships) {
+                console.log('Removing membership because cheaper membership found for: ' + this.id + ' - membership ' + toDelete.id)
+                await toDelete.delete()
+            }
         });
     }
 }

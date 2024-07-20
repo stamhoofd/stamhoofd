@@ -1,26 +1,35 @@
 <template>
     <div class="member-payments-view">
         <main class="container">
-            <p class="info-box">Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.</p>
+            <p class="info-box">
+                Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.
+            </p>
             <p v-if="memberships.length === 0" class="warning-box">
                 {{ $t('shared.noMembershipWarning') }}
             </p>
             <STList v-else>
                 <STListItem v-for="membership of memberships" :key="membership.id" class="right-stack">
                     <template #left>
-                        <span class="icon clock" v-if="membership.startDate > now" />
-                        <span class="icon warning" v-else-if="membership.expireDate && membership.expireDate < now" />
-                        <span class="icon success" v-else />
+                        <span v-if="membership.startDate > now" class="icon clock" />
+                        <span v-else-if="membership.expireDate && membership.expireDate < now" class="icon warning" />
+                        <span v-else class="icon success" />
                     </template>
-                    <h3 class="style-title-list">{{ getMembershipType(membership).name }}</h3>
+                    <h3 class="style-title-list">
+                        {{ getMembershipType(membership).name }}
+                    </h3>
                     <p class="style-description-small">
                         {{ formatDate(membership.startDate, true) }} tot en met {{ formatDate(membership.expireDate ?? membership.endDate, true) }}
                     </p>
-                    <p class="style-description-small" v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now">
+                    <p class="style-description-small">
+                        Via {{ getOrganizationName(membership) }}
+                    </p>
+                    <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
                         Verlopen. Verleng de aansluiting om de verzekering te behouden.
                     </p>
 
-                    <p class="style-description-small">{{ getMembershipType(membership).description }}</p>
+                    <p class="style-description-small">
+                        {{ getMembershipType(membership).description }}
+                    </p>
 
                     <template #right>
                         <span>{{ formatPrice(membership.price) }}</span>
@@ -47,10 +56,10 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+import { usePlatform } from '../../hooks';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import SelectPlatformMembershipView from '../components/platform-membership/SelectPlatformMembershipView.vue';
-import { usePlatform } from '../../hooks';
 
 const props = defineProps<{
     member: PlatformMember
@@ -65,6 +74,10 @@ const now = new Date();
 const memberships = computed(() => {
     return props.member.member.platformMemberships.filter(m => m.endDate >= now);
 });
+
+function getOrganizationName(membership: MemberPlatformMembership) {
+    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? 'Onbekende groep'
+}
 
 async function addMembership() {
     await present({

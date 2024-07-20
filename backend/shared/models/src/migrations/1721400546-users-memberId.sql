@@ -1,0 +1,3 @@
+ALTER TABLE `users`
+ADD COLUMN `memberId` varchar(36) NULL AFTER `id`;
+ALTER TABLE `users` ADD FOREIGN KEY (`memberId`) REFERENCES `members` (`id`) ON UPDATE CASCADE ON DELETE SET NULL;

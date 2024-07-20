@@ -7,6 +7,7 @@ import { MemberWithRegistrationsBlob, MembersBlob } from "@stamhoofd/structures"
 import { Context } from '../../../helpers/Context';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
@@ -83,7 +84,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             const updatedMember = members.find(m => m.id === member.id);
             if (updatedMember) {
                 // Make sure we also give access to other parents
-                await PatchOrganizationMembersEndpoint.updateManagers(updatedMember)
+                await MemberUserSyncer.onChangeMember(updatedMember)
                 await Document.updateForMember(updatedMember.id)
             }
         }
@@ -121,7 +122,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 })
             }
             await member.save();
-            await PatchOrganizationMembersEndpoint.updateManagers(member)
+            await MemberUserSyncer.onChangeMember(member)
 
             // Update documents
             await Document.updateForMember(member.id)

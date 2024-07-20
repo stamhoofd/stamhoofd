@@ -365,17 +365,35 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (organization) {
             // Add organization scope filter
-            scopeFilter = {
-                registrations: {
-                    $elemMatch: {
-                        organizationId: organization.id,
-                        periodId: organization.periodId,
-                        registeredAt: {
-                            $neq: null
+            const groups = await Context.auth.getAccessibleGroups(organization.id)
+
+            if (groups === 'all') {
+                scopeFilter = {
+                    registrations: {
+                        $elemMatch: {
+                            organizationId: organization.id,
+                            registeredAt: {
+                                $neq: null
+                            }
                         }
                     }
-                }
-            };
+                };
+            } else {
+                scopeFilter = {
+                    registrations: {
+                        $elemMatch: {
+                            organizationId: organization.id,
+                            periodId: organization.periodId,
+                            groupId: {
+                                $in: groups
+                            },
+                            registeredAt: {
+                                $neq: null
+                            }
+                        }
+                    }
+                };
+            }
         }
         
         const query = SQL

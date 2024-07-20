@@ -35,7 +35,7 @@ export default class EmailInput extends Vue {
     emailRaw = "";
     valid = true;
 
-    @Prop({ default: null })
+    @Prop({ required: true })
         modelValue!: string | null
 
     @Prop({ default: null })
@@ -117,10 +117,11 @@ export default class EmailInput extends Vue {
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": "Ongeldig e-mailadres",
+                    "message": this.emailRaw.length === 0 ? 'Vul een e-mailadres in' :  "Ongeldig e-mailadres " + this.emailRaw,
                     "field": "email"
                 }))
             }
+            this.$emit('update:modelValue', this.emailRaw)
             return false
 
         } else {

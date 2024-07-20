@@ -5,7 +5,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :value="getEmail(n - 1)" placeholder="E-mailadres" :validator="validator" @input="setEmail(n - 1, $event)">
+        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :modelValue="getEmail(n - 1)" placeholder="E-mailadres" :validator="validator" @update:modelValue="setEmail(n - 1, $event)">
             <template #right><span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
             <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" /></template>
         </EmailInput>
@@ -29,11 +29,11 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { EmailInput, SaveView, STErrorsDefault, STInputBox, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { UrlHelper } from "@stamhoofd/networking";
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditWebshopMixin from "./EditWebshopMixin";

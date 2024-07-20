@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding"
 import { ErrorBox, useErrors, useOrganization, usePlatform } from "@stamhoofd/components"
 import { useOrganizationManager, usePlatformManager } from "@stamhoofd/networking"
-import { Organization, OrganizationPrivateMetaData, PermissionRoleDetailed, Platform, PlatformPrivateConfig, Version } from "@stamhoofd/structures"
+import { Organization, OrganizationPrivateMetaData, PermissionRoleDetailed, PermissionRoleForResponsibility, Platform, PlatformPrivateConfig, Version } from "@stamhoofd/structures"
 import { computed, Ref, ref } from "vue"
 
 export function useRoles() {
@@ -35,6 +35,11 @@ export function usePatchRoles() {
     const createRolePatchArray = () => {
         return new PatchableArray() as PatchableArrayAutoEncoder<PermissionRoleDetailed>
     }
+
+    const createResponsibilityRolePatchArray = () => {
+        return new PatchableArray() as PatchableArrayAutoEncoder<PermissionRoleForResponsibility>
+    }
+
     const patchRoles = (patch: PatchableArrayAutoEncoder<PermissionRoleDetailed>) => {
         if (organization.value) {
             const oPatch = Organization.patch({
@@ -53,12 +58,32 @@ export function usePatchRoles() {
         platformPatch.value = platformPatch.value.patch(oPatch)
         return;
     }
+
+    const patchResponsibilityRoles = (patch: PatchableArrayAutoEncoder<PermissionRoleForResponsibility>) => {
+        if (organization.value) {
+            const oPatch = Organization.patch({
+                privateMeta: OrganizationPrivateMetaData.patch({
+                    responsibilityRoles: patch
+                })
+            })
+            organizationPatch.value = organizationPatch.value.patch(oPatch)
+            return;
+        }
+        // not supported yet on platform level
+    }
     
     const roles = computed(() => {
         if (patchedOrganization.value) {
             return patchedOrganization.value.privateMeta?.roles ?? []
         }
         return patchedPlatform.value.privateConfig?.roles ?? []
+    })
+
+    const responsibilityRoles = computed(() => {
+        if (patchedOrganization.value) {
+            return patchedOrganization.value.privateMeta?.responsibilityRoles ?? []
+        }
+        return []
     })
 
     const hasChanges = computed(() => {
@@ -104,8 +129,11 @@ export function usePatchRoles() {
         patchedOrganization,
         patchedPlatform,
         roles,
+        responsibilityRoles,
         patchRoles,
+        patchResponsibilityRoles,
         createRolePatchArray,
+        createResponsibilityRolePatchArray,
         hasChanges
     }
 }

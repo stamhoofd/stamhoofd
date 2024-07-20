@@ -2,37 +2,43 @@
     <div class="container">
         <Title v-bind="$attrs" :title="title" />
 
-        <ScrollableSegmentedControl v-model="selectedOrganization" :items="items" :labels="labels" v-if="!organization">
-            <template #right>
-                <button v-tooltip="'Kies andere groep'" class="button icon gray add" type="button" @click="searchOrganization" />
-            </template>
-        </ScrollableSegmentedControl>
-
+        <ScrollableSegmentedControl v-model="selectedOrganization" :items="items" :labels="labels" v-if="!organization && items.length" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p class="info-box" v-if="responsibilities.length === 0">
+        <p v-if="!selectedOrganization" class="info-box">
+            Een lid moet eerst een actieve inschrijving hebben voor je functies kan toekennen.
+        </p>
+
+        <p class="info-box" v-else-if="groupsWithResponsibilites.length === 0">
             Geen functies gevonden
         </p>
 
-        <STList v-else>
-            <STListItem v-for="responsibility of responsibilities" :key="responsibility.id" element-name="label" :selectable="true">
-                <template #left>
-                    <Checkbox :model-value="isResponsibilityEnabled(responsibility)" @update:model-value="setResponsibilityEnabled(responsibility, $event)" />
-                </template>
+        <div class="container" v-for="group of groupsWithResponsibilites" :key="''+group.groupId">
+            <hr v-if="group.title">
+            <h2 v-if="group.title">{{ group.title }}</h2>
 
-                <h2 class="style-title-list">
-                    {{ responsibility.name }}
-                </h2>
-                <p class="style-description-small" v-if="getResponsibilityEnabledDescription(responsibility)">
-                    {{ getResponsibilityEnabledDescription(responsibility) }}
-                </p>
-                <p class="style-description-small">
-                    {{ responsibility.description }}
-                </p>
-            </STListItem>
-        </STList>
+            <STList>
+                <STListItem v-for="responsibility of group.responsibilities" :key="responsibility.id" element-name="label" :selectable="true">
+                    <template #left>
+                        <Checkbox :model-value="isResponsibilityEnabled(responsibility, group.groupId)" @update:model-value="setResponsibilityEnabled(responsibility, group.groupId, $event)" />
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ responsibility.name }}
+                    </h2>
+                    <p class="style-description-small" v-if="getResponsibilityEnabledDescription(responsibility, group.groupId)">
+                        {{ getResponsibilityEnabledDescription(responsibility, group.groupId) }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ responsibility.description }}
+                    </p>
+                </STListItem>
+            </STList>
+        </div>
+
+        
     </div>
 </template>
 
@@ -70,23 +76,64 @@ const items = computed(() => {
     if (organization.value) {
         return [organization.value]
     }
-    return [...props.member.organizations, null]
+    return [...props.member.organizations]
 });
 
 const responsibilities = computed(() => {
     if (selectedOrganization.value === null) {
-        if (!auth.hasFullPlatformAccess()) {
-            return []
-        }
-        return platform.value.config.responsibilities.filter(r => !r.assignableByOrganizations)
+        return []
     }
-    return platform.value.config.responsibilities.filter(r => r.assignableByOrganizations) 
+    const org = selectedOrganization.value
+    return platform.value.config.responsibilities.filter(r => r.organizationTagIds === null || org.meta.matchTags(r.organizationTagIds))
 })
+
 const selectedOrganization = ref((items.value[0] ?? null) as any) as Ref<Organization|null>;
 const $t = useTranslate();
 const present = usePresent();
 const auth = useAuth();
 
+const groupsWithResponsibilites = computed(() => {
+    const groups: {title: string, groupId: string|null, responsibilities: MemberResponsibility[]}[] = []
+    const defaultGroup: MemberResponsibility[] = []
+
+    for (const responsibility of responsibilities.value) {
+        if (responsibility.defaultAgeGroupIds === null) {
+            defaultGroup.push(responsibility)
+        }
+    }
+    
+    if (defaultGroup.length > 0) {
+        groups.push({
+            title: '',
+            groupId: null,
+            responsibilities: defaultGroup
+        })
+    }
+
+    const organizationGroups = selectedOrganization.value?.period.adminCategoryTree.getAllGroups() ?? []
+    for (const group of organizationGroups) {
+        if (group.defaultAgeGroupId === null) {
+            continue
+        }
+
+        const groupResponsibilities: MemberResponsibility[] = []
+        for (const responsibility of responsibilities.value) {
+            if (responsibility.defaultAgeGroupIds !== null && responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
+                groupResponsibilities.push(responsibility)
+            }
+        }
+
+        if (groupResponsibilities.length > 0) {
+            groups.push({
+                title: group.settings.name,
+                groupId: group.id,
+                responsibilities: groupResponsibilities
+            })
+        }
+    }
+
+    return groups;
+})
 
 const labels = computed(() => {
     return items.value.map(o => o === null ? 'Koepel' : o.name)
@@ -130,12 +177,12 @@ async function searchOrganization() {
     })
 }
 
-function isResponsibilityEnabled(responsibility: MemberResponsibility) {
-    return !!props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null))
+function isResponsibilityEnabled(responsibility: MemberResponsibility, groupId: string|null) {
+    return !!props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === groupId)
 }
 
-function getResponsibilityEnabledDescription(responsibility: MemberResponsibility) {
-    const rr = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null))
+function getResponsibilityEnabledDescription(responsibility: MemberResponsibility, groupId: string|null) {
+    const rr = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === groupId)
 
     if (rr) {
         if (!rr.endDate) {
@@ -147,13 +194,13 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
     return null;
 }
 
-function setResponsibilityEnabled(responsibility: MemberResponsibility, enabled: boolean) {
-    if (enabled === isResponsibilityEnabled(responsibility)) {
+function setResponsibilityEnabled(responsibility: MemberResponsibility, groupId: string|null, enabled: boolean) {
+    if (enabled === isResponsibilityEnabled(responsibility, groupId)) {
         return;
     }
 
     if (enabled) {
-        const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null))
+        const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === groupId)
 
         if (originalEnabled) {
             // Restore original state
@@ -175,7 +222,8 @@ function setResponsibilityEnabled(responsibility: MemberResponsibility, enabled:
             responsibilityId: responsibility.id,
             startDate: new Date(),
             endDate: null,
-            organizationId: selectedOrganization?.value?.id ?? null
+            organizationId: selectedOrganization?.value?.id ?? null,
+            groupId: groupId
         })
 
         const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray()
@@ -187,14 +235,14 @@ function setResponsibilityEnabled(responsibility: MemberResponsibility, enabled:
         return;
     }
 
-    const current = props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null))
+    const current = props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === groupId)
     if (!current) {
         return;
     }
     const patch: PatchableArrayAutoEncoder<MemberResponsibilityRecord> = new PatchableArray()
 
     // Did we already have this?
-    const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null))
+    const originalEnabled = props.member.member.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === groupId)
     if (originalEnabled && originalEnabled.id === current.id) {
         patch.addPatch(MemberResponsibilityRecord.patch({
             id: current.id,

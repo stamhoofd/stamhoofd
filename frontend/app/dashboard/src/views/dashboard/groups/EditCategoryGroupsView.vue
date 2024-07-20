@@ -2,13 +2,14 @@
     <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save">
         <h1>
             {{ title }}
+
+            <span v-if="organization" class="title-suffix">
+                {{ period.period.nameShort }}
+            </span>
         </h1>
-        <p v-if="organization && period.id !== organization.period.id">
-            {{ period.period.name }}
-        </p>
             
         <p v-if="isRoot && enableActivities">
-            Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen. Als je geen onderverdeling wilt, kan je gewoon één groep toevoegen. Leden kunnen dan inschrijven voor één of meerdere inschrijvingsgroepen. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
+            Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen in {{ period.period.name }}. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je leeftijdsgroepen en één voor al je vrijwilligers.
         </p>
           
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -136,7 +137,7 @@ const patchedCategory = computed(() => {
 })
 
 const isRoot = computed(() => props.category.id === patchedPeriod.value.settings.rootCategoryId)
-const title = computed(() => isRoot.value ? 'Inschrijvingsgroepen'+(enableActivities.value ? " en activiteiten" : "") : (props.isNew ? "Nieuwe categorie" : name.value))
+const title = computed(() => isRoot.value ? 'Inschrijvingsgroepen' : (props.isNew ? "Nieuwe categorie" : name.value))
 const name = computed({
     get: () => patchedCategory.value.settings.name,
     set: (name: string) => {

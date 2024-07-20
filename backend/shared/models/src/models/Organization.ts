@@ -13,6 +13,7 @@ import { validateDNSRecords } from "../helpers/DNSValidator";
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { EmailTemplate, Group, OrganizationRegistrationPeriod, RegistrationPeriod, StripeAccount } from "./";
+import { QueueHandler } from "@stamhoofd/queues";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -263,11 +264,46 @@ export class Organization extends Model {
         return this.id+"." + defaultDomain;
     }
 
-    async getStructure({emptyGroups} = {emptyGroups: false}): Promise<OrganizationStruct> {
+    async getPeriod({emptyGroups} = {emptyGroups: false}) {
         const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, {limit: 1})
-        const oPeriod = oPeriods[0];
         const period = await RegistrationPeriod.getByID(this.periodId)
+
+        if (!period) {
+            throw new Error("Period not found")
+        }
+
+        let oPeriod: OrganizationRegistrationPeriod;
+        if (oPeriods.length == 0) {
+            // Automatically create a period
+            oPeriod = await QueueHandler.schedule('create-missing-organization-period', async () => {
+                // Race condition check
+                const updatedPeriods =  await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, {limit: 1})
+
+                if (updatedPeriods.length) {
+                    return updatedPeriods[0]
+                }
+
+                console.log('Automatically creating new organization registration period for organization ' + this.id + ' and period ' + this.periodId + ' - organization period is missing')
+                const created = new OrganizationRegistrationPeriod()
+                created.organizationId = this.id
+                created.periodId = this.periodId
+                await created.save()
+                return created
+            })
+        } else {
+            oPeriod = oPeriods[0];
+        }
         const groups = emptyGroups ? [] : (await (await import("./Group")).Group.getAll(this.id, this.periodId))
+
+        return {
+            organizationPeriod: oPeriod,
+            period,
+            groups
+        }
+    }
+
+    async getStructure({emptyGroups} = {emptyGroups: false}): Promise<OrganizationStruct> {
+        const {groups, organizationPeriod, period} = await this.getPeriod({emptyGroups})
 
         const struct = OrganizationStruct.create({
             id: this.id,
@@ -279,7 +315,7 @@ export class Organization extends Model {
             website: this.website,
             groups: groups.map(g => g.getStructure()),
             createdAt: this.createdAt,
-            period: oPeriod.getStructure(period!, groups)
+            period: organizationPeriod.getStructure(period, groups)
         })
 
         if (this.meta.modules.disableActivities) {

@@ -34,10 +34,10 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         const u = await User.getForRegister(organization?.id ?? null, request.body.email)
 
         // Don't optimize. Always run two queries atm.
-        let user = await User.register(
+        let user = u ? undefined : (await User.register(
             organization,
             request.body
-        );
+        ));
 
         let sendCode = true
 

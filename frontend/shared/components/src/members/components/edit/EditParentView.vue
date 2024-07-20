@@ -26,11 +26,38 @@
                     </div>
                 </STInputBox>
 
-                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="errors.validator" :placeholder="$t('dashboard.inputs.parentPhone.placeholder')" :required="false" />
-                <EmailInput v-model="email" title="E-mailadres" :validator="errors.validator" placeholder="E-mailadres van ouder" :required="false" />
+                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="errors.validator" :placeholder="$t('dashboard.inputs.parentPhone.placeholder')" :required="app === 'registration'" />
+                
+                <EmailInput v-model="email" :required="app === 'registration'" :title="'E-mailadres' " placeholder="E-mailadres van ouder" :validator="errors.validator">
+                        <template #right>
+                        <button class="button icon add gray" type="button" @click="addEmail" v-tooltip="'Alternatief e-mailadres toevoegen'"/>
+                    </template>
+                </EmailInput>
+                <EmailInput 
+                    :model-value="getEmail(n - 1)" 
+                    @update:modelValue="setEmail(n - 1, ($event as any).target.value)" 
+                    :required="true" 
+                    :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') " 
+                    placeholder="E-mailadres van ouder" 
+                    :validator="errors.validator"  
+                    v-for="n in alternativeEmails.length" 
+                    :key="n"
+                >
+                    <template #right>
+                        <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+                    </template>
+                </EmailInput>
+            
+                <p class="style-description-small" v-if="email && member && member.patchedMember.details.parentsHaveAccess && app !== 'registration'">Deze ouder kan inloggen of registreren op <template v-if="alternativeEmails.length">één van de ingevoerde e-mailadressen</template><template v-else>het ingevoerde e-mailadres</template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.</p>
+                <p class="style-description-small" v-else-if="firstName && email && member && member.patchedMember.details.parentsHaveAccess">{{ firstName }} kan inloggen of registreren op <template v-if="alternativeEmails.length">één van de ingevoerde e-mailadressen</template><template v-else>het ingevoerde e-mailadres</template> en krijgt dan automatisch toegang tot de gegevens van {{ member.patchedMember.firstName }} en het ledenportaal.</p>
+            
+                <p v-if="alternativeEmails.length && member && member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                    <template v-if="app !== 'registration'">De ouder ontvangt enkel communicatie op het eerste e-mailadres.</template>
+                    <template v-else>{{ firstName }} ontvangt enkel communicatie op het eerste e-mailadres.</template>
+                </p>
             </div>
 
-            <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="errors.validator" :required="false" />
+            <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="errors.validator" :required="app === 'registration'" />
         </div>
     </SaveView>
 </template>
@@ -51,6 +78,7 @@ import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { NavigationActions, useNavigationActions } from '../../../types/NavigationActions';
+import { useAppContext } from '../../../context/appContext';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember|null,
@@ -73,6 +101,7 @@ const saveText = ref("Opslaan");
 const parentTypes = Object.values(ParentType);
 const title = computed(() => !props.isNew ? `${patched.value.firstName || 'Ouder'} bewerken` : "Ouder toevoegen");
 const navigate = useNavigationActions();
+const app = useAppContext()
 
 const firstName = computed({
     get: () => patched.value.firstName,
@@ -104,6 +133,12 @@ const address = computed({
     set: (address) => addPatch({address})
 });
 
+const alternativeEmails = computed({
+    get: () => patched.value.alternativeEmails,
+    set: (alternativeEmails) => addPatch({
+        alternativeEmails: alternativeEmails as any
+    })
+});
 const availableAddresses = computed(() => {
     const list = family.addresses
     
@@ -112,6 +147,26 @@ const availableAddresses = computed(() => {
     }
     return list
 });
+
+function deleteEmail(n: number) {
+    const newEmails = [...alternativeEmails.value];
+    newEmails.splice(n, 1);
+    alternativeEmails.value = newEmails;
+}
+
+function addEmail() {
+    alternativeEmails.value = [...alternativeEmails.value, ""];
+}
+
+function getEmail(index: number) {
+    return alternativeEmails.value[index] ?? "";
+}
+
+function setEmail(index: number, value: string) {
+    const newEmails = [...alternativeEmails.value];
+    newEmails[index] = value;
+    alternativeEmails.value = newEmails;
+}
 
 function formatParentType(type: ParentType) {
     return ParentTypeHelper.getName(type)

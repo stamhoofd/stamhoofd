@@ -1,5 +1,5 @@
-import { AutoEncoder, EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter,StringCompare } from '@stamhoofd/utility';
+import { ArrayDecoder, AutoEncoder, EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { DataValidator, Formatter,StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
@@ -25,6 +25,9 @@ export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 5 })
     email: string | null = null;
 
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 278 })
+    alternativeEmails: string[] = []
+
     @field({ decoder: Address, nullable: true })
     address: Address | null = null;
 
@@ -49,6 +52,14 @@ export class Parent extends AutoEncoder {
         return false;
     }
 
+    hasEmail(email: string): boolean {
+        const cleaned = email.toLowerCase().trim()
+        if (this.email === cleaned) {
+            return true;
+        }
+        return this.alternativeEmails.includes(cleaned)
+    }
+
     /**
      * Call this to clean up capitals in all the available data
      */
@@ -62,7 +73,22 @@ export class Parent extends AutoEncoder {
 
         if (this.email) {
             this.email = this.email.toLowerCase().trim()
+
+            if (!DataValidator.isEmailValid(this.email)) {
+                this.email = null
+            }
         }
+
+        this.alternativeEmails = this.alternativeEmails.map(e => e.toLowerCase().trim()).filter(email => {
+            if (this.email && email === this.email) {
+                return false
+            }
+            if (!DataValidator.isEmailValid(email)) {
+                return false
+            }
+
+            return true
+        })
 
         if (this.phone) {
             this.phone = Formatter.removeDuplicateSpaces(this.phone.trim())
@@ -115,5 +141,7 @@ export class Parent extends AutoEncoder {
                 this.type = other.type
             }
         }
+
+        this.alternativeEmails = Formatter.uniqueArray([...this.alternativeEmails, ...other.alternativeEmails])
     }
 }

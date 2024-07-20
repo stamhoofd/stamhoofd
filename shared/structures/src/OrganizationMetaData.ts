@@ -422,4 +422,16 @@ export class OrganizationMetaData extends AutoEncoder {
             }),
         ]
     }
+
+    /**
+     * True if at least one id matches
+     */
+    matchTags(ids: string[]) {
+        for (const id of ids) {
+            if (this.tags.includes(id)) {
+                return true;
+            }
+        }
+        return false
+    }
 }

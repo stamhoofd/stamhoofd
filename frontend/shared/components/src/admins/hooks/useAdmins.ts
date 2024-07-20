@@ -4,7 +4,7 @@ import { Toast, useContext, useOrganization } from "@stamhoofd/components"
 import { ContextPermissions, OrganizationManager, usePlatformManager } from "@stamhoofd/networking"
 import { User, UserPermissions, Permissions } from "@stamhoofd/structures"
 import { Sorter } from "@stamhoofd/utility"
-import { computed, getCurrentInstance } from "vue"
+import { computed, getCurrentInstance, onActivated } from "vue"
 
 
 export function useAdmins() {
@@ -24,21 +24,30 @@ export function useAdmins() {
         // Platform scope
         return platformManager.value.$platform.admins === undefined
     })
-    
-    if (loading.value) {
+
+    function reload() {
         if (organization.value) {
             const manager = new OrganizationManager($context.value!)
             promise = manager.loadAdmins(true, true, instance?.proxy).catch((e) => {
                 Toast.fromError(e).show()
-                pop({force: true})
+                pop({force: true})?.catch(console.error)
             })
         } else {
             promise = platformManager.value.loadAdmins(true, true, instance?.proxy).catch((e) => {
                 Toast.fromError(e).show()
-                pop({force: true})
+                pop({force: true})?.catch(console.error)
             })
         }
     }
+    
+    if (loading.value) {
+        reload()
+    }
+
+    onActivated(() => {
+        // Reload admins
+        reload();
+    })
 
     const admins = computed(() => {
         if (organization.value) {

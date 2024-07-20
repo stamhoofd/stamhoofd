@@ -11,6 +11,9 @@ export class MemberResponsibilityRecord extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     organizationId: string|null = null;
 
+    @field({ decoder: StringDecoder, nullable: true })
+    groupId: string|null = null;
+
     @field({ decoder: StringDecoder })
     responsibilityId: string;
 

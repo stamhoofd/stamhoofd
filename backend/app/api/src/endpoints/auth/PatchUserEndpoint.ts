@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
+import { EmailVerificationCode, Member, PasswordToken, Token, User } from '@stamhoofd/models';
 import { NewUser, PermissionLevel, SignupResponse, User as UserStruct,UserPermissions } from "@stamhoofd/structures";
 
 import { Context } from '../../helpers/Context';
@@ -46,8 +46,20 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         if (await Context.auth.canEditUserName(editUser)) {
-            editUser.firstName = request.body.firstName ?? editUser.firstName
-            editUser.lastName = request.body.lastName ?? editUser.lastName
+            if (editUser.memberId) {
+                const member = await Member.getByID(editUser.memberId)
+                if (member) {
+                    member.details.firstName = request.body.firstName ?? member.details.firstName
+                    member.details.lastName = request.body.lastName ?? member.details.lastName
+
+                    editUser.firstName = member.details.firstName
+                    editUser.lastName = member.details.lastName
+                    await member.save()
+                }
+            } else {
+                editUser.firstName = request.body.firstName ?? editUser.firstName
+                editUser.lastName = request.body.lastName ?? editUser.lastName
+            }
         }
 
         if (request.body.permissions !== undefined) {

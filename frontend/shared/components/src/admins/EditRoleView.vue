@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox title="Titel" error-fields="name" :error-box="errors.errorBox">
+        <STInputBox v-if="!isForResponsibility" title="Titel" error-fields="name" :error-box="errors.errorBox">
             <input
                 v-model="name"
                 class="input"
@@ -279,7 +279,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategory, PermissionRoleDetailed, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategory, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
@@ -289,17 +289,32 @@ const saving = ref(false);
 const deleting = ref(false);
 
 const props = defineProps<{
-    role: PermissionRoleDetailed;
+    role: PermissionRoleDetailed|PermissionRoleForResponsibility;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed>) => Promise<void>,
+    saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed|PermissionRoleForResponsibility>) => Promise<void>,
     deleteHandler: (() => Promise<void>)|null
 }>();
-const title = computed(() => props.isNew ? 'Nieuwe rol' : props.role.name);
 const enableWebshopModule = computed(() => organization.value?.meta?.packages.useWebshops ?? false);
 const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
 const enableActivities = computed(() => organization.value?.meta?.packages.useActivities ?? false);
 const pop = usePop();
 const app = useAppContext()
+const isForResponsibility = props.role instanceof PermissionRoleForResponsibility
+const responsibility = computed(() => {
+    if (!(props.role instanceof PermissionRoleForResponsibility)) {
+        return null
+    }
+
+    const rid = props.role.responsibilityId
+    return platform.value.config.responsibilities.find(r => r.id === rid) ?? null
+})
+
+const title = computed(() => {
+    if (responsibility.value) {
+        return 'Rechten voor ' + responsibility.value.name
+    }
+    return props.isNew ? 'Nieuwe rol' : props.role.name
+});
 
 const {sortedAdmins, loading, getPermissions} = useAdmins()
 const organization = useOrganization()
@@ -331,7 +346,7 @@ const save = async () => {
     }
     saving.value = true;
     try {
-        if (name.value.length === 0) {
+        if (!isForResponsibility && name.value.length === 0) {
             throw new SimpleError({
                 code: "invalid_field",
                 message: "Gelieve een titel in te vullen",
@@ -393,7 +408,6 @@ const managePayments = useAccessRightSetter(AccessRight.OrganizationManagePaymen
 
 const readFinancialData = useAccessRightSetter(AccessRight.MemberReadFinancialData);
 const writeFinancialData = useAccessRightSetter(AccessRight.MemberWriteFinancialData);
-const platformLoginAs = useAccessRightSetter(AccessRight.PlatformLoginAs);
 
 function useAccessRightSetter(accessRight: AccessRight) {
     return computed({

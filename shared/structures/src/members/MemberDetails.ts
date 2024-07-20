@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter, StringCompare } from '@stamhoofd/utility';
+import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
 import { Replacement } from '../endpoints/EmailRequest';
@@ -58,6 +58,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, field: "mail" })
     @field({ decoder: StringDecoder, nullable: true, version: 5 })
     email: string | null = null;
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 277 })
+    alternativeEmails: string[] = []
 
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date("1970-01-01") })
@@ -165,6 +168,37 @@ export class MemberDetails extends AutoEncoder {
         for (const contact of this.emergencyContacts) {
             contact.cleanData()
         }
+
+        // Remove email address on member if it was set on a parent too
+        if (this.email !== null) {
+            this.email = this.email.toLocaleLowerCase().trim()
+
+            for (const parent of this.parents) {
+                if (parent.hasEmail(this.email)) {
+                    this.email = null
+                    break;
+                }
+            }
+            if (!this.email || !DataValidator.isEmailValid(this.email)) {
+                this.email = null
+            }
+        }
+
+        this.alternativeEmails = this.alternativeEmails.map(e => e.toLowerCase().trim()).filter(email => {
+            if (this.email && email === this.email) {
+                return false
+            }
+            if (!DataValidator.isEmailValid(email)) {
+                return false
+            }
+
+            for (const parent of this.parents) {
+                if (parent.hasEmail(email)) {
+                    return false
+                }
+            }
+            return true
+        })
     }
 
     isEqual(other: MemberDetails): boolean {
@@ -484,8 +518,12 @@ export class MemberDetails extends AutoEncoder {
         this.parents.push(parent)
     }
 
+    get canHaveOwnAccount() {
+        return (this.age === null || (this.age >= 12))
+    }
+
     get parentsHaveAccess() {
-        return (this.age && (this.age < 18 || (this.age < 24 && !this.address)))
+        return (this.age && (this.age < 18))
     }
 
     /**
@@ -493,14 +531,24 @@ export class MemberDetails extends AutoEncoder {
      */
     getManagerEmails(): string[] {
         const emails = new Set<string>()
-        if (this.email) {
+        if (this.email && this.canHaveOwnAccount) {
             emails.add(this.email)
+        }
+
+        if (this.canHaveOwnAccount) {
+            for (const email of this.alternativeEmails) {
+                emails.add(email)
+            }
         }
 
         if (this.parentsHaveAccess) {
             for (const parent of this.parents) {
                 if (parent.email) {
                     emails.add(parent.email)
+                }
+
+                for (const email of parent.alternativeEmails) {
+                    emails.add(email)
                 }
             }
         }

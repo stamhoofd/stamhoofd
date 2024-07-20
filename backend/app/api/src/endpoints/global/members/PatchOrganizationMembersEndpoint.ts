@@ -2,12 +2,13 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, MemberPlatformMembership, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, Platform, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { BalanceItemStatus, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, Payment, Platform, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
+import { BalanceItemStatus, MemberWithRegistrationsBlob, MembersBlob, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -188,13 +189,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 updateGroups.set(group.id, group)
             }
 
-            // Add users if they don't exist (only placeholders allowed)
-            for (const placeholder of struct.users) {
-                await PatchOrganizationMembersEndpoint.linkUser(placeholder, member)
-            }
-
             // Auto link users based on data
-            await PatchOrganizationMembersEndpoint.updateManagers(member)
+            await MemberUserSyncer.onChangeMember(member)
         }
 
         // Loop all members one by one
@@ -458,7 +454,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 await responsibilityRecord.save()
             }
 
-            // Update responsibilities
+            // Create responsibilities
             for (const {put} of patch.responsibilities.getPuts()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden aan te passen")
@@ -475,21 +471,54 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 model.memberId = member.id
                 model.responsibilityId = responsibility.id
 
-                if (responsibility.assignableByOrganizations) {
-                    if (organization) {
-                        model.organizationId = organization.id
-                    } else {
-                        if (!put.organizationId) {
-                            if (!Context.auth.hasPlatformFullAccess()) {
-                                throw Context.auth.error("Je hebt niet voldoende rechten om deze functie toe te kennen")
-                            }
-                        } else if (!await Context.auth.hasFullAccess(put.organizationId)) {
-                            throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden toe te kennen voor deze vereniging")
-                        }
-                        model.organizationId = put.organizationId
+                if (organization) {
+                    model.organizationId = organization.id
+
+                    if (responsibility.organizationTagIds !== null && !organization.meta.matchTags(responsibility.organizationTagIds)) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Invalid organization",
+                            human: "Deze functie is niet beschikbaar voor deze vereniging",
+                            field: "organizationId"
+                        })
                     }
                 } else {
-                    model.organizationId = null
+                    if (!Context.auth.hasPlatformFullAccess() || !put.organizationId) {
+                        throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden toe te kennen voor deze vereniging")
+                    }
+                    model.organizationId = put.organizationId
+                }
+
+                if (responsibility.defaultAgeGroupIds !== null) {
+                    if (!put.groupId) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Missing groupId",
+                            human: "Kies een leeftijdsgroep waarvoor je deze functie wilt toekennen",
+                            field: "groupId"
+                        })
+                    }
+
+                    const group = await Group.getByID(put.groupId)
+                    if (!group || group.organizationId !== model.organizationId) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Invalid groupId",
+                            human: "Deze leeftijdsgroep bestaat niet",
+                            field: "groupId"
+                        })
+                    }
+
+                    if (group.defaultAgeGroupId === null || !responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Invalid groupId",
+                            human: "Deze leeftijdsgroep komt niet in aanmerking voor deze functie",
+                            field: "groupId"
+                        })
+                    }
+
+                    model.groupId = group.id
                 }
                 
                 // Allow patching begin and end date
@@ -499,25 +528,17 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw Context.auth.error("Je kan de startdatum van een functie niet in de toekomst zetten")
                 }
 
+                if (put.endDate && put.endDate > new Date(Date.now() + 60*1000)) {
+                    throw Context.auth.error("Je kan de einddatum van een functie niet in de toekomst zetten - kijk indien nodig je systeemtijd na")
+                }
+
                 model.startDate = put.startDate
 
                 await model.save()
             }
 
-            // Link users
-            for (const placeholder of patch.users.getPuts()) {
-                await PatchOrganizationMembersEndpoint.linkUser(placeholder.put, member)
-            }
-
-            // Unlink users
-            for (const userId of patch.users.getDeletes()) {
-                await PatchOrganizationMembersEndpoint.unlinkUser(userId, member)
-            }
-
             // Auto link users based on data
-            if (patch.users.changes.length || patch.details) {
-                await PatchOrganizationMembersEndpoint.updateManagers(member)
-            }
+            await MemberUserSyncer.onChangeMember(member)
 
             // Add platform memberships
             for (const {put} of patch.platformMemberships.getPuts()) {
@@ -571,6 +592,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 await membership.calculatePrice()
                 await membership.save()
+
+                updateMembershipMemberIds.add(member.id)           
             }
 
             // Delete platform memberships
@@ -599,7 +622,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                if (membership.invoiceId || membership.invoiceItemDetailId) {
+                if (!membership.canDelete()) {
                     throw new SimpleError({
                         code: "invalid_field",
                         message: "Invalid invoice",
@@ -608,7 +631,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 await membership.delete()
+                updateMembershipMemberIds.add(member.id)
             }
+
 
             if (!members.find(m => m.id === member.id)) {
                 members.push(member)
@@ -622,6 +647,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw Context.auth.error("Je hebt niet voldoende rechten om dit lid te verwijderen")
             }
 
+            await MemberUserSyncer.onDeleteMember(member)
             await User.deleteForDeletedMember(member.id)
             await BalanceItem.deleteForDeletedMember(member.id)
             await member.delete()
@@ -803,72 +829,5 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.registrations.push(registration)
             await registration.save()
         }
-    }
-
-    static async updateManagers(member: MemberWithRegistrations) {
-        // Check accounts
-        const managers = member.details.getManagerEmails()
-
-        for(const email of managers) {
-            const u = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase())
-            if (!u) {
-                console.log("Linking user "+email+" to member "+member.id)
-                await PatchOrganizationMembersEndpoint.linkUser(UserStruct.create({
-                    firstName: member.details.parents.find(p => p.email === email)?.firstName,
-                    lastName: member.details.parents.find(p => p.email === email)?.lastName,
-                    email,
-                }), member)
-            }
-        }
-
-        // Delete accounts that should no longer have access
-        for (const u of member.users) {
-            if (!u.hasAccount()) {
-                // And not in managers list (case insensitive)
-                if (!managers.find(m => m.toLocaleLowerCase() === u.email.toLocaleLowerCase())) {
-                    console.log("Unlinking user "+u.email+" from member "+member.id)
-                    await PatchOrganizationMembersEndpoint.unlinkUser(u.id, member)
-                }
-            }
-        }
-    }
-
-    static async linkUser(user: UserStruct, member: MemberWithRegistrations) {
-        const email = user.email
-        let u = await User.getForAuthentication(member.organizationId, email, {allowWithoutAccount: true});
-        if (u) {
-            console.log("Giving an existing user access to a member: "+u.id)
-        } else {
-            u = new User()
-            u.organizationId = member.organizationId
-            u.email = email
-            u.firstName = user.firstName
-            u.lastName = user.lastName
-            await u.save()
-
-            console.log("Created new (placeholder) user that has access to a member: "+u.id)
-        }
-
-        await Member.users.reverse("members").link(u, [member])
-
-        // Update model relation to correct response
-        member.users.push(u)
-    }
-
-    static async unlinkUser(userId: string, member: MemberWithRegistrations) {
-        console.log("Removing access for "+ userId +" to member "+member.id)
-        const existingIndex = member.users.findIndex(u => u.id === userId)
-        if (existingIndex === -1) {
-            throw new SimpleError({
-                code: "user_not_found",
-                message: "Unlinking a user that doesn't exists anymore",
-                human: "Je probeert de toegang van een account tot een lid te verwijderen, maar dat account bestaat niet (meer)"
-            })
-        }
-        const existing = member.users[existingIndex]
-        await Member.users.reverse("members").unlink(existing, member)
-
-        // Update model relation to correct response
-        member.users.splice(existingIndex, 1)
     }
 }

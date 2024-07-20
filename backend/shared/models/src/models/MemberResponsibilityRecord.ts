@@ -1,5 +1,6 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from "uuid";
+import { MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
 
 export class MemberResponsibilityRecord extends Model {
     static table = "member_responsibility_records"
@@ -14,6 +15,9 @@ export class MemberResponsibilityRecord extends Model {
 
     @column({ type: "string", nullable: true })
     organizationId: string|null = null;
+
+    @column({ type: "string", nullable: true })
+    groupId: string|null = null;
 
     @column({ type: "string" })
     memberId: string
@@ -36,4 +40,7 @@ export class MemberResponsibilityRecord extends Model {
     @column({ type: "datetime", nullable: true })
     endDate: Date | null = null
 
+    getStructure() {
+        return MemberResponsibilityRecordStruct.create(this)
+    }
 }

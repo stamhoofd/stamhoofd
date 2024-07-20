@@ -1,8 +1,20 @@
 
 import { AutoEncoder, AutoEncoderPatchType, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { AccessRight, getPermissionLevelNumber, LoadedPermissions, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from './Permissions';
+import { LoadedPermissions, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions } from './Permissions';
 import { Platform } from './Platform';
+import { OrganizationRegistrationPeriod } from './RegistrationPeriod';
+
+type OrganizationForPermissionCalculation = {
+    id: string, 
+    meta: {
+        tags: string[]
+    }, 
+    privateMeta?: {
+        roles: PermissionRoleDetailed[],
+        responsibilityRoles: PermissionRoleForResponsibility[]
+    }|null
+}
 
 export class UserPermissions extends AutoEncoder {
     @field({ decoder: Permissions, nullable: true })
@@ -10,6 +22,8 @@ export class UserPermissions extends AutoEncoder {
 
     @field({ decoder: new MapDecoder(StringDecoder, Permissions) })
     organizationPermissions: Map<string, Permissions> = new Map()
+
+    // Current list of groups
 
     get platform(): LoadedPermissions|null {
         return this.forPlatform(Platform.shared)
@@ -21,12 +35,12 @@ export class UserPermissions extends AutoEncoder {
         }
 
         const platformRoles = platform.getRoles()
-        return LoadedPermissions.from(this.globalPermissions, platformRoles)
+        return LoadedPermissions.from(this.globalPermissions, platformRoles, [], [])
     }
 
-    forOrganization(organization: {id: string, meta: {tags: string[]}, privateMeta?: {roles: PermissionRoleDetailed[]}|null}, platform?: Platform|null): LoadedPermissions|null {
+    forOrganization(organization: OrganizationForPermissionCalculation, platform?: Platform|null): LoadedPermissions|null {
         let base: ResourcePermissions|null = null
-        const organizationRoles = organization?.privateMeta?.roles ?? []
+        
         if (platform) {
             const platformPermissions = this.forPlatform(platform);
 
@@ -36,12 +50,11 @@ export class UserPermissions extends AutoEncoder {
                 for (const tag of tags) {
                     const rp = platformPermissions.getMergedResourcePermissions(PermissionsResourceType.OrganizationTags, tag);
                     if (rp) {
-                        const pp = Permissions.create({
-                            level: rp.level,
-                        })
-
                         if (rp.hasAccess(PermissionLevel.Full)) {
-                            return LoadedPermissions.from(pp, organizationRoles)
+                            const pp = Permissions.create({
+                                level: rp.level,
+                            })
+                            return LoadedPermissions.from(pp, [], [], [])
                         }
                         base = base ? base.merge(rp) : rp
                     }
@@ -49,14 +62,16 @@ export class UserPermissions extends AutoEncoder {
             }
         }
 
-        const specific = this.forWithoutInherit(organization.id, organizationRoles)
+        const specific = this.forWithoutInherit(organization)
 
         if (base) {
             const p = LoadedPermissions.from(
                 Permissions.create({
                     level: base.level,
                 }),
-                organizationRoles
+                [],
+                [],
+                []
             )
 
             if (!specific) {
@@ -69,12 +84,15 @@ export class UserPermissions extends AutoEncoder {
         return specific
     }
 
-    forWithoutInherit(organizationId: string, organizationRoles: PermissionRoleDetailed[]): LoadedPermissions|null {
-        const permissions = this.organizationPermissions.get(organizationId) ?? null
+    forWithoutInherit(organization: OrganizationForPermissionCalculation): LoadedPermissions|null {
+        const permissions = this.organizationPermissions.get(organization.id) ?? null
         if (!permissions) {
             return null;
         }
-        return LoadedPermissions.from(permissions, organizationRoles)
+        const organizationRoles = organization?.privateMeta?.roles ?? []
+        const responsibilityRoles = organization?.privateMeta?.responsibilityRoles ?? []
+        const allResponsibilities = Platform.shared.config.responsibilities
+        return LoadedPermissions.from(permissions, organizationRoles, responsibilityRoles, allResponsibilities)
     }
 
     convertPlatformPatch(patch: AutoEncoderPatchType<Permissions>|null): AutoEncoderPatchType<UserPermissions> {
@@ -92,12 +110,25 @@ export class UserPermissions extends AutoEncoder {
     convertPatch(patch: AutoEncoderPatchType<Permissions>|null, organizationId: string): AutoEncoderPatchType<UserPermissions> {
         if (!this.organizationPermissions.get(organizationId)) {
             const clonedPatch = UserPermissions.patch({})
-            clonedPatch.organizationPermissions.set(organizationId, patch === null ? null : Permissions.create({}).patch(patch))
+            const p = patch === null ? null : Permissions.create({}).patch(patch)
+            clonedPatch.organizationPermissions.set(organizationId, p)
             return clonedPatch
         }
         const clonedPatch = UserPermissions.patch({})
         clonedPatch.organizationPermissions.set(organizationId, patch)
         return clonedPatch
+    }
+
+    clearEmptyPermissions() {
+        if (this.globalPermissions && this.globalPermissions.isEmpty) {
+            this.globalPermissions = null
+        }
+
+        for (const [organizationId, permissions] of this.organizationPermissions) {
+            if (permissions.isEmpty) {
+                this.organizationPermissions.delete(organizationId)
+            }
+        }
     }
 
     get isEmpty(): boolean {

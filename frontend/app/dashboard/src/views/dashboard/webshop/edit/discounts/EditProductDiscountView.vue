@@ -23,11 +23,11 @@
 
                 <div class="split-inputs">
                     <div>
-                        <PriceInput v-if="getDiscountType(d) == 'discountPerPiece'" :value="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @input="setDiscountDiscountPerPiece(d, $event)" />
-                        <PermyriadInput v-else :value="getDiscountPercentageDiscount(d)" :required="true" @input="setDiscountPercentageDiscount(d, $event)" />
+                        <PriceInput v-if="getDiscountType(d) == 'discountPerPiece'" :modelValue="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @update:modelValue="setDiscountDiscountPerPiece(d, $event)" />
+                        <PermyriadInput v-else :modelValue="getDiscountPercentageDiscount(d)" :required="true" @update:modelValue="setDiscountPercentageDiscount(d, $event)" />
                     </div>
                     <div>
-                        <Dropdown :value="getDiscountType(d)" @update:model-value="setDiscountType(d, $event)">
+                        <Dropdown :modelValue="getDiscountType(d)" @update:model-value="setDiscountType(d, $event)">
                             <option value="percentageDiscount">
                                 Percentage
                             </option>

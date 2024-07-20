@@ -15,7 +15,7 @@ type ResponseBody = OrganizationRegistrationPeriodStruct[]
  * One endpoint to create, patch and delete members and their registrations and payments
  */
 
-export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = new PatchableArrayDecoder(OrganizationRegistrationPeriodStruct as Decoder<OrganizationRegistrationPeriodStruct>, OrganizationRegistrationPeriodStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationRegistrationPeriodStruct>>, StringDecoder)
 
     protected doesMatch(request: Request): [true, Params] | [false] {

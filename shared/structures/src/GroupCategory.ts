@@ -2,11 +2,9 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, Strin
 import { v4 as uuidv4 } from "uuid";
 
 import { Group } from './Group';
-import { Organization } from './Organization';
 // Eslint wants to remove Permissions, but it is needed for types!
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AccessRight, LoadedPermissions, PermissionLevel, PermissionRole, PermissionsByRole, PermissionsResourceType } from './Permissions';
-import { UserPermissions } from './UserPermissions';
+import { AccessRight, LoadedPermissions, PermissionRole, PermissionsByRole, PermissionsResourceType } from './Permissions';
 import { OrganizationRegistrationPeriod } from './RegistrationPeriod';
 /**
  * Give access to a given resouce based by the roles of a user

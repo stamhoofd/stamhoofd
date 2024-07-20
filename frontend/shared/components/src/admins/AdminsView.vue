@@ -16,30 +16,15 @@
             <p>Voeg hier beheerders toe en regel wat ze kunnen doen in Stamhoofd door rollen toe te kennen. Maak zelf nieuwe rollen aan en stel de rechten in per rol.</p>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="createAdmin">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/account-add.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        Nieuwe beheerder
-                    </h2>
-                    <p class="style-description">
-                        Nodig iemand uit om beheerder te worden.
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
                 <STListItem :selectable="true" class="left-center" @click="editRoles(true)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Rollen beheren
+                        Functies beheren
                     </h2>
                     <p class="style-description">
-                        Maak rollen die je aan beheerders kan toekennen.
+                        Voeg functies toe en stel de toegangsrechten voor elke functie in.
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -48,7 +33,8 @@
             </STList>
 
             <hr>
-            <h2>Alle beheerders</h2>
+            <h2>Interne beheerders</h2>
+            <p>Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.</p>
 
             <p v-if="sortedAdmins.length === 0" class="info-box">
                 Deze groep heeft nog geen beheerders. Nodig iemand uit om beheerder te worden.
@@ -68,7 +54,84 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        <span>{{ admin.firstName }} {{ admin.lastName }}</span>
+                        <span>{{ admin.name || admin.email }}</span>
+                    </h2>
+                    <p class="style-description-small">
+                        {{ admin.email }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ permissionList(admin) }}
+                    </p>
+
+                    <template #right>
+                        <span v-if="admin.id === me?.id" class="style-tag">
+                            Ik
+                        </span>
+                        <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
+                        <span><span class="icon gray edit" /></span>
+                    </template>
+                </STListItem>
+            </STList>
+
+            <hr>
+            <h2>Externe beheerders</h2>
+            <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan geen lid omdat ze een onbekend e-mailadres gebruiken).</p>
+            <p class="info-box">Opgelet, deze beheerders zijn ook niet aangesloten bij de koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.</p>
+
+            <STList class="illustration-list">    
+                <STListItem :selectable="true" class="left-center" @click="createAdmin">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/account-add.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Nieuwe externe beheerder
+                    </h2>
+                    <p class="style-description">
+                        Nodig iemand uit om beheerder te worden zonder die als lid toe te voegen.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="editRoles(true)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Rollen voor externe beheerders beheren
+                    </h2>
+                    <p class="style-description">
+                        Maak rollen die je aan beheerders kan toekennen.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+
+            <hr>
+
+
+            <p v-if="sortedAdmins.length === 0" class="info-box">
+                Deze groep heeft nog geen beheerders. Nodig iemand uit om beheerder te worden.
+            </p>
+            <STList v-else>
+                <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
+                    <template #left>
+                        <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
+                            <span class="icon user-admin-layer-1" />
+                            <span class="icon user-admin-layer-2 yellow" />
+                        </span>
+                        <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen rol'" class="icon layered">
+                            <span class="icon user-blocked-layer-1" />
+                            <span class="icon user-blocked-layer-2 red" />
+                        </span>
+                        <span v-else class="icon user" />
+                    </template>
+
+                    <h2 class="style-title-list">
+                        <span>{{ admin.name || admin.email }}</span>
                     </h2>
                     <p class="style-description-small">
                         {{ admin.email }}
@@ -92,8 +155,8 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { LoadingView, useOrganization, usePlatform, useUser } from '@stamhoofd/components';
-import { PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
+import { LoadingView, useOrganization, useUser } from '@stamhoofd/components';
+import { PermissionLevel, PermissionRoleForResponsibility, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditAdminView from './EditAdminView.vue';
 import RolesView from './RolesView.vue';
@@ -194,8 +257,19 @@ const permissionList = (user: User) => {
         list.push("Hoofdbeheerders")
     }
 
+    console.log(permissions.roles)
+
     for (const role of permissions.roles) {
-        list.push(role.name)
+        if (organization.value && role instanceof PermissionRoleForResponsibility) {
+            const group = organization.value.period.groups.find(g => g.id === role.responsibilityGroupId)
+            if (group) {
+                list.push(role.name + ' van ' + group.settings.name)
+            } else {
+                list.push(role.name)
+            }
+        } else {
+            list.push(role.name)
+        }
     }
 
     if (list.length === 0) {

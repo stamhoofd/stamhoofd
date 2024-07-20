@@ -1,9 +1,9 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, EnumDecoder, field, MapDecoder, PatchMap, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, EnumDecoder, field, MapDecoder, PatchMap, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Group } from './Group';
-import { WebshopPreview } from './webshops/Webshop';
+import { MemberResponsibilityRecord } from './members/MemberResponsibilityRecord';
+import { MemberResponsibility } from './MemberResponsibility';
 
 /**
  * PermissionLevels are used to grant permissions to specific resources or system wide
@@ -415,6 +415,41 @@ export class PermissionRoleDetailed extends PermissionRole {
 
         return  this.getResourcePermissions(type, id)?.hasAccessRight(right) ?? false
     }
+
+    add(other: PermissionRoleDetailed) {
+        if (getPermissionLevelNumber(this.level) < getPermissionLevelNumber(other.level)) {
+            this.level = other.level;
+        }
+
+        for (const right of other.accessRights) {
+            if (!this.accessRights.includes(right)) {
+                this.accessRights.push(right)
+            }
+        }
+
+        for (const [type, r] of other.resources) {
+            for (const [id, resource] of r) {
+                if (!this.resources.has(type)) {
+                    this.resources.set(type, new Map())
+                }
+
+                const current = this.resources.get(type)!.get(id)
+                if (!current) {
+                    this.resources.get(type)!.set(id, resource)
+                } else {
+                    this.resources.get(type)!.set(id, current.merge(resource))
+                }
+            }
+        }
+    }
+}
+
+export class PermissionRoleForResponsibility extends PermissionRoleDetailed {
+    @field({ decoder: StringDecoder })
+    responsibilityId: string
+
+    @field({ decoder: StringDecoder, nullable: true })
+    responsibilityGroupId: string|null = null
 }
 
 /**
@@ -525,6 +560,9 @@ export class Permissions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRole), version: 60 })
     roles: PermissionRole[] = []
 
+    @field({ decoder: new ArrayDecoder(MemberResponsibilityRecord), version: 274 })
+    responsibilities: MemberResponsibilityRecord[] = []
+
     /**
      * Mostly for temporary access
      */
@@ -556,6 +594,10 @@ export class Permissions extends AutoEncoder {
             }
         }
     }
+
+    get isEmpty() {
+        return this.level === PermissionLevel.None && this.roles.length === 0 && this.responsibilities.length === 0 && this.resources.size === 0
+    }
 }
 
 /**
@@ -574,18 +616,66 @@ export class LoadedPermissions {
         return new LoadedPermissions(data)
     }
 
-    static from(permissions: Permissions, allRoles: PermissionRoleDetailed[]) {
-        return this.create({
-            level: permissions.level,
-            roles: permissions.roles.flatMap(role => {
-                const d = allRoles.find(a => a.id === role.id);
-                if (d) {
-                    return [d]
+    static from(permissions: Permissions, allRoles: PermissionRoleDetailed[], responsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
+        const roles = permissions.roles.flatMap(role => {
+            const d = allRoles.find(a => a.id === role.id);
+            if (d) {
+                return [d]
+            }
+            return []
+        });
+
+        for (const responsibility of permissions.responsibilities) {
+            if (responsibility.endDate !== null && responsibility.endDate < new Date()) {
+                continue
+            }
+
+            if (responsibility.startDate > new Date()) {
+                continue
+            }
+
+            const responsibilityData = allResponsibilites.find(r => r.id === responsibility.responsibilityId)
+            if (!responsibilityData) {
+                continue
+            }
+
+            const role = responsibilityRoles.find(r => r.responsibilityId === responsibility.responsibilityId && r.responsibilityGroupId === responsibility.groupId)
+
+            if (responsibilityData.defaultPermissionLevel !== PermissionLevel.None) {
+                const r = PermissionRoleForResponsibility.create({
+                    id: responsibility.id,
+                    name: responsibilityData.name,
+                    level: responsibilityData.isGroupBased ? PermissionLevel.None : responsibilityData.defaultPermissionLevel,
+                    responsibilityId: responsibility.id,
+                    responsibilityGroupId: responsibility.groupId,
+                    resources: new Map()
+                });
+                if (responsibility.groupId) {
+                    const map: Map<string, ResourcePermissions> = new Map()
+                    map.set(responsibility.groupId, ResourcePermissions.create({level: responsibilityData.defaultPermissionLevel}))
+                    r.resources.set(PermissionsResourceType.Groups, map)
                 }
-                return []
-            }),
+                if (role) {
+                    r.id = role.id
+                    r.add(role)
+                }
+                roles.push(r)
+                continue;
+            }
+
+            if (role) {
+                roles.push(role)
+            }
+        }
+
+        const result = this.create({
+            level: permissions.level,
+            roles,
             resources: permissions.resources
         })
+        console.log('loaded permissions', result)
+
+        return result;
     }
 
     getResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions|null {

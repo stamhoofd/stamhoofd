@@ -7,16 +7,18 @@
             Beheerder bewerken
         </h1>
 
-        <button v-if="!isNew && !user.hasAccount" class="warning-box with-button" type="button" :class="{selectable: !didSendInvite}" @click="resendInvite">
-            Deze beheerder heeft nog geen account aangemaakt
+        <LoadingButton :loading="sendingInvite">
+            <button v-if="!isNew && !user.hasAccount" class="warning-box with-button" type="button" :class="{selectable: !didSendInvite}" @click="resendInvite">
+                Deze beheerder heeft nog geen account aangemaakt
 
-            <span class="button text" :class="{disabled: didSendInvite}">
-                Uitnodiging opnieuw versturen
-            </span>
-        </button>
+                <span class="button text" :class="{disabled: didSendInvite}">
+                    Uitnodiging opnieuw versturen
+                </span>
+            </button>
+        </LoadingButton>
 
-        <STErrorsDefault :error-box="errors$.errorBox" />
-        <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errors$.errorBox">
+        <STErrorsDefault :error-box="$errors.errorBox" />
+        <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="$errors.errorBox">
             <div class="input-group">
                 <div>
                     <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name" :disabled="!canEditDetails">
@@ -27,7 +29,7 @@
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" title="E-mailadres" :validator="errors$.validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails" />
+        <EmailInput v-model="email" title="E-mailadres" :validator="$errors.validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails" />
 
         <div class="container">
             <hr>
@@ -81,10 +83,11 @@ import { computed, ref } from 'vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
 
-const errors$ = useErrors();
+const $errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 const didSendInvite = ref(false);
+const sendingInvite = ref(false);
 const $context = useContext()
 const pop = usePop();
 
@@ -147,12 +150,12 @@ const save = async () => {
     let valid = false
 
     if (errors.errors.length > 0) {
-        errors$.errorBox = new ErrorBox(errors)
+        $errors.errorBox = new ErrorBox(errors)
     } else {
-        errors$.errorBox = null
+        $errors.errorBox = null
         valid = true
     }
-    valid = valid && await errors$.validator.validate()
+    valid = valid && await $errors.validator.validate()
 
     // TODO: validate if at least email or name is filled in
 
@@ -194,7 +197,7 @@ const save = async () => {
         await pop({ force: true })
     } catch (e) {
         console.error(e)
-        errors$.errorBox = new ErrorBox(e)
+        $errors.errorBox = new ErrorBox(e)
         saving.value = false
     }
 }
@@ -234,14 +237,43 @@ const doDelete = async () => {
         new Toast("Beheerder "+props.user.firstName+" is verwijderd", "success").setHide(2000).show()
     } catch (e) {
         console.error(e)
-        errors$.errorBox = new ErrorBox(e)
+        $errors.errorBox = new ErrorBox(e)
         deleting.value = false;
     }
     return false;
 };
 const resendInvite = async () => {
-    // todo
-    didSendInvite.value = true;
+    // We can send a new invite by just recreating the admin (the API will merge with existing admins)
+    if (hasChanges.value || props.isNew) {
+        new CenteredMessage('Wijzigingen niet opgeslagen', 'Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.').addCloseButton().show()
+        return
+    }
+    if (sendingInvite.value) {
+        return;
+    }
+    sendingInvite.value = true
+
+    try {
+
+        // Note: we don't use the patchedUser, because that would save any changes too
+        const response = await $context.value.authenticatedServer.request({
+            method: "POST",
+            path: "/user",
+            body: props.user,
+            decoder: User as Decoder<User>
+        })
+        
+        // Copy all data
+        props.user.set(response.data);
+        didSendInvite.value = true
+
+        new Toast("Uitnodiging verzonden naar "+props.user.email, "success").setHide(2000).show()
+    } catch (e) {
+        console.error(e)
+        $errors.errorBox = new ErrorBox(e)
+        
+    }
+    sendingInvite.value = false
 };
 
 const firstName = computed({
