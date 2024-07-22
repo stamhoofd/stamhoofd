@@ -49,7 +49,7 @@
         <EmailInput v-model="email" title="E-mailadres" :validator="$errors.validator" placeholder="E-mailadres" :required="true" :disabled="!canEditDetails" />
 
         <template v-if="getPermissions(user)">
-            <div v-if="!user.memberId || (getPermissions(user) && !!getPermissions(user)!.roles.find(r => !(r instanceof PermissionRoleForResponsibility)))" class="container">
+            <div v-if="!user.memberId || getPermissions(user)" class="container">
                 <hr>
                 <h2>Externe beheerdersrollen</h2>
                 <p>Je kan externe beheerders verschillende rollen toekennen (alternatief voor functies die je aan leden kan koppelen). Een externe beheerder zonder rollen heeft geen enkele toegang.</p>

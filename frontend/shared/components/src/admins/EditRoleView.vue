@@ -47,8 +47,7 @@
         </STList>
 
         <template v-if="basePermission !== PermissionLevel.Full">
-
-            <template v-if="app === 'admin'">
+            <template v-if="app === 'admin' && (scope === null || scope === 'admin')">
                 <hr>
                 <h2>
                     Toegang tot verenigingen
@@ -77,7 +76,7 @@
                 </STList>
             </template>
 
-            <template v-if="app === 'admin'">
+            <template v-if="app === 'admin' && (scope === null || scope === 'admin')">
                 <hr>
                 <h2>
                     Administratietools
@@ -149,7 +148,7 @@
                 </STList>
             </div>
 
-            <div v-if="app !== 'admin'" class="container">
+            <div v-if="app !== 'admin' || scope === 'organization'" class="container">
                 <hr>
                 <h2>
                     Toegang tot gegevens van leden
@@ -193,7 +192,7 @@
                 </STList>
             </div>
 
-            <template v-if="organization">
+            <template v-if="app !== 'admin' || scope === 'organization'">
                 <hr>
                 <h2>Boekhouding</h2>
 
@@ -226,7 +225,10 @@
 
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
-            <h2>
+            <h2 v-if="responsibility">
+                Verwijder gekoppelde rechten
+            </h2>
+            <h2 v-else>
                 Verwijder deze rol
             </h2>
 
@@ -236,7 +238,7 @@
             </button>
         </div>
 
-        <template v-if="!isNew">
+        <template v-if="!isNew && !responsibility">
             <hr>
             <h2>Beheerders met deze rol</h2>
 
@@ -275,17 +277,23 @@ const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 
-const props = defineProps<{
-    role: PermissionRoleDetailed|PermissionRoleForResponsibility;
-    isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed|PermissionRoleForResponsibility>) => Promise<void>,
-    deleteHandler: (() => Promise<void>)|null
-}>();
+const props = withDefaults(
+    defineProps<{
+        role: PermissionRoleDetailed|PermissionRoleForResponsibility;
+        isNew: boolean;
+        saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed|PermissionRoleForResponsibility>) => Promise<void>,
+        deleteHandler: (() => Promise<void>)|null
+        scope?: 'organization'|'admin'|null
+    }>(), {
+        scope: null
+    }
+)
+
+const app = useAppContext()
 const enableWebshopModule = computed(() => organization.value?.meta?.packages.useWebshops ?? false);
 const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
 const enableActivities = computed(() => organization.value?.meta?.packages.useActivities ?? false);
 const pop = usePop();
-const app = useAppContext()
 const isForResponsibility = props.role instanceof PermissionRoleForResponsibility
 const responsibility = computed(() => {
     if (!(props.role instanceof PermissionRoleForResponsibility)) {

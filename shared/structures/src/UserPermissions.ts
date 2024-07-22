@@ -35,7 +35,12 @@ export class UserPermissions extends AutoEncoder {
         }
 
         const platformRoles = platform.getRoles()
-        return LoadedPermissions.from(this.globalPermissions, platformRoles, [], [])
+        return LoadedPermissions.from(
+            this.globalPermissions, 
+            platformRoles, 
+            [], 
+            platform.config.responsibilities
+        )
     }
 
     forOrganization(organization: OrganizationForPermissionCalculation, platform?: Platform|null): LoadedPermissions|null {

@@ -22,6 +22,7 @@ export type StamhoofdKeyFilterValue =
     |{$lt: StamhoofdCompareValue}
     |{$contains: string}
     |{$length: StamhoofdFilter}
+    |{$elemMatch: StamhoofdFilter}
     |StamhoofdCompareValue;
 
 export type StamhoofdKeyFilter = {

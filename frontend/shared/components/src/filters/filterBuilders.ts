@@ -194,6 +194,50 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
         })
     )
 
+    all.push(
+        new MultipleChoiceFilterBuilder({
+            name: 'Actieve aansluiting',
+            options: platform.config.membershipTypes.map(type => {
+                return new MultipleChoiceUIFilterOption(type.name, type.id);
+            }),
+            buildFilter: (choices) => {
+                const d = new Date()
+                d.setHours(12);
+                d.setMinutes(0);
+                d.setSeconds(0);
+                d.setMilliseconds(0);
+
+                const filters: StamhoofdFilter = [
+                    {
+                        membershipTypeId: {
+                            $in: choices as string[]
+                        },
+                        expireDate: null,
+                        endDate: {
+                            $gt: Formatter.dateIso(d)
+                        },
+                    },
+                    {
+                        membershipTypeId: {
+                            $in: choices as string[]
+                        },
+                        expireDate: {
+                            $gt: Formatter.dateIso(d)
+                        },
+                    }
+                ]
+
+                return {
+                    platformMemberships: {
+                        $elemMatch: {
+                            $or: filters
+                        }
+                    }
+                }
+            }
+        })
+    )
+
     all.unshift(
         new GroupUIFilterBuilder({
             builders: all

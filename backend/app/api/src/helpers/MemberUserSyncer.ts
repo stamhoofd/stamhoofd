@@ -63,30 +63,42 @@ export class MemberUserSyncerStatic {
         user.permissions = user.permissions ?? UserPermissions.create({})
 
         // Group responsibilities by organization
-        const responsibilitiesByOrganization: Record<string, MemberResponsibilityRecord[]> = {}
+        const responsibilitiesByOrganization: Map<string|null, MemberResponsibilityRecord[]> = new Map()
+
+        responsibilitiesByOrganization.set(null, [])
 
         for (const organizationId of user.permissions.organizationPermissions.keys()) {
             // Make sure we reset responsibilities for organizations that are not in the list
-            responsibilitiesByOrganization[organizationId] = []
+            responsibilitiesByOrganization.set(organizationId, [])
         }
 
         for (const responsibility of responsibilities) {
-            if (!responsibility.organizationId) {
-                continue;
-            }
-            responsibilitiesByOrganization[responsibility.organizationId] = responsibilitiesByOrganization[responsibility.organizationId] ?? []
-            responsibilitiesByOrganization[responsibility.organizationId].push(responsibility)
+            const v = responsibilitiesByOrganization.get(responsibility.organizationId) ?? []
+            responsibilitiesByOrganization.set(responsibility.organizationId, v)
+            v.push(responsibility)
         }
 
-        for (const organizationId in responsibilitiesByOrganization) {
-            const patch = user.permissions.convertPatch(
-                Permissions.patch({
-                    responsibilities: (responsibilitiesByOrganization[organizationId] ?? []).map(r => r.getStructure()) as any
-                }),
-                organizationId
-            )
-            user.permissions = user.permissions.patch(patch)
+        for (const organizationId of responsibilitiesByOrganization.keys()) {
+            if (organizationId === null) {
+                const patch = user.permissions.convertPlatformPatch(
+                    Permissions.patch({
+                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getStructure()) as any
+                    })
+                )
+                user.permissions = user.permissions.patch(patch)
+            } else {
+                const patch = user.permissions.convertPatch(
+                    Permissions.patch({
+                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getStructure()) as any
+                    }),
+                    organizationId
+                )
+                user.permissions = user.permissions.patch(patch)
+            }
+            
         }
+
+        // Platform permissions
         user.permissions.clearEmptyPermissions()
 
         if (user.permissions.isEmpty) {

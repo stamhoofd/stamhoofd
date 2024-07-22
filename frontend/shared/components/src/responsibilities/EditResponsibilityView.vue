@@ -68,13 +68,13 @@
                 </div>
             </h2>
 
-            <p>Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep, die gekoppeld is met de geselecteerde standaard leeftijdsgroepen.</p>
+            <p>Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep. Hier kan je die lokale leeftijdsgroepen beperken tot een aantal standaard leeftijdsgroepen.</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" />
 
             <hr>
 
-            <h2>Automatische rechten</h2>
+            <h2>Automatische rechten voor gekoppelde leeftijdsgroep</h2>
 
             <p>Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd.</p>
 
@@ -152,8 +152,11 @@
                         <span class="icon privacy gray" />
                     </template>
 
-                    <h3 class="style-title-list">
+                    <h3 v-if="!permissions" class="style-title-list">
                         Automatisch rechten toekennen
+                    </h3>
+                    <h3 v-else class="style-title-list">
+                        Gekoppelde rechten aanpassen
                     </h3>
 
                     <p v-if="organizationBased" class="style-description-small">
@@ -327,6 +330,7 @@ async function editPermissions() {
             new ComponentWithProperties(EditRoleView, {
                 role,
                 isNew,
+                scope: organizationBased.value ? 'organization' : 'admin',
                 saveHandler: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => {
                     if (isNew) {
                         addPatch({

@@ -7,11 +7,7 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="!selectedOrganization" class="info-box">
-            Een lid moet eerst een actieve inschrijving hebben voor je functies kan toekennen.
-        </p>
-
-        <p class="info-box" v-else-if="groupsWithResponsibilites.length === 0">
+        <p class="info-box" v-if="groupsWithResponsibilites.length === 0">
             Geen functies gevonden
         </p>
 
@@ -82,7 +78,7 @@ const items = computed(() => {
 
 const platformResponsibilities = computed(() => {
     if (selectedOrganization.value === null) {
-        return []
+        return platform.value.config.responsibilities.filter(r => !r.organizationBased)
     }
     const org = selectedOrganization.value
     return platform.value.config.responsibilities.filter(r => r.organizationBased && (r.organizationTagIds === null || org.meta.matchTags(r.organizationTagIds)))
@@ -106,7 +102,7 @@ const groupsWithResponsibilites = computed(() => {
     
     if (defaultGroup.length > 0) {
         groups.push({
-            title: 'Nationale functies',
+            title: selectedOrganization.value === null ? '' : 'Nationale functies',
             groupId: null,
             responsibilities: defaultGroup
         })

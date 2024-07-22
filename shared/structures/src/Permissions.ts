@@ -312,7 +312,7 @@ export class PermissionRoleDetailed extends PermissionRole {
             stack.push("alles bewerken")
         }
         if (this.level === PermissionLevel.Full) {
-            stack.push("alles")
+            stack.push("volledige toegang")
         }
 
         for (const right of this.accessRights) {
@@ -339,7 +339,7 @@ export class PermissionRoleDetailed extends PermissionRole {
         }
 
         if (stack.length === 0) {
-            return "geen toegang"
+            return "geen rechten"
         }
 
         return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' en '))
@@ -441,6 +441,10 @@ export class PermissionRoleDetailed extends PermissionRole {
                 }
             }
         }
+    }
+
+    get isEmpty() {
+        return this.level === PermissionLevel.None && this.accessRights.length === 0 && this.resources.size === 0
     }
 }
 

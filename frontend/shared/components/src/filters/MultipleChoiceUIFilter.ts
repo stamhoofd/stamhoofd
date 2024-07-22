@@ -77,8 +77,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
     
     create(): MultipleChoiceUIFilter {
         return new MultipleChoiceUIFilter({
-            builder: this,
-            options: []
+            builder: this
         })
     }
 }
