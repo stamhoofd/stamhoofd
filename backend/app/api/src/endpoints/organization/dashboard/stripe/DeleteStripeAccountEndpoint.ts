@@ -1,10 +1,10 @@
 
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
+import { StripeHelper } from '../../../../helpers/StripeHelper';
 
 type Params = { id: string };
 type Body = undefined;
@@ -42,13 +42,13 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         // For now we don't delete them in Stripe because this causes issues with data access
-        // const stripe = StripeHelper.getInstance()
-        // 
-        // try {
-        //     await stripe.accounts.del(model.accountId);
-        // } catch (e) {
-        //     console.error('Tried deleting account but failed', e)
-        // }
+        const stripe = StripeHelper.getInstance()
+        
+        try {
+            await stripe.accounts.del(model.accountId);
+        } catch (e) {
+            console.error('Tried deleting account but failed', e)
+        }
 
         // If that succeeded
         model.status = "deleted"
