@@ -32,7 +32,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
-import { useAuth, useOrganization, usePlatform } from '../../hooks';
+import { useAuth, useContext, useOrganization, usePlatform } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import TableActionsContextMenu from '../../tables/TableActionsContextMenu.vue';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
@@ -61,6 +61,7 @@ const platformFamilyManager = usePlatformFamilyManager()
 platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
+const context = useContext();
 const visibleRegistrations = computed(() => {
     return props.member.patchedMember.registrations.filter(r => {
         if (organization.value && r.organizationId !== organization.value.id) {
@@ -93,7 +94,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
         groups: [registration.group],
         organizations: props.member.organizations.filter(o => o.id === registration.group.organizationId),
         inWaitingList: registration.waitingList,
-        hasWrite,
+        context: context.value,
         platformFamilyManager
     })
 

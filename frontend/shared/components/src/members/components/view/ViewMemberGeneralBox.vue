@@ -25,10 +25,10 @@
 
             <template v-if="hasResponsibilities && (hasWrite || responsibilities.length)">
                 <dt>Functies</dt>
-                <dd class="with-icons button" @click="editResponsibilities">
+                <dd class="with-icons" :class="{button: $context.auth.hasFullAccess()}" @click="$context.auth.hasFullAccess() ? editResponsibilities : null">
                     {{ responsibilitiesText }}
 
-                    <span class="icon edit gray" />
+                    <span class="icon edit gray" v-if="$context.auth.hasFullAccess()"/>
                 </dd>
             </template>
 
@@ -71,7 +71,7 @@
 import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useAuth, useCountry, useOrganization, usePlatform } from '../../../hooks';
+import { useAuth, useContext, useCountry, useOrganization, usePlatform } from '../../../hooks';
 import { MemberActionBuilder } from '../../classes/MemberActionBuilder';
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
@@ -92,6 +92,7 @@ const present = usePresent();
 const auth = useAuth();
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
 const platformFamilyManager = usePlatformFamilyManager();
+const context = useContext();
 
 const responsibilities = computed(() => {
     return props.member.getResponsibilities(organization.value)
@@ -107,7 +108,7 @@ const responsibilitiesText = computed(() => {
 async function editResponsibilities() {
     const actionBuilder = new MemberActionBuilder({
         present,
-        hasWrite,
+        context: context.value,
         groups: [],
         organizations: [],
         platformFamilyManager

@@ -1,7 +1,7 @@
 <template>
     <div class="member-payments-view">
         <main class="container">
-            <p class="info-box">
+            <p class="info-box" v-if="hasFull">
                 Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.
             </p>
             <p v-if="memberships.length === 0" class="warning-box">
@@ -31,7 +31,7 @@
                         {{ getMembershipType(membership).description }}
                     </p>
 
-                    <template #right>
+                    <template #right v-if="hasFull">
                         <span>{{ formatPrice(membership.price) }}</span>
                         <LoadingButton :loading="deletingMemberships.has(membership.id)">
                             <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
@@ -40,7 +40,7 @@
                 </STListItem>
             </STList>
 
-            <p>
+            <p v-if="hasFull">
                 <button type="button" class="button text" @click="addMembership">
                     <span class="icon add" />
                     <span>Aansluiting of verzekering toevoegen</span>
@@ -56,7 +56,7 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import { usePlatform } from '../../hooks';
+import { useAuth, usePlatform } from '../../hooks';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import SelectPlatformMembershipView from '../components/platform-membership/SelectPlatformMembershipView.vue';
@@ -70,6 +70,8 @@ const platformFamilyManager = usePlatformFamilyManager()
 const deletingMemberships = ref(new Set());
 const platform = usePlatform();
 const now = new Date();
+const auth = useAuth();
+const hasFull = auth.hasFullAccess()
 
 const memberships = computed(() => {
     return props.member.member.platformMemberships.filter(m => m.endDate >= now);

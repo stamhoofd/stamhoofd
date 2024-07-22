@@ -413,7 +413,7 @@ const actionBuilder = new MemberActionBuilder({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
     organizations: organization.value ? [organization.value] : [],
     inWaitingList: props.waitingList,
-    hasWrite: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value.period.settings.categories) : auth.permissions?.hasWriteAccess()) ?? false,
+    context: context.value,
     platformFamilyManager
 })
 

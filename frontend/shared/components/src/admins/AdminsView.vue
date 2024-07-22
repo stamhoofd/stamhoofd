@@ -121,7 +121,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditResponsibilitiesView, LoadingView, useOrganization, usePlatformFamilyManager, useUser } from '@stamhoofd/components';
+import { EditResponsibilitiesView, LoadingView, useContext, useOrganization, usePlatformFamilyManager, useUser } from '@stamhoofd/components';
 import { PermissionLevel, PermissionRoleForResponsibility, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditAdminView from './EditAdminView.vue';
@@ -135,6 +135,7 @@ const organization = useOrganization()
 const {sortedAdmins, sortedMembers, loading, promise: loadPromise, getPermissions} = useAdmins()
 const present = usePresent();
 const platformFamilyManager = usePlatformFamilyManager()
+const context = useContext();
 
 enum Routes {
     Roles = 'rollen',
@@ -222,9 +223,6 @@ const editAdmin = async (user: User) => {
     await $navigate(Routes.EditAdmin, { properties: {user} })
 }
 
-const editRoles = () => {
-    $navigate(Routes.Roles)
-}
 const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false
 const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u))
 
@@ -241,8 +239,6 @@ const permissionList = (user: User) => {
     if (permissions.hasFullAccess()) {
         list.push("Hoofdbeheerders")
     }
-
-    console.log(permissions.roles)
 
     for (const role of permissions.roles) {
         if (organization.value && role instanceof PermissionRoleForResponsibility) {
@@ -266,7 +262,7 @@ const permissionList = (user: User) => {
 async function editMember(member: PlatformMember) {
     const actionBuilder = new MemberActionBuilder({
         present,
-        hasWrite: true,
+        context: context.value,
         groups: [],
         organizations: [],
         platformFamilyManager

@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useContext, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
@@ -57,6 +57,7 @@ const show = useShow();
 const present = usePresent();
 const organization = useOrganization();
 const platformFamilyManager = usePlatformFamilyManager();
+const context = useContext();
 
 const tabs = computed(() => {
     const base: {name: string, component: unknown}[] = [{
@@ -166,7 +167,7 @@ async function showContextMenu(event: MouseEvent) {
         groups: [],
         organizations: organization.value ? [organization.value] : props.member.organizations,
         inWaitingList: false,
-        hasWrite: hasWrite.value,
+        context: context.value,
         platformFamilyManager
     })
 

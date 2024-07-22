@@ -1,6 +1,6 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
@@ -11,29 +11,39 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, Ta
 import { NavigationActions } from '../../types/NavigationActions'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
 import { PlatformFamilyManager } from '../PlatformFamilyManager'
+import { SessionContext } from '@stamhoofd/networking'
 
 export class MemberActionBuilder {
     present: ReturnType<typeof usePresent>
     groups: Group[]
     organizations: Organization[]
-    hasWrite: boolean
+    context: SessionContext
     inWaitingList = false
     platformFamilyManager: PlatformFamilyManager
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>,
-        hasWrite: boolean,
+        context: SessionContext,
         groups: Group[],
         inWaitingList?: boolean,
         organizations: Organization[],
         platformFamilyManager: PlatformFamilyManager
     }) {
         this.present = settings.present
-        this.hasWrite = settings.hasWrite
+        this.context = settings.context
         this.groups = settings.groups
         this.inWaitingList = settings.inWaitingList ?? false
         this.organizations = settings.organizations
         this.platformFamilyManager = settings.platformFamilyManager
+    }
+
+    get hasWrite() {
+        for (const group of this.groups) {
+            if (!this.context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                return false
+            }
+        }
+        return true
     }
 
     getRegisterActions(organization?: Organization): TableAction<PlatformMember>[] {
@@ -160,7 +170,7 @@ export class MemberActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                enabled: this.hasWrite,
+                enabled: this.context.auth.hasFullAccess(),
                 handler: (members: PlatformMember[]) => {
                     this.editResponsibilities(members[0])
                 }
