@@ -63,7 +63,7 @@ export function usePatchRoles() {
         if (organization.value) {
             const oPatch = Organization.patch({
                 privateMeta: OrganizationPrivateMetaData.patch({
-                    responsibilityRoles: patch
+                    inheritedResponsibilityRoles: patch
                 })
             })
             organizationPatch.value = organizationPatch.value.patch(oPatch)
@@ -79,9 +79,9 @@ export function usePatchRoles() {
         return patchedPlatform.value.privateConfig?.roles ?? []
     })
 
-    const responsibilityRoles = computed(() => {
+    const inheritedResponsibilityRoles = computed(() => {
         if (patchedOrganization.value) {
-            return patchedOrganization.value.privateMeta?.responsibilityRoles ?? []
+            return patchedOrganization.value.privateMeta?.inheritedResponsibilityRoles ?? []
         }
         return []
     })
@@ -129,7 +129,7 @@ export function usePatchRoles() {
         patchedOrganization,
         patchedPlatform,
         roles,
-        responsibilityRoles,
+        inheritedResponsibilityRoles,
         patchRoles,
         patchResponsibilityRoles,
         createRolePatchArray,

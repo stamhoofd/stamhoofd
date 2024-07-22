@@ -18,6 +18,7 @@ export * from "./src/payments"
 export * from "./src/events"
 export * from "./src/containers"
 export * from "./src/tables"
+export * from "./src/responsibilities"
 
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"

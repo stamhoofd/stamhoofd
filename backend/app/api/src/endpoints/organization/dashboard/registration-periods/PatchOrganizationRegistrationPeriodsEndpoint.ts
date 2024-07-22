@@ -3,7 +3,7 @@ import { GroupPrivateSettings, OrganizationRegistrationPeriod as OrganizationReg
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Context } from "../../../../helpers/Context";
-import { Group, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
+import { Group, Member, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { SimpleError } from "@simonbackx/simple-errors";
 
 type Params = Record<string, never>;
@@ -160,6 +160,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.deletedAt = new Date()
                     await model.save()
                     deleteUnreachable = true
+
+                    Member.updateMembershipsForGroupId(id)
                 }
             }
 
@@ -249,6 +251,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 
                 await model.updateOccupancy()
                 await model.save();
+                Member.updateMembershipsForGroupId(model.id)
             }
 
             const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);

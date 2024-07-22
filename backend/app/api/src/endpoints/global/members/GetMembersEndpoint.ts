@@ -192,6 +192,10 @@ const filterCompilers: SQLFilterDefinitions = {
         .where(
             SQL.column('memberId'),
             SQL.column('members', 'id'),
+        )
+        .where(
+            SQL.column('deletedAt'),
+            null,
         ),
         {
             ...baseSQLFilterCompilers,

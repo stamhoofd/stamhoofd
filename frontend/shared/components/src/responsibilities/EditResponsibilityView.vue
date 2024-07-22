@@ -65,38 +65,38 @@
             <p>Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep, die gekoppeld is met de geselecteerde standaard leeftijdsgroepen.</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" />
-        </JumpToContainer>
 
-        <JumpToContainer :visible="defaultPermissionLevel !== PermissionLevel.None">
             <hr>
 
-            <h2 class="style-with-button">
-                <div>Automatische rechten</div>
-                <div>
-                    <button type="button" class="button icon trash" @click="defaultPermissionLevel = PermissionLevel.None" />
-                </div>
-            </h2>
+            <h2>Automatische rechten</h2>
 
-            <p>Alle accounts (met uitzondering van leden die minderjarig zijn) van leden met deze functie, krijgen automatisch toegangsrechten tot de <template v-if="defaultAgeGroupIds !== null">leeftijdsgroep van een lokale groep</template><template v-else>lokale groep</template> waarvoor de functie werd toegevoegd.</p>
+            <p>Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd.</p>
 
             <STList>
                 <STListItem element-name="label" :selectable="true">
                     <template #left>
-                        <Radio v-model="defaultPermissionLevel" :value="PermissionLevel.Read" />
+                        <Radio v-model="groupPermissionLevel" :value="PermissionLevel.None" />
+                    </template>
+                    <h3 class="style-title-list">Geen</h3>
+                </STListItem>
+
+                <STListItem element-name="label" :selectable="true">
+                    <template #left>
+                        <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Read" />
                     </template>
                     <h3 class="style-title-list">Lezen</h3>
                 </STListItem>
 
                 <STListItem element-name="label" :selectable="true">
                     <template #left>
-                        <Radio v-model="defaultPermissionLevel" :value="PermissionLevel.Write" />
+                        <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Write" />
                     </template>
                     <h3 class="style-title-list">Lezen en bewerken</h3>
                 </STListItem>
 
                 <STListItem element-name="label" :selectable="true">
                     <template #left>
-                        <Radio v-model="defaultPermissionLevel" :value="PermissionLevel.Full" />
+                        <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Full" />
                     </template>
                     <h3 class="style-title-list">Volledige toegang</h3>
                 </STListItem>
@@ -107,31 +107,33 @@
             <hr>
 
             <STList>
-                <STListItem v-if="organizationTagIds === null" :selectable="true" element-name="button" @click="organizationTagIds = []">
-                    <template #left>
-                        <span class="icon add gray" />
-                    </template>
+                <template v-if="app === 'admin'">
+                    <STListItem v-if="organizationTagIds === null" :selectable="true" element-name="button" @click="organizationTagIds = []">
+                        <template #left>
+                            <span class="icon add gray" />
+                        </template>
 
-                    <h3 class="style-title-list">
-                        Beperk tot bepaalde lokale groepen (tags)
-                    </h3>
-                </STListItem>
+                        <h3 class="style-title-list">
+                            Beperk tot bepaalde lokale groepen (tags)
+                        </h3>
+                    </STListItem>
 
-                <STListItem v-if="defaultAgeGroupIds === null" :selectable="true" element-name="button" @click="defaultAgeGroupIds = []">
-                    <template #left>
-                        <span class="icon add gray" />
-                    </template>
+                    <STListItem v-if="defaultAgeGroupIds === null" :selectable="true" element-name="button" @click="defaultAgeGroupIds = []">
+                        <template #left>
+                            <span class="icon add gray" />
+                        </template>
 
-                    <h3 class="style-title-list">
-                        Koppel de functie aan leeftijdsgroepen
-                    </h3>
+                        <h3 class="style-title-list">
+                            Koppel de functie aan leeftijdsgroepen
+                        </h3>
 
-                    <p class="style-description-small">
-                        De functie moet dan worden toegekend aan een specifieke inschrijvingsgroep
-                    </p>
-                </STListItem>
+                        <p class="style-description-small">
+                            De functie moet dan worden toegekend aan een specifieke inschrijvingsgroep
+                        </p>
+                    </STListItem>
+                </template>
 
-                <STListItem v-if="defaultPermissionLevel === PermissionLevel.None" :selectable="true" element-name="button" @click="defaultPermissionLevel = PermissionLevel.Read">
+                <STListItem v-if="groupPermissionLevel === PermissionLevel.None" :selectable="true" element-name="button" @click="groupPermissionLevel = PermissionLevel.Read">
                     <template #left>
                         <span class="icon privacy gray" />
                     </template>
@@ -166,7 +168,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DefaultAgeGroupIdsInput, ErrorBox, JumpToContainer, NumberInput, SaveView, TagIdsInput, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, DefaultAgeGroupIdsInput, ErrorBox, JumpToContainer, NumberInput, SaveView, TagIdsInput, useAppContext, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberResponsibility, PermissionLevel } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -184,6 +186,7 @@ const props = defineProps<{
 }>();
 const title = computed(() => props.isNew ? $t('admin.settings.responsibilities.new.title') : $t('admin.settings.responsibilities.edit.title'));
 const pop = usePop();
+const app = useAppContext();
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.responsibility);
 
@@ -267,9 +270,9 @@ const defaultAgeGroupIds = computed({
     }),
 });
 
-const defaultPermissionLevel = computed({
-    get: () => patched.value.defaultPermissionLevel,
-    set: (defaultPermissionLevel) => addPatch({defaultPermissionLevel}),
+const groupPermissionLevel = computed({
+    get: () => patched.value.groupPermissionLevel,
+    set: (groupPermissionLevel) => addPatch({groupPermissionLevel}),
 });
 
 const shouldNavigateAway = async () => {

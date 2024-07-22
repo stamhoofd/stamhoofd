@@ -17,6 +17,8 @@
             </button>
         </LoadingButton>
 
+        <p class="info-box" v-if="!user.memberId">Deze beheerder is niet gekoppeld aan een ingeschreven lid. Zorg dat het e-mailadres overeen komt met het e-mailadres van een lid zelf.</p> 
+
         <STErrorsDefault :error-box="$errors.errorBox" />
         <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="$errors.errorBox">
             <div class="input-group">
@@ -33,8 +35,8 @@
 
         <div class="container">
             <hr>
-            <h2>Rollen</h2>
-            <p>Je kan beheerders verschillende rollen toekennen. Een beheerder zonder rollen heeft geen enkele toegang.</p>
+            <h2>Externe beheerdersrollen</h2>
+            <p>Je kan externe beheerders verschillende rollen toekennen (alternatief voor functies die je aan leden kan koppelen). Een externe beheerder zonder rollen heeft geen enkele toegang.</p>
 
             <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
         </div>
@@ -77,7 +79,7 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, EmailInput, ErrorBox, SaveView, Toast, useContext, useErrors, usePatch, useUninheritedPermissions, EditUserPermissionsBox } from '@stamhoofd/components';
-import { Permissions, PermissionsResourceType, User } from '@stamhoofd/structures';
+import { Permissions, PermissionsResourceType, User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
@@ -92,7 +94,7 @@ const $context = useContext()
 const pop = usePop();
 
 const props = defineProps<{
-    user: User;
+    user: UserWithMembers;
     isNew: boolean;
 }>();
 
@@ -171,7 +173,7 @@ const save = async () => {
                 method: "POST",
                 path: "/user",
                 body: patched.value,
-                decoder: User as Decoder<User>
+                decoder: UserWithMembers as Decoder<UserWithMembers>
             })
             user = response.data;
             new Toast("Beheerder "+user.firstName+" is toegevoegd en heeft een uitnodiging via email ontvangen.", "success").setHide(5000).show()
@@ -180,7 +182,7 @@ const save = async () => {
                 method: "PATCH",
                 path: "/user/"+patched.value.id,
                 body: patch.value,
-                decoder: User as Decoder<User>
+                decoder: UserWithMembers as Decoder<UserWithMembers>
             })
             user = response.data;
             new Toast("Beheerder "+user.firstName+" is aangepast", "success").setHide(2000).show()

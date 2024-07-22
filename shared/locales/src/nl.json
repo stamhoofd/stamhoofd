@@ -223,5 +223,7 @@
     "admin.invoices.emptyMessage": "Er zijn nog geen facturen aangemaakt",
     "shared.allOrganizations": "Alle verenigingen",
     "shared.allAgeGroups": "Alle leeftijdsgroepen",
-    "shared.saveConfirmation": "Wijzigingen zijn opgeslagen"
+    "shared.saveConfirmation": "Wijzigingen zijn opgeslagen",
+    "admin.settings.responsibilities.inherited": "Ingebouwde functies",
+    "admin.settings.responsibilities.ownTitle": "Groepseigenfuncties"
 }

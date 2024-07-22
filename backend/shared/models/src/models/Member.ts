@@ -372,10 +372,7 @@ export class Member extends Model {
             ...this,
             registrations: this.registrations.map(r => r.getStructure()),
             details: this.details,
-            users: this.users.map(u => UserStruct.create({
-                ...u, 
-                hasAccount: u.hasAccount()
-            })),
+            users: this.users.map(u => u.getStructure()),
         })
     }
 
@@ -385,6 +382,36 @@ export class Member extends Model {
             cycle: registration.cycle,
             member: MemberStruct.create(registration.member),
         })
+    }
+
+    static updateMembershipsForGroupId(id: string) {
+        QueueHandler.schedule('bulk-update-memberships', async () => {
+            console.log('Bulk updating memberships for group id ', id)
+
+            // Get all members that are registered in this group
+            const memberIds = (await SQL.select(
+                    SQL.column('members', 'id')
+                )
+                .from(SQL.table(Member.table))
+                .join(
+                    SQL.leftJoin(
+                        SQL.table(Registration.table)
+                    ).where(
+                        SQL.column(Registration.table, 'memberId'),
+                        SQL.column(Member.table, 'id')
+                    )
+                ).where(
+                    SQL.column(Registration.table, 'groupId'),
+                    id
+                ).fetch()).flatMap(r => (r.members && (typeof r.members.id) === 'string') ? [r.members.id as string] : [])
+            
+            for (const id of memberIds) {
+                const member = await Member.getWithRegistrations(id)
+                await member?.updateMemberships()
+            }
+        }).catch((e) => {
+            console.error('Failed to update memberships for group id ', id), e
+        });
     }
 
     async updateMemberships(this: MemberWithRegistrations) {
@@ -412,18 +439,19 @@ export class Member extends Model {
                     membership: defaultMembership,
                 }]
             })
-            // Get active memberships for this member
+            // Get active memberships for this member that
             const memberships = await MemberPlatformMembership.where({memberId: this.id, periodId: platform.periodId })
             const now = new Date()
-            const activeMemberships = memberships.filter(m => m.startDate <= now && m.endDate >= now)
-            const activeMembershipsUndeletable = activeMemberships.filter(m => !m.canDelete())
+            const activeMemberships = memberships.filter(m => m.startDate <= now && m.endDate >= now && m.deletedAt === null)
+            const activeMembershipsUndeletable = activeMemberships.filter(m => !m.canDelete() || !m.generated)
 
             if (defaultMemberships.length == 0) {
-                // Stop all active memberships
+                // Stop all active memberships taht were added automatically
                 for (const membership of activeMemberships) {
-                    if (!membership.invoiceId && !membership.invoiceItemDetailId) {
+                    if (membership.canDelete() && membership.generated) {
                         console.log('Removing membership because no longer registered member and not yet invoiced for: ' + this.id + ' - membership ' + membership.id)
-                        await membership.delete()
+                        membership.deletedAt = new Date()
+                        await membership.save()
                     }
                 }
 
@@ -461,6 +489,7 @@ export class Member extends Model {
                 throw new Error("Period config not found")
             }
 
+            // Can we revive an earlier deleted membership?
             console.log('Creating automatic membership for: ' + this.id + ' - membership type ' + cheapestMembership.membership.id)
             const membership = new MemberPlatformMembership();
             membership.memberId = this.id
@@ -471,14 +500,18 @@ export class Member extends Model {
             membership.startDate = periodConfig.startDate
             membership.endDate = periodConfig.endDate
             membership.expireDate = periodConfig.expireDate
+            membership.generated = true;
 
             await membership.calculatePrice()
             await membership.save()
 
             // This reasoning allows us to replace an existing membership with a cheaper one (not date based ones, but type based ones)
             for (const toDelete of activeMemberships) {
-                console.log('Removing membership because cheaper membership found for: ' + this.id + ' - membership ' + toDelete.id)
-                await toDelete.delete()
+                if (toDelete.canDelete() && toDelete.generated) {
+                    console.log('Removing membership because cheaper membership found for: ' + this.id + ' - membership ' + toDelete.id)
+                    toDelete.deletedAt = new Date()
+                    await toDelete.save()
+                }
             }
         });
     }

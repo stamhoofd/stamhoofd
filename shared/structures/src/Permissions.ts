@@ -593,6 +593,12 @@ export class Permissions extends AutoEncoder {
                 this.roles.push(role.clone());
             }
         }
+
+        for (const responsibility of other.responsibilities) {
+            if (!this.responsibilities.find(r => r.id === responsibility.id)) {
+                this.responsibilities.push(responsibility.clone());
+            }
+        }
     }
 
     get isEmpty() {
@@ -616,7 +622,7 @@ export class LoadedPermissions {
         return new LoadedPermissions(data)
     }
 
-    static from(permissions: Permissions, allRoles: PermissionRoleDetailed[], responsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
+    static from(permissions: Permissions, allRoles: PermissionRoleDetailed[], inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
         const roles = permissions.roles.flatMap(role => {
             const d = allRoles.find(a => a.id === role.id);
             if (d) {
@@ -639,33 +645,32 @@ export class LoadedPermissions {
                 continue
             }
 
-            const role = responsibilityRoles.find(r => r.responsibilityId === responsibility.responsibilityId && r.responsibilityGroupId === responsibility.groupId)
+            const role = inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibility.responsibilityId && r.responsibilityGroupId === responsibility.groupId)
 
-            if (responsibilityData.defaultPermissionLevel !== PermissionLevel.None) {
-                const r = PermissionRoleForResponsibility.create({
-                    id: responsibility.id,
-                    name: responsibilityData.name,
-                    level: responsibilityData.isGroupBased ? PermissionLevel.None : responsibilityData.defaultPermissionLevel,
-                    responsibilityId: responsibility.id,
-                    responsibilityGroupId: responsibility.groupId,
-                    resources: new Map()
-                });
-                if (responsibility.groupId) {
-                    const map: Map<string, ResourcePermissions> = new Map()
-                    map.set(responsibility.groupId, ResourcePermissions.create({level: responsibilityData.defaultPermissionLevel}))
-                    r.resources.set(PermissionsResourceType.Groups, map)
-                }
-                if (role) {
-                    r.id = role.id
-                    r.add(role)
-                }
-                roles.push(r)
-                continue;
+            const r = responsibilityData.permissions?.clone() ?? PermissionRoleForResponsibility.create({
+                id: responsibility.id,
+                name: responsibilityData.name,
+                level: PermissionLevel.None,
+                responsibilityId: responsibility.id,
+                responsibilityGroupId: responsibility.groupId,
+                resources: new Map()
+            }); 
+
+            r.name = responsibilityData.name
+            r.id = responsibility.id
+            r.responsibilityId = responsibility.id
+            r.responsibilityGroupId = responsibility.groupId
+
+            if (responsibility.groupId && responsibilityData.groupPermissionLevel !== PermissionLevel.None) {
+                const map: Map<string, ResourcePermissions> = new Map()
+                map.set(responsibility.groupId, ResourcePermissions.create({level: responsibilityData.groupPermissionLevel}))
+                r.resources.set(PermissionsResourceType.Groups, map)
             }
-
             if (role) {
-                roles.push(role)
+                r.id = role.id
+                r.add(role)
             }
+            roles.push(r)
         }
 
         const result = this.create({

@@ -3,14 +3,15 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from '@stamhoofd/email';
 import { PasswordToken, User } from '@stamhoofd/models';
-import { User as UserStruct,UserPermissions } from "@stamhoofd/structures";
+import { User as UserStruct,UserPermissions, UserWithMembers } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../helpers/Context';
+import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UserStruct
-type ResponseBody = UserStruct
+type ResponseBody = UserWithMembers
 
 export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = UserStruct as Decoder<UserStruct>
@@ -132,6 +133,8 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        return new Response(UserStruct.create({...admin, hasAccount: admin.hasAccount()}));
+        return new Response(
+            await AuthenticatedStructures.userWithMembers(admin)
+        );        
     }
 }

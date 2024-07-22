@@ -124,8 +124,7 @@ export class OrganizationManager {
 
         const loaded = await LoginHelper.loadAdmins(this.$context, shouldRetry, owner)
 
-        if (this.organization.admins !== undefined) {
-            console.log("Loaded admins with deep set", loaded.users)
+        if (this.organization.admins) {
             deepSetArray(this.organization.admins, loaded.users)
         } else {
             this.organization.admins = loaded.users

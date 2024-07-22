@@ -6,6 +6,22 @@
         
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <template v-if="inheritedResponsibilities.length">
+            <hr>
+            <h2>{{ $t('admin.settings.responsibilities.inherited') }}</h2>
+            <p>Ken automatisch rechten toe aan leden die een bepaalde ingebouwde functie hebben.</p>
+
+            <STList>
+                <ResponsibilityRow v-for="responsibility of inheritedResponsibilities" :key="responsibility.id" :responsibility="responsibility" @click="editResponsibility(responsibility)" />
+            </STList>
+
+        </template>
+
+        <template v-if="inheritedResponsibilities.length">
+            <hr>
+            <h2>{{ $t('admin.settings.responsibilities.ownTitle') }}</h2>
+        </template>
+
         <STList v-model="draggableResponsibilities" :draggable="true">
             <template #item="{item: responsibility}">
                 <ResponsibilityRow :responsibility="responsibility" @click="editResponsibility(responsibility)" />
@@ -24,10 +40,10 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, useOrganization, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { usePlatformManager } from '@stamhoofd/networking';
-import { MemberResponsibility, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { useOrganizationManager, usePlatformManager } from '@stamhoofd/networking';
+import { MemberResponsibility, Organization, OrganizationPrivateMetaData, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import ResponsibilityRow from './components/ResponsibilityRow.vue';
 import EditResponsibilityView from './EditResponsibilityView.vue';
@@ -38,8 +54,12 @@ const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
 const $t = useTranslate();
+const organization = useOrganization()
+const organizationManager = useOrganizationManager()
 
-const originalResponsibilities = computed(() => platform.value.config.responsibilities)
+const originalResponsibilities = computed(() => organization.value ? (organization.value.privateMeta?.responsibilities ?? []) : platform.value.config.responsibilities)
+const inheritedResponsibilities = computed(() => organization.value  ? platform.value.config.responsibilities : [])
+
 const {patched: responsibilities, patch, addArrayPatch, hasChanges} = usePatchArray(originalResponsibilities)
 const draggableResponsibilities = useDraggableArray(() => responsibilities.value, addArrayPatch)
 const saving = ref(false);
@@ -97,11 +117,22 @@ async function save() {
     saving.value = true;
 
     try {
-        await platformManager.value.patch(Platform.patch({
-            config: PlatformConfig.patch({
-                responsibilities: patch.value
-            })
-        }))
+        if (organization.value) {
+            await organizationManager.value.patch(
+                Organization.patch({
+                    privateMeta: OrganizationPrivateMetaData.patch({
+                        responsibilities: patch.value
+                    })
+                })
+            )
+        } else {
+            await platformManager.value.patch(Platform.patch({
+                config: PlatformConfig.patch({
+                    responsibilities: patch.value
+                })
+            }))
+        }
+
         new Toast('De wijzigingen zijn opgeslagen', "success green").show()
         await pop({ force: true });
     } catch (e) {

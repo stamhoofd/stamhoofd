@@ -282,10 +282,12 @@ export class Group extends Model {
         }
 
         for (const group of allGroups) {
-            if (!reachable.get(group.id) && group.status !== GroupStatus.Archived) {
-                console.log("Archiving unreachable group "+group.id+" from organization "+organizationId + " org period "+period.id)
-                group.status = GroupStatus.Archived
+            if (!reachable.get(group.id) && group.deletedAt === null) {
+                console.log("Deleting unreachable group "+group.id+" from organization "+organizationId + " org period "+period.id)
+                group.deletedAt = new Date()
                 await group.save()
+
+                Member.updateMembershipsForGroupId(group.id)
             }
         }
     }

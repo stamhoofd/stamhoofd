@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
-import { PermissionLevel } from "./Permissions";
+import { PermissionLevel, PermissionRoleForResponsibility } from "./Permissions";
 
 export class MemberResponsibility extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -37,8 +37,17 @@ export class MemberResponsibility extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true, version: 273})
     defaultAgeGroupIds: string[]|null = null
 
-    @field({ decoder: new EnumDecoder(PermissionLevel), version: 276 })
-    defaultPermissionLevel: PermissionLevel = PermissionLevel.None
+    /**
+     * Automatically grant the following permissions
+     */
+    @field({ decoder: PermissionRoleForResponsibility, nullable: true, version: 279 })
+    permissions: PermissionRoleForResponsibility|null = null
+
+    /**
+     * Automatically grant limited permissions to the group associated with this responsibility
+     */
+    @field({ decoder: new EnumDecoder(PermissionLevel), version: 279 })
+    groupPermissionLevel: PermissionLevel = PermissionLevel.None
 
     get isGroupBased() {
         return this.defaultAgeGroupIds !== null

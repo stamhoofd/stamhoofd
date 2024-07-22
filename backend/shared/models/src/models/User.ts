@@ -1,11 +1,11 @@
 
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { EmailInterfaceRecipient } from "@stamhoofd/email";
-import { LoginProviderType, NewUser, Permissions, User as UserStruct,UserMeta, UserPermissions } from "@stamhoofd/structures";
+import { LoginProviderType, NewUser, Permissions, UserMeta, UserPermissions, User as UserStruct } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization, Platform } from "./";
+import { Organization } from "./";
 
 export class User extends Model {
     static table = "users";
@@ -437,7 +437,9 @@ export class User extends Model {
             email: this.email,
             verified: this.verified,
             permissions: this.permissions,
-            hasAccount: this.hasAccount()
+            hasAccount: this.hasAccount(),
+            memberId: this.memberId,
+            organizationId: this.organizationId
         });
     }
 

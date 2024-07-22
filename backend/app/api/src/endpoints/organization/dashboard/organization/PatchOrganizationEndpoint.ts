@@ -99,7 +99,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
-                organization.privateMeta.responsibilityRoles = request.body.privateMeta.responsibilityRoles.applyTo(organization.privateMeta.responsibilityRoles)
+                organization.privateMeta.responsibilities = request.body.privateMeta.responsibilities.applyTo(organization.privateMeta.responsibilities)
+                organization.privateMeta.inheritedResponsibilityRoles = request.body.privateMeta.inheritedResponsibilityRoles.applyTo(organization.privateMeta.inheritedResponsibilityRoles)
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
 
@@ -182,28 +183,27 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             // Allow admin patches (permissions only atm). No put atm
             if (request.body.admins) {
-                for (const patch of request.body.admins.getPatches()) {
-                    if (patch.permissions) {
-                        const admin = await User.getByID(patch.id)
-                        if (!admin || !await Context.auth.canAccessUser(admin, PermissionLevel.Full)) {
-                            throw new SimpleError({
-                                code: "invalid_field",
-                                message: "De beheerder die je wilt wijzigen bestaat niet (meer)",
-                                field: "admins"
-                            })
-                        }
-
-                        admin.permissions = UserPermissions.limitedPatch(admin.permissions, patch.permissions, organization.id)
-
-                        if (admin.id === user.id && (!admin.permissions || !admin.permissions.forOrganization(organization)?.hasFullAccess())) {
-                            throw new SimpleError({
-                                code: "permission_denied",
-                                message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
-                            })
-                        }
-                        await admin.save()
-                    }
-                }
+                throw new Error("Temporary removed to keep code cleaner. Please use different endpoints.")
+                // for (const patch of request.body.admins.getPatches()) {
+                //     if (patch.permissions) {
+                //         const admin = await User.getByID(patch.id)
+                //         if (!admin || !await Context.auth.canAccessUser(admin, PermissionLevel.Full)) {
+                //             throw new SimpleError({
+                //                 code: "invalid_field",
+                //                 message: "De beheerder die je wilt wijzigen bestaat niet (meer)",
+                //                 field: "admins"
+                //             })
+                //         }
+                //         admin.permissions = UserPermissions.limitedPatch(admin.permissions, patch.permissions, organization.id)
+                //         if (admin.id === user.id && (!admin.permissions || !admin.permissions.forOrganization(organization)?.hasFullAccess())) {
+                //             throw new SimpleError({
+                //                 code: "permission_denied",
+                //                 message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
+                //             })
+                //         }
+                //         await admin.save()
+                //     }
+                // }
             }
 
             if (request.body.meta) {

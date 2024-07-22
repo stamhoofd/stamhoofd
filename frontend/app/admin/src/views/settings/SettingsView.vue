@@ -142,14 +142,13 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView, EmailSettingsView } from '@stamhoofd/components';
+import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView, EmailSettingsView, EditMemberResponsibilitiesView } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
-import EditMemberResponsibilitiesView from './responsibilities/EditMemberResponsibilitiesView.vue';
 
 enum Routes {
     Admins = 'beheerders',

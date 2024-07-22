@@ -1,8 +1,9 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Event, Group, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
-import { Event as EventStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, User as UserStruct, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
+import { Event as EventStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, User as UserStruct, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
+import { Formatter } from "@stamhoofd/utility";
 
 /**
  * Builds authenticated structures for the current user
@@ -98,18 +99,50 @@ export class AuthenticatedStructures {
 
     static async adminOrganizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
         const structs: OrganizationStruct[] = [];
-        const admins = await User.getAdmins(organizations.map(o => o.id))
 
         for (const organization of organizations) {
             const base = await organization.getStructure({emptyGroups: true})
-            base.admins = admins.filter(a => a.permissions?.organizationPermissions.has(organization.id)).map(a => UserStruct.create({...a, hasAccount: a.hasAccount()}))
             structs.push(base)
         }
         
         return structs
     }
 
+    static async userWithMembers(user: User): Promise<UserWithMembers> {
+        const members = await Member.getMembersWithRegistrationForUser(user)
+
+        return UserWithMembers.create({
+            ...user,
+            hasAccount: user.hasAccount(),
+            members: await this.membersBlob(members, false)
+        })
+    }
+
+    /**
+     * This version only returns connected members that are 1:1, skips other members
+     */
+    static async usersWithMembers(users: User[]): Promise<UserWithMembers[]> {
+        const structs: UserWithMembers[] = [];
+        const memberIds = Formatter.uniqueArray(users.map(u => u.memberId).filter(id => id !== null) as string[])
+        const members = memberIds.length > 0 ? await Member.getBlobByIds(...memberIds) : []
+
+        for (const user of users) {
+            const filteredMembers = user.memberId ? members.filter(m => m.id === user.memberId) : []
+            structs.push(UserWithMembers.create({
+                ...user,
+                hasAccount: user.hasAccount(),
+                members: await this.membersBlob(filteredMembers, false)
+            }))
+        }
+        
+        return structs
+    }
+
     static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false): Promise<MembersBlob> {
+        if (members.length === 0) {
+            return MembersBlob.create({members: [], organizations: []})
+        }
+
         const organizations = new Map<string, Organization>()
         const memberBlobs: MemberWithRegistrationsBlob[] = []
         for (const member of members) {
@@ -131,7 +164,19 @@ export class AuthenticatedStructures {
 
         // Load responsibilities
         const responsibilities = members.length > 0 ? await MemberResponsibilityRecord.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
-        const platformMemberships = members.length > 0 ? await MemberPlatformMembership.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
+        const platformMemberships = members.length > 0 ? await MemberPlatformMembership.where({ deletedAt: null, memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
+
+        // Load missing organizations
+        const organizationIds = Formatter.uniqueArray(responsibilities.map(r => r.organizationId).filter(id => id !== null) as string[])
+        for (const id of organizationIds) {
+            if (includeContextOrganization || id !== Context.auth.organization?.id) {
+                const found = organizations.get(id);
+                if (!found) {
+                    const organization = await Context.auth.getOrganization(id)
+                    organizations.set(organization.id, organization)
+                }
+            }
+        }
 
         for (const blob of memberBlobs) {
             blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map(r => r.getStructure())

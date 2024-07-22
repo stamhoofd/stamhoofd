@@ -945,11 +945,7 @@ async function loadColumnConfiguration() {
             updateVisibleRows();
             updateRecommendedWidths();
  
-            if (decoded.canCollapse) {
-                updateCanCollapse()
-            } else {
-                updateColumnWidth()
-            }
+            updateColumnWidth()
         } else {
             updateVisibleRows();
             updateRecommendedWidths();
@@ -1234,7 +1230,44 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
             } else {
                 column.width += distributeWidth
                 column.renderWidth = Math.floor(column.width);
+                distributeWidth = 0
                 break
+            }
+        }
+
+        // Now same with minimum
+        for (const column of affectedColumns) {
+            if (column.width == null) {
+                continue;
+            }
+
+            if (distributeWidth < 0) {
+                if (column.width > column.minimumWidth) {
+                    const shrinkAmount = Math.min(-distributeWidth, column.width - column.minimumWidth);
+                    column.width -= shrinkAmount
+                    column.renderWidth = Math.floor(column.width);
+                    distributeWidth += shrinkAmount;
+
+                    if (distributeWidth >= 0) {
+                        break
+                    }
+                }
+            } else {
+                column.width += distributeWidth
+                column.renderWidth = Math.floor(column.width);
+                distributeWidth = 0
+                break
+            }
+        }
+
+        // Ignore remaining
+        if (distributeWidth !== 0) {
+            // Add back to afterColumn
+            if (afterColumn && afterColumn.width !== null) {
+                afterColumn.width += distributeWidth
+                afterColumn.renderWidth = Math.floor(afterColumn.width);
+
+                updateColumnWidth(null, 'grow')
             }
         }
     }

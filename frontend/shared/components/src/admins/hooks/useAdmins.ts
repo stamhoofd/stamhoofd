@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
 import { usePop } from "@simonbackx/vue-app-navigation"
-import { Toast, useContext, useOrganization } from "@stamhoofd/components"
+import { Toast, useContext, useOrganization, usePlatform } from "@stamhoofd/components"
 import { ContextPermissions, OrganizationManager, usePlatformManager } from "@stamhoofd/networking"
-import { User, UserPermissions, Permissions } from "@stamhoofd/structures"
+import { Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from "@stamhoofd/structures"
 import { Sorter } from "@stamhoofd/utility"
 import { computed, getCurrentInstance, onActivated } from "vue"
 
@@ -12,6 +12,7 @@ export function useAdmins() {
     const platformManager = usePlatformManager()
     const $context = useContext()
     const instance = getCurrentInstance()
+    const platform = usePlatform()
     const pop = usePop()
 
     let promise: Promise<unknown> | undefined = undefined
@@ -75,13 +76,33 @@ export function useAdmins() {
     }
 
     const sortedAdmins = computed(() => {
-        return admins.value.slice().sort((a, b) => Sorter.stack(
+        return admins.value.filter(a => !a.memberId).sort((a, b) => Sorter.stack(
             Sorter.byBooleanValue(getPermissions(a)?.hasFullAccess() ?? false, getPermissions(b)?.hasFullAccess() ?? false), 
             Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)
         ))
     })
 
-    const pushInMemory = (user: User) => {
+    const sortedMembers = computed(() => {
+        const members = new Map<string, PlatformMember>();
+        for (const admin of admins.value) {
+            const adminMembers = PlatformFamily.createSingles(admin.members, {
+                contextOrganization: organization.value,
+                platform: platform.value
+            })
+
+            for (const m of adminMembers) {
+                if (!members.has(m.id)) {
+                    members.set(m.id, m)
+                }
+            }
+        }
+
+        return [...members.values()]
+    });
+
+    // Sorted members todo
+
+    const pushInMemory = (user: UserWithMembers) => {
         if (organization.value) {
             return organization.value?.admins?.push(user)
         }
@@ -90,7 +111,7 @@ export function useAdmins() {
         return platformManager.value.$platform.admins?.push(user)
     }
 
-    const dropFromMemory = (user: User) => {
+    const dropFromMemory = (user: UserWithMembers) => {
         if (organization.value) {
             const index = organization.value?.admins?.findIndex((u) => u.id == user.id)
 
@@ -108,5 +129,5 @@ export function useAdmins() {
         }
     }
 
-    return { loading, admins, promise, sortedAdmins, getPermissions, getPermissionsPatch, pushInMemory, dropFromMemory}
+    return { loading, admins, promise, sortedAdmins, sortedMembers, getPermissions, getPermissionsPatch, pushInMemory, dropFromMemory}
 }

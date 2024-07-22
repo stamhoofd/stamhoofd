@@ -12,7 +12,7 @@
         </h2>
 
         <STList>
-            <STListItem v-for="user in member.patchedMember.users" :key="user.id" class="hover-box">
+            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
                 <template v-if="user.hasAccount && user.verified" #left>
                     <span class="icon user small" />
                 </template>
@@ -23,7 +23,7 @@
                     <span v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" />
                 </template>
 
-                <template v-if="user.firstName || user.lastName">
+                <template v-if="(user.firstName || user.lastName) && (user.name !== member.patchedMember.name)">
                     <h3 v-if="user.firstName || user.lastName" class="style-title-list">
                         {{ user.firstName }} {{ user.lastName }}
                     </h3>
@@ -43,8 +43,12 @@
                     E-mailadres nog niet geverifieerd
                 </p>
 
+                <p v-if="user.memberId === member.id" class="style-description-small">
+                    Dit is een account van {{ member.patchedMember.firstName }} zelf
+                </p>
+
                 <p v-if="user.permissions" class="style-description-small">
-                    Beheerder
+                    Heeft toegang tot beheerdersportaal
                 </p>
             </STListItem>
         </STList>
@@ -53,11 +57,22 @@
 
 <script setup lang="ts">
 import { PlatformMember } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
+import { computed } from 'vue';
 
 defineOptions({
     inheritAttrs: false
 })
-defineProps<{
+const props = defineProps<{
     member: PlatformMember
 }>()
+
+const sortedUsers = computed(() => {
+    return props.member.patchedMember.users.slice().sort((a, b) => {
+        return Sorter.stack(
+            Sorter.byBooleanValue(a.id === props.member.id, b.id === props.member.id),
+            Sorter.byBooleanValue(a.hasAccount, b.hasAccount),
+        )
+    })
+})
 </script>

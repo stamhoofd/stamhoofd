@@ -705,6 +705,10 @@
         flex-direction: row;
         justify-content: space-between;
         gap: 15px;
+
+        > .icon {
+            flex-shrink: 0;
+        }
     }
 }
 

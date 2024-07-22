@@ -98,7 +98,7 @@ export class PlatformFamily {
 
             for (const organization of blob.organizations) {
                 // Check if this organization is relevant to this member
-                if (member.registrations.find(r => r.organizationId === organization.id)) {
+                if (member.registrations.find(r => r.organizationId === organization.id) || member.platformMemberships.find(m => m.organizationId === organization.id) || member.responsibilities.find(r => r.organizationId === organization.id)) {
                     family.insertOrganization(organization)
                 }
             }
@@ -792,5 +792,33 @@ export class PlatformMember implements ObjectWithRecords {
 
     getRecordAnswers(): Map<string, RecordAnswer> {
         return this.patchedMember.details.recordAnswers
+    }
+
+    getResponsibilities(organization?: Organization|null, short = false) {
+        return this.patchedMember.responsibilities
+            .filter(r => r.endDate === null && (!organization || r.organizationId === organization.id))
+            .map(r => {
+                const org = this.organizations.find(o => o.id === r.organizationId)
+    
+                if (!org && r.organizationId) {
+                    return 'Onbekende functie'
+                }
+                let suffix = '';
+    
+                if (r.groupId && org) {
+                    const group = org.adminAvailableGroups.find(g => g.id === r.groupId)
+                    if (group) {
+                        suffix += (short ? ' ' : ' van ')+group.settings.name
+                    }
+                }
+    
+                if (!short && !organization) {
+                    suffix += org ? ' bij '+org.name : ' (nationaal)';
+                }
+    
+                return (this.platform.config.responsibilities.find(rr => rr.id === r.responsibilityId)?.name 
+                    ?? org?.privateMeta?.responsibilities?.find(rr => rr.id === r.responsibilityId)?.name 
+                    ?? 'Onbekend') + suffix
+        });
     }
 }

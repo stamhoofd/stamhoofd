@@ -1,8 +1,8 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { Platform, RegistrationPeriod, User, Version } from '@stamhoofd/structures';
+import { Platform, RegistrationPeriod, UserWithMembers, Version } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { Ref, inject, reactive, toRef } from 'vue';
+import { inject, reactive, Ref, toRef } from 'vue';
 
 export function usePlatformManager(): Ref<PlatformManager> {
     return toRef(inject<PlatformManager>('$platformManager') as PlatformManager) as Ref<PlatformManager>
@@ -89,12 +89,16 @@ export class PlatformManager {
         const response = await this.$context.authenticatedServer.request({
             method: 'GET',
             path: '/platform/admins',
-            decoder: new ArrayDecoder(User as Decoder<User>),
+            decoder: new ArrayDecoder(UserWithMembers as Decoder<UserWithMembers>),
             shouldRetry: shouldRetry ?? false,
             owner
         })
 
-        this.$platform.admins = response.data
+        if (this.$platform.admins) {
+            deepSetArray(this.$platform.admins, response.data)
+        } else {
+            this.$platform.admins = response.data
+        }
     }
 
     async loadPeriods(force = false, shouldRetry?: boolean, owner?: any) {

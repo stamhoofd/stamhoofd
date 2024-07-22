@@ -15,8 +15,8 @@
             Geen functies gevonden
         </p>
 
-        <div class="container" v-for="group of groupsWithResponsibilites" :key="''+group.groupId">
-            <hr v-if="group.title">
+        <div class="container" v-for="(group, index) of groupsWithResponsibilites" :key="''+group.groupId">
+            <hr v-if="index > 0 || !(!organization && items.length)">
             <h2 v-if="group.title">{{ group.title }}</h2>
 
             <STList>
@@ -47,16 +47,16 @@ import { MemberResponsibility, MemberResponsibilityRecord, Organization, Platfor
 
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, PopOptions, usePresent } from '@simonbackx/vue-app-navigation';
-import { ScrollableSegmentedControl, SearchMemberOrganizationView, useAuth, useOrganization, usePlatform } from '@stamhoofd/components';
+import { usePresent } from '@simonbackx/vue-app-navigation';
+import { ScrollableSegmentedControl, useAuth, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { Formatter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import Title from './Title.vue';
-import { Formatter } from '@stamhoofd/utility';
 
 defineOptions({
     inheritAttrs: false
@@ -76,10 +76,11 @@ const items = computed(() => {
     if (organization.value) {
         return [organization.value]
     }
-    return [...props.member.organizations]
+    // Only show organization that have an active registration in the organization active period
+    return [...props.member.filterOrganizations({currentPeriod: true})]
 });
 
-const responsibilities = computed(() => {
+const platformResponsibilities = computed(() => {
     if (selectedOrganization.value === null) {
         return []
     }
@@ -88,15 +89,20 @@ const responsibilities = computed(() => {
 })
 
 const selectedOrganization = ref((items.value[0] ?? null) as any) as Ref<Organization|null>;
+
+const organizationResponsibilities = computed(() => {
+    return selectedOrganization.value?.privateMeta?.responsibilities ?? []
+})
+
 const $t = useTranslate();
 const present = usePresent();
 const auth = useAuth();
 
 const groupsWithResponsibilites = computed(() => {
     const groups: {title: string, groupId: string|null, responsibilities: MemberResponsibility[]}[] = []
-    const defaultGroup: MemberResponsibility[] = []
+    let defaultGroup: MemberResponsibility[] = []
 
-    for (const responsibility of responsibilities.value) {
+    for (const responsibility of platformResponsibilities.value) {
         if (responsibility.defaultAgeGroupIds === null) {
             defaultGroup.push(responsibility)
         }
@@ -104,7 +110,22 @@ const groupsWithResponsibilites = computed(() => {
     
     if (defaultGroup.length > 0) {
         groups.push({
-            title: '',
+            title: 'Nationale functies',
+            groupId: null,
+            responsibilities: defaultGroup
+        })
+        defaultGroup = []
+    }
+
+    for (const responsibility of organizationResponsibilities.value) {
+        if (responsibility.defaultAgeGroupIds === null) {
+            defaultGroup.push(responsibility)
+        }
+    }
+    
+    if (defaultGroup.length > 0) {
+        groups.push({
+            title: 'Groepseigenfuncties',
             groupId: null,
             responsibilities: defaultGroup
         })
@@ -117,7 +138,7 @@ const groupsWithResponsibilites = computed(() => {
         }
 
         const groupResponsibilities: MemberResponsibility[] = []
-        for (const responsibility of responsibilities.value) {
+        for (const responsibility of [...platformResponsibilities.value, ...organizationResponsibilities.value]) {
             if (responsibility.defaultAgeGroupIds !== null && responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
                 groupResponsibilities.push(responsibility)
             }
@@ -155,27 +176,6 @@ useValidation(errors.validator, () => {
     return true
 });
 
-function addOrganization(organization: Organization) {
-    props.member.insertOrganization(organization);
-    selectedOrganization.value = organization;
-}
-
-async function searchOrganization() {
-    await present({
-        url: 'zoeken',
-        components: [
-            new ComponentWithProperties(SearchMemberOrganizationView, {
-                title: $t('shared.responsibilities.searchOrganizationTitle'),
-                member: props.member,
-                selectOrganization: async (organization: Organization, pop: (options?: PopOptions) => Promise<void>) => {
-                    addOrganization(organization)
-                    await pop({force: true});
-                }
-            })
-        ],
-        modalDisplayStyle: "popup"
-    })
-}
 
 function isResponsibilityEnabled(responsibility: MemberResponsibility, groupId: string|null) {
     return !!props.member.patchedMember.responsibilities.find(r => !r.endDate && r.responsibilityId === responsibility.id && r.organizationId === (selectedOrganization?.value?.id ?? null) && r.groupId === groupId)

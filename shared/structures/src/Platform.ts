@@ -1,14 +1,14 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
-import { PermissionRoleDetailed } from "./Permissions";
-import { User } from "./User";
-import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
 import { MemberResponsibility } from "./MemberResponsibility";
-import { RegistrationPeriod } from "./RegistrationPeriod";
 import { OrganizationEmail } from "./OrganizationEmail";
+import { PermissionRoleDetailed } from "./Permissions";
+import { RegistrationPeriod } from "./RegistrationPeriod";
+import { UserWithMembers } from "./UserWithMembers";
 import { Replacement } from "./endpoints/EmailRequest";
+import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -169,7 +169,7 @@ export class Platform extends AutoEncoder {
     /**
      * Keep admins accessible and in memory
      */
-    admins?: User[]
+    admins?:  UserWithMembers[]|null
 
     /**
      * Keep admins accessible and in memory

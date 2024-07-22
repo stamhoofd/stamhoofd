@@ -74,7 +74,7 @@ const platform = usePlatform()
 const platformFamilyManager = usePlatformFamilyManager();
 
 const configurationId = computed(() => {
-    return 'members-'+app
+    return 'members-'+app+'-'+(props.group ? '-group-'+props.group.id : '')+'-'+(props.waitingList ? '-waitingList' : '') + (props.category ? '-category-'+props.category.id : '')
 })
 const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false)
 
@@ -196,8 +196,8 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'age',
         name: "Leeftijd", 
         getValue: (member) => member.member.details.age, 
-        format: (age) => age ? Formatter.integer(age) + ' jaar' : 'onbekend',
-        minimumWidth: 30,
+        format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' jaar')) : 'onbekend',
+        minimumWidth: 50,
         recommendedWidth: 120,
     }),
     new Column<ObjectType, MembershipStatus>({
@@ -230,6 +230,34 @@ const allColumns: Column<ObjectType, any>[] = [
         },
         minimumWidth: 100,
         recommendedWidth: 120,
+    }),
+    new Column<ObjectType, string[]>({
+        name: "Functies", 
+        allowSorting: false,
+        getValue: (member) => member.getResponsibilities(organization.value ?? null, true),
+        format: (list) => {
+            if (list.length === 0) {
+                return 'Geen'
+            }
+            return list.join(', ')
+        }, 
+        getStyle: (list) => list.length === 0 ? "gray" : "",
+        minimumWidth: 100,
+        recommendedWidth: 200
+    }),
+    new Column<ObjectType, string[]>({
+        name: "Account", 
+        allowSorting: false,
+        getValue: (member) => member.patchedMember.users.filter(u => u.hasAccount).map(u => u.email),
+        format: (accounts) => {
+            if (accounts.length === 0) {
+                return 'Geen account'
+            }
+            return accounts.join(', ')
+        }, 
+        getStyle: (accounts) => accounts.length === 0 ? "gray" : "",
+        minimumWidth: 100,
+        recommendedWidth: 200
     })
 ];
 

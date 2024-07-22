@@ -3,6 +3,7 @@ import { User } from '@stamhoofd/models';
 import { OrganizationAdmins, User as UserStruct } from "@stamhoofd/structures";
 
 import { Context } from "../../../../helpers/Context";
+import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -35,7 +36,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         const admins = await User.getAdmins([organization.id])
 
         return new Response(OrganizationAdmins.create({
-            users: admins.map(a => UserStruct.create({...a, hasAccount: a.hasAccount()})),
+            users: await AuthenticatedStructures.usersWithMembers(admins)
         }));
     }
 }

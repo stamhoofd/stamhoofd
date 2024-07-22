@@ -12,7 +12,7 @@ type OrganizationForPermissionCalculation = {
     }, 
     privateMeta?: {
         roles: PermissionRoleDetailed[],
-        responsibilityRoles: PermissionRoleForResponsibility[]
+        inheritedResponsibilityRoles: PermissionRoleForResponsibility[]
     }|null
 }
 
@@ -90,9 +90,9 @@ export class UserPermissions extends AutoEncoder {
             return null;
         }
         const organizationRoles = organization?.privateMeta?.roles ?? []
-        const responsibilityRoles = organization?.privateMeta?.responsibilityRoles ?? []
+        const inheritedResponsibilityRoles = organization?.privateMeta?.inheritedResponsibilityRoles ?? []
         const allResponsibilities = Platform.shared.config.responsibilities
-        return LoadedPermissions.from(permissions, organizationRoles, responsibilityRoles, allResponsibilities)
+        return LoadedPermissions.from(permissions, organizationRoles, inheritedResponsibilityRoles, allResponsibilities)
     }
 
     convertPlatformPatch(patch: AutoEncoderPatchType<Permissions>|null): AutoEncoderPatchType<UserPermissions> {

@@ -10,6 +10,8 @@ import { LoadedPermissions } from './Permissions';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod';
 import { User } from './User';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
+import { OrganizationAdmins } from './endpoints/OrganizationAdmins';
+import { UserWithMembers } from './UserWithMembers';
 
 export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -173,8 +175,7 @@ export class Organization extends AutoEncoder {
     /**
      * Only available for patching. Also available with lazy loading OrganizationAdmins
      */
-    @field({ decoder: new ArrayDecoder(User), optional: true, version: 60 })
-    admins?: User[]
+    admins?: UserWithMembers[]|null = null
 
     /**
      * Keep admins accessible and in memory

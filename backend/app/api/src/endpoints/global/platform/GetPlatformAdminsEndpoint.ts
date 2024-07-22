@@ -3,6 +3,7 @@ import { User } from '@stamhoofd/models';
 import { User as UserStruct } from "@stamhoofd/structures";
 
 import { Context } from "../../../helpers/Context";
+import { AuthenticatedStructures } from "../../../helpers/AuthenticatedStructures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -38,7 +39,7 @@ export class GetPlatformAdminsEndpoint extends Endpoint<Params, Query, Body, Res
         admins = admins.filter(a => !!a.permissions?.globalPermissions)
 
         return new Response(
-            admins.map(a => UserStruct.create({...a, hasAccount: a.hasAccount()}))
+            await AuthenticatedStructures.usersWithMembers(admins)
         );
     }
 }

@@ -57,6 +57,9 @@ export class MemberUserSyncerStatic {
     async updateInheritedPermissions(user: User) {
         const responsibilities = user.memberId ? (await this.getResponsibilitiesForMembers([user.memberId])) : []
 
+        // Check if the member has active registrations
+        // otherwise -> do not inherit any permissions
+
         user.permissions = user.permissions ?? UserPermissions.create({})
 
         // Group responsibilities by organization
@@ -145,6 +148,12 @@ export class MemberUserSyncerStatic {
                 user.memberId = member.id;
                 await this.updateInheritedPermissions(user)
             } else {
+                if (user.memberId === member.id) {
+                    // Unlink: parents are never 'equal' to the member
+                    user.memberId = null;
+                    await this.updateInheritedPermissions(user)
+                }
+
                 if (!user.firstName && !user.lastName) {
                     const parents = member.details.parents.filter(p => p.email === email)
                     if (parents.length === 1) {

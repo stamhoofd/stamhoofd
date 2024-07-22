@@ -2,14 +2,16 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { EmailVerificationCode, Member, PasswordToken, Token, User } from '@stamhoofd/models';
-import { NewUser, PermissionLevel, SignupResponse, User as UserStruct,UserPermissions } from "@stamhoofd/structures";
+import { NewUser, PermissionLevel, SignupResponse, UserPermissions, UserWithMembers } from "@stamhoofd/structures";
 
 import { Context } from '../../helpers/Context';
+import { MemberUserSyncer } from '../../helpers/MemberUserSyncer';
+import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures';
 
 type Params = { id: string };
 type Query = undefined;
 type Body = AutoEncoderPatchType<NewUser>
-type ResponseBody = UserStruct
+type ResponseBody = UserWithMembers
 
 export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = NewUser.patchType() as Decoder<AutoEncoderPatchType<NewUser>>
@@ -47,7 +49,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         if (await Context.auth.canEditUserName(editUser)) {
             if (editUser.memberId) {
-                const member = await Member.getByID(editUser.memberId)
+                const member = await Member.getWithRegistrations(editUser.memberId)
                 if (member) {
                     member.details.firstName = request.body.firstName ?? member.details.firstName
                     member.details.lastName = request.body.lastName ?? member.details.lastName
@@ -55,6 +57,9 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     editUser.firstName = member.details.firstName
                     editUser.lastName = member.details.lastName
                     await member.save()
+
+                    // Also propage the name change to other users of the same member if needed
+                    await MemberUserSyncer.onChangeMember(member)
                 }
             } else {
                 editUser.firstName = request.body.firstName ?? editUser.firstName
@@ -129,6 +134,8 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        return new Response(UserStruct.create({...editUser, hasAccount: editUser.hasAccount()}));      
+        return new Response(
+            await AuthenticatedStructures.userWithMembers(editUser)
+        );      
     }
 }

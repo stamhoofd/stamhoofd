@@ -461,32 +461,49 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 const platform = await Platform.getShared()
-                const responsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId)
+                const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId)
+                const org = organization ?? (put.organizationId ? await Organization.getByID(put.organizationId) : null)
 
-                if (!responsibility || (!responsibility.assignableByOrganizations && !Context.auth.hasPlatformFullAccess())) {
-                    throw Context.auth.error("Je hebt niet voldoende rechten om deze functie toe te kennen")
+                if (!org && put.organizationId) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid organization",
+                        human: "Deze vereniging bestaat niet",
+                        field: "organizationId"
+                    })
+                }
+                const responsibility = platformResponsibility ?? org?.privateMeta.responsibilities.find(r => r.id === put.responsibilityId)
+
+                if (!responsibility) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid responsibility",
+                        human: "Deze functie bestaat niet",
+                        field: "responsibilityId"
+                    })
+                }
+
+                if (!org && !responsibility.assignableByOrganizations) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid organization",
+                        human: "Deze functie kan niet worden toegewezen aan deze vereniging",
+                        field: "organizationId"
+                    })
                 }
 
                 const model = new MemberResponsibilityRecord()
                 model.memberId = member.id
                 model.responsibilityId = responsibility.id
+                model.organizationId = org?.id ?? null
 
-                if (organization) {
-                    model.organizationId = organization.id
-
-                    if (responsibility.organizationTagIds !== null && !organization.meta.matchTags(responsibility.organizationTagIds)) {
-                        throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Invalid organization",
-                            human: "Deze functie is niet beschikbaar voor deze vereniging",
-                            field: "organizationId"
-                        })
-                    }
-                } else {
-                    if (!Context.auth.hasPlatformFullAccess() || !put.organizationId) {
-                        throw Context.auth.error("Je hebt niet voldoende rechten om functies van leden toe te kennen voor deze vereniging")
-                    }
-                    model.organizationId = put.organizationId
+                if (responsibility.organizationTagIds !== null && (!org || !org.meta.matchTags(responsibility.organizationTagIds))) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid organization",
+                        human: "Deze functie is niet beschikbaar voor deze vereniging",
+                        field: "organizationId"
+                    })
                 }
 
                 if (responsibility.defaultAgeGroupIds !== null) {
@@ -630,7 +647,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                await membership.delete()
+                membership.deletedAt = new Date()
+                await membership.save()
                 updateMembershipMemberIds.add(member.id)
             }
 

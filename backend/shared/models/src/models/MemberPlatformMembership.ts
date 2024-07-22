@@ -47,6 +47,17 @@ export class MemberPlatformMembership extends Model {
     @column({ type: "integer" })
     price = 0;
 
+    /**
+     * Whether this was added automatically by the system
+     */
+    @column({ type: "boolean" })
+    generated = false
+
+    @column({
+        type: "datetime", nullable: true
+    })
+    deletedAt: Date|null = null
+
     @column({
         type: "datetime", beforeSave(old?: any) {
             if (old !== undefined) {
@@ -74,6 +85,10 @@ export class MemberPlatformMembership extends Model {
             return false;
         }
         return true;
+    }
+
+    delete(): Promise<void> {
+        throw new Error('Cannot delete a membership. Use the deletedAt column.');
     }
 
     async calculatePrice() {

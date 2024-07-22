@@ -3,7 +3,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
-import { EditMemberAllBox, MemberStepView } from '..'
+import { EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
 import EmailView from '../../email/EmailView.vue'
 import { CenteredMessage, CenteredMessageButton } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
@@ -419,6 +419,19 @@ export class MemberActionBuilder {
         //     members,
         // });
         // this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    async showMember(member: PlatformMember) {
+        const component = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberSegmentedView, {
+                member
+            }),
+        });
+
+        await this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        });
     }
 
     editMember(member: PlatformMember) {

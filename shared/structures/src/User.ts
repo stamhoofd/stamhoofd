@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder,EnumDecoder,field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Permissions } from './Permissions';
@@ -22,6 +22,9 @@ export class User extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 245 })
     organizationId: string|null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 281 })
+    memberId: string|null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 14 })
     firstName: string | null = null;
@@ -84,12 +87,6 @@ export class NewUser extends User {
      */
     @field({ decoder: StringDecoder, version: 162 })
     password = '';
-}
-
-/**
- * @deprecated
- */
-export class MyUser extends NewUser {
 }
 
 export class ApiUser extends AutoEncoder {

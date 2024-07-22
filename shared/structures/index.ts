@@ -47,6 +47,7 @@ export * from "./src/Event"
 
 // UserPermissions
 export * from "./src/UserPermissions"
+export * from "./src/UserWithMembers"
 
 // Endpoints
 export * from "./src/DNSRecord"

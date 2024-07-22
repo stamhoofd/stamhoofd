@@ -158,7 +158,7 @@ defineRoutes([
             roleId: String
         },
         paramsToProps: async (params: {roleId: string}) => {
-            const role = responsibilityRoles.value.find(u => u.id === params.roleId)
+            const role = inheritedResponsibilityRoles.value.find(u => u.id === params.roleId)
             if (!role) {
                 throw new Error('Role not found')
             }
@@ -236,7 +236,7 @@ defineRoutes([
 const $navigate = useNavigate();
 
 const {getPermissions, loading, admins} = useAdmins()
-const {createRolePatchArray, errors, hasChanges, patchRoles, roles, responsibilityRoles, patchResponsibilityRoles, createResponsibilityRolePatchArray, saving, save: rawSave} = usePatchRoles()
+const {createRolePatchArray, errors, hasChanges, patchRoles, roles, inheritedResponsibilityRoles, patchResponsibilityRoles, createResponsibilityRolePatchArray, saving, save: rawSave} = usePatchRoles()
 const platform = usePlatform();
 const organization = useOrganization()
 const present = usePresent()
@@ -295,7 +295,7 @@ const getMainAdmins = (): number => {
 }
 
 function roleForResponsibility(responsibility: MemberResponsibility, group: Group|null): PermissionRoleForResponsibility|null {
-    return responsibilityRoles.value.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === (group ? group.id : null)) ?? null
+    return inheritedResponsibilityRoles.value.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === (group ? group.id : null)) ?? null
 }
 
 const roleDescription = (role: PermissionRoleDetailed): string => {

@@ -7,6 +7,7 @@ import { PaymentMethod } from './PaymentMethod';
 import { PaymentProvider } from './PaymentProvider';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './Permissions';
 import { StripeMetaData } from './StripeAccount';
+import { MemberResponsibility } from './MemberResponsibility';
 
 export class CreditItem extends AutoEncoder {
     /**
@@ -219,11 +220,14 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed), version: 60 })
     roles: PermissionRoleDetailed[] = []
 
+    @field({ decoder: new ArrayDecoder(MemberResponsibility), version: 280 })
+    responsibilities: MemberResponsibility[] = []
+
     /**
      * Link responsibility type ids to roles that should be auto-applied for users linked to members with those responsibilities
      */
-    @field({ decoder: new ArrayDecoder(PermissionRoleForResponsibility), version: 275 })
-    responsibilityRoles: PermissionRoleForResponsibility[] = []
+    @field({ decoder: new ArrayDecoder(PermissionRoleForResponsibility), version: 280 })
+    inheritedResponsibilityRoles: PermissionRoleForResponsibility[] = []
 
     @field({ decoder: StringDecoder, nullable: true, version: 88 })
     billingContact: string | null = null

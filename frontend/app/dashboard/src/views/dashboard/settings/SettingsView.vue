@@ -53,10 +53,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Beheerders
+                        Toegangsrechten en functies
                     </h2>
                     <p class="style-description">
-                        Geef anderen ook toegang tot deze vereniging
+                        Beheer wie toegang heeft tot welk onderdeel van het beheerdersportaal
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
