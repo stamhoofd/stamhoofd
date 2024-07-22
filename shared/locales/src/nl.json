@@ -225,5 +225,7 @@
     "shared.allAgeGroups": "Alle leeftijdsgroepen",
     "shared.saveConfirmation": "Wijzigingen zijn opgeslagen",
     "admin.settings.responsibilities.inherited": "Ingebouwde functies",
-    "admin.settings.responsibilities.ownTitle": "Groepseigenfuncties"
+    "admin.settings.responsibilities.ownTitle": "Groepseigenfuncties",
+    "admin.roles.description": "Soms wil je personen die geen lid zijn toegang geven tot Stamhoofd. Dat kan door externe beheerdersrollen aan te maken, en die rollen vervolgens toe te kennen aan externe beheerders.",
+    "admin.admins.description": "Beheer hier alle personen die toegang hebben tot Stamhoofd, en wijzig hun toegangsrechten."
 }

@@ -25,18 +25,24 @@
             />
         </STInputBox>
 
-        <hr>
-        <h2>Vereisten</h2>
+        <Checkbox v-if="app == 'admin'" v-model="notOrganizationBased">
+            Nationale functie
+        </Checkbox>
 
-        <div class="split-inputs">
-            <STInputBox title="Minimum aantal (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
-                <NumberInput v-model="minimumMembers" placeholder="Geen" :required="false" />
-            </STInputBox>
+        <template v-if="organizationBased">
+            <hr>
+            <h2>Vereisten</h2>
 
-            <STInputBox title="Maximum aantal (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
-                <NumberInput v-model="maximumMembers" placeholder="Onbeperkt" :required="false" />
-            </STInputBox>
-        </div>
+            <div class="split-inputs">
+                <STInputBox title="Minimum aantal (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
+                    <NumberInput v-model="minimumMembers" placeholder="Geen" :required="false" />
+                </STInputBox>
+
+                <STInputBox title="Maximum aantal (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
+                    <NumberInput v-model="maximumMembers" placeholder="Onbeperkt" :required="false" />
+                </STInputBox>
+            </div>
+        </template>
 
         <JumpToContainer :visible="organizationTagIds !== null">
             <hr>
@@ -77,28 +83,36 @@
                     <template #left>
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.None" />
                     </template>
-                    <h3 class="style-title-list">Geen</h3>
+                    <h3 class="style-title-list">
+                        Geen
+                    </h3>
                 </STListItem>
 
                 <STListItem element-name="label" :selectable="true">
                     <template #left>
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Read" />
                     </template>
-                    <h3 class="style-title-list">Lezen</h3>
+                    <h3 class="style-title-list">
+                        Lezen
+                    </h3>
                 </STListItem>
 
                 <STListItem element-name="label" :selectable="true">
                     <template #left>
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Write" />
                     </template>
-                    <h3 class="style-title-list">Lezen en bewerken</h3>
+                    <h3 class="style-title-list">
+                        Lezen en bewerken
+                    </h3>
                 </STListItem>
 
                 <STListItem element-name="label" :selectable="true">
                     <template #left>
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Full" />
                     </template>
-                    <h3 class="style-title-list">Volledige toegang</h3>
+                    <h3 class="style-title-list">
+                        Volledige toegang
+                    </h3>
                 </STListItem>
             </STList>
         </JumpToContainer>
@@ -108,7 +122,7 @@
 
             <STList>
                 <template v-if="app === 'admin'">
-                    <STListItem v-if="organizationTagIds === null" :selectable="true" element-name="button" @click="organizationTagIds = []">
+                    <STListItem v-if="organizationTagIds === null && organizationBased" :selectable="true" element-name="button" @click="organizationTagIds = []">
                         <template #left>
                             <span class="icon add gray" />
                         </template>
@@ -118,7 +132,7 @@
                         </h3>
                     </STListItem>
 
-                    <STListItem v-if="defaultAgeGroupIds === null" :selectable="true" element-name="button" @click="defaultAgeGroupIds = []">
+                    <STListItem v-if="defaultAgeGroupIds === null && organizationBased" :selectable="true" element-name="button" @click="defaultAgeGroupIds = []">
                         <template #left>
                             <span class="icon add gray" />
                         </template>
@@ -133,7 +147,7 @@
                     </STListItem>
                 </template>
 
-                <STListItem v-if="groupPermissionLevel === PermissionLevel.None" :selectable="true" element-name="button" @click="groupPermissionLevel = PermissionLevel.Read">
+                <STListItem :selectable="true" element-name="button" @click="editPermissions">
                     <template #left>
                         <span class="icon privacy gray" />
                     </template>
@@ -142,8 +156,11 @@
                         Automatisch rechten toekennen
                     </h3>
 
-                    <p class="style-description-small">
-                        Ken automatisch rechten toe aan deze leden zodat ze hun lokale groep kunnen beheren zonder dat er eerst manueel een beheerder moet worden toegevoegd.
+                    <p v-if="organizationBased" class="style-description-small">
+                        Stel in welke rechten deze leden automatisch krijgen tot het beheerderportaal
+                    </p>
+                    <p v-else class="style-description-small">
+                        Stel in welke rechten deze leden automatisch krijgen tot het administratieportaal
                     </p>
                 </STListItem>
             </STList>
@@ -167,16 +184,17 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DefaultAgeGroupIdsInput, ErrorBox, JumpToContainer, NumberInput, SaveView, TagIdsInput, useAppContext, useErrors, usePatch } from '@stamhoofd/components';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, DefaultAgeGroupIdsInput, EditRoleView, ErrorBox, JumpToContainer, NumberInput, SaveView, TagIdsInput, useAppContext, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { MemberResponsibility, PermissionLevel } from '@stamhoofd/structures';
+import { MemberResponsibility, PermissionLevel, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 const $t = useTranslate();
+const present = usePresent();
 
 const props = defineProps<{
     responsibility: MemberResponsibility;
@@ -274,6 +292,59 @@ const groupPermissionLevel = computed({
     get: () => patched.value.groupPermissionLevel,
     set: (groupPermissionLevel) => addPatch({groupPermissionLevel}),
 });
+
+const permissions = computed({
+    get: () => patched.value.permissions,
+    set: (permissions) => addPatch({permissions}),
+});
+
+const organizationBased = computed({
+    get: () => patched.value.organizationBased,
+    set: (organizationBased) => addPatch({organizationBased}),
+});
+
+const notOrganizationBased = computed({
+    get: () => !organizationBased.value,
+    set: (notOrganizationBased) => organizationBased.value = !notOrganizationBased,
+});
+
+async function editPermissions() {
+    let isNew = false
+    let role = permissions.value
+
+    if (!role) {
+        role = PermissionRoleForResponsibility.create({
+            name: name.value,
+            responsibilityId: props.responsibility.id,
+            responsibilityGroupId: null,
+        })
+        isNew = true
+    }
+
+    await present({
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditRoleView, {
+                role,
+                isNew,
+                saveHandler: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => {
+                    if (isNew) {
+                        addPatch({
+                            permissions: role.patch(patch)
+                        })
+                    } else {
+                        addPatch({
+                            permissions: patch
+                        })
+                    }
+                },
+                deleteHandler: isNew ? null : (() => {
+                    permissions.value = null
+                })
+            })
+        ]
+    })
+}
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {

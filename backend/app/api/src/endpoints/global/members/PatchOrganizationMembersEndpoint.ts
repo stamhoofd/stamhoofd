@@ -424,7 +424,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const platform = await Platform.getShared()
                 const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId)
 
-                if (responsibility && !responsibility.assignableByOrganizations && !Context.auth.hasPlatformFullAccess()) {
+                if (responsibility && !responsibility.organizationBased && !Context.auth.hasPlatformFullAccess()) {
                     throw Context.auth.error("Je hebt niet voldoende rechten om deze functie aan te passen")
                 }
                 
@@ -483,7 +483,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                if (!org && !responsibility.assignableByOrganizations) {
+                if (!org && responsibility.organizationBased) {
                     throw new SimpleError({
                         code: "invalid_field",
                         message: "Invalid organization",

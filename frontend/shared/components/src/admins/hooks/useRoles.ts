@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding"
 import { ErrorBox, useErrors, useOrganization, usePlatform } from "@stamhoofd/components"
 import { useOrganizationManager, usePlatformManager } from "@stamhoofd/networking"
-import { Organization, OrganizationPrivateMetaData, PermissionRoleDetailed, PermissionRoleForResponsibility, Platform, PlatformPrivateConfig, Version } from "@stamhoofd/structures"
+import { Group, MemberResponsibility, Organization, OrganizationPrivateMetaData, PermissionRoleDetailed, PermissionRoleForResponsibility, Platform, PlatformConfig, PlatformPrivateConfig, Version } from "@stamhoofd/structures"
 import { computed, Ref, ref } from "vue"
 
 export function useRoles() {
@@ -36,9 +36,14 @@ export function usePatchRoles() {
         return new PatchableArray() as PatchableArrayAutoEncoder<PermissionRoleDetailed>
     }
 
-    const createResponsibilityRolePatchArray = () => {
+    const createInheritedResponsibilityRolePatchArray = () => {
         return new PatchableArray() as PatchableArrayAutoEncoder<PermissionRoleForResponsibility>
     }
+
+    const createResponsibilityPatchArray = () => {
+        return new PatchableArray() as PatchableArrayAutoEncoder<MemberResponsibility>
+    }
+
 
     const patchRoles = (patch: PatchableArrayAutoEncoder<PermissionRoleDetailed>) => {
         if (organization.value) {
@@ -59,7 +64,7 @@ export function usePatchRoles() {
         return;
     }
 
-    const patchResponsibilityRoles = (patch: PatchableArrayAutoEncoder<PermissionRoleForResponsibility>) => {
+    const patchInheritedResponsibilityRoles = (patch: PatchableArrayAutoEncoder<PermissionRoleForResponsibility>) => {
         if (organization.value) {
             const oPatch = Organization.patch({
                 privateMeta: OrganizationPrivateMetaData.patch({
@@ -70,6 +75,25 @@ export function usePatchRoles() {
             return;
         }
         // not supported yet on platform level
+    }
+
+    const patchResponsibilities = (patch: PatchableArrayAutoEncoder<MemberResponsibility>) => {
+        if (organization.value) {
+            const oPatch = Organization.patch({
+                privateMeta: OrganizationPrivateMetaData.patch({
+                    responsibilities: patch
+                })
+            })
+            organizationPatch.value = organizationPatch.value.patch(oPatch)
+            return;
+        }
+        
+        const oPatch = Platform.patch({
+            config: PlatformConfig.patch({
+                responsibilities: patch
+            })
+        })
+        platformPatch.value = platformPatch.value.patch(oPatch)
     }
     
     const roles = computed(() => {
@@ -86,6 +110,13 @@ export function usePatchRoles() {
         return []
     })
 
+    const responsibilities = computed(() => {
+        if (patchedOrganization.value) {
+            return patchedOrganization.value.privateMeta?.responsibilities ?? []
+        }
+        return platform.value.config.responsibilities
+    })
+
     const hasChanges = computed(() => {
         if (organization.value) {
             return patchContainsChanges(organizationPatch.value, organization.value, {version: Version})
@@ -93,7 +124,7 @@ export function usePatchRoles() {
         return patchContainsChanges(platformPatch.value, platform.value, {version: Version})
     })
     
-    const save = async (succeededHandler: () => void) => {
+    const save = async (succeededHandler: () => Promise<void>|void) => {
         if (saving.value) {
             return
         }
@@ -104,14 +135,14 @@ export function usePatchRoles() {
             try {
                 organizationPatch.value.id = organization.value.id
                 await organizationManager.value.patch(organizationPatch.value)
-                succeededHandler()
+                await succeededHandler()
             } catch (e) {
                 errors.errorBox = new ErrorBox(e)
             }
         } else {
             try {
                 await platformManager.value.patch(platformPatch.value)
-                succeededHandler()
+                await succeededHandler()
             } catch (e) {
                 errors.errorBox = new ErrorBox(e)
             }
@@ -119,6 +150,42 @@ export function usePatchRoles() {
     
         saving.value = false
     }
+
+
+    const inheritedResponsibilitiesWithGroup = computed(() => {
+        if (!organization.value) {
+            return []
+        }
+        
+        const list: {
+            responsibility: MemberResponsibility, 
+            group: Group|null,
+            role: PermissionRoleForResponsibility|null
+        }[] = []
+
+        const org = organization.value
+        for (const responsibility of patchedPlatform.value.config.responsibilities.filter(r => r.organizationBased && (r.organizationTagIds === null || org.meta.matchTags(r.organizationTagIds)))) {
+            if (responsibility.organizationTagIds !== null) {
+                if (!organization.value || !organization.value.meta.matchTags(responsibility.organizationTagIds)) {
+                    continue
+                }
+            }
+
+            if (responsibility.defaultAgeGroupIds !== null) {
+                // For each matching group
+                for (const group of organization.value?.adminAvailableGroups ?? []) {
+                    if (group.defaultAgeGroupId && responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
+                        const role = patchedOrganization.value?.privateMeta?.inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === (group?.id ?? null)) ?? null
+                        list.push({responsibility, group, role})
+                    }
+                }
+            } else {
+                const role = patchedOrganization.value?.privateMeta?.inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === null) ?? null
+                list.push({responsibility, group: null, role})
+            }
+        }
+        return list
+    });
 
     return {
         errors,
@@ -129,11 +196,15 @@ export function usePatchRoles() {
         patchedOrganization,
         patchedPlatform,
         roles,
+        responsibilities,
         inheritedResponsibilityRoles,
+        inheritedResponsibilitiesWithGroup,
         patchRoles,
-        patchResponsibilityRoles,
+        patchResponsibilities,
+        patchInheritedResponsibilityRoles,
         createRolePatchArray,
-        createResponsibilityRolePatchArray,
+        createResponsibilityPatchArray,
+        createInheritedResponsibilityRolePatchArray,
         hasChanges
     }
 }

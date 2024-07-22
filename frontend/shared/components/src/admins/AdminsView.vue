@@ -1,19 +1,12 @@
 <template>
     <LoadingView v-if="loading" />
     <div v-else class="st-view background">
-        <STNavigationBar title="Beheerders">
-            <template #right>
-                <button class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" type="button" @click="createAdmin">
-                    <span class="icon add" />
-                    <span>Beheerder</span>
-                </button>
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Beheerders" />
 
     
         <main class="center">
             <h1>Beheerders</h1>
-            <p>Voeg hier beheerders toe en regel wat ze kunnen doen in Stamhoofd door rollen toe te kennen. Maak zelf nieuwe rollen aan en stel de rechten in per rol.</p>
+            <p>{{ $t('admin.admins.description') }}</p>
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
@@ -25,36 +18,6 @@
                     </h2>
                     <p class="style-description">
                         Voeg functies toe en stel de toegangsrechten voor elke functie in.
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem :selectable="true" class="left-center" @click="createAdmin">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/account-add.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        Nieuwe externe beheerder
-                    </h2>
-                    <p class="style-description">
-                        Nodig iemand uit om beheerder te worden zonder die als lid toe te voegen.
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem :selectable="true" class="left-center" @click="editRoles(true)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        Externe beheerdersrollen
-                    </h2>
-                    <p class="style-description">
-                        Maak rollen die je aan beheerders kan toekennen.
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -104,8 +67,14 @@
             </STList>
 
             <hr>
-            <h2>Externe beheerders</h2>
-            <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan geen lid omdat ze een onbekend e-mailadres gebruiken).</p>
+            <h2 class="style-with-button">
+                <div>Externe beheerders</div>
+                <div>
+                    <button type="button" class="button icon add" @click="createAdmin" />
+                </div>
+            </h2>
+
+            <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).</p>
             <p class="info-box">Opgelet, deze beheerders zijn ook niet aangesloten bij de koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.</p>
 
 
@@ -152,7 +121,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditMemberResponsibilitiesView, LoadingView, useOrganization, usePlatformFamilyManager, useUser } from '@stamhoofd/components';
+import { EditResponsibilitiesView, LoadingView, useOrganization, usePlatformFamilyManager, useUser } from '@stamhoofd/components';
 import { PermissionLevel, PermissionRoleForResponsibility, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditAdminView from './EditAdminView.vue';
@@ -184,7 +153,7 @@ defineRoutes([
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: EditMemberResponsibilitiesView as ComponentOptions,
+        component: EditResponsibilitiesView as ComponentOptions,
     },
     {
         url: 'nieuw',

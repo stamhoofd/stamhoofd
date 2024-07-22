@@ -142,7 +142,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView, EmailSettingsView, EditMemberResponsibilitiesView } from '@stamhoofd/components';
+import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView, EmailSettingsView, EditResponsibilitiesView } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
@@ -195,7 +195,7 @@ defineRoutes([
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: EditMemberResponsibilitiesView as ComponentOptions,
+        component: EditResponsibilitiesView as ComponentOptions,
     },
     {
         url: Routes.RegistrationPeriods,

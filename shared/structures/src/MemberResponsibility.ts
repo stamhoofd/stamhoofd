@@ -19,17 +19,17 @@ export class MemberResponsibility extends AutoEncoder {
     maximumMembers: null | number = null
 
     /**
-     * @deprecated
-     * Group full-admins can assign this responsibility to members
+     * Whether this is a national responsibility or not
      */
     @field({ decoder: BooleanDecoder, optional: true})
-    assignableByOrganizations = true
+    organizationBased = true
 
     /**
      * Limit this responsibility to specific organizations
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true, version: 273})
     organizationTagIds: string[]|null = null
+
 
     /**
      * Whether this responsibility should be assigned to a specific group (or more) of a specific organization
@@ -53,4 +53,9 @@ export class MemberResponsibility extends AutoEncoder {
         return this.defaultAgeGroupIds !== null
     }
     
+}
+
+export class PlatformResponsibility extends MemberResponsibility {
+   // todo
+
 }

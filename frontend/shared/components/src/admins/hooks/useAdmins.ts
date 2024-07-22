@@ -2,7 +2,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
 import { usePop } from "@simonbackx/vue-app-navigation"
 import { Toast, useContext, useOrganization, usePlatform } from "@stamhoofd/components"
 import { ContextPermissions, OrganizationManager, usePlatformManager } from "@stamhoofd/networking"
-import { Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from "@stamhoofd/structures"
+import { PermissionRoleForResponsibility, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from "@stamhoofd/structures"
 import { Sorter } from "@stamhoofd/utility"
 import { computed, getCurrentInstance, onActivated } from "vue"
 
@@ -76,7 +76,7 @@ export function useAdmins() {
     }
 
     const sortedAdmins = computed(() => {
-        return admins.value.filter(a => !a.memberId).sort((a, b) => Sorter.stack(
+        return admins.value.filter(a => !a.memberId || (getPermissions(a) && !!getPermissions(a)?.roles.find(r => !(r instanceof PermissionRoleForResponsibility)))).sort((a, b) => Sorter.stack(
             Sorter.byBooleanValue(getPermissions(a)?.hasFullAccess() ?? false, getPermissions(b)?.hasFullAccess() ?? false), 
             Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)
         ))

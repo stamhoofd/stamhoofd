@@ -22,4 +22,8 @@ export class MemberResponsibilityRecord extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true })
     endDate: Date | null = null
+
+    get isActive() {
+        return this.startDate < new Date() && (this.endDate === null || this.endDate > new Date())
+    }
 }

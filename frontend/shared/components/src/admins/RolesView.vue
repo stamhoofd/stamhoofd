@@ -5,62 +5,14 @@
             <button class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
     
-        <h1>Beheerdersrollen</h1>
-        <p>Maak rollen aan om toegang te regelen tot bepaalde onderdelen. Daarna kan je één of meerdere rollen toekennen aan een beheerder. Zo kan je bijvoorbeeld alle beheerders met een bepaalde rol toegang geven tot een webshop, in plaats van individueel per beheerder. Als beheerders later van rol veranderen of de vereniging verlaten, hoef je enkel maar de rollen van een beheerder te wijzigen.</p>
-
-        <STErrorsDefault :error-box="errors.errorBox" />
-
-
-        <hr>
-        <h2>Rechten op basis van functies</h2>
-        <p>Ken automatisch rechten toe aan de accounts die verbonden zijn met een lid die een bepaalde functie hebben.</p>
+        <h1>Externe beheerdersrollen</h1>
+        <p>{{ $t('admin.roles.description') }}</p>
 
         <p class="info-box">
             Het concept van leden, beheerders en accounts kan verwarrend zijn. Het verschil zit hem in het feit dat leden beheerd kunnen worden door meerdere accounts (= een e-mailadres met wachtwoord waarmee je kan inloggen). Rechten en rollen worden aan accounts toegekend, terwijl je functies kan toekennen aan leden (= iemand die is ingeschreven voor een leeftijdsgroep).
         </p>
 
-        <STList>
-            <STListItem v-for="{responsibility, group} of responsibilitiesWithGroup" :key="responsibility.id" :selectable="true" class="right-stack" @click="editRoleForResponsibility(responsibility, group)">
-                <template #left>
-                    <span class="icon layered" v-if="!roleForResponsibility(responsibility, group)">
-                        <span class="icon user-blocked-layer-1" />
-                        <span class="icon user-blocked-layer-2 red" />
-                    </span>
-
-                    <span class="icon layered" v-else>
-                        <span class="icon user-admin-layer-1" />
-                        <span class="icon user-admin-layer-2 yellow" />
-                    </span>
-                </template>
-
-                <h2 class="style-title-list">
-                    {{ responsibility.name }} {{ group ? ` (${group.settings.name})` : '' }}
-                </h2>
-
-                <p class="style-description-small" v-if="!roleForResponsibility(responsibility, group)">
-                    Geen automatische rechten
-                </p>
-
-                <p class="style-description-small" v-else>
-                    {{  roleDescription(roleForResponsibility(responsibility, group)!) }}
-                </p>
-
-                <template #right>
-                    <span v-if="getAdminsForResponsibility(responsibility, group)" class="style-tag">
-                        {{ getAdminsForResponsibility(responsibility, group) }}
-                    </span>
-                    <span v-else class="style-tag warn">
-                        0
-                    </span>
-                    <span class="icon arrow-right-small gray" />
-                </template>
-
-            </STListItem>
-        </STList>
-
-        <hr>
-        <h2>Manueel rollen toekennen</h2>
-        <p>Soms wil je de toegang van bepaalde mensen nog wat verfijnen, los van hun functies of leidinggevende taken. Bv. voor personen die geen lid zijn, of voor interne werkgroepen. Hier kan je manueel rollen aanmaken en toekennen aan bepaalde accounts.</p>
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList>
             <STListItem>

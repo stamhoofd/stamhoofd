@@ -77,7 +77,7 @@ const items = computed(() => {
         return [organization.value]
     }
     // Only show organization that have an active registration in the organization active period
-    return [...props.member.filterOrganizations({currentPeriod: true})]
+    return [...props.member.filterOrganizations({currentPeriod: true}), null]
 });
 
 const platformResponsibilities = computed(() => {
@@ -85,7 +85,7 @@ const platformResponsibilities = computed(() => {
         return []
     }
     const org = selectedOrganization.value
-    return platform.value.config.responsibilities.filter(r => r.organizationTagIds === null || org.meta.matchTags(r.organizationTagIds))
+    return platform.value.config.responsibilities.filter(r => r.organizationBased && (r.organizationTagIds === null || org.meta.matchTags(r.organizationTagIds)))
 })
 
 const selectedOrganization = ref((items.value[0] ?? null) as any) as Ref<Organization|null>;
@@ -93,10 +93,6 @@ const selectedOrganization = ref((items.value[0] ?? null) as any) as Ref<Organiz
 const organizationResponsibilities = computed(() => {
     return selectedOrganization.value?.privateMeta?.responsibilities ?? []
 })
-
-const $t = useTranslate();
-const present = usePresent();
-const auth = useAuth();
 
 const groupsWithResponsibilites = computed(() => {
     const groups: {title: string, groupId: string|null, responsibilities: MemberResponsibility[]}[] = []
@@ -157,7 +153,7 @@ const groupsWithResponsibilites = computed(() => {
 })
 
 const labels = computed(() => {
-    return items.value.map(o => o === null ? 'Koepel' : o.name)
+    return items.value.map(o => o === null ? 'Nationaal' : o.name)
 });
 
 const title = computed(() => {

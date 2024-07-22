@@ -622,6 +622,35 @@ export class LoadedPermissions {
         return new LoadedPermissions(data)
     }
 
+    static buildRoleForResponsibility(groupId: string|null, responsibilityData: MemberResponsibility, inheritedResponsibilityRoles: PermissionRoleForResponsibility[]) {
+        const role = inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibilityData.id && r.responsibilityGroupId === groupId)
+
+        const r = responsibilityData.permissions?.clone() ?? PermissionRoleForResponsibility.create({
+            id: responsibilityData.id,
+            name: responsibilityData.name,
+            level: PermissionLevel.None,
+            responsibilityId: responsibilityData.id,
+            responsibilityGroupId: groupId,
+            resources: new Map()
+        }); 
+
+        r.name = responsibilityData.name
+        r.id = responsibilityData.id + (groupId ? '-'+groupId : '')
+        r.responsibilityId = responsibilityData.id
+        r.responsibilityGroupId = groupId
+
+        if (groupId && responsibilityData.groupPermissionLevel !== PermissionLevel.None) {
+            const map: Map<string, ResourcePermissions> = new Map()
+            map.set(groupId, ResourcePermissions.create({level: responsibilityData.groupPermissionLevel}))
+            r.resources.set(PermissionsResourceType.Groups, map)
+        }
+        if (role) {
+            r.id = role.id
+            r.add(role)
+        }
+        return r
+    }
+
     static from(permissions: Permissions, allRoles: PermissionRoleDetailed[], inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
         const roles = permissions.roles.flatMap(role => {
             const d = allRoles.find(a => a.id === role.id);
@@ -645,31 +674,7 @@ export class LoadedPermissions {
                 continue
             }
 
-            const role = inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibility.responsibilityId && r.responsibilityGroupId === responsibility.groupId)
-
-            const r = responsibilityData.permissions?.clone() ?? PermissionRoleForResponsibility.create({
-                id: responsibility.id,
-                name: responsibilityData.name,
-                level: PermissionLevel.None,
-                responsibilityId: responsibility.id,
-                responsibilityGroupId: responsibility.groupId,
-                resources: new Map()
-            }); 
-
-            r.name = responsibilityData.name
-            r.id = responsibility.id
-            r.responsibilityId = responsibility.id
-            r.responsibilityGroupId = responsibility.groupId
-
-            if (responsibility.groupId && responsibilityData.groupPermissionLevel !== PermissionLevel.None) {
-                const map: Map<string, ResourcePermissions> = new Map()
-                map.set(responsibility.groupId, ResourcePermissions.create({level: responsibilityData.groupPermissionLevel}))
-                r.resources.set(PermissionsResourceType.Groups, map)
-            }
-            if (role) {
-                r.id = role.id
-                r.add(role)
-            }
+            const r = this.buildRoleForResponsibility(responsibility.groupId, responsibilityData, inheritedResponsibilityRoles)
             roles.push(r)
         }
 

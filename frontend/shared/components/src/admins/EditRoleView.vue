@@ -16,225 +16,212 @@
             >
         </STInputBox>
 
-        <template v-if="app === 'admin'">
-            <hr>
-            <h2>
-                Toegang tot verenigingen
-            </h2>
+        <hr>
+        <h2>Basistoegang</h2>
+        <p>Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw vereniging.</p>
 
-            <p>Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.</p>
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Radio v-model="basePermission" value="None" />
+                </template>
+                <h3 class="style-title-list">
+                    Geen
+                </h3>
+                <p v-if="basePermission === 'None'" class="style-description-small">
+                    Deze beheerders kunnen geen onderdelen zien of bewerken tenzij expliciet hieronder toegang werd gegeven.
+                </p>
+            </STListItem>
 
-            <STList>
-                <ResourcePermissionRow 
-                    :role="patched" 
-                    :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" 
-                    :configurable-access-rights="[]"
-                    type="resource" 
-                    @patch:role="addPatch" 
-                />
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Radio v-model="basePermission" :value="PermissionLevel.Full" />
+                </template>
+                <h3 class="style-title-list">
+                    Volledige toegang
+                </h3>
+                <p v-if="basePermission === PermissionLevel.Full" class="style-description-small">
+                    Deze beheerders hebben toegang tot alles
+                </p>
+            </STListItem>
+        </STList>
 
-                <ResourcePermissionRow 
-                    v-for="tag in tags" 
-                    :key="tag.id" 
-                    :role="patched" 
-                    :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" 
-                    :configurable-access-rights="[]"
-                    type="resource" 
-                    @patch:role="addPatch" 
-                />
-            </STList>
-        </template>
+        <template v-if="basePermission !== PermissionLevel.Full">
 
-        <template v-if="app === 'admin'">
-            <hr>
-            <h2>
-                Administratietools
-            </h2>
+            <template v-if="app === 'admin'">
+                <hr>
+                <h2>
+                    Toegang tot verenigingen
+                </h2>
 
-            <p>Hier kan je in de toekomst toegang regelen tot tools zoals de facturatie.</p>
+                <p>Je kan een beheerder volledige toegang geven tot alle verenigingen (en dus ook de leden van die vereniging), of per tag de toegang regelen.</p>
 
-        </template>
+                <STList>
+                    <ResourcePermissionRow 
+                        :role="patched" 
+                        :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" 
+                        :configurable-access-rights="[]"
+                        type="resource" 
+                        @patch:role="addPatch" 
+                    />
 
-        <template v-if="false">
-            <hr>
-            <h2>Basistoegang</h2>
-            <p>Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw vereniging.</p>
+                    <ResourcePermissionRow 
+                        v-for="tag in tags" 
+                        :key="tag.id" 
+                        :role="patched" 
+                        :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" 
+                        :configurable-access-rights="[]"
+                        type="resource" 
+                        @patch:role="addPatch" 
+                    />
+                </STList>
+            </template>
 
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="basePermission" value="None" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Geen
-                    </h3>
-                    <p v-if="basePermission === 'None'" class="style-description-small">
-                        Deze beheerders kunnen geen onderdelen zien of bewerken tenzij expliciet hieronder toegang werd gegeven.
-                    </p>
-                </STListItem>
+            <template v-if="app === 'admin'">
+                <hr>
+                <h2>
+                    Administratietools
+                </h2>
 
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="basePermission" value="Read" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Lezen
-                    </h3>
-                    <p v-if="basePermission === 'Read'" class="style-description-small">
-                        Deze beheerders kunnen alle onderdelen zien. Je kan ze eventueel bewerk toegang geven tot specifieke onderdelen.
-                    </p>
-                </STListItem>
+                <p>Hier kan je in de toekomst toegang regelen tot tools zoals de facturatie.</p>
+            </template>
 
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio v-model="basePermission" value="Write" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Bewerken
-                    </h3>
-                    <p v-if="basePermission === 'Write'" class="style-description-small">
-                        Deze beheerders kunnen alle onderdelen zien en bewerken. Je kan ze eventueel toegang geven tot instellingen (volledige toegang) voor specifieke onderdelen.
-                    </p>
-                </STListItem>
-            </STList>
-        </template>
-
-        <template v-if="enableActivities && categories.length">
-            <hr>
-            <h2>
-                Inschrijvingscategorieën
-            </h2>
-            <p>Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.</p>
+            <template v-if="enableActivities && categories.length">
+                <hr>
+                <h2>
+                    Inschrijvingscategorieën
+                </h2>
+                <p>Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.</p>
            
-            <STList>
-                <ResourcePermissionRow 
-                    v-for="category in categories" 
-                    :key="category.id" 
-                    :role="patched" 
-                    :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" 
-                    :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
-                    type="resource" 
-                    @patch:role="addPatch" 
-                />
-            </STList>
-        </template>
+                <STList>
+                    <ResourcePermissionRow 
+                        v-for="category in categories" 
+                        :key="category.id" 
+                        :role="patched" 
+                        :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" 
+                        :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
+                        type="resource" 
+                        @patch:role="addPatch" 
+                    />
+                </STList>
+            </template>
 
-        <div v-if="enableMemberModule && groups.length" class="container">
-            <hr>
-            <h2>
-                Individuele inschrijvingsgroepen
-            </h2>
+            <div v-if="enableMemberModule && groups.length" class="container">
+                <hr>
+                <h2>
+                    Individuele inschrijvingsgroepen
+                </h2>
 
-            <STList>
-                <ResourcePermissionRow 
-                    v-for="group in groups" 
-                    :key="group.id" 
-                    :role="patched" 
-                    :resource="{id: group.id, name: group.settings.name, type: PermissionsResourceType.Groups }" 
-                    :configurable-access-rights="[]"
-                    type="resource" 
-                    @patch:role="addPatch" 
-                />
-            </STList>
-        </div>
+                <STList>
+                    <ResourcePermissionRow 
+                        v-for="group in groups" 
+                        :key="group.id" 
+                        :role="patched" 
+                        :resource="{id: group.id, name: group.settings.name, type: PermissionsResourceType.Groups }" 
+                        :configurable-access-rights="[]"
+                        type="resource" 
+                        @patch:role="addPatch" 
+                    />
+                </STList>
+            </div>
 
-        <div v-if="enableWebshopModule" class="container">
-            <hr>
-            <h2>Webshops</h2>
-            <p>Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop</p>
+            <div v-if="enableWebshopModule" class="container">
+                <hr>
+                <h2>Webshops</h2>
+                <p>Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop</p>
 
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="createWebshops" />
-                    </template>
-                    Kan nieuwe webshops maken
-                </STListItem>
-                <ResourcePermissionRow 
-                    v-for="webshop in webshops" 
-                    :key="webshop.id" 
-                    :role="patched" 
-                    :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" 
-                    :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []"
-                    type="resource" 
-                    @patch:role="addPatch" 
-                />
-            </STList>
-        </div>
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="createWebshops" />
+                        </template>
+                        Kan nieuwe webshops maken
+                    </STListItem>
+                    <ResourcePermissionRow 
+                        v-for="webshop in webshops" 
+                        :key="webshop.id" 
+                        :role="patched" 
+                        :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" 
+                        :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []"
+                        type="resource" 
+                        @patch:role="addPatch" 
+                    />
+                </STList>
+            </div>
 
-        <div v-if="app !== 'admin'" class="container">
-            <hr>
-            <h2>
-                Toegang tot gegevens van leden
-            </h2>
-            <p>Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.</p>
+            <div v-if="app !== 'admin'" class="container">
+                <hr>
+                <h2>
+                    Toegang tot gegevens van leden
+                </h2>
+                <p>Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.</p>
 
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="readFinancialData" :disabled="financeDirector" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Financiële gegevens bekijken
-                    </h3>
-                    <p class="style-description-small">
-                        Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief.
-                    </p>
-                </STListItem>
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="readFinancialData" :disabled="financeDirector" />
+                        </template>
+                        <h3 class="style-title-list">
+                            Financiële gegevens bekijken
+                        </h3>
+                        <p class="style-description-small">
+                            Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief.
+                        </p>
+                    </STListItem>
 
-                <STListItem v-if="financeDirector || readFinancialData || writeFinancialData" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="writeFinancialData" :disabled="financeDirector" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Financiële gegevens bewerken
-                    </h3>
-                    <p class="style-description-small">
-                        Voeg openstaande bedragen toe of verwijder ze, en pas de betaalstatus van een lid aan.
-                    </p>
-                </STListItem>
+                    <STListItem v-if="financeDirector || readFinancialData || writeFinancialData" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="writeFinancialData" :disabled="financeDirector" />
+                        </template>
+                        <h3 class="style-title-list">
+                            Financiële gegevens bewerken
+                        </h3>
+                        <p class="style-description-small">
+                            Voeg openstaande bedragen toe of verwijder ze, en pas de betaalstatus van een lid aan.
+                        </p>
+                    </STListItem>
 
-                <ResourcePermissionRow 
-                    v-for="recordCategory in recordCategories" 
-                    :key="recordCategory.id" 
-                    :role="patched" 
-                    :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories }" 
-                    :configurable-access-rights="[]"
-                    type="resource" 
-                    @patch:role="addPatch" 
-                />
-            </STList>
-        </div>
+                    <ResourcePermissionRow 
+                        v-for="recordCategory in recordCategories" 
+                        :key="recordCategory.id" 
+                        :role="patched" 
+                        :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories }" 
+                        :configurable-access-rights="[]"
+                        type="resource" 
+                        @patch:role="addPatch" 
+                    />
+                </STList>
+            </div>
 
+            <template v-if="organization">
+                <hr>
+                <h2>Boekhouding</h2>
 
-        <template v-if="organization">
-            <hr>
-            <h2>Boekhouding</h2>
-
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="financeDirector" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Volledige toegang
-                    </h3>
-                    <p class="style-description-small">
-                        Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
-                    </p>
-                </STListItem>
-                <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox v-model="managePayments" />
-                    </template>
-                    <h3 class="style-title-list">
-                        Overschrijvingen beheren
-                    </h3>
-                    <p class="style-description-small">
-                        Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
-                    </p>
-                </STListItem>
-            </STList>
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="financeDirector" />
+                        </template>
+                        <h3 class="style-title-list">
+                            Volledige toegang
+                        </h3>
+                        <p class="style-description-small">
+                            Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
+                        </p>
+                    </STListItem>
+                    <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="managePayments" />
+                        </template>
+                        <h3 class="style-title-list">
+                            Overschrijvingen beheren
+                        </h3>
+                        <p class="style-description-small">
+                            Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
         </template>
 
         <div v-if="!isNew && deleteHandler" class="container">
@@ -279,7 +266,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategory, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategory, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';

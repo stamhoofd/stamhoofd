@@ -634,6 +634,20 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
+        for (const responsibility of this.patchedMember.responsibilities) {
+            if (!responsibility.isActive) {
+                continue;
+            }
+            if (base.find(g => g.id === responsibility.organizationId)) {
+                continue;
+            }
+
+            const organization = this.organizations.find(o => o.id === responsibility.organizationId);
+            if (organization) {
+                base.push(organization)
+            }
+        }
+
         return base;
     }
 

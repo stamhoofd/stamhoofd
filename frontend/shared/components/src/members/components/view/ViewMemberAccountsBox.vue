@@ -12,7 +12,7 @@
         </h2>
 
         <STList>
-            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
+            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box" :selectbale="true" @click="editUser(user)">
                 <template v-if="user.hasAccount && user.verified" #left>
                     <span class="icon user small" />
                 </template>
@@ -56,9 +56,14 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformMember } from '@stamhoofd/structures';
+import { Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { PlatformMember, User, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import EditAdminView from '../../../admins/EditAdminView.vue';
+import { useContext } from '../../../hooks';
+import { Toast } from '../../../overlays/Toast';
 
 defineOptions({
     inheritAttrs: false
@@ -66,6 +71,9 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember
 }>()
+const context = useContext();
+const present = usePresent();
+const editingUser = ref(new Set())
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {
@@ -75,4 +83,33 @@ const sortedUsers = computed(() => {
         )
     })
 })
+
+async function editUser(user: User) {
+    if (editingUser.value.has(user.id)) {
+        return
+    }
+    editingUser.value.add(user.id)
+    // First load the specific user
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: `/user/${user.id}`,
+            decoder: UserWithMembers as Decoder<UserWithMembers>
+        })
+
+        const userWithMembers = response.data;
+        await present({
+            components: [
+                new ComponentWithProperties(EditAdminView, {
+                    user: userWithMembers,
+                    isNew: false
+                })
+            ],
+            modalDisplayStyle: 'popup'
+        })
+    } catch (e) {
+        Toast.fromError(e).show()
+    }
+    editingUser.value.delete(user.id)
+}
 </script>

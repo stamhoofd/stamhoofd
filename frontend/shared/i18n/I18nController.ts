@@ -8,12 +8,12 @@ import { HistoryManager } from "@simonbackx/vue-app-navigation"
 
 export function useTranslate(): typeof I18n.prototype.$t {
     const i18n = I18nController.getI18n()
-    return i18n ? i18n.$t.bind(i18n) : ((k) => k)
+    return i18n ? i18n.$t.bind(i18n) : ((k) => 'i18n missing')
 }
 
 if (import.meta.hot) {
-    import.meta.hot.accept((newModule) => {
-       // noop
+    import.meta.hot.accept(() => {
+        import.meta.hot.invalidate()    
     })
 }
 
