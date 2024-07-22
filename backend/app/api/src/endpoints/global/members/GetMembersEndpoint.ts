@@ -169,6 +169,14 @@ const filterCompilers: SQLFilterDefinitions = {
         .from(
             SQL.table('member_responsibility_records')
         )
+        .join(
+            SQL.leftJoin(
+                SQL.table('groups')
+            ).where(
+                SQL.column('groups', 'id'),
+                SQL.column('member_responsibility_records', 'groupId')
+            )
+        )
         .where(
             SQL.column('memberId'),
             SQL.column('members', 'id'),
@@ -181,6 +189,11 @@ const filterCompilers: SQLFilterDefinitions = {
             "organizationId": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'organizationId')),
             "startDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'startDate')),
             "endDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'endDate')),
+            "group": createSQLFilterNamespace({
+                ...baseSQLFilterCompilers,
+                id: createSQLColumnFilterCompiler(SQL.column('groups', 'id')),
+                defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId')),
+            })
         }
     ),
 

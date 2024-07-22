@@ -86,6 +86,36 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                 }
             })
         )
+
+        for (const responsibility of platform.config.responsibilities) {
+            if (!responsibility.organizationBased || responsibility.defaultAgeGroupIds === null) {
+                continue
+            }
+
+            all.push(
+                new MultipleChoiceFilterBuilder({
+                    name: responsibility.name,
+                    options: platform.config.defaultAgeGroups.filter(group => responsibility.defaultAgeGroupIds?.includes(group.id)).map(group => {
+                        return new MultipleChoiceUIFilterOption(group.name, group.id);
+                    }),
+                    buildFilter: (choices) => {
+                        return {
+                            responsibilities: {
+                                $elemMatch: {
+                                    responsibilityId: responsibility.id,
+                                    endDate: null,
+                                    group: {
+                                        defaultAgeGroupId: {
+                                            $in: choices.map(c => c)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            )
+        }
     }
 
     all.push(

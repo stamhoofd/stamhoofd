@@ -50,7 +50,7 @@
                         <span>{{ member.patchedMember.name }}</span>
                     </h2>
                     <p class="style-description-small">
-                        todo
+                        {{ member.patchedMember.users.filter(u => u.memberId === member.id).map(u => u.email).join(', ') }}
                     </p>
                     <p class="style-description-small">
                         {{ Formatter.joinLast(member.getResponsibilities(organization), ', ', ' en ') }}

@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @contextmenu.prevent="showContextMenu">
         <template #left>
-            <span v-if="mergedRole.isEmpty" v-tooltip="'Heeft geen rol'" class="icon layered">
+            <span v-if="mergedRole.isEmpty" v-tooltip="'Heeft geen automatische rechten'" class="icon layered">
                 <span class="icon user-blocked-layer-1" />
                 <span class="icon user-blocked-layer-2 red" />
             </span>

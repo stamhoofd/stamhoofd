@@ -68,14 +68,15 @@ const draggableResponsibilities = useDraggableArray(() => responsibilities.value
 const groupedDraggableResponsibilites = computed(() => {
     const nationalResponsibilites = {
         id: 'national',
-        title: 'Nationale functies',
+        title: 'Functies op nationaal niveau',
+        description: 'Deze functies zijn globaal en gelden enkel op koepelniveau. Enkel een hoofdbeheerder van de koepel kan deze toekennen aan een lid. Sommige functies geven ook toegang het het administratieportaal.',
         responsibilities: [] as MemberResponsibility[]
     }
 
     const organizationResponsibiities = {
         id: 'organization',
-        title: organization.value ? 'Groepseigenfuncties' : 'Functies van groepen',
-        description: organization.value ? 'Voeg eigen functies toe die enkel van toepassing zijn in je eigen groep.' : 'Deze functies worden gekoppeld aan een lokale groep. Een lokale groep kan zelf ook nog groepseigen functies toevoegen om deze uit te breiden.',
+        title: organization.value ? 'Groepseigenfuncties' : 'Standaardfuncties op lokaal niveau',
+        description: organization.value ? 'Voeg eigen functies toe die enkel van toepassing zijn in je eigen groep.' : 'Deze functies worden gekoppeld aan een lid samen met een lokale groep, door een hoofdbeheerder van die groep. Een lokale groep kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.',
         responsibilities: [] as MemberResponsibility[]
     }
     

@@ -76,7 +76,7 @@
 
             <h2>Automatische rechten voor gekoppelde leeftijdsgroep</h2>
 
-            <p>Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd.</p>
+            <p>Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.</p>
 
             <STList>
                 <STListItem element-name="label" :selectable="true">

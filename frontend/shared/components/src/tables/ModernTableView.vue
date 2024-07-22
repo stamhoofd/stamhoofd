@@ -16,7 +16,7 @@
                 </BackButton>
             </template>
             <template #right>
-                <template v-if="!isIOS || !isMobile">
+                <template v-if="!(isIOS && showSelection)">
                     <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" @click="handleAction(action, $event)" />
                 </template>
 
@@ -25,7 +25,7 @@
                         Gereed
                     </button>
                 </template>
-                <button v-else-if="!showSelection && isIOS" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
+                <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
                     Selecteer
                 </button>
                 <button v-else key="actions" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
@@ -126,7 +126,7 @@
             </p>
         </main>
 
-        <STButtonToolbar v-if="isIOS && isMobile">
+        <STButtonToolbar v-if="isIOS && isMobile && showSelection && filteredActions.length">
             <button v-for="(action, index) of filteredActions" :key="index" type="button" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && !hasSelection" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && !hasSelection ? undefined : handleAction(action, $event)">
                 <span :class="'icon '+action.icon" />
             </button>
@@ -321,13 +321,19 @@ const sortedActions = computed(() => {
 })
 
 const filteredActions = computed(() => {
+    let maximum = 3;
+
+    if (isIOS && isMobile.value && !showSelection.value) {
+        maximum = 1;
+    }
+
     if (!isMobile.value || !showSelection.value) {
-        return sortedActions.value.filter(action => action.enabled && !action.singleSelection).slice(0, 3)
+        return sortedActions.value.filter(action => action.enabled && !action.singleSelection).slice(0, maximum)
     }
 
     return sortedActions.value.filter(action => {
         return action.enabled && action.needsSelection && !action.singleSelection
-    }).slice(0, 3)
+    }).slice(0, maximum)
 })
 
 function getColumnContextMenu() {
@@ -375,7 +381,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     const actions = (isMobile.value && showSelection.value ? props.actions.filter(a => a.needsSelection) : props.actions.slice())
 
     // Also add select all actions
-    if (!showSelection.value && !isIOS) {
+    if (!showSelection.value) {
         // Add select action
         actions.push(new AsyncTableAction({
             name: "Selecteer",
