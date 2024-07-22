@@ -1,11 +1,11 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { isSimpleError, isSimpleErrors,SimpleErrors } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { LoginProviderType, Organization, Platform, Token, User, Version } from '@stamhoofd/structures'
+import { LoginProviderType, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures'
 import { isReactive } from 'vue'
 
-import { AppManager, SessionManager, UrlHelper } from '..'
+import { SessionManager, UrlHelper } from '..'
 import { ContextPermissions } from './ContextPermissions'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
@@ -31,7 +31,7 @@ export class SessionContext implements RequestMiddleware {
      * This will become optional in the future
      */
     organization: Organization | null = null
-    user: User | null = null
+    user: UserWithMembers | null = null
 
     /** 
      * Manually mark the session as incomplete by setting this to true
@@ -181,7 +181,7 @@ export class SessionContext implements RequestMiddleware {
                 if (json) {
                     try {
                         const parsed = JSON.parse(json)
-                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(User as Decoder<User>) as Decoder<VersionBox<User>>).data
+                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>) as Decoder<VersionBox<UserWithMembers>>).data
                         this.callListeners("user")
                         return;
                     } catch (e) {
@@ -508,7 +508,7 @@ export class SessionContext implements RequestMiddleware {
         await this.onTokenChanged()
     }
 
-    async fetchUser(shouldRetry = true): Promise<User> {
+    async fetchUser(shouldRetry = true): Promise<UserWithMembers> {
         console.log("Fetching session user...")
 
         if (!isReactive(this)) {
@@ -518,7 +518,7 @@ export class SessionContext implements RequestMiddleware {
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/user",
-            decoder: User as Decoder<User>,
+            decoder: UserWithMembers as Decoder<UserWithMembers>,
             shouldRetry
         })
         if (this.user) {

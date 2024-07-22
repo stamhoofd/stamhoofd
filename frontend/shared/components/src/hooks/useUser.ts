@@ -1,8 +1,8 @@
+import { UserWithMembers } from "@stamhoofd/structures";
 import { Ref, computed } from "vue";
-import { User } from "@stamhoofd/structures";
 import { useContext } from "./useContext";
 
-export function useUser(): Ref<User | null> {
+export function useUser(): Ref<UserWithMembers | null> {
     const context = useContext()
     return computed(() => context.value.user);
 }

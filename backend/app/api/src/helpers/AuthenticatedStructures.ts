@@ -114,7 +114,7 @@ export class AuthenticatedStructures {
         return UserWithMembers.create({
             ...user,
             hasAccount: user.hasAccount(),
-            members: await this.membersBlob(members, false)
+            members: await this.membersBlob(members, false, user)
         })
     }
 
@@ -138,12 +138,25 @@ export class AuthenticatedStructures {
         return structs
     }
 
-    static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false): Promise<MembersBlob> {
-        if (members.length === 0) {
+    static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<MembersBlob> {
+        if (members.length === 0 && !includeUser) {
             return MembersBlob.create({members: [], organizations: []})
         }
-
         const organizations = new Map<string, Organization>()
+ 
+        if (includeUser) {
+            for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ?? []) {
+                if (includeContextOrganization || organizationId !== Context.auth.organization?.id) {
+                    const found = organizations.get(organizationId);
+                    if (!found) {
+                        const organization = await Context.auth.getOrganization(organizationId)
+                        organizations.set(organization.id, organization)
+                    }
+                }
+            }
+        }
+
+
         const memberBlobs: MemberWithRegistrationsBlob[] = []
         for (const member of members) {
             for (const registration of member.registrations) {
@@ -155,6 +168,7 @@ export class AuthenticatedStructures {
                     }
                 }
             }
+
 
             const blob = member.getStructureWithRegistrations()
             memberBlobs.push(

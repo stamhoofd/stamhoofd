@@ -49,7 +49,23 @@ export function useContextOptions() {
             })
         }
 
-        for (const context of availableContexts) {
+        for (const organizationId of $user.value?.permissions?.organizationPermissions.keys() ?? []) {
+            const organization = $user.value!.members.organizations.find(o => o.id === organizationId)
+            if (!organization) {
+                continue;
+            }
+            const context = new SessionContext(organization)
+            await context.loadFromStorage();
+
+            opts.push({
+                id: 'dashboard-'+organization.id,
+                organization,
+                app: 'dashboard',
+                context
+            })
+        }
+
+        /*for (const context of availableContexts) {
             if (!context.canGetCompleted()) {
                 continue;
             }
@@ -100,7 +116,7 @@ export function useContextOptions() {
                     context
                 })
             }
-        }
+        }*/
 
         return opts;
     }
