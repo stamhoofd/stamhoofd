@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, IntegerDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
+import { AutoEncoder, BooleanDecoder, DateDecoder, IntegerDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 export class MemberPlatformMembership extends AutoEncoder {
@@ -34,6 +34,9 @@ export class MemberPlatformMembership extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     price = 0;
+
+    @field({ decoder: BooleanDecoder })
+    generated = false;
 
     @field({ decoder: DateDecoder })
     createdAt = new Date()

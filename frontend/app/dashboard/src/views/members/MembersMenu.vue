@@ -18,7 +18,9 @@
                 <hr v-if="canUpgradePeriod || canSetDefaultPeriod">
             </template>
 
-            <p class="info-box" v-if="tree.categories.length === 0">Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.</p>
+            <p v-if="tree.categories.length === 0" class="info-box">
+                Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.
+            </p>
 
             <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                 <div class="grouped">

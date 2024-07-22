@@ -1,7 +1,7 @@
 <template>
     <div class="member-payments-view">
         <main class="container">
-            <p class="info-box" v-if="hasFull">
+            <p v-if="hasFull" class="info-box">
                 Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.
             </p>
             <p v-if="memberships.length === 0" class="warning-box">
@@ -26,12 +26,15 @@
                     <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
                         Verlopen. Verleng de aansluiting om de verzekering te behouden.
                     </p>
+                    <p v-if="membership.generated" class="style-description-small">
+                        Deze aansluiting werd automatisch aangemaakt door een inschrijving bij een standaard leeftijdsgroep.
+                    </p>
 
                     <p class="style-description-small">
                         {{ getMembershipType(membership).description }}
                     </p>
 
-                    <template #right v-if="hasFull">
+                    <template v-if="hasFull" #right>
                         <span>{{ formatPrice(membership.price) }}</span>
                         <LoadingButton :loading="deletingMemberships.has(membership.id)">
                             <button class="button icon trash" type="button" @click="deleteMembership(membership)" />

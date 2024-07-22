@@ -687,7 +687,6 @@ export class LoadedPermissions {
             roles,
             resources: permissions.resources
         })
-        console.log('loaded permissions', result)
 
         return result;
     }
