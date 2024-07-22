@@ -94,6 +94,18 @@ export class AccessRightHelper {
         }
     }
 
+    static getLongDescription(right: AccessRight): string|null {
+        switch (right) {
+            case AccessRight.OrganizationFinanceDirector: return 'Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van de organisatie, en kunnen overschrijvingen als betaald markeren.'
+            case AccessRight.OrganizationManagePayments: return 'Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.'
+
+            // Member data
+            case AccessRight.MemberReadFinancialData: return 'Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief.'
+            case AccessRight.MemberWriteFinancialData: return 'Voeg openstaande bedragen toe of verwijder ze, en pas de betaalstatus van een lid aan.'
+        }
+        return null
+    }
+
     /**
      * If a user has a certain permission level, automatically grant the specific access right
      * By default only full permissions gives all access rights, but you can tweak it:
@@ -116,7 +128,7 @@ export class AccessRightHelper {
             case AccessRight.OrganizationManagePayments: return [AccessRight.OrganizationFinanceDirector]
             
             // Finance director also can view and edit member financial data
-            case AccessRight.MemberReadFinancialData: return [AccessRight.OrganizationFinanceDirector]
+            case AccessRight.MemberReadFinancialData: return [AccessRight.OrganizationFinanceDirector, AccessRight.MemberWriteFinancialData]
             case AccessRight.MemberWriteFinancialData: return [AccessRight.OrganizationFinanceDirector]
         }
         return []
@@ -134,6 +146,28 @@ export function getPermissionLevelNumber(level: PermissionLevel): number {
             throw new Error("Unknown permission level "+l);
         }
     }
+}
+
+export function maximumPermissionlevel(...levels: PermissionLevel[]): PermissionLevel {
+    let max = PermissionLevel.None
+    for (const level of levels) {
+        if (getPermissionLevelNumber(level) > getPermissionLevelNumber(max)) {
+            max = level
+        }
+    }
+    return max
+
+}
+
+export function minimumPermissionLevel(...levels: PermissionLevel[]): PermissionLevel {
+    let min: PermissionLevel = levels[0]
+    for (const level of levels) {
+        if (getPermissionLevelNumber(level) < getPermissionLevelNumber(min)) {
+            min = level
+        }
+    }
+    return min
+
 }
 
 export function getPermissionLevelName(level: PermissionLevel): string {

@@ -34,15 +34,18 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ContextMenu, ContextMenuItem, useAuth, useEmitPatch } from '@stamhoofd/components';
-import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName } from '@stamhoofd/structures';
+import { maximumPermissionlevel, AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName } from '@stamhoofd/structures';
 import { Ref, computed } from 'vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     resource: {id: string, name: string, type: PermissionsResourceType};
     role: PermissionRoleDetailed|Permissions;
+    inheritedRoles?: (PermissionRoleDetailed|Permissions)[];
     type: 'resource' | 'role'; // whether we show the name of the role or the resource
     configurableAccessRights: AccessRight[];
-}>();
+}>(), {
+    inheritedRoles: () => [],
+})
 
 
 const emit = defineEmits(['patch:role'])
@@ -64,10 +67,16 @@ const lockedMinimumLevel = computed(() => {
     const a = props.role.level
     const b = props.resource.id !== '' ? (role.value.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None) : PermissionLevel.None
 
-    if (getPermissionLevelNumber(a) > getPermissionLevelNumber(b)) {
-        return a
+    const arr = [a, b]
+
+    for (const role of props.inheritedRoles) {
+        const c = role.level;
+        const d = role.resources.get(props.resource.type)?.get('')?.level ?? PermissionLevel.None;
+        const e = props.resource.id !== '' ? (role.resources.get(props.resource.type)?.get(props.resource.id)?.level ?? PermissionLevel.None) : PermissionLevel.None;
+        arr.push(c, d, e)
     }
-    return b
+
+    return maximumPermissionlevel(...arr)
 })
 
 const permissionLevel = computed({

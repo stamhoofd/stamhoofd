@@ -23,7 +23,7 @@
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="basePermission" value="None" />
+                    <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
                     Geen
@@ -35,7 +35,7 @@
 
             <STListItem :selectable="true" element-name="label">
                 <template #left>
-                    <Radio v-model="basePermission" :value="PermissionLevel.Full" />
+                    <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
                     Volledige toegang
@@ -59,6 +59,7 @@
                     <ResourcePermissionRow 
                         :role="patched" 
                         :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" 
+                        :inherited-roles="inheritedRoles"
                         :configurable-access-rights="[]"
                         type="resource" 
                         @patch:role="addPatch" 
@@ -68,6 +69,7 @@
                         v-for="tag in tags" 
                         :key="tag.id" 
                         :role="patched" 
+                        :inherited-roles="inheritedRoles"
                         :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" 
                         :configurable-access-rights="[]"
                         type="resource" 
@@ -97,6 +99,7 @@
                         v-for="category in categories" 
                         :key="category.id" 
                         :role="patched" 
+                        :inherited-roles="inheritedRoles"
                         :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" 
                         :configurable-access-rights="[AccessRight.OrganizationCreateGroups]"
                         type="resource" 
@@ -116,6 +119,7 @@
                         v-for="group in groups" 
                         :key="group.id" 
                         :role="patched" 
+                        :inheritedRoles="inheritedRoles"
                         :resource="{id: group.id, name: group.settings.name, type: PermissionsResourceType.Groups }" 
                         :configurable-access-rights="[]"
                         type="resource" 
@@ -130,16 +134,17 @@
                 <p>Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop</p>
 
                 <STList>
-                    <STListItem :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox v-model="createWebshops" />
-                        </template>
-                        Kan nieuwe webshops maken
-                    </STListItem>
+                    <AccessRightPermissionRow
+                        :access-right="AccessRight.OrganizationCreateWebshops"
+                        :inherited-roles="inheritedRoles"
+                        :role="patched" 
+                        @patch:role="addPatch" 
+                    />
                     <ResourcePermissionRow 
                         v-for="webshop in webshops" 
                         :key="webshop.id" 
                         :role="patched" 
+                        :inherited-roles="inheritedRoles"
                         :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" 
                         :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []"
                         type="resource" 
@@ -156,34 +161,25 @@
                 <p>Standaard heeft elke beheerder die een lid kan bekijken of bewerken, toegang tot de algemene informatie van dat lid (naam, geboortedatum, gender, adres, ouders, noodcontactpersonen). Je kan bepaalde beheerders ook toegang geven tot meer gegevens hieronder.</p>
 
                 <STList>
-                    <STListItem :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox v-model="readFinancialData" :disabled="financeDirector" />
-                        </template>
-                        <h3 class="style-title-list">
-                            Financiële gegevens bekijken
-                        </h3>
-                        <p class="style-description-small">
-                            Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief.
-                        </p>
-                    </STListItem>
+                    <AccessRightPermissionRow
+                        :access-right="AccessRight.MemberReadFinancialData"
+                        :inherited-roles="inheritedRoles"
+                        :role="patched" 
+                        @patch:role="addPatch" 
+                    />
 
-                    <STListItem v-if="financeDirector || readFinancialData || writeFinancialData" :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox v-model="writeFinancialData" :disabled="financeDirector" />
-                        </template>
-                        <h3 class="style-title-list">
-                            Financiële gegevens bewerken
-                        </h3>
-                        <p class="style-description-small">
-                            Voeg openstaande bedragen toe of verwijder ze, en pas de betaalstatus van een lid aan.
-                        </p>
-                    </STListItem>
+                    <AccessRightPermissionRow
+                        :access-right="AccessRight.MemberWriteFinancialData"
+                        :inherited-roles="inheritedRoles"
+                        :role="patched" 
+                        @patch:role="addPatch" 
+                    />
 
                     <ResourcePermissionRow 
                         v-for="recordCategory in recordCategories" 
                         :key="recordCategory.id" 
                         :role="patched" 
+                        :inherited-roles="inheritedRoles"
                         :resource="{id: recordCategory.id, name: recordCategory.name, type: PermissionsResourceType.RecordCategories }" 
                         :configurable-access-rights="[]"
                         type="resource" 
@@ -197,28 +193,19 @@
                 <h2>Boekhouding</h2>
 
                 <STList>
-                    <STListItem :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox v-model="financeDirector" />
-                        </template>
-                        <h3 class="style-title-list">
-                            Volledige toegang
-                        </h3>
-                        <p class="style-description-small">
-                            Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
-                        </p>
-                    </STListItem>
-                    <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox v-model="managePayments" />
-                        </template>
-                        <h3 class="style-title-list">
-                            Overschrijvingen beheren
-                        </h3>
-                        <p class="style-description-small">
-                            Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
-                        </p>
-                    </STListItem>
+                    <AccessRightPermissionRow
+                        :access-right="AccessRight.OrganizationFinanceDirector"
+                        :inherited-roles="inheritedRoles"
+                        :role="patched" 
+                        @patch:role="addPatch" 
+                    />
+
+                    <AccessRightPermissionRow
+                        :access-right="AccessRight.OrganizationManagePayments"
+                        :inherited-roles="inheritedRoles"
+                        :role="patched" 
+                        @patch:role="addPatch" 
+                    />
                 </STList>
             </template>
         </template>
@@ -268,10 +255,11 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SaveView, Spinner, useAppContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategory, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategory, maximumPermissionlevel, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
+import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -280,12 +268,15 @@ const deleting = ref(false);
 const props = withDefaults(
     defineProps<{
         role: PermissionRoleDetailed|PermissionRoleForResponsibility;
+        inheritedRoles: (PermissionRoleDetailed|PermissionRoleForResponsibility)[];
         isNew: boolean;
         saveHandler: (p: AutoEncoderPatchType<PermissionRoleDetailed|PermissionRoleForResponsibility>) => Promise<void>,
         deleteHandler: (() => Promise<void>)|null
         scope?: 'organization'|'admin'|null
     }>(), {
-        scope: null
+        scope: null,
+        inheritedRoles: () => [],
+        deleteHandler: null
     }
 )
 
@@ -305,8 +296,8 @@ const responsibility = computed(() => {
 })
 
 const title = computed(() => {
-    if (responsibility.value) {
-        return 'Rechten voor ' + responsibility.value.name
+    if (props.role instanceof PermissionRoleForResponsibility) {
+        return 'Rechten voor ' + props.role.name
     }
     return props.isNew ? 'Nieuwe rol' : props.role.name
 });
@@ -392,8 +383,19 @@ const name = computed({
     set: (name) => addPatch({name}),
 });
 
+const lockedMinimumLevel = computed(() => {
+    const arr = []
+
+    for (const role of props.inheritedRoles) {
+        arr.push(role.level)
+    }
+
+    return maximumPermissionlevel(...arr)
+})
+
+
 const basePermission = computed({
-    get: () => patched.value.level,
+    get: () => maximumPermissionlevel(lockedMinimumLevel.value, patched.value.level),
     set: (level) => addPatch({level}),
 });
 

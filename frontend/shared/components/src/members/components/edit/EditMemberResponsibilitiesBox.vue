@@ -7,14 +7,14 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="groupsWithResponsibilites.length === 0" class="info-box">
+        <p v-if="groupedResponsibilites.length === 0" class="info-box">
             Geen functies gevonden
         </p>
 
-        <div v-for="({title, responsibilities}, index) of groupsWithResponsibilites" :key="''+index" class="container">
+        <div v-for="({title: groupTitle, responsibilities}, index) of groupedResponsibilites" :key="''+index" class="container">
             <hr v-if="index > 0 || !(!organization && items.length)">
-            <h2 v-if="title && groupsWithResponsibilites.length > 1">
-                {{ title }}
+            <h2 v-if="groupTitle && groupedResponsibilites.length > 1">
+                {{ groupTitle }}
             </h2>
 
             <STList>
@@ -115,7 +115,7 @@ const organizationResponsibilities = computed(() => {
     return selectedOrganization.value?.privateMeta?.responsibilities ?? []
 })
 
-const groupsWithResponsibilites = computed(() => {
+const groupedResponsibilites = computed(() => {
     const groupedPlatformResponsibilities: {responsibility: MemberResponsibility, group: Group|null}[] = []
     const groupedOrganizationResponsibilities: {responsibility: MemberResponsibility, group: Group|null}[] = []
     const organizationGroups = selectedOrganization.value?.period.adminCategoryTree.getAllGroups() ?? []

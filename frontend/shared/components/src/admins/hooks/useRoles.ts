@@ -110,11 +110,18 @@ export function usePatchRoles() {
         return []
     })
 
+    const applicableResponsibilities = computed(() => {
+        if (patchedOrganization.value) {
+            return patchedOrganization.value.privateMeta?.responsibilities ?? []
+        }
+        return patchedPlatform.value.config.responsibilities.filter(r => !r.organizationBased)
+    })
+
     const responsibilities = computed(() => {
         if (patchedOrganization.value) {
             return patchedOrganization.value.privateMeta?.responsibilities ?? []
         }
-        return platform.value.config.responsibilities
+        return patchedPlatform.value.config.responsibilities
     })
 
     const hasChanges = computed(() => {
@@ -197,6 +204,7 @@ export function usePatchRoles() {
         patchedPlatform,
         roles,
         responsibilities,
+        applicableResponsibilities,
         inheritedResponsibilityRoles,
         inheritedResponsibilitiesWithGroup,
         patchRoles,

@@ -155,11 +155,7 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
     let isNew = false
 
     if (!role) {
-        role = PermissionRoleForResponsibility.create({
-            name: responsibility.name + (group ? ' van ' + group.settings.name : ''),
-            responsibilityId: responsibility.id,
-            responsibilityGroupId: group?.id ?? null,
-        })
+        role = responsibility.createDefaultPermissions(group)
         isNew = true
     }
     
@@ -168,6 +164,7 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
         components: [
             new ComponentWithProperties(EditRoleView, {
                 role,
+                inheritedRoles: [responsibility.getPermissions(group?.id ?? null)],
                 isNew,
                 saveHandler: (patch: AutoEncoderPatchType<PermissionRoleForResponsibility>) => {
                     const arr = createInheritedResponsibilityRolePatchArray()

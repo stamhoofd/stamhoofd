@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
-import { PermissionLevel, PermissionRoleForResponsibility } from "./Permissions";
+import { PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions } from "./Permissions";
+import { Group } from "./Group";
 
 export class MemberResponsibility extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -51,6 +52,38 @@ export class MemberResponsibility extends AutoEncoder {
 
     get isGroupBased() {
         return this.defaultAgeGroupIds !== null
+    }
+
+    createDefaultPermissions(group: Group|null) {
+        return PermissionRoleForResponsibility.create({
+            name: this.name + (group ? ` van ${group.settings.name}` : ''), 
+            responsibilityId: this.id, 
+            responsibilityGroupId: group?.id ?? null
+        })
+    }
+
+    getPermissions(groupId: string|null) {
+        const r = this.permissions?.clone() ?? PermissionRoleForResponsibility.create({
+            id: this.id,
+            name: this.name,
+            level: PermissionLevel.None,
+            responsibilityId: this.id,
+            responsibilityGroupId: groupId,
+            resources: new Map()
+        }); 
+
+        r.name = this.name
+        r.id = this.id + (groupId ? '-'+groupId : '')
+        r.responsibilityId = this.id
+        r.responsibilityGroupId = groupId
+
+        if (groupId && this.groupPermissionLevel !== PermissionLevel.None) {
+            const map: Map<string, ResourcePermissions> = new Map()
+            map.set(groupId, ResourcePermissions.create({level: this.groupPermissionLevel}))
+            r.resources.set(PermissionsResourceType.Groups, map)
+        }
+
+        return r
     }
     
 }
