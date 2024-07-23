@@ -87,7 +87,7 @@ export class GroupBuilder {
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
-            prices: this.organization.meta.defaultPrices,
+            oldPrices: this.organization.meta.defaultPrices,
             minAge: 6,
             maxAge: 7
         })
@@ -102,7 +102,7 @@ export class GroupBuilder {
             genderType: mixedType,
             startDate: this.organization.meta.defaultStartDate,
             endDate: this.organization.meta.defaultEndDate,
-            prices: this.organization.meta.defaultPrices,
+            oldPrices: this.organization.meta.defaultPrices,
             minAge: 17,
             maxAge: 17
         })

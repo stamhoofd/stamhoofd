@@ -7,7 +7,7 @@ import { Replacement } from './endpoints/EmailRequest';
 import { File } from './files/File';
 import { Image } from './files/Image';
 import { GroupCategory } from './GroupCategory';
-import { GroupPrices } from './GroupPrices';
+import { OldGroupPrices } from './OldGroupPrices';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
@@ -267,17 +267,29 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: IntegerDecoder, optional: true })
     expectedMemberCount = 0
 
-    @field({ decoder: new EnumDecoder(OrganizationGenderType) })
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new EnumDecoder(OrganizationGenderType), optional: true })
     genderType: OrganizationGenderType = OrganizationGenderType.Mixed
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: DateDecoder, optional: true })
     defaultStartDate: Date = new Date()
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: DateDecoder, optional: true })
     defaultEndDate: Date = new Date()
 
-    @field({ decoder: new ArrayDecoder(GroupPrices), optional: true })
-    defaultPrices: GroupPrices[] = []
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new ArrayDecoder(OldGroupPrices), optional: true })
+    defaultPrices: OldGroupPrices[] = []
 
     /**
      * @deprecated

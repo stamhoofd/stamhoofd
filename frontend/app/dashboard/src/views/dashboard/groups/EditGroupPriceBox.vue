@@ -105,7 +105,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Group, GroupPrice, GroupPrices, Organization, OrganizationRegistrationPeriod } from "@stamhoofd/structures";
+import { Group, OldGroupPrice, OldGroupPrices, Organization, OrganizationRegistrationPeriod } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
@@ -138,7 +138,7 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
      * This array will get changed by emitting patch events that contain a patchablearray
      */
     @Prop({ default: () => [] })
-        prices!: GroupPrices[]
+        prices!: OldGroupPrices[]
 
     @Prop({ default: null })
         group!: Group | null
@@ -179,44 +179,44 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         }
     }
 
-    ordinalNumber(price: GroupPrices, num: number, total: number) {
+    ordinalNumber(price: OldGroupPrices, num: number, total: number) {
         if (price.sameMemberOnlyDiscount) {
             return Formatter.capitalizeFirstLetter(Formatter.ordinalNumber(num))+" inschrijving"+(num === total ? " en daarna" : "")+"**"
         }
         return Formatter.capitalizeFirstLetter(Formatter.ordinalNumber(num))+" gezinslid"+(num === total ? " en daarna" : "")
     }
 
-    getPricesPatch(): PatchableArrayAutoEncoder<GroupPrices> {
+    getPricesPatch(): PatchableArrayAutoEncoder<OldGroupPrices> {
         return new PatchableArray()
     }
 
-    addPatch(patch: PatchableArrayAutoEncoder<GroupPrices>) {
+    addPatch(patch: PatchableArrayAutoEncoder<OldGroupPrices>) {
         this.$emit("patch", patch)
     }
 
-    setPrice(group: GroupPrices, index: number, price: number) {
+    setPrice(group: OldGroupPrices, index: number, price: number) {
         const patch = this.getPricesPatch()
         const prices = group.prices.map(p => p.clone())
         prices[index].price = price
-        patch.addPatch(GroupPrices.patch({ id: group.id, prices }))
+        patch.addPatch(OldGroupPrices.patch({ id: group.id, prices }))
         this.addPatch(patch)
     }
 
-    setReducedPrice(group: GroupPrices, index: number, reducedPrice: number | null) {
+    setReducedPrice(group: OldGroupPrices, index: number, reducedPrice: number | null) {
         const patch = this.getPricesPatch()
         const prices = group.prices.map(p => p.clone())
         prices[index].reducedPrice = reducedPrice
-        patch.addPatch(GroupPrices.patch({ id: group.id, prices }))
+        patch.addPatch(OldGroupPrices.patch({ id: group.id, prices }))
         this.addPatch(patch)
     }
 
-    setStartDate(group: GroupPrices, startDate: Date) {
+    setStartDate(group: OldGroupPrices, startDate: Date) {
         const patch = this.getPricesPatch()
-        patch.addPatch(GroupPrices.patch({ id: group.id, startDate }))
+        patch.addPatch(OldGroupPrices.patch({ id: group.id, startDate }))
         this.addPatch(patch)
     }
 
-    removeGroup(group: GroupPrices, force = false) {
+    removeGroup(group: OldGroupPrices, force = false) {
         if (group.startDate === null && !force) {
             // Not allowed
             return
@@ -232,7 +232,7 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         const dd = new Date()
         dd.setHours(0, 0, 0, 0)
 
-        patch.addPut(GroupPrices.create({ 
+        patch.addPut(OldGroupPrices.create({ 
             startDate: this.prices.length == 0 ? null : dd
         }))
         this.addPatch(patch)
@@ -246,12 +246,12 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         return parents[0] ?? null
     }
 
-    getOnlySameGroup(group: GroupPrices) {
+    getOnlySameGroup(group: OldGroupPrices) {
         return group.onlySameGroup
     }
 
-    setOnlySameGroup(group: GroupPrices, onlySameGroup: boolean) {
-        const gp = GroupPrices.patch({ id: group.id })
+    setOnlySameGroup(group: OldGroupPrices, onlySameGroup: boolean) {
+        const gp = OldGroupPrices.patch({ id: group.id })
         gp.onlySameGroup = onlySameGroup
 
         const patch = this.getPricesPatch()
@@ -259,9 +259,9 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         this.addPatch(patch)
     }
 
-    addMultipleDiscount(group: GroupPrices) {
-        const gp = GroupPrices.patch({ id: group.id })
-        gp.prices = [...group.prices, GroupPrice.create(group.prices[group.prices.length - 1] ?? {})]
+    addMultipleDiscount(group: OldGroupPrices) {
+        const gp = OldGroupPrices.patch({ id: group.id })
+        gp.prices = [...group.prices, OldGroupPrice.create(group.prices[group.prices.length - 1] ?? {})]
         gp.sameMemberOnlyDiscount = true
         gp.onlySameGroup = false // other combination is not possible
 
@@ -270,9 +270,9 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         this.addPatch(patch)
     }
 
-    addFamilyPrice(group: GroupPrices) {
-        const gp = GroupPrices.patch({ id: group.id })
-        gp.prices = [...group.prices, GroupPrice.create(group.prices[group.prices.length - 1] ?? {})]
+    addFamilyPrice(group: OldGroupPrices) {
+        const gp = OldGroupPrices.patch({ id: group.id })
+        gp.prices = [...group.prices, OldGroupPrice.create(group.prices[group.prices.length - 1] ?? {})]
         gp.sameMemberOnlyDiscount = false
 
         const patch = this.getPricesPatch()
@@ -280,11 +280,11 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         this.addPatch(patch)
     }
 
-    removeFamilyPrice(group: GroupPrices, index: number){
+    removeFamilyPrice(group: OldGroupPrices, index: number){
         if (group.prices.length <= 1) {
             return
         }
-        const gp = GroupPrices.patch({ id: group.id })
+        const gp = OldGroupPrices.patch({ id: group.id })
         gp.prices = [...group.prices]
         gp.prices.splice(index, 1)
         const patch = this.getPricesPatch()

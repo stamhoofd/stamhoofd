@@ -29,7 +29,7 @@ export default class EditGroupPricesView extends Mixins(EditGroupMixin) {
     }
 
     getPrices() {
-        return this.patchedGroup.settings.prices
+        return this.patchedGroup.settings.oldPrices
     }
 }
 </script>

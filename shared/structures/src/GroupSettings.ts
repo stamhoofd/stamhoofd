@@ -3,7 +3,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { Image } from './files/Image';
 import { GroupGenderType } from './GroupGenderType';
-import { GroupPrices } from './GroupPrices';
+import { OldGroupPrices } from './OldGroupPrices';
 
 
 export enum WaitingListType {
@@ -142,8 +142,12 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: GroupDefaultEventTime, nullable: true, version: 283 })
     defaultEventTime: GroupDefaultEventTime|null = null
 
-    @field({ decoder: new ArrayDecoder(GroupPrices) })
-    prices: GroupPrices[] = []
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'prices' })
+    @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'oldPrices', optional: true, version: 284 })
+    oldPrices: OldGroupPrices[] = []
 
     @field({ decoder: new EnumDecoder(GroupGenderType) })
     genderType: GroupGenderType = GroupGenderType.Mixed
@@ -293,11 +297,14 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 102 })
     preventPreviousGroupIds: string[] = []
 
+    /**
+     * @deprecated
+     */
     getGroupPrices(date: Date) {
-        let foundPrice: GroupPrices | undefined = undefined
+        let foundPrice: OldGroupPrices | undefined = undefined
 
         // Determine price
-        for (const price of this.prices) {
+        for (const price of this.oldPrices) {
             if (!price.startDate || price.startDate <= date) {
                 foundPrice = price
             }

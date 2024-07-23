@@ -1,6 +1,6 @@
 import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
-import { GroupPrices } from "../../GroupPrices"
+import { OldGroupPrices } from "../../OldGroupPrices"
 import { MemberDetails } from "../MemberDetails"
 import { Registration } from "../Registration"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
@@ -20,7 +20,7 @@ export interface RegisterItemWithPrice {
 
 interface RegisterItemWithPriceAndGroupPrices extends RegisterItemWithPrice {
     /// Cached to improve calculation performance
-    _groupPrices: GroupPrices
+    _groupPrices: OldGroupPrices
 
     _group: Group
     _category: GroupCategory
@@ -98,7 +98,7 @@ export class OldRegisterCartPriceCalculator {
             }
 
             if (!item.waitingList) {
-                const groupPrices = group.settings.getGroupPrices(now) ?? GroupPrices.create({})
+                const groupPrices = group.settings.getGroupPrices(now) ?? OldGroupPrices.create({})
                 const category = this.getParentCategory(group, categories)
 
                 if (!category) {

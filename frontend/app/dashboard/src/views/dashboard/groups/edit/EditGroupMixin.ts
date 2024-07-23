@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder,
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, ErrorBox, Validator } from "@stamhoofd/components";
-import { Group, GroupPrices, GroupPrivateSettings, GroupSettings, Organization, OrganizationRegistrationPeriod, Version } from '@stamhoofd/structures';
+import { Group, OldGroupPrices, GroupPrivateSettings, GroupSettings, Organization, OrganizationRegistrationPeriod, Version } from '@stamhoofd/structures';
 
 @Component
 export default class EditGroupMixin extends Mixins(NavigationMixin) {
@@ -60,7 +60,7 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
         this.addPeriodPatch(p)
     }
 
-    addPricesPatch(patch: PatchableArrayAutoEncoder<GroupPrices>) {
+    addPricesPatch(patch: PatchableArrayAutoEncoder<OldGroupPrices>) {
         this.addSettingsPatch({ prices: patch })
     }
 
