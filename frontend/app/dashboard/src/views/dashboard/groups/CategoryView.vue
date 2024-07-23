@@ -87,10 +87,6 @@
                         <h3 class="style-title-list">
                             {{ group.settings.name }}
                         </h3>
-                        <p v-if="false" class="style-description-small">
-                            {{ group.settings.dateRangeDescription }}
-                        </p>
-
                         <template #right>
                             <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
                             <span class="icon arrow-right-small gray" />
@@ -104,29 +100,6 @@
                         <span>Inschrijvingsgroep</span>
                     </button>
                 </p>
-
-                <template v-if="groups.length > 1 && cycleOffsets.length > 0">
-                    <hr>
-                    <h2>Vorige periodes</h2>
-                    <STList class="illustration-list">
-                        <STListItem v-for="offset in cycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openAll(true, offset)">
-                            <template #left><img src="@stamhoofd/assets/images/illustrations/package-members.svg"></template>
-                            <h2 v-if="offset === 1" class="style-title-list">
-                                Vorige inschrijvingsperiode
-                            </h2>
-                            <h2 v-else class="style-title-list">
-                                {{ offset }} inschrijvingsperiodes geleden
-                            </h2>
-
-                            <p class="style-description">
-                                {{ getTimeRangeOffset(offset) }}
-                            </p>
-
-                            <template #right><span v-if="getMemberCount({cycleOffset: offset}) !== null" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span>
-                            <span class="icon arrow-right-small gray" /></template>
-                        </STListItem>
-                    </STList>
-                </template>
             </template>
 
             <p v-if="categories.length == 0 && groups.length == 0 && canCreate" class="info-box">
@@ -243,34 +216,6 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         })
     }
 
-    get cycleOffsets() {
-        const l = Math.max(...this.groups.map(g => g.cycle));
-        const arr = new Array(l)
-        for (let i = 0; i < l; i++) {
-            arr[i] = i+1
-        }
-
-        // Remove last ones if no members in it
-        for (let i = l - 1; i >= 0; i--) {
-            if (this.getMemberCount({cycleOffset: i + 1}) === 0) {
-                arr.pop()
-            } else {
-                break
-            }
-        }
-        return arr;
-    }
-
-    getTimeRangeOffset(offset: number) {
-        for (const group of this.groups) {
-            const str = group.getTimeRangeOffset(offset)
-            if (str) {
-                return str
-            }
-        }
-        return null
-    }
-
     get reactiveCategory() {
         const c = this.period.settings.categories.find(c => c.id === this.category.id)
         if (c) {
@@ -279,8 +224,8 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         return this.category
     }
 
-    getMemberCount({cycleOffset, waitingList}: {cycleOffset?: number, waitingList?: boolean} = {}) {
-        return this.tree.getMemberCount({cycleOffset, waitingList})
+    getMemberCount({waitingList}: {waitingList?: boolean} = {}) {
+        return this.tree.getMemberCount({waitingList})
     }
 
     get hasMultipleWaitingLists() {

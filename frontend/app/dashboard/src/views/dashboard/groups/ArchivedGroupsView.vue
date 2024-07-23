@@ -19,10 +19,7 @@
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
                     </h2>
-                    <p class="style-description-small">
-                        {{ group.settings.dateRangeDescription }}
-                    </p>
-
+                    
                     <template #right>
                         <span v-if="group.settings.registeredMembers !== null" class="style-description-small">{{ group.settings.registeredMembers }}</span>
                         <span class="icon arrow-right-small gray" />

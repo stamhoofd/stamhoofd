@@ -154,19 +154,15 @@ export class GroupCategoryTree extends GroupCategory {
         return [...this.categories, ...this.categories.flatMap(c => c.getAllCategories())]
     }
 
-    getMemberCount({cycleOffset, waitingList}: {cycleOffset?: number, waitingList?: boolean} = {}) {
+    getMemberCount({waitingList}: {waitingList?: boolean} = {}) {
         if (this.getAllGroups().length == 0) {
             return null
         }
 
         let count = 0
         for (const group of this.getAllGroups()) {
-            const c = group.getMemberCount({cycleOffset, waitingList});
+            const c = group.getMemberCount({waitingList});
             if (c === null) {
-                if (cycleOffset && group.cycle < cycleOffset) {
-                    // This group did not have active registrations at the time
-                    continue
-                }
                 return null
             }
             count += c

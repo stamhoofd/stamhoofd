@@ -21,9 +21,6 @@
                     <h2 class="style-title-list">
                         {{ group.settings.name }}
                     </h2>
-                    <p class="style-description-small">
-                        {{ group.settings.dateRangeDescription }}
-                    </p>
                     <p class="style-description-small" v-if="group.deletedAt">
                         Verwijderd op {{ formatDate(group.deletedAt) }}
                     </p>

@@ -96,14 +96,14 @@ export class DocumentTemplate extends Model {
                     id: "registration.startDate",
                     type: RecordType.Date,
                 }), // settings will be overwritten
-                dateValue: group?.settings?.getStartDate({cycle: registration.cycle === group.cycle ? undefined : registration.cycle}) ?? null
+                dateValue: group?.settings?.startDate
             }),
             "registration.endDate": RecordDateAnswer.create({
                 settings: RecordSettings.create({
                     id: "registration.endDate",
                     type: RecordType.Date,
                 }), // settings will be overwritten
-                dateValue: group?.settings?.getEndDate({cycle: registration.cycle === group.cycle ? undefined : registration.cycle}) ?? null
+                dateValue: group?.settings?.endDate
             }),
             "registration.price": 
                 RecordPriceAnswer.create({

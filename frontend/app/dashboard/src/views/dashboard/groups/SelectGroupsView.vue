@@ -20,9 +20,6 @@
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
                         </h2>
-                        <p class="style-description-small">
-                            {{ group.getTimeRangeOffset(cycleOffset) }}
-                        </p>
                     </STListItem>
                 </STList>
             </div>
@@ -41,9 +38,6 @@
                             <h2 class="style-title-list">
                                 {{ group.settings.name }}
                             </h2>
-                            <p class="style-description-small">
-                                {{ group.getTimeRangeOffset(cycleOffset) }}
-                            </p>
                         </STListItem>
                     </STList>
                 </template>
@@ -93,9 +87,6 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
     @Prop({ default: true })
         allowArchived!: boolean
 
-    @Prop({ default: 0 })
-        cycleOffset!: number
-
     groupIds = this.initialGroupIds.slice()
 
     @Prop({ required: true })
@@ -109,13 +100,8 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
     loadingGroups = true
 
     get categoryTree() {
-        return this.$organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true, filterGroups: this.filterGroup})
+        return this.$organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true})
     }
-
-    filterGroup(group: Group) {
-        return group.cycle >= this.cycleOffset
-    }
-
     mounted() {
         this.load().catch(console.error)
     }
@@ -171,7 +157,7 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
         }
 
         try {
-            this.archivedGroups = (await this.$organizationManager.loadArchivedGroups({owner: this})).filter(this.filterGroup)
+            this.archivedGroups = (await this.$organizationManager.loadArchivedGroups({owner: this}))
         } catch (e) {
             Toast.fromError(e).show()
         }

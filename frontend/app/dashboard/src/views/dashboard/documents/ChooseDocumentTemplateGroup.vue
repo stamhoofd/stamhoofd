@@ -38,13 +38,12 @@
 
 <script lang="ts">
 import { Request } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { DocumentTemplateGroup, Group, RecordCategory } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 
-import ChooseDocumentTemplateCycle from "./ChooseDocumentTemplateCycle.vue";
 
 @Component({
     components: {
@@ -71,22 +70,10 @@ export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin)
     }
 
     selectGroup(group: Group) {
-        if (group.cycle === 0) {
-            this.addGroup(DocumentTemplateGroup.create({
-                groupId: group.id,
-                cycle: group.cycle
-            }), this);
-            return;
-        }
-        this.show({
-            components: [
-                new ComponentWithProperties(ChooseDocumentTemplateCycle, { 
-                    group, 
-                    fieldCategories: this.fieldCategories,
-                    addGroup: this.addGroup 
-                })
-            ]
-        })
+        this.addGroup(DocumentTemplateGroup.create({
+            groupId: group.id,
+            cycle: group.cycle
+        }), this);
     }
 
     mounted() {

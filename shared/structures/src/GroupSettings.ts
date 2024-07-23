@@ -46,32 +46,6 @@ export class CycleInformation extends AutoEncoder {
     })
     waitingListSize: number | null = 0
 
-    get dateRangeDescription() {
-        if (!this.endDate) {
-            return null
-        }
-
-        if (!this.startDate) {
-            return null
-        }
-
-        const daysBetween = Math.abs(this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 24);
-
-        if (Formatter.dateWithoutDay(this.startDate) === Formatter.dateWithoutDay(this.endDate)) {
-            return `${Formatter.dateWithoutDay(this.startDate)}`
-        }
-        
-        if (daysBetween < 10 * 30) {
-            return `${Formatter.dateWithoutDay(this.startDate)} - ${Formatter.dateWithoutDay(this.endDate)}`
-        }
-        const year1 = Formatter.year(this.startDate);
-        const year2 = Formatter.year(this.endDate);
-        if (year1 !== year2) {
-            return `${year1} - ${year2}`
-        }
-        return `${year1}`
-    }
-
 }
 
 export class GroupDefaultEventTime extends AutoEncoder {
@@ -93,6 +67,7 @@ export class GroupSettings extends AutoEncoder {
     description = ""
 
     /**
+     * @deprecated
      * Information about previous cycles
      */
     @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193 })
@@ -406,81 +381,16 @@ export class GroupSettings extends AutoEncoder {
         return who;
     }
 
-    getMemberCount({cycle, waitingList}: {cycle?: number, waitingList?: boolean}) {
-        let data: GroupSettings|CycleInformation|undefined = this;
-
-        if (cycle !== undefined) {
-            data = this.cycleSettings.get(cycle)
-        }
-
-        if (!data) {
-            return null;
-        }
-
+    getMemberCount({waitingList}: {waitingList?: boolean}) {
         if (waitingList) {
-            return data.waitingListSize;
+            return this.waitingListSize;
         }
 
-        return data.registeredMembers;
-    }
-
-    getStartDate({cycle}: {cycle?: number}) {
-        let data: GroupSettings|CycleInformation|undefined = this;
-
-        if (cycle !== undefined) {
-            data = this.cycleSettings.get(cycle)
-        }
-
-        if (!data) {
-            return null;
-        }
-
-        return data.startDate;
-    }
-
-    getEndDate({cycle}: {cycle?: number}) {
-        let data: GroupSettings|CycleInformation|undefined = this;
-
-        if (cycle !== undefined) {
-            data = this.cycleSettings.get(cycle)
-        }
-
-        if (!data) {
-            return null;
-        }
-
-        return data.endDate;
+        return this.registeredMembers;
     }
 
     getShortCode(maxLength: number) {
         return Formatter.firstLetters(this.name, maxLength)
-    }
-
-    get dateRangeDescription() {
-        const daysBetween = Math.abs(this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 24);
-
-        if (Formatter.dateWithoutDay(this.startDate) === Formatter.dateWithoutDay(this.endDate)) {
-            return `${Formatter.dateWithoutDay(this.startDate)}`
-        }
-        
-        if (daysBetween < 10 * 30) {
-            return `${Formatter.dateWithoutDay(this.startDate)} - ${Formatter.dateWithoutDay(this.endDate)}`
-        }
-        const year1 = Formatter.year(this.startDate);
-        const year2 = Formatter.year(this.endDate);
-        if (year1 !== year2) {
-            return `${year1} - ${year2}`
-        }
-        return `${year1}`
-    }
-
-    getEstimatedTimeRange(cycleOffset = 0) {
-        const yearStart = Formatter.year(this.startDate) - cycleOffset
-        const yearEnd = Formatter.year(this.endDate) - cycleOffset
-        if (yearStart !== yearEnd) {
-            return `${yearStart} - ${yearEnd}`
-        }
-        return `${yearStart}`
     }
 }
 

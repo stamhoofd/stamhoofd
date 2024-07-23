@@ -56,21 +56,6 @@ export class Group extends AutoEncoder {
     @field({ decoder: new EnumDecoder(GroupStatus), version: 192 })
     status = GroupStatus.Open
 
-    getTimeRange(cycle = 0) {
-        if (cycle === this.cycle) {
-            return this.settings.dateRangeDescription
-        }
-        const cycleInfo = this.settings.cycleSettings.get(cycle)
-        if (!cycleInfo || ! cycleInfo.dateRangeDescription) {
-            return this.settings.getEstimatedTimeRange(this.cycle - cycle)
-        }
-        return cycleInfo.dateRangeDescription
-    }
-
-    getTimeRangeOffset(cycleOffset = 0) {
-        return this.getTimeRange(this.cycle - cycleOffset)
-    }
-
     static defaultSort(this: unknown, a: Group, b: Group) {
         if (a.settings.maxAge && !b.settings.maxAge) {
             return -1
@@ -101,12 +86,8 @@ export class Group extends AutoEncoder {
         return 0
     }
 
-    getMemberCount({cycle, cycleOffset, waitingList}: {cycle?: number, cycleOffset?: number, waitingList?: boolean} = {}) {
-        if (cycleOffset) {
-            cycle = this.cycle - cycleOffset
-        }
-
-        return this.settings.getMemberCount({cycle, waitingList})
+    getMemberCount({waitingList}: {waitingList?: boolean} = {}) {
+        return this.settings.getMemberCount({waitingList})
     }
 
     /**

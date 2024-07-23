@@ -381,10 +381,9 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
 
                     const group = this.organization.groups.find(g => g.id === groupId);
                     const groupName = group?.settings.name ?? groupId
-                    const cyclePeriod = group?.getTimeRange(balanceItem.registration.cycle) ?? ""
 
                     name = !group ? (balanceItem.description || 'Onbekende inschrijving (verwijderde groep)') : ("Inschrijving " + groupName);
-                    description = !group ? 'Verwijderde groep' : cyclePeriod;
+                    description = !group ? 'Verwijderde groep' : '';
 
                     filter = {
                         filterBalanceItems: (b: BalanceItemPaymentDetailed) => {

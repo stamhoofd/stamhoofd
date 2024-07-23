@@ -207,7 +207,6 @@ export class Group extends Model {
             "groupId = ? and cycle = ? and waitingList = 0 and registeredAt is not null",
             [this.id, this.cycle]
         )
-        //const query = `select count(*) as c from \`${Registration.table}\` where groupId = ? and cycle = ? and (((registeredAt is not null or reservedUntil >= ?) and waitingList = 0) OR (waitingList = 1 AND canRegister = 1))`
 
         this.settings.reservedMembers = await Group.getCount(
             "groupId = ? and cycle = ? and ((waitingList = 0 and registeredAt is null AND reservedUntil >= ?) OR (waitingList = 1 and canRegister = 1))",
@@ -218,37 +217,6 @@ export class Group extends Model {
             "groupId = ? and cycle = ? and waitingList = 1",
             [this.id, this.cycle, new Date()]
         )
-
-        // Loop cycle -1 until current (excluding current)
-        for (let cycle = -1; cycle < this.cycle; cycle++) {
-            if (!this.settings.cycleSettings.has(cycle)) {
-                this.settings.cycleSettings.set(cycle, CycleInformation.create({
-                    registeredMembers: 0,
-                    reservedMembers: 0,
-                    waitingListSize: 0
-                }))
-            }
-        }
-
-        // Older cycles
-        // todo: optimize this a bit
-        for (const [cycle, info] of this.settings.cycleSettings) {
-
-            info.registeredMembers = await Group.getCount(
-                "groupId = ? and cycle = ? and waitingList = 0 and registeredAt is not null",
-                [this.id, cycle]
-            )
-
-            info.reservedMembers = await Group.getCount(
-                "groupId = ? and cycle = ? and ((waitingList = 0 and registeredAt is null AND reservedUntil >= ?) OR (waitingList = 1 and canRegister = 1))",
-                [this.id, cycle, new Date()]
-            )
-
-            info.waitingListSize = await Group.getCount(
-                "groupId = ? and cycle = ? and waitingList = 1",
-                [this.id, cycle, new Date()]
-            )
-        }
     }
 
     static async deleteUnreachable(organizationId: string, period: OrganizationRegistrationPeriod, allGroups: Group[]) {

@@ -7,10 +7,6 @@
         <h2 class="style-title-list">
             {{ group.settings.name }}
         </h2>
-        <p class="style-description-small">
-            {{ group.settings.dateRangeDescription }}
-        </p>
-
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
