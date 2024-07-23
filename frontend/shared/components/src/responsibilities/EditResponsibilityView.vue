@@ -29,7 +29,7 @@
             Nationale functie
         </Checkbox>
 
-        <template v-if="organizationBased">
+        <template v-if="organizationBased && app === 'admin'">
             <hr>
             <h2>Vereisten</h2>
 
