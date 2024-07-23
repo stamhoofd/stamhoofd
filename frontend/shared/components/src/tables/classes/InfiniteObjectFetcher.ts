@@ -33,7 +33,7 @@ export class InfiniteObjectFetcher<O extends {id: string}> {
     fetchingData = false;
     delayFetchUntil: Date|null = null;
 
-    limit = 1
+    limit = 20
     sort: SortList = []
 
     /**

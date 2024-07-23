@@ -6,23 +6,11 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Formatter } from '@stamhoofd/utility';
 
-import {ErrorBox} from "../errors/ErrorBox";
-import STErrorsDefault from "../errors/STErrorsDefault.vue";
-import {Validator} from "../errors/Validator";
-import STList from "../layout/STList.vue";
-import STListItem from "../layout/STListItem.vue";
-import AddressInput from "./AddressInput.vue";
-import Checkbox from "./Checkbox.vue";
-import DateSelection from "./DateSelection.vue";
-import EmailInput from "./EmailInput.vue";
-import ImageInput from "./ImageInput.vue";
-import NumberInput from "./NumberInput.vue";
-import PhoneInput from "./PhoneInput.vue";
-import PriceInput from "./PriceInput.vue";
-import Radio from "./Radio.vue";
+import { ErrorBox } from "../errors/ErrorBox";
+import { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
 @Component({
     components: {
@@ -41,7 +29,7 @@ export default class TimeMinutesInput extends Vue {
     valid = true;
 
     @Prop({ default: null })
-        value!: number | null
+        modelValue!: number | null
 
     @Prop({ default: true })
         required!: boolean
@@ -57,7 +45,7 @@ export default class TimeMinutesInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChanged(val: number | null) {
         if (val === null) {
             return
@@ -71,8 +59,8 @@ export default class TimeMinutesInput extends Vue {
                 return this.validate()
             })
         }
-        if (this.value) {
-            this.timeRaw = Formatter.minutesPadded(this.value)
+        if (this.modelValue) {
+            this.timeRaw = Formatter.minutesPadded(this.modelValue)
         } else {
             this.timeRaw = ""
         }
@@ -91,7 +79,7 @@ export default class TimeMinutesInput extends Vue {
         if (!this.required && this.timeRaw.length == 0) {
             this.errorBox = null
 
-            if (this.value !== null) {
+            if (this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
             }
             return true
@@ -105,7 +93,7 @@ export default class TimeMinutesInput extends Vue {
                 "message": "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
                 "field": "time"
             }))
-            if (this.value !== null) {
+            if (this.modelValue !== null) {
                 this.$emit('update:modelValue', null)
             }
             return false
@@ -125,7 +113,7 @@ export default class TimeMinutesInput extends Vue {
 
             const time = Math.max(0, Math.min(hours*60 + minutes, 24*60 - 1))
 
-            if (time !== this.value) {
+            if (time !== this.modelValue) {
                 this.$emit('update:modelValue', time)
             }
             this.errorBox = null

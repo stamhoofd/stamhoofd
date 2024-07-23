@@ -29,7 +29,9 @@
 
             <ScrollableSegmentedControl v-model="selectedYear" :items="years" :labels="yearLabels" />
             
-            <Checkbox v-model="addSuggestions" v-if="selectedYear === null">Toon wekelijkse suggesties voor X</Checkbox>
+            <Checkbox v-if="selectedYear === null && suggestionsGroup" v-model="addSuggestions">
+                Toon wekelijkse suggesties voor {{ suggestionsGroup.settings.name }}
+            </Checkbox>
 
             <hr>
 
@@ -61,8 +63,8 @@
                         </p>
 
                         <template #right>
-                            <span class="icon edit gray" v-if="event.id" />
-                            <span class="icon add gray" v-else />
+                            <span v-if="event.id" class="icon edit gray" />
+                            <span v-else class="icon add gray" />
                         </template>
                     </STListItem>
                 </STList>
@@ -80,11 +82,11 @@ import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, So
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref, watchEffect } from 'vue';
 import { UIFilter } from '../filters/UIFilter';
-import { useContext } from '../hooks';
+import { useContext, useOrganization, useUser } from '../hooks';
+import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
-import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 
 type ObjectType = Event;
 
@@ -98,6 +100,8 @@ const years = computed(() => {
     const currentYear = Formatter.year(new Date());
     return [null, currentYear, currentYear - 1, currentYear - 2]
 })
+const user = useUser();
+const organization = useOrganization();
 
 const yearLabels = computed(() => {
     return years.value.map(y => {
@@ -135,6 +139,22 @@ const fetcher = useInfiniteObjectFetcher<ObjectType>({
 })
 
 const addSuggestions = ref(false);
+const suggestedGroups = computed(() => {
+    const u = user.value
+    if (!u || !u.memberId) {
+        return []
+    }
+    const member = u.members.members.find(m => m. id === u.memberId)
+    if (!member) {
+        return []
+    }
+
+    const responsibilities = member.responsibilities.filter(r => r.isActive && !!r.groupId)
+    const groups = [organization.value, ...u.members.organizations].flatMap(o => o?.period.groups ?? [])
+    return groups.filter(g => g.settings.defaultEventTime && responsibilities.some(r => r.groupId === g.id))
+})
+const suggestionsGroup = ref(suggestedGroups.value[0]) ?? null;
+
 const fillEventsUntil = computed(() => {
     const fetcherLastDate = fetcher.objects[fetcher.objects.length - 1]?.startDate
 

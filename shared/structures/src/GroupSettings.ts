@@ -74,6 +74,17 @@ export class CycleInformation extends AutoEncoder {
 
 }
 
+export class GroupDefaultEventTime extends AutoEncoder {
+    @field({ decoder: IntegerDecoder })
+    dayOfWeek = 1 // 1 = monday, 7 = sunday
+
+    @field({ decoder: IntegerDecoder })
+    startTime = 0 // minutes since midnight
+
+    @field({ decoder: IntegerDecoder })
+    endTime = 0 // minutes since midnight
+}
+
 export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
@@ -127,6 +138,9 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function(this: GroupSettings){ return this.endDate } })
     @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function(this: GroupSettings){ return this.registrationEndDate ?? this.endDate } })
     registrationEndDate: Date | null = null
+
+    @field({ decoder: GroupDefaultEventTime, nullable: true, version: 283 })
+    defaultEventTime: GroupDefaultEventTime|null = null
 
     @field({ decoder: new ArrayDecoder(GroupPrices) })
     prices: GroupPrices[] = []
