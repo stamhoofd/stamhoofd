@@ -25,7 +25,7 @@
 
             <template v-if="hasResponsibilities && (hasWrite || responsibilities.length)">
                 <dt>Functies</dt>
-                <dd class="with-icons" :class="{button: $context.auth.hasFullAccess()}" @click="$context.auth.hasFullAccess() ? editResponsibilities : null">
+                <dd class="with-icons" :class="{button: $context.auth.hasFullAccess()}" @click="$context.auth.hasFullAccess() ? editResponsibilities() : null">
                     {{ responsibilitiesText }}
 
                     <span class="icon edit gray" v-if="$context.auth.hasFullAccess()"/>
