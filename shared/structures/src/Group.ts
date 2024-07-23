@@ -29,6 +29,9 @@ export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 267 })
     defaultAgeGroupId: string|null = null
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: IntegerDecoder })
     cycle = 0
 
