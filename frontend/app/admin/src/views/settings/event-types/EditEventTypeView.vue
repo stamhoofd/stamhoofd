@@ -7,13 +7,32 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('shared.name') ">
+            <STInputBox :title="$t('shared.name') " error-fields="name" :error-box="errors.errorBox">
                 <input
                     v-model="name"
                     class="input"
                     type="text"
                     :placeholder="$t('shared.name') "
                 >
+            </STInputBox>
+        </div>
+
+        <STInputBox :title="$t('Beschrijving')" error-fields="description" :error-box="errors.errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                :placeholder="$t('Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.')"
+                autocomplete=""
+            />
+        </STInputBox>
+
+        <hr>
+        <h2>{{ $t('Limieten') }}</h2>
+
+        <div class="split-inputs">
+            <STInputBox title="Maximum aantal activiteiten per jaar (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
+                <NumberInput v-model="maximum" placeholder="Geen" :required="false" />
             </STInputBox>
         </div>
 
@@ -36,7 +55,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch, NumberInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformEventType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -98,6 +117,16 @@ const doDelete = async () => {
 const name = computed({
     get: () => patched.value.name,
     set: (name) => addPatch({name}),
+});
+
+const description = computed({
+    get: () => patched.value.description,
+    set: (description) => addPatch({description}),
+});
+
+const maximum = computed({
+    get: () => patched.value.maximum,
+    set: (maximum) => addPatch({maximum}),
 });
 
 const shouldNavigateAway = async () => {
