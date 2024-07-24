@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus } from '@stamhoofd/structures';
+import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
@@ -27,6 +27,9 @@ export class Group extends Model {
         }
     })
     id!: string;
+
+    @column({ type: "string" })
+    type = GroupType.Membership;
 
     @column({ type: "json", decoder: GroupSettings })
     settings: GroupSettings;

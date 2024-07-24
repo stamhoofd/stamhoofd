@@ -1,11 +1,12 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Event } from '@stamhoofd/models';
-import { Event as EventStruct, PermissionLevel } from "@stamhoofd/structures";
+import { Event as EventStruct, GroupType, PermissionLevel } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
+import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
 
 type Params = { id: string };
 type Query = undefined;
@@ -68,7 +69,17 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.startDate = put.startDate
             event.endDate = put.endDate
             event.meta = put.meta
-            event.groupId = put.group?.id ?? null
+
+            if (put.group) {
+                put.group.type = GroupType.EventRegistration
+                const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                    put.group,
+                    organization?.id ?? put.group.organizationId,
+                    organization?.periodId ? organization.periodId : put.group.periodId
+                )
+                event.groupId = group.id
+
+            }
             event.typeId = put.typeId
 
             if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
@@ -95,14 +106,46 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.startDate = patch.startDate ?? event.startDate
             event.endDate = patch.endDate ?? event.endDate
             event.meta = patchObject(event.meta, patch.meta)
-            event.groupId = patch.group?.id ?? event.groupId
             event.typeId = patch.typeId ?? event.typeId
 
-            await event.save()
+            if (patch.group !== undefined) {
+                if (patch.group === null) {
+                    // delete
+                    if (event.groupId) {
+                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
+                        event.groupId = null;
+                    }
 
+                } else if (patch.group.isPatch()) {
+                    if (!event.groupId) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'group',
+                            message: 'Cannot patch group before it is created'
+                        })
+                    }
+                    patch.group.id = event.groupId
+                    patch.group.type = GroupType.EventRegistration
+                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group)
+                } else {
+                    if (event.groupId) {
+                        // need to delete old group first
+                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId)
+                        event.groupId = null;
+                    }
+                    patch.group.type = GroupType.EventRegistration
+                    const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                        patch.group,
+                        organization?.id ?? patch.group.organizationId,
+                        organization?.periodId ? organization.periodId : patch.group.periodId
+                    )
+                    event.groupId = group.id
+                }
+            }
+
+            await event.save()
             events.push(event)
         }
-
 
         return new Response(
             await AuthenticatedStructures.events(events)
