@@ -1,9 +1,9 @@
 import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType } from '@stamhoofd/structures';
+import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
 import { Formatter } from '@stamhoofd/utility';
+import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
 
 if (Member === undefined) {
     throw new Error("Import Member is undefined")

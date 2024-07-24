@@ -214,7 +214,7 @@ export class AuthenticatedStructures {
             const group = groups.find(g => g.id == event.groupId) ?? null
 
             if (group && await Context.auth.canAccessGroup(group)) {
-                result.push(event.getPrivateStructure())
+                result.push(event.getPrivateStructure(group))
             } else {
                 result.push(event.getStructure(group))
             }
