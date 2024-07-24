@@ -98,6 +98,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EventTypes)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/tent.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Soorten activiteiten') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Stel in welke soorten activiteiten er bestaan en toegevoegd kunnen worden aan de kalender') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
 
@@ -149,6 +164,7 @@ import { ComponentOptions } from 'vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
+import EditEventTypesView from './event-types/EditEventTypesView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -159,6 +175,7 @@ enum Routes {
     PlatformMembershipTypes = 'lidmaatschappen',
     EmailTemplates = 'email-templates',
     EmailSettings = 'emailadressen',
+    EventTypes = 'soorten-activiteiten',
 }
 
 const platform = usePlatform()
@@ -216,6 +233,11 @@ defineRoutes([
         url: Routes.EmailSettings,
         present: 'popup',
         component: EmailSettingsView as ComponentOptions,
+    },
+    {
+        url: Routes.EventTypes,
+        present: 'popup',
+        component: EditEventTypesView as ComponentOptions,
     }
 ])
 const $navigate = useNavigate()

@@ -123,6 +123,24 @@ export class PlatformMembershipType extends AutoEncoder {
     }
 }
 
+
+export class PlatformEventType extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ''
+
+    @field({ decoder: StringDecoder })
+    description = ''
+
+    /**
+     * Maximum amount that each organization can have this type
+     */
+    @field({ decoder: IntegerDecoder, nullable: true })
+    maximum: null | number = null
+}
+
 export class PlatformConfig extends AutoEncoder {
     @field({ decoder: OrganizationRecordsConfiguration, version: 253 })
     recordsConfiguration = OrganizationRecordsConfiguration.create({})
@@ -138,6 +156,9 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PlatformMembershipType), version: 268 })
     membershipTypes: PlatformMembershipType[] = []
+
+    @field({ decoder: new ArrayDecoder(PlatformEventType), version: 287 })
+    eventTypes: PlatformEventType[] = []
 
     getEmailReplacements() {
         // todo: implement real colors
