@@ -119,6 +119,9 @@ export * from './src/members/checkout/OldRegisterCartValidator'
 export * from "./src/members/checkout/OldRegisterCheckout"
 export * from "./src/members/checkout/OldRegisterItem"
 export * from "./src/members/checkout/RegisterCheckout"
+export * from "./src/members/checkout/RegisterCart"
+export * from "./src/members/checkout/RegisterItem"
+export * from "./src/members/checkout/BalanceItemCartItem"
 export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop

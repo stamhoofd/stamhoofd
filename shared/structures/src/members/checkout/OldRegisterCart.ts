@@ -4,16 +4,12 @@ import { SimpleErrors } from "@simonbackx/simple-errors"
 import { MemberBalanceItem } from "../../BalanceItemDetailed"
 import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
-// eslint bug marks types as "unused"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from "../../Organization"
 import { PaymentConfiguration } from "../../PaymentConfiguration"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from "../MemberWithRegistrations"
-import { MemberWithRegistrationsBlob } from "../MemberWithRegistrationsBlob"
+import { BalanceItemCartItem } from "./BalanceItemCartItem"
 import { OldRegisterCartPriceCalculator } from "./OldRegisterCartPriceCalculator"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { BalanceItemCartItem, OldIDRegisterItem, OldRegisterItem } from "./OldRegisterItem"
+import { OldIDRegisterItem, OldRegisterItem } from "./OldRegisterItem"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 /**

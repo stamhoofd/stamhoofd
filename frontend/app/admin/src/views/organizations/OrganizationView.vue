@@ -156,7 +156,7 @@
             <LoadingButton :loading="deleting">
                 <button class="button secundary danger" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>{{ $t('shared.delete') }}</span>
+                    <span>{{ $t('Verwijderen') }}</span>
                 </button>
             </LoadingButton>
         </main>

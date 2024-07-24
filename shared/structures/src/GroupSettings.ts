@@ -1,9 +1,73 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder, EnumDecoder,field, IntegerDecoder,MapDecoder,RecordDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from "uuid";
 
 import { Image } from './files/Image';
 import { GroupGenderType } from './GroupGenderType';
 import { OldGroupPrices } from './OldGroupPrices';
+
+export class ReduceablePrice extends AutoEncoder {
+    @field({ decoder: IntegerDecoder })
+    price = 0
+
+    @field({ decoder: IntegerDecoder, nullable: true })
+    reducedPrice: number | null = null
+}
+
+export class GroupPrice extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = 'Standaardtarief'
+
+    @field({ decoder: ReduceablePrice })
+    price = ReduceablePrice.create({})
+
+    // Toekomst: restricties
+}
+
+export class GroupOption extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ""
+
+    /**
+     * Price added (can be negative) is always in cents, to avoid floating point errors
+     */
+    @field({ decoder: ReduceablePrice })
+    price = ReduceablePrice.create({})
+
+    /**
+     * Minimum you need to choose
+     */
+    @field({ decoder: IntegerDecoder })
+    mininum = 0
+
+    /**
+     * Maximum (if > 1, you can choose an amount for this option)
+     */
+    @field({ decoder: IntegerDecoder })
+    maximum = 1
+}
+
+export class GroupOptionMenu extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ""
+
+    @field({ decoder: BooleanDecoder })
+    multipleChoice = false;
+
+    @field({ decoder: new ArrayDecoder(GroupOption) })
+    options: GroupOption[] = [
+        GroupOption.create({})
+    ]
+}
 
 
 export enum WaitingListType {
@@ -66,45 +130,11 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = ""
 
-    /**
-     * @deprecated
-     * Information about previous cycles
-     */
-    @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193 })
-    cycleSettings: Map<number, CycleInformation> = new Map()
+    @field({ decoder: new ArrayDecoder(GroupPrice), version: 285})
+    prices: GroupPrice[] = [GroupPrice.create({})]
 
-    /**
-     * @deprecated
-     * Use registration periods instead
-     * + replaced by activities
-     */
-    @field({ decoder: DateDecoder })
-    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
-        const d2 = new Date(d)
-        d2.setUTCHours(-2, 0, 0, 0) // brussels time
-        return d2
-    } })
-    startDate: Date = new Date()
-
-    /**
-     * @deprecated
-     * Use registration periods instead
-     * + replaced by activities
-     */
-    @field({ decoder: DateDecoder })
-    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
-        const d2 = new Date(d)
-        d2.setUTCHours(23-2, 59, 0, 0) // brussels time
-        return d2
-    } })
-    endDate: Date = new Date()
-
-    /**
-     * @deprecated
-     * Dispay start and end date times
-     */
-    @field({ decoder: BooleanDecoder, version: 78 })
-    displayStartEndTime = false
+    @field({ decoder: new ArrayDecoder(GroupOptionMenu), version: 285 })
+    optionMenus: GroupOptionMenu[] = []
 
     @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function(this: GroupSettings){ return this.startDate } })
     @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function(this: GroupSettings){ return this.registrationStartDate ?? this.startDate } })
@@ -116,13 +146,6 @@ export class GroupSettings extends AutoEncoder {
 
     @field({ decoder: GroupDefaultEventTime, nullable: true, version: 283 })
     defaultEventTime: GroupDefaultEventTime|null = null
-
-    /**
-     * @deprecated
-     */
-    @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'prices' })
-    @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'oldPrices', optional: true, version: 284 })
-    oldPrices: OldGroupPrices[] = []
 
     @field({ decoder: new EnumDecoder(GroupGenderType) })
     genderType: GroupGenderType = GroupGenderType.Mixed
@@ -236,18 +259,28 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 16 })
     priorityForFamily = true
 
-    /**
-     * @deprecated
-     */
-    @field({ decoder: new ArrayDecoder(Image), version: 58 })
-    images: Image[] = []
-
     @field({ decoder: Image, nullable: true, version: 65 })
     coverPhoto: Image | null = null
 
     @field({ decoder: Image, nullable: true, version: 66 })
     squarePhoto: Image | null = null
 
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'prices' })
+    @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'oldPrices', optional: true, version: 284 })
+    oldPrices: OldGroupPrices[] = []
+
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new ArrayDecoder(Image), version: 58 })
+    images: Image[] = []
+
+    /**
+     * @deprecated
+     */
     @field({ decoder: StringDecoder, version: 76 })
     location = ""
 
@@ -271,6 +304,46 @@ export class GroupSettings extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 102 })
     preventPreviousGroupIds: string[] = []
+
+    /**
+     * @deprecated
+     * Information about previous cycles
+     */
+    @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193 })
+    cycleSettings: Map<number, CycleInformation> = new Map()
+
+    /**
+     * @deprecated
+     * Use registration periods instead
+     * + replaced by activities
+     */
+    @field({ decoder: DateDecoder })
+    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
+        const d2 = new Date(d)
+        d2.setUTCHours(-2, 0, 0, 0) // brussels time
+        return d2
+    } })
+    startDate: Date = new Date()
+
+    /**
+     * @deprecated
+     * Use registration periods instead
+     * + replaced by activities
+     */
+    @field({ decoder: DateDecoder })
+    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
+        const d2 = new Date(d)
+        d2.setUTCHours(23-2, 59, 0, 0) // brussels time
+        return d2
+    } })
+    endDate: Date = new Date()
+
+    /**
+     * @deprecated
+     * Dispay start and end date times
+     */
+    @field({ decoder: BooleanDecoder, version: 78 })
+    displayStartEndTime = false
 
     /**
      * @deprecated

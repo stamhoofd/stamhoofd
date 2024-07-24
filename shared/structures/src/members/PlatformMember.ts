@@ -13,10 +13,11 @@ import { MemberDetails } from "./MemberDetails"
 import { MemberWithRegistrationsBlob, MembersBlob } from "./MemberWithRegistrationsBlob"
 import { ObjectWithRecords } from "./ObjectWithRecords"
 import { Parent } from "./Parent"
-import { RegisterCheckout, RegisterItem } from "./checkout/RegisterCheckout"
+import { RegisterCheckout } from "./checkout/RegisterCheckout"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
+import { RegisterItem } from "./checkout/RegisterItem"
 
 export class PlatformFamily {
     members: PlatformMember[] = []

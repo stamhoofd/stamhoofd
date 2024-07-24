@@ -220,7 +220,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
 }
 
 defineExpose({

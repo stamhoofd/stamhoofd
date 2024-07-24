@@ -183,7 +183,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Locatie toevoegen
+                    {{ $t('Locatie toevoegen') }}
                 </h3>
             </STListItem>
 
@@ -194,42 +194,42 @@
 
                 <UploadButton v-model="coverPhoto" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
-                        Omslagfoto toevoegen
+                        {{ $t('Omslagfoto toevoegen') }}
                     </h3>
                 </UploadButton>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="button">
+            <STListItem :selectable="true" element-name="button" @click="addRegistrations">
                 <template #left>
                     <span class="icon edit gray" />
                 </template>
 
                 <h3 class="style-title-list">
-                    Inschrijvingen verzamelen
+                    {{ patched.group ? $t('Inschrijvingen') : $t('Inschrijvingen verzamelen') }}
                 </h3>
             </STListItem>
         </STList>
 
-              
-
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
-                Verwijder deze activiteit
+                {{ $t('Acties') }}
             </h2>
 
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
+            <LoadingButton :loading="deleting">
+                <button class="button secundary danger" type="button" @click="deleteMe">
+                    <span class="icon trash" />
+                    <span>{{ $t('Verwijderen') }}</span>
+                </button>
+            </LoadingButton>
         </div>
     </SaveView>
 </template>
 
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
-import { Event, EventLocation, EventMeta, ResolutionRequest } from '@stamhoofd/structures';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
+import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
@@ -237,8 +237,8 @@ import { useContext, useOrganization, usePatch } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 
 const props = withDefaults(
     defineProps<{
@@ -255,10 +255,12 @@ const errors = useErrors();
 const {hasChanges, patched, addPatch, patch} = usePatch(props.event);
 const title = computed(() => props.isNew ? 'Activiteit toevoegen' : 'Activiteit bewerken')
 const saving = ref(false)
+const deleting = ref(false)
 const $t = useTranslate()
 const context = useContext();
 const pop = usePop();
 const organization = useOrganization();
+const present = usePresent();
 
 const multipleDays = computed({
     get: () => {
@@ -486,15 +488,92 @@ async function save() {
     saving.value = false;
 }
 
-function deleteMe() {
-    // todo delete
+async function addRegistrations() {
+    
+    if (patched.value.group) {
+        // Edit the group
+        await present({
+            components: [
+                new ComponentWithProperties(EditGroupView, {
+                    group: patched.value.group,
+                    isNew: false,
+                    showToasts: false,
+                    saveHandler: (patch: AutoEncoderPatchType<Group>) => {
+                        addPatch({
+                            group: patch
+                        })
+                    },
+                    deleteHandler: async () => {
+                        addPatch({
+                            group: null
+                        })
+                    }
+                })
+            ],
+            modalDisplayStyle: 'popup'
+        })
+    } else {
+        const group = Group.create({
+            type: GroupType.EventRegistration,
+            settings: GroupSettings.create({
+                name: patched.value.name
+            })
+        })
+        
+        // Edit the group
+        await present({
+            components: [
+                new ComponentWithProperties(EditGroupView, {
+                    group: group,
+                    isNew: true,
+                    showToasts: false,
+                    saveHandler: (patch: AutoEncoderPatchType<Group>) => {
+                        addPatch({
+                            group: group.patch(patch)
+                        })
+                    }
+                })
+            ],
+            modalDisplayStyle: 'popup'
+        })
+    }
+
+}
+
+async function deleteMe() {
+    if (saving.value || deleting.value) {
+        return;
+    }
+
+    deleting.value = true;
+
+    try {
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+        arr.addDelete(props.event.id)
+
+        await context.value.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/events',
+            body: arr,
+            decoder: new ArrayDecoder(Event as Decoder<Event>),
+        })
+
+        Toast.success($t('De activiteit is verwijderd')).show()
+        props.callback?.()
+        await pop({force: true})
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    
+    }
+
+    deleting.value = false;
 }
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
 }
 
 defineExpose({

@@ -40,7 +40,7 @@
                     <div>
                         <button class="button text" type="button" @click="deletePrice(price)">
                             <span class="icon trash" />
-                            <span class="hide-smartphone">{{ $t('shared.delete') }}</span>
+                            <span class="hide-smartphone">{{ $t('Verwijderen') }}</span>
                         </button>
                     </div>
                 </h2>
@@ -77,12 +77,12 @@
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
             <h2>
-                {{ $t('shared.actions') }}
+                {{ $t('Acties') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('shared.delete') }}</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>
@@ -139,7 +139,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('admin.settings.membershipTypes.period.delete.confirmation.title'), $t('shared.delete'))) {
+    if (!await CenteredMessage.confirm($t('admin.settings.membershipTypes.period.delete.confirmation.title'), $t('Verwijderen'))) {
         return
     }
         
@@ -184,7 +184,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
 }
 
 function patchPrice(configPrice: PlatformMembershipTypeConfigPrice, patch: PartialWithoutMethods<AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>>) {

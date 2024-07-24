@@ -16,9 +16,26 @@ export enum GroupStatus {
     "Archived" = "Archived"
 }
 
+export enum GroupType {
+    /**
+     * registration as a member at an organization - for a specific age group (most of the time)
+     */
+    "Membership" = "Membership",
+
+    /**
+     * Activity
+     */
+    "EventRegistration" = "EventRegistration",
+    // idea: EventPreRegistration = "EventPreRegistration", // let know in advance that you want to join
+    // idea: EventAttendance = "EventAttendance", // attendance list for an event, by admins only
+}
+
 export class Group extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
+
+    @field({ decoder: new EnumDecoder(GroupType), version: 286 })
+    type: GroupType = GroupType.Membership
 
     @field({ decoder: StringDecoder, version: 250 })
     organizationId: string = ""

@@ -1,17 +1,22 @@
 {
-    "javascript.format.enable": false,
-    "search.exclude": {
-        "**/dist": true,
-        "**/dist-prefix": true,
-        "**/node_modules": true,
-        "**/android/app/src/main/assets": true,
-        "**/android/app/build": true,
-        "**/ios/App/App/public": true,
-        "**/yarn-error.log": true,
-        "LICENSE": true,
-        ".yarn/releases": true,
-        "**.tsbuildinfo": true
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
     },
+    "[typescript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "codeQL.githubDatabase.update": "never",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "never"
+    },
+    "editor.codeLens": false,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": false,
+    "eslint.format.enable": true,
     "eslint.options": {
         "extensions": [
             ".js",
@@ -19,12 +24,6 @@
             ".vue"
         ]
     },
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "never"
-    },
-    "editor.formatOnPaste": false,
-    "editor.formatOnSave": false,
-    "eslint.format.enable": true,
     "eslint.validate": [
         "typescript",
         "javascript",
@@ -38,28 +37,50 @@
         "./devops",
         "./shared/*"
     ],
-    "search.useIgnoreFiles": false,
     "i18n-ally.autoDetection": false,
+    "i18n-ally.disablePathParsing": true,
+    "i18n-ally.displayLanguage": "nl",
+    "i18n-ally.enabledFrameworks": [
+        "vue"
+    ],
+    "i18n-ally.extract.autoDetect": true,
+    "i18n-ally.extract.keygenStrategy": "source",
+    "i18n-ally.extract.parsers.html": {
+        "attributes": [
+            "text",
+            "title",
+            "alt",
+            "placeholder",
+            "label",
+            "aria-label"
+        ],
+        "ignoredTags": [
+            "script",
+            "style"
+        ],
+        "inlineText": true,
+        "vBind": true
+    },
+    "i18n-ally.keepFulfilled": false,
+    "i18n-ally.keystyle": "flat",
     "i18n-ally.localesPaths": [
         "shared/locales/src"
     ],
     "i18n-ally.sourceLanguage": "nl",
-    "i18n-ally.displayLanguage": "nl",
-    "i18n-ally.keepFulfilled": false,
-    "i18n-ally.extract.autoDetect": false,
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "codeQL.githubDatabase.update": "never",
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-    "[vue]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "javascript.format.enable": false,
+    "search.exclude": {
+        "**.tsbuildinfo": true,
+        "**/android/app/build": true,
+        "**/android/app/src/main/assets": true,
+        "**/dist": true,
+        "**/dist-prefix": true,
+        "**/ios/App/App/public": true,
+        "**/node_modules": true,
+        "**/yarn-error.log": true,
+        ".yarn/releases": true,
+        "LICENSE": true
     },
-    "[typescript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
-    "editor.codeLens": false,
-    "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
-    },
+    "search.useIgnoreFiles": false,
     "typescript.preferences.importModuleSpecifier": "project-relative",
-    "i18n-ally.keystyle": "flat"
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

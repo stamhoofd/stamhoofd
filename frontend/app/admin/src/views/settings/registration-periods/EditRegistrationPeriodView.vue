@@ -39,7 +39,7 @@
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('shared.delete') }}</span>
+                <span>{{ $t('Verwijderen') }}</span>
             </button>
         </div>
     </SaveView>
@@ -93,7 +93,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('admin.settings.registrationPeriods.delete.confirmation.title'), $t('shared.delete'), $t('admin.settings.registrationPeriods.delete.confirmation.description'))) {
+    if (!await CenteredMessage.confirm($t('admin.settings.registrationPeriods.delete.confirmation.title'), $t('Verwijderen'), $t('admin.settings.registrationPeriods.delete.confirmation.description'))) {
         return
     }
         
@@ -128,7 +128,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
     
-    return await CenteredMessage.confirm($t('shared.save.shouldNavigateAway.title'), $t('shared.save.shouldNavigateAway.confirm'))
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
 }
 
 defineExpose({

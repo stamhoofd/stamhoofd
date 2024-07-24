@@ -6,7 +6,14 @@ export class Registration extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4()  })
     id: string
 
-    /// You need to look up the group yourself in the organization
+    // Group price that was chosen
+    // @field({ decoder: GroupPrice, version: 266 })
+    // groupPrice: GroupPrice
+
+    // options that were chosen
+    // @field({ decoder: new ArrayDecoder(RegisterItemOption), version: 266 })
+    // options: RegisterItemOption[] = []
+
     @field({ decoder: Group, version: 266 })
     group: Group
 
