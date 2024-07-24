@@ -510,6 +510,10 @@
     align-items: center;
 }
 
+.style-description-small + .style-button-bar {
+    margin-top: 10px;
+}
+
 .style-with-button {
     display: flex;
     flex-direction: row;

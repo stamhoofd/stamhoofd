@@ -62,6 +62,12 @@
                             {{ event.meta.location?.name || event.meta.location?.address?.city }}
                         </p>
 
+                        <p v-if="event.group" class="style-button-bar">
+                            <span class="style-tag" v-if="event.group.notYetOpen">Inschrijvingen starten op {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+                            <span class="style-tag error" v-else-if="event.group.closed">Inschrijvingen gesloten</span>
+                            <span class="style-tag success" v-else>Inschrijvingen open</span>
+                        </p>
+
                         <template #right>
                             <span v-if="event.id" class="icon edit gray" />
                             <span v-else class="icon add gray" />
