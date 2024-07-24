@@ -40,7 +40,7 @@
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <STListItem v-for="event of group.events" :key="event.id" class="" :selectable="true" @click="editEvent(event)">
+                    <STListItem v-for="event of group.events" :key="event.id" class="right-stack" :selectable="true" @click="editEvent(event)">
                         <template #left>
                             <div class="calendar-box">
                                 <div class="overlay">
@@ -62,13 +62,14 @@
                             {{ event.meta.location?.name || event.meta.location?.address?.city }}
                         </p>
 
-                        <p v-if="event.group" class="style-button-bar">
-                            <span class="style-tag" v-if="event.group.notYetOpen">Inschrijvingen starten op {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-                            <span class="style-tag error" v-else-if="event.group.closed">Inschrijvingen gesloten</span>
-                            <span class="style-tag success" v-else>Inschrijvingen open</span>
+                        <p v-if="event.group" class="style-description-small">
+                            <span v-if="event.group.notYetOpen">Inschrijvingen starten op {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+                            <span v-else-if="event.group.closed">Inschrijvingen gesloten</span>
+                            <span v-else>Inschrijvingen open</span>
                         </p>
 
                         <template #right>
+                            <span class="icon gray eye-off" v-if="!event.meta.visible" v-tooltip="'Verborgen'" />
                             <span v-if="event.id" class="icon edit gray" />
                             <span v-else class="icon add gray" />
                         </template>
