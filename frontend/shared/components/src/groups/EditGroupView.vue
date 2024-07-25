@@ -28,6 +28,11 @@
             <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
         </div>
 
+        <hr>
+        <h2>Tarieven</h2>
+
+        <GroupPriceBox :price="patched.settings.prices[0]" :group="patched" :error-box="errors.errorBox" @patch:price="addPatchPrice" />
+
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
@@ -45,16 +50,17 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Group, GroupSettings, GroupType } from '@stamhoofd/structures';
+import { Group, GroupPrice, GroupSettings, GroupType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { usePatch } from '../hooks';
+import { usePatch, usePatchableArray } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { DateSelection, TimeInput } from '@stamhoofd/components';
+import GroupPriceBox from './components/GroupPriceBox.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -71,6 +77,15 @@ const props = withDefaults(
 );
 
 const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
+
+const {addPatch: addPatchPrice} = usePatchableArray((prices: PatchableArrayAutoEncoder<GroupPrice>) => {
+    addPatch({
+        settings: GroupSettings.patch({
+            prices
+        })
+    })
+})
+
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);

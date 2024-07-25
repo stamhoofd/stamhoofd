@@ -1,5 +1,6 @@
 export * from "./useContext";
 export * from "./usePatch";
+export * from "./usePatchableArray";
 export * from "./usePatchArray";
 export * from "./useDraggableArray";
 export * from "./useEmitPatch";

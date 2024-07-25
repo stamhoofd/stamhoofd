@@ -6,13 +6,15 @@ export function useEmitPatch<T extends AutoEncoder>(props: any, emit: any, propN
     patched: Ref<T>, 
     addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void 
 } {
+    const createPatch = () => {
+        return ("id" in props[propName] ? props[propName].static.patch({id: props[propName].id}) : props[propName].static.patch({})) as AutoEncoderPatchType<T>;
+    }
+
     return {
-        createPatch: () => {
-            return ("id" in props[propName] ? props[propName].static.patch({id: props[propName].id}) : props[propName].static.patch({})) as AutoEncoderPatchType<T>;
-        },
+        createPatch,
         patched: computed(() => props[propName]) as Ref<T>,
         addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
-            emit('patch:' + propName, props[propName].static.patch(newPatch))
+            emit('patch:' + propName, createPatch().patch(props[propName].static.patch(newPatch)))
         }
     } as any
 }

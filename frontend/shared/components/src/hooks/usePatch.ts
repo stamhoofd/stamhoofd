@@ -1,6 +1,6 @@
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges, PatchType } from "@simonbackx/simple-encoding";
-import { Ref, ref, unref, computed } from "vue";
 import { Version } from "@stamhoofd/structures";
+import { computed, Ref, ref, unref } from "vue";
 
 export function usePatch<T extends AutoEncoder>(obj: T|Ref<T>): {
     createPatch: () => AutoEncoderPatchType<T>,

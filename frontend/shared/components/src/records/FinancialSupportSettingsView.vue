@@ -28,7 +28,7 @@
                 <input v-model="title" class="input" :placeholder="FinancialSupportSettings.defaultTitle">
             </STInputBox>
             <p class="style-description-small">
-                De titel bovenaan de pagina. Normaal neem je hier gewoon '{{ FinancialSupportSettings.defaultTitle }}', maar als je bijvoorbeeld met een UiTPAS werkt, kan je dat wat wijzigen naar bijvoorbeeld 'UiTPAS kansentarief'.
+                De titel bovenaan de pagina waar leden zelf kunnen aangeven dat ze deze financiële ondersteuning nodig hebben. Normaal neem je hier gewoon '{{ FinancialSupportSettings.defaultTitle }}', maar als je bijvoorbeeld met een UiTPAS werkt, kan je dat wat wijzigen naar bijvoorbeeld 'UiTPAS kansentarief'.
             </p>
 
             <STInputBox title="Beschrijving" class="max">
@@ -51,6 +51,14 @@
             
             <STInputBox title="Waarschuwingstekst" class="max">
                 <input v-model="warningText" class="input" :placeholder="FinancialSupportSettings.defaultWarningText">
+            </STInputBox>
+
+            <hr>
+            <h2>Benaming verlaagd tarief</h2>
+            <p>Overal in het systeem krijg je nu de optie om een 2de prijs in te vullen voor personen met deze financiële ondersteuning. Je kan deze prijs daar een naam geven.</p>
+            
+            <STInputBox title="Benaming">
+                <input v-model="priceName" class="input" :placeholder="FinancialSupportSettings.defaultPriceName">
             </STInputBox>
         </template>
     </SaveView>
@@ -122,6 +130,15 @@ const warningText = computed({
     set: (warningText) => {
         addPatch({
             financialSupport: FinancialSupportSettings.patch({warningText})
+        });
+    }
+});
+
+const priceName = computed({
+    get: () => patched.value.financialSupport?.priceName ?? "",
+    set: (priceName) => {
+        addPatch({
+            financialSupport: FinancialSupportSettings.patch({priceName})
         });
     }
 });

@@ -38,6 +38,12 @@ export class FinancialSupportSettings extends AutoEncoder {
     checkboxLabel = FinancialSupportSettings.defaultCheckboxLabel
 
     /**
+     * E.g. 'SOMkort'
+    */
+    @field({ decoder: StringDecoder, version: 289 })
+    priceName = FinancialSupportSettings.defaultPriceName
+
+    /**
      * E.g. 'Uses financial support'
      */
     @field({ decoder: StringDecoder, optional: true })
@@ -49,6 +55,10 @@ export class FinancialSupportSettings extends AutoEncoder {
 
     static get defaultTitle() {
         return "Financiële ondersteuning"
+    }
+
+    static get defaultPriceName() {
+        return "Verlaagd tarief"
     }
 
     static get defaultCheckboxLabel() {
