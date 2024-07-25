@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="time" :error-box="errorBox">
-        <input v-model="timeRaw" class="input" type="time" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
+        <input v-model="timeRaw" class="input" type="time" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @input="(event) => {timeRaw = event.currentTarget.value; validate();}">
     </STInputBox>
 </template>
 
@@ -12,6 +12,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { ErrorBox } from "../errors/ErrorBox";
 import { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
+
 @Component({
     components: {
         STInputBox
@@ -41,7 +42,7 @@ export default class TimeInput extends Vue {
 
     errorBox: ErrorBox | null = null
 
-    @Watch('modelValue')
+    @Watch('modelValue', {deep: true})
     onValueChanged(val: Date) {
         if (val === null) {
             return
@@ -56,7 +57,6 @@ export default class TimeInput extends Vue {
             })
         }
         this.timeRaw = Formatter.timeIso(this.modelValue)
-
     }
 
     unmounted() {

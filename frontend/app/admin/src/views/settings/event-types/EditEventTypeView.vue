@@ -31,8 +31,18 @@
         <h2>{{ $t('Limieten') }}</h2>
 
         <div class="split-inputs">
-            <STInputBox title="Maximum aantal activiteiten per jaar (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
-                <NumberInput v-model="maximum" placeholder="Geen" :required="false" />
+            <STInputBox :title="$t('Maximum aantal activiteiten per jaar (optioneel)')" error-fields="maximum" :error-box="errors.errorBox">
+                <NumberInput v-model="maximum" :placeholder="$t('Geen')" :required="false" />
+            </STInputBox>
+        </div>
+
+        <div class="split-inputs">
+            <STInputBox :title="$t('Minimum aantal dagen')" error-fields="minimumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="minimumDays" :placeholder="$t('Geen')" :required="false" />
+            </STInputBox>
+
+            <STInputBox :title="$t('Maximum aantal dagen')" error-fields="maximumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="maximumDays" :placeholder="$t('Onbeperkt')" :required="false" />
             </STInputBox>
         </div>
 
@@ -127,6 +137,16 @@ const description = computed({
 const maximum = computed({
     get: () => patched.value.maximum,
     set: (maximum) => addPatch({maximum}),
+});
+
+const minimumDays = computed({
+    get: () => patched.value.minimumDays,
+    set: (minimumDays) => addPatch({minimumDays}),
+});
+
+const maximumDays = computed({
+    get: () => patched.value.maximumDays,
+    set: (maximumDays) => addPatch({maximumDays}),
 });
 
 const shouldNavigateAway = async () => {

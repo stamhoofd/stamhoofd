@@ -105,7 +105,9 @@ export abstract class SQLWhere implements SQLExpression {
 export enum SQLWhereSign {
     Equal = '=',
     Greater = '>',
+    GreaterEqual = '>=',
     Less = '<',
+    LessEqual = '<=',
     NotEqual = '!='
 }
 
@@ -147,8 +149,10 @@ export class SQLWhereEqual extends SQLWhere {
         switch (this.sign) {
             case SQLWhereSign.Equal: this.sign = SQLWhereSign.NotEqual; break;
             case SQLWhereSign.NotEqual: this.sign = SQLWhereSign.Equal; break;
-            case SQLWhereSign.Greater: this.sign = SQLWhereSign.Less; break;
-            case SQLWhereSign.Less: this.sign = SQLWhereSign.Greater; break;
+            case SQLWhereSign.Greater: this.sign = SQLWhereSign.LessEqual; break;
+            case SQLWhereSign.Less: this.sign = SQLWhereSign.GreaterEqual; break;
+            case SQLWhereSign.GreaterEqual: this.sign = SQLWhereSign.Less; break;
+            case SQLWhereSign.LessEqual: this.sign = SQLWhereSign.Greater; break
         }
         return this;
     }

@@ -139,6 +139,18 @@ export class PlatformEventType extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, nullable: true })
     maximum: null | number = null
+
+    /**
+     * Maximum number of days allowed for this event type
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 288 })
+    maximumDays: null | number = null
+
+    /**
+     * Minimum number of days allowed for this event type
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 288 })
+    minimumDays: null | number = null
 }
 
 export class PlatformConfig extends AutoEncoder {

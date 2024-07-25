@@ -245,5 +245,15 @@
     "Inschrijvingen verzamelen": "Inschrijvingen verzamelen",
     "Omslagfoto toevoegen": "Omslagfoto toevoegen",
     "Locatie toevoegen": "Locatie toevoegen",
-    "De activiteit is verwijderd": "De activiteit is verwijderd"
+    "De activiteit is verwijderd": "De activiteit is verwijderd",
+    "Limieten": "Limieten",
+    "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.": "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.",
+    "Beschrijving": "Beschrijving",
+    "Maximum aantal activiteiten per jaar (optioneel)": "Maximum aantal activiteiten per jaar (optioneel)",
+    "Geen": "Geen",
+    "Minimum aantal dagen": "Minimum aantal dagen",
+    "Maximum aantal dagen": "Maximum aantal dagen",
+    "Onbeperkt": "Onbeperkt",
+    "Ben je zeker dat je deze activiteit wilt verwijderen?": "Ben je zeker dat je deze activiteit wilt verwijderen?",
+    "Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.": "Je verliest alle bijhorende informatie en kan dit niet ongedaan maken."
 }

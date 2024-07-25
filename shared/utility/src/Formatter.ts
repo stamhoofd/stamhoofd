@@ -177,6 +177,14 @@ export class Formatter {
 
     static dateRange(startDate: Date, endDate: Date): string {
         if (Formatter.dateIso(startDate) === Formatter.dateIso(endDate)) {
+            if (Formatter.time(startDate) === Formatter.time(endDate)) {
+                return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)
+            }
+
+            if (Formatter.time(startDate) === "00:00" && Formatter.time(endDate) === "23:59") {
+                return Formatter.dateWithDay(startDate)
+            }
+
             return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)+" - "+Formatter.time(endDate)
         }
         

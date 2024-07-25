@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges" :loading="saving" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -23,17 +23,27 @@
                 <Dropdown
                     v-model="typeId"
                 >
-                    <option value="">
-                        Geen
-                    </option>
-                    <option value="todo">
-                        Kamp
+                    <option v-for="type of platform.config.eventTypes" :key="type.id" :value="type.id">
+                        {{ type.name }}
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
+        <p v-if="type" class="style-description-block">
+            {{ type.description }}
+        </p>
 
-        <Checkbox v-model="multipleDays">
+        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errors.errorBox" class="max">
+            <WYSIWYGTextInput
+                v-model="description"
+                placeholder="Beschrijving van deze activiteit"
+            />
+        </STInputBox>
+
+        <hr>
+        <h2>Datum</h2>
+
+        <Checkbox v-if="!type || (type.maximumDays !== 1 && (type.minimumDays ?? 1) <= 1)" v-model="multipleDays">
             Meerdere dagen
         </Checkbox>
 
@@ -46,19 +56,12 @@
 
 
         <div class="split-inputs">
-            <STInputBox v-if="multipleDays" title="Einddatum" error-fields="endDate" :error-box="errors.errorBox">
+            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" title="Einddatum" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" />
             </STInputBox>
             <TimeInput v-else v-model="startDate" title="Vanaf" :validator="errors.validator" /> 
             <TimeInput v-model="endDate" title="Tot" :validator="errors.validator" /> 
         </div>
-
-        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errors.errorBox" class="max">
-            <WYSIWYGTextInput
-                v-model="description"
-                placeholder="Beschrijving van deze activiteit"
-            />
-        </STInputBox>
 
         <hr>
         <h2>Beschikbaarheid</h2>
@@ -227,18 +230,17 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
-import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, ResolutionRequest } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
-import { useErrors } from '../errors/useErrors';
-import { useContext, useOrganization, usePatch } from '../hooks';
-import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
-import JumpToContainer from '../containers/JumpToContainer.vue';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, ResolutionRequest } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, ref, watchEffect } from 'vue';
+import JumpToContainer from '../containers/JumpToContainer.vue';
+import { useErrors } from '../errors/useErrors';
+import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
+import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -261,6 +263,12 @@ const context = useContext();
 const pop = usePop();
 const organization = useOrganization();
 const present = usePresent();
+const platform = usePlatform();
+
+const type = computed(() => {
+    const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId)
+    return type ?? null
+})
 
 const multipleDays = computed({
     get: () => {
@@ -272,7 +280,7 @@ const multipleDays = computed({
         }
         if (md) {
             const d = new Date(endDate.value)
-            d.setDate(startDate.value.getDate() + 1)
+            d.setDate(startDate.value.getDate() + (Math.max(2, type.value?.minimumDays || 2) - 1))
             endDate.value = d
         } else {
             const d = new Date(endDate.value)
@@ -284,6 +292,24 @@ const multipleDays = computed({
     }
 })
 
+// Auto correct invalid types
+watchEffect(() => {
+    const t = type.value
+    if (!t) {
+        addPatch({typeId: platform.value.config.eventTypes[0].id})
+        return;
+    }
+
+    if (t.minimumDays !== null && t.minimumDays > 1 && !multipleDays.value) {
+        multipleDays.value = true
+    }
+
+    if (t.maximumDays === 1 && multipleDays.value) {
+        multipleDays.value = false
+    }
+})
+
+
 const name = computed({
     get: () => patched.value.name,
     set: (name) => addPatch({name})
@@ -291,7 +317,19 @@ const name = computed({
 
 const startDate = computed({
     get: () => patched.value.startDate,
-    set: (startDate) => addPatch({startDate})
+    set: (startDate) => {
+        const wasMultipleDays = multipleDays.value
+        addPatch({startDate})
+
+        if (!wasMultipleDays) {
+            // Makse sure end date remains same date
+            const d = new Date(endDate.value)
+            d.setFullYear(startDate.getFullYear())
+            d.setMonth(startDate.getMonth())
+            d.setDate(startDate.getDate())
+            endDate.value = d
+        }
+    }
 })
 
 const endDate = computed({
@@ -441,17 +479,7 @@ async function save() {
         return;
     }
 
-    // todo
-    if (endDate.value < startDate.value) {
-        errors.errorBox = new ErrorBox(
-            new SimpleError({
-                code: 'invalid_field',
-                field: 'endDate',
-                message: 'De einddatum moet na de startdatum liggen'
-            })
-        )
-        return ;
-    }
+
     errors.errorBox = null;
 
     saving.value = true;
@@ -541,6 +569,10 @@ async function addRegistrations() {
 }
 
 async function deleteMe() {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je deze activiteit wilt verwijderen?'), $t('Verwijderen'), $t('Je verliest alle bijhorende informatie en kan dit niet ongedaan maken.'))) {
+        return
+    }
+
     if (saving.value || deleting.value) {
         return;
     }

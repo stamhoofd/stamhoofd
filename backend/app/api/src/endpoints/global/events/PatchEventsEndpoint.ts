@@ -1,12 +1,14 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Event } from '@stamhoofd/models';
+import { Event, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Event as EventStruct, GroupType, PermissionLevel } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
+import { SQL, SQLWhereNot, SQLWhereSign } from '@stamhoofd/sql';
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string };
 type Query = undefined;
@@ -80,7 +82,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 event.groupId = group.id
 
             }
-            event.typeId = put.typeId
+            event.typeId = await PatchEventsEndpoint.validateEventType(put.typeId)
+            await PatchEventsEndpoint.checkEventLimits(event)
 
             if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
                 throw Context.auth.error()
@@ -106,7 +109,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.startDate = patch.startDate ?? event.startDate
             event.endDate = patch.endDate ?? event.endDate
             event.meta = patchObject(event.meta, patch.meta)
-            event.typeId = patch.typeId ?? event.typeId
+            event.typeId = patch.typeId ? (await PatchEventsEndpoint.validateEventType(patch.typeId)) : event.typeId
+            await PatchEventsEndpoint.checkEventLimits(event)
 
             if (patch.group !== undefined) {
                 if (patch.group === null) {
@@ -150,5 +154,104 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return new Response(
             await AuthenticatedStructures.events(events)
         );
+    }
+
+    static async validateEventType(typeId: string) {
+        return (await this.getEventType(typeId)).id 
+    }
+
+    static async getEventType(typeId: string) {
+        const platform = await Platform.getSharedStruct();
+        const type = platform.config.eventTypes.find(t => t.id == typeId)
+        if (!type) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Invalid typeId',
+                human: 'Dit type activiteit wordt niet ondersteund',
+                field: 'typeId'
+            })
+        }
+        return type
+    }
+
+    static async checkEventLimits(event: Event) {
+        const type = await this.getEventType(event.typeId)
+
+        if (event.name.length < 2) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Name is too short',
+                human: 'Vul een naam voor je activiteit in',
+                field: 'name'
+            })
+        }
+
+        if (event.endDate < event.startDate) {
+            throw new SimpleError({
+                code: 'invalid_dates',
+                message: 'End date is before start date',
+                human: 'De einddatum moet na de startdatum liggen',
+                field: 'endDate'
+            })
+        }
+
+        if (type.maximumDays !== null || type.minimumDays !== null) {
+            const start = Formatter.luxon(event.startDate).startOf('day')
+            const end = Formatter.luxon(event.endDate).startOf('day')
+
+            const days = end.diff(start, 'days').days + 1;
+
+            console.log('Detected days:', days)
+
+            if (type.minimumDays !== null && days < type.minimumDays) {
+                throw new SimpleError({
+                    code: 'minimum_days',
+                    message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
+                    human: 'Een ' + type.name + ' moet minimum ' + Formatter.pluralText(type.minimumDays, 'dag', 'dagen') + ' duren',
+                    field: 'startDate'
+                })
+            }
+
+            if (type.maximumDays !== null && days > type.maximumDays) {
+                throw new SimpleError({
+                    code: 'maximum_days',
+                    message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
+                    human: 'Een ' + type.name + ' mag maximaal ' + Formatter.pluralText(type.maximumDays, 'dag', 'dagen') + ' duren',
+                    field: 'startDate'
+                })
+            }
+        }
+
+        if (type.maximum && (!event.existsInDatabase || ("typeId" in (await event.getChangedDatabaseProperties()).fields))) {
+            const currentPeriod = await RegistrationPeriod.getByDate(event.startDate);
+            console.log('event.startDate', event.startDate)
+            if (currentPeriod) {
+                const count = await SQL.select().from(
+                        SQL.table(Event.table)
+                    )
+                    .where(SQL.column('organizationId'), event.organizationId)
+                    .where(SQL.column('typeId'), event.typeId)
+                    .where(SQL.column('id'), SQLWhereSign.NotEqual, event.id)
+                    .where(SQL.column('startDate'), SQLWhereSign.GreaterEqual, currentPeriod.startDate)
+                    .where(SQL.column('endDate'), SQLWhereSign.LessEqual, currentPeriod.endDate)
+                    .count()
+                
+                if (count >= type.maximum) {
+                    throw new SimpleError({
+                        code: 'type_maximum_reached',
+                        message: 'Maximum number of events with this type reached',
+                        human: 'Het maximum aantal voor ' + type.name + ' is bereikt (' + type.maximum + ')',
+                        field: 'typeId'
+                    })
+                }
+            } else {
+                throw new SimpleError({
+                    code: 'invalid_period',
+                    message: 'No period found for this start date',
+                    human: 'Oeps, je kan nog geen evenementen van dit type aanmaken in deze periode',
+                    field: 'startDate'
+                })
+            }
+        }
     }
 }

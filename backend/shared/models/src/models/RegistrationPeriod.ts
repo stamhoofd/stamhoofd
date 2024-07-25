@@ -1,4 +1,5 @@
 import { column, Model } from '@simonbackx/simple-database';
+import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
@@ -51,5 +52,18 @@ export class RegistrationPeriod extends Model {
 
     getStructure() {
         return RegistrationPeriodStruct.create(this)
+    }
+
+    static async getByDate(date: Date): Promise<RegistrationPeriod|null> {
+        const result = await SQL.select().from(SQL.table(this.table))
+            .where(SQL.column('startDate'), SQLWhereSign.LessEqual, date)
+            .where(SQL.column('endDate'), SQLWhereSign.GreaterEqual, date)
+            .first(false);
+
+        if (result === null || !result[this.table]) {
+            return null;
+        }
+
+        return RegistrationPeriod.fromRow(result[this.table]) ?? null
     }
 }
