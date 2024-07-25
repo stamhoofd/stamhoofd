@@ -1,4 +1,4 @@
-import viteSvgToWebfont from '@simonbackx/vite-svg-2-webfont';
+import viteSvgToWebfont from 'vite-svg-2-webfont';
 import vue from '@vitejs/plugin-vue';
 import fs from 'fs';
 import path, { resolve } from 'path';
@@ -72,7 +72,7 @@ export function buildConfig(options: {port: number}) {
         ],
         define: use_env,
         server: {
-            host: '0.0.0.0',
+            host: '127.0.0.1',
             port: options.port,
             strictPort: true,
             hmr: {
