@@ -3,14 +3,20 @@
         <STNavigationBar :title="title" />
 
         <main class="center">
+            <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
+
             <h1 class="style-navigation-title">
                 {{ title }}
             </h1>
-            <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
-            <div v-if="event.meta.description.html" class="description style-wysiwyg" v-html="event.meta.description.html" />
+
+            <template v-if="event.meta.description.html">
+                <div class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
+                <hr>
+            </template>
+            <h2>Bekijken</h2>
 
             <STList class="illustration-list">
-                <STListItem v-if="event.group" :selectable="true" class="left-center">
+                <STListItem v-if="event.group" :selectable="true" class="left-center right-stack">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>

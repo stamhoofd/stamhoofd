@@ -504,7 +504,7 @@
 
 .style-cover-photo {
     border-radius: $border-radius;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
 }
 
 .style-button-bar {
@@ -943,13 +943,26 @@
         font-style: italic;
     }
 
-    p{
+    p:not([class]), p.is-empty {
         margin: 0;
         padding: 0;
         font-size: 15px;
         font-weight: $font-weight-default;
         line-height: 1.5;
         color: $color-dark;
+    }
+
+    &.gray {
+        p:not([class]), p.is-empty {
+            color: $color-gray-text;
+        }
+    }
+
+    &.large {
+        p:not([class]), p.is-empty {
+           // @extend .style-description-large;
+        }
+        
     }
 
     p:empty::after {

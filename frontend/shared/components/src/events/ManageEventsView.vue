@@ -2,7 +2,7 @@
     <div id="settings-view" class="st-view background">
         <STNavigationBar title="Activiteiten">
             <template #right>
-                <button type="button" class="button icon add navigation" @click="addEvent" />
+                <button type="button" class="button icon add navigation" @click="addEvent()" />
             </template>
         </STNavigationBar>
 

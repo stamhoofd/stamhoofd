@@ -23,7 +23,7 @@
             <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="openMembers(true)">
+                <STListItem :selectable="true" class="left-center right-stack" @click="openMembers(true)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
@@ -39,7 +39,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center" @click="openMembers(true, {waitingList: true})">
+                <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center right-stack" @click="openMembers(true, {waitingList: true})">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
