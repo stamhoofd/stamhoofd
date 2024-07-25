@@ -47,7 +47,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ patched.group ? $t('Inschrijvingen') : $t('Inschrijvingen verzamelen') }}
+                    {{ patched.group ? $t('Bewerk inschrijvinginstellingen') : $t('Inschrijvingen verzamelen') }}
                 </h3>
             </STListItem>
         </STList>
@@ -220,7 +220,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ patched.group ? $t('Inschrijvingen') : $t('Inschrijvingen verzamelen') }}
+                    {{ patched.group ? $t('Bewerk inschrijvinginstellingen') : $t('Inschrijvingen verzamelen') }}
                 </h3>
             </STListItem>
         </STList>
