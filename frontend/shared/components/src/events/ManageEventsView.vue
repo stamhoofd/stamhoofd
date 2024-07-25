@@ -29,11 +29,13 @@
 
             <ScrollableSegmentedControl v-model="selectedYear" :items="years" :labels="yearLabels" />
             
-            <Checkbox v-if="selectedYear === null && suggestionsGroup" v-model="addSuggestions">
-                Toon wekelijkse suggesties voor {{ suggestionsGroup.settings.name }}
-            </Checkbox>
+            <template v-if="selectedYear === null && suggestionsGroup">
+                <Checkbox v-model="addSuggestions">
+                    Toon wekelijkse suggesties voor {{ suggestionsGroup.settings.name }}
+                </Checkbox>
 
-            <hr>
+                <hr>
+            </template>
 
             <div v-for="(group, index) of groupedEvents" :key="group.title" class="container">
                 <hr v-if="index > 0">
@@ -69,7 +71,7 @@
                         </p>
 
                         <template #right>
-                            <span class="icon gray eye-off" v-if="!event.meta.visible" v-tooltip="'Verborgen'" />
+                            <span v-if="!event.meta.visible" v-tooltip="'Verborgen'" class="icon gray eye-off" />
                             <span v-if="event.id" class="icon edit gray" />
                             <span v-else class="icon add gray" />
                         </template>
