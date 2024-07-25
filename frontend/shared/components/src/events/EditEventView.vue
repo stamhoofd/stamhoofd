@@ -23,8 +23,8 @@
                 <Dropdown
                     v-model="typeId"
                 >
-                    <option v-for="type of platform.config.eventTypes" :key="type.id" :value="type.id">
-                        {{ type.name }}
+                    <option v-for="t of platform.config.eventTypes" :key="t.id" :value="t.id">
+                        {{ t.name }}
                     </option>
                 </Dropdown>
             </STInputBox>
