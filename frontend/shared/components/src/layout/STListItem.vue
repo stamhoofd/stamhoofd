@@ -102,6 +102,7 @@ button.st-list-item {
   margin: 0;
   display: flex !important;
   flex-direction: row;
+    align-items: stretch;
   width: 100%; // fix for buttons
   box-sizing: border-box;
   contain: style paint;
