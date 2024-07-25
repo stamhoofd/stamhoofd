@@ -42,7 +42,7 @@
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <STListItem v-for="event of group.events" :key="event.id" class="right-stack" :selectable="true" @click="editEvent(event)">
+                    <STListItem v-for="event of group.events" :key="event.id" class="right-stack" :selectable="true" @click="onClickEvent(event)">
                         <template #left>
                             <div class="calendar-box">
                                 <div class="overlay">
@@ -72,7 +72,7 @@
 
                         <template #right>
                             <span v-if="!event.meta.visible" v-tooltip="'Verborgen'" class="icon gray eye-off" />
-                            <span v-if="event.id" class="icon edit gray" />
+                            <span v-if="event.id" class="icon arrow-right-small gray" />
                             <span v-else class="icon add gray" />
                         </template>
                     </STListItem>
@@ -86,16 +86,18 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref, watchEffect } from 'vue';
+import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
 import { UIFilter } from '../filters/UIFilter';
 import { useContext, useOrganization, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
+import EventOverview from './EventOverview.vue';
+import { Toast } from '../overlays/Toast';
 
 type ObjectType = Event;
 
@@ -111,6 +113,7 @@ const years = computed(() => {
 })
 const user = useUser();
 const organization = useOrganization();
+const $navigate = useNavigate();
 
 const yearLabels = computed(() => {
     return years.value.map(y => {
@@ -121,6 +124,51 @@ const yearLabels = computed(() => {
     })
 })
 
+enum Routes {
+    Event = "activiteit"
+}
+
+defineRoutes([
+    {
+        name: Routes.Event,
+        url: "@id",
+        component: EventOverview as ComponentOptions,
+        params: {
+            id: String
+        },
+        paramsToProps: async (params: {id: string}) => {
+            // Fetch event
+            const events = await fetcher.objectFetcher.fetch(
+                new LimitedFilteredRequest({
+                    filter: {
+                        id: params.id
+                    },
+                    limit: 1,
+                    sort: []
+                })
+            )
+
+            if (events.results.length === 1) {
+                return {
+                    event: events.results[0]
+                }
+            }
+            Toast.error('Activiteit niet gevonden').show()
+            throw new Error('Event not found')
+        },
+
+        propsToParams(props) {
+            if (!("event" in props) || typeof props.event !== 'object' || props.event === null || !("id" in props.event)) {
+                throw new Error('Missing event')
+            }
+            return {
+                params: {
+                    id: props.event.id
+                }
+            }
+        }
+    },
+])
 
 
 const fetcher = useInfiniteObjectFetcher<ObjectType>({
@@ -252,8 +300,9 @@ function blurFocus() {
     (document.activeElement as HTMLElement)?.blur()
 }
 
-async function addEvent() {
-    const event = Event.create({})
+async function addEvent(template?: Event) {
+    const event = (template?.clone() ?? Event.create({}))
+    event.id = Event.create({}).id
 
     await present({
         modalDisplayStyle: 'popup',
@@ -279,6 +328,15 @@ async function editEvent(event: Event) {
             })
         ]
     })
+}
+
+async function onClickEvent(event: Event) {
+    if (!event.id) {
+        // Create a new one
+        return await addEvent(event)
+    }
+
+    await $navigate(Routes.Event, {properties: {event}})
 }
 
 function editFilter() {

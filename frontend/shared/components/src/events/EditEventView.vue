@@ -40,6 +40,18 @@
             />
         </STInputBox>
 
+        <STList>
+            <STListItem :selectable="true" element-name="button" @click="addRegistrations">
+                <template #left>
+                    <span class="icon edit gray" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ patched.group ? $t('Inschrijvingen') : $t('Inschrijvingen verzamelen') }}
+                </h3>
+            </STListItem>
+        </STList>
+
         <hr>
         <h2>Datum</h2>
 

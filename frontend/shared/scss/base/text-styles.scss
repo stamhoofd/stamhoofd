@@ -502,6 +502,11 @@
     font-size: 15px;
 }
 
+.style-cover-photo {
+    border-radius: $border-radius;
+    margin-bottom: 15px;
+}
+
 .style-button-bar {
     display: flex;
     flex-direction: row;
