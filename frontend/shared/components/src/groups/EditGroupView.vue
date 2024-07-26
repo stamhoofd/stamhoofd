@@ -5,6 +5,65 @@
         </h1>
 
         <hr>
+        <h2 class="style-with-button">
+            <div>{{ $t('Tarieven') }}</div>
+            <div>
+                <button class="button text only-icon-smartphone" type="button" @click="addGroupPrice">
+                    <span class="icon add" />
+                    <span>{{ $t('Tarief') }}</span>
+                </button>
+            </div>
+        </h2>
+        <p>Je kan een meerdere tarieven instellen en elk tarief een eigen naam geven. Een lid kan bij het inschrijven zelf één van de beschikbare tarieven kiezen.</p>
+
+        <STList v-if="patched.settings.prices.length !== 1" v-model="draggablePrices" :draggable="true">
+            <template #item="{item: price}">
+                <STListItem :selectable="true" class="right-stack" @click="editGroupPrice(price)">
+                    <h3 class="style-title-list">
+                        {{ price.name }}
+                    </h3>
+
+                    <p class="style-description-small">
+                        Prijs: {{ formatPrice(price.price.price) }}
+                    </p>
+
+                    <p class="style-description-small" v-if="price.price.reducedPrice !== null">
+                        {{ reducedPriceName }}: <span>{{ formatPrice(price.price.reducedPrice) }}</span>
+                    </p>
+
+                    <p v-if="price.isSoldOut" class="style-description-small">
+                        Uitverkocht
+                    </p>
+                    <p v-else-if="price.stock" class="style-description-small">
+                        Nog {{ pluralText(price.remainingStock, 'stuk', 'stuks') }} beschikbaar
+                    </p>
+
+                    <template #right>
+                        <span v-if="price.hidden" v-tooltip="$t('Verborgen')" class="icon gray eye-off" />
+                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </template>
+        </STList>
+        <GroupPriceBox v-else :price="patched.settings.prices[0]" :group="patched" :errors="errors" @patch:price="addPricePatch" />
+
+        <hr>
+
+        <STList>
+            <STListItem :selectable="true" element-name="button">
+                <template #left>
+                    <span class="icon add gray" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Keuzemenu toevoegen
+                </h3>
+            </STListItem>
+        </STList>
+
+        <hr>
+        <h2>Beschikbaarheid</h2>
 
         <Checkbox v-model="useRegistrationStartDate">
             {{ $t('Start inschrijvingen pas na een bepaalde datum') }}
@@ -28,11 +87,6 @@
             <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
         </div>
 
-        <hr>
-        <h2>Tarieven</h2>
-
-        <GroupPriceBox :price="patched.settings.prices[0]" :group="patched" :error-box="errors.errorBox" @patch:price="addPatchPrice" />
-
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
@@ -51,16 +105,18 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { DateSelection, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, GroupPrice, GroupSettings, GroupType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { usePatch, usePatchableArray } from '../hooks';
+import { useDraggableArray, usePatch, usePatchableArray } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { DateSelection, TimeInput } from '@stamhoofd/components';
 import GroupPriceBox from './components/GroupPriceBox.vue';
+import GroupPriceView from './components/GroupPriceView.vue';
+import { useFinancialSupportSettings } from './hooks';
 
 const props = withDefaults(
     defineProps<{
@@ -78,19 +134,23 @@ const props = withDefaults(
 
 const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
 
-const {addPatch: addPatchPrice} = usePatchableArray((prices: PatchableArrayAutoEncoder<GroupPrice>) => {
+const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
     addPatch({
         settings: GroupSettings.patch({
             prices
         })
     })
-})
+}
+const {addPatch: addPricePatch, addPut: addPricePut, addDelete: addPriceDelete} = usePatchableArray(patchPricesArray)
+const draggablePrices = useDraggableArray(() => patched.value.settings.prices, patchPricesArray)
 
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 const $t = useTranslate();
 const pop = usePop();
+const {priceName: reducedPriceName} = useFinancialSupportSettings()
+const present = usePresent();
 
 const registrationStartDate = computed({
     get: () => patched.value.settings.registrationStartDate,
@@ -194,6 +254,33 @@ async function deleteMe() {
     } finally {
         deleting.value = false;
     }
+}
+
+function addGroupPrice() {
+    const price = GroupPrice.create({
+        name: $t('Onbekend'),
+        price: patched.value.settings.prices[0]?.price?.clone()
+    })
+    addPricePut(price)
+}
+
+async function editGroupPrice(price: GroupPrice) {
+    await present({
+        components: [
+            new ComponentWithProperties(GroupPriceView, {
+                price,
+                group: patched,
+                isNew: false,
+                saveHandler: async (patch: AutoEncoderPatchType<GroupPrice>) => {
+                    addPricePatch(patch)
+                },
+                deleteHandler: async () => {
+                    addPriceDelete(price.id)
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
 }
 
 const shouldNavigateAway = async () => {

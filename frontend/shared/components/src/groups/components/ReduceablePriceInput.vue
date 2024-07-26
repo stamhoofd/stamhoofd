@@ -12,10 +12,10 @@
 
 <script setup lang="ts">
 import { PriceInput } from '@stamhoofd/components';
-import { FinancialSupportSettings, ReduceablePrice } from '@stamhoofd/structures';
+import { ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
-import { useOrganization, usePlatform } from '../../hooks';
+import { useFinancialSupportSettings } from '../hooks';
 
 withDefaults(
     defineProps<{
@@ -28,12 +28,7 @@ withDefaults(
     }
 );
 const model = defineModel<ReduceablePrice>({ required: true })
-const organinization = useOrganization();
-const platform = usePlatform()
-const financialSupport = computed(() => platform.value.config.recordsConfiguration.financialSupport ?? organinization.value?.meta.recordsConfiguration.financialSupport ?? null )
-const enabled = computed(() => financialSupport.value !== null)
-
-const reducedPriceName = computed(() => financialSupport.value?.priceName ?? FinancialSupportSettings.defaultPriceName)
+const {enabled, priceName: reducedPriceName} = useFinancialSupportSettings()
 
 const price = computed({
     get: () => model.value.price,

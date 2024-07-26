@@ -9,6 +9,18 @@ export function usePatchableArray<T extends AutoEncoder & NonScalarIdentifiable<
             const arr = new PatchableArray() as PatchableArrayAutoEncoder<T>
             arr.addPatch(patch)
             patchArray(arr)
+        },
+
+        addPut: (put: T, after?: string | number | null | undefined) => {
+            const arr = new PatchableArray() as PatchableArrayAutoEncoder<T>
+            arr.addPut(put, after)
+            patchArray(arr)
+        },
+
+        addDelete: (id: string | number) => {
+            const arr = new PatchableArray() as PatchableArrayAutoEncoder<T>
+            arr.addDelete(id)
+            patchArray(arr)
         }
     }
 }

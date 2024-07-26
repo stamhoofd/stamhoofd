@@ -24,7 +24,31 @@ export class GroupPrice extends AutoEncoder {
     @field({ decoder: ReduceablePrice })
     price = ReduceablePrice.create({})
 
-    // Toekomst: restricties
+    @field({ decoder: BooleanDecoder, version: 290 })
+    hidden = false
+
+    /**
+     * Total stock, excluding already sold items into account
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 290 })
+    stock: number | null = null
+
+    @field({ decoder: IntegerDecoder, version: 290 })
+    usedStock = 0
+
+    get isSoldOut(): boolean {
+        if (this.stock === null) {
+            return false
+        }
+        return this.usedStock >= this.stock
+    }
+
+    get remainingStock(): number | null {
+        if (this.stock === null) {
+            return null
+        }
+        return Math.max(0, this.stock - this.usedStock)
+    }
 }
 
 export class GroupOption extends AutoEncoder {
@@ -33,6 +57,9 @@ export class GroupOption extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     name = ""
+
+    @field({ decoder: BooleanDecoder, version: 290 })
+    hidden = false
 
     /**
      * Price added (can be negative) is always in cents, to avoid floating point errors
@@ -51,6 +78,29 @@ export class GroupOption extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder })
     maximum = 1
+
+    /**
+     * Total stock, excluding already sold items into account
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 290 })
+    stock: number | null = null
+
+    @field({ decoder: IntegerDecoder, version: 290 })
+    usedStock = 0
+
+    get isSoldOut(): boolean {
+        if (this.stock === null) {
+            return false
+        }
+        return this.usedStock >= this.stock
+    }
+
+    get remainingStock(): number | null {
+        if (this.stock === null) {
+            return null
+        }
+        return Math.max(0, this.stock - this.usedStock)
+    }
 }
 
 export class GroupOptionMenu extends AutoEncoder {

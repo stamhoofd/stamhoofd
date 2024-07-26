@@ -211,6 +211,7 @@ export class VueGlobalHelper {
                 },
                 formatCountry: CountryHelper.getName.bind(CountryHelper),
                 formatInteger: Formatter.integer.bind(Formatter),
+                pluralText: Formatter.pluralText.bind(Formatter),
             }
         })
     }
