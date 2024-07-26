@@ -7,6 +7,7 @@ import { PlatformMember, PlatformFamily } from "../PlatformMember"
 import { RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator"
 import { RegisterContext } from "./RegisterCheckout"
 import { v4 as uuidv4 } from "uuid";
+import { Registration } from "../Registration"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -51,6 +52,15 @@ export class RegisterItem implements RegisterItemWithPrice {
 
     waitingList = false
     calculatedPrice = 0
+
+    static fromRegistration(registration: Registration, member: PlatformMember) {
+        return new RegisterItem({
+            id: registration.id,
+            member,
+            group: registration.group,
+            waitingList: registration.waitingList
+        })
+    }
 
     constructor(data: {id?: string, member: PlatformMember, group: Group, waitingList: boolean}) {
         this.id = data.id ?? uuidv4()

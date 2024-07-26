@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, SplitViewController, setTitleSuffix } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, ManageEventsView, MembersTableView, NoPermissionsView, OrganizationSwitcher, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { PlatformManager, SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Country } from '@stamhoofd/structures';
@@ -78,6 +78,14 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         component: organizationsTableView
     });
 
+    const calendarTab = new TabBarItem({
+        icon: 'calendar',
+        name: 'Activiteiten',
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(ManageEventsView, {})
+        })
+    });
+
     const financesTab =  new TabBarItem({
         icon: 'calculator',
         name: 'Boekhouding',
@@ -91,6 +99,16 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         name: 'Instellingen',
         component: settingsView
     });
+
+    const moreTab = new TabBarItemGroup({
+        icon: 'category',
+        name: 'Meer',
+        items: [
+            financesTab,
+            settingsTab
+        ]
+    });
+
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
@@ -112,12 +130,12 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
                             const tabs: (TabBarItem|TabBarItemGroup)[] = [
                                 startTab,
                                 membersTab,
-                                groupsTab
+                                groupsTab,
+                                calendarTab
                             ]
 
                             if (reactiveSession.auth.hasFullPlatformAccess()) {
-                                tabs.push(financesTab)
-                                tabs.push(settingsTab)
+                                tabs.push(moreTab)
                             }
 
                             return tabs;

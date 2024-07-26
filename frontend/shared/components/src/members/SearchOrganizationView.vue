@@ -1,9 +1,9 @@
 <template>
-    <div class="st-view search-member-organization-view">
-        <STNavigationBar :title="$t('shared.searchMemberOrganizations.smallTitle')" />
+    <div class="st-view search-organization-view">
+        <STNavigationBar :title="$t('Zoeken')" />
 
         <main>
-            <h1>{{ title || defaultTitle }}</h1>
+            <h1>{{ title }}</h1>
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
                 <input ref="input" v-model="query" :autofocus="true" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
@@ -34,20 +34,20 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { PopOptions, usePop } from '@simonbackx/vue-app-navigation';
-import { OrganizationAvatar, Spinner,Toast } from '@stamhoofd/components';
+import { OrganizationAvatar, Spinner, Toast } from '@stamhoofd/components';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization, PlatformMember } from '@stamhoofd/structures';
-import {throttle} from "@stamhoofd/utility"
-import { Ref, computed, ref, watch } from 'vue';
+import { throttle } from "@stamhoofd/utility";
+import { Ref, ref, watch } from 'vue';
 
-const props = withDefaults(
+withDefaults(
     defineProps<{
         title?: string
         member: PlatformMember;
         selectOrganization: (organization: Organization, pop: (options?: PopOptions) => Promise<void>|undefined) => Promise<void>|void;
     }>(), {
-        title: ''
+        title: 'Zoeken'
     }
 );
 
@@ -59,7 +59,6 @@ const owner = useRequestOwner()
 const defaultCountry = I18nController.shared.country
 const pop = usePop()
 const $t = useTranslate();
-const defaultTitle = computed(() => $t('shared.searchMemberOrganizations.defaultTitle', {firstName: props.member.patchedMember.firstName}))
 
 let lastQuery = '';
 let counter = 0;
@@ -134,7 +133,7 @@ watch(query, startUpdateResults);
 </script>
 
 <style lang="scss">
-.search-member-organization-view {
+.search-organization-view {
     .search-box {
         margin: 15px 0;
     }

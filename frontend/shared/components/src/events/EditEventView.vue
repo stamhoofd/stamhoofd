@@ -79,9 +79,9 @@
         <h2>Beschikbaarheid</h2>
 
         <STList>
-            <STListItem v-if="isNationalActivity" :selectable="true" element-name="label">
+            <STListItem v-if="canSetNationalActivity" :selectable="true" element-name="label">
                 <template #left>
-                    <Checkbox v-model="isNationalActivity" :disabled="true" />
+                    <Checkbox v-model="isNationalActivity" />
                 </template>
 
                 <h3 class="style-title-list">
@@ -244,7 +244,7 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -425,7 +425,28 @@ const locationAddress = computed({
     }
 })
 
-const isNationalActivity = computed(() => (patched.value.organizationId === null && !props.isNew) || (!organization.value && props.isNew))
+const app = useAppContext()
+const canSetNationalActivity = computed(() => app === 'admin')
+const isNationalActivity = computed({
+    get: () => (patched.value.organizationId === null && !props.isNew) || (!organization.value && props.isNew),
+    set: (isNationalActivity) => {
+        if (isNationalActivity) {
+            addPatch({
+                organizationId: null
+            })
+        } else {
+            const organizationId = props.event.organizationId || organization.value?.id
+
+            if (!organizationId) {
+                Toast.error('Via het administratieportaal kan je momenteel geen lokale activiteiten aanmaken').show()
+                return
+            }
+            addPatch({
+                organizationId
+            })
+        }
+    }
+})
 
 const description = computed({
     get: () => patched.value.meta.description,
@@ -554,6 +575,7 @@ async function addRegistrations() {
         })
     } else {
         const group = Group.create({
+            organizationId: patched.value.organizationId ?? undefined,
             type: GroupType.EventRegistration,
             settings: GroupSettings.create({
                 name: patched.value.name

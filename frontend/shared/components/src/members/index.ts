@@ -6,7 +6,7 @@ export {default as EditParentView} from "./components/edit/EditParentView.vue";
 
 export {default as GroupView} from "./GroupView.vue";
 export {default as RegisterMemberView} from "./RegisterMemberView.vue";
-export {default as SearchMemberOrganizationView} from "./SearchMemberOrganizationView.vue";
+export {default as SearchOrganizationView} from "./SearchOrganizationView.vue";
 
 export * from "./PlatformFamilyManager";
 

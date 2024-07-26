@@ -1,5 +1,5 @@
 <template>
-    <SearchMemberOrganizationView v-if="!selectedOrganization" :member="member" :select-organization="addOrganization" />
+    <SearchOrganizationView v-if="!selectedOrganization" :member="member" :select-organization="addOrganization" :title="searchOrganizationTitle" />
     <div v-else class="st-view">
         <STNavigationBar :title="member.patchedMember.name" />
 
@@ -38,11 +38,12 @@ import { computed, markRaw, Ref, ref } from 'vue';
 
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import GroupView from './GroupView.vue';
-import SearchMemberOrganizationView from './SearchMemberOrganizationView.vue';
+import SearchOrganizationView from './SearchOrganizationView.vue';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import ConfigureNewRegistrationsView from './ConfigureNewRegistrationsView.vue';
 import MemberStepView from './MemberStepView.vue';
 import EditMemberAllBox from './components/edit/EditMemberAllBox.vue';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -54,6 +55,8 @@ const present = usePresent()
 const show = useShow()
 const app = useAppContext();
 const manager = usePlatformFamilyManager();
+const $t = useTranslate();
+const searchOrganizationTitle = computed(() => $t('shared.searchMemberOrganizations.defaultTitle', {firstName: props.member.patchedMember.firstName}))
 
 const items = computed(() => {
     return props.member.organizations
@@ -156,8 +159,9 @@ async function searchOrganization() {
     await present({
         url: 'zoeken',
         components: [
-            new ComponentWithProperties(SearchMemberOrganizationView, {
+            new ComponentWithProperties(SearchOrganizationView, {
                 member: props.member,
+                title: searchOrganizationTitle.value,
                 selectOrganization: async (organization: Organization, pop: (options?: PopOptions) => Promise<void>) => {
                     addOrganization(organization)
                     await pop({force: true});
