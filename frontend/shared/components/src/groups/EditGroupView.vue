@@ -27,7 +27,7 @@
                         Prijs: {{ formatPrice(price.price.price) }}
                     </p>
 
-                    <p class="style-description-small" v-if="price.price.reducedPrice !== null">
+                    <p v-if="price.price.reducedPrice !== null" class="style-description-small">
                         {{ reducedPriceName }}: <span>{{ formatPrice(price.price.reducedPrice) }}</span>
                     </p>
 
@@ -48,10 +48,15 @@
         </STList>
         <GroupPriceBox v-else :price="patched.settings.prices[0]" :group="patched" :errors="errors" @patch:price="addPricePatch" />
 
+        <div v-for="optionMenu of patched.settings.optionMenus" :key="optionMenu.id" class="container">
+            <hr>
+            <GroupOptionMenuBox :option-menu="optionMenu" :group="patched" :errors="errors" :level="2" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+        </div>
+
         <hr>
 
         <STList>
-            <STListItem :selectable="true" element-name="button">
+            <STListItem :selectable="true" element-name="button" @click="addGroupOptionMenu()">
                 <template #left>
                     <span class="icon add gray" />
                 </template>
@@ -87,7 +92,7 @@
             <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
         </div>
 
-        <div v-if="!isNew" class="container">
+        <div v-if="!isNew && deleteHandler" class="container">
             <hr>
             <h2>
                 {{ $t('Acties') }}
@@ -108,15 +113,17 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { DateSelection, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Group, GroupPrice, GroupSettings, GroupType } from '@stamhoofd/structures';
+import { Group, GroupOptionMenu, GroupPrice, GroupSettings, GroupType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { useDraggableArray, usePatch, usePatchableArray } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
+import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import { useFinancialSupportSettings } from './hooks';
+import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -143,6 +150,14 @@ const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
 }
 const {addPatch: addPricePatch, addPut: addPricePut, addDelete: addPriceDelete} = usePatchableArray(patchPricesArray)
 const draggablePrices = useDraggableArray(() => patched.value.settings.prices, patchPricesArray)
+
+const {addPatch: addOptionMenuPatch, addPut: addOptionMenuPut, addDelete: addOptionMenuDelete} = usePatchableArray((optionMenus: PatchableArrayAutoEncoder<GroupOptionMenu>) => {
+    addPatch({
+        settings: GroupSettings.patch({
+            optionMenus
+        })
+    })
+})
 
 const errors = useErrors();
 const saving = ref(false);
@@ -276,6 +291,26 @@ async function editGroupPrice(price: GroupPrice) {
                 },
                 deleteHandler: async () => {
                     addPriceDelete(price.id)
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+
+async function addGroupOptionMenu() {
+    const optionMenu = GroupOptionMenu.create({
+        name: $t('Onbekend')
+    })
+    
+    await present({
+        components: [
+            new ComponentWithProperties(GroupOptionMenuView, {
+                optionMenu,
+                group: patched,
+                isNew: true,
+                saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
+                    addOptionMenuPut(optionMenu.patch(patch))
                 }
             })
         ],

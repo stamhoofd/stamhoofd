@@ -110,6 +110,9 @@ export class GroupOptionMenu extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
 
+    @field({ decoder: StringDecoder })
+    description = ""
+
     @field({ decoder: BooleanDecoder })
     multipleChoice = false;
 

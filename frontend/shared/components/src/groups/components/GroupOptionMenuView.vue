@@ -1,10 +1,10 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" @save="save">
         <h1>
             {{ title }}
         </h1>
 
-        <GroupPriceBox :price="patched" :group="group" :errors="errors" @patch:price="addPatch" />
+        <GroupOptionMenuBox :option-menu="patched" :group="group" :errors="errors" :level="1" @patch:option-menu="addPatch" @delete="deleteMe" />
 
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
@@ -26,21 +26,21 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Group, GroupPrice } from '@stamhoofd/structures';
+import { Group, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
 import { usePatch } from '../../hooks';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 
-import GroupPriceBox from './GroupPriceBox.vue';
+import GroupOptionMenuBox from './GroupOptionMenuBox.vue';
 
 const props = withDefaults(
     defineProps<{
-        price: GroupPrice;
+        optionMenu: GroupOptionMenu;
         group: Group;
         isNew: boolean;
-        saveHandler: (price: AutoEncoderPatchType<GroupPrice>) => Promise<void>;
+        saveHandler: (price: AutoEncoderPatchType<GroupOptionMenu>) => Promise<void>;
         deleteHandler?: (() => Promise<void>)|null,
         showToasts?: boolean
     }>(),
@@ -50,7 +50,7 @@ const props = withDefaults(
     }
 );
 
-const {patched, hasChanges, addPatch, patch} = usePatch(props.price);
+const {patched, hasChanges, addPatch, patch} = usePatch(props.optionMenu);
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
@@ -58,7 +58,7 @@ const $t = useTranslate();
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t('Nieuw tarief') : $t('Wijzig tarief');
+    return props.isNew ? $t('Nieuw keuzemenu') : $t('Wijzig keuzemenu');
 });
 
 async function save() {
@@ -78,7 +78,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je dit tarief wilt verwijderen?'), $t('shared.confirmDelete'), $t('Het tarief wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'))) {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je dit keuzemenu wilt verwijderen?'), $t('shared.confirmDelete'), $t('Het keuzemenu wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
