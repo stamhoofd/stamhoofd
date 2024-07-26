@@ -19,7 +19,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Verbergen
+                    Verborgen
                 </h3>
                 <p v-if="hidden" class="style-description-small">
                     Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.
