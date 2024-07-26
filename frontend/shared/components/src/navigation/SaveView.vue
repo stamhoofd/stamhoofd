@@ -1,7 +1,7 @@
 <template>
     <form class="st-view" @submit.prevent="$emit('save')">
-        <STNavigationBar :title="title" :disablePop="true" :disableDismiss="true">
-            <template #left v-if="canPop || ($isMobile || $isIOS || $isAndroid)">
+        <STNavigationBar :title="title" :disable-pop="true" :disable-dismiss="true">
+            <template v-if="canPop || ($isMobile || $isIOS || $isAndroid)" #left>
                 <BackButton v-if="canPop" @click="pop" />
                 <button v-else-if="$isAndroid" class="button navigation icon close" type="button" @click="pop" />
                 <button v-else class="button text selected unbold" type="button" @click="pop">
@@ -10,9 +10,13 @@
             </template>
 
             <template #right>
-                <template v-if="!$isMobile && !$isIOS"><slot name="buttons" /></template>
-                <button class="icon trash navigation" v-if="canDelete" type="button" @click="$emit('delete')" :disabled="deleting" />
-                <LoadingButton :loading="loading" v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)">
+                <template v-if="!$isMobile && !$isIOS">
+                    <slot name="buttons" />
+                </template>
+                <LoadingButton v-if="canDelete" :loading="deleting">
+                    <button class="button icon trash navigation" type="button" :disabled="deleting" @click="$emit('delete')" />
+                </LoadingButton>
+                <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
                     <button class="button navigation highlight" :disabled="disabled" type="submit">
                         {{ saveText }}
                     </button>
@@ -50,14 +54,14 @@
 
 
 <script lang="ts">
-import { Component,Mixins,Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import BackButton from "./BackButton.vue";
 import LoadingButton from "./LoadingButton.vue";
 import STButtonToolbar from "./STButtonToolbar.vue";
 import STNavigationBar from "./STNavigationBar.vue";
 import STToolbar from "./STToolbar.vue";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 
 @Component({
     components: {
@@ -67,42 +71,42 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
         BackButton,
         STButtonToolbar
     },
-    emits: ["save", "delete"]
+    emit: ["save", "delete"]
 })
 export default class SaveView extends Mixins(NavigationMixin) {
     @Prop({ default: false })
-    loading!: boolean;
+        loading!: boolean;
 
     @Prop({ default: false })
-    deleting!: boolean;
+        deleting!: boolean;
 
     @Prop({ default: false })
-    disabled!: boolean;
+        disabled!: boolean;
 
     @Prop({ default: "" })
-    title!: string;
+        title!: string;
 
     @Prop({ default: "Opslaan" })
-    saveText!: string;
+        saveText!: string;
 
     @Prop({ default: null })
-    saveIcon!: string | null;
+        saveIcon!: string | null;
 
     @Prop({ default: null })
-    saveIconRight!: string | null;
+        saveIconRight!: string | null;
 
     @Prop({ default: "Annuleren" })
-    cancelText!: string | null;
+        cancelText!: string | null;
 
     @Prop({ default: false })
-    preferLargeButton!: boolean; // Always use large buttons at the bottom on mobile
+        preferLargeButton!: boolean; // Always use large buttons at the bottom on mobile
 
     @Prop({ default: false })
-    addExtraCancel!: boolean; // Add a large cancel button at the bottom
+        addExtraCancel!: boolean; // Add a large cancel button at the bottom
 
     get canDelete() {
         // Check has delete listener
-        return !!this.$props.onDelete
+        return !!this.$attrs && !!this.$attrs.onDelete
     }
 }
 </script>

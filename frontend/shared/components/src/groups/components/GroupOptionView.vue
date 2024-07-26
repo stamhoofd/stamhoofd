@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" :deleting="deleting" @save="save" @delete="deleteMe">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" :deleting="deleting" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -18,7 +18,7 @@
         <ReduceablePriceInput v-model="price" title="Meer of minkost" :error-box="errors.errorBox" />
 
         <STList>
-            <STListItem v-if="hidden" :selectable="true" element-name="label">
+            <STListItem :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="hidden" />
                 </template>
@@ -47,21 +47,6 @@
                 </div>
             </STListItem>
         </STList>
-
-
-        <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2>
-                {{ $t('Acties') }}
-            </h2>
-
-            <LoadingButton :loading="deleting">
-                <button class="button secundary danger" type="button" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>{{ $t('Verwijderen') }}</span>
-                </button>
-            </LoadingButton>
-        </div>
     </SaveView>
 </template>
 

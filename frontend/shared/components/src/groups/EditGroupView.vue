@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" class="group-edit-view" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" class="group-edit-view" @save="save" :deleting="deleting" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -92,20 +92,6 @@
                 <DateSelection v-model="registrationEndDate" />
             </STInputBox>
             <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
-        </div>
-
-        <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2>
-                {{ $t('Acties') }}
-            </h2>
-
-            <LoadingButton :loading="deleting">
-                <button class="button secundary danger" type="button" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>{{ $t('Verwijderen') }}</span>
-                </button>
-            </LoadingButton>
         </div>
     </SaveView>
 </template>

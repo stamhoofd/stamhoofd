@@ -1,25 +1,11 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges && !isNew" :deleting="deleting" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <GroupOptionMenuBox :option-menu="patched" :group="group" :errors="errors" :level="1" @patch:option-menu="addPatch" @delete="deleteMe" />
-
-        <div v-if="!isNew && deleteHandler" class="container">
-            <hr>
-            <h2>
-                {{ $t('Acties') }}
-            </h2>
-
-            <LoadingButton :loading="deleting">
-                <button class="button secundary danger" type="button" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>{{ $t('Verwijderen') }}</span>
-                </button>
-            </LoadingButton>
-        </div>
     </SaveView>
 </template>
 
