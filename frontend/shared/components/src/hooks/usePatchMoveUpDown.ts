@@ -1,5 +1,5 @@
 import { AutoEncoder, NonScalarIdentifiable, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { Ref, unref } from "vue";
+import { computed, Ref, unref } from "vue";
 
 export function usePatchMoveUpDown<T extends AutoEncoder & NonScalarIdentifiable<any>>(
     movingItemId: string|number,
@@ -30,7 +30,17 @@ export function usePatchMoveUpDown<T extends AutoEncoder & NonScalarIdentifiable
             const p = new PatchableArray() as PatchableArrayAutoEncoder<T>
             p.addMove(movingItemId, list[moveTo]?.id ?? null)
             addPatch(p)
-        }
+        },
+        canMoveUp: computed(() => {
+            const list = unref(inList)
+            const index = list.findIndex(c => c.id === movingItemId)
+            return index > 0
+        }),
+        canMoveDown: computed(() => {
+            const list = unref(inList)
+            const index = list.findIndex(c => c.id === movingItemId)
+            return index != -1 && index < list.length - 1
+        })
     }
 }
 

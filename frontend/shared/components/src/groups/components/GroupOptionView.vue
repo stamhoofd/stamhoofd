@@ -33,11 +33,40 @@
             
             <STListItem :selectable="true" element-name="label">
                 <template #left>
+                    <Checkbox v-model="allowAmount" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Meerdere stuks
+                </h3>
+                <p class="style-description-small">
+                    Een lid kan zelf een aantal stuks kiezen met een invulveld en plus- en minknop bij deze keuze.
+                </p>
+            </STListItem>
+
+            <STListItem v-if="allowAmount" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="useMaximum" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Beperk hoeveel stuks maximaal kunnen worden gekozen per inschrijving
+                </h3>
+
+                <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox title="Maximum aantal" error-fields="maximum" :error-box="errors.errorBox">
+                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('Ongelimiteerd')" />
+                    </STInputBox>
+                </div>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
                     <Checkbox v-model="useStock" />
                 </template>
 
                 <h3 class="style-title-list">
-                    Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
+                    Beperk het totale beschikbare aantal stuks (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -109,11 +138,27 @@ const stock = computed({
     set: (stock) => addPatch({stock})
 })
 
+
 const usedStock = computed(() => patched.value.usedStock || 0);
 
 const useStock = computed({
     get: () => patched.value.stock !== null,
     set: (useStock) => addPatch({stock: useStock ? (patched.value.usedStock || 10) : null})
+})
+
+const maximum = computed({
+    get: () => patched.value.maximum,
+    set: (maximum) => addPatch({maximum})
+})
+
+const useMaximum = computed({
+    get: () => patched.value.maximum !== null,
+    set: (useMaximum) => addPatch({maximum: useMaximum ? 10 : null})
+})
+
+const allowAmount = computed({
+    get: () => patched.value.allowAmount,
+    set: (allowAmount) => addPatch({allowAmount})
 })
 
 async function save() {

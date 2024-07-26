@@ -52,7 +52,7 @@
 
         <div v-for="optionMenu of patched.settings.optionMenus" :key="optionMenu.id" class="container">
             <hr>
-            <GroupOptionMenuBox :option-menu="optionMenu" :group="patched" :errors="errors" :level="2" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
+            <GroupOptionMenuBox :option-menu="optionMenu" :group="patched" :errors="errors" :level="2" @patch:group="addPatch" @patch:option-menu="addOptionMenuPatch" @delete="addOptionMenuDelete(optionMenu.id)" />
         </div>
 
         <hr>
@@ -72,27 +72,41 @@
         <hr>
         <h2>Beschikbaarheid</h2>
 
-        <Checkbox v-model="useRegistrationStartDate">
-            {{ $t('Start inschrijvingen pas na een bepaalde datum') }}
-        </Checkbox>
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="useRegistrationStartDate" />
+                </template>
 
-        <div v-if="useRegistrationStartDate" class="split-inputs">
-            <STInputBox :title="$t('Inschrijven start op')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
-                <DateSelection v-model="registrationStartDate" />
-            </STInputBox>
-            <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('Vanaf')" :validator="errors.validator" /> 
-        </div>
+                <h3 class="style-title-list">
+                    {{ $t('Start inschrijvingen pas na een bepaalde datum') }}
+                </h3>
 
-        <Checkbox v-model="useRegistrationEndDate">
-            {{ $t('Sluit inschrijvingen automatisch na een bepaalde datum') }}
-        </Checkbox>
-                
-        <div v-if="useRegistrationEndDate" class="split-inputs">
-            <STInputBox :title="$t('Inschrijven sluit op')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
-                <DateSelection v-model="registrationEndDate" />
-            </STInputBox>
-            <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
-        </div>
+                <div v-if="useRegistrationStartDate" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox :title="$t('Inschrijven start op')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="registrationStartDate" />
+                    </STInputBox>
+                    <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('Vanaf')" :validator="errors.validator" /> 
+                </div>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="useRegistrationEndDate" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Sluit inschrijvingen automatisch na een bepaalde datum') }}
+                </h3>
+
+                <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
+                    <STInputBox :title="$t('Inschrijven sluit op')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="registrationEndDate" />
+                    </STInputBox>
+                    <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('Tot welk tijdstip')" :validator="errors.validator" />
+                </div>
+            </STListItem>
+        </STList>
     </SaveView>
 </template>
 

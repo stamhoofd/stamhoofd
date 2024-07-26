@@ -7,12 +7,6 @@
 </template>
 
 <script setup lang="ts">
-defineOptions({
-    compatConfig: {
-        MODE: 3
-    }
-})
-
 export interface Props {
     min: number | null,
     max?: number | null

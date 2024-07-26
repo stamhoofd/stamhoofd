@@ -68,16 +68,18 @@ export class GroupOption extends AutoEncoder {
     price = ReduceablePrice.create({})
 
     /**
-     * Minimum you need to choose
+     * Maximum per registration (if > 1, you can choose an amount for this option)
+     * If null = infinite
      */
-    @field({ decoder: IntegerDecoder })
-    mininum = 0
+    @field({ decoder: BooleanDecoder })
+    allowAmount = false
 
     /**
-     * Maximum (if > 1, you can choose an amount for this option)
+     * Maximum per registration (in case allowAmount is true)
+     * If null = infinite
      */
-    @field({ decoder: IntegerDecoder })
-    maximum = 1
+    @field({ decoder: IntegerDecoder, nullable: true })
+    maximum: number | null = null
 
     /**
      * Total stock, excluding already sold items into account
