@@ -107,6 +107,12 @@
                 </div>
             </STListItem>
         </STList>
+
+        <hr>
+        <h2>Gegevensverzameling</h2>
+        <p>Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
+
+        <InheritedRecordsConfigurationBox :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
     </SaveView>
 </template>
 
@@ -115,10 +121,10 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { DateSelection, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Group, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType } from '@stamhoofd/structures';
+import { Group, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { useDraggableArray, usePatch, usePatchableArray } from '../hooks';
+import { useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
@@ -126,6 +132,7 @@ import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import { useFinancialSupportSettings } from './hooks';
+import { InheritedRecordsConfigurationBox } from '@stamhoofd/components';
 
 const props = withDefaults(
     defineProps<{
@@ -141,6 +148,8 @@ const props = withDefaults(
     }
 );
 
+const platform = usePlatform();
+const organization = useOrganization();
 const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
 
 const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
@@ -160,6 +169,22 @@ const {addPatch: addOptionMenuPatch, addPut: addOptionMenuPut, addDelete: addOpt
         })
     })
 })
+
+const recordsConfiguration = computed(() => patched.value.settings.recordsConfiguration);
+const patchRecordsConfiguration = (recordsConfiguration: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
+    addPatch({
+        settings: GroupSettings.patch({
+            recordsConfiguration
+        })
+    })
+}
+const inheritedRecordsConfiguration = computed(() => {
+    if (organization.value) {
+        return OrganizationRecordsConfiguration.mergeChild(platform.value.config.recordsConfiguration, organization.value.meta.recordsConfiguration)
+    }
+    return platform.value.config.recordsConfiguration
+
+});
 
 const errors = useErrors();
 const saving = ref(false);

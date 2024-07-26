@@ -18,7 +18,7 @@ export function useCheckoutRegisterItem() {
         const steps = allMemberSteps.slice();
 
         for (const recordCategory of member.getAllRecordCategories()) {
-            steps.push(new MemberRecordCategoryStep(recordCategory));
+            steps.push(new MemberRecordCategoryStep(recordCategory, item));
         }
         
         const manager = new MemberStepManager(member, steps, async (navigate) => {

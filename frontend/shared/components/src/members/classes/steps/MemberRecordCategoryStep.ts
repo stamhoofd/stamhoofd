@@ -1,24 +1,28 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { RecordCategory } from "@stamhoofd/structures";
+import { RecordCategory, RegisterItem } from "@stamhoofd/structures";
 import { markRaw } from "vue";
 import { MemberStepView } from "../..";
 import { NavigationActions } from "../../../types/NavigationActions";
-import EditEmergencyContactsBox from "../../components/edit/EditEmergencyContactsBox.vue";
-import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
 import EditMemberRecordCategoryBox from "../../components/edit/EditMemberRecordCategoryBox.vue";
+import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
 
 const outdatedTime = 60*1000*60*24*31*3 // 3 months
 
 export class MemberRecordCategoryStep implements EditMemberStep {
     recordCategory: RecordCategory
+    item: RegisterItem
 
-    constructor(recordCategory: RecordCategory) {
+    constructor(recordCategory: RecordCategory, item: RegisterItem) {
         this.recordCategory = recordCategory
+        this.item = item
     }
 
     isEnabled(manager: MemberStepManager) {
         const member = manager.member
-        const enabledCategories = member.getEnabledRecordCategories({ scopeOrganization: member.family.pendingRegisterItems[0]?.organization ?? null })
+        const enabledCategories = member.getEnabledRecordCategories({ 
+            scopeOrganization: this.item.organization,
+            scopeGroup: this.item.group,   
+        })
 
         const enabled = !!enabledCategories.find(c => c.id == this.recordCategory.id);
 

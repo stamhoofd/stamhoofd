@@ -2,4 +2,5 @@ export {default as RecordsConfigurationView} from './RecordsConfigurationView.vu
 export {default as EditRecordCategoryView} from './EditRecordCategoryView.vue'
 export {default as RecordCategoryRow} from './components/RecordCategoryRow.vue'
 export {default as ViewRecordCategoryAnswersBox} from './components/ViewRecordCategoryAnswersBox.vue'
+export {default as InheritedRecordsConfigurationBox } from './components/InheritedRecordsConfigurationBox.vue'
 export * from './RecordEditorSettings'

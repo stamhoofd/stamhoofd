@@ -692,7 +692,12 @@ export class PlatformMember implements ObjectWithRecords {
         return categories;
     }
 
-    getEnabledRecordCategories(options: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}|null, scopeOrganization?: Organization|null}): RecordCategory[] {
+    getEnabledRecordCategories(options: {checkPermissions?: {
+        permissions: UserPermissions|null, 
+        level: PermissionLevel}|null, 
+        scopeOrganization?: Organization|null,
+        scopeGroup?: Group|null,
+    }): RecordCategory[] {
         const checkPermissions = options.checkPermissions
         if (checkPermissions && !checkPermissions.permissions) {
             return []

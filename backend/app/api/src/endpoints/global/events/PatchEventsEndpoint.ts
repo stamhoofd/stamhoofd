@@ -4,11 +4,11 @@ import { Event, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Event as EventStruct, GroupType, PermissionLevel } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
+import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
-import { SQL, SQLWhereNot, SQLWhereSign } from '@stamhoofd/sql';
-import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string };
 type Query = undefined;

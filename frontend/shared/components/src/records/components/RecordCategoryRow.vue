@@ -1,5 +1,9 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editCategory()" @contextmenu.prevent="showContextMenu">
+        <template #left>
+            <Checkbox :model-value="category.defaultEnabled" :disabled="true" />
+        </template>
+        
         <h3 class="style-title-list">
             {{ category.name || $t('shared.untitled') }}
         </h3>

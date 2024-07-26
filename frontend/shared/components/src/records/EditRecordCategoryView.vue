@@ -44,11 +44,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Verplicht ingeschakeld voor alle groepen
+                    Verplicht ingeschakeld voor alle leden
                 </h3>
 
                 <p class="style-description-small">
-                    Schakel je dit uit, dan kan elke groep zelf kiezen of ze dit inschakelen of niet.
+                    Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld.
                 </p>
             </STListItem>
         </STList>

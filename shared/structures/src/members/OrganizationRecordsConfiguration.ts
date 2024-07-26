@@ -160,4 +160,69 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     // General configurations
     @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
     freeContribution: FreeContributionSettings | null = null
+
+    /**
+     * Note: best to not use this visually
+     */
+    static mergeChild(parent: OrganizationRecordsConfiguration, child: OrganizationRecordsConfiguration): OrganizationRecordsConfiguration {
+        const clone = child.clone();
+        if (parent.financialSupport !== null) {
+            clone.financialSupport = parent.financialSupport;
+        }
+
+        if (parent.dataPermission !== null) {
+            clone.dataPermission = parent.dataPermission;
+        }
+
+        if (parent.emailAddress !== null) {
+            clone.emailAddress = parent.emailAddress;
+        }
+
+        if (parent.phone !== null) {
+            clone.phone = parent.phone;
+        }
+
+        if (parent.gender !== null) {
+            clone.gender = parent.gender
+        }
+
+        if (parent.birthDay !== null) {
+            clone.birthDay = parent.birthDay
+        }
+
+        if (parent.address !== null) {
+            clone.address = parent.address
+        }
+
+        if (parent.parents !== null) {
+            clone.parents = parent.parents
+        }
+
+        if (parent.emergencyContacts !== null) {
+            clone.emergencyContacts = parent.emergencyContacts
+        }
+
+        if (parent.freeContribution !== null) {
+            clone.freeContribution = parent.freeContribution
+        }
+
+        clone.recordCategories = [...parent.recordCategories.map(r => {
+            const c = r.clone();
+            if (r.defaultEnabled) {
+                return c;
+            }
+            const inheritedFilter = child.inheritedRecordCategories.get(r.id);
+            if (inheritedFilter !== undefined) {
+                c.filter = inheritedFilter;
+                c.defaultEnabled = true;
+            }
+
+            return c;
+        }), ...clone.recordCategories]
+
+        // Nothing inherited yet
+        clone.inheritedRecordCategories = new Map()
+
+        return clone;
+    }
 }

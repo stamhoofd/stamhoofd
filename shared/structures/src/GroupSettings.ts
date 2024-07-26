@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Image } from './files/Image';
 import { GroupGenderType } from './GroupGenderType';
 import { OldGroupPrices } from './OldGroupPrices';
+import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -190,6 +191,13 @@ export class GroupSettings extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(GroupOptionMenu), version: 285 })
     optionMenus: GroupOptionMenu[] = []
+
+    @field({ 
+        decoder: OrganizationRecordsConfiguration, 
+        version: 291,
+        defaultValue: () => OrganizationRecordsConfiguration.create({})
+    })
+    recordsConfiguration: OrganizationRecordsConfiguration
 
     @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function(this: GroupSettings){ return this.startDate } })
     @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function(this: GroupSettings){ return this.registrationStartDate ?? this.startDate } })
