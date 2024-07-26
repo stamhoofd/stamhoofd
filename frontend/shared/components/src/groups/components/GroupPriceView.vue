@@ -3,6 +3,7 @@
         <h1>
             {{ title }}
         </h1>
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <GroupPriceBox :price="patched" :group="group" :errors="errors" @patch:price="addPatch" />
 

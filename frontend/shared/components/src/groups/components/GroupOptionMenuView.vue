@@ -3,6 +3,7 @@
         <h1>
             {{ title }}
         </h1>
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <GroupOptionMenuBox :option-menu="patched" :group="group" :errors="errors" :level="1" @patch:option-menu="addPatch" @delete="deleteMe" />
 

@@ -11,6 +11,7 @@
 
             <template #right>
                 <template v-if="!$isMobile && !$isIOS"><slot name="buttons" /></template>
+                <button class="icon trash navigation" v-if="canDelete" type="button" @click="$emit('delete')" :disabled="deleting" />
                 <LoadingButton :loading="loading" v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)">
                     <button class="button navigation highlight" :disabled="disabled" type="submit">
                         {{ saveText }}
@@ -65,11 +66,15 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
         LoadingButton,
         BackButton,
         STButtonToolbar
-    }
+    },
+    emits: ["save", "delete"]
 })
 export default class SaveView extends Mixins(NavigationMixin) {
     @Prop({ default: false })
     loading!: boolean;
+
+    @Prop({ default: false })
+    deleting!: boolean;
 
     @Prop({ default: false })
     disabled!: boolean;
@@ -94,5 +99,10 @@ export default class SaveView extends Mixins(NavigationMixin) {
 
     @Prop({ default: false })
     addExtraCancel!: boolean; // Add a large cancel button at the bottom
+
+    get canDelete() {
+        // Check has delete listener
+        return !!this.$props.onDelete
+    }
 }
 </script>

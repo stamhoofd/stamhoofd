@@ -4,6 +4,8 @@
             {{ title }}
         </h1>
 
+        <STErrorsDefault :error-box="errors.errorBox" />
+
         <hr>
         <h2 class="style-with-button">
             <div>{{ $t('Tarieven') }}</div>
@@ -113,17 +115,17 @@ import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/sim
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { DateSelection, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Group, GroupOptionMenu, GroupPrice, GroupSettings, GroupType } from '@stamhoofd/structures';
+import { Group, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { useDraggableArray, usePatch, usePatchableArray } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
+import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import { useFinancialSupportSettings } from './hooks';
-import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -273,7 +275,7 @@ async function deleteMe() {
 
 function addGroupPrice() {
     const price = GroupPrice.create({
-        name: $t('Onbekend'),
+        name: $t('Naamloos'),
         price: patched.value.settings.prices[0]?.price?.clone()
     })
     addPricePut(price)
@@ -300,7 +302,12 @@ async function editGroupPrice(price: GroupPrice) {
 
 async function addGroupOptionMenu() {
     const optionMenu = GroupOptionMenu.create({
-        name: $t('Onbekend')
+        name: $t('Naamloos'),
+        options: [
+            GroupOption.create({
+                name: $t('Optie 1')
+            })
+        ]
     })
     
     await present({

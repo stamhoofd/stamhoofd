@@ -1,6 +1,6 @@
 <template>
     <div class="split-inputs">
-        <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
+        <STInputBox :title="title" error-fields="price" :error-box="errorBox">
             <PriceInput v-model="price" placeholder="Gratis" :min="min" />
         </STInputBox>
 
@@ -20,11 +20,13 @@ import { useFinancialSupportSettings } from '../hooks';
 withDefaults(
     defineProps<{
         errorBox?: ErrorBox|null,
-        min?: number|null
+        min?: number|null,
+        title?: string
     }>(),
     {
         errorBox: null,
-        min: null
+        min: null,
+        title: 'Prijs'
     }
 );
 const model = defineModel<ReduceablePrice>({ required: true })
