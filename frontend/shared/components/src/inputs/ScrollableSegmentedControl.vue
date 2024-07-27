@@ -16,7 +16,7 @@
             <slot name="right" />
         </div>
 
-        <div class="seeker" :style="{'--seek-width': seekerWidth+'px', '--seek-x': seekerXOffset + 'px'}" />
+        <div v-if="seekerWidth" class="seeker" :style="{'--seek-width': seekerWidth+'px', '--seek-x': seekerXOffset + 'px'}" />
     </div>
 </template>
 
