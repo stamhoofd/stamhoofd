@@ -91,7 +91,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
+import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
 import { getEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
@@ -110,7 +110,7 @@ const filteredCount = ref(0);
 const present = usePresent()
 const context = useContext();
 const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
-const selectedYear = ref(null);
+const selectedYear = ref(null) as Ref<number|null>;
 const years = computed(() => {
     const currentYear = Formatter.year(new Date());
     return [null, currentYear, currentYear - 1, currentYear - 2]
@@ -178,9 +178,10 @@ defineRoutes([
     },
 ])
 
-
 const fetcher = useInfiniteObjectFetcher<ObjectType>({
-    requiredFilter: getRequiredFilter(),
+    get requiredFilter() {
+        return getRequiredFilter()
+    },
     async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
         console.log('Events.fetch', data);
         data.sort = extendSort(data.sort);
@@ -376,12 +377,33 @@ function extendSort(list: SortList): SortList  {
 
 
 function getRequiredFilter(): StamhoofdFilter|null  {
-    return {
-        startDate: {
-            $gt: new Date()
+    if (selectedYear.value === null) {
+        return {
+            startDate: {
+                $gt: new Date()
+            }
         }
     }
+
+    return {
+        $and: [
+            {
+                startDate: {
+                    $gte: new Date(selectedYear.value, 0, 1),
+                }
+            },
+            {
+                startDate: {
+                    $lt: new Date(selectedYear.value + 1, 0, 1)
+                }
+            }
+        ]
+    }
 }
+
+watch(selectedYear, () => {
+    fetcher.reset()
+})
 
 function getEventPrefix(event: Event) {
     const prefixes: string[] = []

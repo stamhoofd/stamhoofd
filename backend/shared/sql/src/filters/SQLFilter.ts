@@ -191,6 +191,35 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.Greater, convertToExpression(norm(f.$gt)));
         }
 
+        if ('$gte' in f) {
+            guardScalar(f.$gte);
+
+            if (isJSONObject) {
+                throw new Error('Greater than is not supported in this place')
+            }
+
+            if (f.$gte === null) {
+                // >= null is always everything
+                return new SQLWhereEqual(new SQLSafeValue(1), SQLWhereSign.Equal, new SQLSafeValue(1));
+            }
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.GreaterEqual, convertToExpression(norm(f.$gte)));
+        }
+
+        if ('$lte' in f) {
+            guardScalar(f.$lte);
+
+            if (isJSONObject) {
+                throw new Error('Greater than is not supported in this place')
+            }
+
+            if (f.$lte === null) {
+                // <= null is same as equal to null
+                return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, convertToExpression(norm(f.$lte)));
+            }
+            return new SQLWhereEqual(sqlExpression, SQLWhereSign.LessEqual, convertToExpression(norm(f.$lte)));
+        }
+
+
         if ('$lt' in f) {
             guardScalar(f.$lt);
 
