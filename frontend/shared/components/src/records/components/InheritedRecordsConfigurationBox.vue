@@ -62,7 +62,7 @@ import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, PropertyFilterView, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useOrganization } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref, watchEffect } from 'vue';
 import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
@@ -73,10 +73,12 @@ type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parent
 const props = withDefaults(
     defineProps<{
         recordsConfiguration: OrganizationRecordsConfiguration,
-        inheritedRecordsConfiguration?: OrganizationRecordsConfiguration|null
+        inheritedRecordsConfiguration?: OrganizationRecordsConfiguration|null,
+        overrideOrganization?: Organization|null
     }>(),
     {
-        inheritedRecordsConfiguration: null
+        inheritedRecordsConfiguration: null,
+        overrideOrganization: null
     }
 );
 
@@ -84,7 +86,8 @@ const emit = defineEmits(['patch:recordsConfiguration'])
 const {patched, addPatch} = useEmitPatch<OrganizationRecordsConfiguration>(props, emit, 'recordsConfiguration');
 const $t = useTranslate();
 const $navigate = useNavigate();
-const organization = useOrganization()
+const baseOrg = useOrganization()
+const organization = computed(() => props.overrideOrganization ?? baseOrg.value)
 const present = usePresent();
 const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0]
 

@@ -141,7 +141,7 @@
         <h2>Gegevensverzameling</h2>
         <p>Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
 
-        <InheritedRecordsConfigurationBox :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
+        <InheritedRecordsConfigurationBox :overrideOrganization="eventOrganizer" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
     </SaveView>
 </template>
 
@@ -216,8 +216,8 @@ const patchRecordsConfiguration = (recordsConfiguration: AutoEncoderPatchType<Or
     })
 }
 const inheritedRecordsConfiguration = computed(() => {
-    if (organization.value) {
-        return OrganizationRecordsConfiguration.mergeChild(platform.value.config.recordsConfiguration, organization.value.meta.recordsConfiguration)
+    if (eventOrganizer.value) {
+        return OrganizationRecordsConfiguration.mergeChild(platform.value.config.recordsConfiguration, eventOrganizer.value.meta.recordsConfiguration)
     }
     return platform.value.config.recordsConfiguration
 
