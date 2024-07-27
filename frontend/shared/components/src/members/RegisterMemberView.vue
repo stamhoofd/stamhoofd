@@ -160,9 +160,8 @@ async function searchOrganization() {
         url: 'zoeken',
         components: [
             new ComponentWithProperties(SearchOrganizationView, {
-                member: props.member,
                 title: searchOrganizationTitle.value,
-                selectOrganization: async (organization: Organization, pop: (options?: PopOptions) => Promise<void>) => {
+                selectOrganization: async (organization: Organization, {pop}: NavigationActions) => {
                     addOrganization(organization)
                     await pop({force: true});
                 }

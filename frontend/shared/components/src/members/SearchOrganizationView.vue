@@ -11,7 +11,7 @@
 
             <Spinner v-if="loadingResults" class="gray center" />
             <STList v-else>
-                <STListItem v-for="organization in results" :key="organization.id" :selectable="true" @click="selectOrganization(organization, pop)">
+                <STListItem v-for="organization in results" :key="organization.id" :selectable="true" @click="selectOrganization(organization, navigationActions)">
                     <template #left>
                         <OrganizationAvatar :organization="organization" />
                     </template>
@@ -33,25 +33,24 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { PopOptions, usePop } from '@simonbackx/vue-app-navigation';
-import { OrganizationAvatar, Spinner, Toast } from '@stamhoofd/components';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { NavigationActions, OrganizationAvatar, Spinner, Toast, useNavigationActions } from '@stamhoofd/components';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
-import { Organization, PlatformMember } from '@stamhoofd/structures';
+import { Organization } from '@stamhoofd/structures';
 import { throttle } from "@stamhoofd/utility";
 import { Ref, ref, watch } from 'vue';
 
 withDefaults(
     defineProps<{
         title?: string
-        member: PlatformMember;
-        selectOrganization: (organization: Organization, pop: (options?: PopOptions) => Promise<void>|undefined) => Promise<void>|void;
+        selectOrganization: (organization: Organization, navigation: NavigationActions) => Promise<void>|void;
     }>(), {
         title: 'Zoeken'
     }
 );
 
-
+const navigationActions = useNavigationActions()
 const loadingResults = ref(false)
 const query = ref("");
 const results = ref([]) as Ref<Organization[]>;

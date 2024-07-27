@@ -14,7 +14,7 @@
             <p class="style-description-block">Daarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.</p>
 
             <STList>
-                <STListItem :selectable="true" v-if="eventOrganizer">
+                <STListItem :selectable="true" v-if="eventOrganizer" @click="chooseOrganizer">
                     <template #left>
                         <OrganizationAvatar :organization="eventOrganizer" />
                     </template>
@@ -144,8 +144,9 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { DateSelection, ErrorBox, InheritedRecordsConfigurationBox, TimeInput, OrganizationAvatar } from '@stamhoofd/components';
+import { DateSelection, ErrorBox, InheritedRecordsConfigurationBox, NavigationActions, OrganizationAvatar, SearchOrganizationView, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { Country, Group, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType, Organization, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { computed, Ref, ref, watchEffect } from 'vue';
 import { useErrors } from '../errors/useErrors';
@@ -157,7 +158,6 @@ import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
 import { useFinancialSupportSettings } from './hooks';
-import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 
 const props = withDefaults(
     defineProps<{
@@ -178,7 +178,7 @@ const organization = useOrganization();
 const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
 const loadedOrganization = ref(null) as Ref<Organization | null>;
 const loadingEventOrganizerErrorBox = ref(null) as Ref<ErrorBox | null>;
-const loadingOrganization = ref(false);
+let loadingOrganization = false; // not reactive
 const owner = useRequestOwner()
 
 const eventOrganizer = computed(() => {
@@ -189,28 +189,32 @@ const eventOrganizer = computed(() => {
     return loadedOrganization.value;
 })
 
-watchEffect(async () => {
-    if (!eventOrganizer.value && !loadingOrganization.value && props.group.organizationId) {
+watchEffect(() => {
+    if (!eventOrganizer.value && !loadingOrganization && props.group.organizationId) {
         // Start loading
-        loadingOrganization.value = true;
-        try {
-            loadingEventOrganizerErrorBox.value = null
-            const response = await SessionContext.serverForOrganization(props.group.organizationId).request({
-                method: "GET",
-                path: "/organization",
-                decoder: Organization as Decoder<Organization>,
-                shouldRetry: true,
-                owner
-            })
-            if (response.data.id === props.group.organizationId) {
-                loadedOrganization.value = response.data;
-            }
-        } catch (e) {
-            loadingEventOrganizerErrorBox.value = new ErrorBox(e);
-        }
-        loadingOrganization.value = false;
+        loadOrganization().catch(console.error)
     }
 });
+
+async function loadOrganization() {
+    loadingOrganization = true;
+    try {
+        loadingEventOrganizerErrorBox.value = null
+        const response = await SessionContext.serverForOrganization(props.group.organizationId).request({
+            method: "GET",
+            path: "/organization",
+            decoder: Organization as Decoder<Organization>,
+            shouldRetry: true,
+            owner
+        })
+        if (response.data.id === props.group.organizationId) {
+            loadedOrganization.value = response.data;
+        }
+    } catch (e) {
+        loadingEventOrganizerErrorBox.value = new ErrorBox(e);
+    }
+    loadingOrganization = false;
+}
     
 const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
     addPatch({
@@ -403,6 +407,24 @@ async function addGroupOptionMenu() {
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
                     addOptionMenuPut(optionMenu.patch(patch))
+                }
+            })
+        ],
+        modalDisplayStyle: "popup"
+    })
+}
+
+async function chooseOrganizer() {
+    await present({
+        components: [
+            new ComponentWithProperties(SearchOrganizationView, {
+                title: 'Kies een organisator',
+                selectOrganization: async (organization: Organization, {dismiss}: NavigationActions) => {
+                    await dismiss({force: true});
+                    loadedOrganization.value = organization;
+                    addPatch({
+                        organizationId: organization.id
+                    })
                 }
             })
         ],
