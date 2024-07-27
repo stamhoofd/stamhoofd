@@ -43,12 +43,16 @@
         <STList>
             <STListItem :selectable="true" element-name="button" @click="addRegistrations">
                 <template #left>
-                    <span class="icon edit gray" />
+                    <span class="icon gray" :class="patched.group ? 'edit' : 'add'" />
                 </template>
 
                 <h3 class="style-title-list">
                     {{ patched.group ? $t('Bewerk inschrijvinginstellingen') : $t('Inschrijvingen verzamelen') }}
                 </h3>
+
+                <p class="style-description-small">
+                    Enkel leden kunnen inschrijven voor een activiteit.
+                </p>
             </STListItem>
         </STList>
 
@@ -235,16 +239,6 @@
                         {{ $t('Omslagfoto toevoegen') }}
                     </h3>
                 </UploadButton>
-            </STListItem>
-
-            <STListItem :selectable="true" element-name="button" @click="addRegistrations">
-                <template #left>
-                    <span class="icon edit gray" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ patched.group ? $t('Bewerk inschrijvinginstellingen') : $t('Inschrijvingen verzamelen') }}
-                </h3>
             </STListItem>
         </STList>
     </SaveView>
