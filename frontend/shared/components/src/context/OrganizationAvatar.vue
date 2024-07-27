@@ -1,7 +1,7 @@
 <template>
-    <figure class="organization-avatar">
-        <div v-if="logoSrc" class="logo">
-            <img :src="logoSrc" :srcset="logoSrcSet">
+    <figure ref="el" class="organization-avatar">
+        <div v-if="logo" class="logo">
+            <ImageComponent :image="logo" />
         </div>
         <div v-else class="letter-logo" :data-length="letters.length">
             {{ letters }}
@@ -9,46 +9,26 @@
     </figure>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Organization } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
+import { computed, ref, watchEffect } from "vue";
 import { ColorHelper } from "../ColorHelper";
+import { ImageComponent } from "@stamhoofd/components";
+const props = defineProps<{
+    organization: Organization
+}>()
 
-@Component
-export default class OrganizationAvatar extends Vue {
-    @Prop({ required: true })
-        organization!: Organization
+const letters = computed(() => Formatter.firstLetters(props.organization.name, 3))
+const logo = computed(() => props.organization.meta.squareLogo)
+const el = ref<HTMLElement|null>(null)
 
-    width = 40
-
-    mounted() {
-        if (this.organization.meta.color) {
-            ColorHelper.setColor(this.organization.meta.color, this.$el as HTMLElement);
-        }
-
-        this.width = parseInt(getComputedStyle(this.$el).getPropertyValue('--block-width') ?? 40);
+watchEffect(() => {
+    if (props.organization.meta.color && el.value) {
+        ColorHelper.setColor(props.organization.meta.color, el.value);
     }
-
-    get letters() {
-        return Formatter.firstLetters(this.organization.name, 3)
-    }
-
-    get logoSrc() {
-        if (!this.organization.meta.squareLogo) {
-            return null
-        }
-        return this.organization.meta.squareLogo.getPathForSize(this.width, this.width)
-    }
-
-    get logoSrcSet() {
-        if (!this.organization.meta.squareLogo) {
-            return null
-        }
-        return this.organization.meta.squareLogo.getPathForSize(this.width, this.width) + " 1x, "+this.organization.meta.squareLogo.getPathForSize(this.width*2, this.width*2)+" 2x, "+this.organization.meta.squareLogo.getPathForSize(this.width*3, this.width*3)+" 3x"
-    }
-}
+})
 </script>
 
 <style lang="scss">
@@ -79,7 +59,7 @@ export default class OrganizationAvatar extends Vue {
     }
 
     .logo {
-        img {
+        .image-component {
             width: var(--block-width, 40px);
             height: var(--block-width, 40px);
             object-fit: contain;
