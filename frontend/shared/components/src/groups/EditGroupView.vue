@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="loadingOrganizer" :error-box="loadingEventOrganizerErrorBox" />
-    <SaveView v-else :loading="saving" :title="title" :disabled="!hasChanges" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
+    <SaveView v-else :loading="saving" :title="title" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
         </h1>
