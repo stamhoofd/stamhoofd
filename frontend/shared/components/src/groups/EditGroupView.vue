@@ -1,6 +1,6 @@
 <template>
-    <LoadingView v-if="!eventOrganizer && props.group.organizationId" :errorBox="loadingEventOrganizerErrorBox" />
-    <SaveView v-else :loading="saving" :title="title" :disabled="!hasChanges" class="group-edit-view" @save="save" :deleting="deleting" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
+    <LoadingView v-if="loadingOrganizer" :error-box="loadingEventOrganizerErrorBox" />
+    <SaveView v-else :loading="saving" :title="title" :disabled="!hasChanges" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -11,15 +11,19 @@
             <hr>
             <h2>Organisator</h2>
             <p>Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.</p>
-            <p class="style-description-block">Daarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.</p>
+            <p class="style-description-block">
+                Daarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.
+            </p>
 
             <STList>
-                <STListItem :selectable="true" v-if="eventOrganizer" @click="chooseOrganizer">
+                <STListItem v-if="eventOrganizer" :selectable="true" @click="chooseOrganizer('Kies een organisator')">
                     <template #left>
                         <OrganizationAvatar :organization="eventOrganizer" />
                     </template>
 
-                    <h3 class="style-title-list">{{ eventOrganizer.name }}</h3>
+                    <h3 class="style-title-list">
+                        {{ eventOrganizer.name }}
+                    </h3>
                     <p class="style-description">
                         {{ eventOrganizer.address.anonymousString(Country.Belgium) }}
                     </p>
@@ -142,13 +146,12 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { DateSelection, ErrorBox, InheritedRecordsConfigurationBox, NavigationActions, OrganizationAvatar, SearchOrganizationView, TimeInput } from '@stamhoofd/components';
+import { DateSelection, InheritedRecordsConfigurationBox, NavigationActions, OrganizationAvatar, SearchOrganizationView, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { Country, Group, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType, Organization, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
-import { computed, Ref, ref, watchEffect } from 'vue';
+import { computed, Ref, ref } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
@@ -157,7 +160,7 @@ import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
 import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
-import { useFinancialSupportSettings } from './hooks';
+import { useFinancialSupportSettings, useExternalOrganization } from './hooks';
 
 const props = withDefaults(
     defineProps<{
@@ -176,46 +179,16 @@ const props = withDefaults(
 const platform = usePlatform();
 const organization = useOrganization();
 const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
-const loadedOrganization = ref(null) as Ref<Organization | null>;
-const loadingEventOrganizerErrorBox = ref(null) as Ref<ErrorBox | null>;
-let loadingOrganization = false; // not reactive
-const owner = useRequestOwner()
 
-const eventOrganizer = computed(() => {
-    if (props.group.organizationId === organization.value?.id) {
-        return organization.value;
-    }
-
-    return loadedOrganization.value;
-})
-
-watchEffect(() => {
-    if (!eventOrganizer.value && !loadingOrganization && props.group.organizationId) {
-        // Start loading
-        loadOrganization().catch(console.error)
-    }
-});
-
-async function loadOrganization() {
-    loadingOrganization = true;
-    try {
-        loadingEventOrganizerErrorBox.value = null
-        const response = await SessionContext.serverForOrganization(props.group.organizationId).request({
-            method: "GET",
-            path: "/organization",
-            decoder: Organization as Decoder<Organization>,
-            shouldRetry: true,
-            owner
+const {externalOrganization: eventOrganizer, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingEventOrganizerErrorBox} = useExternalOrganization(
+    computed({
+        get: () => patched.value.organizationId,
+        set: (organizationId: string) => addPatch({
+            organizationId
         })
-        if (response.data.id === props.group.organizationId) {
-            loadedOrganization.value = response.data;
-        }
-    } catch (e) {
-        loadingEventOrganizerErrorBox.value = new ErrorBox(e);
-    }
-    loadingOrganization = false;
-}
-    
+    })
+)
+
 const patchPricesArray = (prices: PatchableArrayAutoEncoder<GroupPrice>) => {
     addPatch({
         settings: GroupSettings.patch({
@@ -407,24 +380,6 @@ async function addGroupOptionMenu() {
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<GroupOptionMenu>) => {
                     addOptionMenuPut(optionMenu.patch(patch))
-                }
-            })
-        ],
-        modalDisplayStyle: "popup"
-    })
-}
-
-async function chooseOrganizer() {
-    await present({
-        components: [
-            new ComponentWithProperties(SearchOrganizationView, {
-                title: 'Kies een organisator',
-                selectOrganization: async (organization: Organization, {dismiss}: NavigationActions) => {
-                    await dismiss({force: true});
-                    loadedOrganization.value = organization;
-                    addPatch({
-                        organizationId: organization.id
-                    })
                 }
             })
         ],

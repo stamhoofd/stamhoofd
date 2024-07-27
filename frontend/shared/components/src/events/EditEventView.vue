@@ -89,6 +89,7 @@
                 </h3>
             </STListItem>
 
+
             <STListItem :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="visible" />
@@ -99,6 +100,28 @@
                 </h3>
             </STListItem>
         </STList>
+
+        <template v-if="canSetNationalActivity && externalOrganization">
+            <hr>
+            <h2>Organisator</h2>
+            <p>Deze activiteit is enkel zichtbaar voor leden van de organisator.</p>
+
+            <STList>
+                <STListItem v-if="externalOrganization" :selectable="true" @click="chooseOrganizer('Kies een organisator')">
+                    <template #left>
+                        <OrganizationAvatar :organization="externalOrganization" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ externalOrganization.name }}
+                    </h3>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+        </template>
 
         <JumpToContainer :visible="isNationalActivity && organizationTagIds !== null">
             <hr>
@@ -244,7 +267,7 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput, OrganizationAvatar } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -276,6 +299,16 @@ const pop = usePop();
 const organization = useOrganization();
 const present = usePresent();
 const platform = usePlatform();
+
+const {externalOrganization, choose: chooseOrganizer, loading, errorBox: organizerEventBox} = useExternalOrganization(
+    computed({
+        get: () => patched.value.organizationId,
+        set: (organizationId) => addPatch({
+            organizationId
+        })
+    })
+)
+
 
 const type = computed(() => {
     const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId)
@@ -428,7 +461,7 @@ const locationAddress = computed({
 const app = useAppContext()
 const canSetNationalActivity = computed(() => app === 'admin')
 const isNationalActivity = computed({
-    get: () => (patched.value.organizationId === null && !props.isNew) || (!organization.value && props.isNew),
+    get: () => patched.value.organizationId === null,
     set: (isNationalActivity) => {
         if (isNationalActivity) {
             addPatch({
@@ -438,7 +471,7 @@ const isNationalActivity = computed({
             const organizationId = props.event.organizationId || organization.value?.id
 
             if (!organizationId) {
-                Toast.error('Via het administratieportaal kan je momenteel geen lokale activiteiten aanmaken').show()
+                chooseOrganizer('Kies een organisator').catch(console.error)
                 return
             }
             addPatch({
