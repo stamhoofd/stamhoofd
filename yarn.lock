@@ -2405,10 +2405,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@2.13.0":
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.13.0.tgz#0c4e06dca0c56d5e68138bef1626d3a4a5a235cc"
-  integrity sha512-t9o8z3BqgBu766lt5vZUeyGhLaoOBk78WKkcV9UL9jYrgaCoZGgT8XpHM3OEVpCJncKFs90rKqbsIJb25rzspA==
+"@simonbackx/simple-encoding@2.13.1":
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.13.1.tgz#d208026f3023f55fe517a51020dab05214e019d7"
+  integrity sha512-YQrOo4N+R5AG65iLSXdi4VegK0w3qFSJzbm9NVQtuJeRrrk27xsoVZYtlTsk2GpIRGDf5YiyG04MGaJ97VUp9w==
 
 "@simonbackx/simple-endpoints@1.13.0":
   version "1.13.0"
