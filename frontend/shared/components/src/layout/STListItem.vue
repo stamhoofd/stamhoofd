@@ -95,280 +95,292 @@ button.st-list-item {
 }
 
 .st-list-item {
-  padding-left: var(--st-horizontal-padding, 15px);
-  padding-right: 0;
-  padding-right: var(--st-horizontal-padding, 15px);
+    padding-left: var(--st-horizontal-padding, 15px);
+    padding-right: 0;
+    padding-right: var(--st-horizontal-padding, 15px);
 
-  margin: 0;
-  display: flex !important;
-  flex-direction: row;
+    margin: 0;
+    display: flex !important;
+    flex-direction: row;
     align-items: stretch;
-  width: 100%; // fix for buttons
-  box-sizing: border-box;
-  contain: style paint;
+    width: 100%; // fix for buttons
+    box-sizing: border-box;
+    contain: style paint;
 
-  @extend .style-normal;
+    @extend .style-normal;
 
-  &.selected {
-    color: $color-primary;
-  }
-
-  > .left {
-    flex-shrink: 0;
-
-    padding-top: var(--st-list-padding, 15px);
-    padding-right: 15px;
-    padding-bottom: var(--st-list-padding, 15px);
-    min-width: 0; // flexbox disable becoming bigger than parent
-
-    &:empty {
-      display: none;
+    &.selected {
+        color: $color-primary;
     }
-  }
 
-  &.left-center {
     > .left {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-  }
-
-  &.right-small {
-    > .main > div > .right {
-      @extend .style-description-small;
-      text-align: right;
-      padding-left: 10px;
-    }
-  }
-
-  &.right-description {
-    > .main > div > .right {
-      @extend .style-description;
-      text-align: right;
-      flex-shrink: 10;
-      padding-left: 15px;
-    }
-  }
-
-  &.right-price {
-    > .main > div > .right {
-      @extend .style-description;
-      text-align: right;
-      flex-shrink: 0;
-      padding-left: 15px;
-    }
-  }
-
-  &.right-description.wrap {
-    > .main > div > .right {
-      white-space: pre-wrap;
-    }
-  }
-
-  &.right-stack {
-    .right {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      > * {
-        margin: 0 5px;
-
-        &:last-child {
-          margin-right: 0;
-        }
-
-        &:first-child {
-          margin-left: 0;
-        }
-      }
-
-      > .button {
-        margin: -5px 5px;
-
-        &:last-child {
-          margin-right: 0;
-        }
-
-        &:first-child {
-          margin-left: 0;
-        }
-      }
-    }
-
-    &.no-margin {
-      .right {
-        > * {
-          margin: 0;
-        }
-
-        > .button {
-          margin: -5px 0;
-        }
-      }
-    }
-  }
-
-  &.no-padding {
-    > .main > div > .middle {
-      padding: 0 !important;
-    }
-
-    > .main > div > .right {
-      padding: 0 !important;
-    }
-  }
-
-  > .main {
-    flex-grow: 1;
-
-    // Make sure the hr drops to the bottom if the left is longer
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 0; // flexbox disable becoming bigger than parent
-
-    > div {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      flex-grow: 1;
-
-      > .middle {
-        padding-top: var(--st-list-padding, 15px);
-        padding-bottom: var(--st-list-padding, 15px);
-        flex-grow: 1;
-        min-width: 0; // flexbox disable becoming bigger than parent
-      }
-
-      > .right {
-        margin-left: auto;
-        min-width: 0; // flexbox disable becoming bigger than parent
         flex-shrink: 0;
 
-        padding-top: var(--st-list-padding-right, var(--st-list-padding, 10px));
-        padding-bottom: var(
-          --st-list-padding-right,
-          var(--st-list-padding, 10px)
-        );
-        padding-left: 15px;
+        padding-top: var(--st-list-padding, 15px);
+        padding-right: 15px;
+        padding-bottom: var(--st-list-padding, 15px);
+        min-width: 0; // flexbox disable becoming bigger than parent
 
         &:empty {
-          display: none;
+            display: none;
         }
-      }
     }
 
-    > hr {
-      border: 0;
-      outline: 0;
-      height: $border-width-thin;
-      width: 100%;
-      background: $color-border;
-      border-radius: $border-width-thin/2;
-      margin: 0;
-      margin-right: calc(-1 * var(--st-horizontal-padding, 15px));
-
-      // Increase width + horizontal padding
-      padding-right: var(--st-horizontal-padding, 15px);
+    &.left-center {
+        > .left {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        }
     }
-  }
 
-  // Wrap on smartphones (because content is too long)
-  &.smartphone-wrap {
-    @media (max-width: 450px) {
-      > .main > div {
-        display: block;
+    &.right-small {
+        > .main > div > .right {
+            @extend .style-description-small;
+            text-align: right;
+            padding-left: 10px;
+        }
+    }
 
-        > .middle {
-          padding-right: var(--st-horizontal-padding, 15px);
-          padding-bottom: 0px;
+    &.right-description {
+        > .main > div > .right {
+            @extend .style-description;
+            text-align: right;
+            flex-shrink: 10;
+            padding-left: 15px;
+        }
+    }
+
+    &.right-price {
+        > .main > div > .right {
+            @extend .style-description;
+            text-align: right;
+            flex-shrink: 0;
+            padding-left: 15px;
+        }
+    }
+
+    &.right-description.wrap {
+        > .main > div > .right {
+            white-space: pre-wrap;
+        }
+    }
+
+    &.right-stack {
+        .right {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            > * {
+                margin: 0 5px;
+
+                &:last-child {
+                margin-right: 0;
+                }
+
+                &:first-child {
+                margin-left: 0;
+                }
+            }
+
+            > .button {
+                margin: -5px 5px;
+
+                &:last-child {
+                margin-right: 0;
+                }
+
+                &:first-child {
+                margin-left: 0;
+                }
+            }
         }
 
-        > .right {
-          padding-top: 5px;
-          padding-bottom: 15px;
+        &.no-margin {
+            .right {
+                > * {
+                margin: 0;
+                }
+
+                > .button {
+                margin: -5px 0;
+                }
+            }
         }
-      }
     }
-  }
 
-  &:last-child,
-  &.no-border {
-    > .main > hr {
-      display: none;
+    &.no-padding {
+        > .main > div > .middle {
+            padding: 0 !important;
+        }
+
+        > .main > div > .right {
+            padding: 0 !important;
+        }
     }
-  }
-
-  &.disabled {
-    opacity: 0.5;
-  }
-
-  &.selectable:not(.is-dragging) {
-    touch-action: manipulation;
-    user-select: none;
-    transition: background-color 0.2s 0.1s;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    cursor: pointer;
 
     > .main {
-      > hr {
-        transition: opacity 0.2s 0.1s;
-      }
-    }
+        flex-grow: 1;
 
-    &.hoverable:hover {
-      opacity: 0.6;
+        // Make sure the hr drops to the bottom if the left is longer
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-width: 0; // flexbox disable becoming bigger than parent
 
-      &:has(button:hover) {
-        opacity: 1;
-      }
-    }
+        > div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            flex-grow: 1;
 
-    &:active {
-      transition: none;
-      background: $color-background-shade;
-      background: var(
-        --color-current-background-shade,
-        $color-background-shade
-      );
+            > .middle {
+                padding-top: var(--st-list-padding, 15px);
+                padding-bottom: var(--st-list-padding, 15px);
+                flex-grow: 1;
+                min-width: 0; // flexbox disable becoming bigger than parent
+            }
 
-      > .main {
-        > hr {
-          transition: none;
-          opacity: 0;
+            > .right {
+                margin-left: auto;
+                min-width: 0; // flexbox disable becoming bigger than parent
+                flex-shrink: 0;
+
+                padding-top: var(--st-list-padding-right, var(--st-list-padding, 10px));
+                padding-bottom: var(
+                --st-list-padding-right,
+                var(--st-list-padding, 10px)
+                );
+                padding-left: 15px;
+
+                &:empty {
+                display: none;
+                }
+            }
         }
-      }
-    }
 
-    &:active:has(button:active) {
-      transition: background-color 0.2s 0.1s;
-      background: none;
-
-      > .main {
         > hr {
-          opacity: 1;
-          transition: opacity 0.2s 0.1s;
+            border: 0;
+            outline: 0;
+            height: $border-width-thin;
+            width: 100%;
+            background: $color-border;
+            border-radius: $border-width-thin/2;
+            margin: 0;
+            margin-right: calc(-1 * var(--st-horizontal-padding, 15px));
+
+            // Increase width + horizontal padding
+            padding-right: var(--st-horizontal-padding, 15px);
         }
-      }
     }
-  }
 
-  &.sortable-chosen {
-    transition: none;
-    background: $color-background-shade;
-    background: var(--color-current-background-shade, $color-background-shade);
-  }
+    // Wrap on smartphones (because content is too long)
+    &.smartphone-wrap {
+        @media (max-width: 450px) {
+            > .main > div {
+                display: block;
 
-  &.sortable-chosen.is-dragging {
-    touch-action: manipulation;
-    user-select: none;
-    transition: background-color 0.2s 0.1s;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    cursor: pointer;
+                > .middle {
+                padding-right: var(--st-horizontal-padding, 15px);
+                padding-bottom: 0px;
+                }
 
-    transition: none;
-    background: none;
-  }
+                > .right {
+                padding-top: 5px;
+                padding-bottom: 15px;
+                }
+            }
+        }
+    }
+
+    &.smartphone-wrap-left {
+        @media (max-width: 450px) {
+            display: block !important;
+
+            > .left {
+                padding-top: var(--st-list-padding, 15px);
+                padding-right: 0;
+                padding-bottom: 0;
+            }
+        }
+    }
+
+    &:last-child,
+    &.no-border {
+        > .main > hr {
+            display: none;
+        }
+    }
+
+    &.disabled {
+        opacity: 0.5;
+    }
+
+    &.selectable:not(.is-dragging) {
+        touch-action: manipulation;
+        user-select: none;
+        transition: background-color 0.2s 0.1s;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        cursor: pointer;
+
+        > .main {
+            > hr {
+                transition: opacity 0.2s 0.1s;
+            }
+        }
+
+        &.hoverable:hover {
+            opacity: 0.6;
+
+            &:has(button:hover) {
+                opacity: 1;
+            }
+        }
+
+        &:active {
+            transition: none;
+            background: $color-background-shade;
+            background: var(
+                --color-current-background-shade,
+                $color-background-shade
+            );
+
+            > .main {
+                > hr {
+                transition: none;
+                opacity: 0;
+                }
+            }
+        }
+
+        &:active:has(button:active) {
+            transition: background-color 0.2s 0.1s;
+            background: none;
+
+            > .main {
+                > hr {
+                opacity: 1;
+                transition: opacity 0.2s 0.1s;
+                }
+            }
+        }
+    }
+
+    &.sortable-chosen {
+        transition: none;
+        background: $color-background-shade;
+        background: var(--color-current-background-shade, $color-background-shade);
+    }
+
+    &.sortable-chosen.is-dragging {
+        touch-action: manipulation;
+        user-select: none;
+        transition: background-color 0.2s 0.1s;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        cursor: pointer;
+
+        transition: none;
+        background: none;
+    }
 }
 </style>

@@ -42,7 +42,7 @@
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <STListItem v-for="event of group.events" :key="event.id" class="right-stack" :selectable="true" @click="onClickEvent(event)">
+                    <STListItem v-for="event of group.events" :key="event.id" class="event-row right-stack smartphone-wrap-left" :selectable="true" @click="onClickEvent(event)">
                         <template #left>
                             <div class="calendar-box">
                                 <div class="overlay">
@@ -52,9 +52,11 @@
                                 <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" class="event-image" />
                             </div>
                         </template>
-
-                        <h3 class="style-title-list">
-                            {{ event.name }}
+                        <p v-if="getEventPrefix(event)" class="style-title-prefix">
+                            {{ getEventPrefix(event) }}
+                        </p>
+                        <h3 class="style-title-list larger">
+                            <span>{{ event.name }}</span>
                         </h3>
                         <p class="style-description-small">
                             {{ Formatter.capitalizeFirstLetter(event.dateRange) }}
@@ -90,16 +92,16 @@ import { ComponentWithProperties, defineRoutes, NavigationController, useNavigat
 import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
+import { getEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
+import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { useContext, useOrganization, usePlatform, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
+import { Toast } from '../overlays/Toast';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
-import { Toast } from '../overlays/Toast';
-import { getEventUIFilterBuilders } from '../filters/filterBuilders';
-import UIFilterEditor from '../filters/UIFilterEditor.vue';
 
 type ObjectType = Event;
 
@@ -381,6 +383,23 @@ function getRequiredFilter(): StamhoofdFilter|null  {
     }
 }
 
+function getEventPrefix(event: Event) {
+    const prefixes: string[] = []
+    if (event.organizationId === null) {
+        prefixes.push('Nationaal')
+    }
+
+    if (event.meta.defaultAgeGroupIds !== null) {
+        for (const ageGroupId of event.meta.defaultAgeGroupIds) {
+            const ageGroup = platform.value?.config.defaultAgeGroups.find(g => g.id === ageGroupId)
+            if (ageGroup) {
+                prefixes.push(ageGroup.name)
+            }
+        }
+    }
+    return prefixes.join(' - ')
+}
+
 </script>
 
 <style lang="scss">
@@ -398,10 +417,9 @@ function getRequiredFilter(): StamhoofdFilter|null  {
     margin-right: 15px;
     border: 1px solid $color-border;
 
-    @media (max-width: 500px) {
-        width: 100px;
+    @media (max-width: 450px) {
+        width: 100%;
         margin-right: 0;
-        padding: 20px 0;
     }
 
     .overlay {
@@ -435,4 +453,5 @@ function getRequiredFilter(): StamhoofdFilter|null  {
         }
     }
 }
+
 </style>
