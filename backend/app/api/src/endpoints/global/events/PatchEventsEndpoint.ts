@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Event, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Event, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Event as EventStruct, GroupType, PermissionLevel } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -48,7 +48,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const events: Event[] = [];
 
         for (const {put} of request.body.getPuts()) {
-            if (put.organizationId && organization?.id && put.organizationId !== organization.id) {
+            if (organization?.id && put.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Invalid organizationId',
@@ -56,7 +56,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 })
             }
 
-            if (put.organizationId && !organization?.id && !Context.auth.hasPlatformFullAccess()) {
+            if (!organization?.id && !Context.auth.hasPlatformFullAccess()) {
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Invalid organizationId',
@@ -64,20 +64,40 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 })
             }
 
+            const eventOrganization = put.organizationId ? (await Organization.getByID(put.organizationId)) : null
+            if (!eventOrganization && put.organizationId) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: 'Invalid organizationId',
+                    human: 'De organisatie werd niet gevonden',
+                })
+            }
+
             const event = new Event()
             event.id = put.id
-            event.organizationId = organization?.id ?? null
+            event.organizationId = put.organizationId
             event.name = put.name
             event.startDate = put.startDate
             event.endDate = put.endDate
             event.meta = put.meta
 
             if (put.group) {
+                const period = await RegistrationPeriod.getByDate(event.startDate)
+
+                if (!period) {
+                    throw new SimpleError({
+                        code: 'invalid_period',
+                        message: 'No period found for this start date',
+                        human: 'Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.',
+                        field: 'startDate'
+                    })
+                }
+
                 put.group.type = GroupType.EventRegistration
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                     put.group,
-                    organization?.id ?? put.group.organizationId,
-                    organization?.periodId ? organization.periodId : put.group.periodId
+                    put.group.organizationId,
+                    period.id
                 )
                 event.groupId = group.id
 
@@ -138,10 +158,22 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         event.groupId = null;
                     }
                     patch.group.type = GroupType.EventRegistration
+
+                    const period = await RegistrationPeriod.getByDate(event.startDate)
+
+                    if (!period) {
+                        throw new SimpleError({
+                            code: 'invalid_period',
+                            message: 'No period found for this start date',
+                            human: 'Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.',
+                            field: 'startDate'
+                        })
+                    }
+
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                         patch.group,
-                        organization?.id ?? patch.group.organizationId,
-                        organization?.periodId ? organization.periodId : patch.group.periodId
+                        patch.group.organizationId,
+                        period.id
                     )
                     event.groupId = group.id
                 }

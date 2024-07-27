@@ -5,7 +5,7 @@ import { Organization } from "@stamhoofd/structures";
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ErrorBox } from "../../errors/ErrorBox";
 import { NavigationActions } from "../../types/NavigationActions";
-import { ComponentWithProperties, usePresent } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { SearchOrganizationView } from "../../members";
 
 export function useExternalOrganization(organizationId: Ref<string | null>) {
@@ -91,13 +91,15 @@ export function useExternalOrganization(organizationId: Ref<string | null>) {
         choose: async function chooseOrganizer(title: string) {
             await present({
                 components: [
-                    new ComponentWithProperties(SearchOrganizationView, {
-                        title,
-                        selectOrganization: async (organization: Organization, {dismiss}: NavigationActions) => {
-                            await dismiss({force: true});
-                            loadedOrganization.value = organization;
-                            organizationId.value = organization.id;
-                        }
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(SearchOrganizationView, {
+                            title,
+                            selectOrganization: async (organization: Organization, {dismiss}: NavigationActions) => {
+                                await dismiss({force: true});
+                                loadedOrganization.value = organization;
+                                organizationId.value = organization.id;
+                            }
+                        })
                     })
                 ],
                 modalDisplayStyle: "popup"

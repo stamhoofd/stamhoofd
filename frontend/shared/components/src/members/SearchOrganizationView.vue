@@ -4,6 +4,7 @@
 
         <main>
             <h1>{{ title }}</h1>
+            <p v-if="description" class="style-description-block pre-wrap" v-text="description" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
                 <input ref="input" v-model="query" :autofocus="true" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off">
@@ -44,9 +45,11 @@ import { Ref, ref, watch } from 'vue';
 withDefaults(
     defineProps<{
         title?: string
+        description?: string,
         selectOrganization: (organization: Organization, navigation: NavigationActions) => Promise<void>|void;
     }>(), {
-        title: 'Zoeken'
+        title: 'Zoeken',
+        description: '',
     }
 );
 

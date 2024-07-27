@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges" :loading="saving" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges" :loading="saving" @save="save" :deleting="deleting" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
         </h1>
@@ -247,35 +247,22 @@
                 </h3>
             </STListItem>
         </STList>
-
-        <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                {{ $t('Acties') }}
-            </h2>
-
-            <LoadingButton :loading="deleting">
-                <button class="button secundary danger" type="button" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>{{ $t('Verwijderen') }}</span>
-                </button>
-            </LoadingButton>
-        </div>
     </SaveView>
 </template>
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput, OrganizationAvatar } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { NavigationActions, AddressInput, CenteredMessage, DateSelection, Dropdown, EditGroupView, ErrorBox, ImageComponent, TagIdsInput, TimeInput, Toast, UploadButton, useAppContext, useExternalOrganization, WYSIWYGTextInput, OrganizationAvatar } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, ResolutionRequest } from '@stamhoofd/structures';
+import { Event, EventLocation, EventMeta, Group, GroupSettings, GroupType, Organization, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
 import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
+import SearchOrganizationView from '../members/SearchOrganizationView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -607,14 +594,52 @@ async function addRegistrations() {
             modalDisplayStyle: 'popup'
         })
     } else {
+        const organizationId = patched.value.organizationId ?? undefined
         const group = Group.create({
-            organizationId: patched.value.organizationId ?? undefined,
+            organizationId,
+            periodId: externalOrganization.value?.period.period.id ?? organization.value?.period.period.id,
             type: GroupType.EventRegistration,
             settings: GroupSettings.create({
                 name: patched.value.name
             })
         })
-        
+
+        if (!organizationId) {
+            // Kies een organisator
+            await present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(SearchOrganizationView, {
+                            title: 'Kies een organisator van deze inschrijvingen',
+                            description: 'Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.',
+                            selectOrganization: async (organization: Organization, navigation: NavigationActions) => {
+                                group.organizationId = organization.id
+                                group.periodId = organization.period.period.id
+                                await navigation.show({
+                                    force: true,
+                                    replace: 1,
+                                    components: [
+                                        new ComponentWithProperties(EditGroupView, {
+                                            group: group,
+                                            isNew: true,
+                                            showToasts: false,
+                                            saveHandler: (patch: AutoEncoderPatchType<Group>) => {
+                                                addPatch({
+                                                    group: group.patch(patch)
+                                                })
+                                            }
+                                        })
+                                    ]
+                                })
+                            }
+                        })
+                    })
+                ],
+                modalDisplayStyle: 'popup'
+            })
+            return;
+        }
+
         // Edit the group
         await present({
             components: [
