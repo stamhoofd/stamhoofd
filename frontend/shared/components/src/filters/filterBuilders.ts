@@ -1,11 +1,11 @@
-import { Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
+import { Organization, Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
 import { StringFilterBuilder } from "./StringUIFilter";
-import { UIFilterBuilders } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterBuilders } from "./UIFilter";
 
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
 export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
@@ -368,3 +368,72 @@ invoicesUIFilterBuilders.unshift(
         builders: invoicesUIFilterBuilders
     })
 )
+
+
+
+// Events
+export function getEventUIFilterBuilders(platform: Platform, organizations: Organization[]) {
+    const all: UIFilterBuilder<UIFilter>[]  = []
+
+    const groupFilter = new MultipleChoiceFilterBuilder({
+        name: 'Lokale groep',
+        options: [
+            new MultipleChoiceUIFilterOption('Nationale activiteiten', null),
+            ...organizations.map(org => new MultipleChoiceUIFilterOption(org.name, org.id))
+        ],
+        buildFilter: (choices) => {
+            return {
+                organizationId: {
+                    $in: choices.map(c => c)
+                }
+            }
+        }
+    })
+    all.push(groupFilter)
+
+    if (organizations.length !== 1) {
+        const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
+            name: 'Standaard leeftijdsgroep',
+            options: [
+                ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id))
+            ],
+            buildFilter: (choices) => {
+                return {
+                    defaultAgeGroupIds: {
+                        $in: [null, ...choices.map(c => c)]
+                    }
+                }
+            }
+        });
+        all.push(defaultAgeGroupFilter)
+    }
+
+    if (organizations.length > 0) {
+        const groupFilter = new MultipleChoiceFilterBuilder({
+            name: 'Inschrijvingsgroep',
+            options: [
+                ...organizations
+                    .flatMap(g => g.period.publicCategoryTree.getAllGroups().map(gg => { return {organization: g, group: gg}}))
+                    .map(g => new MultipleChoiceUIFilterOption((organizations.length > 1 ? (g.organization.name + ' - ') : '') + g.group.settings.name, g.group.id))
+            ],
+            buildFilter: (choices) => {
+                return {
+                    groupIds: {
+                        $in: [null, ...choices.map(c => c)]
+                    }
+                }
+            }
+        });
+        all.push(groupFilter)
+    }
+
+
+
+    all.unshift(
+        new GroupUIFilterBuilder({
+            builders: all
+        })
+    )
+
+    return all
+}

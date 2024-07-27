@@ -3,7 +3,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Event } from '@stamhoofd/models';
-import { SQL, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler } from "@stamhoofd/sql";
+import { SQL, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler } from "@stamhoofd/sql";
 import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -22,6 +22,21 @@ const filterCompilers: SQLFilterDefinitions = {
     organizationId: createSQLColumnFilterCompiler('organizationId'),
     startDate: createSQLColumnFilterCompiler('startDate'),
     endDate: createSQLColumnFilterCompiler('endDate'),
+    groupIds: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('meta'), '$.value.groupIds'),
+        undefined,
+        true,
+        true
+    ),
+    defaultAgeGroupIds: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
+        undefined,
+        true,
+        true
+    ),
+    organizationTagIds: createSQLExpressionFilterCompiler(
+        SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds')
+    )
 }
 
 const sorters: SQLSortDefinitions<Event> = {

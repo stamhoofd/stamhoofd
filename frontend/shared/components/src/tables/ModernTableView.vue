@@ -143,7 +143,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS } from "@stamhoofd/components";
+import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { SortItemDirection, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -237,6 +237,7 @@ const columns = computed(() => {
 const canPop = useCanPop();
 const pop = usePop();
 const present = usePresent();
+const {presentPositionableSheet} = usePositionableSheet()
 
 const deviceWidth = useDeviceWidth()
 const isMobile = computed(() => deviceWidth.value < 600)
@@ -1324,32 +1325,6 @@ const canFilter = computed(() => {
     return !!props.filterBuilders
 });
 
-function calculateModalPosition(event: MouseEvent) {
-    const padding = 15;
-    let width = 400;
-    const button = event.currentTarget as HTMLElement
-    const bounds = button.getBoundingClientRect()
-    const win = window,
-        doc = document,
-        docElem = doc.documentElement,
-        body = doc.getElementsByTagName("body")[0],
-        clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
-
-    let left = bounds.left - padding;
-
-    if (left + width > clientWidth + padding) {
-        left = clientWidth - padding - width;
-
-        if (left < padding) {
-            left = padding;
-            width = clientWidth - padding * 2;
-        }
-    }
-
-    const top = bounds.top + bounds.height + padding;
-
-    return '--sheet-position-left: '+left.toFixed(1)+'px; --sheet-position-top: '+top.toFixed(1)+'px; --sheet-vertical-padding: 15px; --st-popup-width: ' + width.toFixed(1) + 'px; '
-}
 
 async function editFilter(event: MouseEvent) {
     if (!props.filterBuilders) {
@@ -1360,17 +1335,14 @@ async function editFilter(event: MouseEvent) {
         selectedUIFilter.value = filter;
     }
 
-    await present({
+    await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(UIFilterEditor, {
                     filter
                 })
             })
-        ],
-        modalDisplayStyle: 'popup',
-        modalClass: 'positionable-sheet',
-        modalCssStyle: calculateModalPosition(event)
+        ]
     })
 }
 

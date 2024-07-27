@@ -135,6 +135,18 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                     new SQLSafeValue(1)
                 );
             }
+
+            const nullIncluded = v.includes(null);
+            if (nullIncluded) {
+                const remaining = v.filter(v => v !== null);
+                if (remaining.length === 0) {
+                    return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull());
+                }
+                return new SQLWhereOr([
+                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()),
+                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(remaining))
+                ]);
+            }
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLArray(v));
         }
 

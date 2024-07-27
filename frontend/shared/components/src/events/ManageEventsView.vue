@@ -86,18 +86,20 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
 import { UIFilter } from '../filters/UIFilter';
-import { useContext, useOrganization, useUser } from '../hooks';
+import { useContext, useOrganization, usePlatform, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
-import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher } from '../tables';
+import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
 import { Toast } from '../overlays/Toast';
+import { getEventUIFilterBuilders } from '../filters/filterBuilders';
+import UIFilterEditor from '../filters/UIFilterEditor.vue';
 
 type ObjectType = Event;
 
@@ -113,7 +115,11 @@ const years = computed(() => {
 })
 const user = useUser();
 const organization = useOrganization();
+const platform = usePlatform()
 const $navigate = useNavigate();
+const {presentPositionableSheet} = usePositionableSheet()
+
+const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [])
 
 const yearLabels = computed(() => {
     return years.value.map(y => {
@@ -339,8 +345,24 @@ async function onClickEvent(event: Event) {
     await $navigate(Routes.Event, {properties: {event}})
 }
 
-function editFilter() {
-    // todo
+async function editFilter(event: MouseEvent) {
+    if (!filterBuilders) {
+        return
+    }
+    const filter = selectedUIFilter.value ?? filterBuilders[0].create()
+    if (!selectedUIFilter.value) {
+        selectedUIFilter.value = filter;
+    }
+
+    await presentPositionableSheet(event, {
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(UIFilterEditor, {
+                    filter
+                })
+            })
+        ]
+    })
 }
 
 function extendSort(list: SortList): SortList  {
