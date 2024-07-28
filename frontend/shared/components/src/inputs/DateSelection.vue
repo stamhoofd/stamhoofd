@@ -30,8 +30,8 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins,Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { Formatter } from "@stamhoofd/utility"
+import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
+import { Formatter } from "@stamhoofd/utility";
 
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 
