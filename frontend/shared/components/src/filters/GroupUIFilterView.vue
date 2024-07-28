@@ -1,24 +1,12 @@
 <template>
     <div class="container">
-        <p v-if="canPop">
+        <p v-if="canPop" class="style-description-block">
             Met een filtergroep kan je combinaties van 'en' en 'of' maken.
         </p>
 
-        <STList v-if="filters.length">
-            <STListItem v-for="(filter, index) in filters" :key="filter.id" :selectable="true" class="right-stack" @click="editFilter(index, filter)">
-                <span v-for="(s, i) in filter.styledDescription" :key="i" :class="'styled-description ' + s.style" v-text="s.text" />
-
-                <template #right>
-                    <button class="button icon trash gray" type="button" @click="deleteFilter(index, filter)" />
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
-        </STList>
+        <GroupUIFilterList v-if="filters.length" :filter="filter" @replace="copyFromChanged($event)"/>
 
         <hr v-if="filters.length">
-        <h2 v-if="filters.length">
-            Nog een filter toevoegen
-        </h2>
 
         <STList>
             <STListItem v-for="(builder, index) in builders" :key="index" :selectable="true" class="right-stack" @click="addFilter(builder)">
@@ -33,76 +21,58 @@
 </template>
 
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { ComponentWithProperties, useCanPop, useShow } from "@simonbackx/vue-app-navigation";
 
+import { computed } from "vue";
 import STList from "../layout/STList.vue";
 import STListItem from "../layout/STListItem.vue";
 import { GroupUIFilter } from "./GroupUIFilter";
 import { UIFilter, UIFilterBuilder } from "./UIFilter";
 import UIFilterEditor from "./UIFilterEditor.vue";
+import GroupUIFilterList from "./components/GroupUIFilterList.vue";
 
-@Component({
-    components: {
-        STListItem,
-        STList,
-    }
-})
-export default class GroupUIFilterView extends Mixins(NavigationMixin)  {
-    @Prop({required: true})
-        filter: GroupUIFilter
+const props = defineProps<{
+    filter: GroupUIFilter
+}>();
 
-    get filters() {
-        return this.filter.filters
-    }
+const show = useShow()
+const canPop = useCanPop()
 
-    get builders() {
-        return this.filter.builders
-    }
+const filters = computed(() => props.filter.filters);
+const builders = computed(() => props.filter.builders);
 
-    editFilter(index: number, filter: UIFilter) {
-        this.show({
-            components: [
-                new ComponentWithProperties(UIFilterEditor, {
-                    filter,
-                    saveHandler: (f: UIFilter) => {
-                        const ff = f.flatten();
-                        if (!ff) {
-                            this.filters.splice(index, 1)
-                            return;
-                        }
-                        this.filters.splice(index, 1, ff)
-                    },
-                    deleteHandler: () => {
-                        this.deleteFilter(index, filter);
+async function addFilter(builder: UIFilterBuilder) {
+    const filter = builder.create();
+    await show({
+        components: [
+            new ComponentWithProperties(UIFilterEditor, {
+                filter,
+                saveHandler: (f: UIFilter) => {
+                    const ff = f.flatten();
+                    if (!ff) {
+                        return;
                     }
-                })
-            ]
-        })
+                    filters.value.push(ff);
+                    copyFromChanged(props.filter.flatten());
+                }
+            })
+        ]
+    })
+}
+
+function copyFromChanged(filter: UIFilter|null) {
+    if (!filter) {
+        props.filter.filters = [];
+        return;
     }
 
-    deleteFilter(index: number, filter: UIFilter) {
-        this.filters.splice(index, 1);
+    if (filter instanceof GroupUIFilter) {
+        props.filter.filters = filter.filters;
+        props.filter.mode = filter.mode;
+        return;
     }
 
-    addFilter(builder: UIFilterBuilder) {
-        const filter = builder.create();
-        this.show({
-            components: [
-                new ComponentWithProperties(UIFilterEditor, {
-                    filter,
-                    saveHandler: (f: UIFilter) => {
-                        const ff = f.flatten();
-                        if (!ff) {
-                            return;
-                        }
-                        this.filters.push(ff);
-                    }
-                })
-            ]
-        })
-    }
-   
+    filters.value.splice(0, filters.value.length, filter);
 }
 </script>

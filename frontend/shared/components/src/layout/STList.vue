@@ -1,5 +1,5 @@
 <template>
-    <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @end="onEnd">
+    <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @update="onUpdate">
         <template #item="{element, index}">
             <slot name="item" v-bind="{item: element, index}" />
         </template>
@@ -51,7 +51,19 @@ const onStart = () => {
     isDrag.value = true;
 };
 
-const onEnd = async ({oldIndex, newIndex}: SortableEvent) => {
+const onUpdate = async ({from, to, oldIndex, newIndex, ...event}: SortableEvent) => {
+    if (from !== to) {
+        console.warn('Dragged between lists, not supported', from, to, event);
+
+        // On firefox we need to cancel all click events that happen after a drag
+        // otherwise it will click one of the elements that was dragged
+
+        setTimeout(() => {
+            isDrag.value = false;
+        }, 100)
+        return;
+    }
+
     if(listModel.value !== undefined) {
         if(oldIndex !== undefined && newIndex !== undefined) {
             listModel.value = await moveItemInArray(listModel.value, oldIndex, newIndex);
@@ -100,8 +112,8 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
 
         &.list-enter-from,
         &.list-leave-to {
-        opacity: 0;
-        transform: translateX(30px);
+            opacity: 0;
+            transform: translateX(30px);
         }
 
         &.list-leave-active {

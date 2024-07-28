@@ -1,6 +1,6 @@
 <template>
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
-        <STNavigationBar :title="filter.name" :disable-dismiss="canPop">
+        <STNavigationBar :title="filter.name" :disable-dismiss="canPop" v-if="canDelete || canPop">
             <template v-if="canDelete" #right>
                 <button class="button icon trash" type="button" @click="deleteFilter" />
             </template>
@@ -26,7 +26,7 @@
 
 
 <script lang="ts">
-import { FramedComponent, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { FramedComponent, NavigationMixin, useCanPop } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import Radio from "../inputs/Radio.vue";

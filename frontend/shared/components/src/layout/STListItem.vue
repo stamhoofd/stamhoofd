@@ -116,9 +116,9 @@ button.st-list-item {
     > .left {
         flex-shrink: 0;
 
-        padding-top: var(--st-list-padding, 15px);
+        padding-top: var(--st-list-padding-top, var(--st-list-padding, 15px));
         padding-right: 15px;
-        padding-bottom: var(--st-list-padding, 15px);
+        padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
         min-width: 0; // flexbox disable becoming bigger than parent
 
         &:empty {
@@ -128,9 +128,9 @@ button.st-list-item {
 
     &.left-center {
         > .left {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
         }
     }
 
@@ -235,8 +235,8 @@ button.st-list-item {
             flex-grow: 1;
 
             > .middle {
-                padding-top: var(--st-list-padding, 15px);
-                padding-bottom: var(--st-list-padding, 15px);
+                padding-top: var(--st-list-padding-top, var(--st-list-padding, 15px));
+                padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
                 flex-grow: 1;
                 min-width: 0; // flexbox disable becoming bigger than parent
             }
@@ -246,11 +246,8 @@ button.st-list-item {
                 min-width: 0; // flexbox disable becoming bigger than parent
                 flex-shrink: 0;
 
-                padding-top: var(--st-list-padding-right, var(--st-list-padding, 10px));
-                padding-bottom: var(
-                --st-list-padding-right,
-                var(--st-list-padding, 10px)
-                );
+                padding-top: var(--st-list-padding-top, var(--st-list-padding, 15px));
+                padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
                 padding-left: 15px;
 
                 &:empty {

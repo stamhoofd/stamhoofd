@@ -4,9 +4,15 @@ import { StamhoofdFilter } from "@stamhoofd/structures";
 import GroupUIFilterView from "./GroupUIFilterView.vue";
 import { UIFilter, UIFilterBuilder, UIFilterWrapper } from "./UIFilter";
 
+export enum GroupUIFilterMode {
+    Or = "Or",
+    And = "And",
+}
+
 export class GroupUIFilter extends UIFilter {
     filters: UIFilter[] = []
     builder!: GroupUIFilterBuilder
+    mode: GroupUIFilterMode = GroupUIFilterMode.And
 
     get builders() {
         return this.builder.builders
@@ -27,22 +33,42 @@ export class GroupUIFilter extends UIFilter {
         }
         
         return {
-            '$and': buildFilters
+            [this.mode === GroupUIFilterMode.And ? '$and' : '$or']: buildFilters
         };
     }
 
     clone() {
         const c = super.clone() as GroupUIFilter;
         c.filters = this.filters.map(f => f.clone());
+        c.mode = this.mode;
         return c;
     }
 
     flatten() {
-        if (this.filters.length === 1 && !this.builder.wrapFilter) {
-            return this.filters[0];
+        if (this.filters.length === 0) {
+            return null;
+        }
+        
+        let flattened = this.builder.wrapFilter ? this.filters.slice() : this.filters.map(f => f?.flatten()).filter(f => !!f);
+        
+        flattened = flattened.flatMap(f => {
+            if (f instanceof GroupUIFilter && f.mode === this.mode) {
+                return f.filters
+            }
+            return f
+        })
+
+        if (flattened.length === 0) {
+            return null;
         }
 
-        return super.flatten()
+        if (flattened.length === 1 && !this.builder.wrapFilter) {
+            return flattened[0]
+        }
+
+        const clone = this.clone();
+        clone.filters = flattened as UIFilter[];
+        return clone;
     }
 
     getComponent(): ComponentWithProperties {
@@ -68,7 +94,7 @@ export class GroupUIFilter extends UIFilter {
         if (plast) {
             flattened.push(...plast)
         }
-        flattened.push({text: ' en ', style: 'gray'})
+        flattened.push({text: this.mode === GroupUIFilterMode.And ? ' en ' : ' of ', style: 'gray'})
         flattened.push(...last)
 
         return flattened
@@ -94,9 +120,17 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
         let allowSelf = false;
+        let mode = GroupUIFilterMode.And;
         if (typeof filter === 'object' && filter !== null && ("$and" in filter)) {
             filter = filter.$and;
             allowSelf = true;
+            mode = GroupUIFilterMode.And;
+        }
+
+        if (typeof filter === 'object' && filter !== null && ("$or" in filter)) {
+            filter = filter.$or;
+            allowSelf = true;
+            mode = GroupUIFilterMode.Or;
         }
 
         // Match
@@ -117,6 +151,7 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
 
         const groupFilter = this.create();
         groupFilter.filters = subfilters;
+        groupFilter.mode = mode;
         return groupFilter;
     }
 }

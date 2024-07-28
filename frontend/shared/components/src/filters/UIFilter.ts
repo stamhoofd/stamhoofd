@@ -79,6 +79,7 @@ export abstract class UIFilter {
     clone(): UIFilter {
         const f = new (this.constructor as any)();
         Object.assign(f, this);
+        f.id = uuidv4();
         return f;
     }
 
