@@ -129,6 +129,36 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.startDate = patch.startDate ?? event.startDate
             event.endDate = patch.endDate ?? event.endDate
             event.meta = patchObject(event.meta, patch.meta)
+
+
+            if (patch.organizationId !== undefined) {
+                if (organization?.id && patch.organizationId !== organization.id) {
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: 'Invalid organizationId',
+                        human: 'Je kan geen activiteiten aanmaken voor een andere organisatie',
+                    })
+                }
+    
+                if (!organization?.id && !Context.auth.hasPlatformFullAccess()) {
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: 'Invalid organizationId',
+                        human: 'Je kan geen activiteiten voor een specifieke organisatie aanmaken als je geen platform hoofdbeheerder bent',
+                    })
+                }
+    
+                const eventOrganization = patch.organizationId ? (await Organization.getByID(patch.organizationId)) : null
+                if (!eventOrganization && patch.organizationId) {
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: 'Invalid organizationId',
+                        human: 'De organisatie werd niet gevonden',
+                    })
+                }
+                event.organizationId = patch.organizationId
+            }
+
             event.typeId = patch.typeId ? (await PatchEventsEndpoint.validateEventType(patch.typeId)) : event.typeId
             await PatchEventsEndpoint.checkEventLimits(event)
 
