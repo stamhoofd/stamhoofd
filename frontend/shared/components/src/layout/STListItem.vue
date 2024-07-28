@@ -332,7 +332,7 @@ button.st-list-item {
         &.hoverable:hover {
             opacity: 0.6;
 
-            &:has(button:hover) {
+            &:has(button:hover), &:has(select:hover), &:has(input:hover) {
                 opacity: 1;
             }
         }
@@ -353,14 +353,14 @@ button.st-list-item {
             }
         }
 
-        &:active:has(button:active) {
+        &:active:has(button:active), &:active:has(select:active), &:active:has(input:not([type=radio]):not([type=checkbox]):active) {
             transition: background-color 0.2s 0.1s;
             background: none;
 
             > .main {
                 > hr {
-                opacity: 1;
-                transition: opacity 0.2s 0.1s;
+                    opacity: 1;
+                    transition: opacity 0.2s 0.1s;
                 }
             }
         }
