@@ -241,16 +241,7 @@ const permissionList = (user: User) => {
     }
 
     for (const role of permissions.roles) {
-        if (organization.value && role instanceof PermissionRoleForResponsibility) {
-            const group = organization.value.period.groups.find(g => g.id === role.responsibilityGroupId)
-            if (group) {
-                list.push(role.name + ' van ' + group.settings.name)
-            } else {
-                list.push(role.name)
-            }
-        } else {
-            list.push(role.name)
-        }
+        list.push(role.name)
     }
 
     if (list.length === 0) {
