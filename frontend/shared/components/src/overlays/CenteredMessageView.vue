@@ -1,37 +1,35 @@
 <template>
-    <transition appear name="show">
-        <form class="centered-message-container" @submit.prevent @mousedown="onClickOutside" @touchdown="onClickOutside">
-            <div class="centered-message" @mousedown.stop="" @touchdown.stop="">
-                <div class="header">
-                    <Spinner v-if="centeredMessage.type == 'loading'" class="" />
-                    <img v-else-if="centeredMessage.type == 'clock'" class="center" src="@stamhoofd/assets/images/illustrations/clock.svg">
-                    <img v-else-if="centeredMessage.type == 'health'" class="center" src="@stamhoofd/assets/images/illustrations/health-data.svg">
-                    <img v-else-if="centeredMessage.type == 'sync'" class="center" src="@stamhoofd/assets/images/illustrations/sync.svg">
-                    <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
-                </div>
-
-                <h1>
-                    {{ centeredMessage.title }}
-                </h1>
-                <p>{{ centeredMessage.description }}</p>
-
-                <STErrorsDefault :error-box="errorBox" />
-
-                <div class="buttons">
-                    <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                        <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
-                            <span v-if="button.icon" class="icon" :class="button.icon" />
-                            <span>{{ button.text }}</span>
-                        </a>
-                        <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" @click="onClickButton(button)">
-                            <span v-if="button.icon" class="icon" :class="button.icon" />
-                            <span>{{ button.text }}</span>
-                        </button>
-                    </LoadingButton>
-                </div>
+    <form class="centered-message-container" @submit.prevent @mousedown="onClickOutside" @touchdown="onClickOutside">
+        <div class="centered-message" @mousedown.stop="" @touchdown.stop="">
+            <div class="header">
+                <Spinner v-if="centeredMessage.type == 'loading'" class="" />
+                <img v-else-if="centeredMessage.type == 'clock'" class="center" src="@stamhoofd/assets/images/illustrations/clock.svg">
+                <img v-else-if="centeredMessage.type == 'health'" class="center" src="@stamhoofd/assets/images/illustrations/health-data.svg">
+                <img v-else-if="centeredMessage.type == 'sync'" class="center" src="@stamhoofd/assets/images/illustrations/sync.svg">
+                <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
             </div>
-        </form>
-    </transition>
+
+            <h1>
+                {{ centeredMessage.title }}
+            </h1>
+            <p>{{ centeredMessage.description }}</p>
+
+            <STErrorsDefault :error-box="errorBox" />
+
+            <div class="buttons">
+                <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
+                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
+                        <span v-if="button.icon" class="icon" :class="button.icon" />
+                        <span>{{ button.text }}</span>
+                    </a>
+                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" @click="onClickButton(button)">
+                        <span v-if="button.icon" class="icon" :class="button.icon" />
+                        <span>{{ button.text }}</span>
+                    </button>
+                </LoadingButton>
+            </div>
+        </div>
+    </form>
 </template>
 
 <script lang="ts">

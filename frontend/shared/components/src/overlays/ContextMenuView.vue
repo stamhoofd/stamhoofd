@@ -1,19 +1,17 @@
 <template>
-    <transition appear name="show">
-        <div v-if="!hide" class="context-menu-container" :class="{ hasParent: !!parentMenu, disableDismiss: !autoDismiss }" @click="pop" @contextmenu.prevent>
-            <div
-                ref="context"
-                class="context-menu"
-                :class="usedXPlacement+' '+usedYPlacement"
-                :style="{ transformOrigin, top: top !== null ? top + 'px' : undefined, left: left !== null ? (left + 'px') : undefined, right: right !== null ? (right + 'px') : undefined, bottom: bottom !== null ? (bottom + 'px') : undefined, width: usedPreferredWidth !== null ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight !== null ? (usedPreferredHeight + 'px') : undefined }"
-                @click.stop=""
-            >
-                <slot />
-            </div>
-
-            <div v-if="ignoreHoverTriangle && false" class="triangle" :style="{ 'clip-path': 'polygon('+ignoreHoverTriangle.p1.x+'px '+ignoreHoverTriangle.p1.y+'px, '+ignoreHoverTriangle.p2.x+'px '+ignoreHoverTriangle.p2.y+'px, '+ignoreHoverTriangle.p3.x+'px '+ignoreHoverTriangle.p3.y+'px)'}" />
+    <div class="context-menu-container" :class="{ hasParent: !!parentMenu, disableDismiss: !autoDismiss }" @click="pop()" @contextmenu.prevent>
+        <div
+            ref="context"
+            class="context-menu"
+            :class="usedXPlacement+' '+usedYPlacement"
+            :style="{ transformOrigin, top: top !== null ? top + 'px' : undefined, left: left !== null ? (left + 'px') : undefined, right: right !== null ? (right + 'px') : undefined, bottom: bottom !== null ? (bottom + 'px') : undefined, width: usedPreferredWidth !== null ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight !== null ? (usedPreferredHeight + 'px') : undefined }"
+            @click.stop=""
+        >
+            <slot />
         </div>
-    </transition>
+
+        <div v-if="ignoreHoverTriangle && false" class="triangle" :style="{ 'clip-path': 'polygon('+ignoreHoverTriangle.p1.x+'px '+ignoreHoverTriangle.p1.y+'px, '+ignoreHoverTriangle.p2.x+'px '+ignoreHoverTriangle.p2.y+'px, '+ignoreHoverTriangle.p3.x+'px '+ignoreHoverTriangle.p3.y+'px)'}" />
+    </div>
 </template>
 
 <script lang="ts">
@@ -630,9 +628,9 @@ export default class ContextMenuView extends VueComponent {
 
         // Trigger hide animation
         this.hide = true;
-        setTimeout(() => {
+        //setTimeout(() => {
             (this as any).parentPop({force: true})
-        }, 200);
+        //}, 200);
 
         if (popParents && this.parentMenu) {
             this.parentMenu.pop(true)

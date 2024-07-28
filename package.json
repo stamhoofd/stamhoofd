@@ -34,6 +34,7 @@
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
         "mail": "maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password",
         "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules",
+        "clear-vite-cache": "rm -rf frontend/app/*/node_modules/.vite",
         "ship": "yarn build:shared && lerna publish --no-private"
     },
     "dependencies": {
@@ -41,7 +42,7 @@
         "@simonbackx/simple-encoding": "2.13.1",
         "@simonbackx/simple-errors": "^1.4.0",
         "@simonbackx/simple-networking": "1.16.0",
-        "@simonbackx/vue-app-navigation": "2.0.0-alpha.17",
+        "@simonbackx/vue-app-navigation": "2.0.0",
         "@types/sortablejs": "^1.15.8",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",

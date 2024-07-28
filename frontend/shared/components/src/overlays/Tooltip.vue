@@ -1,15 +1,13 @@
 <template>
-    <transition appear name="show">
-        <div 
-            class="tooltip" 
-            :class="usedXPlacement+' '+usedYPlacement+' '+icon"
-            :style="{ transformOrigin, top: top !== null ? top + 'px' : undefined, left: left !== null ? (left + 'px') : undefined, right: right !== null ? (right + 'px') : undefined, bottom: bottom !== null ? (bottom + 'px') : undefined, width: usedPreferredWidth !== null ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight !== null ? (usedPreferredHeight + 'px') : undefined }"  
-            @click="hide"
-        >
-            <span v-if="icon" :class="'icon '+icon" />
-            <span>{{ text }}</span>
-        </div>
-    </transition>
+    <div 
+        class="tooltip" 
+        :class="usedXPlacement+' '+usedYPlacement+' '+icon"
+        :style="{ transformOrigin, top: top !== null ? top + 'px' : undefined, left: left !== null ? (left + 'px') : undefined, right: right !== null ? (right + 'px') : undefined, bottom: bottom !== null ? (bottom + 'px') : undefined, width: usedPreferredWidth !== null ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight !== null ? (usedPreferredHeight + 'px') : undefined }"  
+        @click="hide"
+    >
+        <span v-if="icon" :class="'icon '+icon" />
+        <span>{{ text }}</span>
+    </div>
 </template>
 
 <script lang="ts">

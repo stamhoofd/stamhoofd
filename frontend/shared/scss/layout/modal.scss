@@ -103,7 +103,7 @@
     
         }
 
-        &:after {
+        &::after {
             background: rgba(black, 0.4);
             content: "";
             position: absolute;
@@ -126,8 +126,8 @@
     }
 
 
-    &.fade-enter-active {
-        &:after {
+    &.show-enter-active {
+        &::after {
             transition: opacity 0.3s;
         }
 
@@ -137,8 +137,8 @@
         }
     }
 
-    &.fade-leave-active {
-        &:after {
+    &.show-leave-active {
+        &::after {
             transition: opacity 0.3s;
         }
 
@@ -148,9 +148,9 @@
         }
     }
 
-    &.fade-enter-from,
-    &.fade-leave-to {
-        &:after {
+    &.show-enter-from.animated,
+    &.show-leave-to {
+        &::after {
             opacity: 0;
         }
 

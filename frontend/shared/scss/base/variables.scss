@@ -377,8 +377,8 @@ $color-current-background: var(--color-current-background, #{$color-background})
       opacity: 0.5;
     }
 
-    &.fade-enter-from,
-    &.fade-leave-to {
+    &.show-enter-from,
+    &.show-leave-to {
       &:after {
         opacity: 0;
       }
