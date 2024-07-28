@@ -1,5 +1,5 @@
 <template>
-    <div class="stepper-input" @pointerdown.stop>
+    <div class="stepper-input" @pointerdown.prevent>
         <button class="icon min" type="button" @click="step(-1)" />
         <hr>
         <button class="icon plus" type="button" @click="step(1)" /> 
