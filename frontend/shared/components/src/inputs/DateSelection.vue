@@ -63,12 +63,51 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         this.updateTextStrings()
 
         document.addEventListener("keydown", this.onKey);
+        document.addEventListener("focusin", this.updateHasFocus);
+        document.addEventListener("focusout", this.updateHasFocus);
+        document.addEventListener("visibilitychange", this.updateHasFocus);
+
+        // Sometimes focusin/focusout isn't called reliably
+        document.addEventListener("click", this.updateHasFocus, {passive: true});
+    }
+
+    activated() {
+        document.addEventListener("keydown", this.onKey);
+        document.addEventListener("focusin", this.updateHasFocus);
+        document.addEventListener("focusout", this.updateHasFocus);
+        document.addEventListener("visibilitychange", this.updateHasFocus);
+
+        // Sometimes focusin/focusout isn't called reliably
+        document.addEventListener("click", this.updateHasFocus, {passive: true});
+    }
+
+    deactivated() {
+        document.removeEventListener("keydown", this.onKey);
+        document.removeEventListener("focusin", this.updateHasFocus);
+        document.removeEventListener("focusout", this.updateHasFocus);
+        document.removeEventListener("visibilitychange", this.updateHasFocus);
+        document.removeEventListener("click", this.updateHasFocus);
+    }
+
+    beforeUnmount() {
+        document.removeEventListener("keydown", this.onKey);
+        document.removeEventListener("focusin", this.updateHasFocus);
+        document.removeEventListener("focusout", this.updateHasFocus);
+        document.removeEventListener("visibilitychange", this.updateHasFocus);
+        document.removeEventListener("click", this.updateHasFocus);
     }
 
     updateTextStrings() {
-        this.dayText = this.modelValue ? this.modelValue.getDate().toString() : ""
-        this.monthText = this.modelValue ? (this.modelValue.getMonth() + 1).toString() : ""
-        this.yearText = this.modelValue ? this.modelValue.getFullYear().toString() : ""
+        const currentDateValue = this.textDate
+
+        const iso1 = this.modelValue ? Formatter.dateIso(this.modelValue) : ""
+        const iso2 = currentDateValue ? Formatter.dateIso(currentDateValue) : ""
+
+        if (iso1 != iso2 || !this.hasFocusUnbounced) {
+            this.dayText = this.modelValue ? this.modelValue.getDate().toString() : ""
+            this.monthText = this.modelValue ? (this.modelValue.getMonth() + 1).toString() : ""
+            this.yearText = this.modelValue ? this.modelValue.getFullYear().toString() : ""
+        }
     }
 
     @Watch("modelValue")
@@ -200,16 +239,43 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         }
     }
 
+    onFocus(index: number) {
+        this.selectNext(index)
+    }
+
+    updateHasFocus() {
+        let focus = !!this.$el.contains(document.activeElement);
+
+        if (this.displayedComponent) {
+            const instance = this.displayedComponent.componentInstance();
+            if (instance) {
+                if (instance.$el && document.activeElement && instance.$el.contains(document.activeElement)) {
+                    focus = true;
+                }
+            }
+        }
+
+        if (focus) {
+            this.hasFocus = true
+            this.hasFocusUnbounced = true
+        } else {
+            this.hasFocus = false
+            setTimeout(() => {
+                this.hasFocusUnbounced = this.hasFocus
+            }, 50)
+        }
+    }
+
+    onFocusIn() {
+        this.updateHasFocus()
+    }
+
+    onFocusOut() {
+        this.updateHasFocus()
+    }
+
     onBlur() {
-        this.hasFocus = false
-
-        // Sometimes the blur happens without a onChange event, so we always need to update the address after a blur
-        // it will only make the errors visible if hasFocus is still false after 200ms
-        // this.updateAddress()
-
-        setTimeout(() => {
-            this.hasFocusUnbounced = this.hasFocus
-        }, 50)
+        // todo
     }
 
     isFull(value: string, config) {
@@ -248,14 +314,6 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         }
     }
 
-    onFocus(index) {
-        this.hasFocus = true
-        this.hasFocusUnbounced = true
-        this.openContextMenu(false);
-
-        this.selectNext(index)
-    }
-
     @Watch("hasFocusUnbounced")
     onHasFocusUnbouncedChanged() {
         if (!this.hasFocusUnbounced) {
@@ -263,6 +321,8 @@ export default class DateSelection extends Mixins(NavigationMixin) {
 
             // Clear invalid date text
             this.updateTextStrings()
+        } else {
+            this.openContextMenu(false);
         }
     }
 
@@ -289,6 +349,10 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             if (date.getFullYear() == year && date.getMonth() == month - 1 && date.getDate() == day) {
                 return date;
             }
+
+            // The date has automatically been corrected
+            return new Date(year, month , 0)
+            
         }
         return null
     }
@@ -348,36 +412,21 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             if (instance) {
                 if (unlessFocused && instance.$el && document.activeElement && instance.$el.contains(document.activeElement)) {
                     // Add an event listener to focus yearInput when blur 
-                    // const activeElement = document.activeElement
-                    // const listener = () => {
-                    //     activeElement.removeEventListener("change", listener)
-                    //     activeElement.removeEventListener("focusout", listener)
-                    //     //this.selectNext(2)
-                    // }
-                    // activeElement.addEventListener("change", listener)
-                    // activeElement.addEventListener("focusout", listener)
+                    const activeElement = document.activeElement
+                    const listener = () => {
+                        activeElement.removeEventListener("change", listener)
+                        activeElement.removeEventListener("focusout", listener)
+                        //this.selectNext(2)
+                    }
+                    activeElement.addEventListener("change", listener)
+                    activeElement.addEventListener("focusout", listener)
 
-                    return;
+                    //return;
                 }
                 (instance as any).dismiss();
             }
             this.displayedComponent = null;
         }
-    }
-
-    activated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.addEventListener("keydown", this.onKey);
-    }
-
-    deactivated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.removeEventListener("keydown", this.onKey);
-    }
-
-    beforeUnmount() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.removeEventListener("keydown", this.onKey);
     }
 
     onKey(event) {

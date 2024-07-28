@@ -189,10 +189,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     previousMonth() {
-        const d = new Date(this.currentMonth)
-        d.setDate(0)
-        d.setDate(1)
-        this.setDateValue(d)
+        this.month = this.month - 1
     }
 
     nextYear() {
@@ -241,17 +238,22 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     set month(month: number) {
-        if (!month) {
-            // Weird vue thing
-            return;
-        }
+        console.log('Set month', month)
         const d = new Date(this.currentMonth)
         d.setDate(1)
+        if (month < 1) {
+            month = 12
+            d.setMonth(month - 1)
+            d.setFullYear(this.currentMonth.getFullYear() - 1)
+        }
         d.setMonth(month - 1)
         d.setDate(this.currentMonth.getDate())
 
         // If date overflowed
-        if (d.getMonth() != month - 1) {
+        if (d.getDate() != this.currentMonth.getDate()) {
+            d.setTime(this.currentMonth.getTime())
+            d.setDate(1)
+            d.setMonth(month)
             d.setDate(0)
         }
 
