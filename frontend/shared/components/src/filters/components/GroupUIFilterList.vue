@@ -25,9 +25,9 @@
                 </div>
 
                 <template v-if="!isGroup(child)" #right>
-                    <button v-if="filters.length > 1" class="button icon trash gray" type="button" @click="deleteFilter(index, child)" />
+                    <button class="button icon trash gray" type="button" @click="deleteFilter(index, child)" />
                     <span class="icon edit gray" />
-                    <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                    <span v-if="filters.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
                 </template>
             </STListItem>
         </template>
