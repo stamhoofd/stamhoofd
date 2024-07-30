@@ -20,7 +20,6 @@ export function useContextOptions() {
     const app = useAppContext();
     
     const getDefaultOptions = async () => {
-        const availableContexts = await SessionManager.availableSessions()
         const opts: Option[] = [];
 
         if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
@@ -50,7 +49,7 @@ export function useContextOptions() {
         }
 
         for (const organizationId of $user.value?.permissions?.organizationPermissions.keys() ?? []) {
-            const organization = $user.value!.members.organizations.find(o => o.id === organizationId)
+            const organization = $user.value!.members.organizations.find(o => o.id === organizationId) ?? ($organization.value?.id === organizationId ? $organization.value : null)
             if (!organization) {
                 continue;
             }
