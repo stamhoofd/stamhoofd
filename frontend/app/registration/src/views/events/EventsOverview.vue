@@ -1,5 +1,5 @@
 <template>
-    <div id="settings-view" class="st-view background">
+    <div class="st-view">
         <STNavigationBar title="Activiteiten" />
 
         <main class="center">
@@ -23,12 +23,12 @@
                 </div>
             </div>
             
-            <div v-for="(group, index) of groupedEvents" :key="group.title" class="container">
+            <div v-for="group of groupedEvents" :key="group.title" class="container">
                 <hr>
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <EventRow v-for="event of group.events" :key="event.id" :event="event" />
+                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="$navigate(Routes.Event, {properties: {event}})" />
                 </STList>
             </div>
 
@@ -40,10 +40,11 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, UIFilter, UIFilterEditor, useContext, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
+import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useContext, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
 import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref, watchEffect } from 'vue';
+import EventView from './EventView.vue';
 
 type ObjectType = Event;
 
@@ -63,7 +64,51 @@ enum Routes {
 }
 
 defineRoutes([
-    
+    {
+        name: Routes.Event,
+        url: "@year/@slug/@id",
+        component: EventView as ComponentOptions,
+        params: {
+            year: Number,
+            slug: String,
+            id: String
+        },
+        paramsToProps: async (params: {year: number, slug: string, id: string}) => {
+            // Fetch event
+            const events = await fetcher.objectFetcher.fetch(
+                new LimitedFilteredRequest({
+                    filter: {
+                        id: params.id
+                    },
+                    limit: 1,
+                    sort: []
+                })
+            )
+
+            if (events.results.length === 1) {
+                return {
+                    event: events.results[0]
+                }
+            }
+            Toast.error('Activiteit niet gevonden').show()
+            throw new Error('Event not found')
+        },
+
+        propsToParams(props) {
+            if (!("event" in props) || typeof props.event !== 'object' || props.event === null || !(props.event instanceof Event)) {
+                throw new Error('Missing event')
+            }
+            const event = props.event;
+
+            return {
+                params: {
+                    year: event.startDate.getFullYear(),
+                    slug: Formatter.slug(event.name),
+                    id: event.id
+                }
+            }
+        }
+    }
 ])
 
 const fetcher = useInfiniteObjectFetcher<ObjectType>({

@@ -1,5 +1,5 @@
 <template>
-    <div id="webshop-overview" class="st-view background">
+    <div class="st-view">
         <STNavigationBar :title="title" />
 
         <main class="center">
