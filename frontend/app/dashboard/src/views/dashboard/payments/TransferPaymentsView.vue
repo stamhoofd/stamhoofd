@@ -149,11 +149,12 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     async mail(payments: PaymentGeneral[]) {
-        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../mail/MailView.vue"), {
-            payments,
-            defaultReplacements: this.$organization.meta.getEmailReplacements()
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
+        // Needs change
+        // const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../mail/MailView.vue"), {
+        //     payments,
+        //     defaultReplacements: this.$organization.meta.getEmailReplacements()
+        // });
+        // this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async downloadExcel(payments: PaymentGeneral[]) {

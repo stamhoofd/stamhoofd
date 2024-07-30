@@ -253,16 +253,17 @@ export class OrderActionBuilder {
     }
 
     async mail(orders: PrivateOrder[]) {
-        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../../mail/MailView.vue"), {
-            defaultSubject: "Bestelling {{nr}}",
-            orders: orders,
-            webshop: this.webshopManager.preview,
-            defaultReplacements: [
-                ...this.webshopManager.preview.meta.getEmailReplacements(),
-                ...this.organizationManager.organization.meta.getEmailReplacements()
-            ]
-        });
-        this.component.present(displayedComponent.setDisplayStyle("popup"));
+        // Needs change
+        //const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../../mail/MailView.vue"), {
+        //    defaultSubject: "Bestelling {{nr}}",
+        //    orders: orders,
+        //    webshop: this.webshopManager.preview,
+        //    defaultReplacements: [
+        //        ...this.webshopManager.preview.meta.getEmailReplacements(),
+        //        ...this.organizationManager.organization.meta.getEmailReplacements()
+        //    ]
+        //});
+        //this.component.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async exportToExcel(orders: PrivateOrder[]) {
