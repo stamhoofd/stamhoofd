@@ -525,7 +525,7 @@ export class PlatformMember implements ObjectWithRecords {
         }
     }
 
-    filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
+    filterRegistrations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
         return this.patchedMember.registrations.filter(r => {
             if (filters.groups && !filters.groups.find(g => g.id === r.groupId)) {
                 return false
@@ -544,18 +544,15 @@ export class PlatformMember implements ObjectWithRecords {
                 return false
             }
 
-            if ((filters.waitingList === undefined || r.waitingList === filters.waitingList) 
-            ) {
-                if (filters.canRegister !== undefined && r.waitingList) {
-                    return r.canRegister === filters.canRegister
-                }
-                return true;
+            if (filters.canRegister !== undefined && r.canRegister !== filters.canRegister) {
+                return false
             }
-            return false;
+
+            return true;
         })
     }
 
-    filterGroups(filters: {groups?: Group[] | null, waitingList?: boolean, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
+    filterGroups(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
         const registrations =  this.filterRegistrations(filters);
         const base: Group[] = [];
 
@@ -570,10 +567,6 @@ export class PlatformMember implements ObjectWithRecords {
         // Loop checkout
         for (const item of this.family.checkout.cart.items) {
             if (item.member.id === this.id) {
-                if (filters.waitingList !== undefined && filters.waitingList !== item.waitingList) {
-                    continue
-                }
-
                 if (filters.currentPeriod === false) {
                     continue
                 }
@@ -582,7 +575,7 @@ export class PlatformMember implements ObjectWithRecords {
                     continue
                 }
 
-                if (filters.canRegister !== undefined && item.waitingList) {
+                if (filters.canRegister !== undefined) {
                     continue
                 }
 
@@ -595,7 +588,7 @@ export class PlatformMember implements ObjectWithRecords {
         return base;
     }
 
-    filterOrganizations(filters: {groups?: Group[] | null, waitingList?: boolean, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
+    filterOrganizations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
         const registrations =  this.filterRegistrations(filters);
         const base: Organization[] = [];
 
@@ -613,10 +606,6 @@ export class PlatformMember implements ObjectWithRecords {
         // Loop checkout
         for (const item of this.family.checkout.cart.items) {
             if (item.member.id === this.id) {
-                if (filters.waitingList !== undefined && filters.waitingList !== item.waitingList) {
-                    continue
-                }
-
                 if (filters.currentPeriod === false) {
                     continue
                 }
@@ -625,7 +614,7 @@ export class PlatformMember implements ObjectWithRecords {
                     continue
                 }
 
-                if (filters.canRegister !== undefined && item.waitingList) {
+                if (filters.canRegister !== undefined) {
                     continue
                 }
 
@@ -653,7 +642,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get groups() {
-        return this.filterGroups({waitingList: false, currentPeriod: true});
+        return this.filterGroups({currentPeriod: true});
     }
 
     insertOrganization(organization: Organization) {

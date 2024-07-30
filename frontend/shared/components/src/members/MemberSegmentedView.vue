@@ -25,31 +25,26 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useContext, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
+import { EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useContext, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
-import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
+import { MemberActionBuilder } from './classes/MemberActionBuilder';
 import MemberStepView from './MemberStepView.vue';
+import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
 import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
 import MemberPlatformMembershipTab from './tabs/MemberPlatformMembershipTab.vue';
-import EditMemberResponsibilitiesBox from './components/edit/EditMemberResponsibilitiesBox.vue';
-import { MemberActionBuilder } from './classes/MemberActionBuilder';
 
 const props = withDefaults(
     defineProps<{
         member: PlatformMember,
         initialTab?: number | null,
         group?: Group | null,
-        cycleOffset?: number,
-        waitingList?: boolean,
         getNext: (current: PlatformMember) => PlatformMember | null,
         getPrevious: (current: PlatformMember) => PlatformMember | null,
     }>(),
     {
         initialTab: null,
-        group: null,
-        cycleOffset: 0,
-        waitingList: false
+        group: null
     }
 );
 const auth = useAuth();
@@ -166,7 +161,6 @@ async function showContextMenu(event: MouseEvent) {
         present,
         groups: [],
         organizations: organization.value ? [organization.value] : props.member.organizations,
-        inWaitingList: false,
         context: context.value,
         platformFamilyManager
     })

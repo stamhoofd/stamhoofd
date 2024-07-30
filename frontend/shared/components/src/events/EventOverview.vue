@@ -11,27 +11,30 @@
 
             <template v-if="event.meta.description.html">
                 <div class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
-                <hr>
             </template>
-            <h2>Bekijken</h2>
 
-            <STList class="illustration-list">
-                <STListItem v-if="event.group" :selectable="true" class="left-center right-stack">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        Ingeschreven leden
-                    </h2>
-                    <p class="style-description">
-                        Bekijk, beheer, exporteer, e-mail of SMS ingeschreven leden.
-                    </p>
-                    <template #right>
-                        <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+            <template v-if="event.group">
+                <hr>
+                <h2>Bekijken</h2>
+
+                <STList class="illustration-list">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            Ingeschreven leden
+                        </h2>
+                        <p class="style-description">
+                            Bekijk, beheer, exporteer, e-mail of SMS ingeschreven leden.
+                        </p>
+                        <template #right>
+                            <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
 
             <hr>
             <h2>Instellingen</h2>
@@ -60,6 +63,7 @@
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { Event } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
+import { MembersTableView } from '../members';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 
@@ -71,10 +75,23 @@ const title = computed(() => props.event.name);
 const $navigate = useNavigate();
 
 enum Routes {
+    Registrations = 'inschrijvingen',
     Edit = "instellingen"
 }
 
 defineRoutes([
+{
+        url: Routes.Registrations,
+        component: MembersTableView as ComponentOptions,
+        paramsToProps: () => {
+            if (!props.event.group) {
+                throw new Error("No group found")
+            }
+            return {
+                group: props.event.group
+            }
+        }
+    },
     {
         url: Routes.Edit,
         component: EditEventView as ComponentOptions,

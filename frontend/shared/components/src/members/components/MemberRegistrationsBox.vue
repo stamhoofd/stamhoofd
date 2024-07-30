@@ -93,7 +93,6 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
         present,
         groups: [registration.group],
         organizations: props.member.organizations.filter(o => o.id === registration.group.organizationId),
-        inWaitingList: registration.waitingList,
         context: context.value,
         platformFamilyManager
     })

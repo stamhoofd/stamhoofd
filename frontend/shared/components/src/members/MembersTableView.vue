@@ -21,7 +21,7 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, EditMemberGeneralBox, InMemoryTableAction, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupType, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, markRaw, reactive, ref } from "vue";
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -33,18 +33,16 @@ type ObjectType = PlatformMember;
 const props = withDefaults(
     defineProps<{
         group?: Group | null,
-        waitingList?: boolean,
-        cycleOffset?: number,
         category?: GroupCategoryTree | null,
         periodId?: string | null
     }>(), {
         group: null,
-        waitingList: false,
-        cycleOffset: 0,
         category: null,
         periodId: null
     }
 )
+
+const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList)
 
 const filterBuilders = computed(() => {
     return getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform.value, {
@@ -52,10 +50,6 @@ const filterBuilders = computed(() => {
     })
 })
 const title = computed(() => {
-    if (props.waitingList) {
-        return "Wachtlijst"
-    }
-
     if (props.group) {
         return props.group.settings.name
     }
@@ -74,7 +68,7 @@ const platform = usePlatform()
 const platformFamilyManager = usePlatformFamilyManager();
 
 const configurationId = computed(() => {
-    return 'members-'+app+'-'+(props.group ? '-group-'+props.group.id : '')+'-'+(props.waitingList ? '-waitingList' : '') + (props.category ? '-category-'+props.category.id : '')
+    return 'members-'+app+'-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '')
 })
 const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false)
 
@@ -108,19 +102,15 @@ function extendSort(list: SortList): SortList  {
 }
 
 function getRequiredFilter(): StamhoofdFilter|null  {
-    if (app == 'admin') {
+    if (!props.group && !props.category) {
         return null
     }
     
     return {
         'registrations': {
             $elemMatch: props.group ? {
-                waitingList: props.waitingList,
-                cycleOffset: props.cycleOffset ?? 0,
                 groupId: props.group.id
             } : {
-                waitingList: props.waitingList,
-                cycleOffset: props.cycleOffset ?? 0,
                 groupId: {
                     $in: groups.map(g => g.id)
                 }
@@ -277,16 +267,16 @@ if (app == 'admin') {
 } else {
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: props.waitingList ? "Sinds" : "Inschrijvingsdatum", 
+            name: waitingList.value ? "Sinds" : "Inschrijvingsdatum", 
             allowSorting: false,
             getValue: (v) => {
-                const registrations = v.filterRegistrations({groups, waitingList: props.waitingList, periodId: props.periodId ?? props.group?.periodId ?? ''})
+                const registrations = v.filterRegistrations({groups, periodId: props.periodId ?? props.group?.periodId ?? ''})
 
                 if (registrations.length == 0) {
                     return null
                 }
 
-                const filtered = !props.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.map(r => r.createdAt!.getTime())
+                const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime())
 
                 if (filtered.length == 0) {
                     return null
@@ -300,7 +290,7 @@ if (app == 'admin') {
         })
     )
 
-    if (!props.waitingList && financialRead.value && organization.value) {
+    if (!waitingList.value && financialRead.value && organization.value) {
         allColumns.push(
             new Column<ObjectType, number>({
                 name: "Openstaand saldo", 
@@ -327,13 +317,13 @@ if (app == 'admin') {
             new Column<ObjectType, Group[]>({
                 id: 'category',
                 allowSorting: false,
-                name: props.waitingList ? 'Wachtlijst' : (props.category.settings.name || 'Groep'), 
+                name: waitingList.value ? 'Wachtlijst' : (props.category.settings.name || 'Groep'), 
                 getValue: (member) => {
                     if (!props.category) {
                         return [];
                     }
                     const groups = props.category.getAllGroups()
-                    const registrations = member.filterRegistrations({groups: groups, waitingList: props.waitingList, periodId: props.periodId ?? props.group?.periodId ?? ''})
+                    const registrations = member.filterRegistrations({groups: groups, periodId: props.periodId ?? props.group?.periodId ?? ''})
                     const memberGroups = registrations.flatMap(r => {
                         const group = groups.find(g => g.id == r.groupId)
                         if (!group) {
@@ -356,33 +346,6 @@ if (app == 'admin') {
             })
         )
     }
-
-    if (props.waitingList) {
-        allColumns.push(
-            new Column<ObjectType, boolean>({
-                name: "Status", 
-                allowSorting: false,
-                getValue: (member) => !!member.patchedMember.registrations.find(r => {
-                    if (groupIds.includes(r.groupId) && r.waitingList && r.canRegister) {
-                        const group = groups.find(g => g.id === r.groupId)
-                        if (group && r.cycle == group.cycle - props.cycleOffset) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }),
-                format: (canRegister) => {
-                    if (canRegister) {
-                        return "Uitgenodigd om in te schrijven";
-                    }
-                    return "Nog niet uitgenodigd"
-                }, 
-                getStyle: (canRegister) => !canRegister ? "gray" : "",
-                minimumWidth: 100,
-                recommendedWidth: 150
-            })
-        )
-    }
 }
 
 async function showMember(member: PlatformMember) {
@@ -396,9 +359,7 @@ async function showMember(member: PlatformMember) {
             member,
             getNext: table.getNext,
             getPrevious: table.getPrevious,
-            group: props.group,
-            cycleOffset: props.cycleOffset,
-            waitingList: props.waitingList
+            group: props.group
         }),
     });
 
@@ -412,7 +373,6 @@ const actionBuilder = new MemberActionBuilder({
     present,
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
     organizations: organization.value ? [organization.value] : [],
-    inWaitingList: props.waitingList,
     context: context.value,
     platformFamilyManager
 })

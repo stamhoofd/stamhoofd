@@ -1,6 +1,6 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
@@ -18,23 +18,24 @@ export class MemberActionBuilder {
     groups: Group[]
     organizations: Organization[]
     context: SessionContext
-    inWaitingList = false
     platformFamilyManager: PlatformFamilyManager
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>,
         context: SessionContext,
         groups: Group[],
-        inWaitingList?: boolean,
         organizations: Organization[],
         platformFamilyManager: PlatformFamilyManager
     }) {
         this.present = settings.present
         this.context = settings.context
         this.groups = settings.groups
-        this.inWaitingList = settings.inWaitingList ?? false
         this.organizations = settings.organizations
         this.platformFamilyManager = settings.platformFamilyManager
+    }
+
+    get inWaitingList() {
+        return this.groups.length === 1 && this.groups.find(g => g.type === GroupType.WaitingList)
     }
 
     get hasWrite() {
@@ -272,7 +273,7 @@ export class MemberActionBuilder {
     getWaitingListActions(): TableAction<PlatformMember>[] {
         return [
             //
-            new InMemoryTableAction({
+            /*new InMemoryTableAction({
                 name: "Toelaten om in te schrijven",
                 icon: "success",
                 priority: 15,
@@ -296,7 +297,7 @@ export class MemberActionBuilder {
                 handler: async (members: PlatformMember[]) => {
                     await this.setCanRegister(members, false)
                 }
-            }),
+            }),*/
 
 
             new InMemoryTableAction({
@@ -584,48 +585,6 @@ export class MemberActionBuilder {
 
     get groupIds() {
         return this.groups?.map(g => g.id) ?? []
-    }
-  
-    async setCanRegister(members: PlatformMember[], allow = true) {
-        members = members.filter(m => {
-            const regs = m.filterRegistrations({groups: this.groups, waitingList: true, canRegister: !allow})
-            return regs.length > 0
-        })
-        if (members.length == 0) {
-            return;
-        }
-
-        try {
-            const patches = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-            for (const member of members) {
-                const registrationsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Registration>;
-
-                const registrations = member.filterRegistrations({groups: this.groups, waitingList: true, canRegister: !allow})
-
-                for (const registration of registrations) {
-                    registrationsPatch.addPatch(Registration.patch({
-                        id: registration.id,
-                        canRegister: allow
-                    }))
-                }
-
-                patches.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    registrations: registrationsPatch
-                }))
-            }
-            await this.platformFamilyManager.isolatedPatch(members, patches, false)
-        } catch (e) {
-            console.error(e)
-            Toast.fromError(e).show()
-            return
-        }
-
-        if (allow) {
-            new Toast("Verstuur zeker nog zelf een uitnodigingsmail", "success green").show()
-        } else {
-            new Toast("Uitnodiging geannuleerd", "success green").show()
-        }
     }
 
     acceptWaitingList(members: PlatformMember[]) {
