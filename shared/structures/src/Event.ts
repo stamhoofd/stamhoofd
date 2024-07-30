@@ -98,6 +98,27 @@ export class Event extends AutoEncoder {
     get dateRange() {
         return Formatter.dateRange(this.startDate, this.endDate)
     }
+
+    static group(events: Event[]) {
+        const queue: {
+            title: string,
+            events: Event[]
+        }[] = [];
+        const currentYear = Formatter.year(new Date());
+    
+        for (const event of events) {
+            const year = Formatter.year(event.startDate);
+            const title = Formatter.month(event.startDate) + (year !== currentYear ? ` ${year}` : '');
+    
+            const group = queue[queue.length - 1];
+            if (group && group.title === title) {
+                group.events.push(event);
+            } else {
+                queue.push({title, events: [event]});
+            }
+        }
+        return queue
+    }
 }
 
 

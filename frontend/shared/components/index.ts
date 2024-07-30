@@ -20,6 +20,7 @@ export * from "./src/containers"
 export * from "./src/tables"
 export * from "./src/responsibilities"
 export * from "./src/groups"
+export * from "./src/filters"
 
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"
@@ -142,24 +143,6 @@ export * from "./src/views/PaymentHandler"
 export { default as PaymentPendingView } from "./src/views/PaymentPendingView.vue"
 export { default as PaymentSelectionList } from "./src/views/PaymentSelectionList.vue"
 export { default as TransferPaymentView } from "./src/views/TransferPaymentView.vue"
-
-// Filters old
-export { default as ChoicesFilterView } from "./src/filters/old/ChoicesFilterView.vue"
-export { default as FilterEditor } from "./src/filters/old/FilterEditor.vue"
-export { default as FilterGroupView } from "./src/filters/old/FilterGroupView.vue"
-export { default as NumberFilterView } from "./src/filters/old/NumberFilterView.vue"
-export { default as RegistrationsFilterView } from "./src/filters/old/RegistrationsFilterView.vue"
-export { default as StringFilterView } from "./src/filters/old/StringFilterView.vue"
-
-// Filters new
-export * from "./src/filters/GroupUIFilter"
-export * from "./src/filters/MultipleChoiceUIFilter"
-export * from "./src/filters/StringUIFilter"
-export * from "./src/filters/UIFilter"
-export * from "./src/filters/NumberUIFilter"
-export * from "./src/filters/filterBuilders"
-export { default as PropertyFilterInput } from "./src/filters/PropertyFilterInput.vue"
-export { default as PropertyFilterView } from "./src/filters/PropertyFilterView.vue"
 
 export * from "./src/VueGlobalHelper"
 

@@ -10,6 +10,7 @@ import { computed, inject, markRaw, reactive } from "vue";
 import { MemberManager } from "./classes/MemberManager";
 import CartView from "./views/cart/CartView.vue";
 import StartView from "./views/start/StartView.vue";
+import EventsOverview from "./views/events/EventsOverview.vue";
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, {initialComponents: components})
@@ -87,6 +88,14 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
 
     //const $checkoutManager = new CheckoutManager($memberManager)
     const $memberManager = reactive(new MemberManager(reactiveSession, platformManager.$platform));
+    
+    const calendarTab = new TabBarItem({
+        icon: 'calendar',
+        name: 'Activiteiten',
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EventsOverview, {})
+        })
+    });
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
@@ -121,6 +130,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                                     name: 'Start',
                                     component: startView
                                 }),
+                                calendarTab,
                                 new TabBarItem({
                                     icon: 'basket',
                                     name: 'Mandje',

@@ -42,42 +42,7 @@
                 <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
-                    <STListItem v-for="event of group.events" :key="event.id" class="event-row right-stack smartphone-wrap-left" :selectable="true" @click="onClickEvent(event)">
-                        <template #left>
-                            <div class="calendar-box">
-                                <div class="overlay">
-                                    <span class="day">{{ Formatter.day(event.startDate) }}</span>
-                                    <span class="month">{{ Formatter.capitalizeFirstLetter(Formatter.month(event.startDate)) }}</span>
-                                </div>
-                                <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" class="event-image" />
-                            </div>
-                        </template>
-                        <p v-if="getEventPrefix(event)" class="style-title-prefix">
-                            {{ getEventPrefix(event) }}
-                        </p>
-                        <h3 class="style-title-list larger">
-                            <span>{{ event.name }}</span>
-                        </h3>
-                        <p class="style-description-small">
-                            {{ Formatter.capitalizeFirstLetter(event.dateRange) }}
-                        </p>
-
-                        <p v-if="event.meta.location?.name || event.meta.location?.address?.city" class="style-description-small">
-                            {{ event.meta.location?.name || event.meta.location?.address?.city }}
-                        </p>
-
-                        <p v-if="event.group" class="style-description-small">
-                            <span v-if="event.group.notYetOpen">Inschrijvingen starten op {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-                            <span v-else-if="event.group.closed">Inschrijvingen gesloten</span>
-                            <span v-else>Inschrijvingen open</span>
-                        </p>
-
-                        <template #right>
-                            <span v-if="!event.meta.visible" v-tooltip="'Verborgen'" class="icon gray eye-off" />
-                            <span v-if="event.id" class="icon arrow-right-small gray" />
-                            <span v-else class="icon add gray" />
-                        </template>
-                    </STListItem>
+                    <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)" />
                 </STList>
             </div>
 
@@ -99,7 +64,7 @@ import { useContext, useOrganization, usePlatform, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 import { Toast } from '../overlays/Toast';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
-import ImageComponent from '../views/ImageComponent.vue';
+import EventRow from './components/EventRow.vue';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
 
@@ -279,24 +244,7 @@ const filledEvents = computed(() => {
 });
 
 const groupedEvents = computed(() => {
-    const queue: {
-        title: string,
-        events: Event[]
-    }[] = [];
-    const currentYear = Formatter.year(new Date());
-
-    for (const event of filledEvents.value) {
-        const year = Formatter.year(event.startDate);
-        const title = Formatter.month(event.startDate) + (year !== currentYear ? ` ${year}` : '');
-
-        const group = queue[queue.length - 1];
-        if (group && group.title === title) {
-            group.events.push(event);
-        } else {
-            queue.push({title, events: [event]});
-        }
-    }
-    return queue
+    return Event.group(filledEvents.value)
 });
 
 watchEffect(() => {
@@ -322,18 +270,6 @@ async function addEvent(template?: Event) {
                 callback: () => {
                     fetcher.reset()
                 }
-            })
-        ]
-    })
-}
-
-async function editEvent(event: Event) {
-    await present({
-        modalDisplayStyle: 'popup',
-        components: [
-            new ComponentWithProperties(EditEventView, {
-                event,
-                isNew: false
             })
         ]
     })
@@ -405,75 +341,4 @@ watch(selectedYear, () => {
     fetcher.reset()
 })
 
-function getEventPrefix(event: Event) {
-    const prefixes: string[] = []
-    if (event.organizationId === null) {
-        prefixes.push('Nationaal')
-    }
-
-    if (event.meta.defaultAgeGroupIds !== null) {
-        for (const ageGroupId of event.meta.defaultAgeGroupIds) {
-            const ageGroup = platform.value?.config.defaultAgeGroups.find(g => g.id === ageGroupId)
-            if (ageGroup) {
-                prefixes.push(ageGroup.name)
-            }
-        }
-    }
-    return prefixes.join(' - ')
-}
-
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.calendar-box {
-    width: 200px;
-    border-radius: $border-radius;
-    position: relative;
-    padding: 40px 0;
-    border-radius: 5px;
-    overflow: hidden;
-    background: $color-background-shade;
-    margin-right: 15px;
-    border: 1px solid $color-border;
-
-    @media (max-width: 450px) {
-        width: 100%;
-        margin-right: 0;
-    }
-
-    .overlay {
-        text-align: center;
-
-        .day {
-            display: block;
-            font-size: 35px;
-            font-weight: bold;
-        }
-
-        .month {
-            display: block;
-            font-size: 15px;
-            color: $color-gray-1;
-        }
-    }
-
-    .event-image {
-        position: absolute;
-        z-index: 1;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        touch-action: none;
-        pointer-events: none;
-
-        img {
-            object-fit: cover;
-        }
-    }
-}
-
-</style>
