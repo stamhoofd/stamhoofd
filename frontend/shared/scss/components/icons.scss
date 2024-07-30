@@ -72,6 +72,14 @@
         color: $color-error;
     }
 
+    &.blue {
+        color: $color-primary-original;
+    }
+
+    &.pink {
+        color: $color-tertiary;
+    }
+
     &.primary {
         color: $color-primary;
     }

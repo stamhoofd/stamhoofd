@@ -13,8 +13,8 @@
         <main>
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ member.member.details.firstName }}</span>
-                <MaleIcon v-if="member.member.details.gender == Gender.Male" v-tooltip="member.member.details.defaultAge >= 18 ? 'Man' : 'Jongen'" class="icon-spacer" />
-                <FemaleIcon v-if="member.member.details.gender == Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? 'Vrouw' : 'Meisje'" class="icon-spacer" />
+                <span v-if="member.member.details.gender == Gender.Male" v-tooltip="member.member.details.defaultAge >= 18 ? 'Man' : 'Jongen'" class="icon male blue icon-spacer" />
+                <span v-if="member.member.details.gender == Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? 'Vrouw' : 'Meisje'" class="icon female pink icon-spacer" />
             </h1>
 
             <SegmentedControl v-model="tab" :items="tabComponents" :labels="tabLabels" />
@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { EditMemberAllBox, FemaleIcon, MaleIcon, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useContext, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
+import { EditMemberAllBox, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useContext, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import { MemberActionBuilder } from './classes/MemberActionBuilder';
