@@ -2432,10 +2432,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.16.0.tgz#9df760744ffde43363056e1ffe276668cbcb7fbf"
   integrity sha512-41u4f+sR91YmEAyHoqLvqNmrrHZknwGBbs73QToV5vk4bCTam9eE4XQCBjcLBpVCbmWgDWdodzXChfMBV86e6A==
 
-"@simonbackx/vue-app-navigation@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.0.0.tgz#228db2d195e9a595b0d3b3ff9c8fc81ac7e26d6e"
-  integrity sha512-GD7kKOe9jnLUIbXW9zojOG+wFh4o7Kehel5XvuCNFXJIktOxwhz5nfq0fkeK/IIv05wggkNkenKUCdh34ihxnA==
+"@simonbackx/vue-app-navigation@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-2.1.0.tgz#ff246f531b992c02231c8b2c56d8e7ca6c3a47cd"
+  integrity sha512-pPn/Nu/x8d5nO5scZp/oCesjHkc4vM+QpNv/wHbaLXnWFDKoE3RnOW6R4H3hZD97hmnRqrbkNXQXVtTOyKdxZw==
   dependencies:
     "@typescript-eslint/parser" "^7.7.1"
     "@vitejs/plugin-vue" "^5.0.4"

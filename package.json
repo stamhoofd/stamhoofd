@@ -42,7 +42,7 @@
         "@simonbackx/simple-encoding": "2.13.1",
         "@simonbackx/simple-errors": "^1.4.0",
         "@simonbackx/simple-networking": "1.16.0",
-        "@simonbackx/vue-app-navigation": "2.0.0",
+        "@simonbackx/vue-app-navigation": "2.1.0",
         "@types/sortablejs": "^1.15.8",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",
