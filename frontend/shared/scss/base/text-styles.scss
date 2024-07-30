@@ -997,7 +997,7 @@
 
     &.large {
         p:not([class]), p.is-empty {
-           // @extend .style-description-large;
+           @extend .style-description-large;
         }
         
     }

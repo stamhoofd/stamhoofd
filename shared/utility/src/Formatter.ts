@@ -175,25 +175,53 @@ export class Formatter {
         return year+"-"+(datetime.month+"").padStart(2, "0")+"-"+(datetime.day+"").padStart(2, "0") + " "+(datetime.hour+"").padStart(2, "0")+":"+(datetime.minute+"").padStart(2, "0")+":"+(datetime.second+"").padStart(2, "0")
     }
 
-    static dateRange(startDate: Date, endDate: Date): string {
+    static startDate(startDate: Date, includeDay = false): string {
+        if (Formatter.time(startDate) === "0:00") {
+            if (includeDay) {
+                return Formatter.dateWithDay(startDate)
+            }
+            return Formatter.date(startDate)
+        }
+
+        if (includeDay) {
+            return Formatter.dateTimeWithDay(startDate)
+        }
+        return Formatter.dateTime(startDate)
+    }
+
+    static endDate(endDate: Date, includeDay = false): string {
+        if (Formatter.time(endDate) === "23:59") {
+            if (includeDay) {
+                return Formatter.dateWithDay(endDate)
+            }
+            return Formatter.date(endDate)
+        }
+
+        if (includeDay) {
+            return Formatter.dateTimeWithDay(endDate)
+        }
+        return Formatter.dateTime(endDate)
+    }
+
+    static dateRange(startDate: Date, endDate: Date, join = ' - '): string {
         if (Formatter.dateIso(startDate) === Formatter.dateIso(endDate)) {
             if (Formatter.time(startDate) === Formatter.time(endDate)) {
                 return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)
             }
 
-            if (Formatter.time(startDate) === "00:00" && Formatter.time(endDate) === "23:59") {
+            if (Formatter.time(startDate) === "0:00" && Formatter.time(endDate) === "23:59") {
                 return Formatter.dateWithDay(startDate)
             }
 
-            return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)+" - "+Formatter.time(endDate)
+            return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)+join+Formatter.time(endDate)
         }
         
         // If start in evening and end on the next morning: only mention date once
         if (Formatter.dateIso(startDate) === Formatter.dateIso(new Date(endDate.getTime() - 24*60*60*1000)) && Formatter.timeIso(endDate) <= "07:00" && Formatter.timeIso(startDate) >= "12:00") {
-            return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)+" - "+Formatter.time(endDate)
+            return Formatter.dateWithDay(startDate)+", "+Formatter.time(startDate)+join+Formatter.time(endDate)
         }
 
-        return Formatter.dateTime(startDate)+" - "+Formatter.dateTime(endDate)
+        return Formatter.startDate(startDate)+join+Formatter.endDate(endDate)
     }
 
 
