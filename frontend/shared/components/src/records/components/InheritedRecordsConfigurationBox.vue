@@ -12,15 +12,16 @@
             </template>
         </STListItem>
 
-        <STListItem element-name="label" :selectable="!financialSupport.locked.value">
+        <STListItem element-name="label" :selectable="!financialSupport.locked.value" class="right-stack">
             <template #left>
                 <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="financialSupport.locked.value" />
             </template>
             <p class="style-title-list">
                 Financiële ondersteuning
             </p>
-            <template v-if="!financialSupport.locked.value && financialSupport.enabled.value" #right>
-                <button class="button gray icon settings" type="button" @click.stop="financialSupport.edit" />
+            <template #right>
+                <span v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy" />
+                <button v-if="!financialSupport.locked.value && financialSupport.enabled.value" class="button gray icon settings" type="button" @click.stop="financialSupport.edit" />
             </template>
         </STListItem>
 
@@ -206,6 +207,10 @@ const financialSupport = {
         get: () => !!props.inheritedRecordsConfiguration?.financialSupport || patched.value.financialSupport !== null,
         set: (value: boolean) => {
             if (value) {
+                if (!dataPermissions.enabled.value) {
+                    Toast.error('De financiële status van een lid is gevoelige informatie en vereist toestemming voor gegevensverzameling').show()
+                    return
+                }
                 addPatch({
                     financialSupport: props.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
                 });
