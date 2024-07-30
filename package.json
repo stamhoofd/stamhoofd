@@ -35,7 +35,7 @@
         "mail": "maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password",
         "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules",
         "clear-vite-cache": "rm -rf frontend/app/*/node_modules/.vite",
-        "ship": "yarn build:shared && lerna publish --no-private"
+        "ship": "yarn build:shared:full && lerna publish --no-private"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",
