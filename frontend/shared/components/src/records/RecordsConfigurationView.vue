@@ -43,7 +43,7 @@
             Breid het aantal vragenlijsten zelf nog uit. Vervolgens kan je per inschrijvingsgroep (of gewoon voor alle leden) de vragenlijsten inschakelen.
         </p>
         <p v-if="app == 'admin'">
-            Voeg zelf nog vragenlijsten toe voor. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen kunnen deze ook nog inschakelen volgens hun wensen.
+            Voeg zelf nog vragenlijsten toe die voor alle lokale groepen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen kunnen deze ook nog inschakelen volgens hun wensen.
         </p>
         <p class="style-description-block">
             Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.

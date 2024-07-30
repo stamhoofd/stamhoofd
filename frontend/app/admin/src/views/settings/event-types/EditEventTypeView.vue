@@ -30,11 +30,10 @@
         <hr>
         <h2>{{ $t('Limieten') }}</h2>
 
-        <div class="split-inputs">
-            <STInputBox :title="$t('Maximum aantal activiteiten per jaar (optioneel)')" error-fields="maximum" :error-box="errors.errorBox">
-                <NumberInput v-model="maximum" :placeholder="$t('Geen')" :required="false" />
-            </STInputBox>
-        </div>
+        <STInputBox :title="$t('Maximum aantal activiteiten per jaar (optioneel)')" error-fields="maximum" :error-box="errors.errorBox">
+            <NumberInput v-model="maximum" :placeholder="$t('Geen')" :required="false" />
+        </STInputBox>
+        <p class="style-description-small">{{ $t('Het maximum geldt per lokale groep') }}</p>
 
         <div class="split-inputs">
             <STInputBox :title="$t('Minimum aantal dagen')" error-fields="minimumDays" :error-box="errors.errorBox">
