@@ -108,7 +108,7 @@ export class Organization extends AutoEncoder {
                 continue;
             }
 
-            if  (group.settings.availableMembers === 0 && !group.settings.waitingListIfFull) {
+            if  (group.settings.availableMembers === 0 && !group.waitingList) {
                 continue;
             }
             return true;
@@ -123,7 +123,7 @@ export class Organization extends AutoEncoder {
             if (group.closed) {
                 continue;
             }
-            if  (group.settings.availableMembers === 0 && !group.settings.waitingListIfFull) {
+            if  (group.settings.availableMembers === 0 && !group.waitingList) {
                 continue;
             }
             return true;

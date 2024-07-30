@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors"
 import { Formatter } from "@stamhoofd/utility"
 import { Group } from "../../Group"
@@ -8,6 +8,7 @@ import { RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator"
 import { RegisterContext } from "./RegisterCheckout"
 import { v4 as uuidv4 } from "uuid";
 import { Registration } from "../Registration"
+import { Organization } from "../../Organization"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -33,8 +34,11 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
     organizationId: string
 
-    @field({ decoder: BooleanDecoder })
-    waitingList: boolean
+    @field({ decoder: GroupPrice })
+    groupPrice: GroupPrice;
+
+    @field({ decoder: new ArrayDecoder(RegisterItemOption) })
+    options: RegisterItemOption[] = []
 
     hydrate(context: RegisterContext) {
         return RegisterItem.fromId(this, context.family)
@@ -46,28 +50,34 @@ export class RegisterItem implements RegisterItemWithPrice {
     
     member: PlatformMember
     group: Group
+    organization: Organization
 
     groupPrice: GroupPrice;
     options: RegisterItemOption[] = []
-
-    waitingList = false
     calculatedPrice = 0
 
-    static fromRegistration(registration: Registration, member: PlatformMember) {
+    /**
+     * @deprecated
+     */
+    get waitingList() {
+        return false;
+    }
+
+    static fromRegistration(registration: Registration, member: PlatformMember, organization: Organization) {
         return new RegisterItem({
             id: registration.id,
             member,
             group: registration.group,
-            waitingList: registration.waitingList
+            organization
         })
     }
 
-    constructor(data: {id?: string, member: PlatformMember, group: Group, waitingList: boolean}) {
+    constructor(data: {id?: string, member: PlatformMember, group: Group, organization: Organization}) {
         this.id = data.id ?? uuidv4()
         this.member = data.member
         this.group = data.group
         this.groupPrice = this.group.settings.prices[0] ?? GroupPrice.create({})
-        this.waitingList = data.waitingList
+        this.organization = data.organization
     }
 
     convert(): IDRegisterItem {
@@ -75,8 +85,9 @@ export class RegisterItem implements RegisterItemWithPrice {
             id: this.id,
             memberId: this.member.member.id,
             groupId: this.group.id,
-            organizationId: this.group.organizationId,
-            waitingList: this.waitingList
+            organizationId: this.organization.id,
+            groupPrice: this.groupPrice,
+            options: this.options
         })
     }
 
@@ -100,18 +111,13 @@ export class RegisterItem implements RegisterItemWithPrice {
         return this.family.checkout
     }
 
-    static defaultFor(member: PlatformMember, group: Group) {
+    static defaultFor(member: PlatformMember, group: Group, organization: Organization) {
         const item = new RegisterItem({
             member,
             group,
-            waitingList: false
+            organization
         });
-        item.waitingList = item.shouldUseWaitingList()
         return item;
-    }
-
-    get organization() {
-        return this.member.organizations.find(o => o.id === this.group.organizationId)!
     }
 
     /**
@@ -198,7 +204,7 @@ export class RegisterItem implements RegisterItemWithPrice {
                 return 'Nieuwe leden kunnen enkel inschrijven voor de wachtlijst'
             }
 
-            if (this.group.settings.waitingListIfFull) {
+            if (this.group.waitingList) {
                 if (this.hasReachedGroupMaximum()) {
                     return 'De inschrijvingen zijn volzet, je kan enkel inschrijven voor de wachtlijst'
                 }
@@ -218,7 +224,7 @@ export class RegisterItem implements RegisterItemWithPrice {
             return true;
         }
 
-        if (this.group.settings.waitingListIfFull) {
+        if (this.group.waitingList) {
             if (this.hasReachedGroupMaximum()) {
                 return true;
             }
@@ -347,7 +353,7 @@ export class RegisterItem implements RegisterItemWithPrice {
         }
 
         if (!this.waitingList) {
-            if (!this.group.settings.waitingListIfFull) {
+            if (!this.group.waitingList) {
                 if (this.hasReachedGroupMaximum()) {
                     throw new SimpleError({
                         code: "maximum_reached",
@@ -388,7 +394,7 @@ export class RegisterItem implements RegisterItemWithPrice {
             id: idRegisterItem.id,
             member,
             group,
-            waitingList: idRegisterItem.waitingList
+            organization
         })
     }
 

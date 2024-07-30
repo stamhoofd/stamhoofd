@@ -89,10 +89,23 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        const groups = await Group.getAll(organization.id, organization.periodId)
+        const groupIds = Formatter.uniqueArray(request.body.cart.items.map(i => i.groupId))
+        const groups = await Group.getByIDs(...groupIds)
+
+        for (const group of groups) {
+            if (group.organizationId !== organization.id) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, één of meerdere groepen waarin je probeert in te schrijven lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+        }
 
         const blob = await AuthenticatedStructures.membersBlob(members, true)
-        const family = PlatformFamily.create(blob, {platform: await Platform.getSharedStruct(), contextOrganization: await organization.getStructure()})
+        const family = PlatformFamily.create(blob, {
+            platform: await Platform.getSharedStruct(),
+            contextOrganization: await AuthenticatedStructures.organization(organization)
+        })
         const checkout = request.body.hydrate({family})
         
         const registrations: RegistrationWithMemberAndGroup[] = []

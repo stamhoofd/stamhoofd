@@ -169,7 +169,7 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 STInvoicePrivate.create({
                     ...invoice,
                     payment: payment ? PaymentStruct.create(payment) : null,
-                    organization: organization ? (await organization.getStructure({emptyGroups: true})) : undefined,
+                    organization: organization ? organization.getBaseStructure() : undefined,
                     settlement: payment?.settlement ?? null,
                 })
             )

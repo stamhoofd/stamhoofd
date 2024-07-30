@@ -7,9 +7,23 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
-        <h2>Ingebouwde gegevens</h2>
+        <h2 v-if="app === 'admin'">
+            Minimale gegevens voor alle leden in het systeem
+        </h2>
+        <h2 v-else>
+            Ingebouwde gegevens (alle leden behalve wachtlijst)
+        </h2>
 
-        <p>Bepaalde gegevens zijn ingebouwd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten, en eventueel bepaalde gegevens optioneel maken (altijd of bijvoorbeeld op basis van de leeftijd).</p>
+        <p v-if="app === 'admin'">
+            Deze minimale gegevens zijn essentieel voor een goede werking van het systeem en worden gevraagd voor elk lid - ook leden op de wachtlijst en leden die inschrijven bij niet-standaard leeftijdsgroepen.
+        </p>
+        <p v-if="app === 'admin'" class="style-description-block">
+            Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een lokale groep en per leeftijdsgroep, wachtlijst of activiteit van een lokale groep (of activiteit op nationaal niveau).
+        </p>
+
+        <p v-if="app === 'dashboard'">
+            Bepaal welke gegevens je voor alle leden wilt verzamelen (behalve leden die enkel inschrijven op een wachtlijst - dat kan via de instellingen van die wachtlijst aangepast worden). Je kan dit ook per leeftijdsgroep instellen, voor maximale flexibiliteit (via de instellingen van elke leeftijdsgroep).
+        </p>
 
         <p v-if="!getFilterConfiguration('emailAddress') && !getFilterConfiguration('parents')" class="error-box">
             Je moet minstens het e-mailadres van een lid of de gegevens van ouders verzamelen. Je kan niet beide uitschakelen.
@@ -18,8 +32,20 @@
         <InheritedRecordsConfigurationBox :inherited-records-configuration="props.inheritedRecordsConfiguration" :records-configuration="patched" @patch:records-configuration="addPatch" />
 
         <hr>
-        <h2>Vragenlijsten</h2>
-        <p>
+        <h2 v-if="app === 'admin'">
+            Ingebouwde vragenlijsten uitbreiden
+        </h2>
+        <h2 v-else>
+            Eigen vragenlijsten
+        </h2>
+
+        <p v-if="app == 'dashboard'">
+            Breid het aantal vragenlijsten zelf nog uit. Vervolgens kan je per inschrijvingsgroep (of gewoon voor alle leden) de vragenlijsten inschakelen.
+        </p>
+        <p v-if="app == 'admin'">
+            Voeg zelf nog vragenlijsten toe voor. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen kunnen deze ook nog inschakelen volgens hun wensen.
+        </p>
+        <p class="style-description-block">
             Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
         </p>
 
@@ -41,10 +67,10 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders, useAppContext, useDraggableArray, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
-import { ComponentOptions, ref } from 'vue';
+import { ComponentOptions, computed, ref } from 'vue';
 import DataPermissionSettingsView from './DataPermissionSettingsView.vue';
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
 import FinancialSupportSettingsView from './FinancialSupportSettingsView.vue';
@@ -162,6 +188,7 @@ const {patch, patched, addPatch, hasChanges} = usePatch(props.recordsConfigurati
 const $t = useTranslate();
 const $navigate = useNavigate();
 const organization = useOrganization()
+const app = useAppContext();
 
 // Data
 const categories = useDraggableArray(
@@ -170,40 +197,44 @@ const categories = useDraggableArray(
         addPatch({recordCategories: p})
     }
 );
-const family = new PlatformFamily({
-    platform: Platform.shared,
-    contextOrganization: organization.value
-})
 
-const settings = new RecordEditorSettings({
-    dataPermission: true,
-    toggleDefaultEnabled: true,
-    filterBuilder: (categories: RecordCategory[]) => {
-        return memberWithRegistrationsBlobUIFilterBuilders[0];
-    },
-    exampleValue: new PlatformMember({
-        member: MemberWithRegistrationsBlob.create({
-            details: MemberDetails.create({
-                firstName: 'Voorbeeld',
-                lastName: 'Lid',
-                dataPermissions: BooleanStatus.create({value: true}),
-                birthDay: new Date('2020-01-01'),
+const settings = computed(() => {
+    const family = new PlatformFamily({
+        platform: Platform.shared,
+        contextOrganization: organization.value
+    })
+    const ss = new RecordEditorSettings({
+        dataPermission: true,
+        toggleDefaultEnabled: true,
+        inheritedRecordsConfiguration: props.inheritedRecordsConfiguration ? OrganizationRecordsConfiguration.mergeChild(props.inheritedRecordsConfiguration, patched.value) : patched.value,
+        filterBuilder: (categories: RecordCategory[]) => {
+            return memberWithRegistrationsBlobUIFilterBuilders[0];
+        },
+        exampleValue: new PlatformMember({
+            member: MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Voorbeeld',
+                    lastName: 'Lid',
+                    dataPermissions: BooleanStatus.create({value: true}),
+                    birthDay: new Date('2020-01-01'),
+                }),
+                users: [],
+                registrations: []
             }),
-            users: [],
-            registrations: []
+            isNew: true,
+            family
         }),
-        isNew: true,
-        family
-    }),
-    patchExampleValue(value: PlatformMember, patch) {
-        const cloned = value.clone()
-        value.addDetailsPatch(MemberDetails.patch({
-            recordAnswers: patch
-        }))
-        return cloned;
-    },
+        patchExampleValue(value: PlatformMember, patch) {
+            const cloned = value.clone()
+            value.addDetailsPatch(MemberDetails.patch({
+                recordAnswers: patch
+            }))
+            return cloned;
+        },
+    })
+    family.members.push(ss.exampleValue)
+    return ss;
 })
-family.members.push(settings.exampleValue)
 
 function getFilterConfiguration(property: PropertyName): PropertyFilter|null {
     return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property]

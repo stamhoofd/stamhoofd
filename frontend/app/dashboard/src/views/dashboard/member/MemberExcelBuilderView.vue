@@ -187,7 +187,7 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 width: 15
             }),
             new ExcelMemberProperty({
-                name: "Geslacht",
+                name: "Gender",
                 getValues: (member: MemberWithRegistrations) => [member.details.gender === Gender.Male ? "Man" : (member.details.gender === Gender.Female ? "Vrouw" : "")],
                 width: 10
             }),

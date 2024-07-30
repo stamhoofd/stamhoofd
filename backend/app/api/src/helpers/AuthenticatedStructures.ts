@@ -1,6 +1,7 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
 import { Event as EventStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, User as UserStruct, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType } from '@stamhoofd/structures';
 
 import { Context } from "./Context";
 import { Formatter } from "@stamhoofd/utility";
@@ -52,10 +53,71 @@ export class AuthenticatedStructures {
     }
 
     static async group(group: Group) {
-        if (!await Context.optionalAuth?.canAccessGroup(group)) {
-            return group.getStructure()
+        return (await this.groups([group]))[0]
+    }
+
+    static async groups(groups: Group[]) {
+        const waitingListIds = Formatter.uniqueArray(groups.map(g => g.waitingListId).filter(id => id !== null) as string[])
+        const waitingLists = waitingListIds.length > 0 ? await Group.getByIDs(...waitingListIds) : []
+
+        const structs: GroupStruct[] = []
+        for (const group of groups) {
+            const waitingList = waitingLists.find(g => g.id == group.waitingListId) ?? null
+            const waitingListStruct = waitingList ? GroupStruct.create(waitingList) : null
+            if (waitingList && waitingListStruct && !await Context.optionalAuth?.canAccessGroup(waitingList)) {
+                waitingListStruct.privateSettings = null;
+            }
+
+            const struct = GroupStruct.create({
+                ...group,
+                waitingList: waitingListStruct
+            })
+
+            if (!await Context.optionalAuth?.canAccessGroup(group)) {
+                struct.privateSettings = null;
+            }
+
+            structs.push(struct)
         }
-        return group.getPrivateStructure()
+
+        return structs;
+    }
+
+    static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[]) {
+        if (organizationRegistrationPeriods.length === 0) {
+            return [];
+        }
+
+        const periodIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId))
+        const periods = await RegistrationPeriod.getByIDs(...periodIds)
+
+        const groupIds = Formatter.uniqueArray(organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)))
+        const groups = groupIds.length ? await Group.getByIDs(...groupIds) : []
+
+        const groupStructs = await this.groups(groups)
+
+        const structs: OrganizationRegistrationPeriodStruct[] = []
+        for (const organizationPeriod of organizationRegistrationPeriods) {
+            const period = periods.find(p => p.id == organizationPeriod.periodId) ?? null
+            if (!period) {
+                continue
+            }
+            const groupIds = Formatter.uniqueArray(organizationPeriod.settings.categories.flatMap(c => c.groupIds))
+
+            structs.push(
+                OrganizationRegistrationPeriodStruct.create({
+                    ...organizationPeriod,
+                    period: period.getStructure(),
+                    groups: groupStructs.filter(gg => groupIds.includes(gg.id)).sort(GroupStruct.defaultSort)
+                })
+            )
+        }
+
+        return structs
+    }
+
+    static async organizationRegistrationPeriod(organizationRegistrationPeriod: OrganizationRegistrationPeriod) {
+        return (await this.organizationRegistrationPeriods([organizationRegistrationPeriod]))[0]
     }
 
     static async webshop(webshop: Webshop) {
@@ -66,6 +128,8 @@ export class AuthenticatedStructures {
     }
 
     static async organization(organization: Organization): Promise<OrganizationStruct> {
+        const organizationPeriod = await organization.getPeriod()
+
         if (await Context.optionalAuth?.canAccessPrivateOrganizationData(organization)) {
             const webshops = await Webshop.where({ organizationId: organization.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
             const webshopStructures: WebshopPreview[] = [] 
@@ -77,35 +141,29 @@ export class AuthenticatedStructures {
                 webshopStructures.push(WebshopPreview.create(w))
             }
 
-            const {groups, organizationPeriod, period} = await organization.getPeriod({emptyGroups: false})
-
             return OrganizationStruct.create({
-                id: organization.id,
-                name: organization.name,
-                meta: organization.meta,
-                address: organization.address,
-                registerDomain: organization.registerDomain,
-                uri: organization.uri,
-                website: organization.website,
+                ...organization.getBaseStructure(),
                 privateMeta: organization.privateMeta,
                 webshops: webshopStructures,
-                createdAt: organization.createdAt,
-                period: organizationPeriod.getPrivateStructure(period, groups)
+                period: await this.organizationRegistrationPeriod(organizationPeriod)
             })
         }
         
-        return await organization.getStructure()
+        return OrganizationStruct.create({
+            ...organization.getBaseStructure(),
+            period: await this.organizationRegistrationPeriod(organizationPeriod)
+        })
     }
 
     static async adminOrganizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
         const structs: OrganizationStruct[] = [];
 
         for (const organization of organizations) {
-            const base = await organization.getStructure({emptyGroups: true})
+            const base = organization.getBaseStructure()
             structs.push(base)
         }
         
-        return structs
+        return Promise.resolve(structs)
     }
 
     static async userWithMembers(user: User): Promise<UserWithMembers> {
@@ -207,17 +265,19 @@ export class AuthenticatedStructures {
         // Load groups
         const groupIds = events.map(e => e.groupId).filter(id => id !== null) as string[]
         const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : []
+        const groupStructs = await this.groups(groups)
 
         const result: EventStruct[] = []
 
         for (const event of events) {
-            const group = groups.find(g => g.id == event.groupId) ?? null
+            const group = groupStructs.find(g => g.id == event.groupId) ?? null
 
-            if (group && await Context.auth.canAccessGroup(group)) {
-                result.push(event.getPrivateStructure(group))
-            } else {
-                result.push(event.getStructure(group))
-            }
+            const struct = EventStruct.create({
+                ...event,
+                group
+            })
+
+            result.push(struct)
         }
         
         return result

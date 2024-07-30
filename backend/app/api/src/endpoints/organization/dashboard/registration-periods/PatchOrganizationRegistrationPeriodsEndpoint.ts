@@ -1,10 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Group as GroupStruct, GroupPrivateSettings, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from "@stamhoofd/structures";
+import { Group as GroupStruct, GroupPrivateSettings, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version, GroupType } from "@stamhoofd/structures";
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Context } from "../../../../helpers/Context";
 import { Group, Member, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from "@stamhoofd/models";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -33,13 +34,13 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        const {user} = await Context.authenticate()
+        await Context.authenticate()
 
         if (!await Context.auth.hasFullAccess(organization.id)) {
             throw Context.auth.error()
         }
 
-        const structs: OrganizationRegistrationPeriodStruct[] = [];
+        const periods: OrganizationRegistrationPeriod[] = [];
 
         for (const {put} of request.body.getPuts()) {
             if (!await Context.auth.hasFullAccess(organization.id)) {
@@ -70,7 +71,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             // Delete unreachable categories first
             await organizationPeriod.cleanCategories(groups);
             await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
-            structs.push(organizationPeriod.getPrivateStructure(period, groups));
+            periods.push(organizationPeriod);
         }
 
         for (const patch of request.body.getPatches()) {
@@ -137,22 +138,20 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct)
             }
 
-            const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
-            const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
 
             if (deleteUnreachable) {
+                const groups = await Group.getAll(organization.id, organizationPeriod.periodId)
+
                 // Delete unreachable categories first
                 await organizationPeriod.cleanCategories(groups);
                 await Group.deleteUnreachable(organization.id, organizationPeriod, groups)
             }
 
-            if (period) {
-                structs.push(organizationPeriod.getPrivateStructure(period, groups));
-            }
+            periods.push(organizationPeriod);
         }
 
         return new Response(
-            structs
+            await AuthenticatedStructures.organizationRegistrationPeriods(periods),
         );
     }
 
@@ -223,10 +222,64 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (struct.defaultAgeGroupId !== undefined) {
             model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId)
         }
+
+        const patch = struct;
+        if (patch.waitingList !== undefined) {
+            if (patch.waitingList === null) {
+                // delete
+                if (model.waitingListId) {
+                    // for now don't delete, as waiting lists can be shared between multiple groups
+                    // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
+                    model.waitingListId = null;
+                }
+
+            } else if (patch.waitingList.isPatch()) {
+                if (!model.waitingListId) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'waitingList',
+                        message: 'Cannot patch waiting list before it is created'
+                    })
+                }
+                patch.waitingList.id = model.waitingListId
+                patch.waitingList.type = GroupType.WaitingList
+                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList)
+            } else {
+                if (model.waitingListId) {
+                    // for now don't delete, as waiting lists can be shared between multiple groups
+                    // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
+                    model.waitingListId = null;
+                }
+                patch.waitingList.type = GroupType.WaitingList
+
+                const existing = await Group.getByID(patch.waitingList.id)
+                if (existing) {
+                    if (existing.organizationId !== model.organizationId) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'waitingList',
+                            message: 'Waiting list group is already used in another organization'
+                        })
+                    }
+
+                    model.waitingListId = existing.id
+                } else {
+                    const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                        patch.waitingList,
+                        model.organizationId,
+                        model.periodId
+                    )
+                    model.waitingListId = group.id
+                }
+            }
+        }
         
         await model.updateOccupancy()
         await model.save();
-        Member.updateMembershipsForGroupId(model.id)
+
+        if (struct.deletedAt !== undefined || struct.defaultAgeGroupId !== undefined) {
+            Member.updateMembershipsForGroupId(model.id)
+        }
     }
 
 
@@ -276,6 +329,29 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 message: "You cannot restrict your own permissions",
                 human: "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep"
             })
+        }
+
+        if (struct.waitingList) {
+            const existing = await Group.getByID(struct.waitingList.id)
+            if (existing) {
+                if (existing.organizationId !== model.organizationId) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'waitingList',
+                        message: 'Waiting list group is already used in another organization'
+                    })
+                }
+
+                model.waitingListId = existing.id
+            } else {
+                struct.waitingList.type = GroupType.WaitingList
+                const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                    struct.waitingList,
+                    model.organizationId,
+                    model.periodId
+                )
+                model.waitingListId = group.id
+            }
         }
 
         await model.updateOccupancy()

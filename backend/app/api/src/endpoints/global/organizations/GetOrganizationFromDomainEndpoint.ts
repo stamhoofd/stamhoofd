@@ -4,6 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { Organization as OrganizationStruct } from "@stamhoofd/structures";
 import { GoogleTranslateHelper } from "@stamhoofd/utility";
+import { AuthenticatedStructures } from "../../../helpers/AuthenticatedStructures";
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -60,7 +61,7 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
                         statusCode: 404
                     })
                 }
-                return new Response(await organization.getStructure());
+                return new Response(await AuthenticatedStructures.organization(organization));
             }
         }
 
@@ -75,6 +76,6 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
                 statusCode: 404
             })
         }
-        return new Response(await organization.getStructure());
+        return new Response(await AuthenticatedStructures.organization(organization));
     }
 }

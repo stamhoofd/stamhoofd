@@ -26,6 +26,8 @@
         </p>
 
         <template #right>
+            <span class="icon privacy gray" v-if="category.containsSensitiveData" v-tooltip="'Vereist toestemming gegevensverzameling'"/>
+
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>

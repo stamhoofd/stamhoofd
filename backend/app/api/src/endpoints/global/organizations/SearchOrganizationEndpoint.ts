@@ -2,6 +2,7 @@ import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-e
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Organization } from "@stamhoofd/models";
 import { Organization as OrganizationStruct,OrganizationSimple } from "@stamhoofd/structures"; 
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 
 type Params = Record<string, never>;
 
@@ -57,6 +58,6 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         if (request.request.getVersion() < 169) {
             return new Response(organizations.map(o => OrganizationSimple.create(o)));
         }
-        return new Response(await Promise.all(organizations.map(o => o.getStructure())));
+        return new Response(await Promise.all(organizations.map(o => AuthenticatedStructures.organization(o))));
     }
 }

@@ -1,5 +1,5 @@
 import { UIFilterBuilder } from "@stamhoofd/components"
-import { ObjectWithRecords, PatchAnswers, RecordCategory } from "@stamhoofd/structures"
+import { ObjectWithRecords, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from "@stamhoofd/structures"
 
 export class RecordEditorSettings<T extends ObjectWithRecords> {
     /**
@@ -11,6 +11,8 @@ export class RecordEditorSettings<T extends ObjectWithRecords> {
     exampleValue!: T
     patchExampleValue!: (exampleValue: T, patch: PatchAnswers) => T
     filterBuilder!: (categories: RecordCategory[]) => UIFilterBuilder
+
+    inheritedRecordsConfiguration: OrganizationRecordsConfiguration|null = null
     
     constructor(options: Partial<RecordEditorSettings<T>>) {
         Object.assign(this, options)

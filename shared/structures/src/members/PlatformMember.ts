@@ -660,10 +660,14 @@ export class PlatformMember implements ObjectWithRecords {
         this.family.insertOrganization(organization)
     }
 
-    canRegister(group: Group) {
-        const item = RegisterItem.defaultFor(this, group);
+    canRegister(group: Group, organization: Organization) {
+        const item = RegisterItem.defaultFor(this, group, organization);
         const error = item.validationError;
         if (error === null) {
+            return true;
+        }
+
+        if (item.shouldUseWaitingList()) {
             return true;
         }
         return false;

@@ -299,7 +299,7 @@ export class GroupSettings extends AutoEncoder {
     }
 
     get canHaveWaitingList() {
-        return (this.waitingListType !== WaitingListType.None && this.waitingListType !== WaitingListType.PreRegistrations) || (this.waitingListIfFull && this.isFull)
+        return (this.waitingListType !== WaitingListType.None && this.waitingListType !== WaitingListType.PreRegistrations) || (this.waitingListIfFull && this.maxMembers !== null)
     }
 
     get canHaveWaitingListWithoutMax() {

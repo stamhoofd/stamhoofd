@@ -39,7 +39,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center right-stack" @click="openMembers(true, {waitingList: true})">
+                <STListItem v-if="group.waitingList" :selectable="true" class="left-center right-stack" @click="openMembers(true, {group: group.waitingList})">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
@@ -50,7 +50,7 @@
                         Bekijk leden op de wachtlijst.
                     </p>
                     <template #right>
-                        <span v-if="group.settings.waitingListSize !== null" class="style-description-small">{{ group.settings.waitingListSize }}</span>
+                        <span v-if="group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.waitingList.getMemberCount()!) }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -81,22 +81,7 @@
                             Algemeen
                         </h2>
                         <p class="style-description">
-                            Naam en periode
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="editPrices(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Prijs
-                        </h2>
-                        <p class="style-description">
-                            Wijzig de inschrijvingsprijs en eventuele kortingen
+                            Naam, tarieven, keuzeopties, gegevens, limieten en beschikbaarheid
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -117,22 +102,6 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="editWaitinglist(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/clock.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Wachtlijst, voorinschrijvingen en limieten
-                        </h2>
-                        <p class="style-description">
-                            Stel het maximum aantal leden in of schakel de wachtlijst in
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
 
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
                         <template #left>
@@ -245,7 +214,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useNavigationController, usePresent, useShow } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from "@stamhoofd/components";
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
@@ -285,12 +254,11 @@ const linkedResponsibilities = computed(() => {
     return platform.value.config.responsibilities.filter(r => r.defaultAgeGroupIds !== null && r.defaultAgeGroupIds.includes(id) && (r.organizationTagIds === null || organization.value?.meta.matchTags(r.organizationTagIds)))
 })
 
-async function openMembers(animated = true, options: { waitingList?: boolean } = {}) {
+async function openMembers(animated = true, options: { group?: Group } = {}) {
     await show({
         components: [
             new ComponentWithProperties(MembersTableView, {
-                group: props.group,
-                waitingList: options.waitingList ?? false
+                group: options?.group ?? props.group
             })
         ],
         animated,
@@ -309,6 +277,7 @@ async function displayEditComponent(component: any, animated = true) {
                         group: props.group, 
                         period: props.period,
                         organization: organization.value, 
+                        iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                             patch.id = props.period.id
                             await organizationManager.value.patchPeriod(patch)
@@ -334,7 +303,39 @@ async function displayEditComponent(component: any, animated = true) {
 
 
 async function editGeneral(animated = true) {
-    await displayEditComponent(EditGroupGeneralView, animated)
+    const displayedComponent = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                try {
+                    // Make sure we have an up to date group
+                    await organizationManager.value.forceUpdate()
+                    return new ComponentWithProperties(EditGroupView, {
+                        group: props.group, 
+                        iswNew: false,
+                        saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
+                            const periodPatch = OrganizationRegistrationPeriod.patch({
+                                id: props.period.id
+                            })
+                            periodPatch.groups.addPatch(patch)
+                            await organizationManager.value.patchPeriod(periodPatch)
+                        }
+                    })
+                } catch (e) {
+                    Toast.fromError(e).show()
+                    throw e
+                }
+            }
+        })
+    })
+
+    await present({
+        animated,
+        adjustHistory: animated,
+        modalDisplayStyle: "popup",
+        components: [
+            displayedComponent
+        ]
+    });
 }
 
 async function editRestrictions(animated = true) {

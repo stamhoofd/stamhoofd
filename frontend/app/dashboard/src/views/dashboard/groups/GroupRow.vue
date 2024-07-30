@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
+    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editGroup()" @contextmenu.prevent="showContextMenu">
         <template #left>
             <GroupAvatar :group="group" />
         </template>
@@ -18,11 +18,9 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { ContextMenu, ContextMenuItem, GroupAvatar, LongPressDirective, STListItem } from "@stamhoofd/components";
-import { Group, GroupCategory, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
+import { ContextMenu, ContextMenuItem, GroupAvatar, LongPressDirective, STListItem, EditGroupView } from "@stamhoofd/components";
+import { Group, GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
-
-import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 
 @Component({
     components: {
@@ -47,25 +45,29 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(50, 50)
     }
 
-    editProduct() {
-        this.present(new ComponentWithProperties(EditGroupGeneralView, { 
+    editGroup() {
+        this.present(new ComponentWithProperties(EditGroupView, { 
             group: this.group, 
-            organization: this.organization, 
-            period: this.period,
-            saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                this.$emit("patch:period", patch)
+            isNew: false,
+            saveHandler: (patch: AutoEncoderPatchType<Group>) => {
+                const p = OrganizationRegistrationPeriod.patch({})
+                p.groups.addPatch(patch)
+                this.$emit("patch:period", p)
+            },
+            deleteHandler: () => {
+                const settings = OrganizationRegistrationPeriodSettings.patch({})
+                const pp = GroupCategory.patch({id:this.parentCategory.id})
+                pp.groupIds.addDelete(this.group.id)
+                settings.categories.addPatch(pp)
 
-                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+                const q = OrganizationRegistrationPeriod.patch({
+                    settings
+                })
+                q.groups.addDelete(this.group.id)
+
+                this.$emit('patch:period', q)
             }
         }).setDisplayStyle("popup"))
-    }
-
-    moveUp() {
-        this.$emit("move-up")
-    }
-
-    moveDown() {
-        this.$emit("move-down")
     }
 
     get parentCategory() {
@@ -88,10 +90,15 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         const settings = OrganizationRegistrationPeriodSettings.patch({})
         settings.categories.addPatch(p)
 
-        this.$emit('patch:period', OrganizationRegistrationPeriod.patch({
+        const pp = GroupCategory.patch({id: this.parentCategory.id})
+        pp.groupIds.addDelete(this.group.id)
+        settings.categories.addPatch(pp)
+
+        const q = OrganizationRegistrationPeriod.patch({
             settings
-        }))
-        this.$emit("delete")
+        })
+
+        this.$emit('patch:period', q)
     }
 
     duplicate() {
@@ -136,25 +143,6 @@ export default class GroupRow extends Mixins(NavigationMixin) {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: "Verplaats omhoog",
-                    icon: "arrow-up",
-                    action: () => {
-                        this.moveUp()
-                        return true;
-                    }
-                }),
-                new ContextMenuItem({
-                    name: "Verplaats omlaag",
-                    icon: "arrow-down",
-                    action: () => {
-                        this.moveDown()
-                        return true;
-                    }
-                }),
-            ],
-
-            [
-                new ContextMenuItem({
                     name: "Verplaats naar",
                     disabled: this.allCategories.length == 0,
                     childMenu: new ContextMenu([
@@ -189,9 +177,13 @@ export default class GroupRow extends Mixins(NavigationMixin) {
                         pp.groupIds.addDelete(this.group.id)
                         settings.categories.addPatch(pp)
 
-                        this.$emit('patch:period', OrganizationRegistrationPeriod.patch({
+                        const q = OrganizationRegistrationPeriod.patch({
                             settings
-                        }))
+                        })
+                        q.groups.addDelete(this.group.id)
+
+
+                        this.$emit('patch:period', q)
 
                         return true;
                     }

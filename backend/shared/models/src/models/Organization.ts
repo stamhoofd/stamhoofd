@@ -264,14 +264,9 @@ export class Organization extends Model {
         return this.id+"." + defaultDomain;
     }
 
-    async getPeriod({emptyGroups} = {emptyGroups: false}) {
+    async getPeriod() {
         const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, {limit: 1})
-        const period = await RegistrationPeriod.getByID(this.periodId)
-
-        if (!period) {
-            throw new Error("Period not found")
-        }
-
+        
         let oPeriod: OrganizationRegistrationPeriod;
         if (oPeriods.length == 0) {
             // Automatically create a period
@@ -293,19 +288,12 @@ export class Organization extends Model {
         } else {
             oPeriod = oPeriods[0];
         }
-        const groups = emptyGroups ? [] : (await (await import("./Group")).Group.getAll(this.id, this.periodId))
 
-        return {
-            organizationPeriod: oPeriod,
-            period,
-            groups
-        }
+        return oPeriod
     }
 
-    async getStructure({emptyGroups} = {emptyGroups: false}): Promise<OrganizationStruct> {
-        const {groups, organizationPeriod, period} = await this.getPeriod({emptyGroups})
-
-        const struct = OrganizationStruct.create({
+    getBaseStructure(): OrganizationStruct {
+        return OrganizationStruct.create({
             id: this.id,
             name: this.name,
             meta: this.meta,
@@ -313,25 +301,8 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => g.getStructure()),
             createdAt: this.createdAt,
-            period: organizationPeriod.getStructure(period, groups)
         })
-
-        if (this.meta.modules.disableActivities) {
-            // Only show groups that are in a given category
-            struct.groups = struct.categoryTree.categories[0]?.groups ?? []
-        }
-
-        if (emptyGroups) {
-            // Reduce data
-            struct.meta = struct.meta.clone()
-            struct.meta.categories = []
-            struct.meta.recordsConfiguration = OrganizationRecordsConfiguration.create({})
-
-        }
-
-        return struct
     }
 
     async updateDNSRecords() {

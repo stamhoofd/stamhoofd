@@ -19,22 +19,22 @@
 
                 <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
                 
-                <template v-if="!member.isNew">
-                    <STInputBox v-if="!member.isNew" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
-                        <RadioGroup>
-                            <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
-                                Man
-                            </Radio>
-                            <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">
-                                Vrouw
-                            </Radio>
-                            <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">
-                                Andere
-                            </Radio>
-                        </RadioGroup>
-                    </STInputBox>
-                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                <STInputBox v-if="isPropertyEnabled('gender') || gender !== Gender.Other" title="Identificeert zich als..." error-fields="gender" :error-box="errors.errorBox">
+                    <RadioGroup>
+                        <Radio v-model="gender" :value="Gender.Male" autocomplete="sex" name="sex">
+                            Man
+                        </Radio>
+                        <Radio v-model="gender" :value="Gender.Female" autocomplete="sex" name="sex">
+                            Vrouw
+                        </Radio>
+                        <Radio v-model="gender" :value="Gender.Other" autocomplete="sex" name="sex">
+                            Andere
+                        </Radio>
+                    </RadioGroup>
+                </STInputBox>
 
+                <template v-if="!member.isNew">
+                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
                     <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator">
                         <template #right>
                             <button class="button icon add gray" type="button" @click="addEmail" v-tooltip="'Alternatief e-mailadres toevoegen'"/>
@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformMember } from '@stamhoofd/structures';
+import { Gender, PlatformMember } from '@stamhoofd/structures';
 
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { computed } from 'vue';

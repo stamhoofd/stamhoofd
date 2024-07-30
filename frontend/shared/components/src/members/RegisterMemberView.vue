@@ -23,7 +23,7 @@
                     <span v-if="!category.settings.public" v-tooltip="'Deze categorie is niet zichtbaar voor gewone leden'" class="icon lock" />
                 </h2>
                 <STList class="illustration-list">
-                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" @click="openGroup(group)"/>
+                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" @click="openGroup(group)" />
                 </STList>
             </div>
         </main>
@@ -31,19 +31,19 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, PopOptions, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, usePlatformFamilyManager, useUninheritedPermissions } from '@stamhoofd/components';
 import { Group, GroupCategoryTree, Organization, PlatformMember, RegisterCart, RegisterItem, Registration } from '@stamhoofd/structures';
 import { computed, markRaw, Ref, ref } from 'vue';
 
-import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
-import GroupView from './GroupView.vue';
-import SearchOrganizationView from './SearchOrganizationView.vue';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import ConfigureNewRegistrationsView from './ConfigureNewRegistrationsView.vue';
-import MemberStepView from './MemberStepView.vue';
-import EditMemberAllBox from './components/edit/EditMemberAllBox.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import EditMemberAllBox from './components/edit/EditMemberAllBox.vue';
+import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
+import ConfigureNewRegistrationsView from './ConfigureNewRegistrationsView.vue';
+import GroupView from './GroupView.vue';
+import MemberStepView from './MemberStepView.vue';
+import SearchOrganizationView from './SearchOrganizationView.vue';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -75,7 +75,7 @@ const tree = computed(() => {
         admin: !!auth.permissions, 
         smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
         filterGroups: (g) => {
-            return props.member.canRegister(g);
+            return props.member.canRegister(g, selectedOrganization.value!);
         }
     })
 });
@@ -149,7 +149,8 @@ async function openGroup(group: Group) {
         components: [
             new ComponentWithProperties(GroupView, {
                 member: props.member,
-                group
+                group,
+                organization: selectedOrganization.value
             })
         ]
     })

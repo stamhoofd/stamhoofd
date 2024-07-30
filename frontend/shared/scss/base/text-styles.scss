@@ -760,7 +760,7 @@
 
 .main-text-container {
     &, .container {
-        > h1:not([class]):first-child {
+        > h1:not([class]):first-child, > .style-title-prefix:first-child + h1:not([class]) {
             padding-bottom: 10px;
             @extend .style-title-1;
 

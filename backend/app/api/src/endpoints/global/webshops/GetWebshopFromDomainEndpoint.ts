@@ -78,7 +78,7 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
                     }
 
                     return new Response(GetWebshopFromDomainResult.create({
-                        organization: await organization.getStructure({emptyGroups: true}),
+                        organization: organization.getBaseStructure(),
                         webshop: WebshopStruct.create(webshop)
                     }));
                 }
@@ -113,14 +113,14 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
             if (!webshop) {
                 // Return organization, so we know the locale + can do some custom logic
                 return new Response(GetWebshopFromDomainResult.create({
-                    organization: await organization.getStructure({emptyGroups: true}),
+                    organization: organization.getBaseStructure(),
                     webshop: null,
                     webshops: []
                 }));
             }
 
             return new Response(GetWebshopFromDomainResult.create({
-                organization: await organization.getStructure({emptyGroups: true}),
+                organization: organization.getBaseStructure(),
                 webshop: WebshopStruct.create(webshop)
             }));
         }
@@ -156,7 +156,7 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
 
                 // Return organization, and the known webshops on this domain
                 return new Response(GetWebshopFromDomainResult.create({
-                    organization: await organization.getStructure({emptyGroups: true}),
+                    organization: organization.getBaseStructure(),
                     webshop: null,
                     webshops: webshops.map(w => WebshopPreview.create(w)).filter(w => w.isClosed(0) === false).sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name))
                 }));
@@ -180,7 +180,7 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
         }
 
         return new Response(GetWebshopFromDomainResult.create({
-            organization: await organization.getStructure({emptyGroups: true}),
+            organization: organization.getBaseStructure(),
             webshop: WebshopStruct.create(webshop)
         }));
     }

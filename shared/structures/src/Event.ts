@@ -14,6 +14,17 @@ export class EventLocation extends AutoEncoder {
     address: Address|null = null
 }
 
+/**
+ * In case we need to cache the name, to properly display information without having to fetch loads of data
+ */
+export class NamedObject extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id = ''
+
+    @field({ decoder: StringDecoder })
+    name = ''
+}
+
 export class EventMeta extends AutoEncoder {
     @field({ decoder: RichText })
     description = RichText.create({})
@@ -34,7 +45,7 @@ export class EventMeta extends AutoEncoder {
 
     /**
      * A valid membership is required for one of these specific groups
-     * (only if isGlobal is false)
+     * (only if organizationId is set)
      * 
      * null = no restriction
      */
@@ -44,7 +55,7 @@ export class EventMeta extends AutoEncoder {
     /**
      * A valid membership is required for an organization with one of these tags
      * 
-     * null = no restriction (unless isGlobal is false)
+     * null = no restriction (unless organizationId is set)
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
     organizationTagIds: string[]|null = null

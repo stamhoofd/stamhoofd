@@ -60,6 +60,10 @@
         <p v-if="waitingListType == 'PreRegistrations' || waitingListType == 'ExistingMembersFirst'" class="info-box">
             Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorige inschrijvingsperiode van gelijk welke inschrijvingsgroep. Let er dus op dat die leden ook in Stamhoofd zijn ingeladen. Je kan leden van vorig jaar importeren via Excel en bij de importeer-instellingen aanduiden dat het gaat om leden van vorig jaar. Leden moeten wel inloggen met een e-mailadres dat verbonden is met een bestaand account. Daarom verstuur je best een e-mail naar alle leden met de magische knop waarmee ze automatisch met het juiste account inloggen (of registreren).
         </p>
+
+        <hr>
+        <h2>Wachtlijst</h2>
+        <p>Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen. Op die manier kan je de wachtlijst makkelijk meerdere jaren aanhouden. Kies hieronder welke wachtlijst van toepassing is voor deze groep.</p>
     </SaveView>
 </template>
 

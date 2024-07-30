@@ -3,9 +3,12 @@
         <STNavigationBar :title="group.settings.name" />
         
         <main>
+            <p class="style-title-prefix">
+                {{ registerItem.organization.name }}
+            </p>
+
             <h1>
                 <span>{{ group.settings.name }}</span>
-                <!--<GroupTag :group="group" />-->
             </h1>
             <figure v-if="group.settings.coverPhoto" class="cover-photo">
                 <ImageComponent :image="group.settings.coverPhoto" :auto-height="true" />
@@ -20,44 +23,6 @@
             <p v-if="infoDescription" class="info-box">
                 {{ infoDescription }}
             </p>
-
-            <STList class="group-info-list">
-                <STListItem class="right-description">
-                    Wanneer?
-
-                    <template v-if="group.settings.displayStartEndTime" #right>
-                        {{ formatDateTime(group.settings.startDate) }} - {{ formatDateTime(group.settings.endDate) }}
-                    </template>
-                    <template v-else #right>
-                        {{ formatDate(group.settings.startDate) }} - {{ formatDate(group.settings.endDate) }}
-                    </template>
-                </STListItem>
-                <STListItem v-if="group.settings.location" class="right-description">
-                    Waar?
-
-                    <template #right>
-                        {{ group.settings.location }}
-                    </template>
-                </STListItem>
-                <STListItem class="right-description wrap">
-                    Wie?
-
-                    <template #right>
-                        <div v-text="who" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-for="(price, index) of priceList" :key="index">
-                    <h3>{{ price.text }}</h3>
-                    <p class="style-description-small">
-                        {{ price.description }}
-                    </p>
-
-                    <template #right>
-                        <div class="style-description" v-text="price.price" />
-                    </template>
-                </STListItem>
-            </STList>
         </main>
 
         <STToolbar v-if="!validationError && member">
@@ -73,16 +38,18 @@
 
 <script setup lang="ts">
 import { ImageComponent, STToolbar } from '@stamhoofd/components';
-import { Group, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { Group, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from './hooks/useCheckoutRegisterItem';
 
 const props = defineProps<{
     group: Group,
-    member: PlatformMember
+    member: PlatformMember,
+    organization: Organization
 }>();
-const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group))
+
+const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group, props.organization))
 const validationError = computed(() => registerItem.value.validationError )
 const infoDescription = computed(() => validationError.value ? null : registerItem.value.infoDescription);
 const checkoutRegisterItem = useCheckoutRegisterItem()

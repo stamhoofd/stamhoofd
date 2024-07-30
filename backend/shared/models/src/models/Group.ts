@@ -42,6 +42,9 @@ export class Group extends Model {
     @column({ type: "string" })
     organizationId: string;
 
+    @column({ type: "string", nullable: true })
+    waitingListId: string | null = null
+
     @column({ type: "string" })
     periodId: string;
 
@@ -186,10 +189,16 @@ export class Group extends Model {
 
     }
 
+    /**
+     * @deprecated
+     */
     getStructure() {
         return GroupStruct.create({ ...this, privateSettings: null })
     }
 
+    /**
+     * @deprecated
+     */
     getPrivateStructure() {
         return GroupStruct.create(this)
     }
@@ -253,6 +262,14 @@ export class Group extends Model {
         }
 
         for (const group of allGroups) {
+            if (group.periodId !== period.periodId) {
+                continue
+            }
+
+            if (group.type !== GroupType.Membership) {
+                continue
+            }
+
             if (!reachable.get(group.id) && group.deletedAt === null) {
                 console.log("Deleting unreachable group "+group.id+" from organization "+organizationId + " org period "+period.id)
                 group.deletedAt = new Date()

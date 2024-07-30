@@ -43,12 +43,15 @@
                     <Checkbox v-model="defaultEnabled" />
                 </template>
 
-                <h3 class="style-title-list">
-                    Verplicht ingeschakeld voor alle leden
+                <h3 class="style-title-list" v-if="app === 'admin'">
+                    Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard-leeftijdsgroep
+                </h3>
+                <h3 class="style-title-list" v-else>
+                    Verplicht ingeschakeld voor alle leden (behalve wachtlijsten en activiteiten)
                 </h3>
 
                 <p class="style-description-small">
-                    Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld.
+                    Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld. Zo behoud je maximale flexibiliteit.
                 </p>
             </STListItem>
         </STList>
@@ -160,6 +163,8 @@ import { RecordEditorSettings } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
 import { NavigationActions } from '../types/NavigationActions';
 import { propertyFilterToString } from '../filters/UIFilter';
+import { useAppContext } from '../context/appContext';
+import { Toast } from '../overlays/Toast';
 
 // Define
 const props = defineProps<{
@@ -181,6 +186,7 @@ const present = usePresent();
 const saving = ref(false);
 const deleting = ref(false);
 const filterBuilder = props.settings.filterBuilder(props.rootCategories)
+const app = useAppContext();
 
 // Computed
 const patchedCategory = computed(() => {
@@ -226,6 +232,11 @@ const description = computed({
 const defaultEnabled = computed({
     get: () => patchedCategory.value.defaultEnabled,
     set: (v: boolean) => {
+        if (v && patchedCategory.value.containsSensitiveData && !props.settings.inheritedRecordsConfiguration?.dataPermission) {
+            Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show()
+            return
+        }
+
         addPatch(
             RecordCategory.patch({
                 id: patchedCategory.value.id,

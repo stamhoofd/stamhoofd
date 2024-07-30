@@ -192,10 +192,8 @@ label.style-label {
     }
 }
 
-
-
 // Checkbox: animate both when active and not checked (because you can disable it)
-label:active:not(:has(button:active, select:active, input:not([type=radio]):not([type=checkbox]):active)) .checkbox, .checkbox:active {
+label:active:not(:has(button:active, select:active, label:active, input:not([type=radio]):not([type=checkbox]):active)) .checkbox, .checkbox:active {
     > input:not(:disabled) + div {
         > div:first-child {
             transform: scale(0.8, 0.8);
@@ -204,7 +202,7 @@ label:active:not(:has(button:active, select:active, input:not([type=radio]):not(
 }
 
 // Radio: only shrink if not yet checked
-label:active:not(:has(button:active, select:active, input:not([type=radio]):not([type=checkbox]):active)) .radio, .radio:active {
+label:active:not(:has(button:active, select:active, label:active, input:not([type=radio]):not([type=checkbox]):active)) .radio, .radio:active {
     > input:not(:disabled):not(:checked) + div {
         > div:first-child {
             transform: scale(0.8, 0.8);

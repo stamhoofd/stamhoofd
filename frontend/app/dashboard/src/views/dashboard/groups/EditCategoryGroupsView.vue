@@ -99,7 +99,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, SaveView, useAuth, useDraggableArrayIds, useErrors, usePatch } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, STErrorsDefault, STInputBox, STList, SaveView, useAuth, useDraggableArrayIds, useErrors, usePatch } from "@stamhoofd/components";
 import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 
 import { computed, getCurrentInstance, ref } from 'vue';
@@ -242,13 +242,11 @@ async function createGroup() {
         periodId: props.organization.period.period.id,
         settings: GroupSettings.create({
             name: "",
-            startDate: new Date(),
-            endDate: new Date(),
-            prices: [],
             genderType: props.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
         }),
         privateSettings: GroupPrivateSettings.create({})
     })
+
     const settings = OrganizationRegistrationPeriodSettings.patch({})
 
     const me = GroupCategory.patch({ id: props.category.id })
@@ -263,13 +261,12 @@ async function createGroup() {
     
     await present({
         components: [
-            new ComponentWithProperties(EditGroupGeneralView, { 
+            new ComponentWithProperties(EditGroupView, { 
                 group, 
-                period: patchedPeriod.value.patch(p),
-                organization: props.organization, 
                 isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(p.patch(patch))
+                saveHandler: (patch: AutoEncoderPatchType<Group>) => {
+                    p.groups.addPatch(patch)
+                    addPatch(p)
                 }
             })
         ],

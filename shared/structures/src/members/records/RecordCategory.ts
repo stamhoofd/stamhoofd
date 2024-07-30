@@ -47,6 +47,10 @@ export class RecordCategory extends AutoEncoder {
     @field({ decoder: PropertyFilter, version: 126, nullable: true, optional: true })
     filter: PropertyFilter | null = null
 
+    get containsSensitiveData() {
+        return !!this.getAllRecords().find(r => r.sensitive)
+    }
+
     getAllRecords(): RecordSettings[] {
         if (this.childCategories.length > 0) {
             return [...this.childCategories.flatMap(c => c.getAllRecords()), ...this.records]

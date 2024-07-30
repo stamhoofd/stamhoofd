@@ -350,7 +350,7 @@ button.st-list-item {
             }
         }
 
-        &:active:has(button:active), &:active:has(select:active), &:active:has(input:not([type=radio]):not([type=checkbox]):active) {
+        &:active:has(button:active), &:active:has(select:active), &:active:has(label:active), &:active:has(input:not([type=radio]):not([type=checkbox]):active) {
             transition: background-color 0.2s 0.1s;
             background: none;
 

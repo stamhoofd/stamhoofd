@@ -3,6 +3,10 @@ import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, IntegerDecoder,
 import { PropertyFilter } from "../filters/PropertyFilter"
 import { LegacyRecordType } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
+import { Platform } from "../Platform"
+import { Organization } from "../Organization"
+import { Group, GroupType } from "../Group"
+import { DefaultAgeGroup } from "../DefaultAgeGroup"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",
@@ -160,6 +164,74 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     // General configurations
     @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
     freeContribution: FreeContributionSettings | null = null
+
+    static build(options: {
+        platform: Platform, 
+        organization?: Organization|null,
+        group?: Group|null,
+
+        /**
+         * Whether the group itself should be included
+         */
+        includeGroup?: boolean,
+    }) {
+        // If not a default-age-group: disable enabled record categories in platform
+        const platformConfig = options.platform.config.recordsConfiguration.clone();
+        if (!options.group || !options.group.defaultAgeGroupId) {
+            for (const c of platformConfig.recordCategories) {
+                c.defaultEnabled = false
+            }
+        }
+
+        let organizationConfig: OrganizationRecordsConfiguration | null = null;
+        let defaultGroupConfig: OrganizationRecordsConfiguration | null = null;
+        let groupConfig: OrganizationRecordsConfiguration | null = null;
+
+        if (options.organization) {
+            organizationConfig = options.organization.meta.recordsConfiguration.clone();
+            
+            if (options.group && options.group.type !== GroupType.Membership) {
+                // Specifically delete all the record categories, as those are only enabled for normal memberships
+                for (const c of platformConfig.recordCategories) {
+                    c.defaultEnabled = false
+                }
+            }
+
+            if (options.group && options.group.type === GroupType.WaitingList) {
+                // Disable default organization - BUT still keep the record categories (to know which ones are available)
+                organizationConfig = OrganizationRecordsConfiguration.create({
+                    recordCategories: organizationConfig.recordCategories
+                })
+            }
+        }
+
+        // Group config
+        if (options.group && options.includeGroup) {
+            groupConfig = options.group.settings.recordsConfiguration.clone();
+        }
+
+        if (options.group && options.group?.defaultAgeGroupId) {
+            const defaultAgeGroupId = options.group.defaultAgeGroupId
+            defaultGroupConfig = options.platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.recordsConfiguration.clone() ?? null;
+        }
+
+        return this.mergeChildren(...([platformConfig, defaultGroupConfig, organizationConfig, groupConfig].filter(f => f !== null) as OrganizationRecordsConfiguration[]))
+    }
+
+    static mergeChildren(...configs: OrganizationRecordsConfiguration[]) {
+        if (configs.length === 0) {
+            throw new Error("At least one configuration is required")
+        }
+
+        if (configs.length === 1) {
+            return configs[0];
+        }
+
+        const first = configs[0].clone();
+        const second = configs[1].clone();
+
+        return this.mergeChildren(this.mergeChild(first, second), ...configs.slice(2))
+    }
 
     /**
      * Note: best to not use this visually

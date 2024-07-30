@@ -171,7 +171,7 @@ export class OldRegisterCartValidator {
                 const reserved = member.registrations.find(r => r.groupId === group.id && r.reservedUntil && r.reservedUntil > now && !r.waitingList && r.registeredAt === null && r.cycle === group.cycle)
 
                 if (!reserved) {
-                    if (!group.settings.waitingListIfFull) {
+                    if (!group.waitingList) {
                         // Maximum reached without waiting list -> closed
                         return {
                             closed: true,

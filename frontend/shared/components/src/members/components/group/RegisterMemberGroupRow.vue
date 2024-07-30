@@ -15,17 +15,18 @@
 </template>
 
 <script setup lang="ts">
-import { Group, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { Group, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import GroupIcon from './GroupIcon.vue';
 
 const props = defineProps<{
     group: Group;
-    member: PlatformMember
+    member: PlatformMember,
+    organization: Organization
 }>()
 
-const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group))
+const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group, props.organization))
 const waitingList = computed(() => registerItem.value.waitingList)
 
 </script>

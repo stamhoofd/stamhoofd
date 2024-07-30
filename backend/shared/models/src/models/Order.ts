@@ -875,7 +875,7 @@ export class Order extends Model {
         const template = templates[0]
 
         let recipient = (await this.getStructure()).getRecipient(
-            await this.webshop.organization.getStructure({emptyGroups: true}), 
+            this.webshop.organization.getBaseStructure(), 
             WebshopPreview.create(this.webshop)
         )
 

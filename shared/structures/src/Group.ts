@@ -23,6 +23,11 @@ export enum GroupType {
     "Membership" = "Membership",
 
     /**
+     * Waiting list of any other group
+     */
+    "WaitingList" = "WaitingList",
+
+    /**
      * Activity
      */
     "EventRegistration" = "EventRegistration",
@@ -45,6 +50,9 @@ export class Group extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 267 })
     defaultAgeGroupId: string|null = null
+
+    @field({ decoder: Group, nullable: true, version: 292 })
+    waitingList: Group | null = null
 
     /**
      * @deprecated
@@ -164,7 +172,7 @@ export class Group extends AutoEncoder {
     }
 
     hasWaitingList(): boolean {
-        return this.settings.canHaveWaitingList
+        return this.settings.canHaveWaitingList || this.waitingList !== null
     }
 
     /**

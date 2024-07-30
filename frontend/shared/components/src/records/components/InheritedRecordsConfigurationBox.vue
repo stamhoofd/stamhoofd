@@ -50,6 +50,7 @@
                 {{ propertyFilterToString(getRefForInheritedCategory(category.id).value.configuration!, filterBuilder) }}
             </p>
             <template #right>
+                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy" />
                 <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)" />
                 <button v-if="!getRefForInheritedCategory(category.id).value.locked && getRefForInheritedCategory(category.id).value.enabled" class="button gray icon settings" type="button" @click.stop="getRefForInheritedCategory(category.id).value.edit" />
             </template>
@@ -60,7 +61,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, PropertyFilterView, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useOrganization } from '@stamhoofd/components';
+import { NavigationActions, PropertyFilterView, Toast, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useOrganization } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref, watchEffect } from 'vue';
@@ -164,7 +165,7 @@ family.members.push(settings.exampleValue)
 const properties = [
     buildPropertyRefs('phone', $t('shared.inputs.mobile.label') + ' (van lid zelf)'),
     buildPropertyRefs('emailAddress', 'E-mailadres (van lid zelf)'),
-    buildPropertyRefs('gender', 'Geslacht'),
+    buildPropertyRefs('gender', 'Gender'),
     buildPropertyRefs('birthDay', 'Geboortedatum'),
     buildPropertyRefs('address', 'Adres'),
     buildPropertyRefs('parents', 'Ouders'),
@@ -288,6 +289,8 @@ function getRefForInheritedCategory(categoryId: string) {
 
 function buildRefForInheritedCategory(categoryId: string) {
     const category = computed(() => props.inheritedRecordsConfiguration?.recordCategories?.find(c => c.id === categoryId))
+
+    const requiresDataPermissions = computed(() => !!category.value?.containsSensitiveData)
     
     const locked = computed(() => !category.value || category.value.defaultEnabled)
     const enabled = computed({
@@ -299,6 +302,11 @@ function buildRefForInheritedCategory(categoryId: string) {
             const patchMap = new PatchMap() as PatchMap<string, PropertyFilter|null>;
 
             if (enable) {
+                if (requiresDataPermissions.value && !dataPermissions.enabled.value) {
+                    Toast.error('Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.').show()
+                    return
+                }
+
                 // Set
                 patchMap.set(
                     categoryId, 
@@ -321,6 +329,7 @@ function buildRefForInheritedCategory(categoryId: string) {
         enabled,
         locked,
         configuration,
+        requiresDataPermissions,
         edit: async () => {
             await editInheritedFilterConfiguration(categoryId)
         }

@@ -216,7 +216,7 @@
 
         <template v-if="settings.dataPermission">
             <hr>
-            <h2>Gevoelige gegevens</h2>
+            <h2>Toestemming gegevensverzameling</h2>
             <p>
                 Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a :href="'https://'+$t('shared.domains.marketing')+'/docs/toestemming-gegevens-verzamelen'" class="inline-link" target="_blank" rel="noopener">
                     Lees onze gids
