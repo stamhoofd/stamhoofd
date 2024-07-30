@@ -531,6 +531,14 @@ export class SessionContext implements RequestMiddleware {
             console.error("SessionContext.user is not reactive after fetching user!")
         }
 
+        // Auto copy organization data from the response
+        const returnedOrganization = this.user.members.organizations.find(o => o.id == this.organization?.id)
+        if (returnedOrganization) {
+            this.updateOrganization(returnedOrganization)
+        } else {
+            console.warn('Did not find organization in user response')
+        }
+
         await this.saveToStorage()
         this.callListeners("user")
         return this.user
@@ -603,13 +611,17 @@ export class SessionContext implements RequestMiddleware {
         }
         try {
             let fetchedUser = false
+            let fetchedOrganization = false
+
             if (force || !this.user) {
                 fetchedUser = true
                 await this.fetchUser(shouldRetry)
+
+                // The user also includes the organization, so we don't need to fetch it again
+                fetchedOrganization = true
             }
 
-            let fetchedOrganization = false
-            if (this.organization && (force || (fetchedUser && this.organizationPermissions) || (this.organizationPermissions && !this.organization.privateMeta))) { 
+            if (this.organization && ((force && !fetchedOrganization) || (this.organizationPermissions && !this.organization.privateMeta))) { 
                 fetchedOrganization = true
                 await this.fetchOrganization(shouldRetry)
             }

@@ -172,7 +172,9 @@ export class AuthenticatedStructures {
         return UserWithMembers.create({
             ...user,
             hasAccount: user.hasAccount(),
-            members: await this.membersBlob(members, false, user)
+
+            // Always include the current context organization - because it is possible we switch organization and we don't want to refetch every time
+            members: await this.membersBlob(members, true, user)
         })
     }
 
