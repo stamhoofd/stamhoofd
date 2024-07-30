@@ -192,7 +192,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             
             if (options.group && options.group.type !== GroupType.Membership) {
                 // Specifically delete all the record categories, as those are only enabled for normal memberships
-                for (const c of platformConfig.recordCategories) {
+                for (const c of organizationConfig.recordCategories) {
                     c.defaultEnabled = false
                 }
             }
