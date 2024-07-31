@@ -29,9 +29,9 @@ export class STPackageBundleHelper {
 
     static getDescription(bundle: STPackageBundle): string {
         switch(bundle) {
-            case STPackageBundle.Members: return "€ 0,5 per jaar, per lid. Minimum € 59 per jaar (minder leden kan uiteraard)"
-            case STPackageBundle.Webshops: return "€ 59 per jaar (inclusief ticketverkoop-functie)"
-            case STPackageBundle.SingleWebshop: return "Eénmalig € 39 (inclusief ticketverkoop-functie)"
+            case STPackageBundle.Members: return "€ 1 per jaar, per lid. Minimum € 79 per jaar, waarbij 79 leden inbegrepen (minder leden kan uiteraard)"
+            case STPackageBundle.Webshops: return "€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)"
+            case STPackageBundle.SingleWebshop: return "Eénmalig € 49 (inclusief ticketverkoop-functie)"
         }
         return "?"
     }
@@ -122,8 +122,8 @@ export class STPackageBundleHelper {
                     removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.Members,
-                        unitPrice: 50,
-                        minimumAmount: 59*2,
+                        unitPrice: 100,
+                        minimumAmount: 79,
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
                         startDate: new Date(date),
@@ -145,7 +145,7 @@ export class STPackageBundleHelper {
                     removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.Webshops,
-                        unitPrice: 5900,
+                        unitPrice: 7900,
                         minimumAmount: 1,
                         allowRenew: true,
                         pricingType: STPricingType.PerYear,
