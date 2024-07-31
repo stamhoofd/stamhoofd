@@ -24,6 +24,7 @@ declare module 'vue' {
         readonly $isAndroid: boolean;
         readonly $isIOS: boolean;
         readonly $isMac: boolean;
+        readonly $isMobile: boolean;
         readonly $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
 
         readonly $context: SessionContext;
