@@ -61,7 +61,7 @@ useHideTabBar();
             min-width: 0;
         }
 
-        > div:last-child > .button, > div:last-child > .loading-button  {
+        > div:last-child > .button:not(:first-child), > div:last-child > .loading-button:not(:first-child)  {
             margin-left: 10px;
         }
 
