@@ -49,7 +49,7 @@
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="event.group" :selectable="!event.group.closed" class="right-stack">
+                <STListItem v-if="event.group" :selectable="!event.group.closed" class="right-stack"  @click="!event.group.closed ? openGroup() : undefined">
                     <template #left>
                         <span class="icon edit" />
                     </template>
@@ -67,11 +67,22 @@
                     </template>
                 </STListItem>
             </STList>
+
+            <template v-if="!$isMobile">
+                <hr>
+
+                <p class="style-button-bar right-align">
+                    <button class="button primary" type="button" @click="openGroup">
+                        <span>Inschrijven</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                </p>
+            </template>
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="$isMobile">
             <template #right>
-                <button class="button primary" type="submit">
+                <button class="button primary" type="button" @click="openGroup">
                     <span>Inschrijven</span>
                     <span class="icon arrow-right" />
                 </button>
@@ -81,17 +92,22 @@
 </template>
 
 <script setup lang="ts">
-import { ImageComponent, usePlatform } from '@stamhoofd/components';
-import { Event } from '@stamhoofd/structures';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ImageComponent, NavigationActions, RegisterItemView, usePlatform, useUser } from '@stamhoofd/components';
+import { Event, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { useMemberManager } from '../../getRootView';
 
 const props = defineProps<{
     event: Event;
 }>();
 
+const present = usePresent();
 const platform = usePlatform();
 const title = computed(() => props.event.name);
+const user = useUser();
+const memberManager = useMemberManager()
 const googleMapsUrl = computed(() => {
     if (props.event.meta.location?.address) {
         return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(props.event.meta.location.address)}`;
@@ -112,6 +128,26 @@ const ageGroups = computed(() => {
     }
     return Formatter.joinLast(prefixes, ', ', ' of ');
 });
+
+async function openGroup() {
+    if (!props.event.group) {
+        return;
+    }
+    
+    await present({
+        components: [
+            new ComponentWithProperties(RegisterItemView, {
+                item: RegisterItem.defaultFor(memberManager.family.members[0], props.event.group, memberManager.family.organizations[0]),
+                admin: false,
+                saveHandler: async (newItem: RegisterItem, navigation: NavigationActions) => {
+                    memberManager.family.checkout.cart.add(newItem)
+                    await navigation.pop({force: true})
+                }
+            }),
+        ],
+        modalDisplayStyle: 'sheet'
+    })
+}
 
 </script>
 

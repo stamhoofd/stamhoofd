@@ -24,12 +24,16 @@ export class RegisterCart {
     balanceItems: BalanceItemCartItem[] = []
 
     calculatePrices() {
-        OldRegisterCartPriceCalculator.calculatePrices(
-            this.items, 
-            this.items.map(i => i.member.patchedMember), 
-            this.items.map(i => i.group), 
-            this.items.flatMap(i => i.organization.period.settings.categories) 
-        )
+        for (const item of this.items) {
+            item.calculatePrice()
+        }
+    }
+
+    clone() {
+        const cart = new RegisterCart()
+        cart.items = this.items.map(i => i.clone())
+        cart.balanceItems = this.balanceItems.map(i => i.clone())
+        return cart
     }
 
     convert(): IDRegisterCart {

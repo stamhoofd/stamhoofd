@@ -55,7 +55,7 @@
 
                 <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="Maximum aantal" error-fields="maximum" :error-box="errors.errorBox">
-                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('Ongelimiteerd')" />
+                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('Ongelimiteerd')" :min="2" />
                     </STInputBox>
                 </div>
             </STListItem>

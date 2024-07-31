@@ -550,6 +550,14 @@
     gap: 15px;
 
     align-items: center;
+
+    &.right-align {
+        justify-content: flex-end;
+    }
+
+    hr + & {
+        margin-top: -15px;
+    }
 }
 
 .style-description-small + .style-button-bar {

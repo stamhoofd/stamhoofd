@@ -7,6 +7,8 @@
 </template>
 
 <script setup lang="ts">
+import { Toast } from '../overlays/Toast';
+
 export interface Props {
     min: number | null,
     max?: number | null
@@ -28,8 +30,12 @@ const constrain = (value: number): number => {
 }
 
 const step = (add: number) => {
-    console.log('step', add)
     const v = constrain(model.value + add)
+
+    if (v === model.value && add !== 0) {
+        Toast.warning(add > 0 ? "Maximum bereikt" : "Minimum bereikt").show()
+        return
+    }
     model.value = v
 }
 

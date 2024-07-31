@@ -89,6 +89,10 @@
                         Nog {{ pluralText(option.remainingStock, 'stuk', 'stuks') }} beschikbaar
                     </p>
 
+                    <p v-if="option.maximum !== null && option.allowAmount" class="style-description-small">
+                        Maximaal {{ pluralText(option.maximum, 'stuk', 'stuks') }} per inschrijving
+                    </p>
+
                     <template #right>
                         <StepperInput v-if="option.allowAmount" />
                         <span v-if="option.hidden" v-tooltip="$t('Verborgen')" class="icon gray eye-off" />

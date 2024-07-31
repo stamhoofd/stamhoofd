@@ -72,12 +72,85 @@ export class RegisterItem implements RegisterItemWithPrice {
         })
     }
 
-    constructor(data: {id?: string, member: PlatformMember, group: Group, organization: Organization}) {
+    constructor(data: {
+        id?: string, 
+        member: PlatformMember, 
+        group: Group, 
+        organization: Organization,
+        groupPrice?: GroupPrice,
+        options?: RegisterItemOption[]
+    }) {
         this.id = data.id ?? uuidv4()
         this.member = data.member
         this.group = data.group
-        this.groupPrice = this.group.settings.prices[0] ?? GroupPrice.create({})
+
+        if (this.group.settings.prices.length === 0) {
+            throw new Error("Group has no prices")
+        }
+
+        this.groupPrice = data.groupPrice ?? this.group.settings.prices[0]
         this.organization = data.organization
+        this.options = data.options ?? []
+
+        // Select all defaults
+        for (const optionMenu of this.group.settings.optionMenus) {
+            if (!optionMenu.multipleChoice) {
+                if (this.options.find(o => o.optionMenu.id === optionMenu.id)) {
+                    continue
+                }
+
+                this.options.push(
+                    RegisterItemOption.create({
+                        option: optionMenu.options[0],
+                        optionMenu: optionMenu,
+                        amount: 1
+                    })
+                )
+            }
+        }
+    }
+
+    calculatePrice() {
+        this.calculatedPrice = this.groupPrice.price.forMember(this.member)
+
+        for (const option of this.options) {
+            this.calculatedPrice += option.option.price.forMember(this.member) * option.amount
+        }
+    }
+
+    clone() {
+        return new RegisterItem({
+            id: this.id,
+            member: this.member,
+            group: this.group,
+            organization: this.organization,
+            groupPrice: this.groupPrice.clone(),
+            options: this.options.map(o => o.clone())
+        })
+    }
+
+    getFilteredPrices(options: {admin?: boolean}) {
+        return this.group.settings.prices.filter(p => {
+            if (p.hidden && !options.admin) {
+                return false
+            }
+            return true
+        })
+    }
+
+    getFilteredOptionMenus(options: {admin?: boolean}) {
+        return this.group.settings.optionMenus.filter(p => {
+            return this.getFilteredOptions(p, options).length > 0
+        })
+    }
+
+    getFilteredOptions(menu: GroupOptionMenu, options: {admin?: boolean}) {
+        return menu.options.filter(p => {
+            if (p.hidden && !options.admin) {
+                return false
+            }
+            return true
+        })
     }
 
     convert(): IDRegisterItem {

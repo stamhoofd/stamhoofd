@@ -6,6 +6,7 @@ import { Image } from './files/Image';
 import { GroupGenderType } from './GroupGenderType';
 import { OldGroupPrices } from './OldGroupPrices';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
+import { PlatformMember } from './members/PlatformMember';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -13,6 +14,15 @@ export class ReduceablePrice extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true })
     reducedPrice: number | null = null
+
+    forMember(member: PlatformMember) {
+        if (this.reducedPrice === null) {
+            return this.price
+        }
+        const reduced = member.patchedMember.details.requiresFinancialSupport?.value ?? false
+
+        return reduced ? this.reducedPrice : this.price
+    }
 }
 
 export class GroupPrice extends AutoEncoder {
@@ -37,18 +47,28 @@ export class GroupPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 290 })
     usedStock = 0
 
+    /**
+     * When stored inside a registration, this contains the amount of stock we reserved for that specific registration.
+     * When reserving the stock, we increase this number
+     * When removing it from the stock, we set it back to 0
+     * 
+     * This value is ignored for newly placed orders and patches. We only look at the ones stored on the server
+     */
+    @field({ decoder: IntegerDecoder, version: 294 })
+    reserved = 0
+
     get isSoldOut(): boolean {
         if (this.stock === null) {
             return false
         }
-        return this.usedStock >= this.stock
+        return this.usedStock - this.reserved >= this.stock
     }
 
     get remainingStock(): number | null {
         if (this.stock === null) {
             return null
         }
-        return Math.max(0, this.stock - this.usedStock)
+        return Math.max(0, this.stock + this.reserved - this.usedStock)
     }
 }
 
@@ -91,18 +111,40 @@ export class GroupOption extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 290 })
     usedStock = 0
 
+    /**
+     * When stored inside a registration, this contains the amount of stock we reserved for that specific registration.
+     * When reserving the stock, we increase this number
+     * When removing it from the stock, we set it back to 0
+     * 
+     * This value is ignored for newly placed orders and patches. We only look at the ones stored on the server
+     */
+    @field({ decoder: IntegerDecoder, version: 295 })
+    reserved = 0
+
     get isSoldOut(): boolean {
         if (this.stock === null) {
             return false
         }
-        return this.usedStock >= this.stock
+        return this.usedStock - this.reserved >= this.stock
     }
 
     get remainingStock(): number | null {
         if (this.stock === null) {
             return null
         }
-        return Math.max(0, this.stock - this.usedStock)
+        return Math.max(0, this.stock + this.reserved - this.usedStock)
+    }
+
+    get maximumSelection() {
+        if (this.maximum === null) {
+            return this.remainingStock
+        }
+
+        if (this.remainingStock === null) {
+            return this.maximum
+        }
+
+        return Math.min(this.maximum, this.remainingStock)
     }
 }
 
