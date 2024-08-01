@@ -224,6 +224,12 @@ export class AdminPermissionChecker {
             return true
         }
 
+        if (member.registrations.length === 0 && permissionLevel !== PermissionLevel.Full && (this.organization && await this.hasFullAccess(this.organization.id, PermissionLevel.Full))) {
+            // Everyone with at least full access to at least one organization can access this member
+            // This allows organizations to register new members themselves
+            return true;
+        }
+
         for (const registration of member.registrations) {
             if (await this.canAccessRegistration(registration, permissionLevel)) {
                 return true;

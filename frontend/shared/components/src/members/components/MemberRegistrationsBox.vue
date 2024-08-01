@@ -36,7 +36,7 @@ import { useAuth, useContext, useOrganization, usePlatform } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import TableActionsContextMenu from '../../tables/TableActionsContextMenu.vue';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
-import RegisterMemberView from '../RegisterMemberView.vue';
+import ChooseGroupForMemberView from '../ChooseGroupForMemberView.vue';
 import { MemberActionBuilder } from '../classes/MemberActionBuilder';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
 
@@ -79,7 +79,7 @@ async function addRegistration() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(RegisterMemberView, {
+                root: new ComponentWithProperties(ChooseGroupForMemberView, {
                     member: props.member
                 })
             })

@@ -183,12 +183,20 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, CopyableDirective, LoadingView, NavigationActions, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import STNavigationBar from "../navigation/STNavigationBar.vue";
+import STToolbar from "../navigation/STToolbar.vue";
+import STList from "../layout/STList.vue";
+import STListItem from "../layout/STListItem.vue";
+import LoadingView from "../containers/LoadingView.vue";
+import Checkbox from "../inputs/Checkbox.vue";
+import BackButton from "../navigation/BackButton.vue";
+import TooltipDirective from "../directives/Tooltip";
+import CopyableDirective from "../directives/Copyable";
 
 @Component({
     components: {

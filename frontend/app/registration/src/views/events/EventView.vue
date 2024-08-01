@@ -93,7 +93,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ImageComponent, NavigationActions, RegisterItemView, usePlatform, useUser } from '@stamhoofd/components';
+import { ImageComponent, NavigationActions, RegisterItemView, useCheckoutRegisterItem, usePlatform, useUser } from '@stamhoofd/components';
 import { Event, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -106,7 +106,6 @@ const props = defineProps<{
 const present = usePresent();
 const platform = usePlatform();
 const title = computed(() => props.event.name);
-const user = useUser();
 const memberManager = useMemberManager()
 const googleMapsUrl = computed(() => {
     if (props.event.meta.location?.address) {
@@ -129,24 +128,19 @@ const ageGroups = computed(() => {
     return Formatter.joinLast(prefixes, ', ', ' of ');
 });
 
+const checkoutRegisterItem = useCheckoutRegisterItem()
+
 async function openGroup() {
     if (!props.event.group) {
         return;
     }
-    
-    await present({
-        components: [
-            new ComponentWithProperties(RegisterItemView, {
-                item: RegisterItem.defaultFor(memberManager.family.members[0], props.event.group, memberManager.family.organizations[0]),
-                admin: false,
-                saveHandler: async (newItem: RegisterItem, navigation: NavigationActions) => {
-                    memberManager.family.checkout.cart.add(newItem)
-                    await navigation.pop({force: true})
-                }
-            }),
-        ],
-        modalDisplayStyle: 'sheet'
+
+    const item = RegisterItem.defaultFor(memberManager.family.members[0], props.event.group, memberManager.family.organizations[0])
+    await checkoutRegisterItem(item, false, {
+        present: 'popup'
     })
+
+    // todo: go to member selection view
 }
 
 </script>

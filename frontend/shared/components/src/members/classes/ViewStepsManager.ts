@@ -1,20 +1,16 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { PlatformMember } from "@stamhoofd/structures";
 import { NavigationActions } from "../../types/NavigationActions";
 
-export class MemberStepManager {
-    member: PlatformMember
-    steps: EditMemberStep[] = []
+export class ViewStepsManager {
+    steps: ViewStep[] = []
     finishHandler: (navigate: NavigationActions) => void|Promise<void>
     present: null|'popup'|'sheet' = null
 
     constructor(
-        member: PlatformMember, 
-        steps: EditMemberStep[], 
+        steps: ViewStep[], 
         finishHandler: (navigate: NavigationActions) => void|Promise<void>,
         options?: { present?: 'popup'|'sheet' }
     ){
-        this.member = member
         this.steps = steps;
         this.finishHandler = finishHandler;
         if (options?.present) {
@@ -22,7 +18,7 @@ export class MemberStepManager {
         }
     }
 
-    async saveHandler(currentStep: EditMemberStep|null, navigate: NavigationActions) {
+    async saveHandler(currentStep: ViewStep|null, navigate: NavigationActions) {
         const nextStep = this.getNextStep(currentStep);
         if (nextStep) {
             if (currentStep === null && this.present) {
@@ -46,7 +42,7 @@ export class MemberStepManager {
 
     }
     
-    getNextStep(step: EditMemberStep|null): EditMemberStep|null {
+    getNextStep(step: ViewStep|null): ViewStep|null {
         let found = step === null;
         for (const s of this.steps) {
             if (found && s.isEnabled(this)) {
@@ -60,7 +56,7 @@ export class MemberStepManager {
     }
 }
 
-export interface EditMemberStep {
+export interface ViewStep {
     getComponent(manager: MemberStepManager): Promise<ComponentWithProperties>|ComponentWithProperties
     isEnabled(manager: MemberStepManager): boolean
 }

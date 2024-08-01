@@ -56,10 +56,9 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, PriceBreakdownBox, useErrors, useOrganization } from '@stamhoofd/components';
+import { ErrorBox, PriceBreakdownBox, startCheckout, useContext, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
 import { RegisterItem } from '@stamhoofd/structures';
-import { DefineComponent, computed, onActivated, onMounted, ref } from 'vue';
+import { computed, onActivated, onMounted, ref } from 'vue';
 import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
@@ -67,7 +66,8 @@ const checkout = computed(() => memberManager.family.checkout)
 const cart = computed(() => checkout.value.cart)
 const organization = useOrganization()
 const errors = useErrors()
-const present = usePresent();
+const context = useContext()
+const navigate = useNavigationActions();
 
 const loading = ref(false)
 
@@ -91,28 +91,10 @@ async function goToCheckout() {
     errors.errorBox = null
 
     try {
-        checkout.value.validate({})
-
-        // Go to the next step
-        const organization = checkout.value.singleOrganization
-
-        let component: unknown
-        if(organization && organization.meta.recordsConfiguration.freeContribution !== null) {
-            // Go to financial view
-            component = (await import('./FreeContributionView.vue')).default;
-        } else {
-            // Go to financial view
-            component = (await import('./PaymentSelectionView.vue')).default;
-        }
-
-        await present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(component, {}),
-                }),
-            ],
-            modalDisplayStyle: "popup"
-        });
+        await startCheckout({
+            checkout: checkout.value,
+            context: context.value
+        }, navigate)
     } catch (e) {
         errors.errorBox = new ErrorBox(e)
     } finally {

@@ -59,17 +59,17 @@ export class PaymentHandler {
             navigate: NavigationActions; 
             type: "order" | "registration";
         }, 
-        successHandler: (payment: Payment, navigate: NavigationActions) => void, 
-        failedHandler: (payment: Payment | null) => void, 
-        transferHandler?: (payment: Payment | null) => void
+        successHandler: (payment: Payment, navigate: NavigationActions) => void|Promise<void>, 
+        failedHandler: (payment: Payment | null) => void|Promise<void>, 
+        transferHandler?: (payment: Payment | null) => void|Promise<void>
     ) {
         const { payment, organization, server, navigate, paymentUrl, transferSettings } = settings;
 
         if (payment.method == PaymentMethod.PointOfSale) {
-            successHandler(payment, navigate)
+            successHandler(payment, navigate)?.catch(console.error)
         } else if (payment.method == PaymentMethod.Transfer) {
             if (transferHandler) {
-                transferHandler(payment)
+                transferHandler(payment)?.catch(console.error)
             }
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             await navigate.show(new ComponentWithProperties(TransferPaymentView, {
@@ -80,7 +80,7 @@ export class PaymentHandler {
                 settings: transferSettings,
                 finishedHandler: (payment: Payment, navigate: NavigationActions) => {
                     // Always go to success
-                    successHandler(payment, navigate)
+                    successHandler(payment, navigate)?.catch(console.error)
                 }
             }))
         } else if (payment.provider == PaymentProvider.Payconiq && paymentUrl) {
@@ -92,9 +92,9 @@ export class PaymentHandler {
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
                         if (payment && payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment, navigate) // use component because payconiq closed itself + was a sheet
+                            successHandler(payment, navigate)?.catch(console.error) // use component because payconiq closed itself + was a sheet
                         } else {
-                            failedHandler(payment)
+                            failedHandler(payment)?.catch(console.error)
                         }
                     }
                 }).setDisplayStyle("sheet")
@@ -115,9 +115,9 @@ export class PaymentHandler {
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
                         if (payment && payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment, navigate) // use component because payconiq closed itself + was a sheet
+                            successHandler(payment, navigate)?.catch(console.error) // use component because payconiq closed itself + was a sheet
                         } else {
-                            failedHandler(payment)
+                            failedHandler(payment)?.catch(console.error)
                         }
                     }
                 }).setDisplayStyle("sheet")

@@ -18,14 +18,21 @@ export class BalanceItem extends Model {
     })
     id!: string;
 
+    // Receiving organization
+    
     @column({ type: "string" })
     organizationId: string
+
+    // Payer: memberId, userId or payingOrganizationId
 
     @column({ type: "string", nullable: true })
     memberId: string | null = null;
 
     @column({ type: "string", nullable: true })
     userId: string | null = null;
+
+    @column({ type: "string", nullable: true })
+    payingOrganizationId: string | null = null;
 
     /**
      * The registration ID that is linked to this balance item
@@ -38,6 +45,14 @@ export class BalanceItem extends Model {
      */
     @column({ type: "string", nullable: true })
     orderId: string | null = null;
+
+    /**
+     * The depending balance item ID that is linked to this balance item
+     * -> as soon as this balance item is paid, we'll mark this balance item as pending if it is still hidden
+     * -> allows for a pay back system where one user needs to pay back a different user
+     */
+    @column({ type: "string", nullable: true })
+    dependingBalanceItemId: string | null = null;
 
     @column({ type: "string" })
     description = "";
@@ -137,6 +152,28 @@ export class BalanceItem extends Model {
                 }
             }
         }
+
+        // Do we have a different connected balance item?
+        // Make it visible if this one is paid
+        if (this.dependingBalanceItemId) {
+            const depending = await BalanceItem.getByID(this.dependingBalanceItemId)
+            if (depending) {
+                if (this.status === BalanceItemStatus.Hidden) {
+                    depending.status = BalanceItemStatus.Pending
+                    await depending.save()
+
+                    if (depending.memberId) {
+                        const {Member} = await import("./Member");
+                        await Member.updateOutstandingBalance([depending.memberId])
+                    }
+
+                    if (depending.registrationId) {
+                        const {Registration} = await import("./Registration");
+                        await Registration.updateOutstandingBalance([depending.registrationId], depending.organizationId)
+                    }
+                }
+            }
+        }
     }
 
     async undoPaid(payment: Payment, organization: Organization) {
@@ -178,7 +215,7 @@ export class BalanceItem extends Model {
     }
 
     updateStatus() {
-        this.status = this.pricePaid >= this.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
+        this.status = this.pricePaid >= this.price ? BalanceItemStatus.Paid : (this.pricePaid > 0 ? BalanceItemStatus.Pending : (this.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending));
     }
 
     static async deleteItems(items: BalanceItem[]) {

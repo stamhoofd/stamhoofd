@@ -2,7 +2,6 @@
 export * from "./src/AppManager"
 export * from "./src/LoginHelper"
 export * from "./src/ManagedToken"
-export * from "./src/MemberManagerBase"
 export * from "./src/NetworkManager"
 export * from "./src/OrganizationManager"
 export * from "./src/SessionContext"

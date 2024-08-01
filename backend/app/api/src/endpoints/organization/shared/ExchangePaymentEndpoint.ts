@@ -101,8 +101,9 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Prevent concurrency issues
             await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
+                const unloaded = (await BalanceItemPayment.where({paymentId: payment.id})).map(r => r.setRelation(BalanceItemPayment.payment, payment))
                 const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                    (await BalanceItemPayment.where({paymentId: payment.id})).map(r => r.setRelation(BalanceItemPayment.payment, payment))
+                    unloaded
                 );
 
                 for (const balanceItemPayment of balanceItemPayments) {

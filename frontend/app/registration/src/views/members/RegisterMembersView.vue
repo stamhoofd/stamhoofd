@@ -44,7 +44,7 @@ import { ComponentWithProperties, NavigationController, defineRoutes, useNavigat
 import { PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, markRaw, reactive } from 'vue';
-import {EditMemberGeneralBox, MemberStepView, NavigationActions, RegisterMemberView} from '@stamhoofd/components'
+import {EditMemberGeneralBox, MemberStepView, NavigationActions, ChooseGroupForMemberView} from '@stamhoofd/components'
 import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
@@ -60,7 +60,7 @@ defineRoutes([
     {
         name: Routes.RegisterMember,
         url: '@name',
-        component: RegisterMemberView as any,
+        component: ChooseGroupForMemberView as any,
         params: {
             name: String
         },
@@ -109,7 +109,7 @@ async function addNewMember() {
                     force: true,
                     url: Formatter.slug(member.patchedMember.firstName),
                     components: [
-                        new ComponentWithProperties(RegisterMemberView, {
+                        new ComponentWithProperties(ChooseGroupForMemberView, {
                             member
                         })
                     ],

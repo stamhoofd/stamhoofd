@@ -65,7 +65,7 @@ export class PlatformFamily {
         for (const member of blob.members) {
             const existing = this.members.find(m => m.id === member.id);
             if (existing) {
-                existing.member.set(member)
+                existing.member.deepSet(member)
                 continue;
             }
 
@@ -74,6 +74,18 @@ export class PlatformFamily {
                 family: this
             })
             this.members.push(platformMember)
+        }
+    }
+
+    /**
+     * Same as insertFromBlob, but doesn't add new members, only updates existing members
+     */
+    updateFromBlob(blob: MembersBlob) {
+        for (const member of blob.members) {
+            const existing = this.members.find(m => m.id === member.id);
+            if (existing) {
+                existing.member.deepSet(member)
+            }
         }
     }
 
@@ -143,8 +155,8 @@ export class PlatformFamily {
         for (const member of this.members) {
             const cloneMember = clone.members.find(m => m.id === member.id || (m._oldId && m._oldId === member.id && member.isNew))
             if (cloneMember) {
-                member.member.set(cloneMember.member)
-                member.patch.set(cloneMember.patch)
+                member.member.deepSet(cloneMember.member)
+                member.patch.deepSet(cloneMember.patch)
                 member.isNew = cloneMember.isNew
                 member._oldId = cloneMember._oldId
 

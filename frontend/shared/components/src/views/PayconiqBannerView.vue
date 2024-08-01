@@ -23,10 +23,14 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, EmailInput, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar } from "@stamhoofd/components"
 import { Payment,PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import STNavigationBar from '../navigation/STNavigationBar.vue';
+import EmailInput from '../inputs/EmailInput.vue';
+import LoadingButton from '../navigation/LoadingButton.vue';
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import STFloatingFooter from '../navigation/STFloatingFooter.vue';
 
 @Component({
     components: {

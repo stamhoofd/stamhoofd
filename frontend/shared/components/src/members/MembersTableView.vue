@@ -19,14 +19,13 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, EditMemberGeneralBox, InMemoryTableAction, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, EditMemberGeneralBox, InMemoryTableAction, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useCheckoutDefaultItem, useChooseGroupForMember, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupType, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, markRaw, reactive, ref } from "vue";
-import MemberSegmentedView from './MemberSegmentedView.vue';
-import RegisterMemberView from "./RegisterMemberView.vue";
 import { MemberActionBuilder } from "./classes/MemberActionBuilder";
+import MemberSegmentedView from './MemberSegmentedView.vue';
 
 type ObjectType = PlatformMember;
 
@@ -377,6 +376,9 @@ const actionBuilder = new MemberActionBuilder({
     platformFamilyManager
 })
 
+const checkoutDefaultItem = useCheckoutDefaultItem()
+const chooseGroupForMember = useChooseGroupForMember()
+
 const actions: TableAction<PlatformMember>[] = [
     new InMemoryTableAction({
         name: "Nieuw lid",
@@ -397,15 +399,20 @@ const actions: TableAction<PlatformMember>[] = [
                     title: 'Nieuw lid',
                     member,
                     component: markRaw(EditMemberGeneralBox),
-                    doSave: false,
+                    doSave: true,
                     saveHandler: async (navigate: NavigationActions) => {
-                        await navigate.show({
-                            components: [
-                                new ComponentWithProperties(RegisterMemberView, {
-                                    member
-                                })
-                            ]
-                        })
+                        if (props.group && organization.value && props.group.organizationId === organization.value.id) {
+                            await checkoutDefaultItem({
+                                group: props.group,
+                                member,
+                                organization: organization.value,
+                                admin: true
+                            })
+                        } else {
+                            await chooseGroupForMember({
+                                member
+                            })
+                        }
                     }
                 }),
             });

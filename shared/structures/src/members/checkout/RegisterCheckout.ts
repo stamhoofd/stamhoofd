@@ -1,16 +1,18 @@
-import { AutoEncoder, EnumDecoder, field, IntegerDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from "@simonbackx/simple-encoding";
 
 import { MemberBalanceItem } from "../../BalanceItemDetailed";
+import { Group } from "../../Group";
+import { Organization } from "../../Organization";
 import { PaymentMethod } from "../../PaymentMethod";
 import { PriceBreakdown } from "../../PriceBreakdown";
-import { PlatformFamily } from "../PlatformMember";
+import { PlatformMember } from "../PlatformMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 
-
 export type RegisterContext = {
-    family: PlatformFamily
+    members: PlatformMember[],
+    groups: Group[],
+    organizations: Organization[]
 }
-
 
 export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IDRegisterCart })
@@ -25,12 +27,39 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null
 
+    /**
+     * The link we'll redirect the user back too after the payment page (either succeeded or failed!)
+     * The id query param will be appended with the payment id
+     */
+    @field({ decoder: new URLDecoder({allowedProtocols: ['https:']}), nullable: true })
+    redirectUrl: URL|null = null
+    
+    /**
+     * The link we'll redirect the user back too after the user canceled a payment (not supported for all payment methods)
+     * The id query param will be appended with the payment id
+     */
+    @field({ decoder: new URLDecoder({allowedProtocols: ['https:']}), nullable: true })
+    cancelUrl: URL|null = null
+
+    /**
+     * Register these members as the organization
+     */
+    @field({ decoder: StringDecoder, nullable: true })
+    asOrganizationId: string | null = null
+
+    /**
+     * Cached price so we can detect inconsistencies between frontend and backend
+     */
+    @field({ decoder: IntegerDecoder, nullable: true })
+    totalPrice: number | null = null
+
     hydrate(context: RegisterContext) {
         const checkout = new RegisterCheckout()
         checkout.cart = this.cart.hydrate(context)
         checkout.administrationFee = this.administrationFee
         checkout.freeContribution = this.freeContribution
         checkout.paymentMethod = this.paymentMethod
+        checkout.asOrganizationId = this.asOrganizationId
         return checkout
     }
 }
@@ -40,13 +69,16 @@ export class RegisterCheckout{
     administrationFee = 0;
     freeContribution = 0
     paymentMethod: PaymentMethod | null = null
+    asOrganizationId: string | null = null
 
     convert(): IDRegisterCheckout {
         return IDRegisterCheckout.create({
             cart: this.cart.convert(),
             administrationFee: this.administrationFee,
             freeContribution: this.freeContribution,
-            paymentMethod: this.paymentMethod
+            paymentMethod: this.paymentMethod,
+            totalPrice: this.totalPrice,
+            asOrganizationId: this.asOrganizationId
         })
     }
 
@@ -58,13 +90,24 @@ export class RegisterCheckout{
         return this.cart.singleOrganization
     }
 
+    get isAdminFromSameOrganization() {
+        return !!this.asOrganizationId && this.asOrganizationId === this.singleOrganization?.id
+    }
+
     updatePrices() {
         this.cart.calculatePrices()
-        this.administrationFee = this.paymentConfiguration?.administrationFee.calculate(this.cart.price) ?? 0
+
+        if (this.isAdminFromSameOrganization) {
+            this.administrationFee = 0;
+        } else {
+            this.administrationFee = this.paymentConfiguration?.administrationFee.calculate(this.cart.price) ?? 0
+        }
     }
 
     validate(data: {memberBalanceItems?: MemberBalanceItem[]}) {
-        // todo
+        this.cart.validate()
+
+        // todo: validate more data
     }
 
     clear() {

@@ -228,7 +228,7 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = ""
 
-    @field({ decoder: new ArrayDecoder(GroupPrice), version: 285})
+    @field({ decoder: new ArrayDecoder(GroupPrice), version: 285, upgrade: () => { return [] } }) // Upgrade uses empty array to prevent generating random ids every time
     prices: GroupPrice[] = [GroupPrice.create({})]
 
     @field({ decoder: new ArrayDecoder(GroupOptionMenu), version: 285 })

@@ -3,7 +3,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
-import { EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
 import EmailView from '../../email/EmailView.vue'
 import { CenteredMessage, CenteredMessageButton } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
@@ -717,10 +717,43 @@ export class MemberActionBuilder {
             .show()
     }
 
-    register(members: PlatformMember[], group: Group, waitingList: boolean) {
-        const member = members.length == 1 ? members[0].patchedMember.name : members.length+" leden"
+    async register(members: PlatformMember[], group: Group) {
+        if (members.length === 1) {
+            return await checkoutDefaultItem({
+                member: members[0], 
+                group,
+                admin: true,
+                organization: this.organizations.find(o => o.id === group.organizationId)!,
+                context: this.context,
+                navigate: {
+                    present: this.present,
+                    show: this.present,
+                    pop: () => Promise.resolve(),
+                    dismiss: () => Promise.resolve()
+                },
+                options: {
+                    present: 'popup'
+                },
 
-        new CenteredMessage(waitingList ? `${member} op wachtlijst plaatsen van ${group.settings.name}?` : `${member} inschrijven voor ${group.settings.name}?`)
+                // Immediately checkout instead of only adding it to the cart
+                startCheckoutFlow: true
+            })
+        }
+
+        return await chooseOrganizationMembersForGroup({
+            members, 
+            group,
+            organization: this.organizations.find(o => o.id === group.organizationId)!,
+            context: this.context,
+            navigate: {
+                present: this.present,
+                show: this.present,
+                pop: () => Promise.resolve(),
+                dismiss: () => Promise.resolve()
+            }
+        })
+
+        /*new CenteredMessage(`${member} inschrijven voor ${group.settings.name}?`)
             .addButton(new CenteredMessageButton("Ja, inschrijven", {
                 action: async () => {
                     const n = members.length == 1 ? members[0].patchedMember.name + ' is' : members.length+" leden zijn"
@@ -796,6 +829,6 @@ export class MemberActionBuilder {
                 }
             }))
             .addCloseButton("Annuleren")
-            .show()
+            .show()*/
     }
 }

@@ -10,6 +10,13 @@
         <main>
             <h1>{{ item.group.settings.name }}</h1>
 
+            <template v-if="showGroupInformation">
+                <figure v-if="item.group.settings.coverPhoto" class="cover-photo">
+                    <ImageComponent :image="item.group.settings.coverPhoto" :auto-height="true" />
+                </figure>
+                <p v-if="item.group.settings.description" class="style-description pre-wrap" v-text="item.group.settings.description" />
+            </template>
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <div v-if="item.getFilteredPrices({admin}).length > 1" class="container">
@@ -95,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, LoadingButton, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox, ImageComponent, LoadingButton, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { GroupOption, GroupOptionMenu, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
@@ -103,7 +110,8 @@ import { computed, ref, watch } from 'vue';
 const props = defineProps<{
     item: RegisterItem,
     admin: boolean,
-    saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void>|void
+    saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void>|void,
+    showGroupInformation: boolean
 }>();
 
 const checkout = computed(() => props.item.member.family.checkout)

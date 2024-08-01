@@ -3,6 +3,7 @@ import { OldRegisterCartPriceCalculator } from "./OldRegisterCartPriceCalculator
 import { RegisterContext } from "./RegisterCheckout";
 import { IDRegisterItem, RegisterItem } from "./RegisterItem";
 import { BalanceItemCartItem } from "./BalanceItemCartItem";
+import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -116,5 +117,29 @@ export class RegisterCart {
         }
 
         return organization
+    }
+
+    validate() {
+        const newItems: RegisterItem[] = []
+        const errors = new SimpleErrors()
+        for (const item of this.items) {
+            try {
+                item.validate()
+                newItems.push(item)
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace('cart')
+                }
+                errors.addError(e)
+
+                if (isSimpleError(e) && (e.meta as any)?.recoverable) {
+                    item.cartError = e;
+                    newItems.push(item)
+                }
+            }
+        }
+
+        this.items = newItems
+        errors.throwIfNotEmpty()
     }
 }

@@ -106,16 +106,29 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 duplicate.details.merge(member.details)
                 member = duplicate
 
-                // Only save after checking permissions
+                // You need write permissions, because a user can potentially earn write permissions on a member
+                // by registering it
+                if (!await Context.auth.canAccessMember(duplicate, PermissionLevel.Write)) {
+                    throw new SimpleError({
+                        code: "known_member_missing_rights",
+                        message: "Creating known member without sufficient access rights",
+                        human: "Dit lid is al bekend in het systeem, maar je hebt er geen toegang tot. Vraag iemand met de juiste toegangsrechten om dit lid voor jou toe te voegen, of vraag het lid om zelf in te schrijven via het ledenportaal.",
+                        statusCode: 400
+                    })
+                }
             }
 
             if (struct.registrations.length === 0) {
-                 throw new SimpleError({
-                    code: "missing_group",
-                    message: "Missing group",
-                    human: "Schrijf een nieuw lid altijd in voor minstens één groep",
-                    statusCode: 400
-                })
+                // We risk creating a new member without being able to access it manually afterwards
+
+                if ((organization && !await Context.auth.hasFullAccess(organization.id)) || (!organization && !Context.auth.hasPlatformFullAccess())) {
+                    throw new SimpleError({
+                        code: "missing_group",
+                        message: "Missing group",
+                        human: "Je moet hoofdbeheerder zijn om een lid toe te voegen zonder inschrijving in het systeem",
+                        statusCode: 400
+                    })
+                }
             }
 
             // Throw early
@@ -223,7 +236,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Update registrations
             for (const patchRegistration of patch.registrations.getPatches()) {
                 const registration = member.registrations.find(r => r.id === patchRegistration.id)
-                if (!registration || registration.memberId != member.id) {
+                if (!registration || registration.memberId != member.id || (!await Context.auth.canAccessRegistration(registration, PermissionLevel.Write))) {
                     throw new SimpleError({
                         code: "permission_denied",
                         message: "You don't have permissions to access this endpoint",

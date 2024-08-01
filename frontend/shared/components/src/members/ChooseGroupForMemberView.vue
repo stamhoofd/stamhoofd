@@ -31,32 +31,27 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, usePlatformFamilyManager, useUninheritedPermissions } from '@stamhoofd/components';
-import { Group, GroupCategoryTree, Organization, PlatformMember, RegisterCart, RegisterItem, Registration } from '@stamhoofd/structures';
-import { computed, markRaw, Ref, ref } from 'vue';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useUninheritedPermissions } from '@stamhoofd/components';
+import { Group, GroupCategoryTree, Organization, PlatformMember } from '@stamhoofd/structures';
+import { computed, Ref, ref } from 'vue';
 
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import EditMemberAllBox from './components/edit/EditMemberAllBox.vue';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
-import ConfigureNewRegistrationsView from './ConfigureNewRegistrationsView.vue';
-import GroupView from './GroupView.vue';
-import MemberStepView from './MemberStepView.vue';
 import SearchOrganizationView from './SearchOrganizationView.vue';
 
 const props = defineProps<{
     member: PlatformMember;
+    selectionHandler: (data: {group: Group, organization: Organization}, navigate: NavigationActions) => Promise<void>|void;
 }>();
 
 const selectedOrganization = ref((props.member.organizations[0] ?? null) as any) as Ref<Organization|null>;
 const auth = useUninheritedPermissions({patchedOrganization: selectedOrganization})
 const present = usePresent()
-const show = useShow()
 const app = useAppContext();
-const manager = usePlatformFamilyManager();
 const $t = useTranslate();
 const searchOrganizationTitle = computed(() => $t('shared.searchMemberOrganizations.defaultTitle', {firstName: props.member.patchedMember.firstName}))
+const navigate = useNavigationActions();
 
 const items = computed(() => {
     return props.member.organizations
@@ -85,76 +80,84 @@ function addOrganization(organization: Organization) {
     selectedOrganization.value = organization;
 }
 
-async function registerAsAdmin(group: Group) {
-    const cart = new RegisterCart()
-    const cartItem = RegisterItem.defaultFor(props.member, group)
-    cart.add(cartItem)
-    cart.calculatePrices()
-
-    // Create a registration
-    const registration = Registration.create({
-        group,
-        organizationId: group.organizationId,
-        registeredAt: new Date(),
-        waitingList: cartItem.waitingList,
-        price: cartItem.calculatedPrice,
-        pricePaid: 0,
-        cycle: group.cycle
-    })
-
-    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Registration>
-    arr.addPut(registration)
-
-    // Create a clone
-    // (prevents adding the same registration twice)
-    const cloned = props.member.clone()
-    cloned.addPatch({
-        registrations: arr
-    })
-
-    // Show registration editor
-    await show({
-        components: [
-            new ComponentWithProperties(ConfigureNewRegistrationsView, {
-                members: [cloned],
-                saveHandler: async (navigate: NavigationActions) => {
-                    await manager.save(cloned.family.members)
-                    await navigate.dismiss({force: true})
-                    Toast.success(cloned.patchedMember.firstName + " is ingeschreven").show()
-
-                    // Copy over all the changes to the original member
-                    props.member.family.copyFromClone(cloned.family)
-
-                    await navigate.present({
-                        components: [
-                            new ComponentWithProperties(MemberStepView, {
-                                member: props.member,
-                                title: 'Gegevens aanvullen',
-                                component: markRaw(EditMemberAllBox)
-                            })
-                        ],
-                        modalDisplayStyle: "popup"
-                    })
-                }
-            })
-        ]
-    })
-}
-
 async function openGroup(group: Group) {
-    if (app !== 'registration') {
-        return await registerAsAdmin(group)
+    try {
+        await props.selectionHandler({group, organization: selectedOrganization.value!}, navigate)
+    } catch (e) {
+        Toast.fromError(e).show()
     }
-    await show({
-        components: [
-            new ComponentWithProperties(GroupView, {
-                member: props.member,
-                group,
-                organization: selectedOrganization.value
-            })
-        ]
-    })
 }
+
+// async function registerAsAdmin(group: Group) {
+//    const cart = new RegisterCart()
+//    const cartItem = RegisterItem.defaultFor(props.member, group)
+//    cart.add(cartItem)
+//    cart.calculatePrices()
+//
+//    // Create a registration
+//    const registration = Registration.create({
+//        group,
+//        organizationId: group.organizationId,
+//        registeredAt: new Date(),
+//        waitingList: cartItem.waitingList,
+//        price: cartItem.calculatedPrice,
+//        pricePaid: 0,
+//        cycle: group.cycle
+//    })
+//
+//    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Registration>
+//    arr.addPut(registration)
+//
+//    // Create a clone
+//    // (prevents adding the same registration twice)
+//    const cloned = props.member.clone()
+//    cloned.addPatch({
+//        registrations: arr
+//    })
+//
+//    // Show registration editor
+//    await show({
+//        components: [
+//            new ComponentWithProperties(ConfigureNewRegistrationsView, {
+//                members: [cloned],
+//                saveHandler: async (navigate: NavigationActions) => {
+//                    await manager.save(cloned.family.members)
+//                    await navigate.dismiss({force: true})
+//                    Toast.success(cloned.patchedMember.firstName + " is ingeschreven").show()
+//
+//                    // Copy over all the changes to the original member
+//                    props.member.family.copyFromClone(cloned.family)
+//
+//                    await navigate.present({
+//                        components: [
+//                            new ComponentWithProperties(MemberStepView, {
+//                                member: props.member,
+//                                title: 'Gegevens aanvullen',
+//                                component: markRaw(EditMemberAllBox)
+//                            })
+//                        ],
+//                        modalDisplayStyle: "popup"
+//                    })
+//                }
+//            })
+//        ]
+//    })
+// }
+// 
+// async function openGroup(group: Group) {
+//     if (app !== 'registration') {
+//         return await registerAsAdmin(group)
+//     }
+//     await show({
+//         components: [
+//             new ComponentWithProperties(GroupView, {
+//                 member: props.member,
+//                 group,
+//                 organization: selectedOrganization.value
+//             })
+//         ]
+//     })
+// }
 
 async function searchOrganization() {
     await present({

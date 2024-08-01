@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
-import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors"
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors"
 import { Formatter } from "@stamhoofd/utility"
 import { Group } from "../../Group"
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from "../../GroupSettings"
@@ -41,7 +41,7 @@ export class IDRegisterItem extends AutoEncoder {
     options: RegisterItemOption[] = []
 
     hydrate(context: RegisterContext) {
-        return RegisterItem.fromId(this, context.family)
+        return RegisterItem.fromId(this, context)
     }
 }
 
@@ -55,6 +55,11 @@ export class RegisterItem implements RegisterItemWithPrice {
     groupPrice: GroupPrice;
     options: RegisterItemOption[] = []
     calculatedPrice = 0
+
+    /**
+     * Show an error in the cart for recovery
+     */
+    cartError: SimpleError|SimpleErrors | null = null;
 
     /**
      * @deprecated
@@ -110,6 +115,10 @@ export class RegisterItem implements RegisterItemWithPrice {
         }
     }
 
+    get showItemView() {
+        return this.shouldUseWaitingList() || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0
+    }
+
     calculatePrice() {
         this.calculatedPrice = this.groupPrice.price.forMember(this.member)
 
@@ -127,6 +136,12 @@ export class RegisterItem implements RegisterItemWithPrice {
             groupPrice: this.groupPrice.clone(),
             options: this.options.map(o => o.clone())
         })
+    }
+
+    copyFrom(item: RegisterItem) {
+        this.groupPrice = item.groupPrice.clone()
+        this.options = item.options.map(o => o.clone())
+        this.calculatedPrice = item.calculatedPrice
     }
 
     getFilteredPrices(options: {admin?: boolean}) {
@@ -185,6 +200,10 @@ export class RegisterItem implements RegisterItemWithPrice {
     }
 
     static defaultFor(member: PlatformMember, group: Group, organization: Organization) {
+        if (group.organizationId !== organization.id) {
+            throw new Error("Group and organization do not match in RegisterItem.defaultFor")
+        }
+
         const item = new RegisterItem({
             member,
             group,
@@ -196,8 +215,73 @@ export class RegisterItem implements RegisterItemWithPrice {
     /**
      * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
      */
-    refresh() {
-        // todo
+    refresh(group: Group) {
+        this.group = group
+        
+        const errors = new SimpleErrors()
+
+        const groupPrice = this.group.settings.prices.find(p => p.id === this.groupPrice.id)
+        if (!groupPrice) {
+            errors.addError(
+                new SimpleError({
+                    code: "product_unavailable",
+                    message: "Product unavailable",
+                    human: "Eén of meerdere tarieven van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                })
+            )
+        } else {
+            this.groupPrice = groupPrice
+        }
+
+        // Check all options
+        const remainingMenus = this.group.settings.optionMenus.slice()
+
+        for (const o of this.options) {
+            let index = remainingMenus.findIndex(m => m.id === o.optionMenu.id)
+            if (index == -1) {
+                // Check if it has a multiple choice one
+                index = this.group.settings.optionMenus.findIndex(m => m.id === o.optionMenu.id)
+                errors.addError(new SimpleError({
+                    code: "option_menu_unavailable",
+                    message: "Option menu unavailable",
+                    human: "Eén of meerdere keuzemogelijkheden van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                }))
+                continue
+            }
+
+            const menu = remainingMenus[index]
+            if (!menu.multipleChoice) {
+                // Already used: not possible to add another
+                remainingMenus.splice(index, 1)[0]
+            }
+            
+            const option = menu.options.find(m => m.id === o.option.id)
+
+            if (!option) {
+                errors.addError(new SimpleError({
+                    code: "option_unavailable",
+                    message: "Option unavailable",
+                    human: "Eén of meerdere keuzemogelijkheden van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                }))
+                continue
+            }
+
+            // Update to latest data
+            o.optionMenu = menu
+            o.option = option
+        }
+
+        if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
+            errors.addError(
+                new SimpleError({
+                    code: "missing_menu",
+                    message: "Missing menu's "+remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(", "),
+                    human: "Er zijn nieuwe keuzemogelijkheden voor "+this.group.settings.name+" waaruit je moet kiezen"
+                })
+            )
+        }
+
+        errors.throwIfNotEmpty()
     }
 
     isAlreadyRegistered() {
@@ -334,6 +418,13 @@ export class RegisterItem implements RegisterItemWithPrice {
     }
 
     validate() {
+        this.cartError = null;
+        this.refresh(this.group)
+
+        if (this.group.organizationId !== this.organization.id) {
+            throw new Error("Group and organization do not match in RegisterItem.validate")
+        }
+
         if (!this.checkout.cart.contains(this)) {
             if (!this.checkout.cart.canAdd(this)) {
                 throw new SimpleError({
@@ -447,18 +538,20 @@ export class RegisterItem implements RegisterItemWithPrice {
 
     }
 
-    static fromId(idRegisterItem: IDRegisterItem, family: PlatformFamily) {
-        const member = family.members.find(m => m.member.id === idRegisterItem.memberId)
+
+
+    static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
+        const member = context.members.find(m => m.member.id === idRegisterItem.memberId)
         if (!member) {
             throw new Error("Member not found: " + idRegisterItem.memberId)
         }
 
-        const organization = member.organizations.find(o => o.id === idRegisterItem.organizationId)
+        const organization = context.organizations.find(o => o.id === idRegisterItem.organizationId)
         if (!organization) {
             throw new Error("Organization not found: " + idRegisterItem.organizationId)
         }
 
-        const group = organization.groups.find(g => g.id === idRegisterItem.groupId)
+        const group = context.groups.find(g => g.id === idRegisterItem.groupId)
         if (!group) {
             throw new Error("Group not found: " + idRegisterItem.groupId)
         }
@@ -467,7 +560,9 @@ export class RegisterItem implements RegisterItemWithPrice {
             id: idRegisterItem.id,
             member,
             group,
-            organization
+            organization,
+            groupPrice: idRegisterItem.groupPrice,
+            options: idRegisterItem.options
         })
     }
 
