@@ -191,7 +191,7 @@
                 </div>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label">
+            <STListItem :selectable="true" element-name="label" v-if="enableMaxMembers || type !== GroupType.WaitingList">
                 <template #left>
                     <Checkbox v-model="enableMaxMembers" />
                 </template>
