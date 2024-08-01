@@ -26,7 +26,7 @@ export default class Radio extends Vue {
     @Prop({ default: "" })
     value!: any;
 
-    @Prop({ default: "" })
+    @Prop({ default: undefined })
     id!: any;
 
     @Prop({})
