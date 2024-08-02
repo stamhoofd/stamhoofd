@@ -75,7 +75,9 @@
             </h2>
 
             <p>Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).</p>
-            <p class="info-box">Opgelet, deze beheerders zijn ook niet aangesloten bij de koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.</p>
+            <p class="info-box">
+                Opgelet, deze beheerders zijn ook niet aangesloten bij de koepel, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.
+            </p>
 
 
             <p v-if="sortedAdmins.length === 0" class="info-box">
@@ -120,22 +122,19 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditResponsibilitiesView, LoadingView, useContext, useOrganization, usePlatformFamilyManager, useUser } from '@stamhoofd/components';
-import { PermissionLevel, PermissionRoleForResponsibility, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { EditResponsibilitiesView, LoadingView, useOrganization, useUser } from '@stamhoofd/components';
+import { PermissionLevel, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions } from 'vue';
+import { useMemberActions } from '../members/classes/MemberActionBuilder';
 import EditAdminView from './EditAdminView.vue';
 import RolesView from './RolesView.vue';
 import { useAdmins } from './hooks/useAdmins';
-import { Formatter } from '@stamhoofd/utility'
-import { MemberActionBuilder } from '../members/classes/MemberActionBuilder';
 
 const me = useUser();
 const organization = useOrganization()
 const {sortedAdmins, sortedMembers, loading, promise: loadPromise, getPermissions} = useAdmins()
-const present = usePresent();
-const platformFamilyManager = usePlatformFamilyManager()
-const context = useContext();
 
 enum Routes {
     Roles = 'rollen',
@@ -250,15 +249,9 @@ const permissionList = (user: User) => {
     return list.join(", ")
 }
 
-async function editMember(member: PlatformMember) {
-    const actionBuilder = new MemberActionBuilder({
-        present,
-        context: context.value,
-        groups: [],
-        organizations: [],
-        platformFamilyManager
-    })
+const actionBuilder = useMemberActions()
 
-    await actionBuilder.showMember(member)
+async function editMember(member: PlatformMember) {
+    await actionBuilder().showMember(member)
 }
 </script>

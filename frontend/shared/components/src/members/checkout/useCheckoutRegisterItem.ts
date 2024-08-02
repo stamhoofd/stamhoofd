@@ -1,5 +1,5 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { SessionContext } from "@stamhoofd/networking";
+import { SessionContext, useRequestOwner } from "@stamhoofd/networking";
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem } from "@stamhoofd/structures";
 import { ChooseGroupForMemberView } from "..";
 import { useAppContext } from "../../context/appContext";
@@ -12,6 +12,23 @@ import { allMemberSteps } from "../classes/steps";
 import { MemberRecordCategoryStep } from "../classes/steps/MemberRecordCategoryStep";
 import { RegisterItemStep } from "../classes/steps/RegisterItemStep";
 import { startCheckout } from "./startCheckout";
+import { Decoder } from "@simonbackx/simple-encoding";
+
+export async function loadGroupOrganization(context: SessionContext, organizationId: string, owner: any) {
+    if (organizationId === context.organization?.id) {
+        return context.organization;
+    }
+
+    const response = await SessionContext.serverForOrganization(organizationId).request({
+        method: "GET",
+        path: "/organization",
+        decoder: Organization as Decoder<Organization>,
+        shouldRetry: true,
+        owner
+    })
+
+    return response.data;
+}
 
 // Flow 1: group and member are already determined
 // -> no extra view in front of normal checkout flow
@@ -200,20 +217,30 @@ export function useChooseFamilyMembersForGroup() {
 // ----------------------------
 // --------- Flow 3 -----------
 
-export async function chooseOrganizationMembersForGroup({members, group, items, context, navigate}: {
+export async function chooseOrganizationMembersForGroup({members, group, items, context, navigate, owner}: {
     members: PlatformMember[], 
     group: Group, 
     context: SessionContext,
     items?: RegisterItem[], 
-    navigate: NavigationActions
+    navigate: NavigationActions,
+    owner: any
 }) {
+    const groupOrganization = await loadGroupOrganization(context, group.organizationId, owner);
+
     // Create a new shared checkout for these members
     const checkout = new RegisterCheckout();
     checkout.asOrganizationId = context.organization?.id || null;
 
+    const automaticItems: RegisterItem[] = [];
     for (const member of members) {
         member.family.checkout = checkout;
         member.family.pendingRegisterItems = [];
+
+        // Add default register item
+        if (items.length === 0) {
+            const item = RegisterItem.defaultFor(member, group, groupOrganization);
+            automaticItems.push(item);
+        }
     }
 
     if (items) {
@@ -240,9 +267,10 @@ export async function chooseOrganizationMembersForGroup({members, group, items, 
 export function useChooseOrganizationMembersForGroup() {
     const navigate = useNavigationActions();
     const context = useContext();
+    const owner = useRequestOwner()
 
-    return async ({members, group, items}: {members: PlatformMember[], group: Group, items?: RegisterItem[]}) => {
-        return await chooseOrganizationMembersForGroup({members, group, items, navigate, context: context.value});
+    return async ({members, group, items}: {members: PlatformMember[], group: Group, items?: RegisterItem[],}) => {
+        return await chooseOrganizationMembersForGroup({members, group, items, navigate, context: context.value, owner});
     }
 }
 

@@ -1,24 +1,54 @@
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegisterCart, RegisterItem, Registration, mergeFilters } from '@stamhoofd/structures'
-import { Formatter } from '@stamhoofd/utility'
+import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, mergeFilters, Organization, PermissionLevel, PlatformMember } from '@stamhoofd/structures'
 import { markRaw } from 'vue'
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
 import EmailView from '../../email/EmailView.vue'
-import { CenteredMessage, CenteredMessageButton } from '../../overlays/CenteredMessage'
+import { useContext, useOrganization } from '../../hooks'
 import { Toast } from '../../overlays/Toast'
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes'
 import { NavigationActions } from '../../types/NavigationActions'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
-import { PlatformFamilyManager } from '../PlatformFamilyManager'
-import { SessionContext } from '@stamhoofd/networking'
+import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager'
+
+export function useDirectMemberActions(options?: {groups?: Group[], organizations?: Organization[]}) {
+    return useMemberActions()(options)
+}
+
+export function useMemberActions() {
+    const present = usePresent()
+    const context = useContext()
+    const platformFamilyManager = usePlatformFamilyManager()
+    const owner = useRequestOwner()
+    const organization = useOrganization()
+
+    return (options?: {groups?: Group[], organizations?: Organization[]}) => {
+        return new MemberActionBuilder({
+            present,
+            context: context.value,
+            groups: options?.groups ?? [],
+            organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
+            platformFamilyManager,
+            owner
+        })
+    }
+}
 
 export class MemberActionBuilder {
-    present: ReturnType<typeof usePresent>
+    /**
+     * Determines which registrations will get moved or removed
+     */
     groups: Group[]
+
+    /**
+     * Determines what to move or register the members to
+     */
     organizations: Organization[]
+    
+    present: ReturnType<typeof usePresent>
     context: SessionContext
     platformFamilyManager: PlatformFamilyManager
+    owner: any
 
     constructor(settings: {
         present: ReturnType<typeof usePresent>,
@@ -26,16 +56,14 @@ export class MemberActionBuilder {
         groups: Group[],
         organizations: Organization[],
         platformFamilyManager: PlatformFamilyManager
+        owner: any
     }) {
         this.present = settings.present
         this.context = settings.context
         this.groups = settings.groups
         this.organizations = settings.organizations
         this.platformFamilyManager = settings.platformFamilyManager
-    }
-
-    get inWaitingList() {
-        return this.groups.length === 1 && this.groups.find(g => g.type === GroupType.WaitingList)
+        this.owner = settings.owner
     }
 
     get hasWrite() {
@@ -206,17 +234,6 @@ export class MemberActionBuilder {
                 }
             }),
         
-            new InMemoryTableAction({
-                name: "SMS'en",
-                icon: "feedback-line",
-                priority: 9,
-                groupIndex: 3,
-
-                handler: (members: PlatformMember[]) => {
-                    this.openSMS(members)
-                }
-            }),
-
             new MenuTableAction({
                 name: "Exporteren naar",
                 icon: "download",
@@ -252,84 +269,10 @@ export class MemberActionBuilder {
                 enabled: this.hasWrite,
                 childActions: () => this.getRegisterActions()
             }),
-            // Waiting list actions
+
             ...this.getMoveAction(),
 
-            ...this.getUnsubscribeAction(),
-
-            ...this.getWaitingListActions(),
-
-            new InMemoryTableAction({
-                name: "Gegevens gedeeltelijk wissen",
-                priority: 0,
-                groupIndex: 7,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.hasWrite,
-                handler: (members) => {
-                    this.deleteRecords(members)
-                }
-            }),
-
-            new InMemoryTableAction({
-                name: "Overal verwijderen",
-                icon: "trash",
-                priority: 0,
-                groupIndex: 7,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.hasWrite,
-                handler: (members) => {
-                    this.deleteData(members)
-                }
-            }),
-        ]
-    }
-
-    /**
-     * Actions for manipulating the waiting list. waitingList indicated whether we are in the waiting list or not
-     */
-    getWaitingListActions(): TableAction<PlatformMember>[] {
-        return [
-            //
-            /*new InMemoryTableAction({
-                name: "Toelaten om in te schrijven",
-                icon: "success",
-                priority: 15,
-                groupIndex: 6,
-                enabled: this.hasWrite && this.inWaitingList,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                handler: async (members: PlatformMember[]) => {
-                    await this.setCanRegister(members, true)
-                }
-            }),
-
-            new InMemoryTableAction({
-                name: "Toelating intrekken",
-                icon: "canceled",
-                priority: 14,
-                groupIndex: 6,
-                enabled: this.hasWrite && this.inWaitingList,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                handler: async (members: PlatformMember[]) => {
-                    await this.setCanRegister(members, false)
-                }
-            }),*/
-
-
-            new InMemoryTableAction({
-                name: "Verplaats naar ingeschreven leden",
-                priority: 1,
-                groupIndex: 5,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.inWaitingList && this.hasWrite,
-                handler: (members) => {
-                    this.acceptWaitingList(members)
-                }
-            }),
+            ...this.getUnsubscribeAction()
         ]
     }
 
@@ -443,14 +386,6 @@ export class MemberActionBuilder {
         });
     }
 
-    openSMS(members: PlatformMember[]) {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-        // const displayedComponent = new ComponentWithProperties(SMSView, {
-        //     members,
-        // });
-        // this.present(displayedComponent.setDisplayStyle("popup"));
-    }
-
     async showMember(member: PlatformMember) {
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberSegmentedView, {
@@ -520,86 +455,9 @@ export class MemberActionBuilder {
         //this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
-    deleteRecords(members: PlatformMember[]) {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-        //const member = members.length == 1 ? members[0].name : members.length+" leden"
-        //new CenteredMessage(`Gegevens van ${member} wissen`, "Opgelet, je kan dit niet ongedaan maken! Deze functie houdt de leden wel in het systeem, maar verwijdert een deel van de gegevens (o.a. handig om in orde te zijn met GDPR).")
-        //    .addButton(new CenteredMessageButton("Behoud contactgegevens", {
-        //        action: async () => {
-        //            if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam, e-mailadres en telefoonnummer (van leden zelf en ouders indien -18jaar) worden verwijderd.")) {
-        //                await MemberManager.deleteDataExceptContacts(members)
-        //                new Toast(`De gegevens van ${member} zijn verwijderd.`, "success green").show()
-        //            }
-        //        },
-        //        type: "destructive",
-        //        icon: "trash"
-        //    }))
-        //    .addButton(new CenteredMessageButton("Behoud enkel naam", {
-        //        action: async () => {
-        //            if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam worden verwijderd.")) {
-        //                await MemberManager.deleteData(members)
-        //                new Toast(`De gegevens van ${member} zijn verwijderd.`, "success green").show()
-        //            }
-        //        },
-        //        type: "destructive",
-        //        icon: "trash"
-        //    }))
-        //    .addCloseButton("Annuleren")
-        //    .show()
-    }
-
-    deleteData(members: PlatformMember[]) {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-
-        //const member = members.length == 1 ? members[0].name : members.length+" leden"
-        //new CenteredMessage(`${member} definitief verwijderen?`, "Je kan dit niet ongedaan maken. Je verliest alle gegevens, betaalgegevens, accounts...")
-        //    .addButton(new CenteredMessageButton("Verwijderen", {
-        //        action: () => {
-        //            CenteredMessage.confirm("Begrijp je dat dit alles verwijdert?", "Ja, verwijderen", 'Alle inschrijvingen, betaalgegevens, gegevens en accounts gaan verloren.').then(async (confirmed) => {
-        //                if (confirmed) {
-        //                    await MemberManager.deleteMembers(members)
-        //                    new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} verwijderd`, "success green").show()
-        //                }
-        //            }).catch(console.error)
-        //            return Promise.resolve()
-        //        },
-        //        type: "destructive",
-        //        icon: "trash"
-        //    }))
-        //    .addCloseButton("Annuleren")
-        //    .show()
-    }
-
     deleteRegistration(members: PlatformMember[]) {
-        const member = members.length == 1 ? members[0].patchedMember.name : members.length+" leden"
-        new CenteredMessage(`${member} uitschrijven?`, `Hiermee verwijder je alleen de inschrijvingen bij ${Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' of ')}. Andere inschrijvingen en gegevens van ${member} blijven behouden.`)
-            .addButton(new CenteredMessageButton("Uitschrijven", {
-                action: () => {
-                    (async () => {
-                        if (members.length == 1 || await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
-                            await this.platformFamilyManager.unregisterMembers(
-                                members.map(m => {
-                                    const registrations = m.filterRegistrations({groups: this.groups, waitingList: this.inWaitingList})
-
-                                    return {
-                                        member: m,
-                                        removeRegistrations: registrations
-                                    }
-                                }), 
-                                {
-                                    shouldRetry: false
-                                }
-                            )
-                            new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} uitgeschreven`, "success green").show()
-                        }
-                    })().catch(console.error)
-                    return Promise.resolve()
-                },
-                type: "destructive",
-                icon: "unregister"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
+        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
+        // todo
     }
 
     get groupIds() {
@@ -607,49 +465,7 @@ export class MemberActionBuilder {
     }
 
     moveRegistrations(members: PlatformMember[], group: Group) {
-        const member = members.length == 1 ? members[0].patchedMember.name : members.length+" leden"
-        new CenteredMessage(`${member} verplaatsen naar ${group.settings.name}?`)
-            .addButton(new CenteredMessageButton("Ja, verplaats", {
-                action: async () => {
-                    //await MemberManager.moveRegistrations(members, this.groups, this.cycleOffset, this.inWaitingList, group)
-
-                    const patches = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-                    for (const member of members) {
-                        const registrationsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Registration>;
-                        const registrations = member.filterRegistrations({groups: this.groups})
-
-                        if (registrations.length === 0) {
-                            continue
-                        }
-        
-                        for (const registration of registrations) {
-                            // Check if already has a registratino with these details, skip otherwise
-                            if (member.patchedMember.registrations.find(r => r.id !== registration.id && r.groupId === group.id)) {
-                                throw new Error('Je kan deze inschrijving niet verplaatsen omdat ' + member.patchedMember.name + ' al is ingeschreven bij die groep of daarbij horende wachtlijst in die periode')
-                            }
-
-                            registrationsPatch.addPatch(
-                                Registration.patch({
-                                    id: registration.id,
-                                    group
-                                })
-                            )
-                        }
-        
-                        patches.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            registrations: registrationsPatch
-                        }))
-                    }
-
-                    console.log('patching', patches)
-                    await this.platformFamilyManager.isolatedPatch(members, patches, false)
-                    new Toast(members.length+` leden zijn naar ${group.settings.name} verplaatst`, "success green").show()
-                },
-                icon: "sync"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
+        // todo
     }
 
     async register(members: PlatformMember[], group: Group) {
@@ -678,8 +494,8 @@ export class MemberActionBuilder {
         return await chooseOrganizationMembersForGroup({
             members, 
             group,
-            groupOrganization: this.organizations.find(o => o.id === group.organizationId)!,
             context: this.context,
+            owner: this.owner,
             navigate: {
                 present: this.present,
                 show: this.present,
@@ -687,83 +503,5 @@ export class MemberActionBuilder {
                 dismiss: () => Promise.resolve()
             }
         })
-
-        /*new CenteredMessage(`${member} inschrijven voor ${group.settings.name}?`)
-            .addButton(new CenteredMessageButton("Ja, inschrijven", {
-                action: async () => {
-                    const n = members.length == 1 ? members[0].patchedMember.name + ' is' : members.length+" leden zijn"
-
-                    const patches = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-                    for (const member of members) {
-                        const registrationsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Registration>;
-                        
-                        if (!waitingList) {
-                            const waitingListRegistrations = member.filterRegistrations({groups: [group], waitingList: true})
-
-                            // Move from waiting list to registration
-                            for (const registration of waitingListRegistrations) {
-                                const cart = new RegisterCart()
-                                cart.add(new RegisterItem({
-                                    member: member,
-                                    group: registration.group,
-                                    waitingList
-                                }))
-                                cart.calculatePrices()
-                                const price = cart.price
-                                registrationsPatch.addPatch(
-                                    Registration.patch({
-                                        id: registration.id,
-                                        waitingList,
-                                        price
-                                    })
-                                )
-                                patches.addPatch(MemberWithRegistrationsBlob.patch({
-                                    id: member.id,
-                                    registrations: registrationsPatch
-                                }))
-                            }
-
-                            if (waitingListRegistrations.length) {
-                                continue;
-                            }
-                        }
-
-                        // Check duplicates
-                        const registrations = member.filterRegistrations({groups: [group]})
-
-                        if (registrations.length) {
-                            throw new Error('Je kan ' + member.patchedMember.name + ' niet inschrijven voor '+ group.settings.name +' omdat die al is ingeschreven.')
-                        }
-        
-        
-                        // Insert new registration
-                        const cart = new RegisterCart()
-                        cart.add(new RegisterItem({
-                            member: member,
-                            group,
-                            waitingList
-                        }))
-                        cart.calculatePrices()
-                        const price = cart.price
-                        const reg = Registration.create({
-                            group,
-                            waitingList,
-                            registeredAt: new Date(),
-                            organizationId: group.organizationId,
-                            price
-                        })
-                        registrationsPatch.addPut(reg)
-
-                        patches.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            registrations: registrationsPatch
-                        }))
-                    }
-                    await this.platformFamilyManager.isolatedPatch(members, patches, false)
-                    new Toast(waitingList ? n+` op de wachtlijst geplaatst voor ${group.settings.name}` : n + ` ingeschreven voor ${group.settings.name}`, "success green").show()
-                }
-            }))
-            .addCloseButton("Annuleren")
-            .show()*/
     }
 }

@@ -25,10 +25,10 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { EditMemberAllBox, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useContext, useKeyUpDown, useOrganization, usePlatformFamilyManager } from '@stamhoofd/components';
+import { EditMemberAllBox, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useKeyUpDown, useOrganization } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
-import { MemberActionBuilder } from './classes/MemberActionBuilder';
+import { useMemberActions } from './classes/MemberActionBuilder';
 import MemberStepView from './MemberStepView.vue';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
 import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
@@ -51,8 +51,6 @@ const auth = useAuth();
 const show = useShow();
 const present = usePresent();
 const organization = useOrganization();
-const platformFamilyManager = usePlatformFamilyManager();
-const context = useContext();
 
 const tabs = computed(() => {
     const base: {name: string, component: unknown}[] = [{
@@ -156,13 +154,11 @@ async function editMember() {
     })
 }
 
+const buildActions = useMemberActions()
+
 async function showContextMenu(event: MouseEvent) {
-    const builder = new MemberActionBuilder({
-        present,
-        groups: [],
-        organizations: organization.value ? [organization.value] : props.member.organizations,
-        context: context.value,
-        platformFamilyManager
+    const builder = buildActions({
+        organizations: props.member.organizations,
     })
 
     const actions = builder.getActions()

@@ -32,12 +32,11 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
-import { useAuth, useContext, useOrganization, usePlatform } from '../../hooks';
+import { useAuth, useOrganization, usePlatform } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import TableActionsContextMenu from '../../tables/TableActionsContextMenu.vue';
-import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import ChooseGroupForMemberView from '../ChooseGroupForMemberView.vue';
-import { MemberActionBuilder } from '../classes/MemberActionBuilder';
+import { useMemberActions } from '../classes/MemberActionBuilder';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
 
 const props = defineProps<{
@@ -56,12 +55,10 @@ const defaultPeriod = organization.value?.period?.period ?? platform.value.perio
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
-const platformFamilyManager = usePlatformFamilyManager()
 
 platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
-const context = useContext();
 const visibleRegistrations = computed(() => {
     return props.member.patchedMember.registrations.filter(r => {
         if (organization.value && r.organizationId !== organization.value.id) {
@@ -88,19 +85,17 @@ async function addRegistration() {
     })
 }
 
+const buildActions = useMemberActions()
+
 async function editRegistration(registration: Registration, event: MouseEvent) {
-    const builder = new MemberActionBuilder({
-        present,
+    const builder = buildActions({
         groups: [registration.group],
         organizations: props.member.organizations.filter(o => o.id === registration.group.organizationId),
-        context: context.value,
-        platformFamilyManager
     })
 
     const actions = [
         ...builder.getUnsubscribeAction().map(a => a.setGroupIndex(0).setPriority(10)),
         ...builder.getMoveAction().map(a => a.setGroupIndex(1).setPriority(5)),
-        ...builder.getWaitingListActions()
     ]
 
     const el = event.currentTarget! as HTMLElement;

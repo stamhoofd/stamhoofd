@@ -19,12 +19,12 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useCheckoutDefaultItem, useChooseGroupForMember, useChooseOrganizationMembersForGroup, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useContext, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupType, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from "vue";
-import { MemberActionBuilder } from "./classes/MemberActionBuilder";
+import { useDirectMemberActions } from "./classes/MemberActionBuilder";
 import MemberSegmentedView from './MemberSegmentedView.vue';
 
 type ObjectType = PlatformMember;
@@ -64,7 +64,6 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform()
-const platformFamilyManager = usePlatformFamilyManager();
 
 const configurationId = computed(() => {
     return 'members-'+app+'-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '')
@@ -366,16 +365,10 @@ async function showMember(member: PlatformMember) {
     });
 }
 
-const actionBuilder = new MemberActionBuilder({
-    present,
+const actionBuilder = useDirectMemberActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
-    organizations: organization.value ? [organization.value] : [],
-    context: context.value,
-    platformFamilyManager
 })
 
-const checkoutDefaultItem = useCheckoutDefaultItem()
-const chooseGroupForMember = useChooseGroupForMember()
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup()
 
 const actions: TableAction<PlatformMember>[] = [
@@ -389,42 +382,8 @@ const actions: TableAction<PlatformMember>[] = [
         handler: async () => {
             await chooseOrganizationMembersForGroup({
                 members: [],
-                group: props.group!,
-                groupOrganization: organization.value!
+                group: props.group!
             })
-            //const family = new PlatformFamily({
-            //    contextOrganization: organization.value,
-            //    platform: platform.value
-            //})
-            //const member = reactive(family.newMember() as any) as PlatformMember
-            //
-            //const component = new ComponentWithProperties(NavigationController, {
-            //    root: new ComponentWithProperties(MemberStepView, {
-            //        title: 'Nieuw lid',
-            //        member,
-            //        component: markRaw(EditMemberGeneralBox),
-            //        doSave: true,
-            //        saveHandler: async (navigate: NavigationActions) => {
-            //            if (props.group && organization.value && props.group.organizationId === organization.value.id) {
-            //                await checkoutDefaultItem({
-            //                    group: props.group,
-            //                    member,
-            //                    organization: organization.value,
-            //                    admin: true
-            //                })
-            //            } else {
-            //                await chooseGroupForMember({
-            //                    member
-            //                })
-            //            }
-            //        }
-            //    }),
-            //});
-            //
-            //await present({
-            //    components: [component],
-            //    modalDisplayStyle: "popup"
-            //});
         }
     }),
     ...actionBuilder.getActions()

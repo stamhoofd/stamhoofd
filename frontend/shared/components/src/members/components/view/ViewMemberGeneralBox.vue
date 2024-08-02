@@ -28,7 +28,7 @@
                 <dd class="with-icons" :class="{button: $context.auth.hasFullAccess()}" @click="$context.auth.hasFullAccess() ? editResponsibilities() : null">
                     {{ responsibilitiesText }}
 
-                    <span class="icon edit gray" v-if="$context.auth.hasFullAccess()"/>
+                    <span v-if="$context.auth.hasFullAccess()" class="icon edit gray" />
                 </dd>
             </template>
 
@@ -40,7 +40,7 @@
             </template>
 
             <template v-if="member.patchedMember.details.email">
-                <dt>E-mailadres {{ member.patchedMember.details.alternativeEmails.length ? '1' : ''}}</dt>
+                <dt>E-mailadres {{ member.patchedMember.details.alternativeEmails.length ? '1' : '' }}</dt>
                 <dd v-copyable>
                     {{ member.patchedMember.details.email }}
                 </dd>
@@ -71,10 +71,8 @@
 import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useAuth, useContext, useCountry, useOrganization, usePlatform } from '../../../hooks';
-import { MemberActionBuilder } from '../../classes/MemberActionBuilder';
-import { usePresent } from '@simonbackx/vue-app-navigation';
-import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
+import { useAuth, useCountry, useOrganization, usePlatform } from '../../../hooks';
+import { useMemberActions } from '../../classes/MemberActionBuilder';
 
 defineOptions({
     inheritAttrs: false
@@ -88,11 +86,8 @@ const currentCountry = useCountry();
 const platform = usePlatform()
 const organization = useOrganization()
 const hasResponsibilities = computed(() => ((platform.value.config.responsibilities.length > 0 || (organization.value && organization.value.privateMeta?.responsibilities?.length)) && props.member.patchedMember.details.defaultAge >= 16) || responsibilities.value.length)
-const present = usePresent();
 const auth = useAuth();
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write)
-const platformFamilyManager = usePlatformFamilyManager();
-const context = useContext();
 
 const responsibilities = computed(() => {
     return props.member.getResponsibilities(organization.value)
@@ -105,16 +100,10 @@ const responsibilitiesText = computed(() => {
     return Formatter.joinLast(responsibilities.value, ', ', ' en ')
 })
 
-async function editResponsibilities() {
-    const actionBuilder = new MemberActionBuilder({
-        present,
-        context: context.value,
-        groups: [],
-        organizations: [],
-        platformFamilyManager
-    })
+const buildActions = useMemberActions()
 
-    await actionBuilder.editResponsibilities(props.member)
+async function editResponsibilities() {
+    await buildActions().editResponsibilities(props.member)
 }
 
 </script>
