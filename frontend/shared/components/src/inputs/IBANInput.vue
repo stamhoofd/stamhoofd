@@ -79,6 +79,16 @@ export default class IBANInput extends Vue {
         
         if (iban === null || !ibantools.isValidIBAN(iban)) {
             if (this.ibanRaw.length == 0) {
+                if (STAMHOOFD.environment === 'development') {
+                    this.ibanRaw = "BE42631299159354"
+                    this.errorBox = new ErrorBox(new SimpleError({
+                        "code": "invalid_field",
+                        "message": "Vul een rekeningnummer in - automatisch willekeurig rekeningnummer ingevuld",
+                        "field": "iban"
+                    }))
+                    return false
+
+                }
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
                     "message": "Vul een rekeningnummer in",
