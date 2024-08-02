@@ -1,5 +1,6 @@
 <template>
     <div v-if="shouldShow">
+
         <div class="hover-box container">
             <hr>
             <h2 class="style-with-button"><div>Niet-toegekende gegevens</div></h2>
@@ -127,3 +128,9 @@ async function deleteFromMemberDetails<T extends string | number | (AutoEncoder 
     }
 }
 </script>
+
+<style lang="scss" scoped>
+.info-text {
+    padding-bottom: 15px;
+}
+</style>
