@@ -1,8 +1,11 @@
 <template>
     <div v-if="shouldShow">
+
         <div class="hover-box container">
             <hr>
             <h2 class="style-with-button"><div>Niet-toegekende gegevens</div></h2>
+
+
 
             <dl class="details-grid hover">
             <template v-for="(email, index) of uncategorizedEmails">
@@ -30,6 +33,8 @@
                 </dd>
             </template>
         </dl>
+
+        <p class="info-box">Deze gegevens konden niet automatisch toegekend worden aan het lid of aan de ouders. Je kan ze toevoegen of verwijderen.</p>
         </div>  
     </div>
 </template>
@@ -55,3 +60,9 @@ const uncategorizedPhones = computed(() => memberDetails.value.uncategorizedPhon
 const uncategorizedEmails = computed(() => memberDetails.value.uncategorizedEmails ?? []);
 const shouldShow = computed(() => uncategorizedAddresses.value.length > 0 || uncategorizedPhones.value.length > 0 || uncategorizedEmails.value.length > 0);
 </script>
+
+<style lang="scss" scoped>
+.info-text {
+    padding-bottom: 15px;
+}
+</style>
