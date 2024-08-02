@@ -70,11 +70,30 @@ export class RegisterCart {
         return false;
     }
 
+    containsMemberAndGroup(memberId: string, groupId: string) {
+        for (const [i, otherItem] of this.items.entries()) {
+            if (otherItem.member.id === memberId && otherItem.groupId === groupId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     remove(item: RegisterItem) {
         for (const [i, otherItem] of this.items.entries()) {
             if (otherItem.id === item.id) {
                 this.items.splice(i, 1);
                 break;
+            }
+        }
+    }
+
+    removeMemberAndGroup(memberId: string, groupId: string) {
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            const otherItem = this.items[i];
+            
+            if (otherItem.member.id === memberId && otherItem.groupId === groupId) {
+                this.items.splice(i, 1);
             }
         }
     }

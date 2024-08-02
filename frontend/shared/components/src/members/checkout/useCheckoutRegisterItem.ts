@@ -1,15 +1,17 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
+import { SessionContext } from "@stamhoofd/networking";
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem } from "@stamhoofd/structures";
+import { ChooseGroupForMemberView } from "..";
+import { useAppContext } from "../../context/appContext";
+import { useContext } from "../../hooks";
 import { Toast } from "../../overlays/Toast";
 import { NavigationActions, useNavigationActions } from "../../types/NavigationActions";
+import ChooseOrganizationMembersForGroupView from "../ChooseOrganizationMembersForGroupView.vue";
 import { EditMemberStep, MemberStepManager } from "../classes/MemberStepManager";
 import { allMemberSteps } from "../classes/steps";
 import { MemberRecordCategoryStep } from "../classes/steps/MemberRecordCategoryStep";
 import { RegisterItemStep } from "../classes/steps/RegisterItemStep";
-import { ChooseGroupForMemberView } from "..";
 import { startCheckout } from "./startCheckout";
-import { SessionContext } from "@stamhoofd/networking";
-import { useContext } from "../../hooks";
 
 // Flow 1: group and member are already determined
 // -> no extra view in front of normal checkout flow
@@ -77,6 +79,8 @@ export async function checkoutRegisterItem({item, admin, context, options, navig
         }
     }
 
+    const rootNavigate = navigate;
+
     const manager = new MemberStepManager(member, steps, async (navigate) => {
         // Move the item to the cart
         member.family.checkout.cart.add(item);
@@ -98,17 +102,20 @@ export async function checkoutRegisterItem({item, admin, context, options, navig
         } else {
             Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').show();
         }
-        await navigate.dismiss({force: true})
+
+        if (!options?.present || rootNavigate !== navigate) {
+            await navigate.dismiss({force: true})
+        }
 
     }, options);
 
     await manager.saveHandler(null, navigate);
 }
 
-export async function checkoutDefaultItem({group, member, admin, organization, context, options, navigate, showGroupInformation, startCheckoutFlow}: {
+export async function checkoutDefaultItem({group, member, admin, groupOrganization, context, options, navigate, showGroupInformation, startCheckoutFlow}: {
     group: Group,
     member: PlatformMember,
-    organization: Organization,
+    groupOrganization: Organization,
     context: SessionContext,
     navigate: NavigationActions
     admin?: boolean,
@@ -118,7 +125,7 @@ export async function checkoutDefaultItem({group, member, admin, organization, c
 }) {
     return await checkoutRegisterItem({
         context,
-        item: RegisterItem.defaultFor(member, group, organization), 
+        item: RegisterItem.defaultFor(member, group, groupOrganization), 
         options, 
         admin, 
         navigate,
@@ -130,25 +137,35 @@ export async function checkoutDefaultItem({group, member, admin, organization, c
 export function useCheckoutRegisterItem() {
     const navigate = useNavigationActions();
     const context = useContext()
+    const app = useAppContext()
 
-    return async (item: RegisterItem, admin = false, options?: { present?: 'popup'|'sheet' }) => {
-        await checkoutRegisterItem({item, admin, options, navigate, context: context.value});
+    return async ({item, startCheckoutFlow, options}: {item: RegisterItem, startCheckoutFlow?: boolean, options?: { present?: 'popup'|'sheet' }}) => {
+        await checkoutRegisterItem({
+            item, 
+            admin: app === 'dashboard' || app === 'admin', 
+            options, 
+            navigate, 
+            startCheckoutFlow, 
+            context: context.value
+        });
     }
 }
 
 export function useCheckoutDefaultItem() {
     const navigate = useNavigationActions();
     const context = useContext()
+    const app = useAppContext()
 
-    return async ({group, member, organization, admin = false, options}: {group: Group, member: PlatformMember, organization: Organization, admin?: boolean, options?: { present?: 'popup'|'sheet' }}) => {
+    return async ({group, member, groupOrganization, options, startCheckoutFlow}: {group: Group, member: PlatformMember, groupOrganization: Organization, startCheckoutFlow?: boolean, options?: { present?: 'popup'|'sheet' }}) => {
         await checkoutDefaultItem({
             group, 
             member, 
-            organization, 
-            admin, 
+            groupOrganization, 
+            admin: app === 'dashboard' || app === 'admin', 
             options, 
             navigate, 
-            context: context.value
+            context: context.value,
+            startCheckoutFlow
         });
     }
 }
@@ -160,16 +177,16 @@ export function useChooseFamilyMembersForGroup() {
     const navigate = useNavigationActions();
     const context = useContext()
 
-    return async ({group, organization, family}: {group: Group, organization: Organization, family: PlatformFamily}) => {
+    return async ({group, groupOrganization, family}: {group: Group, groupOrganization: Organization, family: PlatformFamily}) => {
         await navigate.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties('ChooseFamilyMembersForGroupView', {
                         family,
                         group,
-                        organization,
+                        groupOrganization,
                         async selectionHandler(member: PlatformMember, navigate: NavigationActions) {
-                            await checkoutDefaultItem({member, group, organization, admin: false, navigate, context: context.value});
+                            await checkoutDefaultItem({member, group, groupOrganization, admin: false, navigate, context: context.value});
                         }
                     })
                 })
@@ -183,16 +200,17 @@ export function useChooseFamilyMembersForGroup() {
 // ----------------------------
 // --------- Flow 3 -----------
 
-export async function chooseOrganizationMembersForGroup({members, group, organization, items, navigate, context}: {
+export async function chooseOrganizationMembersForGroup({members, group, items, context, navigate}: {
     members: PlatformMember[], 
     group: Group, 
-    organization: Organization, 
     context: SessionContext,
     items?: RegisterItem[], 
     navigate: NavigationActions
 }) {
     // Create a new shared checkout for these members
     const checkout = new RegisterCheckout();
+    checkout.asOrganizationId = context.organization?.id || null;
+
     for (const member of members) {
         member.family.checkout = checkout;
         member.family.pendingRegisterItems = [];
@@ -207,22 +225,10 @@ export async function chooseOrganizationMembersForGroup({members, group, organiz
     await navigate.present({
         components: [
             new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties('ChooseOrganizationMembersForGroupView', {
+                root: new ComponentWithProperties(ChooseOrganizationMembersForGroupView, {
                     members,
                     group,
-                    organization,
-                    checkout,
-                    async selectionHandler(member: PlatformMember, navigate: NavigationActions) {
-                        await checkoutDefaultItem({
-                            member, 
-                            group, 
-                            organization, 
-                            context,
-                            admin: true,
-                            navigate,
-                            startCheckoutFlow: false
-                        });
-                    }
+                    checkout
                 })
             })
         ],
@@ -235,8 +241,8 @@ export function useChooseOrganizationMembersForGroup() {
     const navigate = useNavigationActions();
     const context = useContext();
 
-    return async ({members, group, organization, items}: {members: PlatformMember[], group: Group, organization: Organization, items?: RegisterItem[]}) => {
-        return await chooseOrganizationMembersForGroup({members, group, organization, items, navigate, context: context.value});
+    return async ({members, group, items}: {members: PlatformMember[], group: Group, items?: RegisterItem[]}) => {
+        return await chooseOrganizationMembersForGroup({members, group, items, navigate, context: context.value});
     }
 }
 
@@ -249,8 +255,8 @@ export async function chooseGroupForMember({member, navigate, context}: {member:
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseGroupForMemberView, {
                     member,
-                    selectionHandler: async ({group, organization}: {group: Group, organization: Organization}, navigate: NavigationActions) => {
-                        await checkoutDefaultItem({member, group, organization, admin: false, navigate, context});
+                    selectionHandler: async ({group, groupOrganization}: {group: Group, groupOrganization: Organization}, navigate: NavigationActions) => {
+                        await checkoutDefaultItem({member, group, groupOrganization, admin: false, navigate, context});
                     }
                 })
             })

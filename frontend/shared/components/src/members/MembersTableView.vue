@@ -19,11 +19,11 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, EditMemberGeneralBox, InMemoryTableAction, MemberStepView, ModernTableView, NavigationActions, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useCheckoutDefaultItem, useChooseGroupForMember, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useCheckoutDefaultItem, useChooseGroupForMember, useChooseOrganizationMembersForGroup, useContext, useOrganization, usePlatform, usePlatformFamilyManager, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupType, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupType, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Ref, computed, markRaw, reactive, ref } from "vue";
+import { Ref, computed, ref } from "vue";
 import { MemberActionBuilder } from "./classes/MemberActionBuilder";
 import MemberSegmentedView from './MemberSegmentedView.vue';
 
@@ -80,8 +80,6 @@ const groups = (() => {
     }
     return []
 })()
-
-const groupIds = groups.map(g => g.id)
 
 function extendSort(list: SortList): SortList  {
     // Map 'age' to 'birthDay' + reverse direction
@@ -140,7 +138,7 @@ const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
         return {
             results: PlatformFamily.createSingles(blob, {
                 contextOrganization: context.value.organization,
-                platform: Platform.shared
+                platform: platform.value
             }),
             next: response.data.next
         }
@@ -378,49 +376,55 @@ const actionBuilder = new MemberActionBuilder({
 
 const checkoutDefaultItem = useCheckoutDefaultItem()
 const chooseGroupForMember = useChooseGroupForMember()
+const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup()
 
 const actions: TableAction<PlatformMember>[] = [
     new InMemoryTableAction({
-        name: "Nieuw lid",
+        name: "Leden inschrijven",
         icon: "add",
         priority: 0,
         groupIndex: 1,
         needsSelection: false,
-        enabled: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value.period.settings.categories) : auth.permissions?.hasWriteAccess()) && !props.waitingList,
+        enabled: (props.group && organization.value ? props.group.hasWriteAccess(auth.permissions, organization.value.period.settings.categories) : false),
         handler: async () => {
-            const family = new PlatformFamily({
-                contextOrganization: organization.value,
-                platform: platform.value
+            await chooseOrganizationMembersForGroup({
+                members: [],
+                group: props.group!,
+                groupOrganization: organization.value!
             })
-            const member = reactive(family.newMember() as any) as PlatformMember
-
-            const component = new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MemberStepView, {
-                    title: 'Nieuw lid',
-                    member,
-                    component: markRaw(EditMemberGeneralBox),
-                    doSave: true,
-                    saveHandler: async (navigate: NavigationActions) => {
-                        if (props.group && organization.value && props.group.organizationId === organization.value.id) {
-                            await checkoutDefaultItem({
-                                group: props.group,
-                                member,
-                                organization: organization.value,
-                                admin: true
-                            })
-                        } else {
-                            await chooseGroupForMember({
-                                member
-                            })
-                        }
-                    }
-                }),
-            });
-
-            await present({
-                components: [component],
-                modalDisplayStyle: "popup"
-            });
+            //const family = new PlatformFamily({
+            //    contextOrganization: organization.value,
+            //    platform: platform.value
+            //})
+            //const member = reactive(family.newMember() as any) as PlatformMember
+            //
+            //const component = new ComponentWithProperties(NavigationController, {
+            //    root: new ComponentWithProperties(MemberStepView, {
+            //        title: 'Nieuw lid',
+            //        member,
+            //        component: markRaw(EditMemberGeneralBox),
+            //        doSave: true,
+            //        saveHandler: async (navigate: NavigationActions) => {
+            //            if (props.group && organization.value && props.group.organizationId === organization.value.id) {
+            //                await checkoutDefaultItem({
+            //                    group: props.group,
+            //                    member,
+            //                    organization: organization.value,
+            //                    admin: true
+            //                })
+            //            } else {
+            //                await chooseGroupForMember({
+            //                    member
+            //                })
+            //            }
+            //        }
+            //    }),
+            //});
+            //
+            //await present({
+            //    components: [component],
+            //    modalDisplayStyle: "popup"
+            //});
         }
     }),
     ...actionBuilder.getActions()

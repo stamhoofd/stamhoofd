@@ -157,6 +157,9 @@ const filterCompilers: SQLFilterDefinitions = {
         .where(
             SQL.column('memberId'),
             SQL.column('members', 'id'),
+        ).whereNot(
+            SQL.column('registeredAt'),
+            null,
         ),
         {
             ...registrationFilterCompilers,

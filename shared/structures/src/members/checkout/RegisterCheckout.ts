@@ -71,6 +71,9 @@ export class RegisterCheckout{
     paymentMethod: PaymentMethod | null = null
     asOrganizationId: string | null = null
 
+    // Default hint for empty carts to know the organization to use
+    defaultOrganization: Organization | null = null
+
     convert(): IDRegisterCheckout {
         return IDRegisterCheckout.create({
             cart: this.cart.convert(),
@@ -87,7 +90,11 @@ export class RegisterCheckout{
     }
 
     get singleOrganization() {
-        return this.cart.singleOrganization
+        return this.cart.singleOrganization ?? this.defaultOrganization
+    }
+
+    setDefaultOrganization(organization: Organization|null) {
+        this.defaultOrganization = organization
     }
 
     get isAdminFromSameOrganization() {

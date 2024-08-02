@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="editRegistration" :selectable="isEditable" class="left-center hover-box member-registration-block" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
         <template #left>
-            <GroupIcon :group="group" :waiting-list="registration.waitingList" />
+            <GroupIcon :group="group" />
         </template>
         <h3 class="style-title-list">
             {{ group.settings.name }}

@@ -35,6 +35,9 @@ export class Registration extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     reservedUntil: Date | null = null
 
+    /**
+     * Currently not yet used
+     */
     @field({ decoder: DateDecoder, nullable: true })
     deactivatedAt: Date | null = null
 
@@ -44,6 +47,9 @@ export class Registration extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date()
 
+    /**
+     * @deprecated - replaced by group type
+     */
     @field({ decoder: BooleanDecoder, version: 16 })
     waitingList = false
 

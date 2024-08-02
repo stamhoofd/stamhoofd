@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors"
 import { Formatter } from "@stamhoofd/utility"
-import { Group } from "../../Group"
+import { Group, GroupType } from "../../Group"
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from "../../GroupSettings"
 import { PlatformMember, PlatformFamily } from "../PlatformMember"
 import { RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator"
@@ -89,11 +89,7 @@ export class RegisterItem implements RegisterItemWithPrice {
         this.member = data.member
         this.group = data.group
 
-        if (this.group.settings.prices.length === 0) {
-            throw new Error("Group has no prices")
-        }
-
-        this.groupPrice = data.groupPrice ?? this.group.settings.prices[0]
+        this.groupPrice = data.groupPrice ?? this.group.settings.prices[0] ?? GroupPrice.create({name: 'Ongeldig tarief', id: ''})
         this.organization = data.organization
         this.options = data.options ?? []
 
@@ -204,11 +200,17 @@ export class RegisterItem implements RegisterItemWithPrice {
             throw new Error("Group and organization do not match in RegisterItem.defaultFor")
         }
 
-        const item = new RegisterItem({
+        let item = new RegisterItem({
             member,
             group,
             organization
         });
+
+        if (item.shouldUseWaitingList() && group.waitingList) {
+            group = group.waitingList
+            item = RegisterItem.defaultFor(member, group, organization);
+        }
+
         return item;
     }
 
@@ -220,17 +222,27 @@ export class RegisterItem implements RegisterItemWithPrice {
         
         const errors = new SimpleErrors()
 
-        const groupPrice = this.group.settings.prices.find(p => p.id === this.groupPrice.id)
-        if (!groupPrice) {
+        if (this.group.settings.prices.length === 0) {
             errors.addError(
                 new SimpleError({
                     code: "product_unavailable",
                     message: "Product unavailable",
-                    human: "Eén of meerdere tarieven van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                    human: "Er is iets fout met de tariefinstellingen van "+this.group.settings.name+", waardoor je nu niet kan inschrijven. Neem contact op met een beheerder en vraag de tariefinstellingen na te kijken."
                 })
             )
         } else {
-            this.groupPrice = groupPrice
+            const groupPrice = this.group.settings.prices.find(p => p.id === this.groupPrice.id)
+            if (!groupPrice) {
+                errors.addError(
+                    new SimpleError({
+                        code: "product_unavailable",
+                        message: "Product unavailable",
+                        human: "Eén of meerdere tarieven van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                    })
+                )
+            } else {
+                this.groupPrice = groupPrice
+            }
         }
 
         // Check all options
@@ -289,15 +301,17 @@ export class RegisterItem implements RegisterItemWithPrice {
     }
     
     hasReachedCategoryMaximum(): boolean {
+        if (this.group.type !== GroupType.Membership) {
+            return false;
+        }
+
         const parents = this.group.getParentCategories(this.organization.period.settings.categories, false)
     
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {
-                const count = this.member.member.registrations.filter(r => {
-                    if (r.registeredAt !== null && !r.waitingList && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)) {
-                        // Check cycle (only count current periods, not previous periods)
-                        const g = this.organization.groups.find(gg => gg.id === r.groupId)
-                        return g && g.cycle === r.cycle
+                const count = this.member.patchedMember.registrations.filter(r => {
+                    if (r.registeredAt !== null && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)) {
+                        return true;
                     }
                     return false
                 }).length
@@ -372,6 +386,13 @@ export class RegisterItem implements RegisterItemWithPrice {
     }
 
     shouldUseWaitingList() {
+        const checkout = this.member.family.checkout;
+
+        if (checkout.isAdminFromSameOrganization) {
+            // Admins can skip the waiting lists if they register internal members for their own groups
+            return false;
+        }
+
         if (this.group.settings.waitingListType === WaitingListType.All) {
             return true;
         }
@@ -417,10 +438,28 @@ export class RegisterItem implements RegisterItemWithPrice {
         return null;
     }
 
-    validate() {
+    get validationWarning() {
+        if (this.validationError) {
+            return null;
+        }
+
+        try {
+            this.validate({warnings: true})
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                return e.getHuman();
+            }
+            throw e;
+        }
+        return null;
+    }
+
+    validate(options?: {warnings?: boolean}) {
         this.cartError = null;
         this.refresh(this.group)
-
+        const checkout = this.member.family.checkout;
+        const admin = checkout.isAdminFromSameOrganization && !options?.warnings
+        
         if (this.group.organizationId !== this.organization.id) {
             throw new Error("Group and organization do not match in RegisterItem.validate")
         }
@@ -449,7 +488,7 @@ export class RegisterItem implements RegisterItemWithPrice {
             throw new SimpleError({
                 code: "maximum_reached",
                 message: "Maximum reached",
-                human: `Je kan niet meer inschrijven voor ${this.group.settings.name} omdat je al ingeschreven bent of aan het inschrijven bent voor een groep die je niet kan combineren.`
+                human: `Je kan niet meer inschrijven voor ${this.group.settings.name} omdat ${this.member.patchedMember.name} al ingeschreven is voor een groep die je niet kan combineren.`
             })
         }
 
@@ -458,36 +497,38 @@ export class RegisterItem implements RegisterItemWithPrice {
             return
         }
 
-        if (this.group.notYetOpen) {
-            throw new SimpleError({
-                code: "not_yet_open",
-                message: "Not yet open",
-                human: `De inschrijvingen voor ${this.group.settings.name} zijn nog niet geopend.`
-            })
-        }
-
-        if (this.group.closed) {
-            throw new SimpleError({
-                code: "closed",
-                message: "Closed",
-                human: `De inschrijvingen voor ${this.group.settings.name} zijn gesloten.`
-            })
-        }
-
-        // Check if it fits
-        if (this.member.member.details) {
-            if (!this.member.member.details.doesMatchGroup(this.group)) {
-                const error = this.member.member.details.getMatchingError(this.group);
+        if (!admin) {
+            if (this.group.notYetOpen) {
                 throw new SimpleError({
-                    code: "not_matching",
-                    message: "Not matching",
-                    human: error?.description ?? "Je voldoet niet aan de voorwaarden om in te schrijven voor deze groep."
+                    code: "not_yet_open",
+                    message: "Not yet open",
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn nog niet geopend.`
                 })
+            }
+
+            if (this.group.closed) {
+                throw new SimpleError({
+                    code: "closed",
+                    message: "Closed",
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn gesloten.`
+                })
+            }
+
+            // Check if it fits
+            if (this.member.member.details) {
+                if (!this.member.member.details.doesMatchGroup(this.group)) {
+                    const error = this.member.member.details.getMatchingError(this.group);
+                    throw new SimpleError({
+                        code: "not_matching",
+                        message: "Not matching",
+                        human: error?.description ?? `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`
+                    })
+                }
             }
         }
 
          // Check if registrations are limited
-        if (!this.doesMeetRequireGroupIds()) {
+        if (!this.doesMeetRequireGroupIds() && !admin) {
             throw new SimpleError({
                 code: "not_matching",
                 message: "Not matching",
@@ -498,7 +539,7 @@ export class RegisterItem implements RegisterItemWithPrice {
         const existingMember = this.isExistingMemberOrFamily()
 
         // Pre registrations?
-        if (this.group.activePreRegistrationDate) {
+        if (this.group.activePreRegistrationDate && !admin) {
             if (!existingMember) {
                 throw new SimpleError({
                     code: "pre_registrations",
@@ -508,7 +549,7 @@ export class RegisterItem implements RegisterItemWithPrice {
             }
         }
 
-        if (!this.waitingList && this.shouldUseWaitingList()) {
+        if (this.shouldUseWaitingList()) {
             throw new SimpleError({
                 code: "waiting_list_required",
                 message: "Waiting list required",
@@ -516,23 +557,21 @@ export class RegisterItem implements RegisterItemWithPrice {
             })
         }
 
-        if (!this.waitingList) {
-            if (!this.group.waitingList) {
-                if (this.hasReachedGroupMaximum()) {
-                    throw new SimpleError({
-                        code: "maximum_reached",
-                        message: "Maximum reached",
-                        human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.`
-                    })
-                }
-            } else {
-                if (this.hasReachedGroupMaximum()) {
-                    throw new SimpleError({
-                        code: "maximum_reached",
-                        message: "Maximum reached",
-                        human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet.`
-                    })
-                }
+        if (!this.group.waitingList) {
+            if (this.hasReachedGroupMaximum()) {
+                throw new SimpleError({
+                    code: "maximum_reached",
+                    message: "Maximum reached",
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.`
+                })
+            }
+        } else {
+            if (this.hasReachedGroupMaximum()) {
+                throw new SimpleError({
+                    code: "maximum_reached",
+                    message: "Maximum reached",
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet.`
+                })
             }
         }
 

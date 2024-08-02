@@ -41,6 +41,7 @@
                         <span v-if="saveIcon" class="icon " :class="saveIcon" />
                         <span>{{ saveText }}</span>
                         <span v-if="saveIconRight" class="icon " :class="saveIconRight" />
+                        <span v-if="saveBadge" v-text="saveBadge" class="bubble" />
                     </button>
                 </LoadingButton>
             </template>
@@ -94,6 +95,9 @@ export default class SaveView extends Mixins(NavigationMixin) {
 
     @Prop({ default: null })
         saveIconRight!: string | null;
+
+    @Prop({ default: null })
+        saveBadge!: string | null;
 
     @Prop({ default: "Annuleren" })
         cancelText!: string | null;

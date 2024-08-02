@@ -3,9 +3,22 @@
         <STNavigationBar :title="title" />
         <main>
             <h1>{{ title }}</h1>
-            
-            <p>
-                Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.
+
+            <template v-if="!checkout.isAdminFromSameOrganization">
+                <p v-if="names.length > 0">
+                    Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.
+                </p>
+
+                <p v-else-if="waitingListNames.length > 0">
+                    We houden je op de hoogte van jouw status op de wachtlijst.
+                </p>
+
+                <p v-else>
+                    We houden je op de hoogte.
+                </p>
+            </template>
+            <p v-else>
+                Er werden mogelijks automatische e-mails uitgestuurd als die ingesteld stonden.
             </p>
         </main>
 
@@ -22,8 +35,8 @@
 
 <script lang="ts" setup>
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { STToolbar } from '@stamhoofd/components';
-import { RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
+import { STToolbar, useAppContext } from '@stamhoofd/components';
+import { GroupType, RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted } from 'vue';
 
@@ -37,9 +50,12 @@ onMounted(() => {
     props.checkout.clear()
 })
 
+const app = useAppContext()
+const names = Formatter.uniqueArray(props.registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.details?.firstName ?? "?"))
+const waitingListNames = Formatter.uniqueArray(props.registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.details?.firstName ?? "?"))
+
 const title = computed(() => {
     let t = "Hoera! "
-    const names = Formatter.uniqueArray(props.registrations.filter(r => !r.waitingList).map(r => r.member.details?.firstName ?? "?"))
 
     if (names.length > 0) {
         if (names.length > 2) {
@@ -50,8 +66,6 @@ const title = computed(() => {
             t += names.join('')+" is ingeschreven"
         }
     }
-
-    const waitingListNames = Formatter.uniqueArray(props.registrations.filter(r => r.waitingList).map(r => r.member.details?.firstName ?? "?"))
 
     if (waitingListNames.length > 0) {
         if (names.length > 0) {

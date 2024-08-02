@@ -87,6 +87,10 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     get adminCategoryTree(): GroupCategoryTree {
         return this.getCategoryTree({admin: true})
     }
+
+    get waitingLists(): Group[] {
+        return (this.groups.map(g => g.waitingList).filter(g => g != null)  as Group[]).filter((value, index, self) => self.findIndex((v) => value.id === v.id) === index)
+    }
     
     /**
      * Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.

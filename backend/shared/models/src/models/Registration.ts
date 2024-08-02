@@ -69,6 +69,9 @@ export class Registration extends Model {
     @column({ type: "datetime", nullable: true })
     reservedUntil: Date | null = null
 
+    /**
+     * @deprecated - replaced by group type
+     */
     @column({ type: "boolean" })
     waitingList = false
 

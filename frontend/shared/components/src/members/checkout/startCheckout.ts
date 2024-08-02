@@ -1,5 +1,5 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, PushOptions } from '@simonbackx/vue-app-navigation';
 import { SessionContext } from '@stamhoofd/networking';
 import { PaymentStatus, PlatformFamily, RegisterCheckout, RegisterResponse } from '@stamhoofd/structures';
 import { NavigationActions } from '../../types/NavigationActions';
@@ -17,8 +17,28 @@ export async function startCheckout({checkout, context}: {checkout: RegisterChec
         new PaymentSelectionStep(checkout),
     ]
 
+    const originalNavigate = navigate
     const stepManager = new ViewStepsManager(steps, async (navigate: NavigationActions) => {
-        await register({checkout, context}, navigate)
+        const didShowAnyView = navigate !== originalNavigate
+        await register({checkout, context}, didShowAnyView ? navigate : {
+            ...navigate,
+            show: async (o) => {
+                let options: PushOptions
+                if (!(o as any).components) {
+                    options = ({ components: [o as ComponentWithProperties] });
+                } else {
+                    options = o as PushOptions
+                }
+
+                await navigate.present({...options, modalDisplayStyle: 'popup'})
+            },
+            dismiss: async () => {
+                // noop
+            },
+            pop: async () => {
+                // noop
+            }
+        })
     }, {present: 'popup'})
 
 

@@ -42,7 +42,7 @@ import SearchOrganizationView from './SearchOrganizationView.vue';
 
 const props = defineProps<{
     member: PlatformMember;
-    selectionHandler: (data: {group: Group, organization: Organization}, navigate: NavigationActions) => Promise<void>|void;
+    selectionHandler: (data: {group: Group, groupOrganization: Organization}, navigate: NavigationActions) => Promise<void>|void;
 }>();
 
 const selectedOrganization = ref((props.member.organizations[0] ?? null) as any) as Ref<Organization|null>;
@@ -82,7 +82,7 @@ function addOrganization(organization: Organization) {
 
 async function openGroup(group: Group) {
     try {
-        await props.selectionHandler({group, organization: selectedOrganization.value!}, navigate)
+        await props.selectionHandler({group, groupOrganization: selectedOrganization.value!}, navigate)
     } catch (e) {
         Toast.fromError(e).show()
     }

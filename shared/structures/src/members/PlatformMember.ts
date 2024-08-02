@@ -663,14 +663,12 @@ export class PlatformMember implements ObjectWithRecords {
 
     canRegister(group: Group, organization: Organization) {
         const item = RegisterItem.defaultFor(this, group, organization);
+        
         const error = item.validationError;
         if (error === null) {
             return true;
         }
-
-        if (item.shouldUseWaitingList()) {
-            return true;
-        }
+        
         return false;
     }
 

@@ -63,13 +63,23 @@ export class MemberActionBuilder {
 
         return [
             new MenuTableAction({
-                name: "Wachtlijst van",
+                name: "Wachtlijsten",
                 groupIndex: 0,
+                enabled: organization.period.waitingLists.length > 0,
                 childActions: () => [
-                    ...this.getActionsForCategory(organization.adminCategoryTree, (members, group) => this.register(members, group, true))
+                    ...organization.period.waitingLists.map(g => {
+                        return new InMemoryTableAction({
+                            name: g.settings.name,
+                            needsSelection: true,
+                            allowAutoSelectAll: false,
+                            handler: async (members: PlatformMember[]) => {
+                                await this.register(members, g)
+                            }
+                        })
+                    })
                 ]
             }),
-            ...this.getActionsForCategory(organization.adminCategoryTree, (members, group) => this.register(members, group, false))
+            ...this.getActionsForCategory(organization.period.adminCategoryTree, async (members, group) => await this.register(members, group))
         ]
     }
 
@@ -85,20 +95,29 @@ export class MemberActionBuilder {
         const organization = this.organizations[0]
         return [
             new MenuTableAction({
-                name: this.inWaitingList ? "Verplaats naar wachtlijst" : "Verplaatsen naar",
+                name: "Verplaatsen naar",
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled: this.hasWrite,
                 childActions: () => [
-                    new InMemoryTableAction({
-                        name: "Wachtlijst",
+                    new MenuTableAction({
+                        name: "Wachtlijsten",
                         groupIndex: 0,
-                        enabled: !this.inWaitingList,
-                        handler: (members) => {
-                            this.moveToWaitingList(members)
-                        }
+                        enabled: organization.period.waitingLists.length > 0,
+                        childActions: () => [
+                            ...organization.period.waitingLists.map(g => {
+                                return new InMemoryTableAction({
+                                    name: g.settings.name,
+                                    needsSelection: true,
+                                    allowAutoSelectAll: false,
+                                    handler: (members: PlatformMember[]) => {
+                                        this.moveRegistrations(members, g)
+                                    }
+                                })
+                            })
+                        ]
                     }),
                     ...this.getActionsForCategory(organization.adminCategoryTree, (members, group) => this.moveRegistrations(members, group))
                 ]
@@ -124,7 +143,7 @@ export class MemberActionBuilder {
         })];
     }
 
-    getActionsForCategory(category: GroupCategoryTree, action: (members: PlatformMember[], group: Group) => void): TableAction<PlatformMember>[] {
+    getActionsForCategory(category: GroupCategoryTree, action: (members: PlatformMember[], group: Group) => void|Promise<void>): TableAction<PlatformMember>[] {
         return [
             ...category.categories.map(c => {
                 return new MenuTableAction({
@@ -141,8 +160,8 @@ export class MemberActionBuilder {
                     name: g.settings.name,
                     needsSelection: true,
                     allowAutoSelectAll: false,
-                    handler: (members: PlatformMember[]) => {
-                        action(members, g)
+                    handler: async (members: PlatformMember[]) => {
+                        await action(members, g)
                     }
                 })
             })
@@ -587,90 +606,6 @@ export class MemberActionBuilder {
         return this.groups?.map(g => g.id) ?? []
     }
 
-    acceptWaitingList(members: PlatformMember[]) {
-        const member = members.length == 1 ? members[0].patchedMember.name : members.length+" leden"
-        new CenteredMessage(`${member} inschrijven?`, "We raden sterk aan om leden toe te laten en daarna uit te nodigen om in te schrijven via een e-mail. Dan zijn ze verplicht om de rest van hun gegevens aan te vullen en de betaling in orde te brengen.")
-            .addButton(new CenteredMessageButton("Ja, inschrijven", {
-                action: async () => {
-                    const patches = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-                    for (const member of members) {
-                        const registrationsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Registration>;
-                        const registrations = member.filterRegistrations({groups: this.groups, waitingList: true})
-
-                        if (registrations.length === 0) {
-                            continue
-                        }
-        
-                        for (const registration of registrations) {
-                            const cart = new RegisterCart()
-                            cart.add(new RegisterItem({
-                                member: member,
-                                group: registration.group,
-                                waitingList: false
-                            }))
-                            cart.calculatePrices()
-                            const price = cart.price
-                            registrationsPatch.addPatch(
-                                Registration.patch({
-                                    id: registration.id,
-                                    waitingList: false,
-                                    price
-                                })
-                            )
-                        }
-        
-                        patches.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            registrations: registrationsPatch
-                        }))
-                    }
-                    await this.platformFamilyManager.isolatedPatch(members, patches, false)
-                    new Toast(members.length+" leden zijn ingeschreven", "success green").show()
-                },
-                type: "destructive",
-                icon: "download"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
-    }
-
-    moveToWaitingList(members: PlatformMember[]) {
-        const member = members.length == 1 ? members[0].patchedMember.name : members.length+" leden"
-        new CenteredMessage(`${member} naar de wachtlijst verplaatsen?`)
-            .addButton(new CenteredMessageButton("Ja, verplaats", {
-                action: async () => {
-                    const patches = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
-                    for (const member of members) {
-                        const registrationsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Registration>;
-                        const registrations = member.filterRegistrations({groups: this.groups, waitingList: false})
-
-                        if (registrations.length === 0) {
-                            continue
-                        }
-        
-                        for (const registration of registrations) {
-                            registrationsPatch.addPatch(
-                                Registration.patch({
-                                    id: registration.id,
-                                    waitingList: true
-                                })
-                            )
-                        }
-        
-                        patches.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            registrations: registrationsPatch
-                        }))
-                    }
-                    await this.platformFamilyManager.isolatedPatch(members, patches, false)
-                    new Toast(members.length+" leden zijn naar de wachtlijst verplaatst", "success green").show()
-                },
-                icon: "clock"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
-    }
-
     moveRegistrations(members: PlatformMember[], group: Group) {
         const member = members.length == 1 ? members[0].patchedMember.name : members.length+" leden"
         new CenteredMessage(`${member} verplaatsen naar ${group.settings.name}?`)
@@ -681,7 +616,7 @@ export class MemberActionBuilder {
                     const patches = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     for (const member of members) {
                         const registrationsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Registration>;
-                        const registrations = member.filterRegistrations({groups: this.groups, waitingList: this.inWaitingList})
+                        const registrations = member.filterRegistrations({groups: this.groups})
 
                         if (registrations.length === 0) {
                             continue
@@ -723,7 +658,7 @@ export class MemberActionBuilder {
                 member: members[0], 
                 group,
                 admin: true,
-                organization: this.organizations.find(o => o.id === group.organizationId)!,
+                groupOrganization: this.organizations.find(o => o.id === group.organizationId)!,
                 context: this.context,
                 navigate: {
                     present: this.present,
@@ -743,7 +678,7 @@ export class MemberActionBuilder {
         return await chooseOrganizationMembersForGroup({
             members, 
             group,
-            organization: this.organizations.find(o => o.id === group.organizationId)!,
+            groupOrganization: this.organizations.find(o => o.id === group.organizationId)!,
             context: this.context,
             navigate: {
                 present: this.present,

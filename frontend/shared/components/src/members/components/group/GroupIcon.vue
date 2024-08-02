@@ -17,18 +17,17 @@
 
 <script setup lang="ts">
 import { ImageComponent } from '@stamhoofd/components';
-import { Group } from '@stamhoofd/structures';
+import { Group, GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(
     defineProps<{
         group: Group;
-        waitingList?: boolean;
     }>(), {
-        waitingList: false,
     }
 );
 
 const image = computed(() => props.group.settings.squarePhoto ?? props.group.settings.coverPhoto);
+const waitingList = computed(() => props.group.type === GroupType.WaitingList);
 
 </script>

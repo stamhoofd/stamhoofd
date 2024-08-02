@@ -62,7 +62,7 @@ module.exports = {
         "@typescript-eslint/indent": ["warn", 4],
         "getter-return": "off", // doesn't work with TypeScript
         "vue/no-unused-components": "warn",
-        "vue/no-multiple-template-root": "error", // For some reason when you have html comments inside components, they are treated as root elements too, which cause unwanted bugs
+        "vue/no-multiple-template-root": "warn", // For some reason when you have html comments inside components, they are treated as root elements too, which cause unwanted bugs
         "vue/multi-word-component-names": "off"
     }
 };
