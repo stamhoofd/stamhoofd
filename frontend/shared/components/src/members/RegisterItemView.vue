@@ -1,108 +1,89 @@
 <template>
-    <form class="st-view register-item-view" @submit.prevent="addToCart">
-        <STNavigationBar :title="item.group.settings.name">
-            <template #left>
-                <p>
-                    <span v-if="item.calculatedPrice" class="style-price">{{ formatPrice(item.calculatedPrice) }}</span>
-                </p>
-            </template>
-        </STNavigationBar>
-        <main>
-            <h1>{{ item.group.settings.name }}</h1>
+    <SaveView class="st-view register-item-view" v-on="isInCart ? {delete: deleteMe} : {}" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Toevoegen'" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" @save="addToCart">
+        <h1>{{ item.group.settings.name }}</h1>
 
-            <template v-if="showGroupInformation">
-                <figure v-if="item.group.settings.coverPhoto" class="cover-photo">
-                    <ImageComponent :image="item.group.settings.coverPhoto" :auto-height="true" />
-                </figure>
-                <p v-if="item.group.settings.description" class="style-description pre-wrap" v-text="item.group.settings.description" />
-            </template>
+        <template v-if="showGroupInformation">
+            <figure v-if="item.group.settings.coverPhoto" class="cover-photo">
+                <ImageComponent :image="item.group.settings.coverPhoto" :auto-height="true" />
+            </figure>
+            <p v-if="item.group.settings.description" class="style-description pre-wrap" v-text="item.group.settings.description" />
+        </template>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-            <div v-if="item.getFilteredPrices({admin}).length > 1" class="container">
-                <STList>
-                    <STListItem v-for="price in item.getFilteredPrices({admin})" :key="price.id" :selectable="!price.isSoldOut" :disabled="price.isSoldOut" element-name="label">
-                        <template #left>
-                            <Radio v-model="item.groupPrice" :value="price" :name="'groupPrice'" :disabled="price.isSoldOut" />
-                        </template>
-                        <h4 class="style-title-list">
-                            {{ price.name || 'Naamloos' }}
-                        </h4>
+        <div v-if="item.getFilteredPrices().length > 1" class="container">
+            <STList>
+                <STListItem v-for="price in item.getFilteredPrices()" :key="price.id" :selectable="!price.isSoldOut" :disabled="price.isSoldOut" element-name="label">
+                    <template #left>
+                        <Radio v-model="item.groupPrice" :value="price" :name="'groupPrice'" :disabled="price.isSoldOut" />
+                    </template>
+                    <h4 class="style-title-list">
+                        {{ price.name || 'Naamloos' }}
+                    </h4>
 
-                        <p v-if="price.remainingStock === 0" class="style-description-small">
-                            Uitverkocht
-                        </p>
+                    <p v-if="price.remainingStock === 0" class="style-description-small">
+                        Uitverkocht
+                    </p>
 
-                        <template #right>
-                            <span class="style-price-base">{{ formatPrice(price.price.forMember(item.member)) }}</span>
-                        </template>
-                    </STListItem>
-                </STList>
-            </div>
+                    <template #right>
+                        <span class="style-price-base">{{ formatPrice(price.price.forMember(item.member)) }}</span>
+                    </template>
+                </STListItem>
+            </STList>
+        </div>
 
-            <div v-for="menu in item.getFilteredOptionMenus({admin})" :key="menu.id" class="container">
-                <hr>
-                <h2>{{ menu.name }}</h2>
-                <p v-if="menu.description" class="pre-wrap style-description-block">
-                    {{ menu.description }}
-                </p>
-
-                <STList>
-                    <STListItem v-for="option in item.getFilteredOptions(menu, {admin})" :key="option.id" :selectable="!option.isSoldOut" :disabled="option.isSoldOut" element-name="label">
-                        <template #left>
-                            <Radio v-if="!menu.multipleChoice" :model-value="getOptionSelected(menu, option)" :value="true" :disabled="option.isSoldOut" @update:model-value="setOptionSelected(menu, option, $event)" />
-                            <Checkbox v-else :value="option" :disabled="option.isSoldOut" :model-value="getOptionSelected(menu, option)" @update:model-value="setOptionSelected(menu, option, $event)" />
-                        </template>
-                        <h4 class="style-title-list">
-                            {{ option.name || 'Naamloos' }}
-                        </h4>
-                        <p v-if="option.allowAmount && option.price.forMember(item.member)" class="style-description-small">
-                            {{ formatPrice(option.price.forMember(item.member)) }} per stuk
-                        </p>
-
-                        <p v-if="option.remainingStock !== null && (option.maximum === null || option.remainingStock < option.maximum) && option.allowAmount" class="style-description-small">
-                            Nog {{ Formatter.pluralText(option.remainingStock, 'stuk', 'stuks') }} beschikbaar
-                        </p>
-
-                        <p v-else-if="option.remainingStock === 0" class="style-description-small">
-                            Uitverkocht
-                        </p>
-
-                        <template #right>
-                            <template v-if="option.allowAmount">
-                                <template v-if="getOptionSelected(menu, option)">
-                                    <NumberInput :model-value="getOptionAmount(menu, option)" suffix="stuks" suffix-singular="stuk" :max="option.maximumSelection" :min="1" :stepper="true" @update:model-value="setOptionAmount(menu, option, $event)" />
-                                </template>
-                            </template>
-                            <span v-else-if="option.price.forMember(item.member)" class="style-price-base">
-                                {{ formatPrice(option.price.forMember(item.member)) }}
-                            </span>
-                        </template>
-                    </STListItem>
-                </STList>
-            </div>
-
+        <div v-for="menu in item.getFilteredOptionMenus()" :key="menu.id" class="container">
             <hr>
-            <div class="pricing-box max">
-                <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: item.calculatedPrice}]" />
-            </div>
-        </main>
+            <h2>{{ menu.name }}</h2>
+            <p v-if="menu.description" class="pre-wrap style-description-block">
+                {{ menu.description }}
+            </p>
 
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" type="submit">
-                        <span class="icon basket" />
-                        <span>Toevoegen</span>
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </form>
+            <STList>
+                <STListItem v-for="option in item.getFilteredOptions(menu)" :key="option.id" :selectable="!option.isSoldOut" :disabled="option.isSoldOut" element-name="label">
+                    <template #left>
+                        <Radio v-if="!menu.multipleChoice" :model-value="getOptionSelected(menu, option)" :value="true" :disabled="option.isSoldOut" @update:model-value="setOptionSelected(menu, option, $event)" />
+                        <Checkbox v-else :value="option" :disabled="option.isSoldOut" :model-value="getOptionSelected(menu, option)" @update:model-value="setOptionSelected(menu, option, $event)" />
+                    </template>
+                    <h4 class="style-title-list">
+                        {{ option.name || 'Naamloos' }}
+                    </h4>
+                    <p v-if="option.allowAmount && option.price.forMember(item.member)" class="style-description-small">
+                        {{ formatPrice(option.price.forMember(item.member)) }} per stuk
+                    </p>
+
+                    <p v-if="option.remainingStock !== null && (option.maximum === null || option.remainingStock < option.maximum) && option.allowAmount" class="style-description-small">
+                        Nog {{ Formatter.pluralText(option.remainingStock, 'stuk', 'stuks') }} beschikbaar
+                    </p>
+
+                    <p v-else-if="option.remainingStock === 0" class="style-description-small">
+                        Uitverkocht
+                    </p>
+
+                    <template #right>
+                        <template v-if="option.allowAmount">
+                            <template v-if="getOptionSelected(menu, option)">
+                                <NumberInput :model-value="getOptionAmount(menu, option)" suffix="stuks" suffix-singular="stuk" :max="option.maximumSelection" :min="1" :stepper="true" @update:model-value="setOptionAmount(menu, option, $event)" />
+                            </template>
+                        </template>
+                        <span v-else-if="option.price.forMember(item.member)" class="style-price-base">
+                            {{ formatPrice(option.price.forMember(item.member)) }}
+                        </span>
+                    </template>
+                </STListItem>
+            </STList>
+        </div>
+
+        <hr>
+        <div class="pricing-box max">
+            <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: item.calculatedPrice}]" />
+        </div>
+    </SaveView>
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, ImageComponent, LoadingButton, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { GroupOption, GroupOptionMenu, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
@@ -118,6 +99,8 @@ const checkout = computed(() => props.item.member.family.checkout)
 const errors = useErrors();
 const saving = ref(false)
 const navigationActions = useNavigationActions()
+const isInCart = computed(() => checkout.value.cart.contains(props.item))
+const pop = usePop()
 
 async function addToCart() {
     if (saving.value) {
@@ -177,6 +160,11 @@ function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: num
     }
 
     props.item.options = filteredOptions
+}
+
+async function deleteMe() {
+    props.item.checkout.cart.remove(props.item)
+    await pop({force: true})
 }
 
 watch(() => [props.item.groupPrice, props.item.options], () => {

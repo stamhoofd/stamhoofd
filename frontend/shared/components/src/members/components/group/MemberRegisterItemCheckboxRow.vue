@@ -1,7 +1,7 @@
 <template>
-    <STListItem :selectable="!disabled" :disabled="disabled" element-name="label">
+    <STListItem :selectable="!disabled" :disabled="disabled" @click="editRegisterItem">
         <template #left>
-            <Checkbox v-model="checked" :disabled="disabled" />
+            <Checkbox v-model="checked" :disabled="disabled" @click.stop />
         </template>
 
         <h4 class="style-title-list ">
@@ -22,7 +22,7 @@
             <span class="style-price">{{ formatPrice(registerItem.calculatedPrice) }}</span>
         </p>
         <template #right>
-            <button v-if="checked && registerItem?.showItemView" type="button" class="icon edit gray" @click="editRegisterItem" />
+            <span v-if="checked && registerItem?.showItemView" class="button icon edit gray" />
         </template>
     </STListItem>
 </template>
@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { Group, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useCheckoutDefaultItem, useCheckoutRegisterItem } from '../../checkout';
+import { useCheckoutRegisterItem } from '../../checkout';
 
 const props = defineProps<{
     group: Group;
@@ -45,27 +45,19 @@ const validationWarning = computed(() => registerItem.value.validationWarning)
 const disabled = computed(() => {
     return validationError.value !== null
 })
-const checkoutDefaultItem = useCheckoutDefaultItem();
 const checkoutRegisterItem = useCheckoutRegisterItem();
 
 const checked = computed({
     get: () => props.member.family.checkout.cart.containsMemberAndGroup(props.member.id, props.group.id),
     set: (value: boolean) => {
-        // todo: add to cart flow
-        if (value) {
-            checkoutDefaultItem({
-                member: props.member, 
-                group: props.group,
-                groupOrganization: props.groupOrganization,
-                startCheckoutFlow: false,
-                displayOptions: {action: 'present', modalDisplayStyle: 'popup'}
-            }).catch(console.error)
-        } else {
-            // Remove from cart
+        if (!value) {
             props.member.family.checkout.cart.removeMemberAndGroup(props.member.id, props.group.id)
+        } else {
+            editRegisterItem().catch(console.error)
         }
     }
 })
+
 
 async function editRegisterItem() {
     await checkoutRegisterItem({

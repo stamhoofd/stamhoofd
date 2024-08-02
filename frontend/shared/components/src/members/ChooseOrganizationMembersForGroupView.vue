@@ -25,12 +25,12 @@
             <p class="style-button-bar">
                 <button type="button" class="button text" @click="addMember">
                     <span class="icon add" />
-                    <span>Spinternieuw lid toevoegen</span>
+                    <span>Splinternieuw lid</span>
                 </button>
             </p>
 
             <hr>
-            <h2>Zoeken</h2>
+            <h2>Zoek bestaande leden</h2>
 
             <div class="input-with-buttons">
                 <div>
@@ -129,24 +129,13 @@ async function addMember() {
         root: new ComponentWithProperties(MemberStepView, {
             title: 'Nieuw lid',
             member,
-            component: markRaw(EditMemberGeneralBox),
+            component: markRaw(EditMemberGeneralBox), // Only this step, because it could be a reused member
             doSave: true,
             saveHandler: async (navigate: NavigationActions) => {
                 await navigate.dismiss({force: true})
                 props.members.push(member)
 
-                // if (props.group && organization.value && props.group.organizationId === organization.value.id) {
-                //     await checkoutDefaultItem({
-                //         group: props.group,
-                //         member,
-                //         organization: organization.value,
-                //         admin: true
-                //     })
-                // } else {
-                //     await chooseGroupForMember({
-                //         member
-                //     })
-                // }
+                // todo: wire up views to check member information
             }
         }),
     });

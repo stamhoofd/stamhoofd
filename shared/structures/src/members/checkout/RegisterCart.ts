@@ -52,7 +52,7 @@ export class RegisterCart {
     }
 
     canAdd(item: RegisterItem) {
-        if (this.containsMemberAndGroup(item.memberId, item.groupId) || this.contains(item)) {
+        if (this.contains(item)) {
             return false;
         }
         if (!item.isValid) {
@@ -66,7 +66,7 @@ export class RegisterCart {
 
     contains(item: RegisterItem) {
         for (const [i, otherItem] of this.items.entries()) {
-            if (otherItem.id === item.id) {
+            if (otherItem.id === item.id || (otherItem.member.id === item.member.id && otherItem.groupId === item.groupId)) {
                 return true;
             }
         }
