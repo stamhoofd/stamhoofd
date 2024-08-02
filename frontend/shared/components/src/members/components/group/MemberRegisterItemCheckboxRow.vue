@@ -16,6 +16,11 @@
             {{ validationWarning }}
         </p>
 
+        <p v-if="checked && registerItem && registerItem.description" class="style-description-small pre-wrap" v-text="registerItem.description" />
+
+        <p v-if="checked && registerItem" class="style-description-small">
+            <span class="style-price">{{ formatPrice(registerItem.calculatedPrice) }}</span>
+        </p>
         <template #right>
             <button v-if="checked && registerItem?.showItemView" type="button" class="icon edit gray" @click="editRegisterItem" />
         </template>
@@ -32,7 +37,8 @@ const props = defineProps<{
     member: PlatformMember,
     groupOrganization: Organization
 }>()
-const registerItem = computed(() => RegisterItem.defaultFor(props.member, props.group, props.groupOrganization))
+
+const registerItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id) ?? RegisterItem.defaultFor(props.member, props.group, props.groupOrganization))
 const validationError = computed(() => registerItem.value.validationError)
 const validationWarning = computed(() => registerItem.value.validationWarning)
 
@@ -52,7 +58,7 @@ const checked = computed({
                 group: props.group,
                 groupOrganization: props.groupOrganization,
                 startCheckoutFlow: false,
-                options: {present: 'popup'}
+                displayOptions: {action: 'present', modalDisplayStyle: 'popup'}
             }).catch(console.error)
         } else {
             // Remove from cart
@@ -65,7 +71,7 @@ async function editRegisterItem() {
     await checkoutRegisterItem({
         item: registerItem.value,
         startCheckoutFlow: false,
-        options: {present: 'popup'}
+        displayOptions: {action: 'present', modalDisplayStyle: 'popup'}
     })
 }
 

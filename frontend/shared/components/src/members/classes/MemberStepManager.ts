@@ -1,39 +1,36 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { PlatformMember } from "@stamhoofd/structures";
-import { NavigationActions } from "../../types/NavigationActions";
+import { defaultDisplayOptions, DisplayOptions, glueNavigationActions, NavigationActions, runDisplayOptions } from "../../types/NavigationActions";
 
 export class MemberStepManager {
     member: PlatformMember
     steps: EditMemberStep[] = []
     finishHandler: (navigate: NavigationActions) => void|Promise<void>
-    present: null|'popup'|'sheet' = null
+    displayOptions: DisplayOptions
 
     constructor(
         member: PlatformMember, 
         steps: EditMemberStep[], 
         finishHandler: (navigate: NavigationActions) => void|Promise<void>,
-        options?: { present?: 'popup'|'sheet' }
+        displayOptions?: DisplayOptions
     ){
         this.member = member
         this.steps = steps;
         this.finishHandler = finishHandler;
-        if (options?.present) {
-            this.present = options.present;
-        }
+        this.displayOptions = displayOptions || defaultDisplayOptions
     }
 
     async saveHandler(currentStep: EditMemberStep|null, navigate: NavigationActions) {
         const nextStep = this.getNextStep(currentStep);
         if (nextStep) {
-            if (currentStep === null && this.present) {
-                return await navigate.present({
-                    modalDisplayStyle: this.present,
+            if (currentStep === null) {
+                return await runDisplayOptions({
                     components: [
                         new ComponentWithProperties(NavigationController, {
                             root: await nextStep.getComponent(this)
                         })
                     ]
-                })
+                }, this.displayOptions, navigate)
             }
             return await navigate.show({
                 components: [
@@ -41,7 +38,10 @@ export class MemberStepManager {
                 ]
             })
         } else {
-            await this.finishHandler(navigate);
+            // Assure that if the next step uses navigate.show, while the displayoptions are 'present', and we never presented
+            // any view, we map the navigate show to something like present to match the display options
+            const gluedNavigate = glueNavigationActions(currentStep !== null, navigate, this.displayOptions)
+            await this.finishHandler(gluedNavigate);
         }
 
     }

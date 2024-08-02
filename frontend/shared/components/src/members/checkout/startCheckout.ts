@@ -1,15 +1,15 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, PushOptions } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { SessionContext } from '@stamhoofd/networking';
 import { PaymentStatus, PlatformFamily, RegisterCheckout, RegisterResponse } from '@stamhoofd/structures';
-import { NavigationActions } from '../../types/NavigationActions';
+import { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { RegistrationSuccessView } from '../checkout';
 import { ViewStep, ViewStepsManager } from '../classes/ViewStepsManager';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
 
-export async function startCheckout({checkout, context}: {checkout: RegisterCheckout, context: SessionContext}, navigate: NavigationActions) {
+export async function startCheckout({checkout, context, displayOptions}: {checkout: RegisterCheckout, context: SessionContext, displayOptions: DisplayOptions}, navigate: NavigationActions) {
     checkout.validate({})
 
     const steps: ViewStep[] = [
@@ -17,30 +17,9 @@ export async function startCheckout({checkout, context}: {checkout: RegisterChec
         new PaymentSelectionStep(checkout),
     ]
 
-    const originalNavigate = navigate
     const stepManager = new ViewStepsManager(steps, async (navigate: NavigationActions) => {
-        const didShowAnyView = navigate !== originalNavigate
-        await register({checkout, context}, didShowAnyView ? navigate : {
-            ...navigate,
-            show: async (o) => {
-                let options: PushOptions
-                if (!(o as any).components) {
-                    options = ({ components: [o as ComponentWithProperties] });
-                } else {
-                    options = o as PushOptions
-                }
-
-                await navigate.present({...options, modalDisplayStyle: 'popup'})
-            },
-            dismiss: async () => {
-                // noop
-            },
-            pop: async () => {
-                // noop
-            }
-        })
-    }, {present: 'popup'})
-
+        await register({checkout, context}, navigate)
+    }, displayOptions)
 
     await stepManager.saveHandler(null, navigate)
 }

@@ -22,7 +22,7 @@
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
                         <span class="hide-small">Filter</span>
-                        <span v-if="filteredCount > 0" class="bubble primary">{{ formatInteger(filteredCount) }}</span>
+                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
             </div>
@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, Event, isEmptyFilter, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
 import { getEventUIFilterBuilders } from '../filters/filterBuilders';
@@ -71,7 +71,6 @@ import EventOverview from './EventOverview.vue';
 type ObjectType = Event;
 
 const searchQuery = ref('');
-const filteredCount = ref(0);
 const present = usePresent()
 const context = useContext();
 const selectedUIFilter = ref(null) as Ref<null|UIFilter>;

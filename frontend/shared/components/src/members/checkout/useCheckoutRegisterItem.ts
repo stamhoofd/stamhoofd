@@ -1,3 +1,4 @@
+import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { SessionContext, useRequestOwner } from "@stamhoofd/networking";
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem } from "@stamhoofd/structures";
@@ -5,14 +6,13 @@ import { ChooseGroupForMemberView } from "..";
 import { useAppContext } from "../../context/appContext";
 import { useContext } from "../../hooks";
 import { Toast } from "../../overlays/Toast";
-import { NavigationActions, useNavigationActions } from "../../types/NavigationActions";
+import { DisplayOptions, NavigationActions, useNavigationActions } from "../../types/NavigationActions";
 import ChooseOrganizationMembersForGroupView from "../ChooseOrganizationMembersForGroupView.vue";
 import { EditMemberStep, MemberStepManager } from "../classes/MemberStepManager";
 import { allMemberSteps } from "../classes/steps";
 import { MemberRecordCategoryStep } from "../classes/steps/MemberRecordCategoryStep";
 import { RegisterItemStep } from "../classes/steps/RegisterItemStep";
 import { startCheckout } from "./startCheckout";
-import { Decoder } from "@simonbackx/simple-encoding";
 
 export async function loadGroupOrganization(context: SessionContext, organizationId: string, owner: any) {
     if (organizationId === context.organization?.id) {
@@ -60,19 +60,20 @@ export async function loadGroupOrganization(context: SessionContext, organizatio
 // ----------------------------
 // --------- Flow 1 -----------
 
-export async function checkoutRegisterItem({item, admin, context, options, navigate, showGroupInformation, startCheckoutFlow}: {
+export async function checkoutRegisterItem({item, admin, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow}: {
     item: RegisterItem,
     navigate: NavigationActions,
     context: SessionContext,
     admin?: boolean,
     showGroupInformation?: boolean,
-    options?: { present?: 'popup'|'sheet' },
+    displayOptions?: DisplayOptions,
     startCheckoutFlow?: boolean
 }) {
     const member = item.member;
 
     // Add it to the platform member
     member.family.pendingRegisterItems = [item];
+    member.family.checkout.defaultOrganization = item.organization
 
     if (admin) {
         if (!context.organization) {
@@ -96,10 +97,9 @@ export async function checkoutRegisterItem({item, admin, context, options, navig
         }
     }
 
-    const rootNavigate = navigate;
-
     const manager = new MemberStepManager(member, steps, async (navigate) => {
         // Move the item to the cart
+        member.family.checkout.cart.remove(item);
         member.family.checkout.cart.add(item);
         member.family.pendingRegisterItems = [];
         member.family.checkout.updatePrices()
@@ -110,7 +110,8 @@ export async function checkoutRegisterItem({item, admin, context, options, navig
             try {
                 return await startCheckout({
                     checkout: member.family.checkout,
-                    context
+                    context,
+                    displayOptions: {action: 'show'}
                 }, navigate);
             } catch (e) {
                 Toast.fromError(e).show()
@@ -120,16 +121,13 @@ export async function checkoutRegisterItem({item, admin, context, options, navig
             Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').show();
         }
 
-        if (!options?.present || rootNavigate !== navigate) {
-            await navigate.dismiss({force: true})
-        }
-
-    }, options);
+        await navigate.dismiss({force: true})
+    }, displayOptions);
 
     await manager.saveHandler(null, navigate);
 }
 
-export async function checkoutDefaultItem({group, member, admin, groupOrganization, context, options, navigate, showGroupInformation, startCheckoutFlow}: {
+export async function checkoutDefaultItem({group, member, admin, groupOrganization, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow}: {
     group: Group,
     member: PlatformMember,
     groupOrganization: Organization,
@@ -137,13 +135,13 @@ export async function checkoutDefaultItem({group, member, admin, groupOrganizati
     navigate: NavigationActions
     admin?: boolean,
     showGroupInformation?: boolean,
-    options?: { present?: 'popup'|'sheet' },
+    displayOptions?: DisplayOptions,
     startCheckoutFlow?: boolean
 }) {
     return await checkoutRegisterItem({
         context,
         item: RegisterItem.defaultFor(member, group, groupOrganization), 
-        options, 
+        displayOptions, 
         admin, 
         navigate,
         showGroupInformation,
@@ -156,11 +154,11 @@ export function useCheckoutRegisterItem() {
     const context = useContext()
     const app = useAppContext()
 
-    return async ({item, startCheckoutFlow, options}: {item: RegisterItem, startCheckoutFlow?: boolean, options?: { present?: 'popup'|'sheet' }}) => {
+    return async ({item, startCheckoutFlow, displayOptions}: {item: RegisterItem, startCheckoutFlow?: boolean, displayOptions?: DisplayOptions}) => {
         await checkoutRegisterItem({
             item, 
             admin: app === 'dashboard' || app === 'admin', 
-            options, 
+            displayOptions, 
             navigate, 
             startCheckoutFlow, 
             context: context.value
@@ -173,13 +171,13 @@ export function useCheckoutDefaultItem() {
     const context = useContext()
     const app = useAppContext()
 
-    return async ({group, member, groupOrganization, options, startCheckoutFlow}: {group: Group, member: PlatformMember, groupOrganization: Organization, startCheckoutFlow?: boolean, options?: { present?: 'popup'|'sheet' }}) => {
+    return async ({group, member, groupOrganization, displayOptions, startCheckoutFlow}: {group: Group, member: PlatformMember, groupOrganization: Organization, startCheckoutFlow?: boolean, displayOptions?: DisplayOptions}) => {
         await checkoutDefaultItem({
             group, 
             member, 
             groupOrganization, 
             admin: app === 'dashboard' || app === 'admin', 
-            options, 
+            displayOptions, 
             navigate, 
             context: context.value,
             startCheckoutFlow
@@ -231,15 +229,14 @@ export async function chooseOrganizationMembersForGroup({members, group, items, 
     const checkout = new RegisterCheckout();
     checkout.asOrganizationId = context.organization?.id || null;
 
-    const automaticItems: RegisterItem[] = [];
     for (const member of members) {
         member.family.checkout = checkout;
         member.family.pendingRegisterItems = [];
 
         // Add default register item
-        if (items.length === 0) {
+        if (!items || items.length === 0) {
             const item = RegisterItem.defaultFor(member, group, groupOrganization);
-            automaticItems.push(item);
+            checkout.cart.add(item);
         }
     }
 

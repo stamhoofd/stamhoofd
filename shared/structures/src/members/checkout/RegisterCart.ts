@@ -45,14 +45,17 @@ export class RegisterCart {
     }
 
     add(item: RegisterItem) {
-        if (this.contains(item)) {
+        if (!this.canAdd(item)) {
             return;
         }
         this.items.push(item)
     }
 
     canAdd(item: RegisterItem) {
-        if (this.contains(item)) {
+        if (this.containsMemberAndGroup(item.memberId, item.groupId) || this.contains(item)) {
+            return false;
+        }
+        if (!item.isValid) {
             return false;
         }
         if (this.paymentConfiguration && item.paymentConfiguration && item.paymentConfiguration !== this.paymentConfiguration) {
@@ -70,13 +73,17 @@ export class RegisterCart {
         return false;
     }
 
-    containsMemberAndGroup(memberId: string, groupId: string) {
+    getMemberAndGroup(memberId: string, groupId: string) {
         for (const [i, otherItem] of this.items.entries()) {
             if (otherItem.member.id === memberId && otherItem.groupId === groupId) {
-                return true;
+                return otherItem;
             }
         }
-        return false;
+        return null;
+    }
+
+    containsMemberAndGroup(memberId: string, groupId: string) {
+        return this.getMemberAndGroup(memberId, groupId) !== null;
     }
 
     remove(item: RegisterItem) {

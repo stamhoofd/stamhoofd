@@ -140,24 +140,24 @@ export class RegisterItem implements RegisterItemWithPrice {
         this.calculatedPrice = item.calculatedPrice
     }
 
-    getFilteredPrices(options: {admin?: boolean}) {
+    getFilteredPrices() {
         return this.group.settings.prices.filter(p => {
-            if (p.hidden && !options.admin) {
+            if (p.hidden && !this.checkout.isAdminFromSameOrganization) {
                 return false
             }
             return true
         })
     }
 
-    getFilteredOptionMenus(options: {admin?: boolean}) {
+    getFilteredOptionMenus() {
         return this.group.settings.optionMenus.filter(p => {
-            return this.getFilteredOptions(p, options).length > 0
+            return this.getFilteredOptions(p).length > 0
         })
     }
 
-    getFilteredOptions(menu: GroupOptionMenu, options: {admin?: boolean}) {
+    getFilteredOptions(menu: GroupOptionMenu) {
         return menu.options.filter(p => {
-            if (p.hidden && !options.admin) {
+            if (p.hidden && !this.checkout.isAdminFromSameOrganization) {
                 return false
             }
             return true
@@ -385,6 +385,20 @@ export class RegisterItem implements RegisterItemWithPrice {
         return null;
     }
 
+    get description() {
+        const descriptions: string[] = []
+
+        if (this.getFilteredPrices().length > 1) {
+            descriptions.push(this.groupPrice.name)
+        }
+        
+        for (const option of this.options) {
+            descriptions.push(option.optionMenu.name + ': ' + option.option.name + (option.option.allowAmount ? ` x ${option.amount}` : ""))
+        }
+
+        return descriptions.filter(d => !!d).join("\n")
+    }
+
     shouldUseWaitingList() {
         const checkout = this.member.family.checkout;
 
@@ -454,6 +468,10 @@ export class RegisterItem implements RegisterItemWithPrice {
         return null;
     }
 
+    get isValid() {
+        return this.validationError === null
+    }
+
     validate(options?: {warnings?: boolean}) {
         this.cartError = null;
         this.refresh(this.group)
@@ -462,16 +480,6 @@ export class RegisterItem implements RegisterItemWithPrice {
         
         if (this.group.organizationId !== this.organization.id) {
             throw new Error("Group and organization do not match in RegisterItem.validate")
-        }
-
-        if (!this.checkout.cart.contains(this)) {
-            if (!this.checkout.cart.canAdd(this)) {
-                throw new SimpleError({
-                    code: "already_registered",
-                    message: "Already registered",
-                    human: `Reken jouw winkelmandje eerst af. Het is niet mogelijk om deze inschrijving samen af te rekenen omdat het inschrijvingsgeld aan een andere partij betaald moet worden.`
-                })
-            }
         }
 
         // Already registered
@@ -576,8 +584,6 @@ export class RegisterItem implements RegisterItemWithPrice {
         }
 
     }
-
-
 
     static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
         const member = context.members.find(m => m.member.id === idRegisterItem.memberId)

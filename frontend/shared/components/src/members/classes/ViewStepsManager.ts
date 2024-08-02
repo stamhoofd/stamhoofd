@@ -1,35 +1,32 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
-import { NavigationActions } from "../../types/NavigationActions";
+import { DisplayOptions, glueNavigationActions, NavigationActions, runDisplayOptions } from "../../types/NavigationActions";
 
 export class ViewStepsManager {
     steps: ViewStep[] = []
     finishHandler: (navigate: NavigationActions) => void|Promise<void>
-    present: null|'popup'|'sheet' = null
+    displayOptions: DisplayOptions
 
     constructor(
         steps: ViewStep[], 
         finishHandler: (navigate: NavigationActions) => void|Promise<void>,
-        options?: { present?: 'popup'|'sheet' }
+        displayOptions: DisplayOptions
     ){
         this.steps = steps;
         this.finishHandler = finishHandler;
-        if (options?.present) {
-            this.present = options.present;
-        }
+        this.displayOptions = displayOptions;
     }
 
     async saveHandler(currentStep: ViewStep|null, navigate: NavigationActions) {
         const nextStep = this.getNextStep(currentStep);
         if (nextStep) {
-            if (currentStep === null && this.present) {
-                return await navigate.present({
-                    modalDisplayStyle: this.present,
+            if (currentStep === null) {
+                return await runDisplayOptions({
                     components: [
                         new ComponentWithProperties(NavigationController, {
                             root: await nextStep.getComponent(this)
                         })
                     ]
-                })
+                }, this.displayOptions, navigate)
             }
             return await navigate.show({
                 components: [
@@ -37,7 +34,10 @@ export class ViewStepsManager {
                 ]
             })
         } else {
-            await this.finishHandler(navigate);
+            // Assure that if the next step uses navigate.show, while the displayoptions are 'present', and we never presented
+            // any view, we map the navigate show to something like present to match the display options
+            const gluedNavigate = glueNavigationActions(currentStep !== null, navigate, this.displayOptions)
+            await this.finishHandler(gluedNavigate);
         }
 
     }
@@ -57,6 +57,6 @@ export class ViewStepsManager {
 }
 
 export interface ViewStep {
-    getComponent(manager: MemberStepManager): Promise<ComponentWithProperties>|ComponentWithProperties
-    isEnabled(manager: MemberStepManager): boolean
+    getComponent(manager: ViewStepsManager): Promise<ComponentWithProperties>|ComponentWithProperties
+    isEnabled(manager: ViewStepsManager): boolean
 }
