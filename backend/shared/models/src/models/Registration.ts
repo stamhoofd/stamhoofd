@@ -164,20 +164,25 @@ export class Registration extends Model {
         }
         
         this.reservedUntil = null
-        this.registeredAt = new Date()
-        this.canRegister = false
+
+        if (!this.waitingList) {
+            this.registeredAt = new Date()
+            this.canRegister = false
+        }
         await this.save();
 
-        await this.sendEmailTemplate({
-            type: EmailTemplateType.RegistrationConfirmation
-        });
+        if (!this.waitingList) {
+            await this.sendEmailTemplate({
+                type: EmailTemplateType.RegistrationConfirmation
+            });
 
-        const {Member} = await import('./Member');
-        const member = await Member.getByID(this.memberId);
-        if (member) {
-            const registrationMemberRelation = new ManyToOneRelation(Member, "member")
-            registrationMemberRelation.foreignKey = Member.registrations.foreignKey
-            await Document.updateForRegistration(this.setRelation(registrationMemberRelation, member))
+            const {Member} = await import('./Member');
+            const member = await Member.getByID(this.memberId);
+            if (member) {
+                const registrationMemberRelation = new ManyToOneRelation(Member, "member")
+                registrationMemberRelation.foreignKey = Member.registrations.foreignKey
+                await Document.updateForRegistration(this.setRelation(registrationMemberRelation, member))
+            }
         }
 
         return true;

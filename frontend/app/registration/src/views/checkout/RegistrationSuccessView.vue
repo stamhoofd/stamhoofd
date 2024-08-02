@@ -6,8 +6,16 @@
         <main>
             <h1>{{ text }}</h1>
             
-            <p>
+            <p v-if="names.length > 0">
                 Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.
+            </p>
+
+            <p v-else-if="waitingListNames.length > 0">
+                We houden je op de hoogte van jouw status op de wachtlijst.
+            </p>
+
+            <p v-else>
+                We houden je op de hoogte.
             </p>
         </main>
 

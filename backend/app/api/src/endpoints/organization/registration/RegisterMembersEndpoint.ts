@@ -302,24 +302,19 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         for (const bundle of payRegistrations) {
             const registration = bundle.registration;
 
-            if (!registration.waitingList) {
-                // Replaced with balance items
-                // registration.paymentId = payment.id
-
+            if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
+                // Mark valid, even for waiting lists -> this will move members from waiting list to normal list
+                await registration.markValid()
+            } else if (!bundle.item.waitingList) {
                 registration.reservedUntil = null
-                registration.canRegister = false
 
-                if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
-                    await registration.markValid()
-                } else {
-                    // Reserve registration for 30 minutes (if needed)
-                    const group = groups.find(g => g.id === registration.groupId)
+                // Reserve registration for 30 minutes (if needed)
+                const group = groups.find(g => g.id === registration.groupId)
 
-                    if (group && group.settings.maxMembers !== null) {
-                        registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
-                    }
-                    await registration.save()
+                if (group && group.settings.maxMembers !== null) {
+                    registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
                 }
+                await registration.save()
             }
             
             await registration.save()
