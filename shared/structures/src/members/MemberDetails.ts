@@ -62,6 +62,15 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 277 })
     alternativeEmails: string[] = []
 
+    @field({decoder: new ArrayDecoder(StringDecoder), version: 296})
+    uncategorizedEmails: string[] = []
+
+    @field({decoder: new ArrayDecoder(StringDecoder), version: 296})
+    uncategorizedPhones: string[] = []
+
+    @field({decoder: new ArrayDecoder(Address), version: 296})
+    uncategorizedAddresses: Address[] = []
+
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date("1970-01-01") })
     birthDay: Date | null = null
