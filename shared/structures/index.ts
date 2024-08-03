@@ -87,7 +87,6 @@ export * from "./src/members/EmergencyContact"
 export * from "./src/members/Gender"
 export * from "./src/members/Member"
 export * from "./src/members/MemberDetails"
-export * from "./src/members/MemberWithRegistrations"
 export * from "./src/members/MemberWithRegistrationsBlob"
 export * from "./src/members/ObjectWithRecords"
 export * from "./src/members/OrganizationRecordsConfiguration"
@@ -113,16 +112,10 @@ export * from "./src/members/RegistrationWithMember"
 export * from "./src/members/ReviewTime"
 
 // Register checkout
-export * from "./src/members/checkout/OldRegisterCart"
-export * from "./src/members/checkout/OldRegisterCartPriceCalculator"
-export * from './src/members/checkout/OldRegisterCartValidator'
-export * from "./src/members/checkout/OldRegisterCheckout"
-export * from "./src/members/checkout/OldRegisterItem"
 export * from "./src/members/checkout/RegisterCheckout"
 export * from "./src/members/checkout/RegisterCart"
 export * from "./src/members/checkout/RegisterItem"
 export * from "./src/members/checkout/BalanceItemCartItem"
-export * from "./src/members/checkout/UnknownMemberWithRegistrations"
 
 // Webshop
 export * from "./src/endpoints/WebshopOrdersQuery"

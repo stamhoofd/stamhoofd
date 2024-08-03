@@ -398,6 +398,35 @@ export class GroupSettings extends AutoEncoder {
     requireGroupIds: string[] = []
 
     /**
+     * Require that the member is already registered for one of these groups before allowing to register for this group.
+     * If it is empty, then it is not enforced
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 297 })
+    requireDefaultAgeGroupIds: string[] = []
+
+    /**
+     * The member should have a platform membership for the provided date before being able to register
+     */
+    @field({ decoder: DateDecoder, nullable: true, version: 297 })
+    requirePlatformMembershipOn: Date | null = null
+
+    /**
+     * The member should have a valid registration (type = GroupType.Membership) for one of these organization ids
+     * 
+     * If empty and requireOrganizationTags empty: new members without registrations can also register
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 297 })
+    requireOrganizationIds: string[] = []
+
+    /**
+     * The member should have a valid registration (type = GroupType.Membership) for one of these organization tags
+     * 
+     * If empty AND requireOrganizationIds empty: new members without registrations can also register
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 297 })
+    requireOrganizationTags: string[] = []
+
+    /**
      * @deprecated
      * Require that the member is already registered for one of these groups before allowing to register for this group.
      * If it is empty, then it is not enforced

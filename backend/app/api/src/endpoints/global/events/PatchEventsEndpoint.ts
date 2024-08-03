@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Event, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Event, Group, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Event as EventStruct, GroupType, PermissionLevel } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -80,6 +80,12 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.startDate = put.startDate
             event.endDate = put.endDate
             event.meta = put.meta
+            event.typeId = await PatchEventsEndpoint.validateEventType(put.typeId)
+            await PatchEventsEndpoint.checkEventLimits(event)
+
+            if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
+                throw Context.auth.error()
+            }
 
             if (put.group) {
                 const period = await RegistrationPeriod.getByDate(event.startDate)
@@ -99,14 +105,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     put.group.organizationId,
                     period.id
                 )
+                await event.syncGroupRequirements(group)
                 event.groupId = group.id
-
-            }
-            event.typeId = await PatchEventsEndpoint.validateEventType(put.typeId)
-            await PatchEventsEndpoint.checkEventLimits(event)
-
-            if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
-                throw Context.auth.error()
             }
 
             await event.save()
@@ -129,7 +129,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.startDate = patch.startDate ?? event.startDate
             event.endDate = patch.endDate ?? event.endDate
             event.meta = patchObject(event.meta, patch.meta)
-
 
             if (patch.organizationId !== undefined) {
                 if (organization?.id && patch.organizationId !== organization.id) {
@@ -210,6 +209,14 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             await event.save()
+
+            if (event.groupId) {
+                const group = await Group.getByID(event.groupId)
+                if (group) {
+                    await event.syncGroupRequirements(group)
+                }
+            }
+ 
             events.push(event)
         }
 

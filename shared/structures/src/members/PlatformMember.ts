@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 
-import { Group } from "../Group"
+import { Group, GroupType } from "../Group"
 import { Organization } from "../Organization"
 import { AccessRight, PermissionLevel, PermissionsResourceType } from "../Permissions"
 import { Platform } from "../Platform"
@@ -537,8 +537,14 @@ export class PlatformMember implements ObjectWithRecords {
         }
     }
 
-    filterRegistrations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
+    filterRegistrations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean, types?: GroupType[]}) {
         return this.patchedMember.registrations.filter(r => {
+            if (filters.types !== undefined) {
+                if (!filters.types.includes(r.group.type)) {
+                    return false;
+                }
+            }
+
             if (filters.groups && !filters.groups.find(g => g.id === r.groupId)) {
                 return false
             }
@@ -600,7 +606,7 @@ export class PlatformMember implements ObjectWithRecords {
         return base;
     }
 
-    filterOrganizations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
+    filterOrganizations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean, types?: GroupType[]}) {
         const registrations =  this.filterRegistrations(filters);
         const base: Organization[] = [];
 
@@ -630,25 +636,31 @@ export class PlatformMember implements ObjectWithRecords {
                     continue
                 }
 
+                if (filters.types !== undefined) {
+                    if (!filters.types.includes(item.group.type)) {
+                        continue;
+                    }
+                }
+
                 if (!base.find(g => g.id === item.organization.id)) {
                     base.push(item.organization)
                 }
             }
         }
 
-        for (const responsibility of this.patchedMember.responsibilities) {
-            if (!responsibility.isActive) {
-                continue;
-            }
-            if (base.find(g => g.id === responsibility.organizationId)) {
-                continue;
-            }
-
-            const organization = this.organizations.find(o => o.id === responsibility.organizationId);
-            if (organization) {
-                base.push(organization)
-            }
-        }
+        // for (const responsibility of this.patchedMember.responsibilities) {
+        //     if (!responsibility.isActive) {
+        //         continue;
+        //     }
+        //     if (base.find(g => g.id === responsibility.organizationId)) {
+        //         continue;
+        //     }
+        // 
+        //     const organization = this.organizations.find(o => o.id === responsibility.organizationId);
+        //     if (organization) {
+        //         base.push(organization)
+        //     }
+        // }
 
         return base;
     }
@@ -795,10 +807,8 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        // Check if no year was skipped
         for (const registration of member.registrations) {
-            if (!registration.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && registration.cycle === registration.group.cycle - 1) {
-                // This was the previous year
+            if (registration.group.type === GroupType.Membership && registration.registeredAt !== null && registration.deactivatedAt === null) {
                 return true
             }
         }

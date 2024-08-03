@@ -418,7 +418,7 @@ export class Member extends Model {
         console.log('Updating memberships for member: ' + this.id)
         return await QueueHandler.schedule('updateMemberships-' + this.id, async () => {
             const platform = await Platform.getShared()
-            const registrations = this.registrations.filter(r => r.group.periodId == platform.periodId && !r.waitingList && r.registeredAt && !r.deactivatedAt)
+            const registrations = this.registrations.filter(r => r.group.periodId == platform.periodId && r.registeredAt && !r.deactivatedAt)
 
             const defaultMemberships = registrations.flatMap(r => {
                 if (!r.group.defaultAgeGroupId) {

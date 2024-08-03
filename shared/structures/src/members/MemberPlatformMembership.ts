@@ -43,4 +43,8 @@ export class MemberPlatformMembership extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt = new Date()
+
+    isActive(date: Date = new Date()) {
+        return this.startDate <= date && this.endDate >= date
+    }
 }

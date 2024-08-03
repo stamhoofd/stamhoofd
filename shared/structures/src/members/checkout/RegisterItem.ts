@@ -1,14 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors"
-import { Formatter } from "@stamhoofd/utility"
+import { v4 as uuidv4 } from "uuid"
 import { Group, GroupType } from "../../Group"
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from "../../GroupSettings"
-import { PlatformMember, PlatformFamily } from "../PlatformMember"
-import { RegisterItemWithPrice } from "./OldRegisterCartPriceCalculator"
-import { RegisterContext } from "./RegisterCheckout"
-import { v4 as uuidv4 } from "uuid";
-import { Registration } from "../Registration"
 import { Organization } from "../../Organization"
+import { PlatformMember } from "../PlatformMember"
+import { Registration } from "../Registration"
+import { RegisterContext } from "./RegisterCheckout"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -45,7 +43,7 @@ export class IDRegisterItem extends AutoEncoder {
     }
 }
 
-export class RegisterItem implements RegisterItemWithPrice {
+export class RegisterItem {
     id: string;
     
     member: PlatformMember
@@ -338,51 +336,62 @@ export class RegisterItem implements RegisterItemWithPrice {
     doesMeetRequireGroupIds() {
         if (this.group.settings.requireGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
-                return this.group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null
+                return r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.requireGroupIds.includes(r.groupId)
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireGroupIds.includes(item.group.id))) {
                 return false;
             }
         }
+
+        if (this.group.settings.requireDefaultAgeGroupIds.length > 0) {
+            const hasGroup = this.member.member.registrations.find(r => {
+                return r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId)
+            });
+
+            if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    doesMeetRequireOrganizationIds() {
+        if (this.group.settings.requireOrganizationIds.length > 0) {
+            const hasGroup = this.member.member.registrations.find(r => {
+                return r.group.type === GroupType.Membership && this.group.settings.requireOrganizationIds.includes(r.organizationId) && r.registeredAt !== null && r.deactivatedAt === null
+            });
+
+            if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireOrganizationIds.includes(item.organization.id))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    doesMeetRequireOrganizationTags() {
+        if (this.group.settings.requireOrganizationTags.length > 0) {
+            const hasOrganization = this.member.filterOrganizations({currentPeriod: true, types: [GroupType.Membership]}).find(organization => {
+                return organization.meta.matchTags(this.group.settings.requireOrganizationTags)
+            });
+
+            if (!hasOrganization && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.organization.meta.matchTags(this.group.settings.requireOrganizationTags))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    doesMeetRequirePlatformMembershipOn() {
+        if (this.group.settings.requirePlatformMembershipOn !== null) {
+            const requirePlatformMembershipOn = this.group.settings.requirePlatformMembershipOn
+            return !!this.member.patchedMember.platformMemberships.find(m => m.isActive(requirePlatformMembershipOn))
+        }
         return true;
     }
 
     isExistingMemberOrFamily() {
         return this.member.isExistingMember(this.group.organizationId) || (this.group.settings.priorityForFamily && !!this.family.members.find(f => f.isExistingMember(this.group.organizationId)))
-    }
-
-    get rowLabel(): string|null {
-        if (this.isInvited()) {
-            return 'Uitnodiging'
-        }
-
-        return null
-    }
-
-    get infoDescription(): string|null {
-        if (this.isInvited()) {
-            return 'Je bent uitgenodigd om in te schrijven voor deze groep'
-        }
-
-        if (this.waitingList) {
-            if (this.group.settings.waitingListType === WaitingListType.All) {
-                return 'Je kan enkel inschrijven voor de wachtlijst'
-            }
-            const existingMember = this.isExistingMemberOrFamily()
-
-            if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
-                return 'Nieuwe leden kunnen enkel inschrijven voor de wachtlijst'
-            }
-
-            if (this.group.waitingList) {
-                if (this.hasReachedGroupMaximum()) {
-                    return 'De inschrijvingen zijn volzet, je kan enkel inschrijven voor de wachtlijst'
-                }
-            }
-        }
-
-        return null;
     }
 
     get description() {
@@ -540,12 +549,36 @@ export class RegisterItem implements RegisterItemWithPrice {
             }
         }
 
-         // Check if registrations are limited
+        // Check if registrations are limited
         if (!this.doesMeetRequireGroupIds() && !admin) {
             throw new SimpleError({
                 code: "not_matching",
                 message: "Not matching: requireGroupIds",
                 human: `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`
+            })
+        }
+
+        if (!this.doesMeetRequireOrganizationIds() && !admin) {
+            throw new SimpleError({
+                code: "not_matching",
+                message: "Not matching: requireOrganizationIds",
+                human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
+            })
+        }
+
+        if (!this.doesMeetRequireOrganizationTags() && !admin) {
+            throw new SimpleError({
+                code: "not_matching",
+                message: "Not matching: requireOrganizationIds",
+                human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
+            })
+        }
+
+        if (!this.doesMeetRequirePlatformMembershipOn() && !admin) {
+            throw new SimpleError({
+                code: "not_matching",
+                message: "Not matching: requirePlatformMembershipOn",
+                human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel`
             })
         }
 

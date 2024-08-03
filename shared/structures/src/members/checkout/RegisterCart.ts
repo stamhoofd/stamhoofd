@@ -1,9 +1,8 @@
-import { AutoEncoder, field, ArrayDecoder } from "@simonbackx/simple-encoding";
-import { OldRegisterCartPriceCalculator } from "./OldRegisterCartPriceCalculator";
+import { ArrayDecoder, AutoEncoder, field } from "@simonbackx/simple-encoding";
+import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
+import { BalanceItemCartItem } from "./BalanceItemCartItem";
 import { RegisterContext } from "./RegisterCheckout";
 import { IDRegisterItem, RegisterItem } from "./RegisterItem";
-import { BalanceItemCartItem } from "./BalanceItemCartItem";
-import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })

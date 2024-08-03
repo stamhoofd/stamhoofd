@@ -6,6 +6,10 @@
             </p>
             <h1>Leden inschrijven voor {{ group.settings.name }}</h1>
 
+            <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
+                De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via het ledenportaal.
+            </p>
+
             <STErrorsDefault :error-box="errors.errorBox" />
             
             <STList>
@@ -28,14 +32,14 @@
                 </button>
             </p>
 
-            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
+            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" v-if="!checkout.isAdminFromSameOrganization" />
         </SaveView>
     </ExternalOrganizationContainer>
 </template>
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ExternalOrganizationContainer, STErrorsDefault, useErrors, PriceBreakdownBox } from '@stamhoofd/components';
+import { ErrorBox, ExternalOrganizationContainer, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, markRaw, onMounted, reactive, ref } from 'vue';
 import { EditMemberGeneralBox, MemberStepView, startCheckout } from '.';

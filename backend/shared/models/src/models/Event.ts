@@ -55,6 +55,9 @@ export class Event extends Model {
     })
     updatedAt: Date
 
+    /**
+     * @deprecated
+     */
     getStructure(group?: Group|null) {
         return EventStruct.create({
             ...this,
@@ -62,10 +65,38 @@ export class Event extends Model {
         })
     }
 
+    /**
+     * @deprecated
+     */
     getPrivateStructure(group?: Group|null) {
         return EventStruct.create({
             ...this,
             group: group ? group.getPrivateStructure() : null
         })
+    }
+
+    async syncGroupRequirements(group: Group|null) {
+        if (!group) {
+            return;
+        }
+
+        group.settings.requireDefaultAgeGroupIds = this.meta.defaultAgeGroupIds ?? []
+        group.settings.requireGroupIds = this.meta.groupIds ?? []
+
+        if (this.organizationId) {
+            // This is a not-national event, so require the organization
+            group.settings.requireOrganizationIds = this.meta.organizationTagIds ?? []
+            group.settings.requireOrganizationTags = []
+            group.settings.requirePlatformMembershipOn = null
+        } else {
+            group.settings.requireOrganizationTags = this.meta.organizationTagIds ?? []
+
+            // Everyone can register
+            group.settings.requireOrganizationIds = []
+
+            // But they need a valid platform membership
+            group.settings.requirePlatformMembershipOn = this.endDate
+        }
+        await group.save()
     }
 }
