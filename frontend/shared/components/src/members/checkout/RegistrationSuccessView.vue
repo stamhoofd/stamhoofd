@@ -58,10 +58,10 @@ const title = computed(() => {
     let t = "Hoera! "
 
     if (names.length > 0) {
-        if (names.length > 2) {
-            t += names.slice(0, names.length - 1).join(', ')+" en "+names[names.length - 1] +" zijn ingeschreven"
+        if (names.length > 3) {
+            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 3) + ' andere leden'], ', ', ' en ')+" zijn ingeschreven"
         } else if (names.length > 1) {
-            t += names.join(' en ')+" zijn ingeschreven"
+            t += Formatter.joinLast(names, ', ', ' en ')+" zijn ingeschreven"
         } else {
             t += names.join('')+" is ingeschreven"
         }
@@ -72,12 +72,12 @@ const title = computed(() => {
             t += " en "
         }
 
-        if (waitingListNames.length > 2) {
-            t += waitingListNames.slice(0, waitingListNames.length - 1).join(', ')+" en "+waitingListNames[waitingListNames.length - 1] +" staan op de wachtlijst"
+        if (waitingListNames.length > 3) {
+            t += Formatter.joinLast([...names.slice(0, 2), (waitingListNames.length - 3) + ' andere leden'], ', ', ' en ')+" zijn ingeschreven op de wachtlijst"
         } else if (waitingListNames.length > 1) {
-            t += waitingListNames.join(' en ')+" staan op de wachtlijst"
+            t += Formatter.joinLast(waitingListNames, ', ', ' en ')+" zijn ingeschreven op de wachtlijst"
         } else {
-            t += waitingListNames.join('')+" staat op de wachtlijst"
+            t += waitingListNames.join('')+" is ingeschreven op de wachtlijst"
         }
     }
     return t
