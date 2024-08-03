@@ -216,18 +216,13 @@ export class Group extends Model {
 
     async updateOccupancy() {
         this.settings.registeredMembers = await Group.getCount(
-            "groupId = ? and cycle = ? and waitingList = 0 and registeredAt is not null",
-            [this.id, this.cycle]
+            "groupId = ? and registeredAt is not null",
+            [this.id]
         )
 
         this.settings.reservedMembers = await Group.getCount(
-            "groupId = ? and cycle = ? and ((waitingList = 0 and registeredAt is null AND reservedUntil >= ?) OR (waitingList = 1 and canRegister = 1))",
-            [this.id, this.cycle, new Date()]
-        )
-
-        this.settings.waitingListSize = await Group.getCount(
-            "groupId = ? and cycle = ? and waitingList = 1",
-            [this.id, this.cycle, new Date()]
+            "groupId = ? and ((waitingList = 0 and registeredAt is null AND reservedUntil >= ?) OR (waitingList = 1 and canRegister = 1))",
+            [this.id, new Date()]
         )
     }
 

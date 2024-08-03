@@ -33,6 +33,22 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem v-if="event.group.waitingList" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/clock.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            Wachtlijst
+                        </h2>
+                        <p class="style-description">
+                            Bekijk leden op de wachtlijst
+                        </p>
+                        <template #right>
+                            <span v-if="event.group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -76,11 +92,12 @@ const $navigate = useNavigate();
 
 enum Routes {
     Registrations = 'inschrijvingen',
+    WaitingList = 'wachtlijst',
     Edit = "instellingen"
 }
 
 defineRoutes([
-{
+    {
         url: Routes.Registrations,
         component: MembersTableView as ComponentOptions,
         paramsToProps: () => {
@@ -89,6 +106,18 @@ defineRoutes([
             }
             return {
                 group: props.event.group
+            }
+        }
+    },
+    {
+        url: Routes.WaitingList,
+        component: MembersTableView as ComponentOptions,
+        paramsToProps: () => {
+            if (!props.event.group || !props.event.group.waitingList) {
+                throw new Error("No waiting list found")
+            }
+            return {
+                group: props.event.group.waitingList
             }
         }
     },
