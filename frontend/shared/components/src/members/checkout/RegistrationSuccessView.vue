@@ -59,7 +59,7 @@ const title = computed(() => {
 
     if (names.length > 0) {
         if (names.length > 3) {
-            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 3) + ' andere leden'], ', ', ' en ')+" zijn ingeschreven"
+            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' andere leden'], ', ', ' en ')+" zijn ingeschreven"
         } else if (names.length > 1) {
             t += Formatter.joinLast(names, ', ', ' en ')+" zijn ingeschreven"
         } else {
@@ -73,7 +73,7 @@ const title = computed(() => {
         }
 
         if (waitingListNames.length > 3) {
-            t += Formatter.joinLast([...names.slice(0, 2), (waitingListNames.length - 3) + ' andere leden'], ', ', ' en ')+" zijn ingeschreven op de wachtlijst"
+            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' andere leden'], ', ', ' en ')+" zijn ingeschreven op de wachtlijst"
         } else if (waitingListNames.length > 1) {
             t += Formatter.joinLast(waitingListNames, ', ', ' en ')+" zijn ingeschreven op de wachtlijst"
         } else {
