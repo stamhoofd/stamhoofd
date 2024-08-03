@@ -7,6 +7,7 @@ import { PaymentMethod } from "../../PaymentMethod";
 import { PriceBreakdown } from "../../PriceBreakdown";
 import { PlatformMember } from "../PlatformMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
+import { RegisterItem } from "./RegisterItem";
 
 export type RegisterContext = {
     members: PlatformMember[],
@@ -99,6 +100,29 @@ export class RegisterCheckout{
 
     get isAdminFromSameOrganization() {
         return !!this.asOrganizationId && this.asOrganizationId === this.singleOrganization?.id
+    }
+
+    add(item: RegisterItem, options?: {calculate?: boolean}) {
+        this.cart.add(item)
+
+        if (options?.calculate !== false) {
+            this.updatePrices()
+        }
+    }
+
+    remove(item: RegisterItem, options?: {calculate?: boolean}) {
+        this.cart.remove(item)
+
+        if (options?.calculate !== false) {
+            this.updatePrices()
+        }
+    }
+
+    removeMemberAndGroup(memberId: string, groupId: string, options?: {calculate?: boolean}) {
+        this.cart.removeMemberAndGroup(memberId, groupId)
+        if (options?.calculate !== false) {
+            this.updatePrices()
+        }
     }
 
     updatePrices() {

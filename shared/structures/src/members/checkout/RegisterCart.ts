@@ -55,9 +55,15 @@ export class RegisterCart {
         if (this.contains(item)) {
             return false;
         }
+        
         if (!item.isValid) {
             return false;
         }
+
+        if (this.items.length >= 500) {
+            return false;
+        }
+
         if (this.paymentConfiguration && item.paymentConfiguration && item.paymentConfiguration !== this.paymentConfiguration) {
             return false;
         }
@@ -135,14 +141,7 @@ export class RegisterCart {
             return null;
         }
 
-        const organization = this.items[0].organization
-        for (const item of this.items) {
-            if (item.organization.id !== organization.id) {
-                return null;
-            }
-        }
-
-        return organization
+        return this.items[0].organization
     }
 
     validate() {

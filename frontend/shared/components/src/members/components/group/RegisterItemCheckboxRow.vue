@@ -4,9 +4,9 @@
             <Checkbox v-model="checked" :disabled="disabled" @click.stop />
         </template>
 
-        <h4 class="style-title-list ">
+        <h3 class="style-title-list ">
             {{ member.patchedMember.name }}
-        </h4>
+        </h3>
 
         <p v-if="validationError" class="style-description-small">
             {{ validationError }}
@@ -17,10 +17,6 @@
         </p>
 
         <p v-if="checked && registerItem && registerItem.description" class="style-description-small pre-wrap" v-text="registerItem.description" />
-
-        <p v-if="checked && registerItem" class="style-description-small">
-            <span class="style-price">{{ formatPrice(registerItem.calculatedPrice) }}</span>
-        </p>
         <template #right>
             <span v-if="checked && registerItem?.showItemView" class="button icon edit gray" />
         </template>
@@ -38,9 +34,11 @@ const props = defineProps<{
     groupOrganization: Organization
 }>()
 
-const registerItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id) ?? RegisterItem.defaultFor(props.member, props.group, props.groupOrganization))
-const validationError = computed(() => registerItem.value.validationError)
-const validationWarning = computed(() => registerItem.value.validationWarning)
+// We do some caching here to prevent too many calculations on cart changes
+const inCartRegisterItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id))
+const registerItem = computed(() => inCartRegisterItem.value ?? RegisterItem.defaultFor(props.member, props.group, props.groupOrganization))
+const validationError = computed(() => inCartRegisterItem.value ? null : registerItem.value.validationError)
+const validationWarning = computed(() => validationError.value ? null : registerItem.value.validationWarning)
 
 const disabled = computed(() => {
     return validationError.value !== null
@@ -48,10 +46,10 @@ const disabled = computed(() => {
 const checkoutRegisterItem = useCheckoutRegisterItem();
 
 const checked = computed({
-    get: () => props.member.family.checkout.cart.containsMemberAndGroup(props.member.id, props.group.id),
+    get: () => !!inCartRegisterItem.value,
     set: (value: boolean) => {
         if (!value) {
-            props.member.family.checkout.cart.removeMemberAndGroup(props.member.id, props.group.id)
+            props.member.family.checkout.removeMemberAndGroup(props.member.id, props.group.id)
         } else {
             editRegisterItem().catch(console.error)
         }

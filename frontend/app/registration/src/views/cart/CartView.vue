@@ -19,26 +19,7 @@
 
             <template v-else>
                 <STList>
-                    <STListItem v-for="item in cart.items" :key="item.id" class="right-stack">
-                        <h3 class="style-title-list">
-                            <span>{{ item.member.patchedMember.name }}</span>
-                        </h3>
-                        <p v-if="!organization" class="style-description">
-                            {{ item.organization.name }}
-                        </p>
-                        <p class="style-description">
-                            {{ item.waitingList ? "Wachtlijst van " : "Inschrijven voor " }}{{ item.group.settings.name }}
-                        </p>
-
-                        <template #right>
-                            <p v-if="item.calculatedPrice" class="price">
-                                {{ formatPrice(item.calculatedPrice) }}
-                            </p>
-                            <div @click.stop>
-                                <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
-                            </div>
-                        </template>
-                    </STListItem>
+                    <RegisterItemRow v-for="item in cart.items" :key="item.id" class="right-stack" :item="item" />
                 </STList>
                 <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
 
@@ -56,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, PriceBreakdownBox, startCheckout, useContext, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
+import { ErrorBox, PriceBreakdownBox, startCheckout, useContext, useErrors, useNavigationActions, useOrganization, RegisterItemRow } from '@stamhoofd/components';
 import { RegisterItem } from '@stamhoofd/structures';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { useMemberManager } from '../../getRootView';
@@ -93,7 +74,8 @@ async function goToCheckout() {
     try {
         await startCheckout({
             checkout: checkout.value,
-            context: context.value
+            context: context.value,
+            displayOptions: {action: 'show'}
         }, navigate)
     } catch (e) {
         errors.errorBox = new ErrorBox(e)

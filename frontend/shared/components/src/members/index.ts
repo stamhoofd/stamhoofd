@@ -13,4 +13,8 @@ export * from "./PlatformFamilyManager";
 export { default as EditMemberGeneralBox } from "./components/edit/EditMemberGeneralBox.vue"
 export { default as EditMemberParentsBox } from "./components/edit/EditMemberParentsBox.vue"
 export { default as EditMemberAllBox } from "./components/edit/EditMemberAllBox.vue"
+
+export { default as RegisterItemRow } from "./components/group/RegisterItemRow.vue"
+export { default as RegisterItemCheckboxRow } from "./components/group/RegisterItemCheckboxRow.vue"
+
 export * from "./checkout";

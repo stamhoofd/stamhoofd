@@ -328,20 +328,16 @@ export class RegisterItem implements RegisterItemWithPrice {
     }
 
     isInvited() {
-        return !!this.member.member.registrations.find(r => r.groupId === this.group.id && r.waitingList && r.canRegister && r.cycle === this.group.cycle)
+        return !!this.member.member.registrations.find(r => r.groupId === this.group.id && r.registeredAt === null && r.canRegister)
     }
 
     doesMeetRequireGroupIds() {
         if (this.group.settings.requireGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
-                const registrationGroup = this.organization.groups.find(g => g.id === r.groupId)
-                if (!registrationGroup) {
-                    return false
-                }
-                return this.group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle
+                return this.group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null
             });
 
-            if (!hasGroup && !this.checkout.cart.items.find(item => this.group.settings.requireGroupIds.includes(item.group.id) && item.member.member.id === this.member.member.id && !item.waitingList)) {
+            if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireGroupIds.includes(item.group.id))) {
                 return false;
             }
         }
@@ -457,6 +453,11 @@ export class RegisterItem implements RegisterItemWithPrice {
             return null;
         }
 
+        if (!this.member.family.checkout.isAdminFromSameOrganization) {
+            // Warnings are only for admins
+            return null;
+        }
+
         try {
             this.validate({warnings: true})
         } catch (e) {
@@ -528,7 +529,7 @@ export class RegisterItem implements RegisterItemWithPrice {
                     const error = this.member.member.details.getMatchingError(this.group);
                     throw new SimpleError({
                         code: "not_matching",
-                        message: "Not matching",
+                        message: "Not matching: memberDetails",
                         human: error?.description ?? `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`
                     })
                 }
@@ -539,8 +540,8 @@ export class RegisterItem implements RegisterItemWithPrice {
         if (!this.doesMeetRequireGroupIds() && !admin) {
             throw new SimpleError({
                 code: "not_matching",
-                message: "Not matching",
-                human:  "Inschrijving bij "+Formatter.joinLast(this.group.settings.requireGroupIds.map(id => this.organization.groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")+" is verplicht voor je kan inschrijven voor "+this.group.settings.name,
+                message: "Not matching: requireGroupIds",
+                human: `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`
             })
         }
 
