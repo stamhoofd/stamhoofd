@@ -291,7 +291,7 @@ if (app == 'admin') {
             new Column<ObjectType, number>({
                 name: "Openstaand saldo", 
                 allowSorting: false,
-                getValue: (v) => v.patchedMember.outstandingBalanceFor(organization.value!.id),
+                getValue: (v) => v.filterRegistrations({groups: groups}).reduce((sum, r) => sum + (r.price - r.pricePaid), 0),
                 format: (outstandingBalance) => {
                     if (outstandingBalance < 0) {
                         return Formatter.price(outstandingBalance)
