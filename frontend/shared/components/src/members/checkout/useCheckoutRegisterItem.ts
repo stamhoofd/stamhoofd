@@ -235,15 +235,17 @@ export async function chooseOrganizationMembersForGroup({members, group, items, 
         // Add default register item
         if (!items || items.length === 0) {
             const item = RegisterItem.defaultFor(member, group, groupOrganization);
-            checkout.cart.add(item);
+            checkout.add(item, {calculate: false});
         }
     }
 
     if (items) {
         for (const item of items) {
-            checkout.cart.add(item);
+            checkout.add(item, {calculate: false});
         }
     }
+
+    checkout.updatePrices()
 
     await navigate.present({
         components: [
