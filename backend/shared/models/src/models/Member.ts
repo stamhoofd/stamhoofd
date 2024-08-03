@@ -415,7 +415,6 @@ export class Member extends Model {
     }
 
     async updateMemberships(this: MemberWithRegistrations) {
-        console.log('Updating memberships for member: ' + this.id)
         return await QueueHandler.schedule('updateMemberships-' + this.id, async () => {
             const platform = await Platform.getShared()
             const registrations = this.registrations.filter(r => r.group.periodId == platform.periodId && r.registeredAt && !r.deactivatedAt)
