@@ -1,10 +1,6 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="group.organizationId" @update="setOrganization">
         <SaveView save-text="Inschrijven" :save-badge="cartLength" :disabled="cartLength === 0" title="Inschrijven" :loading="saving" @save="goToCheckout">
-            <template #left>
-                Totaal: {{ formatPrice(checkout.totalPrice) }}
-            </template>
-
             <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
                 {{ groupOrganization!.name }}
             </p>
@@ -41,7 +37,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, ExternalOrganizationContainer, STErrorsDefault, useErrors, PriceBreakdownBox } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
-import { computed, markRaw, reactive, ref } from 'vue';
+import { computed, markRaw, onMounted, reactive, ref } from 'vue';
 import { EditMemberGeneralBox, MemberStepView, startCheckout } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
@@ -57,6 +53,15 @@ const props = defineProps<{
 function setOrganization(groupOrganization: Organization) {
     props.checkout.setDefaultOrganization(groupOrganization)
 }
+
+onMounted(() => {
+    // Initially show errors as soon as it is possible
+    try {
+        props.checkout.validate({})
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    }
+})
 
 const context = useContext();
 const contextOrganization = useOrganization()

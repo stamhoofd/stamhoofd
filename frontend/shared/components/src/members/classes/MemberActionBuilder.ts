@@ -482,8 +482,9 @@ export class MemberActionBuilder {
                     pop: () => Promise.resolve(),
                     dismiss: () => Promise.resolve()
                 },
-                options: {
-                    present: 'popup'
+                displayOptions: {
+                    action: 'present',
+                    modalDisplayStyle: 'popup'
                 },
 
                 // Immediately checkout instead of only adding it to the cart

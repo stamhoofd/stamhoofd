@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="st-view register-item-view" v-on="isInCart ? {delete: deleteMe} : {}" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Toevoegen'" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" @save="addToCart">
+    <SaveView class="st-view register-item-view" v-on="isInCart ? {delete: deleteMe} : {}" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Toevoegen'" :save-icon="isInCart ? 'edit' : 'basket'" :disabled="!!validationError" :title="item.group.settings.name" @save="addToCart">
         <h1>{{ item.group.settings.name }}</h1>
 
         <template v-if="showGroupInformation">
@@ -8,6 +8,14 @@
             </figure>
             <p v-if="item.group.settings.description" class="style-description pre-wrap" v-text="item.group.settings.description" />
         </template>
+
+        <p v-else-if="validationError" class="error-box">
+            {{ validationError }}
+        </p>
+        <p v-if="item.cartError" class="error-box small">
+            {{ item.cartError.getHuman() }}
+        </p>
+
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -74,10 +82,12 @@
             </STList>
         </div>
 
-        <hr>
-        <div class="pricing-box max">
-            <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: item.calculatedPrice}]" />
-        </div>
+        <template v-if="!validationError">
+            <hr>
+            <div class="pricing-box max">
+                <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: item.calculatedPrice}]" />
+            </div>
+        </template>
     </SaveView>
 </template>
 
@@ -101,6 +111,7 @@ const saving = ref(false)
 const navigationActions = useNavigationActions()
 const isInCart = computed(() => checkout.value.cart.contains(props.item))
 const pop = usePop()
+const validationError = computed(() => props.item.validationError)
 
 async function addToCart() {
     if (saving.value) {

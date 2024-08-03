@@ -111,8 +111,12 @@ export class RegisterItem implements RegisterItemWithPrice {
         }
     }
 
+    get isInCart() {
+        return this.member.family.checkout.cart.contains(this)
+    }
+
     get showItemView() {
-        return this.shouldUseWaitingList() || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0
+        return this.shouldUseWaitingList() || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
     }
 
     calculatePrice() {
@@ -562,7 +566,8 @@ export class RegisterItem implements RegisterItemWithPrice {
             throw new SimpleError({
                 code: "waiting_list_required",
                 message: "Waiting list required",
-                human: `${this.member.member.firstName} kan momenteel enkel voor de wachtlijst van ${this.group.settings.name} inschrijven.`
+                human: `${this.member.member.firstName} kan momenteel enkel voor de wachtlijst van ${this.group.settings.name} inschrijven.`,
+                meta: {recoverable: true}
             })
         }
 
@@ -571,7 +576,8 @@ export class RegisterItem implements RegisterItemWithPrice {
                 throw new SimpleError({
                     code: "maximum_reached",
                     message: "Maximum reached",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.`
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.`,
+                    meta: {recoverable: true}
                 })
             }
         } else {
@@ -579,7 +585,8 @@ export class RegisterItem implements RegisterItemWithPrice {
                 throw new SimpleError({
                     code: "maximum_reached",
                     message: "Maximum reached",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet.`
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet.`,
+                    meta: {recoverable: true}
                 })
             }
         }

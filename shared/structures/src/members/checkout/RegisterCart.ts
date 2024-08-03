@@ -56,10 +56,6 @@ export class RegisterCart {
             return false;
         }
         
-        if (!item.isValid) {
-            return false;
-        }
-
         if (this.items.length >= 500) {
             return false;
         }
