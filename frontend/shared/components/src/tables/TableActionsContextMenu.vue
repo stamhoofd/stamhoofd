@@ -16,8 +16,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { Component, Prop, VueComponent } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from "@stamhoofd/components";
 
 import { TableAction, TableActionSelection } from "./classes";
@@ -30,7 +30,7 @@ import { TableAction, TableActionSelection } from "./classes";
         Checkbox
     },
 })
-export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
+export default class TableActionsContextMenu extends VueComponent {
     @Prop({ required: true })
         actions: TableAction<any>[];
 
@@ -114,5 +114,10 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
             selection: this.selection
         })
     }
+
+    pop(popParents = false) {
+        this.$refs.contextMenuView?.pop(popParents)
+    }
+
 }
 </script>

@@ -252,8 +252,11 @@ export default class ContextMenuView extends VueComponent {
             const instance = this.childMenu.componentInstance() as any
 
             if (instance) {
+                console.log("Pop child menu")
                 instance.pop(false)
-            }
+            } else (
+                console.warn('Missing instance for childMenu')
+            )
         }
         this.childMenu = null
     }
@@ -623,6 +626,7 @@ export default class ContextMenuView extends VueComponent {
             // Ignore
             return
         }
+        console.log('Popping ContextMenuView')
         this.isPopped = true
         this.popChildMenu();
 
