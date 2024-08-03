@@ -327,6 +327,7 @@ export class GroupSettings extends AutoEncoder {
     reservedMembers: number | null = 0
 
     /**
+     * @deprecated
      * Amount of members on the waiting list
      */
     @field({ 

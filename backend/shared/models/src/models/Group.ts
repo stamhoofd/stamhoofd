@@ -221,7 +221,7 @@ export class Group extends Model {
         )
 
         this.settings.reservedMembers = await Group.getCount(
-            "groupId = ? and ((waitingList = 0 and registeredAt is null AND reservedUntil >= ?) OR (waitingList = 1 and canRegister = 1))",
+            "groupId = ? and registeredAt is null AND (canRegister = 1 OR reservedUntil >= ?)",
             [this.id, new Date()]
         )
     }
