@@ -1,7 +1,7 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { SessionContext, useRequestOwner } from "@stamhoofd/networking";
-import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem } from "@stamhoofd/structures";
+import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithMember } from "@stamhoofd/structures";
 import { ChooseGroupForMemberView } from "..";
 import { useAppContext } from "../../context/appContext";
 import { useContext } from "../../hooks";
@@ -214,11 +214,12 @@ export function useChooseFamilyMembersForGroup() {
 // ----------------------------
 // --------- Flow 3 -----------
 
-export async function chooseOrganizationMembersForGroup({members, group, items, context, navigate, owner}: {
+export async function chooseOrganizationMembersForGroup({members, group, items, context, navigate, owner, deleteRegistrations}: {
     members: PlatformMember[], 
     group: Group, 
     context: SessionContext,
     items?: RegisterItem[], 
+    deleteRegistrations?: RegistrationWithMember[],
     navigate: NavigationActions,
     owner: any
 }) {
@@ -242,6 +243,12 @@ export async function chooseOrganizationMembersForGroup({members, group, items, 
     if (items) {
         for (const item of items) {
             checkout.add(item, {calculate: false});
+        }
+    }
+
+    if (deleteRegistrations){
+        for (const registration of deleteRegistrations) {
+            checkout.removeRegistration(registration, {calculate: false});
         }
     }
 

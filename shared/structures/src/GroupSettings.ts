@@ -7,6 +7,9 @@ import { GroupGenderType } from './GroupGenderType';
 import { OldGroupPrices } from './OldGroupPrices';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
 import { PlatformMember } from './members/PlatformMember';
+import { StockReservation } from './StockReservation';
+import { RegisterItem } from './members/checkout/RegisterItem';
+import { Group } from './Group';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -44,31 +47,54 @@ export class GroupPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true, version: 290 })
     stock: number | null = null
 
-    @field({ decoder: IntegerDecoder, version: 290 })
-    usedStock = 0
+    /**
+     * @deprecated removed
+     */
+    @field({ decoder: IntegerDecoder, optional: true, field: 'usedStock' })
+    _usedStock = 0
 
     /**
-     * When stored inside a registration, this contains the amount of stock we reserved for that specific registration.
-     * When reserving the stock, we increase this number
-     * When removing it from the stock, we set it back to 0
-     * 
-     * This value is ignored for newly placed orders and patches. We only look at the ones stored on the server
+     * @deprecated removed
      */
-    @field({ decoder: IntegerDecoder, version: 294 })
-    reserved = 0
+    @field({ decoder: IntegerDecoder, optional: true, field: 'reserved' })
+    _reserved = 0
 
-    get isSoldOut(): boolean {
+    getUsedStock(group: Group) {
+        const groupStockReservations = group.stockReservations
+        return StockReservation.getAmount('GroupOption', this.id, groupStockReservations)
+    }
+
+    /**
+     * Can be negative is we are editing items, positive if other items in the cart cause stock changes
+     */
+    getPendingStock(item: RegisterItem) {
+        const stock = item.getCartPendingStockReservations() // this is positive if it will be used
+        return StockReservation.getAmount(
+            'GroupOption', 
+            this.id, 
+            StockReservation.filter('Group', item.group.id, stock)
+        )
+    }
+
+    isSoldOut(item: RegisterItem|Group): boolean {
         if (this.stock === null) {
             return false
         }
-        return this.usedStock - this.reserved >= this.stock
+        if (item instanceof Group) {
+            return this.getUsedStock(item) >= this.stock
+        }
+        return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.stock
     }
 
-    get remainingStock(): number | null {
+    getRemainingStock(item: RegisterItem|Group): number | null {
         if (this.stock === null) {
             return null
         }
-        return Math.max(0, this.stock + this.reserved - this.usedStock)
+        if (item instanceof Group) {
+            return Math.max(0, this.stock - this.getUsedStock(item))
+        }
+        return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group))
+
     }
 }
 
@@ -108,43 +134,67 @@ export class GroupOption extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true, version: 290 })
     stock: number | null = null
 
-    @field({ decoder: IntegerDecoder, version: 290 })
-    usedStock = 0
+    /**
+     * @deprecated removed
+     */
+    @field({ decoder: IntegerDecoder, optional: true, field: 'usedStock' })
+    _usedStock = 0
 
     /**
-     * When stored inside a registration, this contains the amount of stock we reserved for that specific registration.
-     * When reserving the stock, we increase this number
-     * When removing it from the stock, we set it back to 0
-     * 
-     * This value is ignored for newly placed orders and patches. We only look at the ones stored on the server
+     * @deprecated removed
      */
-    @field({ decoder: IntegerDecoder, version: 295 })
-    reserved = 0
+    @field({ decoder: IntegerDecoder, optional: true, field: 'reserved' })
+    _reserved = 0
 
-    get isSoldOut(): boolean {
+    getUsedStock(group: Group) {
+        const groupStockReservations = group.stockReservations
+        return StockReservation.getAmount('GroupOption', this.id, groupStockReservations)
+    }
+
+    /**
+     * Can be negative is we are editing items, positive if other items in the cart cause stock changes
+     */
+    getPendingStock(item: RegisterItem) {
+        const stock = item.getCartPendingStockReservations() // this is positive if it will be used
+        return StockReservation.getAmount(
+            'GroupOption', 
+            this.id, 
+            StockReservation.filter('Group', item.group.id, stock)
+        )
+    }
+
+    isSoldOut(item: RegisterItem|Group): boolean {
         if (this.stock === null) {
             return false
         }
-        return this.usedStock - this.reserved >= this.stock
+        if (item instanceof Group) {
+            return this.getUsedStock(item) >= this.stock
+        }
+        return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.stock
     }
 
-    get remainingStock(): number | null {
+    getRemainingStock(item: RegisterItem|Group): number | null {
         if (this.stock === null) {
             return null
         }
-        return Math.max(0, this.stock + this.reserved - this.usedStock)
+        if (item instanceof Group) {
+            return Math.max(0, this.stock - this.getUsedStock(item))
+        }
+        return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group))
+
     }
 
-    get maximumSelection() {
+    getMaximumSelection(item: RegisterItem) {
         if (this.maximum === null) {
-            return this.remainingStock
+            return this.getRemainingStock(item)
         }
 
-        if (this.remainingStock === null) {
+        const remaining = this.getRemainingStock(item)
+        if (remaining === null) {
             return this.maximum
         }
 
-        return Math.min(this.maximum, this.remainingStock)
+        return Math.min(this.maximum, remaining)
     }
 }
 
@@ -600,6 +650,7 @@ export class GroupSettings extends AutoEncoder {
     getShortCode(maxLength: number) {
         return Formatter.firstLetters(this.name, maxLength)
     }
+
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType()

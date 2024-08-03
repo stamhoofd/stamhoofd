@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, mergeFilters, Organization, PermissionLevel, PlatformMember } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, mergeFilters, Organization, PermissionLevel, PlatformMember, RegistrationWithMember } from '@stamhoofd/structures'
 import { markRaw } from 'vue'
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
 import EmailView from '../../email/EmailView.vue'
@@ -464,8 +464,45 @@ export class MemberActionBuilder {
         return this.groups?.map(g => g.id) ?? []
     }
 
-    moveRegistrations(members: PlatformMember[], group: Group) {
-        // todo
+    async moveRegistrations(members: PlatformMember[], group: Group) {
+        const deleteRegistrations = members.flatMap(m => m.filterRegistrations({groups: this.groups}).map(r => RegistrationWithMember.from(r, m.patchedMember)))
+
+        //if (members.length === 1) {
+        //    return await checkoutDefaultItem({
+        //        member: members[0], 
+        //        group,
+        //        admin: true,
+        //        groupOrganization: this.organizations.find(o => o.id === group.organizationId)!,
+        //        context: this.context,
+        //        navigate: {
+        //            present: this.present,
+        //            show: this.present,
+        //            pop: () => Promise.resolve(),
+        //            dismiss: () => Promise.resolve()
+        //        },
+        //        displayOptions: {
+        //            action: 'present',
+        //            modalDisplayStyle: 'popup'
+        //        },
+//
+        //        // Immediately checkout instead of only adding it to the cart
+        //        startCheckoutFlow: true
+        //    })
+        //}
+
+        return await chooseOrganizationMembersForGroup({
+            members, 
+            group,
+            context: this.context,
+            owner: this.owner,
+            deleteRegistrations,
+            navigate: {
+                present: this.present,
+                show: this.present,
+                pop: () => Promise.resolve(),
+                dismiss: () => Promise.resolve()
+            }
+        })
     }
 
     async register(members: PlatformMember[], group: Group) {

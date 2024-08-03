@@ -13,6 +13,7 @@
             <STErrorsDefault :error-box="errors.errorBox" />
             
             <STList>
+                <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.id" class="right-stack" :registration="registration" :checkout="checkout"  />
                 <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
             </STList>
             
@@ -46,6 +47,7 @@ import { EditMemberGeneralBox, MemberStepView, startCheckout } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import RegisterItemRow from './components/group/RegisterItemRow.vue';
+import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
 import SearchOrganizationMembersForGroupView from './SearchOrganizationMembersForGroupView.vue';
 
 const props = defineProps<{

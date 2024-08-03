@@ -7,6 +7,7 @@ import { Organization } from "../../Organization"
 import { PlatformMember } from "../PlatformMember"
 import { Registration } from "../Registration"
 import { RegisterContext } from "./RegisterCheckout"
+import { StockReservation } from "../../StockReservation"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -299,7 +300,7 @@ export class RegisterItem {
     }
 
     isAlreadyRegistered() {
-        return !!this.member.member.registrations.find(r => r.groupId === this.group.id && (this.waitingList || r.registeredAt !== null) && r.deactivatedAt === null && r.waitingList === this.waitingList && r.cycle === this.group.cycle)
+        return !!this.member.member.registrations.find(r => r.groupId === this.group.id && r.registeredAt !== null && r.deactivatedAt === null)
     }
     
     hasReachedCategoryMaximum(): boolean {
@@ -657,5 +658,52 @@ export class RegisterItem {
             return null;
         }
         return this.organization.meta.registrationPaymentConfiguration
+    }
+
+    /**
+     * Returns the stock that will be taken (or freed if negative) by all the register items before this item
+     * and with the removed registrations freed up, so this can be negative
+     */
+    getCartPendingStockReservations() {
+        const deleteRegistrations = this.checkout.cart.deleteRegistrations.filter(r => r.groupId === this.group.id)
+
+        const cartIndex = this.checkout.cart.items.findIndex(i => i.id === this.id)
+        const itemsBefore = this.checkout.cart.items.slice(0, cartIndex === -1 ? undefined : cartIndex)
+
+        return StockReservation.removed(
+            itemsBefore.flatMap(i => i.getPendingStockReservations()),  // these will be removed
+            deleteRegistrations.flatMap(r => r.stockReservations) // these will be freed up
+        )
+    }
+
+
+    /**
+     * Stock that will be taken by this item
+     */
+    getPendingStockReservations() {
+        return [
+            // Global level stock reservations (stored in each group)
+            StockReservation.create({
+                objectId: this.group.id,
+                objectType: 'Group',
+                amount: 1,
+                children: [
+                    // Group level stock reservatiosn (stored in the group)
+
+                    StockReservation.create({
+                        objectId: this.groupPrice.id,
+                        objectType: 'GroupPrice',
+                        amount: 1
+                    }),
+                    ...this.options.map(o => {
+                        return StockReservation.create({
+                            objectId: o.option.id,
+                            objectType: 'GroupOption',
+                            amount: o.amount
+                        })
+                    })
+                ]
+            })
+        ]
     }
 }

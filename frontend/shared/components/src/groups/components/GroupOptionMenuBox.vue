@@ -82,11 +82,8 @@
                         {{ reducedPriceName }}: <span>{{ formatPriceChange(option.price.reducedPrice) }}</span>
                     </p>
 
-                    <p v-if="option.isSoldOut" class="style-description-small">
-                        Uitverkocht
-                    </p>
-                    <p v-else-if="option.stock" class="style-description-small">
-                        Nog {{ pluralText(option.remainingStock, 'stuk', 'stuks') }} beschikbaar
+                    <p v-if="option.stock !== null" class="style-description-small">
+                        Nog {{ pluralText(option.getRemainingStock(group), 'stuk', 'stuks') }} beschikbaar
                     </p>
 
                     <p v-if="option.maximum !== null && option.allowAmount" class="style-description-small">

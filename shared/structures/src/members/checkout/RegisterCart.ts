@@ -3,6 +3,8 @@ import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-
 import { BalanceItemCartItem } from "./BalanceItemCartItem";
 import { RegisterContext } from "./RegisterCheckout";
 import { IDRegisterItem, RegisterItem } from "./RegisterItem";
+import { Registration } from "../Registration";
+import { RegistrationWithMember } from "../RegistrationWithMember";
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -22,6 +24,14 @@ export class IDRegisterCart extends AutoEncoder {
 export class RegisterCart {
     items: RegisterItem[] = []
     balanceItems: BalanceItemCartItem[] = []
+
+    /**
+     * You can define which registrations you want remove as part of this register operation.
+     * This can be used to update registrations -> first delete them and add a new RegisterItem 
+     * for them - internally the backend can handle this and maintain some data points from the
+     * old registration
+     */
+    deleteRegistrations: RegistrationWithMember[] = []
 
     calculatePrices() {
         for (const item of this.items) {
@@ -103,6 +113,20 @@ export class RegisterCart {
             if (otherItem.member.id === memberId && otherItem.groupId === groupId) {
                 this.items.splice(i, 1);
             }
+        }
+    }
+
+    removeRegistration(registration: RegistrationWithMember) {
+        const index = this.deleteRegistrations.findIndex(r => r.id === registration.id)
+        if (index === -1) {
+            this.deleteRegistrations.push(registration)
+        }
+    }
+
+    unremoveRegistration(registration: RegistrationWithMember) {
+        const index = this.deleteRegistrations.findIndex(r => r.id === registration.id)
+        if (index !== -1) {
+            this.deleteRegistrations.splice(index, 1)
         }
     }
 

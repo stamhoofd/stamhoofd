@@ -1,6 +1,7 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 import { Group } from '../Group';
+import { StockReservation } from '../StockReservation';
 
 export class Registration extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4()  })
@@ -24,6 +25,9 @@ export class Registration extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 250 })
     organizationId: string
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: IntegerDecoder })
     cycle: number = 0
 
@@ -62,7 +66,6 @@ export class Registration extends AutoEncoder {
     @field({ decoder: IntegerDecoder, optional: true })
     pricePaid = 0
 
-    /// Payment can be null if the member is on a waiting list
-    // @field({ decoder: Payment, nullable: true })
-    // payment: Payment | null = null
+    @field({ decoder: new ArrayDecoder(StockReservation), nullable: true, version: 299 })
+    stockReservations: StockReservation[] = []
 }

@@ -44,6 +44,7 @@ export * from "./src/members/MemberResponsibilityRecord"
 export * from "./src/RegistrationPeriod"
 export * from "./src/members/MemberPlatformMembership"
 export * from "./src/Event"
+export * from "./src/StockReservation"
 
 // UserPermissions
 export * from "./src/UserPermissions"

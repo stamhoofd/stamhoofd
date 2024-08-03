@@ -1,9 +1,11 @@
 import { column, Database, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType } from '@stamhoofd/structures';
+import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Formatter } from '@stamhoofd/utility';
 import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
+import { QueueHandler } from '@stamhoofd/queues';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 
 if (Member === undefined) {
     throw new Error("Import Member is undefined")
@@ -87,6 +89,12 @@ export class Group extends Model {
 
     @column({ type: "string" })
     status = GroupStatus.Open;
+
+    /**
+     * Editing this field is only allowed when running inside the QueueHandler
+     */
+    @column({ type: "json", decoder: new ArrayDecoder(StockReservation) })
+    stockReservations: StockReservation[] = []
 
     static async getAll(organizationId: string, periodId: string|null, active = true) {
         const w: any = periodId ? {periodId} : {}
@@ -271,6 +279,28 @@ export class Group extends Model {
             }
         }
     }
+
+    static async applyStockReservations(groupId: string, addStockReservations: StockReservation[], free = false) {
+        await QueueHandler.schedule('group-stock-update-'+groupId, async () => {
+            const updatedGroup = await Group.getByID(groupId)
+            if (!updatedGroup) {
+                throw new Error("Expected group")
+            }
+
+            if (!free) {
+                updatedGroup.stockReservations = StockReservation.added(updatedGroup.stockReservations, addStockReservations)
+            } else {
+                updatedGroup.stockReservations = StockReservation.removed(updatedGroup.stockReservations, addStockReservations)
+            }
+            await updatedGroup.save()
+        })
+
+    }
+
+    static async freeStockReservations(groupId: string, reservations: StockReservation[]) {
+        return await this.applyStockReservations(groupId, reservations, true)
+    }
+
 
 }
 

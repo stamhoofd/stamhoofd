@@ -1,10 +1,11 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { GroupCategory } from './GroupCategory';
 import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { GroupSettings, WaitingListType } from './GroupSettings';
 import { LoadedPermissions, PermissionLevel, PermissionsResourceType } from './Permissions';
+import { StockReservation } from './StockReservation';
 
 export enum GroupStatus {
     "Open" = "Open",
@@ -53,6 +54,9 @@ export class Group extends AutoEncoder {
 
     @field({ decoder: Group, nullable: true, version: 292 })
     waitingList: Group | null = null
+
+    @field({ decoder: new ArrayDecoder(StockReservation), nullable: true, version: 298 })
+    stockReservations: StockReservation[] = []
 
     /**
      * @deprecated

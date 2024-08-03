@@ -1,11 +1,13 @@
 import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { Email } from '@stamhoofd/email';
-import { EmailTemplateType, PaymentMethod, PaymentMethodHelper, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, PaymentMethod, PaymentMethodHelper, Recipient, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { getEmailBuilder } from '../helpers/EmailBuilder';
-import { Document, EmailTemplate, Organization, User } from './';
+import { Document, EmailTemplate, Group, Organization, User } from './';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { QueueHandler } from '@stamhoofd/queues';
 
 export class Registration extends Model {
     static table = "registrations"
@@ -90,6 +92,12 @@ export class Registration extends Model {
      */
     @column({ type: "integer" })
     pricePaid = 0
+
+    /**
+     * Set to null if no reservations are made, to help faster querying
+     */
+    @column({ type: "json", decoder: new ArrayDecoder(StockReservation), nullable: true })
+    stockReservations: StockReservation[] = []
 
     static group: ManyToOneRelation<"group", import('./Group').Group>
 
@@ -410,5 +418,54 @@ export class Registration extends Model {
         })
 
         Email.schedule(builder)
+    }
+
+    shouldIncludeStock() {
+        return (this.registeredAt !== null && this.deactivatedAt === null) || this.canRegister || (this.reservedUntil && this.reservedUntil > new Date())
+    }
+
+
+
+    /**
+     * Adds or removes the order to the stock of the webshop (if it wasn't already included). If amounts were changed, only those
+     * changes will get added
+     * Should always happen in the webshop-stock queue to prevent multiple webshop writes at the same time
+     * + in combination with validation and reading the webshop
+     */
+    async updateStock() {
+        const id = this.id;
+        await QueueHandler.schedule('registration-stock-update-'+id, async function(this: undefined) {
+            const updated = await Registration.getByID(id);
+
+            if (!updated) {
+                return;
+            }
+            
+            // Start with clearing all the stock reservations we've already made
+            if (updated.stockReservations) {
+                const groupIds = Formatter.uniqueArray(updated.stockReservations.flatMap(r => r.objectType === 'Group' ? [r.objectId] : []));
+                for (const groupId of groupIds) {
+                    const stocks = StockReservation.filter('Group', groupId, updated.stockReservations);
+                    
+                    // Technically we don't need to await this, but okay...
+                    await Group.freeStockReservations(groupId, stocks);
+                }
+            }
+
+            if (updated.shouldIncludeStock()) {
+                const myStockReservations: StockReservation[] = [];
+
+                // todo: build
+
+                updated.stockReservations = myStockReservations;
+                await updated.save();
+            } else {
+                if (updated.stockReservations.length) {
+                    updated.stockReservations = [];
+                    await updated.save();
+                }
+            }
+
+        })
     }
 }

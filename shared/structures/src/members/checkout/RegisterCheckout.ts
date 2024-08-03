@@ -8,6 +8,7 @@ import { PriceBreakdown } from "../../PriceBreakdown";
 import { PlatformMember } from "../PlatformMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 import { RegisterItem } from "./RegisterItem";
+import { RegistrationWithMember } from "../RegistrationWithMember";
 
 export type RegisterContext = {
     members: PlatformMember[],
@@ -120,6 +121,20 @@ export class RegisterCheckout{
 
     removeMemberAndGroup(memberId: string, groupId: string, options?: {calculate?: boolean}) {
         this.cart.removeMemberAndGroup(memberId, groupId)
+        if (options?.calculate !== false) {
+            this.updatePrices()
+        }
+    }
+
+    removeRegistration(registration: RegistrationWithMember, options?: {calculate?: boolean}) {
+        this.cart.removeRegistration(registration)
+        if (options?.calculate !== false) {
+            this.updatePrices()
+        }
+    }
+
+    unremoveRegistration(registration: RegistrationWithMember, options?: {calculate?: boolean}) {
+        this.cart.unremoveRegistration(registration)
         if (options?.calculate !== false) {
             this.updatePrices()
         }
