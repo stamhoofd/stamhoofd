@@ -426,7 +426,7 @@ export class DocumentTemplate extends Model {
 
             for (const groupDefinition of this.privateSettings.groups) {
                 // Get the registrations for this group with this cycle
-                const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId, groupDefinition.cycle)
+                const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId)
 
                 for (const registration of registrations) {
                     const document = await this.generateForRegistration(registration)

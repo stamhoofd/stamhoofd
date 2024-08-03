@@ -132,6 +132,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             for (const groupPut of patch.groups.getPuts()) {
                 await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, organizationPeriod.periodId, {allowedIds})
+                deleteUnreachable = true
             }
 
             for (const struct of patch.groups.getPatches()) {

@@ -144,7 +144,7 @@ export class Member extends Model {
         }
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
         
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
         query += `where \`${Registration.table}\`.\`${Registration.primary.name}\` IN (?)`
@@ -177,15 +177,15 @@ export class Member extends Model {
     /**
      * Fetch all registrations with members with their corresponding (valid) registrations
      */
-    static async getRegistrationWithMembersForGroup(groupId: string, cycle: number): Promise<RegistrationWithMember[]> {
+    static async getRegistrationWithMembersForGroup(groupId: string): Promise<RegistrationWithMember[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
         
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Registration.table}\`.\`groupId\` = ? AND \`${Registration.table}\`.\`cycle\` = ?`
+        query += `where \`${Registration.table}\`.\`groupId\` = ?`
 
-        const [results] = await Database.select(query, [groupId, cycle])
+        const [results] = await Database.select(query, [groupId])
         const registrations: RegistrationWithMember[] = []
 
          // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
@@ -261,7 +261,7 @@ export class Member extends Model {
             return []
         }
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Member.table}\`\n`;
-        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
+        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`
         query += Member.users.joinQuery(Member.table, User.table)+"\n"
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)

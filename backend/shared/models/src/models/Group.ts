@@ -85,9 +85,6 @@ export class Group extends Model {
     })
     deletedAt: Date | null = null
 
-    /**
-     * Every time a new registration period starts, this number increases. This is used to mark all older registrations as 'out of date' automatically
-     */
     @column({ type: "string" })
     status = GroupStatus.Open;
 
@@ -95,7 +92,7 @@ export class Group extends Model {
         const w: any = periodId ? {periodId} : {}
         if (active) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            return await Group.where({ organizationId, deletedAt: null, ...w, status: {sign: '!=', value: GroupStatus.Archived} })
+            return await Group.where({ organizationId, deletedAt: null, ...w })
         }
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return await Group.where({ organizationId, ...w })

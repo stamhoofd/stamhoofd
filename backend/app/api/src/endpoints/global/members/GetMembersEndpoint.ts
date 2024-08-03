@@ -160,6 +160,9 @@ const filterCompilers: SQLFilterDefinitions = {
         ).whereNot(
             SQL.column('registeredAt'),
             null,
+        ).where(
+            SQL.column('groups', 'deletedAt'),
+            null
         ),
         {
             ...registrationFilterCompilers,
@@ -248,9 +251,9 @@ const filterCompilers: SQLFilterDefinitions = {
         ).whereNot(
             SQL.column('registeredAt'),
             null,
-        ).whereNot(
-            SQL.column('groups', 'status'),
-            GroupStatus.Archived
+        ).where(
+            SQL.column('groups', 'deletedAt'),
+            null
         ),
         registrationFilterCompilers
     ),
@@ -279,9 +282,9 @@ const filterCompilers: SQLFilterDefinitions = {
         ).whereNot(
             SQL.column('registeredAt'),
             null,
-        ).whereNot(
-            SQL.column('groups', 'status'),
-            GroupStatus.Archived
+        ).where(
+            SQL.column('groups', 'deletedAt'),
+            null
         ),
         organizationFilterCompilers
     ),
