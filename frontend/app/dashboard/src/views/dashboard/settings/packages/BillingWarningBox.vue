@@ -179,6 +179,10 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         let d: Date | null = null
         for (const [type, pack] of this.organization.meta.packages.packages) {
             if (type === STPackageType.Webshops || type === STPackageType.SingleWebshop) {
+                if (pack.removeAt && pack.removeAt <= new Date()) {
+                    return null
+                }
+
                 if (pack.deactivateDate === null) {
                     return null
                 }
@@ -195,6 +199,9 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         let d: Date | null = null
         for (const [type, pack] of this.organization.meta.packages.packages) {
             if (type === STPackageType.Members || type === STPackageType.LegacyMembers) {
+                if (pack.removeAt && pack.removeAt <= new Date()) {
+                    return null
+                }
                 if (pack.deactivateDate === null) {
                     return null
                 }
@@ -211,6 +218,9 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         let d: Date | null = null
         let hasLegacy = false
         for (const [type, pack] of this.organization.meta.packages.packages) {
+            if (pack.removeAt && pack.removeAt <= new Date()) {
+                return null
+            }
             if (type === STPackageType.LegacyMembers) {
                 hasLegacy = true;
                 continue;
