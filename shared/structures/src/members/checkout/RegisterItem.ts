@@ -576,7 +576,7 @@ export class RegisterItem implements RegisterItemWithPrice {
                 throw new SimpleError({
                     code: "maximum_reached",
                     message: "Maximum reached",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.`,
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. `,
                     meta: {recoverable: true}
                 })
             }
@@ -585,7 +585,7 @@ export class RegisterItem implements RegisterItemWithPrice {
                 throw new SimpleError({
                     code: "maximum_reached",
                     message: "Maximum reached",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet.`,
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.`,
                     meta: {recoverable: true}
                 })
             }
