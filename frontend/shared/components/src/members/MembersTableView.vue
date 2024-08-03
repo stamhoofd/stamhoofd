@@ -286,7 +286,7 @@ if (app == 'admin') {
         })
     )
 
-    if (!waitingList.value && financialRead.value && organization.value) {
+    if (!waitingList.value && financialRead.value && organization.value && !groups.find(g => g.organizationId !== organization.value!.id)) {
         allColumns.push(
             new Column<ObjectType, number>({
                 name: "Openstaand saldo", 
