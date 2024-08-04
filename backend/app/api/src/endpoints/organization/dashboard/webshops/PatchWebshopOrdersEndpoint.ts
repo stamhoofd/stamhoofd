@@ -243,13 +243,18 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 // Update balance item prices for this order if price has changed
                 if (previousToPay !== model.totalToPay) {
                     const items = await BalanceItem.where({ orderId: model.id })
-                    if (items.length === 1) {
+                    if (items.length >= 1) {
                         model.markUpdated()
                         items[0].price = model.totalToPay
                         items[0].description = model.generateBalanceDescription(webshop)
                         items[0].updateStatus();
                         await items[0].save()
-                    } else if (items.length === 0 && model.totalToPay > 0) {
+
+                        // Zero out the other items
+                        const otherItems = items.slice(1)
+                        await BalanceItem.deleteItems(otherItems)
+                    } else if (items.length === 0
+                         && model.totalToPay > 0) {
                         model.markUpdated()
                         const balanceItem = new BalanceItem();
                         balanceItem.orderId = model.id;

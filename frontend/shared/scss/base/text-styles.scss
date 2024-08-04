@@ -906,14 +906,13 @@
         bottom: 0;
         background: $color-background;
         border-radius: 40px;
-        line-height: 24px;
         transform: translate(40%, 40%);
-        height: 23px; // alignment fix for centered icons
+        line-height: 1;
+        display: block;
 
-        display: flex;
-        vertical-align: middle;
-        align-items: center;
-        justify-content: center;
+        > * {
+            display: block;
+        }
     }
 }
 

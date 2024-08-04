@@ -1,14 +1,14 @@
 <template>
     <STListItem class="right-stack">
         <template #left>
-            <GroupIcon :group="registration.group" />
+            <GroupIcon :group="registration.group" icon="canceled" />
         </template>
 
         <h3 class="style-title-list">
             <span>{{ registration.member.name }}</span>
         </h3>
 
-        <p>
+        <p class="style-description-small">
             Uitschrijven voor {{ registration.group.settings.name }}
         </p>
         

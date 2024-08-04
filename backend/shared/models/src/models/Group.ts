@@ -221,7 +221,7 @@ export class Group extends Model {
 
     async updateOccupancy() {
         this.settings.registeredMembers = await Group.getCount(
-            "groupId = ? and registeredAt is not null",
+            "groupId = ? and registeredAt is not null AND deactivatedAt is null",
             [this.id]
         )
 

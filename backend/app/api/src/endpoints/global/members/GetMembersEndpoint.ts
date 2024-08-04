@@ -161,6 +161,9 @@ const filterCompilers: SQLFilterDefinitions = {
             SQL.column('registeredAt'),
             null,
         ).where(
+            SQL.column('deactivatedAt'),
+            null,
+        ).where(
             SQL.column('groups', 'deletedAt'),
             null
         ),
@@ -250,6 +253,9 @@ const filterCompilers: SQLFilterDefinitions = {
             SQL.column('members', 'id'),
         ).whereNot(
             SQL.column('registeredAt'),
+            null,
+        ).where(
+            SQL.column('deactivatedAt'),
             null,
         ).where(
             SQL.column('groups', 'deletedAt'),

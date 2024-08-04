@@ -234,13 +234,13 @@ export async function chooseOrganizationMembersForGroup({members, group, items, 
         member.family.pendingRegisterItems = [];
 
         // Add default register item
-        if (!items || items.length === 0) {
+        if (items === undefined) {
             const item = RegisterItem.defaultFor(member, group, groupOrganization);
             checkout.add(item, {calculate: false});
         }
     }
 
-    if (items) {
+    if (items !== undefined) {
         for (const item of items) {
             checkout.add(item, {calculate: false});
         }

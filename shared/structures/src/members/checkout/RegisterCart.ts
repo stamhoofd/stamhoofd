@@ -1,10 +1,11 @@
 import { ArrayDecoder, AutoEncoder, field } from "@simonbackx/simple-encoding";
-import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { BalanceItemCartItem } from "./BalanceItemCartItem";
 import { RegisterContext } from "./RegisterCheckout";
 import { IDRegisterItem, RegisterItem } from "./RegisterItem";
 import { Registration } from "../Registration";
 import { RegistrationWithMember } from "../RegistrationWithMember";
+import { MemberBalanceItem } from "../../BalanceItemDetailed";
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -13,10 +14,14 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
     balanceItems: BalanceItemCartItem[] = []
 
+    @field({ decoder: new ArrayDecoder(RegistrationWithMember), optional: true })
+    deleteRegistrations: RegistrationWithMember[] = []
+
     hydrate(context: RegisterContext) {
         const cart = new RegisterCart()
         cart.items = this.items.map(i => i.hydrate(context))
         cart.balanceItems = this.balanceItems
+        cart.deleteRegistrations = this.deleteRegistrations
         return cart
     }
 }
@@ -27,9 +32,6 @@ export class RegisterCart {
 
     /**
      * You can define which registrations you want remove as part of this register operation.
-     * This can be used to update registrations -> first delete them and add a new RegisterItem 
-     * for them - internally the backend can handle this and maintain some data points from the
-     * old registration
      */
     deleteRegistrations: RegistrationWithMember[] = []
 
@@ -43,13 +45,15 @@ export class RegisterCart {
         const cart = new RegisterCart()
         cart.items = this.items.map(i => i.clone())
         cart.balanceItems = this.balanceItems.map(i => i.clone())
+        cart.deleteRegistrations = this.deleteRegistrations.map(r => r.clone())
         return cart
     }
 
     convert(): IDRegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),
-            balanceItems: this.balanceItems
+            balanceItems: this.balanceItems,
+            deleteRegistrations: this.deleteRegistrations
         })
     }
 
@@ -131,16 +135,19 @@ export class RegisterCart {
     }
 
     get isEmpty() {
-        return this.items.length === 0
+        return this.count === 0
     }
 
     get count() {
-        return this.items.length
+        return this.items.length + this.balanceItems.length + this.deleteRegistrations.length
     }
 
     get price() {
         return this.items.reduce((total, item) => item.calculatedPrice + total, 0) 
             + this.balanceItems.reduce((total, item) => {
+                return total + item.price
+            }, 0)
+            - this.deleteRegistrations.reduce((total, item) => {
                 return total + item.price
             }, 0)
     }
@@ -163,7 +170,7 @@ export class RegisterCart {
         return this.items[0].organization
     }
 
-    validate() {
+    validate(data?: {memberBalanceItems?: MemberBalanceItem[]}) {
         const newItems: RegisterItem[] = []
         const errors = new SimpleErrors()
         for (const item of this.items) {
@@ -173,8 +180,10 @@ export class RegisterCart {
             } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     e.addNamespace('cart')
+                    errors.addError(e)
+                } else {
+                    throw e
                 }
-                errors.addError(e)
 
                 if (isSimpleError(e) && (e.meta as any)?.recoverable) {
                     item.cartError = e;
@@ -183,6 +192,39 @@ export class RegisterCart {
             }
         }
 
+        const cleanedBalanceItems: BalanceItemCartItem[] = []
+        for (const balanceItem of this.balanceItems) {
+            // TODO: validate balance item organization (happens in backend anyway)
+
+            try {
+                balanceItem.validate({balanceItems: data?.memberBalanceItems})
+                cleanedBalanceItems.push(balanceItem)
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace('cart')
+                    errors.addError(e)
+                } else {
+                    throw e
+                }
+            }
+        }
+
+        const cleanedRegistrations: RegistrationWithMember[] = []
+        for (const registration of this.deleteRegistrations) {
+            if (this.singleOrganization && registration.group.organizationId !== this.singleOrganization?.id) {
+                errors.addError(new SimpleError({
+                    code: 'invalid_organization',
+                    message: 'Invalid organization in deleteRegistrations',
+                    human: 'Het is niet mogelijk om een inschrijving te verwijderen samen met een inschrijving voor een andere organisatie, dit moet apart gebeuren.',
+                    field: 'deleteRegistrations'
+                }))
+                continue;
+            }
+            cleanedRegistrations.push(registration)
+        }
+
+        this.balanceItems = cleanedBalanceItems
+        this.deleteRegistrations = cleanedRegistrations
         this.items = newItems
         errors.throwIfNotEmpty()
     }

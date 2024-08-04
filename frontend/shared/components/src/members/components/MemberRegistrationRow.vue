@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="editRegistration" :selectable="isEditable" class="left-center hover-box member-registration-block" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
         <template #left>
-            <GroupIcon :group="group" />
+            <GroupIcon :group="group" :icon="registration.deactivatedAt ? 'canceled' : ''"/>
         </template>
         <h3 class="style-title-list">
             {{ group.settings.name }}
@@ -10,14 +10,15 @@
             {{ registrationOrganization.name }}
         </p>
 
-        <p v-if="!registration.waitingList && registration.registeredAt" class="style-description-small">
+        <p v-if="registration.registeredAt" class="style-description-small">
             Ingeschreven op {{ formatDateTime(registration.registeredAt) }}
         </p>
-        <p v-else class="style-description-small">
-            Op wachtlijst sinds {{ formatDateTime(registration.createdAt) }}
+        <p v-if="registration.deactivatedAt" class="style-description-small">
+            Uitgeschreven op {{ formatDateTime(registration.deactivatedAt) }}
         </p>
-        <p v-if="registration.waitingList && registration.canRegister" class="style-description-small">
-            Toegelaten om in te schrijven
+
+        <p v-if="!registration.registeredAt && registration.canRegister" class="style-description-small">
+            Uitgenodigd om in te schrijven
         </p>
 
         <template v-if="isEditable" #right>

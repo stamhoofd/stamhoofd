@@ -8,6 +8,7 @@ import { PlatformMember } from "../PlatformMember"
 import { Registration } from "../Registration"
 import { RegisterContext } from "./RegisterCheckout"
 import { StockReservation } from "../../StockReservation"
+import { RegistrationWithMember } from "../RegistrationWithMember"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -56,6 +57,11 @@ export class RegisterItem {
     calculatedPrice = 0
 
     /**
+     * These registrations will be replaced as part of this new registration (moving or updating a registration is possible this way)
+     */
+    replaceRegistrations: RegistrationWithMember[] = []
+
+    /**
      * Show an error in the cart for recovery
      */
     cartError: SimpleError|SimpleErrors | null = null;
@@ -82,7 +88,8 @@ export class RegisterItem {
         group: Group, 
         organization: Organization,
         groupPrice?: GroupPrice,
-        options?: RegisterItemOption[]
+        options?: RegisterItemOption[],
+        replaceRegistrations?: RegistrationWithMember[]
     }) {
         this.id = data.id ?? uuidv4()
         this.member = data.member
@@ -91,6 +98,7 @@ export class RegisterItem {
         this.groupPrice = data.groupPrice ?? this.group.settings.prices[0] ?? GroupPrice.create({name: 'Ongeldig tarief', id: ''})
         this.organization = data.organization
         this.options = data.options ?? []
+        this.replaceRegistrations = data.replaceRegistrations ?? []
 
         // Select all defaults
         for (const optionMenu of this.group.settings.optionMenus) {
@@ -123,6 +131,10 @@ export class RegisterItem {
 
         for (const option of this.options) {
             this.calculatedPrice += option.option.price.forMember(this.member) * option.amount
+        }
+
+        for (const registration of this.replaceRegistrations) {
+            this.calculatedPrice -= registration.price
         }
     }
 
@@ -398,6 +410,12 @@ export class RegisterItem {
     get description() {
         const descriptions: string[] = []
 
+        if (this.replaceRegistrations.length > 0) {
+            for (const registration of this.replaceRegistrations) {
+                descriptions.push("Verplaatsen vanaf " + registration.group.settings.name)
+            }
+        }
+
         if (this.getFilteredPrices().length > 1) {
             descriptions.push(this.groupPrice.name)
         }
@@ -495,6 +513,27 @@ export class RegisterItem {
         
         if (this.group.organizationId !== this.organization.id) {
             throw new Error("Group and organization do not match in RegisterItem.validate")
+        }
+
+        for (const registration of this.replaceRegistrations) {
+            // todo: check if you are allowed to move
+            if (registration.member.id !== this.member.id) {
+                throw new SimpleError({
+                    code: "invalid_move",
+                    message: "Invalid member in replaceRegistration",
+                    human: "Je wilt een inschrijving verplaatsen van een ander lid in ruil voor een ander lid. Dit is niet toegestaan.",
+                    field: "replaceRegistrations"
+                })
+            }
+
+            if (registration.group.organizationId !== this.organization.id) {
+                throw new SimpleError({
+                    code: "invalid_move",
+                    message: "Invalid organization in replaceRegistration",
+                    human: "Je wilt een inschrijving verplaatsen van een andere organisatie. Dit is niet toegestaan.",
+                    field: "replaceRegistrations"
+                })
+            }
         }
 
         // Already registered

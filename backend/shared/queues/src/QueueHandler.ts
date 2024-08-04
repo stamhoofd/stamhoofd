@@ -30,6 +30,18 @@ export class QueueHandler {
     static queues = new Map<string, Queue>()
     static asyncLocalStorage = new AsyncLocalStorage<string[]>();
 
+    static cancel(queue: string) {
+        const q = this.queues.get(queue)
+        if (q) {
+            // This doesn't interfere any running items
+            for (const item of q.items) {
+                item.handler = () => {
+                    return Promise.reject(new Error('Queue was cancelled'))
+                }
+            }
+        }
+    }
+
     static async schedule<T>(queue: string, handler: () => Promise<T>, parallel = 1): Promise<T> {
         // console.log("[QUEUE] Schedule "+queue)
 

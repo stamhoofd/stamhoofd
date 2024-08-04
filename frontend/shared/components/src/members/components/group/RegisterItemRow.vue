@@ -1,7 +1,7 @@
 <template>
     <STListItem class="right-stack" :selectable="canEdit" @click="canEdit ? editMe() : undefined">
         <template v-if="showGroup" #left>
-            <GroupIcon :group="item.group" />
+            <GroupIcon :group="item.group" :icon="item.replaceRegistrations ? 'sync' : ''" />
         </template>
 
         <h3 class="style-title-list">

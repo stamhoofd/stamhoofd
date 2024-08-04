@@ -112,7 +112,7 @@ export class Registration extends Model {
     /**
      * Update the outstanding balance of multiple members in one go (or all members)
      */
-    static async updateOutstandingBalance(registrationIds: string[] | 'all', organizationId: string) {
+    static async updateOutstandingBalance(registrationIds: string[] | 'all', organizationId?: string) {
         if (registrationIds !== 'all' && registrationIds.length == 0) {
             return
         }
@@ -147,7 +147,7 @@ export class Registration extends Model {
         
         await Database.update(query, params)
 
-        if (registrationIds !== 'all') {
+        if (registrationIds !== 'all' && organizationId) {
             await Document.updateForRegistrations(registrationIds, organizationId)
         }
     }
@@ -160,7 +160,7 @@ export class Registration extends Model {
         const query = `
         SELECT COUNT(DISTINCT \`${Registration.table}\`.memberId) as c FROM \`${Registration.table}\` 
         JOIN \`groups\` ON \`groups\`.id = \`${Registration.table}\`.groupId
-        WHERE \`groups\`.organizationId = ? AND \`${Registration.table}\`.cycle = \`groups\`.cycle AND \`groups\`.deletedAt is null AND \`groups\`.status != 'Archived' AND \`${Registration.table}\`.registeredAt is not null AND \`${Registration.table}\`.waitingList = 0`
+        WHERE \`groups\`.organizationId = ? AND \`${Registration.table}\`.cycle = \`groups\`.cycle AND \`groups\`.deletedAt is null AND \`${Registration.table}\`.registeredAt is not null AND \`${Registration.table}\`.deactivatedAt is null`
         
         const [results] = await Database.select(query, [organizationId])
         const count = results[0]['']['c'];
@@ -174,17 +174,14 @@ export class Registration extends Model {
     }
 
     async markValid(this: Registration) {
-        if (this.registeredAt !== null) {
+        if (this.registeredAt !== null && this.deactivatedAt === null) {
             await this.save();
             return false;
         }
 
-        if (this.waitingList && this.canRegister) {
-            this.waitingList = false
-        }
-        
         this.reservedUntil = null
-        this.registeredAt = new Date()
+        this.registeredAt =  this.registeredAt ?? new Date()
+        this.deactivatedAt = null
         this.canRegister = false
         await this.save();
 
@@ -432,9 +429,11 @@ export class Registration extends Model {
      * Should always happen in the webshop-stock queue to prevent multiple webshop writes at the same time
      * + in combination with validation and reading the webshop
      */
-    async updateStock() {
+    scheduleStockUpdate() {
         const id = this.id;
-        await QueueHandler.schedule('registration-stock-update-'+id, async function(this: undefined) {
+
+        QueueHandler.cancel('registration-stock-update-'+id);
+        QueueHandler.schedule('registration-stock-update-'+id, async function(this: undefined) {
             const updated = await Registration.getByID(id);
 
             if (!updated) {
@@ -466,6 +465,6 @@ export class Registration extends Model {
                 }
             }
 
-        })
+        }).catch(console.error)
     }
 }

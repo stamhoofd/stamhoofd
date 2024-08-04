@@ -260,18 +260,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Who is going to pay?
-        let whoWillPay: 'member'|'organization'|'nobody' = 'member' // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
+        let whoWillPayNow: 'member'|'organization'|'nobody' = 'member' // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
 
         if (request.body.asOrganizationId && request.body.asOrganizationId === organization.id) {
             // Will get added to the outstanding amount of the member
-            whoWillPay = 'nobody'
+            whoWillPayNow = 'nobody'
         } else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
             // The organization will pay to the organizing organization, and it will get added to the outstanding amount of the member towards the paying organization
-            whoWillPay = 'organization'
+            whoWillPayNow = 'organization'
         }
 
         // Validate payment method
-        if (totalPrice > 0 && whoWillPay !== 'nobody') {
+        if (totalPrice > 0 && whoWillPayNow !== 'nobody') {
             const allowedPaymentMethods = organization.meta.registrationPaymentConfiguration.paymentMethods
 
             if (!checkout.paymentMethod || !allowedPaymentMethods.includes(checkout.paymentMethod)) {
@@ -292,10 +292,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             checkout.paymentMethod = PaymentMethod.Unknown
         }
 
-        console.log('Registering members using whoWillPay', whoWillPay, checkout.paymentMethod, totalPrice)
+        console.log('Registering members using whoWillPayNow', whoWillPayNow, checkout.paymentMethod, totalPrice)
 
         const items: BalanceItem[] = []
-        const shouldMarkValid = whoWillPay === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale
+        const shouldMarkValid = whoWillPayNow === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale
 
         // Save registrations and add extra data if needed
         for (const bundle of payRegistrations) {
@@ -330,7 +330,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Who is responsible for payment?
             let balanceItem2: BalanceItem | null = null
-            if (whoWillPay === 'organization' && request.body.asOrganizationId) {
+            if (whoWillPayNow === 'organization' && request.body.asOrganizationId) {
                 // Create a separate balance item for this meber to pay back the paying organization
                 // this is not yet associated with a payment but will be added to the outstanding balance of the member
 
@@ -391,7 +391,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             items.push(balanceItem)
         }
 
-        if (checkout.administrationFee && whoWillPay !== 'nobody') {
+        if (checkout.administrationFee && whoWillPayNow !== 'nobody') {
             // Create balance item
             const balanceItem = new BalanceItem();
             balanceItem.price = checkout.administrationFee
@@ -415,14 +415,59 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             items.push(balanceItem)
         }
 
-        if (checkout.cart.balanceItems.length && whoWillPay === 'nobody') {
-            throw new Error('Not possible to pay balance items when whoWillPay is nobody')
+        if (checkout.cart.balanceItems.length && whoWillPayNow === 'nobody') {
+            throw new Error('Not possible to pay balance items when whoWillPayNow is nobody')
+        }
+
+        // Create negative balance items
+        for (const registrationStruct of checkout.cart.deleteRegistrations) {
+            if (whoWillPayNow !== 'nobody') {
+                // this also fixes the issue that we cannot delete the registration right away if we would need to wait for a payment 
+                throw new SimpleError({
+                    code: "forbidden",
+                    message: "Permission denied: you are not allowed to delete registrations",
+                    human: "Oeps, je hebt geen toestemming om inschrijvingen te verwijderen.",
+                    statusCode: 403
+                })
+            }
+
+            const existingRegistration = await Registration.getByID(registrationStruct.id)
+            if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
+            if (existingRegistration.deactivatedAt || !existingRegistration.registeredAt) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
+            // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
+            // Find all balance items of this registration and set them to zero
+            await BalanceItem.deleteForDeletedRegistration(existingRegistration.id)
+            
+            // Clear the registration
+            existingRegistration.deactivatedAt = new Date()
+            await existingRegistration.save()
+            existingRegistration.scheduleStockUpdate()
+
+            const group = groups.find(g => g.id === existingRegistration.groupId)
+            if (!group) {
+                const g = await Group.getByID(existingRegistration.groupId)
+                if (g) {
+                    groups.push(g)
+                }
+            }
         }
 
         let paymentUrl: string | null = null
         let payment: Payment | null = null
 
-        if (whoWillPay !== 'nobody') {
+        if (whoWillPayNow !== 'nobody') {
             const mappedBalanceItems = new Map<BalanceItem, number>()
 
             for (const item of items) {
@@ -452,11 +497,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        await ExchangePaymentEndpoint.updateOutstanding(items, organization.id)
+        await BalanceItem.updateOutstanding(items, organization.id)
 
         // Update occupancy
         for (const group of groups) {
-            if (registrations.find(p => p.groupId === group.id)) {
+            if (registrations.find(p => p.groupId === group.id) || checkout.cart.deleteRegistrations.find(p => p.groupId === group.id)) {
                 await group.updateOccupancy()
                 await group.save()
             }
@@ -501,10 +546,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         if (totalPrice < 0) {
-            throw new SimpleError({
-                code: "empty_data",
-                message: "Oeps! De totaalprijs is negatief."
-            })
+            // No payment needed: the outstanding balance will be negative and can be used in the future
+            return;
+            // throw new SimpleError({
+            //     code: "empty_data",
+            //     message: "Oeps! De totaalprijs is negatief."
+            // })
         }
 
         if (totalPrice === 0) {

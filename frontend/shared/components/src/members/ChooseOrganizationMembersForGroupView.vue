@@ -76,7 +76,7 @@ const present = usePresent()
 const navigate = useNavigationActions();
 const errors = useErrors();
 const saving = ref(false)
-const cartLength = computed(() => props.checkout.cart.items.length)
+const cartLength = computed(() => props.checkout.cart.count)
 
 async function addMember() {
     const family = new PlatformFamily({

@@ -219,72 +219,48 @@ export class BalanceItem extends Model {
     }
 
     static async deleteItems(items: BalanceItem[]) {
-        const {payments} = await BalanceItem.loadPayments(items)
+        const {balanceItemPayments} = await BalanceItem.loadPayments(items)
 
-        // Load all balance items
-        const {balanceItems, balanceItemPayments: allBalanceItemPayments} = await Payment.loadBalanceItems(payments)
-        for (const payment of payments) {
-            if (payment.status === PaymentStatus.Succeeded) {
-                continue;
-            }
-            if (!(payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.Unknown)) {
-                continue;
-            }
-            const bip = allBalanceItemPayments.filter(p => p.paymentId == payment.id)
-            const bis = balanceItems.filter(b => b.status !== BalanceItemStatus.Hidden && bip.find(p => p.balanceItemId == b.id))
-
-            const remainingAfterDelete = bis.filter(b => !items.find(i => i.id == b.id))
-            if (remainingAfterDelete.length == 0) {
-                // Delete payment
-                payment.status = PaymentStatus.Failed
-                payment._forceUpdatedAt = new Date(1900, 0, 1)
-                await payment.save()
-            }
-        }
+        // todo: in the future we could automatically delete payments that are not needed anymore and weren't paid yet -> to prevent leaving ghost payments
+        // for now, an admin can manually cancel those payments
+        let needsUpdate = false
 
         // Set other items to zero (the balance item payments keep the real price)
         for (const item of items) {
+            needsUpdate = needsUpdate || (item.price > 0 && item.status !== BalanceItemStatus.Hidden)
+
             // Don't change status of items that are already paid or are partially paid
             // Not using item.paidPrice, since this is cached
-            const bip = allBalanceItemPayments.filter(p => p.balanceItemId == item.id)
-            const relatedPayments = payments.filter(p => bip.find(b => b.paymentId == p.id))
+            const bip = balanceItemPayments.filter(p => p.balanceItemId == item.id)
 
-            if (relatedPayments.length === 0 || !relatedPayments.find(p => p.status === PaymentStatus.Succeeded)) {
-                // No paid payments associated with this item
+            if (bip.length === 0) {
+                // No payments associated with this item
                 item.status = BalanceItemStatus.Hidden
+                item.price = 0
+                await item.save()
+            } else {
+                item.price = 0
                 await item.save()
             }
+        }
+
+        if (needsUpdate) {
+            await this.updateOutstanding(items)
         }
     }
 
     static async reactivateItems(items: BalanceItem[]) {
-        // Set other items to zero (the balance item payments keep the real price)
+        let needsUpdate = false
         for (const item of items) {
             if (item.status === BalanceItemStatus.Hidden) {
                 item.status = BalanceItemStatus.Pending
+                needsUpdate = needsUpdate || item.price > 0
                 await item.save()
             }
         }
 
-        const {payments} = await BalanceItem.loadPayments(items)
-
-        // Load all balance items
-        const {balanceItems, balanceItemPayments: allBalanceItemPayments} = await Payment.loadBalanceItems(payments)
-        for (const payment of payments) {
-            if (payment.status !== PaymentStatus.Failed) {
-                continue;
-            }
-            if (!(payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.Unknown)) {
-                continue;
-            }
-            const bip = allBalanceItemPayments.filter(p => p.paymentId == payment.id)
-            const bis = balanceItems.filter(b => b.status !== BalanceItemStatus.Hidden && bip.find(p => p.balanceItemId == b.id))
-
-            if (bis.length > 0) {
-                // Undo failed
-                payment.status = PaymentStatus.Created
-                await payment.save()
-            }
+        if (needsUpdate) {
+            await this.updateOutstanding(items)
         }
     }
 
@@ -320,6 +296,18 @@ export class BalanceItem extends Model {
             items,
             ...(await this.loadPayments(items))
         }
+    }
+
+    static async updateOutstanding(items: BalanceItem[], organizationId?: string) {
+        const Member = (await import('./Member')).Member;
+
+        // Update outstanding amount of related members and registrations
+        const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null)) as any
+        await Member.updateOutstandingBalance(memberIds)
+
+        const {Registration} = await import('./Registration');
+        const registrationIds: string[] = Formatter.uniqueArray(items.map(p => p.registrationId).filter(id => id !== null)) as any
+        await Registration.updateOutstandingBalance(registrationIds, organizationId)
     }
 
     static async loadPayments(items: BalanceItem[]) {
