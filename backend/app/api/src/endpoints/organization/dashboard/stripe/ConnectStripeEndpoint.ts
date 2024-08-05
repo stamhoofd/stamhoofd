@@ -49,7 +49,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         const type = STAMHOOFD.STRIPE_CONNECT_METHOD
 
         const sharedData: Stripe.AccountCreateParams = {
-             capabilities: {
+            capabilities: {
                 card_payments: { requested: true },
                 transfers: { requested: true },
                 bancontact_payments: { requested: true },
