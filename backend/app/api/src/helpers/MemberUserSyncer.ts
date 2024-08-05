@@ -15,7 +15,8 @@ export class MemberUserSyncerStatic {
             userEmails.push(member.details.email)
         }
 
-        const parentEmails = member.details.parentsHaveAccess ? member.details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails) : []
+        const uncategorizedEmails: string[] = member.details.uncategorizedEmails;
+        const parentEmails = member.details.parentsHaveAccess ? member.details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(uncategorizedEmails) : []
 
         // Make sure all these users have access to the member
         for (const email of userEmails) {
