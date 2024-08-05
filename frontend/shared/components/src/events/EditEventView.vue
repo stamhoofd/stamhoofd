@@ -83,7 +83,7 @@
         <h2>Beschikbaarheid</h2>
 
         <STList>
-            <STListItem v-if="canSetNationalActivity" :selectable="true" element-name="label">
+            <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="isNationalActivity" />
                 </template>
@@ -145,15 +145,30 @@
             <hr>
 
             <h2 class="style-with-button">
-                <div>Leeftijdsgroepen</div>
+                <div>Standaard leeftijdsgroepen</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteDefaultAgeGroupRestriction" />
                 </div>
             </h2>
 
-            <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze leeftijdsgroepen.</p>
+            <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze standaard leeftijdsgroepen.</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" />
+        </JumpToContainer>
+
+        <JumpToContainer :visible="groups !== null">
+            <hr>
+
+            <h2 class="style-with-button">
+                <div>Leeftijdsgroepen</div>
+                <div>
+                    <button type="button" class="button icon trash" @click="deleteGroupsRestriction" />
+                </div>
+            </h2>
+
+            <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze leeftijdsgroepen.</p>
+
+            <GroupsInput v-model="groups" :date="startDate" />
         </JumpToContainer>
 
         <JumpToContainer :visible="!!location">
@@ -200,6 +215,16 @@
 
         <STList>
             <STListItem v-if="defaultAgeGroupIds === null" :selectable="true" element-name="button" @click="addDefaultAgeGroupRestriction">
+                <template #left>
+                    <span class="icon add gray" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Beperking op standaard leeftijdsgroep toevoegen
+                </h3>
+            </STListItem>
+
+            <STListItem v-if="!isNationalActivity && externalOrganization && groups === null" :selectable="true" element-name="button" @click="addGroupsRestriction">
                 <template #left>
                     <span class="icon add gray" />
                 </template>
@@ -257,6 +282,7 @@ import { useErrors } from '../errors/useErrors';
 import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import SearchOrganizationView from '../members/SearchOrganizationView.vue';
+import GroupsInput from '../inputs/GroupsInput.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -389,6 +415,16 @@ const defaultAgeGroupIds = computed({
         })
 })
 
+const groups = computed({
+    get: () => patched.value.meta.groups,
+    set: (groups) => 
+        addPatch({
+            meta: EventMeta.patch({
+                groups: groups as any
+            })
+        })
+})
+
 const location = computed({
     get: () => patched.value.meta.location,
     set: (location) => 
@@ -508,8 +544,16 @@ function addDefaultAgeGroupRestriction() {
     defaultAgeGroupIds.value = []
 }
 
+function addGroupsRestriction() {
+    groups.value = []
+}
+
 function deleteDefaultAgeGroupRestriction() {
     defaultAgeGroupIds.value = null
+}
+
+function deleteGroupsRestriction() {
+    groups.value = null
 }
 
 function addTagRestriction() {

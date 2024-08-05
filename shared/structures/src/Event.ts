@@ -23,6 +23,9 @@ export class NamedObject extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     name = ''
+
+    @field({ decoder: StringDecoder })
+    description = ''
 }
 
 export class EventMeta extends AutoEncoder {
@@ -49,8 +52,8 @@ export class EventMeta extends AutoEncoder {
      * 
      * null = no restriction
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
-    groupIds: string[]|null = null
+    @field({ decoder: new ArrayDecoder(NamedObject), nullable: true, version: 302})
+    groups: NamedObject[]|null = null
 
     /**
      * A valid membership is required for an organization with one of these tags

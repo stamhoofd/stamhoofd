@@ -259,6 +259,7 @@ function blurFocus() {
 async function addEvent(template?: Event) {
     const event = (template?.clone() ?? Event.create({}))
     event.id = Event.create({}).id
+    event.organizationId = organization.value?.id ?? null
 
     await present({
         modalDisplayStyle: 'popup',
