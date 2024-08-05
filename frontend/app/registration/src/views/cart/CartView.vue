@@ -76,7 +76,7 @@ async function goToCheckout() {
             admin: false,
             checkout: checkout.value,
             context: context.value,
-            displayOptions: {action: 'show'}
+            displayOptions: {action: 'present', modalDisplayStyle: 'popup'}
         }, navigate)
     } catch (e) {
         errors.errorBox = new ErrorBox(e)

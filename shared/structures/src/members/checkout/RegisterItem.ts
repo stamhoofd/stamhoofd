@@ -587,7 +587,7 @@ export class RegisterItem {
                 throw new SimpleError({
                     code: "not_matching",
                     message: "Not matching: requireGroupIds",
-                    human: `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`
+                    human: `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verplichte inschrijving bij leeftijdsgroep).`
                 })
             }
 
@@ -595,7 +595,7 @@ export class RegisterItem {
                 throw new SimpleError({
                     code: "not_matching",
                     message: "Not matching: requireOrganizationIds",
-                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
+                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving bij lokale groep).`
                 })
             }
 
@@ -603,7 +603,7 @@ export class RegisterItem {
                 throw new SimpleError({
                     code: "not_matching",
                     message: "Not matching: requireOrganizationIds",
-                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
+                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).`
                 })
             }
 

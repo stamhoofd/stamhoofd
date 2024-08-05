@@ -81,7 +81,7 @@ export class Event extends Model {
         }
 
         group.settings.requireDefaultAgeGroupIds = this.meta.defaultAgeGroupIds ?? []
-        group.settings.requireGroupIds = this.meta.groupIds ?? []
+        group.settings.requireGroupIds = this.meta.groups?.map(g => g.id) ?? []
 
         if (this.organizationId) {
             // This is a not-national event, so require the organization

@@ -72,7 +72,7 @@
                     </STListItem>
                 </STList>
 
-                <template v-if="!$isMobile">
+                <template v-if="!$isMobile && event.group">
                     <hr>
 
                     <p class="style-button-bar right-align">
@@ -84,7 +84,7 @@
                 </template>
             </main>
 
-            <STToolbar v-if="$isMobile">
+            <STToolbar v-if="$isMobile && event.group">
                 <template #right>
                     <button class="button primary" type="button" @click="openGroup">
                         <span>Inschrijven</span>
@@ -97,10 +97,10 @@
 </template>
 
 <script setup lang="ts">
-import { ImageComponent, useCheckoutRegisterItem, usePlatform, ExternalOrganizationContainer } from '@stamhoofd/components';
-import { Event, Organization, RegisterItem } from '@stamhoofd/structures';
+import { ExternalOrganizationContainer, ImageComponent, useChooseFamilyMembersForGroup, usePlatform } from '@stamhoofd/components';
+import { Event, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useMemberManager } from '../../getRootView';
 
 const props = defineProps<{
@@ -162,19 +162,21 @@ const ageGroups = computed(() => {
     return Formatter.joinLast(prefixes, ', ', ' of ');
 });
 
-const checkoutRegisterItem = useCheckoutRegisterItem()
+const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup()
 
 async function openGroup() {
     if (!props.event.group) {
         return;
     }
 
-    const item = RegisterItem.defaultFor(memberManager.family.members[0], props.event.group, memberManager.family.organizations[0])
-    await checkoutRegisterItem(item, false, {
-        present: 'popup'
+    await chooseFamilyMembersForGroup({
+        group: props.event.group,
+        family: memberManager.family,
+        displayOptions: {
+            action: 'present',
+            modalDisplayStyle: 'popup'
+        }
     })
-
-    // todo: go to member selection view
 }
 
 </script>

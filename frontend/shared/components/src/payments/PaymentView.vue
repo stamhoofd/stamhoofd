@@ -434,13 +434,13 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             const key = 'member-' + member.id;
             if (!added.has(key)) {
                 const values: string[] = [];
-                if (member.details.phone) {
-                    values.push(member.details.phone);
-                }
-
-                if (member.details.email) {
-                    values.push(member.details.email);
-                }
+                //if (member.details.phone) {
+                //    values.push(member.details.phone);
+                //}
+//
+                //if (member.details.email) {
+                //    values.push(member.details.email);
+                //}
 
                 if (values.length) {
                     contactInfo.push({
@@ -450,28 +450,28 @@ export default class PaymentView extends Mixins(NavigationMixin) {
                 }
                 added.add(key);
 
-                for (const parent of member.details.parents) {
-                    const key = 'parent-' + parent.name;
-                    if (!added.has(key)) {
-                        const values: string[] = [];
-                        if (parent.phone) {
-                            values.push(parent.phone);
-                        }
-
-                        if (parent.email) {
-                            values.push(parent.email);
-                        }
-
-                        if (values.length) {
-                            contactInfo.push({
-                                title: parent.name + ' (' + ParentTypeHelper.getName(parent.type) + ')',
-                                values
-                            })
-                        }
-
-                        added.add(key);
-                    }
-                }
+                //for (const parent of member.details.parents) {
+                //    const key = 'parent-' + parent.name;
+                //    if (!added.has(key)) {
+                //        const values: string[] = [];
+                //        if (parent.phone) {
+                //            values.push(parent.phone);
+                //        }
+//
+                //        if (parent.email) {
+                //            values.push(parent.email);
+                //        }
+//
+                //        if (values.length) {
+                //            contactInfo.push({
+                //                title: parent.name + ' (' + ParentTypeHelper.getName(parent.type) + ')',
+                //                values
+                //            })
+                //        }
+//
+                //        added.add(key);
+                //    }
+                //}
             }
         }
 
