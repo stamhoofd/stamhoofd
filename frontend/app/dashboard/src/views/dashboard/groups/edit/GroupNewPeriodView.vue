@@ -72,13 +72,6 @@
             </STInputBox>
             <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" title="Tot welk tijdstip" :validator="validator" />
         </div>
-
-        <template v-if="hasWaitingList">
-            <hr>
-            <Checkbox v-model="keepWaitingList">
-                Wachtlijst behouden
-            </Checkbox>
-        </template>
     </SaveView>
 </template>
 
@@ -114,8 +107,6 @@ import EditGroupMixin from './EditGroupMixin';
     },
 })
 export default class GroupNewPeriodView extends Mixins(EditGroupMixin) {
-    keepWaitingList = true
-
     get title() {
         return 'Nieuwe inschrijvingsperiode';
     }

@@ -48,39 +48,45 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem v-if="group.getMemberCount({cycleOffset: 1, waitingList: true}) !== null && group.getMemberCount({cycleOffset: 1, waitingList: true}) !== 0" :selectable="true" class="left-center" @click="openWaitingList(true, 1)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
-                    <h2 class="style-title-list">
-                        Wachtlijst vorige inschrijvingsperiode
-                    </h2>
-                    <p class="style-description">
-                        {{ group.getTimeRangeOffset(1) }}
-                    </p>
+                <template v-for="offset in limitedCycleOffsets">
+                    <STListItem :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
+                        <h2 v-if="offset === 1" class="style-title-list">
+                            Vorige inschrijvingsperiode
+                        </h2>
+                        <h2 v-else class="style-title-list">
+                            {{ offset }} inschrijvingsperiodes geleden
+                        </h2>
 
-                    <p class="style-description">
-                        Je hebt nog een wachtlijst van vorig jaar open staan. Je kan de leden hierin eventueel verplaatsen naar de nieuwe wachtlijst om ze te behouden.
-                    </p>
+                        <p class="style-description">
+                            {{ group.getTimeRangeOffset(offset) }}
+                        </p>
 
-                    <span slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: 1, waitingList: true}) }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
-                </STListItem>
+                        <span v-if="group.getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
 
-                <STListItem v-for="offset in limitedCycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
-                    <h2 v-if="offset === 1" class="style-title-list">
-                        Vorige inschrijvingsperiode
-                    </h2>
-                    <h2 v-else class="style-title-list">
-                        {{ offset }} inschrijvingsperiodes geleden
-                    </h2>
+                    <STListItem v-if="group.getMemberCount({cycleOffset: offset, waitingList: true}) !== null && group.getMemberCount({cycleOffset: offset, waitingList: true}) !== 0" :key="'waitinglist-offset-' + offset" :selectable="true" class="left-center" @click="openWaitingList(true, offset)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-clock.svg">
+                        <h2 v-if="offset === 1" class="style-title-list">
+                            Wachtlijst vorige inschrijvingsperiode
+                        </h2>
+                        <h2 v-else class="style-title-list">
+                            Wachtlijst {{ offset }} inschrijvingsperiodes geleden
+                        </h2>
 
-                    <p class="style-description">
-                        {{ group.getTimeRangeOffset(offset) }}
-                    </p>
+                        <p class="style-description">
+                            {{ group.getTimeRangeOffset(offset) }}
+                        </p>
 
-                    <span v-if="group.getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
-                </STListItem>
+                        <p class="style-description">
+                            Je hebt nog een oude wachtlijst open staan. Je kan de leden hierin eventueel verplaatsen naar de nieuwe wachtlijst om ze te behouden.
+                        </p>
+
+                        <span slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset, waitingList: true}) }}</span>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </template>
             </STList>
 
             <button v-if="hasMoreCycleOffsets && !showAllCycleOffsets" type="button" class="button text" @click="doShowAllCycleOffsets">
