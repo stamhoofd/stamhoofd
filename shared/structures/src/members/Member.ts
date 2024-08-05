@@ -1,7 +1,28 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { MemberDetails } from './MemberDetails';
+
+export class TinyMember extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    firstName = "";
+
+    @field({ decoder: StringDecoder })
+    lastName = "";
+
+    get name() {
+        if (!this.firstName) {
+            return this.lastName;
+        }
+        if (!this.lastName) {
+            return this.firstName;
+        }
+        return this.firstName + " " + this.lastName;
+    }
+}
 
 export class Member extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -19,6 +40,15 @@ export class Member extends AutoEncoder {
 
     @field({ decoder: DateDecoder, version: 31 })
     updatedAt: Date = new Date()
+
+    get tiny() {
+        return TinyMember.create({
+            id: this.id,
+            firstName: this.details.firstName,
+            lastName: this.details.lastName
+        })
+    }
+
 
     get isMinor() {
         return (this.details.age !== null && this.details.age < 18)

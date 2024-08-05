@@ -26,11 +26,11 @@ export class AuthenticatedStructures {
         }
 
         const {balanceItemPayments, balanceItems} = await Payment.loadBalanceItems(payments)
-        const {registrations, orders, members, groups} = await Payment.loadBalanceItemRelations(balanceItems);
+        const {registrations, orders, groups} = await Payment.loadBalanceItemRelations(balanceItems);
 
         if (checkPermissions) {
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
-            if (!(await Context.auth.canAccessBalanceItems(balanceItems, PermissionLevel.Read, {registrations, orders, members}))) {
+            if (!(await Context.auth.canAccessBalanceItems(balanceItems, PermissionLevel.Read, {registrations, orders}))) {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Payment not found",
@@ -41,13 +41,12 @@ export class AuthenticatedStructures {
 
         const includeSettlements = checkPermissions && !!Context.user && !!Context.user.permissions
 
-        return Payment.getGeneralStructureFromRelations({
+        return await Payment.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,
             balanceItems,
             registrations,
             orders,
-            members,
             groups
         }, includeSettlements)
     }

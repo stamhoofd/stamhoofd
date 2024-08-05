@@ -69,7 +69,6 @@ function setOrganization(groupOrganization: Organization) {
 }
 
 const searchQuery = ref('');
-const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
 
 const context = useContext();
 const contextOrganization = useOrganization()
@@ -84,6 +83,7 @@ const auth = useAuth();
 const filterBuilders = getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform.value, {
     user: auth.user,
 })
+const selectedUIFilter = ref(filterBuilders[0].fromFilter(props.group.settings.getRecommendedFilter())) as Ref<null|UIFilter>;
 
 async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {

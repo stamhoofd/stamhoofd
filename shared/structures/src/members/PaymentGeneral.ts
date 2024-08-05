@@ -58,14 +58,10 @@ export class PaymentGeneral extends Payment {
         return this.balanceItemPayments.flatMap(p => p.balanceItem.order ? [p.balanceItem.order] : [])
     }
 
+    /**
+     * @deprecated
+     */
     override matchQuery(query: string): boolean {
-        if (
-            super.matchQuery(query) 
-            || !!this.members.find(member => member.details.matchQuery(query))
-            || !!this.orders.find(o => o.matchQuery(query))
-        ) {
-            return true;
-        }
         return false;
     }
 

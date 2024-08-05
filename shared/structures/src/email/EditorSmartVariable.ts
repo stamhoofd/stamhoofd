@@ -20,7 +20,7 @@ import { STPackageType, STPackageTypeHelper } from "../billing/STPackage";
 import { PaymentDetailed } from "../members/PaymentDetailed";
 import { Group } from "../Group";
 import { GroupSettings } from "../GroupSettings";
-import { Member } from "../members/Member";
+import { Member, TinyMember } from "../members/Member";
 import { MemberDetails } from "../members/MemberDetails";
 import { RegistrationWithMember } from "../members/RegistrationWithMember";
 
@@ -84,11 +84,9 @@ export class EditorSmartVariable extends AutoEncoder {
             registrations: [
                 RegistrationWithMember.create({
                     organizationId: '',
-                    member: Member.create({
-                        details: MemberDetails.create({
-                            firstName: 'John',
-                            lastName: 'Doe'
-                        })
+                    member: TinyMember.create({
+                        firstName: 'John',
+                        lastName: 'Doe'
                     }),
                     group: Group.create({
                         settings: GroupSettings.create({
@@ -106,11 +104,9 @@ export class EditorSmartVariable extends AutoEncoder {
                 }),
                 RegistrationWithMember.create({
                     organizationId: '',
-                    member: Member.create({
-                        details: MemberDetails.create({
-                            firstName: 'Jane',
-                            lastName: 'Doe'
-                        })
+                    member: TinyMember.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe'
                     }),
                     group: Group.create({
                         settings: GroupSettings.create({

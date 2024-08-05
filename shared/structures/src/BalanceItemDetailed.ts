@@ -1,22 +1,31 @@
 import { ArrayDecoder, field, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { BalanceItem, BalanceItemPayment, MemberBalanceItemPayment } from "./BalanceItem"
-import { Member } from "./members/Member"
 import { Registration } from "./members/Registration"
+import { RegistrationWithMember } from "./members/RegistrationWithMember"
 import { Order } from "./webshops/Order"
 
 export class BalanceItemDetailed extends BalanceItem {
-    @field({ decoder: Registration, nullable: true })
-    registration: Registration | null = null
-
-    @field({ decoder: Member, nullable: true })
-    member: Member | null = null
+    @field({ decoder: RegistrationWithMember, nullable: true })
+    registration: RegistrationWithMember | null = null
 
     @field({ decoder: Order, nullable: true })
     order: Order | null = null
-
+   
+    /**
+     * @deprecated
+     * Use registration.memberId instead
+     */
     get memberId() {
-        return this.member?.id ?? null
+        return this.registration?.memberId ?? null
+    }
+
+    /**
+     * @deprecated
+     * Use registration.member instead
+     */
+    get member() {
+        return this.registration?.member ?? null
     }
 }
 

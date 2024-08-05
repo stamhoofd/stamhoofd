@@ -4,7 +4,7 @@
         <main>
             <h1>{{ title }}</h1>
 
-            <template v-if="!checkout.isAdminFromSameOrganization">
+            <template v-if="!checkout || !checkout.isAdminFromSameOrganization">
                 <p v-if="names.length > 0">
                     Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.
                 </p>
@@ -40,19 +40,23 @@ import { GroupType, RegisterCheckout, RegistrationWithMember } from '@stamhoofd/
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted } from 'vue';
 
-const props = defineProps<{
-    checkout: RegisterCheckout,
-    registrations: RegistrationWithMember[]
-}>();
+const props = withDefaults(
+    defineProps<{
+        checkout?: RegisterCheckout|null,
+        registrations: RegistrationWithMember[]
+    }>(),
+    {
+        checkout: null,
+    }
+);
 const dismiss = useDismiss()
 
 onMounted(() => {
-    props.checkout.clear()
+    props.checkout?.clear()
 })
 
-const app = useAppContext()
-const names = Formatter.uniqueArray(props.registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.details?.firstName ?? "?"))
-const waitingListNames = Formatter.uniqueArray(props.registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.details?.firstName ?? "?"))
+const names = Formatter.uniqueArray(props.registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? "?"))
+const waitingListNames = Formatter.uniqueArray(props.registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.firstName ?? "?"))
 
 const title = computed(() => {
     let t = "Hoera! "

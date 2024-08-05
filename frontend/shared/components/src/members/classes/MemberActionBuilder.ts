@@ -456,7 +456,7 @@ export class MemberActionBuilder {
     }
 
     async deleteRegistration(members: PlatformMember[]) {
-        const deleteRegistrations = members.flatMap(m => m.filterRegistrations({groups: this.groups}).map(r => RegistrationWithMember.from(r, m.patchedMember)))
+        const deleteRegistrations = members.flatMap(m => m.filterRegistrations({groups: this.groups}).map(r => RegistrationWithMember.from(r, m.patchedMember.tiny)))
         return await chooseOrganizationMembersForGroup({
             members, 
             group: this.groups[0],
@@ -485,7 +485,7 @@ export class MemberActionBuilder {
 
         for (const member of members) {
             const item = RegisterItem.defaultFor(member, group, groupOrganization);
-            item.replaceRegistrations = member.filterRegistrations({groups: this.groups}).map(r => RegistrationWithMember.from(r, member.patchedMember))
+            item.replaceRegistrations = member.filterRegistrations({groups: this.groups}).map(r => RegistrationWithMember.from(r, member.patchedMember.tiny))
             items.push(item);
         }
 

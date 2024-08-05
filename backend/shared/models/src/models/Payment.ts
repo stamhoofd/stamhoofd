@@ -110,39 +110,37 @@ export class Payment extends Model {
         }
 
         const {balanceItemPayments, balanceItems} = await Payment.loadBalanceItems(payments)
-        const {registrations, orders, members, groups} = await Payment.loadBalanceItemRelations(balanceItems);
+        const {registrations, orders, groups} = await Payment.loadBalanceItemRelations(balanceItems);
         
-        return this.getGeneralStructureFromRelations({
+        return await this.getGeneralStructureFromRelations({
             payments,
             registrations,
             orders,
-            members,
             balanceItemPayments,
             balanceItems,
             groups
         }, includeSettlements)
     }
 
-    static getGeneralStructureFromRelations({payments, registrations, orders, members, balanceItemPayments, balanceItems, groups}: {
+    static async getGeneralStructureFromRelations({payments, registrations, orders, balanceItemPayments, balanceItems, groups}: {
         payments: Payment[];
-        registrations: import("./Registration").Registration[];
+        registrations: import("./Member").RegistrationWithMember[];
         orders: import("./Order").Order[];
-        members: import("./Member").Member[];
         balanceItemPayments: import("./BalanceItemPayment").BalanceItemPayment[];
         balanceItems: import("./BalanceItem").BalanceItem[];
         groups: import("./Group").Group[];
-    }, includeSettlements = false): PaymentGeneral[] {
+    }, includeSettlements = false): Promise<PaymentGeneral[]> {
         if (payments.length === 0) {
             return []
         }
+        const {Member} = (await import("./Member"));
 
         return payments.map(payment => {
             return PaymentGeneral.create({
                 ...payment,
                 balanceItemPayments: balanceItemPayments.filter(item => item.paymentId === payment.id).map((item) => {
                     const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)
-                    const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
-                    const member = balanceItem?.memberId ? members.find(r => r.id === balanceItem.memberId) : undefined
+                    const registration = balanceItem?.registrationId ? registrations.find(r => r.id === balanceItem.registrationId) : null
                     const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
                     const group = registration ? groups.find(g => g.id === registration.groupId) : null
 
@@ -154,8 +152,7 @@ export class Payment extends Model {
                         ...item,
                         balanceItem: BalanceItemDetailed.create({
                             ...balanceItem,
-                            registration: registration ? registration.setRelation(Registration.group, group!).getStructure() : null,
-                            member: member ? MemberStruct.create(member) : null,
+                            registration: registration ? Member.getRegistrationWithMemberStructure(registration.setRelation(Registration.group, group!)) : null,
                             order: order ? OrderStruct.create({...order, payment: null}) : null
                         })
                     })
@@ -195,22 +192,19 @@ export class Payment extends Model {
     }
 
     static async loadBalanceItemRelations(balanceItems: import("./BalanceItem").BalanceItem[]) {
-        const {Registration} = await import("./Registration");
         const {Order} = await import("./Order");
         const {Member} = await import("./Member");
 
         // Load members and orders
         const registrationIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.registrationId ? [b.registrationId] : []))
         const orderIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.orderId ? [b.orderId] : []))
-        const memberIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.memberId ? [b.memberId] : []))
 
-        const registrations = await Registration.getByIDs(...registrationIds)
+        const registrations = await Member.getRegistrationWithMembersByIDs(registrationIds)
         const orders = await Order.getByIDs(...orderIds)
-        const members = await Member.getByIDs(...memberIds)
 
         const groupIds = Formatter.uniqueArray(registrations.map(r => r.groupId))
         const groups = await (await import("./Group")).Group.getByIDs(...groupIds)
 
-        return {registrations, orders, members, groups}
+        return {registrations, orders, groups}
     }
 }

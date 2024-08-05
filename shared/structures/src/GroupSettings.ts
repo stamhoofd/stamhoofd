@@ -10,6 +10,8 @@ import { PlatformMember } from './members/PlatformMember';
 import { StockReservation } from './StockReservation';
 import { RegisterItem } from './members/checkout/RegisterItem';
 import { Group } from './Group';
+import { StamhoofdFilter } from './filters/new/StamhoofdFilter';
+import { Gender } from './members/Gender';
 
 export class ReduceablePrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -649,6 +651,92 @@ export class GroupSettings extends AutoEncoder {
 
     getShortCode(maxLength: number) {
         return Formatter.firstLetters(this.name, maxLength)
+    }
+
+    getRecommendedFilter(): StamhoofdFilter {
+        const filter: StamhoofdFilter = []
+
+        if (this.minAge !== null) {
+            filter.push({
+                age: {
+                    $gte: this.minAge
+                }
+            })
+        }
+
+        if (this.maxAge !== null) {
+            filter.push({
+                age: {
+                    $lte: this.maxAge
+                }
+            })
+        }
+
+        if (this.genderType === GroupGenderType.OnlyMale) {
+            filter.push({
+                gender: Gender.Male
+            })
+        }
+
+        if (this.genderType === GroupGenderType.OnlyFemale) {
+            filter.push({
+                gender: Gender.Male
+            })
+        }
+
+        if (this.requireGroupIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        groupId: {
+                            $in: this.requireGroupIds
+                        }
+                    }
+                }
+            })
+        }
+
+        if (this.requireDefaultAgeGroupIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        group: {
+                            defaultAgeGroupId: {
+                                $in: this.requireDefaultAgeGroupIds
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        if (this.requireOrganizationIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        organizationId: {
+                            $in: this.requireOrganizationIds
+                        }
+                    }
+                }
+            })
+        }
+
+        if (this.requireOrganizationTags.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        organization: {
+                            tags: {
+                                $in: this.requireOrganizationTags
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        return filter
     }
 
 }

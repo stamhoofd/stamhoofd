@@ -131,6 +131,7 @@ async function goToCheckout() {
     saving.value = true
     try {
         await startCheckout({
+            admin: true,
             checkout: props.checkout,
             context: context.value,
             displayOptions: {action: 'show'}

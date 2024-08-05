@@ -33,7 +33,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import editDataIllustration from "@stamhoofd/assets/images/illustrations/edit-data.svg";
 import { CenteredMessage, EditEmailTemplateView, ErrorBox, STErrorsDefault, STList, STListItem, SaveView, Toast } from "@stamhoofd/components";
-import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EditorSmartButton, EditorSmartVariable, EmailTemplate, EmailTemplateType, Group, Member, MemberDetails, Order, OrderData, Organization, OrganizationMetaData, OrganizationType, Payment, PaymentDetailed, PaymentMethod, Product, ProductPrice, RegistrationWithMember, STPackageType, STPackageTypeHelper, ValidatedAddress, WebshopMetaData, WebshopPreview, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Address, Cart, CartItem, CartItemPrice, Country, Customer, EditorSmartButton, EditorSmartVariable, EmailTemplate, EmailTemplateType, Group, Member, MemberDetails, Order, OrderData, Organization, OrganizationMetaData, OrganizationType, Payment, PaymentDetailed, PaymentMethod, Product, ProductPrice, RegistrationWithMember, STPackageType, STPackageTypeHelper, TinyMember, ValidatedAddress, WebshopMetaData, WebshopPreview, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 
@@ -205,20 +205,16 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
             updatedAt: new Date(),
             registrations: [
                 RegistrationWithMember.create({
-                    member: Member.create({
-                        details: MemberDetails.create({
-                            firstName: 'John',
-                            lastName: 'Doe'
-                        })
+                    member: TinyMember.create({
+                        firstName: 'John',
+                        lastName: 'Doe'
                     }),
                     cycle: 0,
                 }),
                 RegistrationWithMember.create({
-                    member: Member.create({
-                        details: MemberDetails.create({
-                            firstName: 'Jane',
-                            lastName: 'Doe'
-                        })
+                    member: TinyMember.create({
+                        firstName: 'John',
+                        lastName: 'Doe'
                     }),
                     cycle: 0,
                 })

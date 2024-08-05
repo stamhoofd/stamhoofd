@@ -28,9 +28,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { LoadingButton,LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Payment, PaymentStatus } from '@stamhoofd/structures';
-import { Component, Mixins,  Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { LoadingButton, LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -56,7 +56,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     @Prop({ required: true })
         server: Server
 
-    payment: Payment | null = null
+    payment: PaymentGeneral | null = null
     loading = false
 
     //step = 4 // TODO?
@@ -67,7 +67,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     didFinish = false
 
     @Prop({ required: true })
-        finishedHandler: (payment: Payment | null) => void
+        finishedHandler: (payment: PaymentGeneral | null) => void
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 200);
@@ -97,7 +97,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
             .request({
                 method: "POST",
                 path: "/payments/" +paymentId,
-                decoder: Payment as Decoder<Payment>,
+                decoder: PaymentGeneral as Decoder<PaymentGeneral>,
                 query: {
                     cancel: this.cancel
                 }

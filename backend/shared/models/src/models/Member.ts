@@ -1,6 +1,6 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { SQL } from "@stamhoofd/sql";
-import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct, GroupStatus } from '@stamhoofd/structures';
+import { Member as MemberStruct, MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct, GroupStatus, TinyMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -380,7 +380,11 @@ export class Member extends Model {
         return RegistrationWithMemberStruct.create({
             ...registration.getStructure(),
             cycle: registration.cycle,
-            member: MemberStruct.create(registration.member),
+            member: TinyMember.create({
+                id: registration.member.id,
+                firstName: registration.member.firstName,
+                lastName: registration.member.lastName,
+            }),
         })
     }
 

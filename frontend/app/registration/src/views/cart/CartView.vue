@@ -73,6 +73,7 @@ async function goToCheckout() {
 
     try {
         await startCheckout({
+            admin: false,
             checkout: checkout.value,
             context: context.value,
             displayOptions: {action: 'show'}

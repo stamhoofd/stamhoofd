@@ -662,11 +662,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             const _redirectUrl = new URL(checkout.redirectUrl)
-            _redirectUrl.searchParams.set('id', payment.id);
-            
+            _redirectUrl.searchParams.set('paymentId', payment.id);
+            _redirectUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+
             const _cancelUrl = new URL(checkout.cancelUrl)
-            _cancelUrl.searchParams.set('id', payment.id);
-            
+            _cancelUrl.searchParams.set('paymentId', payment.id);
+            _cancelUrl.searchParams.set('cancel', 'true');
+            _cancelUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+
             const redirectUrl = _redirectUrl.href
             const cancelUrl = _cancelUrl.href
 

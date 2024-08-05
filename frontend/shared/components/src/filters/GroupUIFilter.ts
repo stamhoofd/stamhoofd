@@ -3,6 +3,7 @@ import { StamhoofdFilter } from "@stamhoofd/structures";
 
 import GroupUIFilterView from "./GroupUIFilterView.vue";
 import { UIFilter, UIFilterBuilder, UIFilterWrapper } from "./UIFilter";
+import { UnknownFilterBuilder } from "./UnknownUIFilter";
 
 export enum GroupUIFilterMode {
     Or = "Or",
@@ -137,7 +138,7 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
         const subfilters: UIFilter[] = [];
 
         for (const f of Array.isArray(filter) ? filter : [filter]) {
-            for (const builder of this.builders) {
+            for (const builder of [...this.builders, new UnknownFilterBuilder()]) {
                 if (builder === this && !allowSelf) {
                     continue;
                 }
@@ -147,6 +148,8 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
                     break;
                 }
             }
+
+            // todo: add default encoding here
         }
 
         const groupFilter = this.create();

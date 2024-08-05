@@ -10,6 +10,44 @@ export class StripeHelper {
         return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 0, timeout: 10000, stripeAccount: accountId ?? undefined});
     }
 
+    static async saveChargeInfo(model: StripePaymentIntent|StripeCheckoutSession, charge: Stripe.Charge, payment: Payment) {
+        try {
+            if (model.accountId) {
+                // This is a direct charge
+                
+                if (charge.balance_transaction !== null && typeof charge.balance_transaction !== 'string') {
+                    const fees = charge.balance_transaction.fee;
+                    payment.transferFee = fees;
+                }
+            }
+
+            if (charge.billing_details.name) {
+                payment.ibanName = charge.billing_details.name
+            }
+
+            if (charge.payment_method_details?.bancontact) {
+                if (charge.payment_method_details.bancontact.iban_last4) {
+                    payment.iban = "xxxx " + charge.payment_method_details.bancontact.iban_last4
+                }
+                payment.ibanName = charge.payment_method_details.bancontact.verified_name
+            }
+            if (charge.payment_method_details?.ideal) {
+                if (charge.payment_method_details.ideal.iban_last4) {
+                    payment.iban = "xxxx " + charge.payment_method_details.ideal.iban_last4
+                }
+                payment.ibanName = charge.payment_method_details.ideal.verified_name
+            }
+            if (charge.payment_method_details?.card) {
+                if (charge.payment_method_details.card.last4) {
+                    payment.iban = "xxxx " + charge.payment_method_details.card.last4
+                }
+            }
+            await payment.save()
+        } catch (e) {
+            console.error('Failed processing charge', e)
+        }
+    }
+
     static async getStatus(payment: Payment, cancel = false, testMode = false): Promise<PaymentStatus> {
         if (testMode && !STAMHOOFD.STRIPE_SECRET_KEY.startsWith("sk_test_")) {
             // Do not query anything
@@ -30,39 +68,7 @@ export class StripeHelper {
         console.log(intent);
         if (intent.status === "succeeded") {
             if (intent.latest_charge !== null && typeof intent.latest_charge !== 'string') {
-                try {
-                    const charge = intent.latest_charge
-
-                    if (model.accountId) {
-                        // This is a direct charge
-                        
-                        if (charge.balance_transaction !== null && typeof charge.balance_transaction !== 'string') {
-                            const fees = charge.balance_transaction.fee;
-                            payment.transferFee = fees;
-                        }
-                    }
-
-                    if (charge.payment_method_details?.bancontact) {
-                        if (charge.payment_method_details.bancontact.iban_last4) {
-                            payment.iban = "xxxx " + charge.payment_method_details.bancontact.iban_last4
-                        }
-                        payment.ibanName = charge.payment_method_details.bancontact.verified_name
-                    }
-                    if (charge.payment_method_details?.ideal) {
-                        if (charge.payment_method_details.ideal.iban_last4) {
-                            payment.iban = "xxxx " + charge.payment_method_details.ideal.iban_last4
-                        }
-                        payment.ibanName = charge.payment_method_details.ideal.verified_name
-                    }
-                    if (charge.payment_method_details?.card) {
-                        if (charge.payment_method_details.card.last4) {
-                            payment.iban = "xxxx " + charge.payment_method_details.card.last4
-                        }
-                    }
-                    await payment.save()
-                } catch (e) {
-                    console.error('Failed processing charge', e)
-                }
+                await this.saveChargeInfo(model, intent.latest_charge, payment)
             }
             return PaymentStatus.Succeeded
         }
@@ -104,9 +110,21 @@ export class StripeHelper {
         }
 
         const stripe = this.getInstance(model.accountId)
-        const session = await stripe.checkout.sessions.retrieve(model.stripeSessionId)
+        const session = await stripe.checkout.sessions.retrieve(model.stripeSessionId, {
+            expand: ['payment_intent.latest_charge.balance_transaction']
+        })
+
         console.log("session", session);
+
         if (session.status === "complete") {
+            // This is a direct charge
+            const payment_intent = session.payment_intent
+            if (payment_intent !== null && typeof payment_intent !== 'string') {
+                const charge = payment_intent.latest_charge
+                if (charge !== null && typeof charge !== 'string') {
+                    await this.saveChargeInfo(model, charge, payment)
+                }
+            }
             return PaymentStatus.Succeeded
         }
         if (session.status === "expired") {

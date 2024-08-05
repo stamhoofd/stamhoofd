@@ -7,13 +7,13 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
-import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PaymentPendingView, PromiseView, RegistrationSuccessView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import { EmailAddressSettings, Token } from '@stamhoofd/structures';
+import { EmailAddressSettings, PaymentGeneral, PaymentStatus, Token } from '@stamhoofd/structures';
 import { Ref, nextTick, onMounted, reactive, ref, markRaw, Raw } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
 
@@ -141,6 +141,62 @@ async function checkGlobalRoutes() {
                 toast.hide()
                 CenteredMessage.fromError(e).addCloseButton().show()
             }
+        }
+    }
+
+    if (queryString.get('paymentId')) {
+        const paymentId = queryString.get('paymentId')
+        const organizationId = queryString.get('organizationId')
+            
+        if (paymentId) {
+            const cancel = queryString.get("cancel") === "true"
+            const toast = new Toast("Betaling ophalen...", "spinner").setHide(null).show()
+            let session: SessionContext
+            
+            try {
+                session = reactive((organizationId ? (await SessionContext.createFrom({organizationId})) : new SessionContext(null)) as Raw<SessionContext>) as SessionContext;
+                await session.loadFromStorage()
+            } finally {
+                toast.hide()
+            }
+
+            modalStack.value.present({
+                adjustHistory: false,
+                animated: false,
+                force: true,
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(PaymentPendingView, { 
+                            server: session.authenticatedServer, 
+                            paymentId,
+                            cancel,
+                            finishedHandler: function(this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
+                                if (payment && payment.status == PaymentStatus.Succeeded) {
+                                    if (payment.registrations.length) {
+                                        this.show({
+                                            components: [
+                                                new ComponentWithProperties(RegistrationSuccessView, {
+                                                    registrations: payment.registrations
+                                                })
+                                            ], 
+                                            replace: 100, // autocorrects to all
+                                            force: true
+                                        })
+                                    } else {
+                                        this.dismiss({force: true})
+                                        new CenteredMessage("Betaling voltooid", "De betaling werd voltooid.").addCloseButton().show()
+                                    }
+                                } else {
+                                    this.dismiss({force: true})
+
+                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton().show()
+                                }
+                            } 
+                        })
+                    })
+                ],
+                modalDisplayStyle: "popup"
+            })
         }
     }
 }

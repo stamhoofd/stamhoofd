@@ -9,7 +9,7 @@ import { ViewStep, ViewStepsManager } from '../classes/ViewStepsManager';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
 
-export async function startCheckout({checkout, context, displayOptions}: {checkout: RegisterCheckout, context: SessionContext, displayOptions: DisplayOptions}, navigate: NavigationActions) {
+export async function startCheckout({checkout, context, displayOptions, admin}: {checkout: RegisterCheckout, context: SessionContext, displayOptions: DisplayOptions, admin?: boolean}, navigate: NavigationActions) {
     checkout.validate({})
 
     const steps: ViewStep[] = [
@@ -18,20 +18,26 @@ export async function startCheckout({checkout, context, displayOptions}: {checko
     ]
 
     const stepManager = new ViewStepsManager(steps, async (navigate: NavigationActions) => {
-        await register({checkout, context}, navigate)
+        await register({checkout, context, admin}, navigate)
     }, displayOptions)
 
     await stepManager.saveHandler(null, navigate)
 }
 
 
-async function register({checkout, context}: {checkout: RegisterCheckout, context: SessionContext}, navigate: NavigationActions) {
+async function register({checkout, context, admin}: {checkout: RegisterCheckout, context: SessionContext, admin: boolean}, navigate: NavigationActions) {
     const organization = checkout.singleOrganization!
     const server = context.getAuthenticatedServerForOrganization(organization.id)
 
     const idCheckout = checkout.convert()
-    idCheckout.redirectUrl = new URL(organization.registerUrl+'/payment')
-    idCheckout.cancelUrl = new URL(organization.registerUrl+'/payment?cancel=true')
+
+    if (!admin) {
+        idCheckout.redirectUrl = new URL(organization.registerUrl+'/payment')
+        idCheckout.cancelUrl = new URL(organization.registerUrl+'/payment?cancel=true')    
+    } else {
+        idCheckout.redirectUrl = new URL(window.location.href)
+        idCheckout.cancelUrl = new URL(window.location.href)
+    }
 
     const response = await server.request({
         method: "POST",

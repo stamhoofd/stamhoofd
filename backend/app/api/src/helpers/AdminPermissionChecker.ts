@@ -366,8 +366,7 @@ export class AdminPermissionChecker {
         permissionLevel: PermissionLevel = PermissionLevel.Read,
         data?: {
             registrations: Registration[],
-            orders: Order[],
-            members: Member[]
+            orders: Order[]
         }
     ): Promise<boolean> {
         for (const balanceItem of balanceItems) {
@@ -403,7 +402,7 @@ export class AdminPermissionChecker {
         }
 
         // Slight optimization possible here
-        const {registrations, orders, members} = data ?? (this.user.permissions || permissionLevel === PermissionLevel.Read) ? (await Payment.loadBalanceItemRelations(balanceItems)) : {registrations: [], members: [] as Member[], orders: []}
+        const {registrations, orders} = data ?? (this.user.permissions || permissionLevel === PermissionLevel.Read) ? (await Payment.loadBalanceItemRelations(balanceItems)) : {registrations: [], orders: []}
 
         if (this.user.permissions) {
             // We grant permission for a whole payment when the user has at least permission for a part of that payment.
@@ -431,7 +430,7 @@ export class AdminPermissionChecker {
             // Check members
             const userMembers = await Member.getMembersWithRegistrationForUser(this.user)
             for (const member of userMembers) {
-                if (members.find(m => m.id === member.id)) {
+                if (balanceItems.find(m => m.memberId === member.id)) {
                     return true;
                 }
             }

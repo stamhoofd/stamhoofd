@@ -18,6 +18,7 @@ import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
 import { RegisterItem } from "./checkout/RegisterItem"
+import { TinyMember } from "./Member"
 
 export class PlatformFamily {
     members: PlatformMember[] = []

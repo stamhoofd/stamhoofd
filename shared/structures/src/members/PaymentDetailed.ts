@@ -10,7 +10,7 @@ export class PaymentDetailed extends Payment {
     registrations: RegistrationWithMember[]
 
     getMemberNamesArray() {
-        return Formatter.uniqueArray(this.registrations.map(r => r.member.details.name))
+        return Formatter.uniqueArray(this.registrations.map(r => r.member.name))
     }
 
     getMemberNames() {
@@ -18,24 +18,21 @@ export class PaymentDetailed extends Payment {
     }
 
     getMemberFirstNames() {
-        return Formatter.joinLast(Formatter.uniqueArray(this.registrations.map(r => r.member.details.firstName)), ", ", " en ")
+        return Formatter.joinLast(Formatter.uniqueArray(this.registrations.map(r => r.member.firstName)), ", ", " en ")
     }
 
     getMemberLastNames() {
-        return Formatter.uniqueArray(this.registrations.map(r => r.member.details?.lastName ?? "Onbekend")).join(", ")
+        return Formatter.uniqueArray(this.registrations.map(r => r.member.lastName ?? "Onbekend")).join(", ")
     }
 
     getRegistrationList() {
-        return this.registrations.map(r => (r.member.details?.name ?? "Onbekend")+" voor "+r.group.settings.name).join(", ")
+        return this.registrations.map(r => (r.member?.name ?? "Onbekend")+" voor "+r.group.settings.name).join(", ")
     }
 
+    /**
+     * @deprecated
+     */
     override matchQuery(query: string): boolean {
-        if (
-            super.matchQuery(query) ||
-            this.registrations.find(r => r.member.details && r.member.details.matchQuery(query))
-        ) {
-            return true;
-        }
         return false;
     }
 

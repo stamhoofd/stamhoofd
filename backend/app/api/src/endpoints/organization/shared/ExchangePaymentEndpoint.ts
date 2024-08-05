@@ -2,11 +2,11 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Member, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Registration, STPendingInvoice } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
+import { PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
@@ -27,7 +27,7 @@ class Query extends AutoEncoder {
     cancel = false
 }
 type Body = undefined
-type ResponseBody = PaymentStruct | undefined;
+type ResponseBody = PaymentGeneral | undefined
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -51,6 +51,9 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope()
+        if (!request.query.exchange) {
+            await Context.authenticate()
+        }
         
         // Not method on payment because circular references (not supprted in ts)
         const payment = await ExchangePaymentEndpoint.pollStatus(request.params.id, organization, request.query.cancel)
@@ -66,17 +69,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         }
         
         return new Response( 
-            PaymentStruct.create({
-                id: payment.id,
-                method: payment.method,
-                provider: payment.provider,
-                status: payment.status,
-                price: payment.price,
-                transferDescription: payment.transferDescription,
-                paidAt: payment.paidAt,
-                createdAt: payment.createdAt,
-                updatedAt: payment.updatedAt
-            })
+            await AuthenticatedStructures.paymentGeneral(payment, true)
         );
     }
 
