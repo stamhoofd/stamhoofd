@@ -85,7 +85,7 @@ export class Event extends Model {
 
         if (this.organizationId) {
             // This is a not-national event, so require the organization
-            group.settings.requireOrganizationIds = this.meta.organizationTagIds ?? []
+            group.settings.requireOrganizationIds = [this.organizationId]
             group.settings.requireOrganizationTags = []
             group.settings.requirePlatformMembershipOn = null
         } else {
