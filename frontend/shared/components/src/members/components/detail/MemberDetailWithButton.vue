@@ -1,6 +1,6 @@
 <template>
-    <dt>{{ label }}</dt>
-    <dd  class="with-icons hover-box" :class="{button: $context.auth.hasFullAccess()}">
+    <dt v-if="label">{{ label }}</dt>
+    <dd  class="with-icons hover-box" :class="{button: $context.auth.hasFullAccess(), 'no-label': label === undefined}">
         <span v-copyable>
             <template v-if="Array.isArray(value)">
                 <template v-for="(line, index) of value">
@@ -24,7 +24,7 @@
 <script setup lang="ts" generic="T extends string | string[]">
 import { Spinner } from '@stamhoofd/components';
 import { computed, ref } from 'vue';
-const props = defineProps<{label: string, value: T, icon: string, color?: string, loading?: boolean, onDelete?: () => Promise<void>}>();
+const props = defineProps<{label?: string, value: T, icon: string, color?: string, loading?: boolean, onDelete?: () => Promise<void>}>();
 const emits = defineEmits<{(e: 'clickButton'): void}>();
 
 const isLoading = ref(false);
@@ -50,5 +50,9 @@ function doDelete() {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0 !important;
+}
+
+.no-label {
+    grid-column: span 2;
 }
 </style>

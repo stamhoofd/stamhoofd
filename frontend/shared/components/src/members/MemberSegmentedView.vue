@@ -5,7 +5,7 @@
                 <button v-if="hasPreviousMember || hasNextMember" v-tooltip="'Ga naar vorige lid'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousMember" @click="goBack" />
                 <button v-if="hasNextMember || hasPreviousMember" v-tooltip="'Ga naar volgende lid'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextMember" @click="goNext" />
 
-                <button v-if="hasWrite" v-tooltip="'Lid bewerken'" class="button icon navigation edit" type="button" @click="editMember" />
+                <button v-if="hasWrite" v-tooltip="'Lid bewerken'" class="button icon navigation edit" type="button" @click="editThisMember" />
                 <button v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
@@ -25,11 +25,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { EditMemberAllBox, NavigationActions, SegmentedControl, TableActionsContextMenu, useAuth, useKeyUpDown, useOrganization } from '@stamhoofd/components';
+import { SegmentedControl, TableActionsContextMenu, useAuth, useKeyUpDown, useOrganization } from '@stamhoofd/components';
 import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
 import { useMemberActions } from './classes/MemberActionBuilder';
-import MemberStepView from './MemberStepView.vue';
+import { useEditMember } from './composables/useEditMember';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
 import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
 import MemberPlatformMembershipTab from './tabs/MemberPlatformMembershipTab.vue';
@@ -50,6 +50,7 @@ const props = withDefaults(
 const auth = useAuth();
 const show = useShow();
 const present = usePresent();
+const editMember = useEditMember();
 const organization = useOrganization();
 
 const tabs = computed(() => {
@@ -138,22 +139,6 @@ async function goNext() {
     await seek(false);
 }
 
-async function editMember() {
-    await present({
-        components: [
-            new ComponentWithProperties(MemberStepView, {
-                member: props.member,
-                title: props.member.member.firstName + ' bewerken',
-                component: markRaw(EditMemberAllBox),
-                saveHandler: async ({dismiss}: NavigationActions) => {
-                    await dismiss({force: true});
-                }
-            })
-        ],
-        modalDisplayStyle: "popup"
-    })
-}
-
 const buildActions = useMemberActions()
 
 async function showContextMenu(event: MouseEvent) {
@@ -183,4 +168,7 @@ async function showContextMenu(event: MouseEvent) {
     await present(displayedComponent.setDisplayStyle("overlay"));
 }
 
+async function editThisMember() {
+    await editMember(props.member);
+}
 </script>
