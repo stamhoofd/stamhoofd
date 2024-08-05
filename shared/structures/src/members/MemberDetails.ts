@@ -74,6 +74,9 @@ export class MemberDetails extends AutoEncoder {
     @field({decoder: new ArrayDecoder(Address), version: 296})
     uncategorizedAddresses: Address[] = []
 
+    @field({decoder: new ArrayDecoder(StringDecoder), version: 301})
+    notes: string[] = []
+
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date("1970-01-01") })
     birthDay: Date | null = null
@@ -175,10 +178,10 @@ export class MemberDetails extends AutoEncoder {
             parent.cleanData()
         }
 
-        this.address?.cleanData()
+        this.address?.cleanData();
 
         for (const contact of this.emergencyContacts) {
-            contact.cleanData()
+            contact.cleanData();
         }
 
         // Remove email address on member if it was set on a parent too
@@ -196,7 +199,9 @@ export class MemberDetails extends AutoEncoder {
             }
         }
 
-        this.alternativeEmails = this.alternativeEmails.map(e => e.toLowerCase().trim()).filter(email => {
+        const filterUsedAndInvalidEmails = (emails: string[]) => emails
+        .map(e => e.toLowerCase().trim())
+        .filter(email => {
             if (this.email && email === this.email) {
                 return false
             }
@@ -210,7 +215,71 @@ export class MemberDetails extends AutoEncoder {
                 }
             }
             return true
-        })
+        });
+
+        this.alternativeEmails = filterUsedAndInvalidEmails(this.alternativeEmails);
+
+        if (this.phone) {
+            const formattedPhone = Formatter.removeDuplicateSpaces(this.phone.trim());
+            if(formattedPhone !== this.phone) {
+                this.phone = formattedPhone;
+            }
+        }
+
+        //#region uncategorized data
+        if (this.hasUncategorizedData) {
+            const lastReviewed = this.reviewTimes.getLastReview("parents") && this.reviewTimes.getLastReview("details");
+
+            if(lastReviewed) {
+                // clear uncategorized data
+                this.uncategorizedAddresses = [];
+                this.uncategorizedEmails = [];
+                this.uncategorizedPhones = [];
+            } else {
+                //#region filter used uncategorized addresses
+                const usedAddressIds = new Set<string>();
+                if(this.uncategorizedAddresses.length > 0) {
+                    const memberAddressId = this.address?.id;
+                    const parentAddressIds = this.parents.filter(parent => parent.address).map(parent => parent.address!.id);
+                
+                    for(const uncategorizedAddress of this.uncategorizedAddresses) {
+                        uncategorizedAddress.cleanData();
+                        const addressId = uncategorizedAddress.id;
+                        const isUsed = addressId === memberAddressId || parentAddressIds.includes(addressId);
+                        if(isUsed) {
+                            usedAddressIds.add(addressId);
+                        }
+                    }
+                
+                    if(usedAddressIds.size > 0) {
+                        this.uncategorizedAddresses = this.uncategorizedAddresses.filter(address => !usedAddressIds.has(address.id));
+                    }
+                }
+                //#endregion
+
+                // filter uncatetorized emails
+                this.uncategorizedEmails = filterUsedAndInvalidEmails(this.uncategorizedEmails);
+
+                //#region filter uncategorized phones
+                if(this.uncategorizedPhones.length > 0 ){
+                    const parentPhones = new Set<string>();
+                    for(const parent of this.parents) {
+                        const parentPhone = parent.phone;
+                        if(parentPhone) parentPhones.add(parentPhone);
+                    }
+
+                    this.uncategorizedPhones = this.uncategorizedPhones
+                    .map(phone => Formatter.removeDuplicateSpaces(phone.trim()))
+                    .filter(uncategorizedPhone => {
+                        if(this.phone === uncategorizedPhone) return false;
+                        if(parentPhones.has(uncategorizedPhone)) return false;
+                        return true;
+                    });
+                }
+                //#endregion
+            }
+        }
+        //#endregion
     }
 
     isEqual(other: MemberDetails): boolean {
@@ -296,6 +365,10 @@ export class MemberDetails extends AutoEncoder {
         }
 
         return Formatter.date(this.birthDay, true);
+    }
+
+    get hasUncategorizedData() {
+        return this.uncategorizedEmails.length > 0 || this.uncategorizedAddresses.length > 0 || this.uncategorizedPhones.length > 0;
     }
 
     matchQuery(query: string): boolean {
