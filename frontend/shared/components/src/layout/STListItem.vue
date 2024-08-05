@@ -231,7 +231,7 @@ button.st-list-item {
         > div {
             display: flex;
             flex-direction: row;
-            //align-items: center;
+            align-items: center;
             flex-grow: 1;
 
             > .middle {
