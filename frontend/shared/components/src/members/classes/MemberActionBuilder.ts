@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, mergeFilters, Organization, PermissionLevel, PlatformMember, RegisterItem, RegistrationWithMember } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, mergeFilters, Organization, PermissionLevel, PlatformMember, RegisterItem, RegistrationWithMember } from '@stamhoofd/structures'
 import { markRaw } from 'vue'
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
 import EmailView from '../../email/EmailView.vue'
@@ -116,7 +116,7 @@ export class MemberActionBuilder {
             return []
         }
 
-        if (this.groups.length === 0) {
+        if (this.groups.filter(g => g.type !== GroupType.EventRegistration).length === 0) {
             return []
         }
 
