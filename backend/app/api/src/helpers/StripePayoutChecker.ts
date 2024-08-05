@@ -147,6 +147,8 @@ export class StripePayoutChecker {
         }
 
         const applicationFee = balanceItem.source.application_fee_amount;
+        const otherFees = balanceItem.fee
+        const totalFees = otherFees + (applicationFee ?? 0);
 
         // Cool, we can store this in the database now.
 
@@ -167,11 +169,11 @@ export class StripePayoutChecker {
             settledAt: new Date(payout.arrival_date * 1000),
             amount: payout.amount,
             // Set only if application fee is witheld
-            fee: applicationFee ?? 0
+            fee: totalFees
         });
 
         payment.settlement = settlement;
-        payment.transferFee = applicationFee ?? 0;
+        payment.transferFee = totalFees;
 
         // Force an updatedAt timestamp of the related order
         // Mark order as 'updated', or the frontend won't pull in the updates

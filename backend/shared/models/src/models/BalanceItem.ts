@@ -121,7 +121,7 @@ export class BalanceItem extends Model {
 
             if (registration) {
                 // 1. Mark registration as being valid
-                if (registration.registeredAt === null) {
+                if (registration.registeredAt === null || registration.deactivatedAt) {
                     await registration.markValid()
 
                     const {Group} = await import("./Group");

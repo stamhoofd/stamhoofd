@@ -6,8 +6,8 @@ import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 
 export class StripeHelper {
-    static getInstance() {
-        return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 0, timeout: 10000});
+    static getInstance(accountId: string|null = null) {
+        return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 0, timeout: 10000, stripeAccount: accountId ?? undefined});
     }
 
     static async getStatus(payment: Payment, cancel = false, testMode = false): Promise<PaymentStatus> {
@@ -22,36 +22,46 @@ export class StripeHelper {
             return await this.getStatusFromCheckoutSession(payment, cancel)
         }
 
-        const stripe = this.getInstance()
+        const stripe = this.getInstance(model.accountId)
 
-        let intent = await stripe.paymentIntents.retrieve(model.stripeIntentId)
+        let intent = await stripe.paymentIntents.retrieve(model.stripeIntentId, {
+            expand: ['latest_charge.balance_transaction']
+        })
         console.log(intent);
         if (intent.status === "succeeded") {
-            if (intent.latest_charge) {
+            if (intent.latest_charge !== null && typeof intent.latest_charge !== 'string') {
                 try {
-                    const charge = await stripe.charges.retrieve(typeof intent.latest_charge === 'string' ? intent.latest_charge : intent.latest_charge.id)
+                    const charge = intent.latest_charge
+
+                    if (model.accountId) {
+                        // This is a direct charge
+                        
+                        if (charge.balance_transaction !== null && typeof charge.balance_transaction !== 'string') {
+                            const fees = charge.balance_transaction.fee;
+                            payment.transferFee = fees;
+                        }
+                    }
+
                     if (charge.payment_method_details?.bancontact) {
                         if (charge.payment_method_details.bancontact.iban_last4) {
                             payment.iban = "xxxx " + charge.payment_method_details.bancontact.iban_last4
                         }
                         payment.ibanName = charge.payment_method_details.bancontact.verified_name
-                        await payment.save()
                     }
                     if (charge.payment_method_details?.ideal) {
                         if (charge.payment_method_details.ideal.iban_last4) {
                             payment.iban = "xxxx " + charge.payment_method_details.ideal.iban_last4
                         }
                         payment.ibanName = charge.payment_method_details.ideal.verified_name
-                        await payment.save()
                     }
                     if (charge.payment_method_details?.card) {
                         if (charge.payment_method_details.card.last4) {
                             payment.iban = "xxxx " + charge.payment_method_details.card.last4
                         }
-                        await payment.save()
                     }
+                    await payment.save()
                 } catch (e) {
-                    console.error('Failed fatching charge', e)
+                    console.error('Failed processing charge', e)
                 }
             }
             return PaymentStatus.Succeeded
@@ -93,7 +103,7 @@ export class StripeHelper {
             return PaymentStatus.Failed
         }
 
-        const stripe = this.getInstance()
+        const stripe = this.getInstance(model.accountId)
         const session = await stripe.checkout.sessions.retrieve(model.stripeSessionId)
         console.log("session", session);
         if (session.status === "complete") {
@@ -145,6 +155,7 @@ export class StripeHelper {
         const totalPrice = payment.price;
 
         let fee = 0;
+        let directCharge = false;
         const vat = calculateVATPercentage(organization.address, organization.meta.VATNumber)
         function calculateFee(fixed: number, percentageTimes100: number) {
             return Math.round(Math.round(fixed + Math.max(1, totalPrice * percentageTimes100 / 100 / 100)) * (100 + vat) / 100); // € 0,21 + 0,2%
@@ -158,6 +169,12 @@ export class StripeHelper {
             fee = calculateFee(25, 150); // € 0,25 + 1,5%
         }
 
+        if (stripeAccount.meta.type === 'standard') {
+            // Submerchant is charged by Stripe for the fees directly
+            fee = 0;
+            directCharge = true;
+        }
+
         payment.transferFee = fee;
 
         const fullMetadata = {
@@ -165,7 +182,7 @@ export class StripeHelper {
             organizationVATNumber: organization.meta.VATNumber
         }
 
-        const stripe = StripeHelper.getInstance()
+        const stripe = StripeHelper.getInstance(directCharge ? stripeAccount.accountId : null)
         let paymentUrl: string
 
         // Bancontact or iDEAL: use payment intends
@@ -185,12 +202,12 @@ export class StripeHelper {
                 payment_method_types: [payment.method.toLowerCase()],
                 statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
                 application_fee_amount: fee,
-                on_behalf_of: stripeAccount.accountId,
+                on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
                 confirm: true,
                 return_url: redirectUrl,
-                transfer_data: {
+                transfer_data: !directCharge ?  {
                     destination: stripeAccount.accountId,
-                },
+                } : undefined,
                 metadata: fullMetadata,
                 payment_method_options: {bancontact: {preferred_language: ['nl', 'fr', 'de', 'en'].includes(i18n.language) ? i18n.language as 'en' : 'nl'}},
             });
@@ -213,6 +230,10 @@ export class StripeHelper {
             paymentIntentModel.paymentId = payment.id
             paymentIntentModel.stripeIntentId = paymentIntent.id
             paymentIntentModel.organizationId = organization.id
+
+            if (directCharge) {
+                paymentIntentModel.accountId = stripeAccount.accountId
+            }
             await paymentIntentModel.save()
         } else {
             // Build Stripe line items
@@ -253,11 +274,11 @@ export class StripeHelper {
                 currency: 'eur',
                 locale: i18n.language as 'nl',
                 payment_intent_data: {
-                    on_behalf_of: stripeAccount.accountId,
+                    on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
                     application_fee_amount: fee,
-                    transfer_data: {
+                    transfer_data: !directCharge ? {
                         destination: stripeAccount.accountId,
-                    },
+                    } : undefined,
                     metadata: fullMetadata,
                     statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
                 },
@@ -281,6 +302,10 @@ export class StripeHelper {
             paymentIntentModel.paymentId = payment.id
             paymentIntentModel.stripeSessionId = session.id
             paymentIntentModel.organizationId = organization.id
+
+            if (directCharge) {
+                paymentIntentModel.accountId = stripeAccount.accountId
+            }
             await paymentIntentModel.save()
         }
 
