@@ -184,6 +184,7 @@ export class Registration extends Model {
         this.deactivatedAt = null
         this.canRegister = false
         await this.save();
+        this.scheduleStockUpdate()
 
         await this.sendEmailTemplate({
             type: EmailTemplateType.RegistrationConfirmation

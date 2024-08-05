@@ -428,13 +428,6 @@ export class RegisterItem {
     }
 
     shouldUseWaitingList() {
-        const checkout = this.member.family.checkout;
-
-        if (checkout.isAdminFromSameOrganization) {
-            // Admins can skip the waiting lists if they register internal members for their own groups
-            return false;
-        }
-
         if (this.group.settings.waitingListType === WaitingListType.All) {
             return true;
         }
@@ -587,78 +580,68 @@ export class RegisterItem {
                     })
                 }
             }
-        }
+        
 
-        // Check if registrations are limited
-        if (!this.doesMeetRequireGroupIds() && !admin) {
-            throw new SimpleError({
-                code: "not_matching",
-                message: "Not matching: requireGroupIds",
-                human: `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`
-            })
-        }
-
-        if (!this.doesMeetRequireOrganizationIds() && !admin) {
-            throw new SimpleError({
-                code: "not_matching",
-                message: "Not matching: requireOrganizationIds",
-                human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
-            })
-        }
-
-        if (!this.doesMeetRequireOrganizationTags() && !admin) {
-            throw new SimpleError({
-                code: "not_matching",
-                message: "Not matching: requireOrganizationIds",
-                human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
-            })
-        }
-
-        if (!this.doesMeetRequirePlatformMembershipOn() && !admin) {
-            throw new SimpleError({
-                code: "not_matching",
-                message: "Not matching: requirePlatformMembershipOn",
-                human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel`
-            })
-        }
-
-        const existingMember = this.isExistingMemberOrFamily()
-
-        // Pre registrations?
-        if (this.group.activePreRegistrationDate && !admin) {
-            if (!existingMember) {
+            // Check if registrations are limited
+            if (!this.doesMeetRequireGroupIds()) {
                 throw new SimpleError({
-                    code: "pre_registrations",
-                    message: "Pre registrations",
-                    human: "Momenteel zijn de voorinschrijvingen nog bezig voor "+this.group.settings.name+". Dit is enkel voor bestaande leden"+(this.group.settings.priorityForFamily ? " en hun broers/zussen" : "")+"."
+                    code: "not_matching",
+                    message: "Not matching: requireGroupIds",
+                    human: `${this.member.patchedMember.name} voldoet niet aan de voorwaarden om in te schrijven voor deze groep.`
                 })
             }
-        }
 
-        if (this.shouldUseWaitingList()) {
-            throw new SimpleError({
-                code: "waiting_list_required",
-                message: "Waiting list required",
-                human: `${this.member.member.firstName} kan momenteel enkel voor de wachtlijst van ${this.group.settings.name} inschrijven.`,
-                meta: {recoverable: true}
-            })
-        }
-
-        if (!this.group.waitingList) {
-            if (this.hasReachedGroupMaximum()) {
+            if (!this.doesMeetRequireOrganizationIds()) {
                 throw new SimpleError({
-                    code: "maximum_reached",
-                    message: "Maximum reached",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. `,
+                    code: "not_matching",
+                    message: "Not matching: requireOrganizationIds",
+                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
+                })
+            }
+
+            if (!this.doesMeetRequireOrganizationTags()) {
+                throw new SimpleError({
+                    code: "not_matching",
+                    message: "Not matching: requireOrganizationIds",
+                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige actieve inschrijving.`
+                })
+            }
+
+            if (!this.doesMeetRequirePlatformMembershipOn()) {
+                throw new SimpleError({
+                    code: "not_matching",
+                    message: "Not matching: requirePlatformMembershipOn",
+                    human: `${this.member.patchedMember.name} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel`
+                })
+            }
+
+            const existingMember = this.isExistingMemberOrFamily()
+
+            // Pre registrations?
+            if (this.group.activePreRegistrationDate) {
+                if (!existingMember) {
+                    throw new SimpleError({
+                        code: "pre_registrations",
+                        message: "Pre registrations",
+                        human: "Momenteel zijn de voorinschrijvingen nog bezig voor "+this.group.settings.name+". Dit is enkel voor bestaande leden"+(this.group.settings.priorityForFamily ? " en hun broers/zussen" : "")+"."
+                    })
+                }
+            }
+
+            if (this.shouldUseWaitingList()) {
+                throw new SimpleError({
+                    code: "waiting_list_required",
+                    message: "Waiting list required",
+                    human: `${this.member.member.firstName} kan momenteel enkel voor de wachtlijst van ${this.group.settings.name} inschrijven.`,
                     meta: {recoverable: true}
                 })
             }
-        } else {
+
             if (this.hasReachedGroupMaximum()) {
                 throw new SimpleError({
                     code: "maximum_reached",
                     message: "Maximum reached",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.`,
+                    human: this.group.waitingList ? `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.` : `De inschrijvingen voor ${this.group.settings.name} zijn volzet. `,
                     meta: {recoverable: true}
                 })
             }

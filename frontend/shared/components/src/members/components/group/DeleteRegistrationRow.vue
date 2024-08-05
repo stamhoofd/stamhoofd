@@ -14,7 +14,7 @@
         
         <footer>
             <p class="style-price">
-                Terug: {{ formatPrice(registration.price) }}
+                Terug: {{ formatPrice(registration.price) }} waarvan {{ formatPrice(registration.pricePaid) }} betaald
             </p>
         </footer>
 

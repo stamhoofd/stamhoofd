@@ -161,6 +161,7 @@ export class RegisterCheckout{
         this.freeContribution = 0;
         this.cart.items = []
         this.cart.balanceItems = []
+        this.cart.deleteRegistrations = []
     }
 
     get totalPrice() {

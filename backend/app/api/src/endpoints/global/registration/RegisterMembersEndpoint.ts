@@ -99,7 +99,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        const memberIds = Formatter.uniqueArray(request.body.cart.items.map(i => i.memberId))
+        const memberIds = Formatter.uniqueArray(
+            [...request.body.cart.items.map(i => i.memberId), ...request.body.cart.deleteRegistrations.map(i => i.member.id)]
+        )
         const members = await Member.getBlobByIds(...memberIds)
         const groupIds = Formatter.uniqueArray(request.body.cart.items.map(i => i.groupId))
         const groups = await Group.getByIDs(...groupIds)
@@ -141,11 +143,19 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             platformMembers.push(...family.members)
         }
 
+        const organizationStruct = await AuthenticatedStructures.organization(organization)
         const checkout = request.body.hydrate({
             members: platformMembers,
             groups: await AuthenticatedStructures.groups(groups),
-            organizations: [await AuthenticatedStructures.organization(organization)]
+            organizations: [organizationStruct]
         })
+
+        // Set circular references
+        for (const member of platformMembers) {
+            member.family.checkout = checkout
+        }
+
+        checkout.setDefaultOrganization(organizationStruct)
         
         const registrations: RegistrationWithMemberAndGroup[] = []
         const payRegistrations: {registration: RegistrationWithMemberAndGroup, item: RegisterItem}[] = []
@@ -177,6 +187,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             memberBalanceItems = await BalanceItem.getMemberStructure(balanceItems)
         }
+
+        console.log('isAdminFromSameOrganization', checkout.isAdminFromSameOrganization)
 
         // Validate the cart
         checkout.validate({memberBalanceItems})
@@ -230,7 +242,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     .setRelation(Registration.group, group)
                 
 
-                if (existingRegistration.registeredAt !== null) {
+                if (existingRegistration.registeredAt !== null && existingRegistration.deactivatedAt === null) {
                     throw new SimpleError({
                         code: "already_registered",
                         message: "Dit lid is reeds ingeschreven. Herlaad de pagina en probeer opnieuw."
@@ -436,6 +448,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: "invalid_data",
                     message: "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
+            if (!await Context.auth.canAccessRegistration(existingRegistration, PermissionLevel.Write)) {
+                throw new SimpleError({
+                    code: "forbidden",
+                    message: "Je hebt geen toegaansrechten om deze inschrijving te verwijderen.",
+                    statusCode: 403
                 })
             }
 
