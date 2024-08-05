@@ -48,6 +48,23 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
+                <STListItem v-if="group.getMemberCount({cycleOffset: 1, waitingList: true}) !== null && group.getMemberCount({cycleOffset: 1, waitingList: true}) !== 0" :selectable="true" class="left-center" @click="openWaitingList(true, 1)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
+                    <h2 class="style-title-list">
+                        Wachtlijst vorige inschrijvingsperiode
+                    </h2>
+                    <p class="style-description">
+                        {{ group.getTimeRangeOffset(1) }}
+                    </p>
+
+                    <p class="style-description">
+                        Je hebt nog een wachtlijst van vorig jaar open staan. Je kan de leden hierin eventueel verplaatsen naar de nieuwe wachtlijst om ze te behouden.
+                    </p>
+
+                    <span slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: 1, waitingList: true}) }}</span>
+                    <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+
                 <STListItem v-for="offset in limitedCycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openMembers(true, offset)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
                     <h2 v-if="offset === 1" class="style-title-list">
@@ -381,14 +398,15 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         })
     }
 
-    openWaitingList(animated = true) {
+    openWaitingList(animated = true, cycleOffset = 0) {
         this.show({
             animated,
             adjustHistory: animated,
             components: [
                 new ComponentWithProperties(GroupMembersView, {
                     group: this.group,
-                    waitingList: true
+                    waitingList: true,
+                    initialCycleOffset: cycleOffset
                 })
             ]
         })
