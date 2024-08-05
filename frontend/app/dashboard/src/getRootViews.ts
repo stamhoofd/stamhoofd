@@ -4,7 +4,7 @@ import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBa
 import { PromiseView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Country, Organization } from '@stamhoofd/structures';
+import { AccessRight, Country, Organization } from '@stamhoofd/structures';
 import { computed, markRaw, reactive, ref } from 'vue';
 
 import { WhatsNewCount } from './classes/WhatsNewCount';
@@ -259,51 +259,48 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
         })
     })
 
-    const moreTab = new TabBarItemGroup({
-        icon: 'category',
-        name: 'Meer',
-        items: [
-            new TabBarItem({
-                icon: 'calculator',
-                name: 'Boekhouding',
-                component: new ComponentWithProperties(SplitViewController, {
-                    root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {})
-                })
-            }),
-            new TabBarItem({
-                icon: 'file-filled',
-                name: 'Documenten',
-                component: new ComponentWithProperties(SplitViewController, {
-                    root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
-                })
-            }),
-            new TabBarItem({
-                icon: 'gift',
-                name: 'Wat is er nieuw?',
-                badge: whatsNewBadge,
-                action: async function () {
-                    window.open('https://'+this.$t('shared.domains.marketing')+'/changelog', '_blank')
-                    whatsNewBadge.value = '';
-                    localStorage.setItem("what-is-new", WhatsNewCount.toString());
-                }
-            }),
-            new TabBarItem({
-                icon: 'book',
-                name: 'Documentatie',
-                action: async function () {
-                    window.open('https://'+this.$t('shared.domains.marketing')+'/docs', '_blank')
-                }
-            }),
-            new TabBarItem({
-                icon: 'feedback',
-                name: 'Feedback',
-                action: async function () {
-                    const NoltHelper = (await import('./classes/NoltHelper'))
-                    await NoltHelper.openNolt(reactiveSession, false)
-                }
+    const financesTab = new TabBarItem({
+        icon: 'calculator',
+        name: 'Boekhouding',
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {})
+        })
+    })
+
+    const sharedMoreItems = [
+        new TabBarItem({
+            icon: 'file-filled',
+            name: 'Documenten',
+            component: new ComponentWithProperties(SplitViewController, {
+                root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {})
             })
-        ]
-    });
+        }),
+        new TabBarItem({
+            icon: 'gift',
+            name: 'Wat is er nieuw?',
+            badge: whatsNewBadge,
+            action: async function () {
+                window.open('https://'+this.$t('shared.domains.marketing')+'/changelog', '_blank')
+                whatsNewBadge.value = '';
+                localStorage.setItem("what-is-new", WhatsNewCount.toString());
+            }
+        }),
+        new TabBarItem({
+            icon: 'book',
+            name: 'Documentatie',
+            action: async function () {
+                window.open('https://'+this.$t('shared.domains.marketing')+'/docs', '_blank')
+            }
+        }),
+        new TabBarItem({
+            icon: 'feedback',
+            name: 'Feedback',
+            action: async function () {
+                const NoltHelper = (await import('./classes/NoltHelper'))
+                await NoltHelper.openNolt(reactiveSession, false)
+            }
+        })
+    ]
 
     // todo: accept terms view
     // if (this.fullAccess && !this.$organization.meta.didAcceptLatestTerms) {
@@ -339,18 +336,32 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
 
                             if (organization?.meta.packages.useMembers) {
                                 tabs.push(membersTab)
-                                tabs.push(calendarTab)
+
+                                if (reactiveSession.auth.hasFullAccess()) {
+                                    tabs.push(calendarTab)
+                                }
                             }
 
                             if (organization?.meta.packages.useWebshops) {
                                 tabs.push(webshopsTab)
                             }
 
+                            const moreTab = new TabBarItemGroup({
+                                icon: 'category',
+                                name: 'Meer',
+                                items: [
+                                    ...sharedMoreItems // need to create a new array, don't pass directly!
+                                ]
+                            });
+
                             if (reactiveSession.auth.hasFullAccess()) {
-                                tabs.push(settingsTab)
+                                moreTab.items.unshift(financesTab)
+                                moreTab.items.unshift(settingsTab)
+                            } else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+                                moreTab.items.unshift(financesTab)
                             }
 
-                            tabs.push(moreTab);
+                            tabs.push(moreTab)
 
                             return tabs;
                         })
