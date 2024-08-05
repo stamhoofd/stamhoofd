@@ -75,9 +75,9 @@ export function buildConfig(options: {port: number}) {
             host: '127.0.0.1',
             port: options.port,
             strictPort: true,
-            hmr: {
-                clientPort: 443
-            }
+            //hmr: {
+            //    clientPort: 443
+            //}
 
         },
         build: {
