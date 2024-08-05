@@ -479,6 +479,13 @@ export class GroupSettings extends AutoEncoder {
     requireOrganizationTags: string[] = []
 
     /**
+     * Allow other organizations to register members in this group
+     * This would create a payment between the organizations instead, so that often requires invoicing
+     */
+    @field({ decoder: BooleanDecoder, version: 303 })
+    allowRegistrationsByOrganization = false
+
+    /**
      * @deprecated
      * Require that the member is already registered for one of these groups before allowing to register for this group.
      * If it is empty, then it is not enforced

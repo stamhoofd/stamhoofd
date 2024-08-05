@@ -168,7 +168,10 @@
 
             <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze leeftijdsgroepen.</p>
 
-            <GroupsInput v-model="groups" :date="startDate" />
+            <p class="info-box" v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id">
+                Je kan dit voorlopig enkel bewerken via het beheerdersportaal van de organisator.
+            </p>
+            <GroupsInput v-else v-model="groups" :date="startDate" />
         </JumpToContainer>
 
         <JumpToContainer :visible="!!location">
@@ -214,7 +217,7 @@
         <hr>
 
         <STList>
-            <STListItem v-if="defaultAgeGroupIds === null" :selectable="true" element-name="button" @click="addDefaultAgeGroupRestriction">
+            <STListItem v-if="defaultAgeGroupIds === null && isNationalActivity" :selectable="true" element-name="button" @click="addDefaultAgeGroupRestriction">
                 <template #left>
                     <span class="icon add gray" />
                 </template>
@@ -224,7 +227,7 @@
                 </h3>
             </STListItem>
 
-            <STListItem v-if="!isNationalActivity && externalOrganization && groups === null" :selectable="true" element-name="button" @click="addGroupsRestriction">
+            <STListItem v-if="!isNationalActivity && externalOrganization && organization && organization.id === externalOrganization.id && groups === null" :selectable="true" element-name="button" @click="addGroupsRestriction">
                 <template #left>
                     <span class="icon add gray" />
                 </template>
@@ -281,8 +284,8 @@ import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
 import { useContext, useOrganization, usePatch, usePlatform } from '../hooks';
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
-import SearchOrganizationView from '../members/SearchOrganizationView.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
+import SearchOrganizationView from '../members/SearchOrganizationView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -615,6 +618,7 @@ async function addRegistrations() {
             components: [
                 new ComponentWithProperties(EditGroupView, {
                     group: patched.value.group,
+                    isMultiOrganization: isNationalActivity.value,
                     isNew: false,
                     showToasts: false,
                     saveHandler: (patch: AutoEncoderPatchType<Group>) => {

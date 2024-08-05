@@ -157,6 +157,19 @@
         <h2>Beschikbaarheid</h2>
 
         <STList>
+            <STListItem :selectable="true" element-name="label" v-if="isMultiOrganization || allowRegistrationsByOrganization">
+                <template #left>
+                    <Checkbox v-model="allowRegistrationsByOrganization" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Groepinschrijvingen
+                </h3>
+                <p class="style-description-small">
+                    Een hoofdbeheerder van een groep kan meerdere leden inschrijven en schiet de betaling voor. De leden betalen vervolgens via een openstaand bedrag het geld terug aan hun groep.
+                </p>
+            </STListItem>
+
             <STListItem :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="useRegistrationStartDate" />
@@ -391,6 +404,7 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 const props = withDefaults(
     defineProps<{
         group: Group;
+        isMultiOrganization: boolean;
         isNew: boolean;
         saveHandler: (group: AutoEncoderPatchType<Group>) => Promise<void>;
         deleteHandler?: (() => Promise<void>)|null;
@@ -398,7 +412,8 @@ const props = withDefaults(
     }>(),
     {
         deleteHandler: null,
-        showToasts: true
+        showToasts: true,
+        isMultiOrganization: false
     }
 );
 
@@ -520,6 +535,15 @@ const name = computed({
             }
         }
     }
+})
+
+const allowRegistrationsByOrganization = computed({
+    get: () => patched.value.settings.allowRegistrationsByOrganization,
+    set: (allowRegistrationsByOrganization) => addPatch({
+        settings: GroupSettings.patch({
+            allowRegistrationsByOrganization
+        })
+    })
 })
 
 const type = computed(() => patched.value.type)

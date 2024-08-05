@@ -508,6 +508,14 @@ export class RegisterItem {
             throw new Error("Group and organization do not match in RegisterItem.validate")
         }
 
+        if (checkout.asOrganizationId && !this.group.settings.allowRegistrationsByOrganization) {
+            throw new SimpleError({
+                code: "as_organization_disabled",
+                message: "allowRegistrationsByOrganization disabled",
+                human: "Inschrijvingen door organisaties zijn niet toegestaan voor "+this.group.settings.name,
+            })
+        }
+
         for (const registration of this.replaceRegistrations) {
             // todo: check if you are allowed to move
             if (registration.member.id !== this.member.id) {
