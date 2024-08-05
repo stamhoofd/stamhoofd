@@ -8,16 +8,15 @@
         "backend/app/*",
         "backend/shared/*",
         "shared/*",
-        "*",
-        ".yalc/@*/*",
-        ".yalc/*"
+        "*"
     ],
     "license": "AGPL-3.0-only",
     "scripts": {
         "dev": "concurrently -r 'yarn build:shared:watch' 'lerna run dev --stream --parallel'",
+        "stripe-webhooks": "stripe listen --forward-to http://api.stamhoofd/stripe/webhooks",
         "test": "lerna run test",
         "migrate": "lerna run migrations --concurrency 1",
-        "dev:server": "concurrently -r 'yarn dev' 'yarn caddy' 'yarn dns' 'yarn mail'",
+        "dev:server": "concurrently -r 'yarn dev' 'yarn caddy' 'yarn dns' 'yarn mail' 'yarn stripe-webhooks'",
         "dev:backend": "concurrently -r 'yarn build:shared:watch' 'lerna run dev:backend --stream --parallel' 'yarn caddy' 'yarn dns' 'yarn mail'",
         "app:release": "cd devops && yarn build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
         "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json --exec yarn build:shared",
