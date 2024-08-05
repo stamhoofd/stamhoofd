@@ -536,52 +536,6 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /**
-     * Return all the e-mail addresses that should have access to this user
-     */
-    getManagerEmails(): string[] {
-        const emails = new Set<string>()
-        if (this.email && this.canHaveOwnAccount) {
-            emails.add(this.email)
-        }
-
-        if (this.canHaveOwnAccount) {
-            for (const email of this.alternativeEmails) {
-                emails.add(email)
-            }
-        }
-
-        if (this.parentsHaveAccess) {
-            for (const parent of this.parents) {
-                if (parent.email) {
-                    emails.add(parent.email)
-                }
-
-                for (const email of parent.alternativeEmails) {
-                    emails.add(email)
-                }
-            }
-        }
-        return [...emails]
-    }
-
-    /**
-     * Return all the e-mail addresses that should have access to this user
-     */
-    getAllEmails(): string[] {
-        const emails = new Set<string>()
-        if (this.email) {
-            emails.add(this.email)
-        }
-
-        for (const parent of this.parents) {
-            if (parent.email) {
-                emails.add(parent.email)
-            }
-        }
-        return [...emails]
-    }
-
-    /**
      * Apply newer details without deleting data or replacing filled in data with empty data
      */
     merge(other: MemberDetails) {
