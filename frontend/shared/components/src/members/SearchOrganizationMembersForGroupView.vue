@@ -219,7 +219,7 @@ function selectAllResults() {
     for (const member of fetcher.objects) {
         try {
             const item = RegisterItem.defaultFor(member, props.group, props.checkout.singleOrganization)
-            props.checkout.cart.add(item)
+            props.checkout.add(item)
         } catch (e) {
             // prob invalid
             return;

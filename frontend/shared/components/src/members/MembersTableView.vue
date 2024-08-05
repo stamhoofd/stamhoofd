@@ -66,7 +66,7 @@ const organization = useOrganization();
 const platform = usePlatform()
 
 const configurationId = computed(() => {
-    return 'members-'+app+'-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '')
+    return 'members-'+app+'-org-' + (organization.value?.id ?? 'null')+ '-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '')
 })
 const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false)
 
@@ -247,14 +247,14 @@ const allColumns: Column<ObjectType, any>[] = [
     })
 ];
 
-if (app == 'admin') {
+if (app == 'admin' || (props.group && props.group.settings.requireOrganizationIds.length !== 1 && props.group.type === GroupType.EventRegistration)) {
     allColumns.push(
         new Column<ObjectType, Organization[]>({
             id: 'organization',
             allowSorting: false,
             name: $t('shared.organization.singular'), 
-            getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? ''}), 
-            format: (organizations) => Formatter.joinLast(organizations.map(o => o.name), ', ', ' en ') || $t('shared.notRegistered'),
+            getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? '', types: [GroupType.Membership]}), 
+            format: (organizations) => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' en ') || $t('shared.notRegistered'),
             getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
