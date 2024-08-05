@@ -18,6 +18,12 @@ class Body extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string
 
+    /**
+     * Events for direct charges
+     */
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    account: string|null = null
+
     @field({ decoder: AnyDecoder })
     data: any
 }

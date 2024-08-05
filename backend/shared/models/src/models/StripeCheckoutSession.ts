@@ -19,4 +19,10 @@ export class StripeCheckoutSession extends Model {
 
     @column({ type: "string", nullable: true })
     organizationId: string | null = null;
+
+    /**
+     * For direct charges, this should be set
+     */
+    @column({ type: "string", nullable: true })
+    accountId: string|null = null
 }
