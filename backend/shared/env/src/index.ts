@@ -40,6 +40,8 @@ export function load(settings?: { path?: string, service?: "redirecter" | "api" 
 
     // Database
     process.env.DB_MULTIPLE_STATEMENTS="true"
+
+    process.env.STRIPE_CONNECT_METHOD = STAMHOOFD.STRIPE_CONNECT_METHOD ?? "express"
 }
 
 export function signInternal(...content: string[]) {

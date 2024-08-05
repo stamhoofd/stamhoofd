@@ -819,7 +819,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             tab = tab ?? (AppManager.shared.isNative ? null : window.open('about:blank'));
 
             const helper = new UrlHelper()
-            helper.setPath(UrlHelper.transformUrl('/settings/payments'))
             helper.getSearchParams().append('recheck-stripe-account', accountId)
 
             // Override domain (required for native app)

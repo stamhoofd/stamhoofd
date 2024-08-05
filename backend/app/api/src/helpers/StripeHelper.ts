@@ -7,7 +7,7 @@ import Stripe from 'stripe';
 
 export class StripeHelper {
     static getInstance() {
-        return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {apiVersion: '2022-11-15', typescript: true, maxNetworkRetries: 0, timeout: 10000});
+        return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 0, timeout: 10000});
     }
 
     static async getStatus(payment: Payment, cancel = false, testMode = false): Promise<PaymentStatus> {

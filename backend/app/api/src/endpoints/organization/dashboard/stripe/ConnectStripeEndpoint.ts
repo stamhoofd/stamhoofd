@@ -46,16 +46,21 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             })
         }
 
-        const type = 'express'
+        const type = STAMHOOFD.STRIPE_CONNECT_METHOD
 
-        let expressData: Stripe.AccountCreateParams = {
-            country: organization.address.country,
-            // Problem: we cannot set company or business_type, because then it defaults the structure of the company to one that requires a company number
-            capabilities: {
+        const sharedData: Stripe.AccountCreateParams = {
+             capabilities: {
                 card_payments: { requested: true },
                 transfers: { requested: true },
                 bancontact_payments: { requested: true },
                 ideal_payments: { requested: true },
+            },
+        }
+
+        let expressData: Stripe.AccountCreateParams = {
+            country: organization.address.country,
+            controller: {
+                requirement_collection: 'application',
             },
             settings: {
                 payouts: {
@@ -76,6 +81,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         const stripe = StripeHelper.getInstance()
         const account = await stripe.accounts.create({
             type,
+            ...sharedData,
             ...expressData
         });
 

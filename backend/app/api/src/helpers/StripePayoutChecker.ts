@@ -9,7 +9,7 @@ export class StripePayoutChecker {
     constructor({secretKey, stripeAccount}: { secretKey: string, stripeAccount?: string}) {
         this.stripe = new Stripe(
             secretKey, {
-                apiVersion: '2022-11-15', 
+                apiVersion: '2024-06-20', 
                 typescript: true, 
                 maxNetworkRetries: 1, 
                 timeout: 10000,
@@ -18,7 +18,7 @@ export class StripePayoutChecker {
 
         this.stripePlatform = new Stripe(
             secretKey, {
-                apiVersion: '2022-11-15', 
+                apiVersion: '2024-06-20', 
                 typescript: true, 
                 maxNetworkRetries: 1, 
                 timeout: 10000
