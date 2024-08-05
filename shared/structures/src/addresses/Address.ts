@@ -1,10 +1,18 @@
 import { AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Formatter,StringCompare } from '@stamhoofd/utility';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Country, CountryDecoder, CountryHelper } from './CountryDecoder';
 
 export class Address extends AutoEncoder {
+    get id() {
+        return this.toString();
+    }
+
+    static patchIdentifier() {
+        return StringDecoder;
+    }
+    
     @field({ decoder: StringDecoder })
     street: string;
 

@@ -14,11 +14,10 @@ import { MemberWithRegistrationsBlob, MembersBlob } from "./MemberWithRegistrati
 import { ObjectWithRecords } from "./ObjectWithRecords"
 import { Parent } from "./Parent"
 import { RegisterCheckout } from "./checkout/RegisterCheckout"
+import { RegisterItem } from "./checkout/RegisterItem"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
-import { RegisterItem } from "./checkout/RegisterItem"
-import { TinyMember } from "./Member"
 
 export class PlatformFamily {
     members: PlatformMember[] = []
@@ -233,6 +232,10 @@ export class PlatformFamily {
                 if (parent.address) {
                     addresses.set(parent.address.toString(), parent.address)
                 }
+            }
+
+            for(const uncategorizedAddress of member.member.details.uncategorizedAddresses) {
+                addresses.set(uncategorizedAddress.toString(), uncategorizedAddress);
             }
         }
 
