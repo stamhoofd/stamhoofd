@@ -107,6 +107,12 @@ export class BalanceItem extends Model {
 
     async markPaid(payment: Payment, organization: Organization) {
         // status and pricePaid changes are handled inside balanceitempayment
+        if (this.dependingBalanceItemId) {
+            const depending = await BalanceItem.getByID(this.dependingBalanceItemId)
+            if (depending && depending.status === BalanceItemStatus.Hidden) {
+                await BalanceItem.reactivateItems([depending])
+            }
+        }
 
         // If registration
         if (this.registrationId) {

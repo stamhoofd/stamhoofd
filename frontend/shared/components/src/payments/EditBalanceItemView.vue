@@ -48,13 +48,9 @@
             <h2>Aangerekend voor</h2>
 
             <STList>
-                <MemberRegistrationRow :member="member" :registration="patchedBalanceItem.registration" @edit="linkRegistration" />
+                <MemberRegistrationRow :member="member" :registration="patchedBalanceItem.registration" />
             </STList>
         </template>
-
-        <button v-else-if="member" class="button text" type="button" @click="linkRegistration">
-            <span class="icon link" /><span>Koppelen aan inschrijving</span>
-        </button>
 
         <template v-if="!isNew && hasPayments(patchedBalanceItem)">
             <hr>
@@ -291,40 +287,6 @@ async function loadMember() {
         console.error(e);
         return;
     }
-}
-
-async function linkRegistration(event: MouseEvent) {
-    if (!member.value) {
-        return
-    }
-
-    const menu = new ContextMenu([
-        [
-            new ContextMenuItem({
-                name: 'Geen',
-                action: () => {
-                    addPatch({
-                        registration: null
-                    })
-                    return false;
-                }
-            })
-        ],
-        member.value.patchedMember.registrations.map(r => {
-            const group = member.value?.allGroups.find(g => g.id === r.groupId);
-            return new ContextMenuItem({
-                name: group?.settings.name ?? '?',
-                action: () => {
-                    addPatch({
-                        registration: r
-                    })
-                    return false;
-                }
-            })
-        })
-    ])
-
-    menu.show({clickEvent: event}).catch(console.error)
 }
 
 function getPaymentMethodName(method: PaymentMethod) {
