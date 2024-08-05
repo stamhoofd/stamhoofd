@@ -16,7 +16,7 @@ export class MemberUserSyncerStatic {
         }
 
         const uncategorizedEmails: string[] = member.details.uncategorizedEmails;
-        const parentEmails = member.details.parentsHaveAccess ? member.details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(uncategorizedEmails) : []
+        const parentAndUncategorizedEmails = member.details.parentsHaveAccess ? member.details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(uncategorizedEmails) : []
 
         // Make sure all these users have access to the member
         for (const email of userEmails) {
@@ -24,18 +24,17 @@ export class MemberUserSyncerStatic {
             await this.linkUser(email, member, false)
         }
 
-        for (const email of parentEmails) {
-            // Link parents
+        for (const email of parentAndUncategorizedEmails) {
+            // Link parents and uncategorized emails
             await this.linkUser(email, member, true)
         }
 
         // Remove access of users that are not in this list
         for (const user of member.users) {
-            if (!userEmails.includes(user.email) && !parentEmails.includes(user.email)) {
+            if (!userEmails.includes(user.email) && !parentAndUncategorizedEmails.includes(user.email)) {
                 await this.unlinkUser(user, member)
             }
         }
-
     }
 
     async onDeleteMember(member: MemberWithRegistrations) {

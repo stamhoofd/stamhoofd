@@ -62,6 +62,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 277 })
     alternativeEmails: string[] = []
 
+    /**
+     * These emails will get access to the member if parentsHaveAccess is true
+     */
     @field({decoder: new ArrayDecoder(StringDecoder), version: 296})
     uncategorizedEmails: string[] = []
 
