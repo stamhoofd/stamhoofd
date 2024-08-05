@@ -44,6 +44,7 @@ import { inject, shallowRef } from 'vue';
 import { useDeviceWidth } from '../hooks';
 import TabBarController from './TabBarController.vue';
 import TabBarDropdownView from './TabBarDropdownView.vue';
+import { GlobalEventBus } from '../EventBus';
 
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
     const c = inject('reactive_tabBarController') as InstanceType<typeof TabBarController>|Ref<InstanceType<typeof TabBarController>>;
@@ -333,6 +334,12 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem|TabBarItemGroup) => 
     })
 };
 
+const selectTabByName = async (name: string) => {
+    const item = flatTabs.value.find(tab => Formatter.slug(tab.name) === Formatter.slug(name));
+    if (item) {
+        await selectItem(item)
+    }
+}
 
 const show = async (options: PushOptions) => {
     if (options.components.length > 1) {
@@ -372,7 +379,13 @@ const show = async (options: PushOptions) => {
 }
 provide('reactive_navigation_show', show)
 
+onMounted(() => {
+    GlobalEventBus.addListener(this, 'selectTabByName', selectTabByName)
+})
+
 onBeforeUnmount(() => {
+    GlobalEventBus.removeListener(this)
+
     // Prevent memory issues by removing all references and destroying kept alive components
     for (const {component} of flatTabs.value) {
         // Destroy them one by one
@@ -389,7 +402,8 @@ const returnToHistoryIndex = () => {
 defineExpose({
     returnToHistoryIndex,
     show,
-    shouldNavigateAway
+    shouldNavigateAway,
+    selectTabByName
 })
 
 </script>

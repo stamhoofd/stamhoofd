@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { ExternalOrganizationContainer } from '@stamhoofd/components';
+import { ExternalOrganizationContainer, GlobalEventBus } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
@@ -41,7 +41,9 @@ function setOrganization(groupOrganization: Organization) {
 async function goNext() {
     await dismiss()
 
-    // todo: go to cart
+    if (!checkout.value.cart.isEmpty) {
+        await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
+    }
 }
 
 </script>
