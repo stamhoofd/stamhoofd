@@ -59,6 +59,12 @@ export class GetStripeLoginLinkEndpoint extends Endpoint<Params, Query, Body, Re
             })
         }
 
+        if (model.meta.type === 'standard') {
+            return new Response(ResponseBody.create({
+                url: 'https://dashboard.stripe.com/'
+            }));
+        }
+
         const stripe = StripeHelper.getInstance()
         const accountLink = await stripe.accounts.createLoginLink(model.accountId);
 

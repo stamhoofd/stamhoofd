@@ -68,7 +68,10 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
             refresh_url: request.body.refreshUrl,
             return_url: request.body.returnUrl,
             type: 'account_onboarding',
-            collect: model.meta.type === 'express' ? 'eventually_due' : undefined, // Collect all at the start
+            collection_options: {
+                fields: 'eventually_due',
+                future_requirements: 'include'
+            }
         });
 
         return new Response(ResponseBody.create({
