@@ -74,8 +74,8 @@ export class MemberDetails extends AutoEncoder {
     @field({decoder: new ArrayDecoder(Address), version: 296})
     uncategorizedAddresses: Address[] = []
 
-    @field({decoder: new ArrayDecoder(StringDecoder), version: 301})
-    notes: string[] = []
+    @field({decoder: StringDecoder, nullable: true, version: 301})
+    notes: string | null = null;
 
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date("1970-01-01") })
