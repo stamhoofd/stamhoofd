@@ -289,7 +289,27 @@ if (app == 'admin') {
     if (!waitingList.value && financialRead.value && organization.value && !groups.find(g => g.organizationId !== organization.value!.id)) {
         allColumns.push(
             new Column<ObjectType, number>({
-                name: "Openstaand saldo", 
+                name: "Prijs", 
+                allowSorting: false,
+                getValue: (v) => v.filterRegistrations({groups: groups}).reduce((sum, r) => sum + r.price, 0),
+                format: (outstandingBalance) => {
+                    if (outstandingBalance < 0) {
+                        return Formatter.price(outstandingBalance)
+                    }
+                    if (outstandingBalance <= 0) {
+                        return "Gratis";
+                    }
+                    return Formatter.price(outstandingBalance)
+                }, 
+                getStyle: (v) => v <= 0 ? "gray" : "",
+                minimumWidth: 70,
+                recommendedWidth: 80
+            })
+        )
+
+        allColumns.push(
+            new Column<ObjectType, number>({
+                name: "Te betalen", 
                 allowSorting: false,
                 getValue: (v) => v.filterRegistrations({groups: groups}).reduce((sum, r) => sum + (r.price - r.pricePaid), 0),
                 format: (outstandingBalance) => {
