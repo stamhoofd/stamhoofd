@@ -960,7 +960,7 @@ export class AdminPermissionChecker {
         }
 
         const hasRecordAnswers = !!data.details.recordAnswers;
-        const hasNotes = !!data.details.notes;
+        const hasNotes = data.details.notes !== undefined;
 
         if(hasRecordAnswers || hasNotes) {
             const isUserManager = this.isUserManager(member);
