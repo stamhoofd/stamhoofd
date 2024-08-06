@@ -35,7 +35,7 @@
 
 <script lang="ts" setup>
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { STToolbar, useAppContext } from '@stamhoofd/components';
+import { STToolbar } from '@stamhoofd/components';
 import { GroupType, RegisterCheckout, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted } from 'vue';
