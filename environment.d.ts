@@ -6,7 +6,15 @@ declare enum Country {
     Netherlands = "NL",
     Luxembourg = "LU",
     France = "FR",
-    Germany = "DE"
+    Germany = "DE",
+    Sweden = "SE",
+    UnitedKingdom = "GB",
+    Switzerland = "CH",
+    Afghanistan = "AF",
+    CzechRepublic = "CZ",
+    UnitedStates = "US",
+    Austria = "AT",
+    Portugal = "PT"
 }
 
 /**
