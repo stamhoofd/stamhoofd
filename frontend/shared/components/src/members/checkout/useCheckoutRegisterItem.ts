@@ -79,10 +79,11 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
 
     if (admin) {
         if (!context.organization) {
-            Toast.error('Het is niet mogelijk om iemand in te schrijven als beheerder zonder eerst naar het beheerdersportaal te gaan van een organisatie.').show()
-            return;
+            // Administration panel: register as organizing organization
+            member.family.checkout.asOrganizationId = item.organization.id
+        } else {
+            member.family.checkout.asOrganizationId = context.organization.id
         }
-        member.family.checkout.asOrganizationId = context.organization.id
     }
 
     // Check which steps need a review or are not complete
@@ -304,7 +305,7 @@ export function useChooseOrganizationMembersForGroup() {
 // ----------------------------
 // --------- Flow 4 -----------
 
-export async function chooseGroupForMember({member, navigate, context, displayOptions}: {member: PlatformMember, navigate: NavigationActions, context: SessionContext, displayOptions?: DisplayOptions}) {
+export async function chooseGroupForMember({member, navigate, context, displayOptions, startCheckoutFlow, admin}: {admin?: boolean, member: PlatformMember, navigate: NavigationActions, context: SessionContext, displayOptions?: DisplayOptions, startCheckoutFlow?: boolean}) {
     await runDisplayOptions({
         components: [
             new ComponentWithProperties(NavigationController, {
@@ -315,11 +316,12 @@ export async function chooseGroupForMember({member, navigate, context, displayOp
                             member, 
                             group, 
                             groupOrganization, 
-                            admin: false, 
+                            admin: admin ?? false, 
                             navigate, 
                             context, 
                             displayOptions: {action: 'show'},
-                            showGroupInformation: true
+                            showGroupInformation: true,
+                            startCheckoutFlow
                         });
                     }
                 })
@@ -331,8 +333,16 @@ export async function chooseGroupForMember({member, navigate, context, displayOp
 export function useChooseGroupForMember() {
     const navigate = useNavigationActions();
     const context = useContext();
+    const app = useAppContext()
 
-    return async ({member, displayOptions}: {member: PlatformMember, displayOptions?: DisplayOptions}) => {
-        await chooseGroupForMember({member, navigate, context: context.value, displayOptions});
+    return async ({member, displayOptions, startCheckoutFlow}: {member: PlatformMember, displayOptions?: DisplayOptions, startCheckoutFlow?: boolean}) => {
+        await chooseGroupForMember({
+            admin: app === 'dashboard' || app === 'admin', 
+            member, 
+            navigate, 
+            context: context.value, 
+            displayOptions, 
+            startCheckoutFlow
+        });
     }
 }

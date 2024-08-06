@@ -95,7 +95,8 @@ const visibleRegistrations = computed(() => {
 const chooseGroupForMember = useChooseGroupForMember()
 
 async function addRegistration() {
-    await chooseGroupForMember({member: props.member, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}})
+    props.member.family.checkout.clear()
+    await chooseGroupForMember({member: props.member, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}, startCheckoutFlow: true})
 }
 
 const buildActions = useMemberActions()
