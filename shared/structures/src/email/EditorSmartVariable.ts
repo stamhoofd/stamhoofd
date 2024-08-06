@@ -84,6 +84,7 @@ export class EditorSmartVariable extends AutoEncoder {
             registrations: [
                 RegistrationWithMember.create({
                     organizationId: '',
+                    memberId: '',
                     member: TinyMember.create({
                         firstName: 'John',
                         lastName: 'Doe'

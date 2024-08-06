@@ -26,7 +26,7 @@ export class Registration extends AutoEncoder {
     organizationId: string
 
     @field({ decoder: StringDecoder, version: 300 })
-    memberId: string
+    memberId = ''
 
     /**
      * @deprecated
