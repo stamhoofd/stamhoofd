@@ -7,8 +7,8 @@
             <ViewMemberParentsBox :member="member" />
             <ViewMemberEmergencyContactsBox :member="member" />
             <ViewMemberRecordCategoriesBox :member="member" />
-            <ViewMemberNotesBox :member="member"/>
             <ViewMemberUncategorizedBox :member="member" />
+            <ViewMemberNotesBox :member="member"/>
         </div>
 
         <div>

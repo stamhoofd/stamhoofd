@@ -3,27 +3,27 @@
         <div class="hover-box container">
             <hr>
             <h2 class="style-with-button"><div>Niet-toegekende gegevens</div></h2>
-            <p>Deze gegevens konden niet automatisch toegekend worden aan het lid of aan de ouders. Je kan ze toevoegen of verwijderen.</p>
+            <p>Deze gegevens konden niet automatisch toegekend worden aan het lid of aan de ouders.</p>
             <dl class="details-grid hover">
                 <template v-for="(email, index) of uncategorizedEmails">
                     <MemberDetailWithButton
                         :label="formatWithIndex('E-mailadres', index, uncategorizedEmails)"
                         :value="email" icon="trash" color="gray"
-                        :on-delete="() => deleteEmail(email)"/>
+                        :onClick="() => deleteEmail(email)"/>
                 </template>
 
                 <template v-for="(phone, index) of uncategorizedPhones">
                     <MemberDetailWithButton
                         :label="formatWithIndex($t('shared.inputs.mobile.label'), index, uncategorizedPhones)"
                         :value="phone" icon="trash" color="gray"
-                        :on-delete="() => deletePhone(phone)"/>
+                        :onClick="() => deletePhone(phone)"/>
                 </template>
 
                 <template v-for="(address, index) of uncategorizedAddresses">
                     <MemberDetailWithButton
                         :label="formatWithIndex('Adres', index, uncategorizedAddresses)"
                         :value="addressToLines(address)" icon="trash" color="gray"
-                        :on-delete="() => deleteAddress(address)"/>
+                        :onClick="() => deleteAddress(address)"/>
                 </template>
             </dl>
         </div>  
