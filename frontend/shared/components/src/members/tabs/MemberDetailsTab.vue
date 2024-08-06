@@ -4,11 +4,11 @@
             <ViewMemberWarningsBox v-if="isMobile" :member="member" />
             <ViewMemberGeneralBox :member="member" />
             <MemberRegistrationsBox :member="member" />
+            <ViewMemberUncategorizedBox :member="member" />
+            <ViewMemberNotesBox :member="member"/>
             <ViewMemberParentsBox :member="member" />
             <ViewMemberEmergencyContactsBox :member="member" />
             <ViewMemberRecordCategoriesBox :member="member" />
-            <ViewMemberUncategorizedBox :member="member" />
-            <ViewMemberNotesBox :member="member"/>
         </div>
 
         <div>
