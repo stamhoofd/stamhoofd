@@ -281,7 +281,7 @@ export class MemberDetails extends AutoEncoder {
         }
         //#endregion
         
-        if(this.notes) {
+        if(this.notes !== null) {
             // cut long notes
             if(this.notes.length > 1000) {
                 this.notes = this.notes.substring(0, 1000);

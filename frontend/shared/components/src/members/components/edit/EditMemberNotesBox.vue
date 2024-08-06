@@ -44,7 +44,7 @@ const appContext = useAppContext();
 const notes = computed({
     get: () => props.member.patchedMember.details.notes,
     set: (notes) => {
-            if(notes) {
+            if(notes !== null) {
                 // cut long notes
                 if(notes.length > maxLength) {
                     notes = notes.substring(0, maxLength);
