@@ -23,7 +23,7 @@ const filterCompilers: SQLFilterDefinitions = {
     startDate: createSQLColumnFilterCompiler('startDate'),
     endDate: createSQLColumnFilterCompiler('endDate'),
     groupIds: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.groupIds'),
+        SQL.jsonValue(SQL.column('meta'), '$.value.groups[*].id'),
         undefined,
         true,
         true
@@ -35,7 +35,10 @@ const filterCompilers: SQLFilterDefinitions = {
         true
     ),
     organizationTagIds: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds')
+        SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds'),
+        undefined,
+        true,
+        true
     )
 }
 
