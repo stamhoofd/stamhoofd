@@ -65,7 +65,7 @@ export class Sorter {
      * Sort from new to old - DESC
      */
     static byDateValue( a: Date, b: Date) {
-        if (a === b) {
+        if (a.getTime() === b.getTime()) {
             return 0
         }
         if (a > b) {
