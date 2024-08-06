@@ -31,14 +31,14 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { EditorSmartButton, EditorSmartVariable, EmailTemplate, EmailTemplateType, getExampleRecipient } from '@stamhoofd/structures';
+import { EditorSmartButton, EditorSmartVariable, EmailTemplate, getExampleRecipient } from '@stamhoofd/structures';
 import { Ref, computed, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
+import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { usePatch } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { EmailStyler } from '../editor/EmailStyler';
 
 const props = defineProps<{
     emailTemplate: EmailTemplate;

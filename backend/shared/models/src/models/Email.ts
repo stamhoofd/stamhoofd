@@ -1,16 +1,16 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, LimitedFilteredRequest, PaginatedResponse, Recipient, SortItemDirection } from '@stamhoofd/structures';
+import { EditorSmartButton, EditorSmartVariable, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, Recipient, SortItemDirection } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Email as EmailClass } from "@stamhoofd/email";
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { EmailRecipient } from './EmailRecipient';
-import { getEmailBuilder } from '../helpers/EmailBuilder';
-import { Organization } from './Organization';
 import { Formatter } from '@stamhoofd/utility';
-import { Email as EmailClass } from "@stamhoofd/email";
+import { getEmailBuilder } from '../helpers/EmailBuilder';
+import { EmailRecipient } from './EmailRecipient';
+import { Organization } from './Organization';
 
 export class Email extends Model {
     static table = "emails";
@@ -497,7 +497,7 @@ export class Email extends Model {
                     let request: LimitedFilteredRequest|null = new LimitedFilteredRequest({
                         filter: subfilter.filter,
                         sort: [{key: 'id', order: SortItemDirection.ASC}],
-                        limit: 1,
+                        limit: 10,
                         search: subfilter.search,
                     })
 
@@ -519,7 +519,7 @@ export class Email extends Model {
                             return;
                         }
 
-                        request = response.next ?? null;
+                        request = null;
                     }
                 }
 
@@ -541,16 +541,27 @@ export class Email extends Model {
             .where(SQL.column('emailId'), this.id)
             .first(false);
 
-        const recipientRow = recipient ? EmailRecipient.fromRow(recipient[EmailRecipient.table]) : null;
+            let recipientRow: EmailRecipientStruct | undefined;
 
-        const smartVariables = recipientRow ? EditorSmartVariable.forRecipient(recipientRow) : []
-        const smartButtons = recipientRow ? EditorSmartButton.forRecipient(recipientRow) : []
-        
-        return EmailPreview.create({
-            ...this,
-            exampleRecipient: recipientRow ? (recipientRow.getStructure()) : null,
-            smartVariables,
-            smartButtons
-        })
+            if(recipient) {
+                const emailRecipient = EmailRecipient.fromRow(recipient[EmailRecipient.table]);
+                if(emailRecipient) {
+                    recipientRow = emailRecipient.getStructure();
+                }
+            }
+
+            if(!recipientRow) {
+                recipientRow = getExampleRecipient();
+            }
+
+            const smartVariables = recipientRow ? EditorSmartVariable.forRecipient(recipientRow) : []
+            const smartButtons = recipientRow ? EditorSmartButton.forRecipient(recipientRow) : []
+            
+            return EmailPreview.create({
+                ...this,
+                exampleRecipient: recipientRow,
+                smartVariables,
+                smartButtons
+            })
     }
 }

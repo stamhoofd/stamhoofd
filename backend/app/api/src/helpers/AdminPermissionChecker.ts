@@ -916,6 +916,10 @@ export class AdminPermissionChecker {
         const isUserManager = this.isUserManager(member)
         if (isUserManager) {
             // For the user manager, we don't delete data, because when registering a new member, it doesn't have any organizations yet...
+
+            // Notes are not visible for the member.
+            data.details.notes = null;
+
             return data;
         }
 
@@ -955,48 +959,63 @@ export class AdminPermissionChecker {
             })
         }
 
-        if (data.details.recordAnswers) {
-            if (!(data.details.recordAnswers instanceof PatchMap)) {
-                throw new SimpleError({
-                    code: 'invalid_request',
-                    message: 'Cannot PUT recordAnswers',
-                    statusCode: 400
-                })
-            }
-            const isUserManager = this.isUserManager(member)
-            const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
+        const hasRecordAnswers = !!data.details.recordAnswers;
+        const hasNotes = data.details.notes !== undefined;
 
-            for (const [key, value] of data.details.recordAnswers.entries()) {
-                let name: string | undefined = undefined
-                if (value) {
-                    if (value.isPatch()) {
-                        throw new SimpleError({
-                            code: 'invalid_request',
-                            message: 'Cannot PATCH a record answer object',
-                            statusCode: 400
-                        })
-                    }
+        if(hasRecordAnswers || hasNotes) {
+            const isUserManager = this.isUserManager(member);
 
-                    const id = value.settings.id
-
-                    if (id !== key) {
-                        throw new SimpleError({
-                            code: 'invalid_request',
-                            message: 'Record answer key does not match record id',
-                            statusCode: 400
-                        })
-                    }
-
-                    name = value.settings.name
-                }
-
-                if (!isUserManager && !records.has(key)) {
+            if (hasRecordAnswers) {
+                if (!(data.details.recordAnswers instanceof PatchMap)) {
                     throw new SimpleError({
-                        code: 'permission_denied',
-                        message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
+                        code: 'invalid_request',
+                        message: 'Cannot PUT recordAnswers',
                         statusCode: 400
                     })
                 }
+                
+                const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
+
+                for (const [key, value] of data.details.recordAnswers.entries()) {
+                    let name: string | undefined = undefined
+                    if (value) {
+                        if (value.isPatch()) {
+                            throw new SimpleError({
+                                code: 'invalid_request',
+                                message: 'Cannot PATCH a record answer object',
+                                statusCode: 400
+                            })
+                        }
+
+                        const id = value.settings.id
+
+                        if (id !== key) {
+                            throw new SimpleError({
+                                code: 'invalid_request',
+                                message: 'Record answer key does not match record id',
+                                statusCode: 400
+                            })
+                        }
+
+                        name = value.settings.name
+                    }
+
+                    if (!isUserManager && !records.has(key)) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
+                            statusCode: 400
+                        })
+                    }
+                }
+            }
+
+            if(hasNotes && isUserManager) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Cannot edit notes',
+                    statusCode: 400
+                })
             }
         }
 

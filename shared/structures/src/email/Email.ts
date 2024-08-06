@@ -1,17 +1,18 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
-import { StamhoofdFilterDecoder } from "../filters/new/FilteredRequest";
-import { StamhoofdFilter } from "../filters/new/StamhoofdFilter";
-import { EmailAttachment, Replacement } from "../endpoints/EmailRequest";
-import { MemberWithRegistrationsBlob } from "../members/MemberWithRegistrationsBlob";
-import { MemberDetails } from "../members/MemberDetails";
 import { EditorSmartButton } from "../email/EditorSmartButton";
 import { EditorSmartVariable } from "../email/EditorSmartVariable";
+import { EmailAttachment, Replacement } from "../endpoints/EmailRequest";
+import { StamhoofdFilterDecoder } from "../filters/new/FilteredRequest";
+import { StamhoofdFilter } from "../filters/new/StamhoofdFilter";
+import { MemberDetails } from "../members/MemberDetails";
+import { MemberWithRegistrationsBlob } from "../members/MemberWithRegistrationsBlob";
 import { EmailTemplateType } from "./EmailTemplate";
 
 export enum EmailRecipientFilterType {
     "Members" = "Members",
-    "MemberParents" = "MemberParents"
+    "MemberParents" = "MemberParents",
+    "MemberUnverified" = "MemberUnverified"
 }
 
 export function getExampleRecipient(type: EmailRecipientFilterType|null = null) {

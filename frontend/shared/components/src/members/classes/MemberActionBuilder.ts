@@ -1,19 +1,19 @@
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, mergeFilters, Organization, PermissionLevel, PlatformMember, RegisterItem, RegistrationWithMember } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegisterItem, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
+import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
+import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..'
+import { GlobalEventBus } from '../../EventBus'
 import EmailView from '../../email/EmailView.vue'
 import { useContext, useOrganization } from '../../hooks'
+import { CenteredMessage } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes'
 import { NavigationActions } from '../../types/NavigationActions'
-import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager'
-import { CenteredMessage } from '../../overlays/CenteredMessage'
-import { Formatter } from '@stamhoofd/utility'
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
-import { GlobalEventBus } from '../../EventBus'
+import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
 
 export function useDirectMemberActions(options?: {groups?: Group[], organizations?: Organization[]}) {
     return useMemberActions()(options)
@@ -384,6 +384,40 @@ export class MemberActionBuilder {
             {
                 name: "Geen ouders",
                 value: []
+            }
+        ])
+
+        options.push([
+            {
+                name: "Geen niet-geverifieerde adressen",
+                value: [],
+            },
+            {
+                name: "Niet-geverifieerde adressen van minderjarige leden",
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.MemberUnverified,
+                        filter: mergeFilters([
+                            filter,
+                            {
+                                age: {
+                                    $lt: 18
+                                }
+                            }
+                        ]),
+                        search
+                    })
+                ]
+            },
+            {
+                name: "Alle niet-geverifieerde adressen",
+                value: [
+                    EmailRecipientSubfilter.create({
+                        type: EmailRecipientFilterType.MemberUnverified,
+                        filter,
+                        search
+                    })
+                ]
             }
         ])
 

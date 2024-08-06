@@ -1,6 +1,6 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { AnyDecoder } from "@simonbackx/simple-encoding";
-import { EmailRecipientFilterType, EmailTemplate as EmailTemplateStruct, EmailTemplateType } from "@stamhoofd/structures";
+import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 

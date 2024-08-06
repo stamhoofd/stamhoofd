@@ -3,8 +3,9 @@
         <div>
             <ViewMemberWarningsBox v-if="isMobile" :member="member" />
             <ViewMemberGeneralBox :member="member" />
-            <ViewMemberUncategorizedBox :member="member" />
             <MemberRegistrationsBox :member="member" />
+            <ViewMemberUnverifiedBox :member="member" />
+            <ViewMemberNotesBox :member="member"/>
             <ViewMemberParentsBox :member="member" />
             <ViewMemberEmergencyContactsBox :member="member" />
             <ViewMemberRecordCategoriesBox :member="member" />
@@ -27,9 +28,10 @@ import ViewMemberAccountsBox from '../components/view/ViewMemberAccountsBox.vue'
 import ViewMemberEmergencyContactsBox from '../components/view/ViewMemberEmergencyContactsBox.vue';
 import ViewMemberFamilyBox from '../components/view/ViewMemberFamilyBox.vue';
 import ViewMemberGeneralBox from '../components/view/ViewMemberGeneralBox.vue';
+import ViewMemberNotesBox from '../components/view/ViewMemberNotesBox.vue';
 import ViewMemberParentsBox from '../components/view/ViewMemberParentsBox.vue';
 import ViewMemberRecordCategoriesBox from '../components/view/ViewMemberRecordCategoriesBox.vue';
-import ViewMemberUncategorizedBox from '../components/view/ViewMemberUncategorizedBox.vue';
+import ViewMemberUnverifiedBox from '../components/view/ViewMemberUnverifiedBox.vue';
 import ViewMemberWarningsBox from '../components/view/ViewMemberWarningsBox.vue';
 
 const isMobile = useIsMobile();
