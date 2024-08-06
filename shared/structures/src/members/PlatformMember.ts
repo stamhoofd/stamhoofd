@@ -543,6 +543,10 @@ export class PlatformMember implements ObjectWithRecords {
 
     filterRegistrations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean, types?: GroupType[]}) {
         return this.patchedMember.registrations.filter(r => {
+            if (!r.registeredAt === null || r.deactivatedAt !== null) {
+                return false;
+            }
+            
             if (filters.types !== undefined) {
                 if (!filters.types.includes(r.group.type)) {
                     return false;

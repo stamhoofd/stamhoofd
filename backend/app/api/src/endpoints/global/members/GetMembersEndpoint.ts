@@ -3,8 +3,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Member, MemberWithRegistrations, Platform } from '@stamhoofd/models';
-import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLJSONValue, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
-import { CountFilteredRequest, EmailRecipientFilterType, GroupStatus, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter, mergeFilters } from '@stamhoofd/structures';
+import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
+import { CountFilteredRequest, EmailRecipientFilterType, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter, mergeFilters } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -378,9 +378,6 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 }
                             },
                             periodId: platform.periodId,
-                            registeredAt: {
-                                $neq: null
-                            },
                             group: {
                                 defaultAgeGroupId: {
                                     $neq: null
@@ -397,16 +394,26 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             const groups = await Context.auth.getAccessibleGroups(organization.id)
 
             if (groups === 'all') {
-                scopeFilter = {
-                    registrations: {
-                        $elemMatch: {
-                            organizationId: organization.id,
-                            registeredAt: {
-                                $neq: null
+                if (await Context.auth.hasFullAccess(organization.id)) {
+                    // Can access full history for now
+                    scopeFilter = {
+                        registrations: {
+                            $elemMatch: {
+                                organizationId: organization.id,
                             }
                         }
-                    }
-                };
+                    };
+                } else {
+                    // Can only access current period
+                    scopeFilter = {
+                        registrations: {
+                            $elemMatch: {
+                                organizationId: organization.id,
+                                periodId: organization.periodId,
+                            }
+                        }
+                    };
+                }
             } else {
                 scopeFilter = {
                     registrations: {
@@ -415,9 +422,6 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             periodId: organization.periodId,
                             groupId: {
                                 $in: groups
-                            },
-                            registeredAt: {
-                                $neq: null
                             }
                         }
                     }
