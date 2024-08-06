@@ -28,10 +28,10 @@
 </template>
 
 <script lang="ts" setup>
-import { Group, GroupSettings, PlatformMember, Registration } from '@stamhoofd/structures';
+import { PlatformMember, Registration } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
-import GroupIcon from './group/GroupIcon.vue';
 import { useOrganization } from '../../hooks';
+import GroupIcon from './group/GroupIcon.vue';
 
 const props = defineProps<{
     registration: Registration;
