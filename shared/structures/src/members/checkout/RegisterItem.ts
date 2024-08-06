@@ -9,6 +9,7 @@ import { Registration } from "../Registration"
 import { RegisterContext } from "./RegisterCheckout"
 import { StockReservation } from "../../StockReservation"
 import { RegistrationWithMember } from "../RegistrationWithMember"
+import { PriceBreakdown } from "../../PriceBreakdown"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -123,7 +124,7 @@ export class RegisterItem {
     }
 
     get showItemView() {
-        return this.shouldUseWaitingList() || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
+        return this.shouldUseWaitingList() || this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
     }
 
     calculatePrice() {
@@ -138,6 +139,38 @@ export class RegisterItem {
         }
     }
 
+    get priceBreakown(): PriceBreakdown {
+        let all: PriceBreakdown = []
+
+        let replacePrice = 0;
+        for (const registration of this.replaceRegistrations) {
+            replacePrice += registration.price
+
+            all.push({
+                name: 'Terugbetaling '+registration.group.settings.name,
+                price: -registration.price
+            })
+        }
+
+        const subtotal = this.calculatedPrice + replacePrice        
+        all = all.filter(a => a.price !== 0)
+
+        if (all.length > 0) {
+            all.unshift({
+                name: 'Subtotaal',
+                price: subtotal
+            })
+        }
+
+        return [
+            ...all,
+            {
+                name: 'Totaal',
+                price: this.calculatedPrice
+            }
+        ];
+    }
+
     clone() {
         return new RegisterItem({
             id: this.id,
@@ -145,7 +178,8 @@ export class RegisterItem {
             group: this.group,
             organization: this.organization,
             groupPrice: this.groupPrice.clone(),
-            options: this.options.map(o => o.clone())
+            options: this.options.map(o => o.clone()),
+            replaceRegistrations: this.replaceRegistrations.map(r => r.clone())
         })
     }
 
@@ -215,16 +249,16 @@ export class RegisterItem {
             throw new Error("Group and organization do not match in RegisterItem.defaultFor")
         }
 
-        let item = new RegisterItem({
+        const item = new RegisterItem({
             member,
             group,
             organization
         });
 
-        if (item.shouldUseWaitingList() && group.waitingList) {
-            group = group.waitingList
-            item = RegisterItem.defaultFor(member, group, organization);
-        }
+        //if (item.shouldUseWaitingList() && group.waitingList) {
+        //    group = group.waitingList
+        //    item = RegisterItem.defaultFor(member, group, organization);
+        //}
 
         return item;
     }

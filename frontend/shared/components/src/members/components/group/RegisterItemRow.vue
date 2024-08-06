@@ -15,7 +15,7 @@
             Inschrijven voor {{ item.group.settings.name }}
         </p>
         <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
-        
+
         <footer>
             <p class="style-price">
                 {{ formatPrice(item.calculatedPrice) }}

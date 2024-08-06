@@ -120,7 +120,9 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
                 return;
             }
         } else {
-            Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').show();
+            if (!admin) {
+                Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').show();
+            }
 
             if (showGroupInformation) {
                 await GlobalEventBus.sendEvent('selectTabByName', 'mandje')

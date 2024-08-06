@@ -85,8 +85,8 @@ export class ContextPermissions {
     }
 
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        if (!this.organization) {
-            return false
+        if (!this.organization || group.organizationId !== this.organization.id) {
+            return this.hasFullPlatformAccess()
         }
 
         return group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel)

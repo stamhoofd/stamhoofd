@@ -14,6 +14,9 @@
             {{ item.cartError.getHuman() }}
         </p>
 
+        <p v-for="registration in item.replaceRegistrations" :key="registration.id" class="style-description">
+            Verplaatsen vanaf {{ registration.group.settings.name }}
+        </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -83,7 +86,7 @@
         <template v-if="!validationError">
             <hr>
             <div class="pricing-box max">
-                <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: item.calculatedPrice}]" />
+                <PriceBreakdownBox :price-breakdown="item.priceBreakown" />
             </div>
         </template>
     </SaveView>

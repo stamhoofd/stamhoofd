@@ -43,6 +43,7 @@ import { useMemberActions } from '../classes/MemberActionBuilder';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
 import { Sorter } from '@stamhoofd/utility';
 import { useChooseGroupForMember } from '../checkout';
+import { Toast } from '../../overlays/Toast';
 
 const props = defineProps<{
     member: PlatformMember
@@ -104,13 +105,18 @@ const buildActions = useMemberActions()
 async function editRegistration(registration: Registration, event: MouseEvent) {
     const builder = buildActions({
         groups: [registration.group],
-        organizations: props.member.organizations.filter(o => o.id === registration.group.organizationId),
+        organizations: props.member.organizations,
     })
 
     const actions = [
         ...builder.getUnsubscribeAction().map(a => a.setGroupIndex(0).setPriority(10)),
         ...builder.getMoveAction().map(a => a.setGroupIndex(1).setPriority(5)),
     ]
+
+    if (actions.filter(a => a.enabled).length === 0) {
+        Toast.warning('Er zijn geen acties beschikbaar voor deze inschrijving').show()
+        return;
+    }
 
     const el = event.currentTarget! as HTMLElement;
     const bounds = el.getBoundingClientRect()
