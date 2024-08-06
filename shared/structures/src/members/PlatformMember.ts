@@ -283,6 +283,49 @@ export class PlatformFamily {
             }
         }
     }
+
+    getRecommendedEventsFilter(): StamhoofdFilter {
+        const filter: StamhoofdFilter = []
+
+        const groups = new Set<string>()
+        const defaultGroupIds = new Set<string>()
+        const organizationIds = new Set<string>()
+        const organizationTags = new Set<string>()
+
+        for (const member of this.members) {
+            for (const group of member.filterGroups({types: [GroupType.Membership], currentPeriod: true})) {
+                groups.add(group.id)
+                if (group.defaultAgeGroupId) {
+                    defaultGroupIds.add(group.defaultAgeGroupId)
+                }
+                organizationIds.add(group.organizationId)
+
+                const organization = this.organizations.find(o => o.id === group.organizationId)
+                if (organization) {
+                    for (const tag of organization.meta.tags) {
+                        organizationTags.add(tag)
+                    }
+                }
+            }
+        }
+
+        filter.push({
+            groupIds: {
+                $in: [null, ...groups.values()]
+            },
+            defaultAgeGroupIds: {
+                $in: [null, ...defaultGroupIds.values()]
+            },
+            organizationId: {
+                $in: [null, ...organizationIds.values()]
+            },
+            organizationTagIds: {
+                $in: [null, ...organizationTags.values()]
+            }
+        })
+
+        return filter
+    }
 }
 
 export enum MembershipStatus {
@@ -578,7 +621,7 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
-    filterGroups(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean}) {
+    filterGroups(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean, types?: GroupType[]}) {
         const registrations =  this.filterRegistrations(filters);
         const base: Group[] = [];
 

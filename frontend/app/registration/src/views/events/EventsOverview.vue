@@ -18,7 +18,7 @@
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
                         <span class="hide-small">Filter</span>
-                        <span v-if="filteredCount > 0" class="bubble primary">{{ formatInteger(filteredCount) }}</span>
+                        <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
             </div>
@@ -40,24 +40,26 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useContext, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
-import { assertSort, Event, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { EventRow, getEventUIFilterBuilders, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useContext, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useUser } from '@stamhoofd/components';
+import { assertSort, Event, isEmptyFilter, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref, watchEffect } from 'vue';
 import EventView from './EventView.vue';
+import { useMemberManager } from '../../getRootView';
 
 type ObjectType = Event;
 
 const searchQuery = ref('');
-const filteredCount = ref(0);
 const context = useContext();
-const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
 const organization = useOrganization();
 const platform = usePlatform()
 const $navigate = useNavigate();
 const {presentPositionableSheet} = usePositionableSheet()
+const user = useUser()
+const memberManager = useMemberManager()
 
-const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [])
+const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : (memberManager.family.organizations ?? []))
+const selectedUIFilter = ref(filterBuilders[0].fromFilter(memberManager.family.getRecommendedEventsFilter())) as Ref<null|UIFilter>;
 
 enum Routes {
     Event = "activiteit"
