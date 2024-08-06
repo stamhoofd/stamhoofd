@@ -29,6 +29,11 @@
             <hr>
             <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :mark-reviewed="true" :level="level + 1" :validator="validator" />
         </div>
+
+        <div class="container">
+            <hr>
+            <EditMemberNotesBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
+        </div>
     </div>
 </template>
 
@@ -36,18 +41,19 @@
 import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
+import { useAppContext } from '../../../context/appContext';
+import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
+import { useAuth, useOrganization } from '../../../hooks';
+import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 import EditEmergencyContactsBox from './EditEmergencyContactsBox.vue';
 import EditMemberDataPermissionsBox from './EditMemberDataPermissionsBox.vue';
+import EditMemberFinancialSupportBox from './EditMemberFinancialSupportBox.vue';
 import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
+import EditMemberNotesBox from './EditMemberNotesBox.vue';
 import EditMemberParentsBox from './EditMemberParentsBox.vue';
 import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
 import Title from './Title.vue';
-import { useAuth, useOrganization } from '../../../hooks';
-import { ErrorBox } from '../../../errors/ErrorBox';
-import { useAppContext } from '../../../context/appContext';
-import EditMemberFinancialSupportBox from './EditMemberFinancialSupportBox.vue';
-import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
     inheritAttrs: false
