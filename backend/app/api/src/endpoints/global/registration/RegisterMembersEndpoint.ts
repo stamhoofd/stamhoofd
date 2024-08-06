@@ -13,7 +13,6 @@ import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructure
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
-import { ExchangePaymentEndpoint } from '../../organization/shared/ExchangePaymentEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout
@@ -424,7 +423,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItem.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden
             await balanceItem.save();
 
-            items.push(balanceItem)
+            items.push(balanceItem);
         }
 
         if (checkout.cart.balanceItems.length && whoWillPayNow === 'nobody') {
