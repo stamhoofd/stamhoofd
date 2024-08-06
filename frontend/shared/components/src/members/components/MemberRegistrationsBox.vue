@@ -39,10 +39,10 @@ import { Ref, computed, ref } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import TableActionsContextMenu from '../../tables/TableActionsContextMenu.vue';
-import ChooseGroupForMemberView from '../ChooseGroupForMemberView.vue';
 import { useMemberActions } from '../classes/MemberActionBuilder';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
 import { Sorter } from '@stamhoofd/utility';
+import { useChooseGroupForMember } from '../checkout';
 
 const props = defineProps<{
     member: PlatformMember
@@ -92,18 +92,10 @@ const visibleRegistrations = computed(() => {
     return filteredRegistrations.value;
 });
 
+const chooseGroupForMember = useChooseGroupForMember()
 
 async function addRegistration() {
-    await present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(ChooseGroupForMemberView, {
-                    member: props.member
-                })
-            })
-        ],
-        modalDisplayStyle: "popup"
-    })
+    await chooseGroupForMember({member: props.member, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}})
 }
 
 const buildActions = useMemberActions()
