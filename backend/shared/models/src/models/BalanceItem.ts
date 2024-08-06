@@ -285,6 +285,8 @@ export class BalanceItem extends Model {
     static async updateOutstanding(items: BalanceItem[], organizationId?: string) {
         const Member = (await import('./Member')).Member;
 
+        await BalanceItem.updatePricePaid(items.map(i => i.id));
+
         // Update outstanding amount of related members and registrations
         const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null)) as any
         await Member.updateOutstandingBalance(memberIds)
@@ -292,6 +294,47 @@ export class BalanceItem extends Model {
         const {Registration} = await import('./Registration');
         const registrationIds: string[] = Formatter.uniqueArray(items.map(p => p.registrationId).filter(id => id !== null)) as any
         await Registration.updateOutstandingBalance(registrationIds, organizationId)
+    }
+
+    /**
+     * Update the outstanding balance of multiple members in one go (or all members)
+     */
+    static async updatePricePaid(balanceItemIds: string[] | 'all') {
+        if (balanceItemIds !== 'all' && balanceItemIds.length == 0) {
+            return
+        }
+
+        const params: any[] = []
+        let firstWhere = ''
+        let secondWhere = ''
+
+        if (balanceItemIds !== 'all') {
+            firstWhere = ` AND balanceItemId IN (?)`
+            params.push(balanceItemIds)
+
+            secondWhere = `WHERE balance_items.id IN (?)`
+            params.push(balanceItemIds)
+        }
+        
+        const query = `
+        UPDATE
+            balance_items
+        LEFT JOIN (
+            SELECT
+                balanceItemId,
+                sum(balance_item_payments.price) AS price
+            FROM
+                balance_item_payments
+                LEFT JOIN payments ON payments.id = balance_item_payments.paymentId
+            WHERE
+                payments.status = 'Succeeded'${firstWhere}
+            GROUP BY
+                balanceItemId
+            ) i ON i.balanceItemId = balance_items.id 
+        SET balance_items.pricePaid = coalesce(i.price, 0)
+        ${secondWhere}`;
+
+        await Database.update(query, params)
     }
 
     static async loadPayments(items: BalanceItem[]) {

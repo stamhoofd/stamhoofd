@@ -190,6 +190,7 @@ watch(() => [props.item.groupPrice, props.item.options], () => {
     clonedCart.calculatePrices()
 
     props.item.calculatedPrice = clone.calculatedPrice
+    props.item.calculatedRefund = clone.calculatedRefund
 }, {deep: true})
 
 //@Watch('cartItem', {deep: true})

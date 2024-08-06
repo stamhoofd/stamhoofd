@@ -9,6 +9,7 @@ import { PlatformMember } from "../PlatformMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 import { RegisterItem } from "./RegisterItem";
 import { RegistrationWithMember } from "../RegistrationWithMember";
+import { SimpleError } from "@simonbackx/simple-errors";
 
 export type RegisterContext = {
     members: PlatformMember[],
@@ -151,9 +152,15 @@ export class RegisterCheckout{
     }
 
     validate(data: {memberBalanceItems?: MemberBalanceItem[]}) {
-        this.cart.validate()
+        if (!this.isAdminFromSameOrganization && this.cart.deleteRegistrations.length > 0) {
+            throw new SimpleError({
+                code: "forbidden",
+                message: "Permission denied: you are not allowed to delete registrations",
+                human: "Oeps, je hebt geen rechten om inschrijvingen te verwijderen.",
+            })
+        }
 
-        // todo: validate more data
+        this.cart.validate()
     }
 
     clear() {
@@ -165,7 +172,7 @@ export class RegisterCheckout{
     }
 
     get totalPrice() {
-        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution)
+        return Math.max(0, this.cart.price + this.administrationFee + this.freeContribution - this.cart.refund)
     }
 
     get priceBreakown(): PriceBreakdown {
@@ -177,6 +184,10 @@ export class RegisterCheckout{
             {
                 name: 'Vrije bijdrage',
                 price: this.freeContribution,
+            },
+            {
+                name: 'Terugbetaling',
+                price: -this.cart.refund
             }
         ].filter(a => a.price !== 0)
 

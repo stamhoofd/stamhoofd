@@ -41,6 +41,9 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RegisterItemOption) })
     options: RegisterItemOption[] = []
 
+    @field({ decoder: new ArrayDecoder(StringDecoder) })
+    replaceRegistrationIds: string[] = []
+
     hydrate(context: RegisterContext) {
         return RegisterItem.fromId(this, context)
     }
@@ -55,12 +58,21 @@ export class RegisterItem {
 
     groupPrice: GroupPrice;
     options: RegisterItemOption[] = []
+
+    /**
+     * Price for the new registration
+     */
     calculatedPrice = 0
+
+    /**
+     * Refund for the replaced registrations
+     */
+    calculatedRefund = 0
 
     /**
      * These registrations will be replaced as part of this new registration (moving or updating a registration is possible this way)
      */
-    replaceRegistrations: RegistrationWithMember[] = []
+    replaceRegistrations: Registration[] = []
 
     /**
      * Show an error in the cart for recovery
@@ -90,7 +102,7 @@ export class RegisterItem {
         organization: Organization,
         groupPrice?: GroupPrice,
         options?: RegisterItemOption[],
-        replaceRegistrations?: RegistrationWithMember[]
+        replaceRegistrations?: Registration[]
     }) {
         this.id = data.id ?? uuidv4()
         this.member = data.member
@@ -129,14 +141,19 @@ export class RegisterItem {
 
     calculatePrice() {
         this.calculatedPrice = this.groupPrice.price.forMember(this.member)
+        this.calculatedRefund = 0
 
         for (const option of this.options) {
             this.calculatedPrice += option.option.price.forMember(this.member) * option.amount
         }
 
         for (const registration of this.replaceRegistrations) {
-            this.calculatedPrice -= registration.price
+            this.calculatedRefund += registration.price
         }
+    }
+
+    get totalPrice() {
+        return this.calculatedPrice - this.calculatedRefund
     }
 
     get priceBreakown(): PriceBreakdown {
@@ -152,13 +169,12 @@ export class RegisterItem {
             })
         }
 
-        const subtotal = this.calculatedPrice + replacePrice        
         all = all.filter(a => a.price !== 0)
 
         if (all.length > 0) {
             all.unshift({
                 name: 'Subtotaal',
-                price: subtotal
+                price: this.calculatedPrice
             })
         }
 
@@ -166,7 +182,7 @@ export class RegisterItem {
             ...all,
             {
                 name: 'Totaal',
-                price: this.calculatedPrice
+                price: this.calculatedPrice - this.calculatedRefund
             }
         ];
     }
@@ -220,7 +236,8 @@ export class RegisterItem {
             groupId: this.group.id,
             organizationId: this.organization.id,
             groupPrice: this.groupPrice,
-            options: this.options
+            options: this.options,
+            replaceRegistrationIds: this.replaceRegistrations.map(r => r.id)
         })
     }
 
@@ -542,7 +559,7 @@ export class RegisterItem {
             throw new Error("Group and organization do not match in RegisterItem.validate")
         }
 
-        if (checkout.asOrganizationId && !admin && !this.group.settings.allowRegistrationsByOrganization) {
+        if (checkout.asOrganizationId && !checkout.isAdminFromSameOrganization  && !this.group.settings.allowRegistrationsByOrganization) {
             throw new SimpleError({
                 code: "as_organization_disabled",
                 message: "allowRegistrationsByOrganization disabled",
@@ -552,7 +569,7 @@ export class RegisterItem {
 
         for (const registration of this.replaceRegistrations) {
             // todo: check if you are allowed to move
-            if (registration.member.id !== this.member.id) {
+            if (registration.memberId !== this.member.id) {
                 throw new SimpleError({
                     code: "invalid_move",
                     message: "Invalid member in replaceRegistration",
@@ -566,6 +583,15 @@ export class RegisterItem {
                     code: "invalid_move",
                     message: "Invalid organization in replaceRegistration",
                     human: "Je wilt een inschrijving verplaatsen van een andere organisatie. Dit is niet toegestaan.",
+                    field: "replaceRegistrations"
+                })
+            }
+
+            if (!admin) {
+                throw new SimpleError({
+                    code: "invalid_move",
+                    message: "Not allowed to move registrations",
+                    human: "Enkel beheerders kunnen inschrijvingen verplaatsen.",
                     field: "replaceRegistrations"
                 })
             }
@@ -707,13 +733,24 @@ export class RegisterItem {
             throw new Error("Group not found: " + idRegisterItem.groupId)
         }
 
+        const replaceRegistrations: Registration[] = []
+
+        for (const registrationId of idRegisterItem.replaceRegistrationIds) {
+            const registration = member.patchedMember.registrations.find(r => r.id === registrationId)
+            if (!registration) {
+                throw new Error("Registration not found: " + registrationId)
+            }
+            replaceRegistrations.push(registration)
+        }
+
         return new RegisterItem({
             id: idRegisterItem.id,
             member,
             group,
             organization,
             groupPrice: idRegisterItem.groupPrice,
-            options: idRegisterItem.options
+            options: idRegisterItem.options,
+            replaceRegistrations
         })
     }
 

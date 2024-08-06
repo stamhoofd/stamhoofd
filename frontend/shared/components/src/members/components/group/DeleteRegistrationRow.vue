@@ -12,9 +12,9 @@
             Uitschrijven voor {{ registration.group.settings.name }}
         </p>
         
-        <footer>
+        <footer v-if="registration.price">
             <p class="style-price">
-                Terug: {{ formatPrice(registration.price) }} waarvan {{ formatPrice(registration.pricePaid) }} betaald
+                Openstaand bedrag daalt met {{ formatPrice(registration.price) }}
             </p>
         </footer>
 

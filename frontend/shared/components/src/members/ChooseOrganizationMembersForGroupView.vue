@@ -1,10 +1,10 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="group.organizationId" @update="setOrganization">
-        <SaveView save-text="Inschrijven" :save-badge="cartLength" :disabled="cartLength === 0" title="Inschrijven" :loading="saving" @save="goToCheckout">
+        <SaveView save-text="Bevestigen" :save-badge="cartLength" :disabled="cartLength === 0" title="Inschrijvingen wijzigen" :loading="saving" @save="goToCheckout">
             <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
                 {{ groupOrganization!.name }}
             </p>
-            <h1>Leden inschrijven voor {{ group.settings.name }}</h1>
+            <h1>Inschrijvingen voor {{ group.settings.name }} wijzigen</h1>
 
             <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
                 De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via het ledenportaal.
@@ -17,7 +17,7 @@
                 <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
             </STList>
             
-            <p v-if="!checkout.cart.items.length" class="info-box">
+            <p v-if="checkout.cart.isEmpty" class="info-box">
                 Voeg de leden toe die je wilt inschrijven
             </p>
 

@@ -16,11 +16,21 @@
         </p>
         <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
 
-        <footer>
-            <p class="style-price">
-                {{ formatPrice(item.calculatedPrice) }}
-            </p>
-        </footer>
+        <template v-if="item.totalPrice !== 0">
+            <footer v-if="item.checkout.isAdminFromSameOrganization">
+                <p class="style-price" v-if="item.totalPrice >= 0">
+                    Openstaand bedrag stijgt met {{ formatPrice(item.totalPrice) }}
+                </p>
+                <p class="style-price" v-else>
+                    Openstaand bedrag daalt met {{ formatPrice(-item.totalPrice) }}
+                </p>
+            </footer>
+            <footer v-else>
+                <p class="style-price">
+                    {{ formatPrice(item.totalPrice) }}
+                </p>
+            </footer>
+        </template>
 
         <template #right>
             <button class="button icon trash gray" type="button" @click.stop="deleteMe()" />

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { BalanceItemCartItem } from "./BalanceItemCartItem";
 import { RegisterContext } from "./RegisterCheckout";
@@ -14,14 +14,40 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
     balanceItems: BalanceItemCartItem[] = []
 
-    @field({ decoder: new ArrayDecoder(RegistrationWithMember), optional: true })
-    deleteRegistrations: RegistrationWithMember[] = []
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
+    deleteRegistrationIds: string[] = []
 
     hydrate(context: RegisterContext) {
         const cart = new RegisterCart()
         cart.items = this.items.map(i => i.hydrate(context))
         cart.balanceItems = this.balanceItems
-        cart.deleteRegistrations = this.deleteRegistrations
+
+        const registrations: RegistrationWithMember[] = []
+        for (const registrationId of this.deleteRegistrationIds) {
+            let found = false;
+            for (const member of context.members) {
+                const registration = member.patchedMember.registrations.find(r => r.id === registrationId)
+                if (!registration) {
+                    continue;
+                }
+                
+                registrations.push(RegistrationWithMember.from(registration, member.patchedMember.tiny))
+                found = true;
+                break;
+            }
+
+            if (!found) {
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Registration not found',
+                    human: 'De inschrijving die je wou verwijderen kon niet gevonden worden. Het is mogelijk dat deze inschrijving al verwijderd is.',
+                    field: 'deleteRegistrationIds'
+                })
+            }
+
+        }
+        cart.deleteRegistrations = registrations
+
         return cart
     }
 }
@@ -53,7 +79,7 @@ export class RegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),
             balanceItems: this.balanceItems,
-            deleteRegistrations: this.deleteRegistrations
+            deleteRegistrationIds: this.deleteRegistrations.map(r => r.id)
         })
     }
 
@@ -147,7 +173,11 @@ export class RegisterCart {
             + this.balanceItems.reduce((total, item) => {
                 return total + item.price
             }, 0)
-            - this.deleteRegistrations.reduce((total, item) => {
+    }
+
+    get refund() {
+        return this.items.reduce((total, item) => item.calculatedRefund + total, 0) 
+            + this.deleteRegistrations.reduce((total, item) => {
                 return total + item.price
             }, 0)
     }

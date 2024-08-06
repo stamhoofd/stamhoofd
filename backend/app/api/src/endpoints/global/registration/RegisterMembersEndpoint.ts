@@ -98,8 +98,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        const deleteRegistrationIds = request.body.cart.deleteRegistrationIds
+        const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id)
+
         const memberIds = Formatter.uniqueArray(
-            [...request.body.cart.items.map(i => i.memberId), ...request.body.cart.deleteRegistrations.map(i => i.member.id)]
+            [...request.body.cart.items.map(i => i.memberId), ...deleteRegistrationModels.map(i => i.memberId)]
         )
         const members = await Member.getBlobByIds(...memberIds)
         const groupIds = Formatter.uniqueArray(request.body.cart.items.map(i => i.groupId))
@@ -174,23 +177,23 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Validate balance items (can only happen serverside)
         const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id)
-        let memberBalanceItems: MemberBalanceItem[] = []
-        let balanceItems: BalanceItem[] = []
+        let memberBalanceItemsStructs: MemberBalanceItem[] = []
+        let balanceItemsModels: BalanceItem[] = []
         if (balanceItemIds.length > 0) {
-            balanceItems = await BalanceItem.where({ id: { sign:'IN', value: balanceItemIds }, organizationId: organization.id })
-            if (balanceItems.length != balanceItemIds.length) {
+            balanceItemsModels = await BalanceItem.where({ id: { sign:'IN', value: balanceItemIds }, organizationId: organization.id })
+            if (balanceItemsModels.length != balanceItemIds.length) {
                 throw new SimpleError({
                     code: "invalid_data",
                     message: "Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw."
                 })
             }
-            memberBalanceItems = await BalanceItem.getMemberStructure(balanceItems)
+            memberBalanceItemsStructs = await BalanceItem.getMemberStructure(balanceItemsModels)
         }
 
         console.log('isAdminFromSameOrganization', checkout.isAdminFromSameOrganization)
 
         // Validate the cart
-        checkout.validate({memberBalanceItems})
+        checkout.validate({memberBalanceItems: memberBalanceItemsStructs})
 
         // Recalculate the price
         checkout.updatePrices()
@@ -233,34 +236,36 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Check if this member is already registered in this group?
             const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle })
-            let registration: RegistrationWithMemberAndGroup | undefined = undefined;
 
             for (const existingRegistration of existingRegistrations) {
-                registration = existingRegistration
-                    .setRelation(registrationMemberRelation, member as Member)
-                    .setRelation(Registration.group, group)
-                
+                if (item.replaceRegistrations.some(r => r.id === existingRegistration.id)) {
+                    // Safe
+                    continue;
+                }
+
+                if (checkout.cart.deleteRegistrations.some(r => r.id === existingRegistration.id)) {
+                    // Safe
+                    continue;
+                }
 
                 if (existingRegistration.registeredAt !== null && existingRegistration.deactivatedAt === null) {
                     throw new SimpleError({
                         code: "already_registered",
-                        message: "Dit lid is reeds ingeschreven. Herlaad de pagina en probeer opnieuw."
+                        message: `${member.firstName} is al ingeschreven voor ${group.settings.name}. Mogelijks heb je meerdere keren proberen in te schrijven en is het intussen wel gelukt. Herlaad de pagina best even om zeker te zijn.`
                     })
                 }
             }
 
-            if (!registration) {
-                registration = new Registration()
-                    .setRelation(registrationMemberRelation, member as Member)
-                    .setRelation(Registration.group, group)
-                registration.organizationId = organization.id
-                registration.periodId = group.periodId
-            }
+            const registration = new Registration()
+                .setRelation(registrationMemberRelation, member as Member)
+                .setRelation(Registration.group, group)
+            registration.organizationId = organization.id
+            registration.periodId = group.periodId
 
             registration.memberId = member.id
             registration.groupId = group.id
             registration.cycle = group.cycle
-            registration.price = item.calculatedPrice
+            registration.price = 0 // will get filled by balance items themselves 
 
             payRegistrations.push({
                 registration,
@@ -305,8 +310,59 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         console.log('Registering members using whoWillPayNow', whoWillPayNow, checkout.paymentMethod, totalPrice)
 
-        const items: BalanceItem[] = []
-        const shouldMarkValid = whoWillPayNow === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale
+        const createdBalanceItems: BalanceItem[] = []
+        const shouldMarkValid = whoWillPayNow === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale || checkout.paymentMethod === PaymentMethod.Unknown
+        
+        // Create negative balance items
+        for (const registrationStruct of [...checkout.cart.deleteRegistrations, ...checkout.cart.items.flatMap(i => i.replaceRegistrations)]) {
+            if (whoWillPayNow !== 'nobody') {
+                // this also fixes the issue that we cannot delete the registration right away if we would need to wait for a payment 
+                throw new SimpleError({
+                    code: "forbidden",
+                    message: "Permission denied: you are not allowed to delete registrations",
+                    human: "Oeps, je hebt geen toestemming om inschrijvingen te verwijderen.",
+                    statusCode: 403
+                })
+            }
+
+            const existingRegistration = await Registration.getByID(registrationStruct.id)
+            if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
+            if (!await Context.auth.canAccessRegistration(existingRegistration, PermissionLevel.Write)) {
+                throw new SimpleError({
+                    code: "forbidden",
+                    message: "Je hebt geen toegaansrechten om deze inschrijving te verwijderen.",
+                    statusCode: 403
+                })
+            }
+
+            if (existingRegistration.deactivatedAt || !existingRegistration.registeredAt) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
+            // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
+            // Find all balance items of this registration and set them to zero
+            await BalanceItem.deleteForDeletedRegistration(existingRegistration.id)
+            
+            // Clear the registration
+            await existingRegistration.deactivate()
+
+            const group = groups.find(g => g.id === existingRegistration.groupId)
+            if (!group) {
+                const g = await Group.getByID(existingRegistration.groupId)
+                if (g) {
+                    groups.push(g)
+                }
+            }
+        }
 
         // Save registrations and add extra data if needed
         for (const bundle of payRegistrations) {
@@ -366,7 +422,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 balanceItem2.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden
                 await balanceItem2.save();
 
-                // do not add to items array because we don't want to add this to the payment if we create a payment
+                // do not add to createdBalanceItems array because we don't want to add this to the payment if we create a payment
             } else {
                 balanceItem.memberId = registration.memberId;
                 balanceItem.userId = user.id
@@ -379,7 +435,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItem.dependingBalanceItemId = balanceItem2?.id ?? null
             
             await balanceItem.save();
-            items.push(balanceItem)
+            createdBalanceItems.push(balanceItem)
         }
         
         const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0]
@@ -399,7 +455,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             balanceItem.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden
             await balanceItem.save();
-            items.push(balanceItem)
+            createdBalanceItems.push(balanceItem)
         }
 
         if (checkout.administrationFee && whoWillPayNow !== 'nobody') {
@@ -423,62 +479,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItem.status = shouldMarkValid ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden
             await balanceItem.save();
 
-            items.push(balanceItem);
+            createdBalanceItems.push(balanceItem);
         }
 
         if (checkout.cart.balanceItems.length && whoWillPayNow === 'nobody') {
-            throw new Error('Not possible to pay balance items when whoWillPayNow is nobody')
-        }
-
-        // Create negative balance items
-        for (const registrationStruct of checkout.cart.deleteRegistrations) {
-            if (whoWillPayNow !== 'nobody') {
-                // this also fixes the issue that we cannot delete the registration right away if we would need to wait for a payment 
-                throw new SimpleError({
-                    code: "forbidden",
-                    message: "Permission denied: you are not allowed to delete registrations",
-                    human: "Oeps, je hebt geen toestemming om inschrijvingen te verwijderen.",
-                    statusCode: 403
-                })
-            }
-
-            const existingRegistration = await Registration.getByID(registrationStruct.id)
-            if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
-                throw new SimpleError({
-                    code: "invalid_data",
-                    message: "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
-                })
-            }
-
-            if (!await Context.auth.canAccessRegistration(existingRegistration, PermissionLevel.Write)) {
-                throw new SimpleError({
-                    code: "forbidden",
-                    message: "Je hebt geen toegaansrechten om deze inschrijving te verwijderen.",
-                    statusCode: 403
-                })
-            }
-
-            if (existingRegistration.deactivatedAt || !existingRegistration.registeredAt) {
-                throw new SimpleError({
-                    code: "invalid_data",
-                    message: "Oeps, één of meerdere inschrijvingen die je probeert te verwijderen was al verwijderd. Herlaad de pagina en probeer opnieuw."
-                })
-            }
-
-            // We can alter right away since whoWillPayNow is nobody, and shouldMarkValid will always be true
-            // Find all balance items of this registration and set them to zero
-            await BalanceItem.deleteForDeletedRegistration(existingRegistration.id)
-            
-            // Clear the registration
-            await existingRegistration.deactivate()
-
-            const group = groups.find(g => g.id === existingRegistration.groupId)
-            if (!group) {
-                const g = await Group.getByID(existingRegistration.groupId)
-                if (g) {
-                    groups.push(g)
-                }
-            }
+            throw new SimpleError({
+                code: 'invalid_data',
+                message: 'Not possible to pay balance items as the organization',
+                statusCode: 400
+            })
         }
 
         let paymentUrl: string | null = null
@@ -487,19 +496,21 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (whoWillPayNow !== 'nobody') {
             const mappedBalanceItems = new Map<BalanceItem, number>()
 
-            for (const item of items) {
+            for (const item of createdBalanceItems) {
                 mappedBalanceItems.set(item, item.price)
             }
 
             for (const item of checkout.cart.balanceItems) {
-                const balanceItem = balanceItems.find(i => i.id === item.item.id)
+                const balanceItem = balanceItemsModels.find(i => i.id === item.item.id)
                 if (!balanceItem) {
                     throw new Error('Balance item not found')
                 }
                 mappedBalanceItems.set(balanceItem, item.price)
-                items.push(balanceItem)
+                createdBalanceItems.push(balanceItem)
             }
 
+            // Make sure every price is accurate before creating a payment
+            await BalanceItem.updateOutstanding(createdBalanceItems, organization.id)
             const response = await this.createPayment({
                 balanceItems: mappedBalanceItems,
                 organization,
@@ -512,9 +523,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 paymentUrl = response.paymentUrl
                 payment = response.payment
             }
+        } else {
+            await BalanceItem.updateOutstanding(createdBalanceItems, organization.id)
         }
 
-        await BalanceItem.updateOutstanding(items, organization.id)
 
         // Update occupancy
         for (const group of groups) {
