@@ -280,6 +280,18 @@ export class MemberDetails extends AutoEncoder {
             }
         }
         //#endregion
+        
+        if(this.notes) {
+            // cut long notes
+            if(this.notes.length > 1000) {
+                this.notes = this.notes.substring(0, 1000);
+            }
+
+            // remove empty notes
+            if(/^\s*$/.test(this.notes)) {
+                this.notes = null;
+            }
+        }
     }
 
     isEqual(other: MemberDetails): boolean {

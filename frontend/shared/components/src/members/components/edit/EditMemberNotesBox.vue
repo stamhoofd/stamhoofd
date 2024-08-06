@@ -12,6 +12,7 @@
                 placeholder="Bijkomende informatie over dit lid (onzichtbaar voor het lid)."
                 autocomplete=""
                 enterkeyhint="next"
+                :maxlength="maxLength"
             />
         </STInputBox>
     </div>
@@ -36,11 +37,27 @@ const props = defineProps<{
     parentErrorBox?: ErrorBox | null
 }>();
 
+const maxLength = 1000;
 const errors = useErrors({validator: props.validator});
 const appContext = useAppContext();
 
 const notes = computed({
     get: () => props.member.patchedMember.details.notes,
-    set: (notes) => props.member.addDetailsPatch({notes})});
+    set: (notes) => {
+            if(notes) {
+                // cut long notes
+                if(notes.length > maxLength) {
+                    notes = notes.substring(0, maxLength);
+                }
+
+                // remove empty notes
+                if(/^\s*$/.test(notes)) {
+                    notes = null;
+                }
+            }
+
+            props.member.addDetailsPatch({notes});
+        }
+    });
 
 </script>
