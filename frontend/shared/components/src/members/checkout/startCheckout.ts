@@ -8,6 +8,7 @@ import { RegistrationSuccessView } from '../checkout';
 import { ViewStep, ViewStepsManager } from '../classes/ViewStepsManager';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
+import { GlobalEventBus } from '../../EventBus';
 
 export async function startCheckout({checkout, context, displayOptions, admin}: {checkout: RegisterCheckout, context: SessionContext, displayOptions: DisplayOptions, admin?: boolean}, navigate: NavigationActions) {
     checkout.validate({})
@@ -70,6 +71,12 @@ async function register({checkout, context, admin}: {checkout: RegisterCheckout,
             transferSettings: checkout.singleOrganization!.meta.registrationPaymentConfiguration.transferSettings,
             type: "registration"
         }, async (_payment, navigate: NavigationActions) => {
+            if (checkout.cart.items.length > 0) {
+                GlobalEventBus.sendEvent('members-added', []).catch(console.error)
+            } else if (checkout.cart.deleteRegistrations.length > 0) {
+                GlobalEventBus.sendEvent('members-deleted', []).catch(console.error)
+            }
+
             await navigate.show({
                 components: [
                     new ComponentWithProperties(RegistrationSuccessView, {
@@ -87,6 +94,12 @@ async function register({checkout, context, admin}: {checkout: RegisterCheckout,
             checkout.clear()
         })
         return;
+    }
+    
+    if (checkout.cart.items.length > 0) {
+        GlobalEventBus.sendEvent('members-added', []).catch(console.error)
+    } else if (checkout.cart.deleteRegistrations.length > 0) {
+        GlobalEventBus.sendEvent('members-deleted', []).catch(console.error)
     }
 
     checkout.clear()

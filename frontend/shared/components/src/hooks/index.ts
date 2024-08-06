@@ -21,3 +21,4 @@ export * from "./useInterval";
 export * from "./useFeatureFlag";
 export * from "./useSalesDisabled";
 export * from "./useMembersPackage";
+export * from "./useGlobalEventListener";

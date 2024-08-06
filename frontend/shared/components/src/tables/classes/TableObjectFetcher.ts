@@ -181,7 +181,7 @@ export class TableObjectFetcher<O extends {id: string}> {
         })
         this.fetchIfNeeded().catch(console.error)
     }
-
+    
     setSearchQuery(query: string) {
         if (query === this.searchQuery) {
             return;

@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, mergeFilters, Organization, PermissionLevel, PlatformMember, RegisterItem, RegistrationWithMember } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, mergeFilters, Organization, PermissionLevel, PlatformMember, RegisterItem, RegistrationWithMember } from '@stamhoofd/structures'
 import { markRaw } from 'vue'
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, EditMemberAllBox, MemberSegmentedView, MemberStepView } from '..'
 import EmailView from '../../email/EmailView.vue'
@@ -10,6 +10,10 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, Ta
 import { NavigationActions } from '../../types/NavigationActions'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager'
+import { CenteredMessage } from '../../overlays/CenteredMessage'
+import { Formatter } from '@stamhoofd/utility'
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
+import { GlobalEventBus } from '../../EventBus'
 
 export function useDirectMemberActions(options?: {groups?: Group[], organizations?: Organization[]}) {
     return useMemberActions()(options)
@@ -140,8 +144,8 @@ export class MemberActionBuilder {
                                     name: g.settings.name,
                                     needsSelection: true,
                                     allowAutoSelectAll: false,
-                                    handler: (members: PlatformMember[]) => {
-                                        this.moveRegistrations(members, g)
+                                    handler: async (members: PlatformMember[]) => {
+                                        await this.moveRegistrations(members, g)
                                     }
                                 })
                             })
@@ -165,8 +169,8 @@ export class MemberActionBuilder {
             needsSelection: true,
             allowAutoSelectAll: false,
             enabled: this.hasWrite,
-            handler: (members) => {
-                this.deleteRegistration(members)
+            handler: async (members) => {
+                await this.deleteRegistration(members)
             }
         })];
     }
@@ -266,13 +270,27 @@ export class MemberActionBuilder {
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite,
+                enabled: this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions()
             }),
 
             ...this.getMoveAction(),
 
-            ...this.getUnsubscribeAction()
+            ...this.getUnsubscribeAction(),
+
+            new InMemoryTableAction({
+                name: "Definitief verwijderen",
+                priority: 1,
+                groupIndex: 100,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                icon: "trash",
+                enabled: !this.context.organization && this.context.auth.hasFullPlatformAccess(),
+                handler: async (members: PlatformMember[]) => {
+                    await this.deleteMembers(members);
+                }
+            }),
+
         ]
     }
 
@@ -429,6 +447,25 @@ export class MemberActionBuilder {
             ],
             modalDisplayStyle: "popup"
         }).catch(console.error)
+    }
+    async deleteMembers(members: PlatformMember[]) {
+        if (!await CenteredMessage.confirm('Ben je zeker dat je ' + Formatter.pluralText(members.length, 'lid', 'leden') + ' wilt verwijderen?', 'Ja, verwijderen', 'De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.')) {
+            return
+        }
+
+        if (!await CenteredMessage.confirm('Ben je 100% zeker?', 'Ja, verwijderen', 'De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.')) {
+            return
+        }
+
+        const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+        for (const member of members) {
+            patch.addDelete(member.id)
+        }
+
+        await this.platformFamilyManager.isolatedPatch(members, patch)
+        GlobalEventBus.sendEvent('members-deleted', members).catch(console.error)
+
+        Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, 'lid', 'leden')) + ' verwijderd').show()
     }
 
     async exportToExcel(members: PlatformMember[]) {

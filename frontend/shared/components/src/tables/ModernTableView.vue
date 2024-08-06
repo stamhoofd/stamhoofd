@@ -487,11 +487,19 @@ function refresh() {
     props.tableObjectFetcher.reset()
 }
 
+const lastFilteredCount = ref(null) as Ref<number|null>
+
+watchEffect(() => {
+    if (props.tableObjectFetcher.totalFilteredCount !== null) {
+        lastFilteredCount.value = props.tableObjectFetcher.totalFilteredCount
+    }
+})
+
 const totalFilteredCount = computed(() => {
     if (errorMessage.value) {
         return 0;
     }
-    return props.tableObjectFetcher.totalFilteredCount ?? props.estimatedRows ?? 0;
+    return props.tableObjectFetcher.totalFilteredCount ?? lastFilteredCount.value ?? props.estimatedRows ?? 0;
 });
 const totalItemsCount = computed(() => props.tableObjectFetcher.totalCount);
 
