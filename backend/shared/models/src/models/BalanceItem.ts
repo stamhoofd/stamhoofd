@@ -158,28 +158,6 @@ export class BalanceItem extends Model {
                 }
             }
         }
-
-        // Do we have a different connected balance item?
-        // Make it visible if this one is paid
-        if (this.dependingBalanceItemId) {
-            const depending = await BalanceItem.getByID(this.dependingBalanceItemId)
-            if (depending) {
-                if (this.status === BalanceItemStatus.Hidden) {
-                    depending.status = BalanceItemStatus.Pending
-                    await depending.save()
-
-                    if (depending.memberId) {
-                        const {Member} = await import("./Member");
-                        await Member.updateOutstandingBalance([depending.memberId])
-                    }
-
-                    if (depending.registrationId) {
-                        const {Registration} = await import("./Registration");
-                        await Registration.updateOutstandingBalance([depending.registrationId], depending.organizationId)
-                    }
-                }
-            }
-        }
     }
 
     async undoPaid(payment: Payment, organization: Organization) {
