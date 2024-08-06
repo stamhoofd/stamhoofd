@@ -5,16 +5,10 @@
             <h2 class="style-with-button">
                 <div>Notities</div>
                 <div class="hover-show">
-                <button v-if="hasWrite" v-long-press="editThisMember" type="button" class="button icon edit gray" @click.prevent="editThisMember" @contextmenu.prevent="editThisMember" />
+                <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember" />
             </div>
             </h2>
-            <dl class="details-grid hover">
-                <dd  class="notes style-description-small" :class="{button: $context.auth.hasFullAccess()}">
-                    <span v-copyable class="style-description-small">
-                            {{ notes }}
-                    </span>
-                </dd>
-            </dl>
+            <p class="style-description-small">{{ notes }}</p>
         </div>  
     </div>
 </template>
