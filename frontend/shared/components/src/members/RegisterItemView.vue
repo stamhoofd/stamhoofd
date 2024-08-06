@@ -1,12 +1,10 @@
 <template>
-    <SaveView class="st-view register-item-view" v-on="isInCart ? {delete: deleteMe} : {}" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Toevoegen'" :save-icon="isInCart ? 'edit' : 'basket'" :disabled="!!validationError" :title="item.group.settings.name" @save="addToCart">
+    <SaveView class="st-view register-item-view" v-on="isInCart ? {delete: deleteMe} : {}" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Inschrijven'" :save-icon="isInCart ? 'edit' : 'basket'" :disabled="!!validationError" :title="item.group.settings.name" @save="addToCart">
         <h1>{{ item.group.settings.name }}</h1>
 
         <template v-if="showGroupInformation">
-            <figure v-if="item.group.settings.coverPhoto" class="cover-photo">
-                <ImageComponent :image="item.group.settings.coverPhoto" :auto-height="true" />
-            </figure>
-            <p v-if="item.group.settings.description" class="style-description pre-wrap" v-text="item.group.settings.description" />
+            <ImageComponent v-if="item.group.settings.coverPhoto"  :image="item.group.settings.coverPhoto" :auto-height="true" class="style-cover-photo" />
+            <p v-if="item.group.settings.description" class="style-description" v-text="item.group.settings.description" />
         </template>
 
         <p v-else-if="validationError" class="error-box">

@@ -14,6 +14,7 @@ import { MemberRecordCategoryStep } from "../classes/steps/MemberRecordCategoryS
 import { RegisterItemStep } from "../classes/steps/RegisterItemStep";
 import { startCheckout } from "./startCheckout";
 import ChooseFamilyMembersForGroupView from "../ChooseFamilyMembersForGroupView.vue";
+import { GlobalEventBus } from "../../EventBus";
 
 export async function loadGroupOrganization(context: SessionContext, organizationId: string, owner: any) {
     if (organizationId === context.organization?.id) {
@@ -119,6 +120,10 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
             }
         } else {
             Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').show();
+
+            if (showGroupInformation) {
+                await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
+            }
         }
 
         await navigate.dismiss({force: true})
@@ -306,7 +311,16 @@ export async function chooseGroupForMember({member, navigate, context, displayOp
                 root: new ComponentWithProperties(ChooseGroupForMemberView, {
                     member,
                     selectionHandler: async ({group, groupOrganization}: {group: Group, groupOrganization: Organization}, navigate: NavigationActions) => {
-                        await checkoutDefaultItem({member, group, groupOrganization, admin: false, navigate, context, displayOptions: {action: 'show'}});
+                        await checkoutDefaultItem({
+                            member, 
+                            group, 
+                            groupOrganization, 
+                            admin: false, 
+                            navigate, 
+                            context, 
+                            displayOptions: {action: 'show'},
+                            showGroupInformation: true
+                        });
                     }
                 })
             })
