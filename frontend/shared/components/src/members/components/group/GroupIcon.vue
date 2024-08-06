@@ -25,7 +25,7 @@ import { computed } from 'vue';
 const props = withDefaults(
     defineProps<{
         group: Group;
-        icon: string;
+        icon?: string;
     }>(), {
         icon: ''
     }

@@ -40,58 +40,23 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController, defineRoutes, useNavigate, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@simonbackx/vue-app-navigation';
+import { ChooseGroupForMemberView, EditMemberGeneralBox, MemberStepView, NavigationActions, useChooseGroupForMember } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, markRaw, reactive } from 'vue';
-import {EditMemberGeneralBox, MemberStepView, NavigationActions, ChooseGroupForMemberView} from '@stamhoofd/components'
 import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
-const $navigate = useNavigate();
 const members = computed(() => memberManager.family.members);
 const title = 'Wie wil je inschrijven?'
 const show = useShow();
 
-enum Routes {
-    RegisterMember = 'registerMember',
-}
-defineRoutes([
-    {
-        name: Routes.RegisterMember,
-        url: '@name',
-        component: ChooseGroupForMemberView as any,
-        params: {
-            name: String
-        },
-        paramsToProps(params) {
-            const member = members.value.find(m => Formatter.slug(m.member.firstName) === params.name);
-            if (!member) {
-                throw new Error("Member not found");
-            }
-
-            return {
-                member
-            }
-        },
-        propsToParams(props) {
-            if (!("member" in props) || !(props.member instanceof PlatformMember)) {
-                throw new Error("Member is required");
-            }
-
-            return { 
-                params: {
-                    name: Formatter.slug(props.member.patchedMember.firstName)
-                }
-            }
-        }
-    }
-])
-
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
+const chooseGroupForMember = useChooseGroupForMember()
 
 async function selectMember(member: PlatformMember) {
-    await $navigate(Routes.RegisterMember, { properties: { member } });
+   await chooseGroupForMember({member, displayOptions: {action: 'show'}})
 }
 
 async function addNewMember() {

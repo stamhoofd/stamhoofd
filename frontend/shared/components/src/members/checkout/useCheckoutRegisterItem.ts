@@ -299,26 +299,26 @@ export function useChooseOrganizationMembersForGroup() {
 // ----------------------------
 // --------- Flow 4 -----------
 
-export async function chooseGroupForMember({member, navigate, context}: {member: PlatformMember, navigate: NavigationActions, context: SessionContext}) {
-    await navigate.present({
+export async function chooseGroupForMember({member, navigate, context, displayOptions}: {member: PlatformMember, navigate: NavigationActions, context: SessionContext, displayOptions?: DisplayOptions}) {
+    await runDisplayOptions({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseGroupForMemberView, {
                     member,
                     selectionHandler: async ({group, groupOrganization}: {group: Group, groupOrganization: Organization}, navigate: NavigationActions) => {
-                        await checkoutDefaultItem({member, group, groupOrganization, admin: false, navigate, context});
+                        await checkoutDefaultItem({member, group, groupOrganization, admin: false, navigate, context, displayOptions: {action: 'show'}});
                     }
                 })
             })
         ]
-    })
+    }, displayOptions ?? {action: 'show'}, navigate)
 }
 
 export function useChooseGroupForMember() {
     const navigate = useNavigationActions();
     const context = useContext();
 
-    return async ({member}: {member: PlatformMember}) => {
-        await chooseGroupForMember({member, navigate, context: context.value});
+    return async ({member, displayOptions}: {member: PlatformMember, displayOptions?: DisplayOptions}) => {
+        await chooseGroupForMember({member, navigate, context: context.value, displayOptions});
     }
 }
