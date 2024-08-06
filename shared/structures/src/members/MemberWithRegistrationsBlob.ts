@@ -65,6 +65,16 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             value: Formatter.price(this.outstandingBalance)
         }))
 
+        const createLoginDetailsReplacement = (email: string) => {
+            const formattedEmail = Formatter.escapeHtml(email);
+
+            return Replacement.create({
+                token: "loginDetails",
+                value: "",
+                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
+            })
+        };
+
         if (this.details.email && (subtypes === null || subtypes.includes('member'))) {
             recipients.push(
                 EmailRecipient.create({
@@ -84,26 +94,12 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                             token: "email",
                             value: this.details.email
                         }),
-                        Replacement.create({
-                            token: "loginDetails",
-                            value: "",
-                            html: this.hasAccount(this.details.email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(this.details.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(this.details.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
-                        }),
+                        createLoginDetailsReplacement(this.details.email),
                         ...shared
                     ]
                 })
             )
         }
-
-        const createLoginDetailsReplacement = (email: string) => {
-            const formattedEmail = Formatter.escapeHtml(email);
-
-            return Replacement.create({
-                token: "loginDetails",
-                value: "",
-                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
-            })
-        };
 
         if (subtypes === null || subtypes.includes('parents')) {
             for (const parent of this.details.parents) {
@@ -141,6 +137,14 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     EmailRecipient.create({
                         email: unverifiedEmail,
                         replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: this.details.firstName
+                            }),
+                            Replacement.create({
+                                token: "lastName",
+                                value: this.details.lastName
+                            }),
                             Replacement.create({
                                 token: "email",
                                 value: unverifiedEmail.toLowerCase()
