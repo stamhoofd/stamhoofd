@@ -173,6 +173,20 @@ export class Registration extends Model {
         }
     }
 
+    async deactivate() {
+        if (this.deactivatedAt !== null) {
+            return
+        }
+
+        // Clear the registration
+        this.deactivatedAt = new Date()
+        await this.save()
+        this.scheduleStockUpdate()
+        
+        const {Member} = await import('./Member');
+        await Member.updateMembershipsForId(this.memberId)
+    }
+
     async markValid(this: Registration) {
         if (this.registeredAt !== null && this.deactivatedAt === null) {
             await this.save();
@@ -186,11 +200,13 @@ export class Registration extends Model {
         await this.save();
         this.scheduleStockUpdate()
 
+        const {Member} = await import('./Member');
+        await Member.updateMembershipsForId(this.memberId)
+
         await this.sendEmailTemplate({
             type: EmailTemplateType.RegistrationConfirmation
         });
 
-        const {Member} = await import('./Member');
         const member = await Member.getByID(this.memberId);
         if (member) {
             const registrationMemberRelation = new ManyToOneRelation(Member, "member")

@@ -471,9 +471,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await BalanceItem.deleteForDeletedRegistration(existingRegistration.id)
             
             // Clear the registration
-            existingRegistration.deactivatedAt = new Date()
-            await existingRegistration.save()
-            existingRegistration.scheduleStockUpdate()
+            await existingRegistration.deactivate()
 
             const group = groups.find(g => g.id === existingRegistration.groupId)
             if (!group) {
