@@ -65,13 +65,13 @@ export class MemberDetails extends AutoEncoder {
     /**
      * These emails will get access to the member if parentsHaveAccess is true
      */
-    @field({decoder: new ArrayDecoder(StringDecoder), version: 296})
+    @field({decoder: new ArrayDecoder(StringDecoder), version: 304})
     unverifiedEmails: string[] = []
 
-    @field({decoder: new ArrayDecoder(StringDecoder), version: 296})
+    @field({decoder: new ArrayDecoder(StringDecoder), version: 304})
     unverifiedPhones: string[] = []
 
-    @field({decoder: new ArrayDecoder(Address), version: 296})
+    @field({decoder: new ArrayDecoder(Address), version: 304})
     unverifiedAddresses: Address[] = []
 
     @field({decoder: StringDecoder, nullable: true, version: 301})
