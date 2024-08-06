@@ -2,26 +2,26 @@
     <div v-if="shouldShow">
         <div class="hover-box container">
             <hr>
-            <h2 class="style-with-button"><div>Niet-toegekende gegevens</div></h2>
-            <p>Deze gegevens konden niet automatisch toegekend worden aan het lid of aan de ouders.</p>
+            <h2 class="style-with-button"><div>Niet-geverifieerde gegevens</div></h2>
+            <p>Deze gegevens konden niet automatisch toegewezen worden aan het lid of aan een ouder.</p>
             <dl class="details-grid hover">
-                <template v-for="(email, index) of uncategorizedEmails">
+                <template v-for="(email, index) of unverifiedEmails">
                     <MemberDetailWithButton
-                        :label="formatWithIndex('E-mailadres', index, uncategorizedEmails)"
+                        :label="formatWithIndex('E-mailadres', index, unverifiedEmails)"
                         :value="email" icon="trash" color="gray"
                         :onClick="() => deleteEmail(email)"/>
                 </template>
 
-                <template v-for="(phone, index) of uncategorizedPhones">
+                <template v-for="(phone, index) of unverifiedPhones">
                     <MemberDetailWithButton
-                        :label="formatWithIndex($t('shared.inputs.mobile.label'), index, uncategorizedPhones)"
+                        :label="formatWithIndex($t('shared.inputs.mobile.label'), index, unverifiedPhones)"
                         :value="phone" icon="trash" color="gray"
                         :onClick="() => deletePhone(phone)"/>
                 </template>
 
-                <template v-for="(address, index) of uncategorizedAddresses">
+                <template v-for="(address, index) of unverifiedAddresses">
                     <MemberDetailWithButton
-                        :label="formatWithIndex('Adres', index, uncategorizedAddresses)"
+                        :label="formatWithIndex('Adres', index, unverifiedAddresses)"
                         :value="addressToLines(address)" icon="trash" color="gray"
                         :onClick="() => deleteAddress(address)"/>
                 </template>
@@ -53,11 +53,11 @@ const platformFamilyManager = usePlatformFamilyManager();
 const currentCountry = useCountry();
 
 const memberDetails = computed(() => props.member.patchedMember.details);
-const uncategorizedAddresses = computed(() => memberDetails.value.uncategorizedAddresses ?? []);
-const uncategorizedPhones = computed(() => memberDetails.value.uncategorizedPhones ?? []);
-const uncategorizedEmails = computed(() => memberDetails.value.uncategorizedEmails ?? []);
+const unverifiedAddresses = computed(() => memberDetails.value.unverifiedAddresses ?? []);
+const unverifiedPhones = computed(() => memberDetails.value.unverifiedPhones ?? []);
+const unverifiedEmails = computed(() => memberDetails.value.unverifiedEmails ?? []);
 
-const shouldShow = computed(() => uncategorizedAddresses.value.length > 0 || uncategorizedPhones.value.length > 0 || uncategorizedEmails.value.length > 0);
+const shouldShow = computed(() => unverifiedAddresses.value.length > 0 || unverifiedPhones.value.length > 0 || unverifiedEmails.value.length > 0);
 
 function formatWithIndex<T>(label: string, index: number, array: T[]) {
     if(array.length === 1) return label;
@@ -76,7 +76,7 @@ async function deletePhone(phone: string) {
     deleteFromMemberDetails({
         valueToDelete: phone,
         confirmMessage: `Weet je zeker dat je het gsm nummer '${phone}' wilt verwijderen?`,
-        key: 'uncategorizedPhones'
+        key: 'unverifiedPhones'
     });
 }
 
@@ -84,7 +84,7 @@ async function deleteEmail(email: string) {
     deleteFromMemberDetails({
         valueToDelete: email,
         confirmMessage: `Weet je zeker dat je het e-mailadres '${email}' wilt verwijderen?`,
-        key: 'uncategorizedEmails'
+        key: 'unverifiedEmails'
     });
 }
 
@@ -92,7 +92,7 @@ async function deleteAddress(address: Address) {
     deleteFromMemberDetails({
         valueToDelete: address,
         confirmMessage: `Weet je zeker dat je het adres '${address}' wilt verwijderen?`,
-        key: 'uncategorizedAddresses'
+        key: 'unverifiedAddresses'
     });
 }
 

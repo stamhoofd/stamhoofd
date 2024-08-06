@@ -234,8 +234,8 @@ export class PlatformFamily {
                 }
             }
 
-            for(const uncategorizedAddress of member.member.details.uncategorizedAddresses) {
-                addresses.set(uncategorizedAddress.toString(), uncategorizedAddress);
+            for(const unverifiedAddress of member.member.details.unverifiedAddresses) {
+                addresses.set(unverifiedAddress.toString(), unverifiedAddress);
             }
         }
 

@@ -1,8 +1,10 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 
+import { Formatter } from '@stamhoofd/utility';
 import { Organization } from '../Organization';
 import { User } from '../User';
 import { EmailRecipient } from '../email/Email';
+import { Replacement } from '../endpoints/EmailRequest';
 import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/filterDefinitions';
 import { compileToInMemoryFilter } from '../filters/new/InMemoryFilter';
 import { StamhoofdFilter } from '../filters/new/StamhoofdFilter';
@@ -11,8 +13,6 @@ import { MemberPlatformMembership } from './MemberPlatformMembership';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord';
 import { Registration } from './Registration';
 import { Filterable } from './records/RecordCategory';
-import { Replacement } from '../endpoints/EmailRequest';
-import { Formatter } from '@stamhoofd/utility';
 
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
@@ -46,7 +46,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         return !!this.users.find(u => u.hasAccount && u.email === email)
     }
 
-    getEmailRecipients(subtypes: ('member'|'parents')[]|null = null): EmailRecipient[] {
+    getEmailRecipients(subtypes: ('member'|'parents'|'unverified')[]|null = null): EmailRecipient[] {
         const recipients: EmailRecipient[] = []
 
         const shared: Replacement[] = []
@@ -95,6 +95,16 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             )
         }
 
+        const createLoginDetailsReplacement = (email: string) => {
+            const formattedEmail = Formatter.escapeHtml(email);
+
+            return Replacement.create({
+                token: "loginDetails",
+                value: "",
+                html: this.hasAccount(email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${formattedEmail}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${formattedEmail}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
+            })
+        };
+
         if (subtypes === null || subtypes.includes('parents')) {
             for (const parent of this.details.parents) {
                 if (parent.email) {
@@ -116,16 +126,30 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                                     token: "email",
                                     value: parent.email.toLowerCase()
                                 }),
-                                Replacement.create({
-                                    token: "loginDetails",
-                                    value: "",
-                                    html: this.hasAccount(parent.email) ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(parent.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(parent.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
-                                }),
+                                createLoginDetailsReplacement(parent.email),
                                 ...shared
                             ]
                         })
                     )
                 }
+            }
+        }
+
+        if(subtypes && subtypes.includes('unverified')) {
+            for(const unverifiedEmail of this.details.unverifiedEmails) {
+                recipients.push(
+                    EmailRecipient.create({
+                        email: unverifiedEmail,
+                        replacements: [
+                            Replacement.create({
+                                token: "email",
+                                value: unverifiedEmail.toLowerCase()
+                            }),
+                            createLoginDetailsReplacement(unverifiedEmail),
+                            ...shared
+                        ]
+                    })
+                )
             }
         }
 

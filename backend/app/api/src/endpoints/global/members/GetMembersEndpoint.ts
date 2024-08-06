@@ -36,6 +36,7 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
         return await q.count();
     }
 });
+
 Email.recipientLoaders.set(EmailRecipientFilterType.MemberParents, {
     fetch: async (query: LimitedFilteredRequest) => {
         const result = await GetMembersEndpoint.buildData(query)
@@ -50,6 +51,24 @@ Email.recipientLoaders.set(EmailRecipientFilterType.MemberParents, {
         const q = await GetMembersEndpoint.buildQuery(query)
         return await q.sum(
             SQL.jsonLength(SQL.column('details'), '$.value.parents[*].email')
+        );
+    }
+});
+
+Email.recipientLoaders.set(EmailRecipientFilterType.MemberUnverified, {
+    fetch: async (query: LimitedFilteredRequest) => {
+        const result = await GetMembersEndpoint.buildData(query)
+
+        return new PaginatedResponse({
+            results: result.results.members.flatMap(m => m.getEmailRecipients(['unverified'])),
+            next: result.next
+        });
+    },
+
+    count: async (query: LimitedFilteredRequest) => {
+        const q = await GetMembersEndpoint.buildQuery(query)
+        return await q.sum(
+            SQL.jsonLength(SQL.column('details'), '$.value.unverifiedEmails')
         );
     }
 });
