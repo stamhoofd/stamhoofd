@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <article class="container">
         <hr>
         <h2 class="style-with-button">
             <button v-long-press="(e) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
@@ -24,7 +24,11 @@
         <STList v-else>
             <MemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" />
         </STList>
-    </div>
+
+        <footer class="style-button-bar" v-if="hasDeleted && !showDeleted" @click="showDeleted = true;">
+            <button class="button text">Toon beëindigde inschrijvingen</button>
+        </footer>   
+    </article>
 </template>
 
 <script lang="ts" setup>
@@ -38,6 +42,7 @@ import TableActionsContextMenu from '../../tables/TableActionsContextMenu.vue';
 import ChooseGroupForMemberView from '../ChooseGroupForMemberView.vue';
 import { useMemberActions } from '../classes/MemberActionBuilder';
 import MemberRegistrationRow from './MemberRegistrationRow.vue';
+import { Sorter } from '@stamhoofd/utility';
 
 const props = defineProps<{
     member: PlatformMember
@@ -55,11 +60,15 @@ const defaultPeriod = organization.value?.period?.period ?? platform.value.perio
 const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
+const showDeleted = ref(false);
+const hasDeleted = computed(() => {
+    return filteredRegistrations.value.some(r => r.deactivatedAt);
+});
 
 platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
-const visibleRegistrations = computed(() => {
+const filteredRegistrations = computed(() => {
     return props.member.patchedMember.registrations.filter(r => {
         if (organization.value && r.organizationId !== organization.value.id) {
             return false;
@@ -68,7 +77,19 @@ const visibleRegistrations = computed(() => {
             return false;
         }
         return true
-    });
+    }).sort((a, b) => 
+        Sorter.stack(
+            Sorter.byDateValue(b.deactivatedAt ?? new Date(0), a.deactivatedAt ?? new Date(0)),
+            Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt)
+
+        )
+    );
+});
+const visibleRegistrations = computed(() => {
+    if (!showDeleted.value) {
+        return filteredRegistrations.value.filter(r => !r.deactivatedAt);
+    }
+    return filteredRegistrations.value;
 });
 
 
