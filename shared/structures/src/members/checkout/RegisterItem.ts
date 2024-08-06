@@ -508,7 +508,7 @@ export class RegisterItem {
             throw new Error("Group and organization do not match in RegisterItem.validate")
         }
 
-        if (checkout.asOrganizationId && !this.group.settings.allowRegistrationsByOrganization) {
+        if (checkout.asOrganizationId && !admin && !this.group.settings.allowRegistrationsByOrganization) {
             throw new SimpleError({
                 code: "as_organization_disabled",
                 message: "allowRegistrationsByOrganization disabled",
