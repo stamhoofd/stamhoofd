@@ -1,23 +1,27 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { PlatformMember } from "@stamhoofd/structures";
 import { defaultDisplayOptions, DisplayOptions, glueNavigationActions, NavigationActions, runDisplayOptions } from "../../types/NavigationActions";
+import { SessionContext } from "@stamhoofd/networking";
 
 export class MemberStepManager {
     member: PlatformMember
     steps: EditMemberStep[] = []
     finishHandler: (navigate: NavigationActions) => void|Promise<void>
     displayOptions: DisplayOptions
+    context: SessionContext
 
     constructor(
+        context: SessionContext,
         member: PlatformMember, 
         steps: EditMemberStep[], 
         finishHandler: (navigate: NavigationActions) => void|Promise<void>,
-        displayOptions?: DisplayOptions
+        displayOptions?: DisplayOptions,
     ){
         this.member = member
         this.steps = steps;
         this.finishHandler = finishHandler;
         this.displayOptions = displayOptions || defaultDisplayOptions
+        this.context = context
     }
 
     async saveHandler(currentStep: EditMemberStep|null, navigate: NavigationActions) {

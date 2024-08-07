@@ -1,5 +1,5 @@
 <template>
-    <div v-if="appContext !== 'registration'" class="container">
+    <div class="container">
         <Title v-bind="$attrs" title="Notities" />
 
         <STErrorsDefault :error-box="parentErrorBox" />

@@ -4,10 +4,10 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Member } from '@stamhoofd/models';
 import { MemberWithRegistrationsBlob, MembersBlob } from "@stamhoofd/structures";
 
-import { Context } from '../../../helpers/Context';
-import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
+import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
@@ -48,15 +48,6 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             struct.details.cleanData()
             member.details = struct.details
 
-            if (!struct.details) {
-                throw new SimpleError({
-                    code: "invalid_data",
-                    message: "No details provided",
-                    human: "Opgelet! Je gebruikt een oudere versie van de inschrijvingspagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
-                    field: "details"
-                })
-            }
-
             // Check for duplicates and prevent creating a duplicate member by a user
             const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member);
             if (duplicate) {
@@ -85,6 +76,12 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             if (updatedMember) {
                 // Make sure we also give access to other parents
                 await MemberUserSyncer.onChangeMember(updatedMember)
+
+                if (!updatedMember.users.find(u => u.id === user.id)) {
+                    // Also link the user to the member if the email address is missing in the details
+                    await MemberUserSyncer.linkUser(user.email, updatedMember, true)
+                }
+
                 await Document.updateForMember(updatedMember.id)
             }
         }

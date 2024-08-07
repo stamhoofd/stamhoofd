@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { DataPermissionsSettings } from "@stamhoofd/structures";
+import { DataPermissionsSettings, PermissionLevel } from "@stamhoofd/structures";
 import { markRaw } from "vue";
 import { MemberStepView } from "../..";
 import { NavigationActions } from "../../../types/NavigationActions";
@@ -13,7 +13,12 @@ export const MemberDataPermissionStep: EditMemberStep = {
         const member = manager.member
         const details = member.patchedMember.details;
 
-        if (!member.isPropertyEnabled('dataPermission')) {
+        if (!member.isPropertyEnabled('dataPermission', {
+            checkPermissions: manager.context.user ? {
+                level: PermissionLevel.Write,
+                user: manager.context.user
+            } : undefined
+        })) {
             return false;
         }
 

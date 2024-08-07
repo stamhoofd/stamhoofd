@@ -71,6 +71,7 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
     displayOptions?: DisplayOptions,
     startCheckoutFlow?: boolean
 }) {
+    console.log('checkoutRegisterItem', {item, admin, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow})
     const member = item.member;
 
     // Add it to the platform member
@@ -100,7 +101,7 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
         }
     }
 
-    const manager = new MemberStepManager(member, steps, async (navigate) => {
+    const manager = new MemberStepManager(context, member, steps, async (navigate) => {
         // Move the item to the cart
         member.family.checkout.remove(item, {calculate: false}); // Fast delete without price calculation
         member.family.checkout.add(item); // With price calculation
@@ -347,11 +348,11 @@ export function useChooseGroupForMember() {
     const context = useContext();
     const app = useAppContext()
 
-    return async ({member, displayOptions, startCheckoutFlow}: {member: PlatformMember, displayOptions?: DisplayOptions, startCheckoutFlow?: boolean}) => {
+    return async ({member, displayOptions, startCheckoutFlow, customNavigate}: {member: PlatformMember, displayOptions?: DisplayOptions, startCheckoutFlow?: boolean, customNavigate?: NavigationActions}) => {
         await chooseGroupForMember({
             admin: app === 'dashboard' || app === 'admin', 
             member, 
-            navigate, 
+            navigate: customNavigate ?? navigate, 
             context: context.value, 
             displayOptions, 
             startCheckoutFlow

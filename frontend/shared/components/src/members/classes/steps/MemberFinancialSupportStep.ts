@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { FinancialSupportSettings } from "@stamhoofd/structures";
+import { FinancialSupportSettings, PermissionLevel } from "@stamhoofd/structures";
 import { markRaw } from "vue";
 import { MemberStepView } from "../..";
 import { NavigationActions } from "../../../types/NavigationActions";
@@ -13,7 +13,12 @@ export const MemberFinancialSupportStep: EditMemberStep = {
         const member = manager.member
         const details = member.patchedMember.details;
 
-        if (!member.isPropertyEnabled('financialSupport')) {
+        if (!member.isPropertyEnabled('financialSupport', {
+            checkPermissions: manager.context.user ? {
+                level: PermissionLevel.Write,
+                user: manager.context.user
+            } : undefined
+        })) {
             return false;
         }
 

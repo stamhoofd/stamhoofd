@@ -18,6 +18,9 @@ import { RegisterItem } from "./checkout/RegisterItem"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
+import { OrganizationRecordsConfiguration } from "./OrganizationRecordsConfiguration"
+import { User } from "../User"
+import { UserWithMembers } from "../UserWithMembers"
 
 export class PlatformFamily {
     members: PlatformMember[] = []
@@ -157,6 +160,7 @@ export class PlatformFamily {
             if (cloneMember) {
                 member.member.deepSet(cloneMember.member)
                 member.patch.deepSet(cloneMember.patch)
+                member.patch.id = member.id
                 member.isNew = cloneMember.isNew
                 member._oldId = cloneMember._oldId
 
@@ -462,7 +466,7 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
-    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport', options?: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}|null, scopeOrganization?: Organization|null}) {
+    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport') {
         if (property === 'financialSupport' && !this.patchedMember.details.dataPermissions?.value) {
             return false;
         }
@@ -481,8 +485,8 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isEnabled(this)
     }
 
-    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport', options?: {checkPermissions?: {permissions: UserPermissions|null, level: PermissionLevel}|null, scopeOrganization?: Organization|null}) {
-        if (this.isPropertyEnabledForPlatform(property, options)) {
+    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport', options?: {checkPermissions?: {user: UserWithMembers, level: PermissionLevel}}) {
+        if (this.isPropertyEnabledForPlatform(property)) {
             return true;
         }
 
@@ -490,25 +494,34 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        const organizations = this.filterOrganizations({currentPeriod: true})
-
-        for (const organization of organizations) {
-            if (property === 'dataPermission' || property === 'financialSupport') {
-                if (options?.checkPermissions && property === 'financialSupport') {
-                    if (!options.checkPermissions.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
-                        // No permission
-                        continue
+        if (options?.checkPermissions && property === 'financialSupport') {
+            const isUserManager = options.checkPermissions.user.members.members.some(m => m.id === this.id)
+            if (!isUserManager) {
+                // Need permission to view financial support
+                let foundPermissions = false;
+                for (const organization of this.filterOrganizations({ currentPeriod: true })) {
+                    if (options.checkPermissions.user.permissions?.forOrganization(organization, Platform.shared)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                        foundPermissions = true;
+                        break;
                     }
                 }
+                if (!foundPermissions) {
+                    return false;
+                }
+            }
+        }
 
+        const recordsConfigurations = this.filterRecordsConfigurations({currentPeriod: true})
 
-                if (organization.meta.recordsConfiguration[property]) {
+        for (const recordsConfiguration of recordsConfigurations) {
+            if (property === 'dataPermission' || property === 'financialSupport') {
+                if (recordsConfiguration[property]) {
                     return true;
                 }
                 continue;
             }
 
-            const def = organization.meta.recordsConfiguration[property];
+            const def = recordsConfiguration[property];
             if (def === null) {
                 continue;
             }
@@ -535,18 +548,14 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
-        if (this.isPropertyRequiredForPlatform(property)) {
-            return true;
-        }
-
         if (!this.isPropertyEnabled(property)) {
             return false;
         }
 
-        const organizations = this.filterOrganizations({currentPeriod: true})
+        const recordsConfigurations = this.filterRecordsConfigurations({currentPeriod: true})
 
-        for (const organization of organizations) {
-            const def = organization.meta.recordsConfiguration[property];
+        for (const recordsConfiguration of recordsConfigurations) {
+            const def = recordsConfiguration[property];
             if (def === null) {
                 continue;
             }
@@ -638,7 +647,7 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Loop checkout
-        for (const item of this.family.checkout.cart.items) {
+        for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
             if (item.member.id === this.id) {
                 if (filters.currentPeriod === false) {
                     continue
@@ -661,6 +670,38 @@ export class PlatformMember implements ObjectWithRecords {
         return base;
     }
 
+    filterRecordsConfigurations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean, types?: GroupType[]}) {
+        const groups =  this.filterGroups(filters);
+        const configurations: OrganizationRecordsConfiguration[] = [];
+
+        for (const group of groups) {
+            const organization = this.family.getOrganization(group.organizationId)
+            if (!organization) {
+                continue;
+            }
+
+            configurations.push(
+                OrganizationRecordsConfiguration.build({
+                    platform: this.platform,
+                    organization,
+                    group,
+                    includeGroup: true
+                })
+            )
+        }
+
+        if (groups.length === 0) {
+            configurations.push(
+                OrganizationRecordsConfiguration.build({
+                    platform: this.platform,
+                })
+            )
+        }
+
+        return configurations
+
+    }
+
     filterOrganizations(filters: {groups?: Group[] | null, canRegister?: boolean, periodId?: string, currentPeriod?: boolean, types?: GroupType[]}) {
         const registrations =  this.filterRegistrations(filters);
         const base: Organization[] = [];
@@ -677,7 +718,7 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Loop checkout
-        for (const item of this.family.checkout.cart.items) {
+        for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
             if (item.member.id === this.id) {
                 if (filters.currentPeriod === false) {
                     continue
@@ -776,76 +817,43 @@ export class PlatformMember implements ObjectWithRecords {
         // From organization
         const categories: RecordCategory[] = [];
         const inheritedFilters = new Map<string, PropertyFilter[]>()
-        const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.organizations;
+        const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.filterOrganizations({currentPeriod: true});
 
-        // First push all platform record categories, these should be first
-        for (const organization of scopedOrganizations) {
-            if (checkPermissions && checkPermissions.permissions) {
-                const organizationPermissions = checkPermissions.permissions.forOrganization(organization, Platform.shared);
+        const recordsConfigurations = this.filterRecordsConfigurations({currentPeriod: true})
 
-                if (!organizationPermissions) {
+        for (const recordsConfiguration of recordsConfigurations) {
+            for (const recordCategory of recordsConfiguration.recordCategories) {
+                if (categories.find(c => c.id === recordCategory.id)) {
+                    // Already added
                     continue;
                 }
 
-                // Any optional categories from the platform that have been enabled?
-                for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
-                    if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, id, checkPermissions.level)) {
-                        inheritedFilters.set(id, [...(inheritedFilters.get(id) ?? []), filter])
+                if (recordCategory.isEnabled(this)) {
+                    if (checkPermissions && checkPermissions.permissions) {
+                        // Check permissions
+                        // we need at least permission in one organization
+                        let hasPermission = false;
+                        for (const organization of scopedOrganizations) {
+                            const organizationPermissions = checkPermissions.permissions.forOrganization(organization, Platform.shared);
+
+                            if (!organizationPermissions) {
+                                continue;
+                            }
+
+                            if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id, checkPermissions.level)) {
+                                hasPermission = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasPermission) {
+                            continue;
+                        }
                     }
-                }
-            } else {
-                for (const [id, filter] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
-                    inheritedFilters.set(id, [...(inheritedFilters.get(id) ?? []), filter])
+
+                    categories.push(recordCategory)
                 }
             }
-        }
-
-        // All required categories of the platform
-        for (const category of this.platform.config.recordsConfiguration.recordCategories) {
-            if (category.isEnabled(this)) {
-                const hasAnyAccess = !checkPermissions || !checkPermissions.permissions || !!scopedOrganizations.find(o => {
-                    const organizationPermissions = checkPermissions.permissions!.forOrganization(o, Platform.shared);
-
-                    if (!organizationPermissions) {
-                        return false;
-                    }
-
-                    return organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, checkPermissions.level);
-                });
-
-                if (hasAnyAccess) {
-                    // At least one organization gave permission for this data
-                    categories.push(category)
-                }
-            } else {
-                const filters = inheritedFilters.get(category.id)
-                if (filters && category.isEnabled(this, true)) {
-                    if (filters.find(f => f.isEnabled(this))) {
-                        categories.push(category)
-                    }
-                }
-            }
-        }
-
-        // All organization record categories
-        for (const organization of scopedOrganizations) {
-            const organizationPermissions = checkPermissions?.permissions ? checkPermissions.permissions.forOrganization(organization, Platform.shared) : null;
-
-            if (checkPermissions && !organizationPermissions) {
-                continue;
-            }
-
-            categories.push(...organization.meta.recordsConfiguration.recordCategories.filter(r => {
-                if (!r.isEnabled(this)) {
-                    return false;
-                }
-
-                if (organizationPermissions && checkPermissions && !organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, r.id, checkPermissions.level)) {
-                    return false;
-                }
-
-                return true;
-            }))
         }
         
         return categories;

@@ -12,7 +12,7 @@
         </h2>
 
         <STList>
-            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box" :selectbale="true" @click="editUser(user)">
+            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box" :selectbale="hasFullAccess" @click="editUser(user)">
                 <template v-if="user.hasAccount && user.verified" #left>
                     <span class="icon user small" />
                 </template>
@@ -50,20 +50,25 @@
                 <p v-if="user.permissions" class="style-description-small">
                     Heeft toegang tot beheerdersportaal
                 </p>
+
+                <template #right v-if="hasWrite && user.hasAccount">
+                    <LoadingButton :loading="isDeletingUser(user)" class="hover-show"><button type="button" class="button icon trash" @click.stop="deleteUser(user)" /></LoadingButton>
+                </template>
             </STListItem>
         </STList>
     </div>
 </template>
 
 <script setup lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { PlatformMember, User, UserWithMembers } from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import EditAdminView from '../../../admins/EditAdminView.vue';
-import { useContext } from '../../../hooks';
+import { useAuth, useContext } from '../../../hooks';
 import { Toast } from '../../../overlays/Toast';
+import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
 
 defineOptions({
     inheritAttrs: false
@@ -74,6 +79,11 @@ const props = defineProps<{
 const context = useContext();
 const present = usePresent();
 const editingUser = ref(new Set())
+const auth = useAuth()
+const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, PermissionLevel.Write))
+const hasFullAccess = computed(() => auth.hasFullAccess())
+const deletingUsers = ref(new Set<string>())
+const platformFamilyManager = usePlatformFamilyManager()
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {
@@ -84,7 +94,35 @@ const sortedUsers = computed(() => {
     })
 })
 
+async function deleteUser(user: User) {
+    if (deletingUsers.value.has(user.id)) {
+        return
+    }
+
+    deletingUsers.value.add(user.id)
+
+    try {
+        const patch = MemberWithRegistrationsBlob.patch({id: props.member.id})
+        patch.users.addDelete(user.id)
+
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>
+        arr.addPatch(patch)
+        await platformFamilyManager.isolatedPatch([props.member], arr)
+    } catch (e) {
+        Toast.fromError(e).show()
+    }
+
+    deletingUsers.value.delete(user.id)
+}
+
+function isDeletingUser(user: User) {
+    return deletingUsers.value.has(user.id)
+}
+
 async function editUser(user: User) {
+    if (!hasFullAccess.value) {
+        return
+    }
     if (editingUser.value.has(user.id)) {
         return
     }

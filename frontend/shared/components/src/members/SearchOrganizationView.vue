@@ -34,7 +34,6 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { usePop } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, OrganizationAvatar, Spinner, Toast, useNavigationActions } from '@stamhoofd/components';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
@@ -59,7 +58,6 @@ const query = ref("");
 const results = ref([]) as Ref<Organization[]>;
 const owner = useRequestOwner()
 const defaultCountry = I18nController.shared.country
-const pop = usePop()
 const $t = useTranslate();
 
 let lastQuery = '';

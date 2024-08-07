@@ -4,6 +4,7 @@ import { NavigationActions } from "../../../types/NavigationActions";
 import EditEmergencyContactsBox from "../../components/edit/EditEmergencyContactsBox.vue";
 import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
 import { markRaw } from "vue";
+import { PermissionLevel } from "@stamhoofd/structures";
 
 const outdatedTime = 60*1000*60*24*31*3 // 3 months
 
@@ -12,7 +13,12 @@ export const MemberEmergencyContactsStep: EditMemberStep = {
         const member = manager.member
         const details = member.patchedMember.details;
 
-        if (!member.isPropertyEnabled('emergencyContacts')) {
+        if (!member.isPropertyEnabled('emergencyContacts', {
+            checkPermissions: manager.context.user ? {
+                level: PermissionLevel.Write,
+                user: manager.context.user
+            } : undefined
+        })) {
             return false;
         }
 

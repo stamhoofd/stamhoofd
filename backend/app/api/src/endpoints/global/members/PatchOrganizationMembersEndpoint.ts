@@ -76,15 +76,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         const balanceItemRegistrationIdsPerOrganization: Map<string, string[]> = new Map()
         const updateMembershipMemberIds = new Set<string>()
 
-        function addBalanceItemRegistrationId(organizationId: string, registrationId: string) {
-            const existing = balanceItemRegistrationIdsPerOrganization.get(organizationId);
-            if (existing) {
-                existing.push(registrationId)
-                return;
-            }
-            balanceItemRegistrationIdsPerOrganization.set(organizationId, [registrationId])
-        }
-
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
             const struct = put.put
@@ -336,6 +327,26 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Auto link users based on data
             await MemberUserSyncer.onChangeMember(member)
+
+            // Allow to remove access for certain users
+            for (const id of patch.users.getDeletes()) {
+                const user = member.users.find(u => u.id === id)
+                if (!user) {
+                    // Ignore silently
+                    continue;
+                }
+
+                if (MemberUserSyncer.doesEmailHaveAccess(member.details, user.email)) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Invalid email",
+                        human: "Je kan een account niet de toegang ontzetten tot een lid als het e-mailadres nog steeds is opgeslagen als onderdeel van de gegevens van dat lid. Verwijder eerst het e-mailadres uit de gegevens van het lid en ontkoppel daarna het account."
+                    });
+                }
+
+                // Remove access
+                await MemberUserSyncer.unlinkUser(user, member)
+            }
 
             // Add platform memberships
             for (const {put} of patch.platformMemberships.getPuts()) {

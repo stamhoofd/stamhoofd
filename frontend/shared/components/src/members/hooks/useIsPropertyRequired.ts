@@ -2,7 +2,7 @@ import { PermissionLevel } from "@stamhoofd/structures";
 import { Ref, computed } from "vue";
 import { PlatformMember } from "../../../../../../shared/structures/esm/dist/src/members/PlatformMember";
 import { useAppContext } from "../../context/appContext";
-import { useAuth } from "../../hooks";
+import { useAuth, useContext } from "../../hooks";
 
 export function useIsPropertyRequired(member: Ref<PlatformMember>) {
     const isAllOptional = useIsAllOptional(member);
@@ -17,15 +17,13 @@ export function useIsPropertyRequired(member: Ref<PlatformMember>) {
 }
 
 export function useIsPropertyEnabled(member: Ref<PlatformMember>, write: boolean) {
-    const app = useAppContext();
-    const isAdmin = app === 'dashboard' || app === 'admin';
-    const auth = useAuth();
+    const context = useContext()
 
     return (property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport') => {
         const m = member.value
-        return m.isPropertyEnabled(property, isAdmin ? {
+        return m.isPropertyEnabled(property, context.value.user ? {
             checkPermissions: {
-                permissions: auth.userPermissions,
+                user: context.value.user,
                 level: write ? PermissionLevel.Write : PermissionLevel.Read
             }
         } : {})
