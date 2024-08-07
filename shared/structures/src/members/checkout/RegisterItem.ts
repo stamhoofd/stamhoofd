@@ -768,7 +768,10 @@ export class RegisterItem {
      * and with the removed registrations freed up, so this can be negative
      */
     getCartPendingStockReservations() {
-        const deleteRegistrations = this.checkout.cart.deleteRegistrations.filter(r => r.groupId === this.group.id)
+        const deleteRegistrations = [
+            ...this.checkout.cart.deleteRegistrations.filter(r => r.groupId === this.group.id),
+            ...this.replaceRegistrations.filter(r => r.groupId === this.group.id)
+        ]
 
         const cartIndex = this.checkout.cart.items.findIndex(i => i.id === this.id)
         const itemsBefore = this.checkout.cart.items.slice(0, cartIndex === -1 ? undefined : cartIndex)
@@ -781,10 +784,10 @@ export class RegisterItem {
 
 
     /**
-     * Stock that will be taken by this item
+     * Stock that will be taken or removed by this item
      */
     getPendingStockReservations() {
-        return [
+        const base = [
             // Global level stock reservations (stored in each group)
             StockReservation.create({
                 objectId: this.group.id,
@@ -807,6 +810,9 @@ export class RegisterItem {
                     })
                 ]
             })
-        ]
+        ];
+
+        const freed = this.replaceRegistrations.flatMap(r =>r.stockReservations)
+        return StockReservation.removed(base, freed);
     }
 }

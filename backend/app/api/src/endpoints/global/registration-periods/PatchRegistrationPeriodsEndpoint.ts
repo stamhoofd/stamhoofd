@@ -2,10 +2,9 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { RegistrationPeriod as RegistrationPeriodStruct } from "@stamhoofd/structures";
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;

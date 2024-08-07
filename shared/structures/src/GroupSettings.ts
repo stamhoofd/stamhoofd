@@ -63,7 +63,7 @@ export class GroupPrice extends AutoEncoder {
 
     getUsedStock(group: Group) {
         const groupStockReservations = group.stockReservations
-        return StockReservation.getAmount('GroupOption', this.id, groupStockReservations)
+        return StockReservation.getAmount('GroupPrice', this.id, groupStockReservations)
     }
 
     /**
@@ -72,7 +72,7 @@ export class GroupPrice extends AutoEncoder {
     getPendingStock(item: RegisterItem) {
         const stock = item.getCartPendingStockReservations() // this is positive if it will be used
         return StockReservation.getAmount(
-            'GroupOption', 
+            'GroupPrice', 
             this.id, 
             StockReservation.filter('Group', item.group.id, stock)
         )

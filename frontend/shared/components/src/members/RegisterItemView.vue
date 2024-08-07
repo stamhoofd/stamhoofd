@@ -66,7 +66,7 @@
                         {{ formatPrice(option.price.forMember(item.member)) }} per stuk
                     </p>
 
-                    <p v-if="option.getRemainingStock(item) !== null && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
+                    <p v-if="option.getRemainingStock(item) && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
                         Nog {{ Formatter.pluralText(option.getRemainingStock(item)!, 'stuk', 'stuks') }} beschikbaar
                     </p>
 

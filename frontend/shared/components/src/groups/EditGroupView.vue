@@ -120,7 +120,7 @@
                             Uitverkocht
                         </p>
                         <p v-else-if="price.stock" class="style-description-small">
-                            Nog {{ pluralText(price.remainingStock, 'stuk', 'stuks') }} beschikbaar
+                            Nog {{ pluralText(price.getRemainingStock(patched), 'stuk', 'stuks') }} beschikbaar
                         </p>
 
                         <template #right>

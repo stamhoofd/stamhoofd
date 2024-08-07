@@ -29,7 +29,7 @@ export class StockReservation extends AutoEncoder {
     }
 
     static filter(type: string, id: string, list: StockReservation[]): StockReservation[] {
-        return list.filter(r => r.objectType === type && r.objectId === id);
+        return list.filter(r => r.objectType === type && r.objectId === id).flatMap(r => r.children);
     }
 
     static add(base: StockReservation[], add: StockReservation) {
@@ -38,7 +38,7 @@ export class StockReservation extends AutoEncoder {
         if (existingIndex !== -1) {
             const existing = base[existingIndex];
             existing.amount += add.amount
-            existing.children = StockReservation.removed(existing.children, add.children);
+            existing.children = StockReservation.added(existing.children, add.children);
 
             if (existing.amount == 0 && existing.children.length === 0) {
                 // NOTE: the amount should be zero.
@@ -81,10 +81,6 @@ export class StockReservation extends AutoEncoder {
     }
 
     static removed(base: StockReservation[], remove: StockReservation[]): StockReservation[] {
-        if (base.length === 0) {
-            return [];
-        }
-
         const newReservations: StockReservation[] = [];
 
         for (const r of base) {
