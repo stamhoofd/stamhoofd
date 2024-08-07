@@ -157,7 +157,7 @@ export class RegisterItem {
     }
 
     get showItemView() {
-        return this.shouldUseWaitingList() || this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
+        return this.shouldUseWaitingList() || !!this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
     }
 
     calculatePrice() {

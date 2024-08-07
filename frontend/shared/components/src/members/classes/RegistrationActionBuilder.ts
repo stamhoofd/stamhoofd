@@ -1,6 +1,6 @@
 import { usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { Group, GroupCategoryTree, Organization, PermissionLevel, PlatformMember, RegisterItem, Registration, RegistrationWithMember } from '@stamhoofd/structures'
+import { Group, GroupCategoryTree, Organization, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithMember } from '@stamhoofd/structures'
 import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..'
 import { useContext, useOrganization } from '../../hooks'
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes'
@@ -200,6 +200,7 @@ export class RegistrationActionBuilder {
 
     async moveRegistrations(group: Group) {
         const items: RegisterItem[] = [];
+        const checkout = new RegisterCheckout()
 
         for (const registration of this.registrations) {
             const member = this.members.find(m => m.id === registration.memberId)
@@ -207,6 +208,9 @@ export class RegistrationActionBuilder {
                 console.warn("Member not found for registration in RegistrationActionBuilder.moveRegistrations", registration)
                 continue
             }
+
+            member.family.checkout = checkout
+            member.family.pendingRegisterItems = []
 
             const item = registration.group.id === group.id ? RegisterItem.fromRegistration(registration, member, this.organization) : RegisterItem.defaultFor(member, group, this.organization)
             item.replaceRegistrations = [registration]
@@ -251,6 +255,7 @@ export class RegistrationActionBuilder {
     async editRegistrations() {
         const items: RegisterItem[] = [];
         const groupOrganization = this.organization
+        const checkout = new RegisterCheckout()
 
         for (const registration of this.registrations) {
             const member = this.members.find(m => m.id === registration.memberId)
@@ -258,6 +263,8 @@ export class RegistrationActionBuilder {
                 console.warn("Member not found for registration in RegistrationActionBuilder.editRegistrations", registration)
                 continue
             }
+            member.family.checkout = checkout
+            member.family.pendingRegisterItems = []
 
             const item = RegisterItem.fromRegistration(registration, member, groupOrganization) 
             item.replaceRegistrations = [registration]
