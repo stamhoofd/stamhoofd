@@ -1,64 +1,60 @@
 <template>
-    <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="group.organizationId" @update="setOrganization">
-        <SaveView save-text="Bevestigen" :save-badge="cartLength" :disabled="cartLength === 0" title="Inschrijvingen wijzigen" :loading="saving" @save="goToCheckout">
-            <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
-                {{ groupOrganization!.name }}
-            </p>
-            <h1>Inschrijvingen voor {{ group.settings.name }} wijzigen</h1>
+    <SaveView save-text="Bevestigen" :save-badge="cartLength" :disabled="cartLength === 0" title="Inschrijvingen wijzigen" :loading="saving" @save="goToCheckout">
+        <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
+            {{ checkout.singleOrganization.name }}
+        </p>
+        <h1 v-if="group">Inschrijvingen voor {{ group.settings.name }} wijzigen</h1>
+        <h1 v-else>Winkelmandje</h1>
 
-            <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
-                De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via het ledenportaal.
-            </p>
+        <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
+            De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via het ledenportaal.
+        </p>
 
-            <STErrorsDefault :error-box="errors.errorBox" />
-            
-            <STList>
-                <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.id" class="right-stack" :registration="registration" :checkout="checkout"  />
-                <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
-            </STList>
-            
-            <p v-if="checkout.cart.isEmpty" class="info-box">
-                Voeg de leden toe die je wilt inschrijven
-            </p>
+        <STErrorsDefault :error-box="errors.errorBox" />
+        
+        <STList>
+            <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.id" class="right-stack" :registration="registration" :checkout="checkout"  />
+            <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
+        </STList>
+        
+        <p v-if="checkout.cart.isEmpty" class="info-box">
+            Voeg de leden toe die je wilt inschrijven
+        </p>
 
-            <p class="style-button-bar">
-                <button type="button" class="button text" @click="searchMembers">
-                    <span class="icon search" />
-                    <span>Zoek bestaande leden</span>
-                </button>
+        <p class="style-button-bar" v-if="group">
+            <button type="button" class="button text" @click="searchMembers">
+                <span class="icon search" />
+                <span>Zoek bestaande leden</span>
+            </button>
 
-                <button type="button" class="button text" @click="addMember">
-                    <span class="icon add" />
-                    <span>Splinternieuw lid</span>
-                </button>
-            </p>
+            <button type="button" class="button text" @click="addMember">
+                <span class="icon add" />
+                <span>Splinternieuw lid</span>
+            </button>
+        </p>
 
-            <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" v-if="!checkout.isAdminFromSameOrganization" />
-        </SaveView>
-    </ExternalOrganizationContainer>
+        <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" v-if="!checkout.isAdminFromSameOrganization" />
+    </SaveView>
 </template>
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ExternalOrganizationContainer, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
+import { ErrorBox, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, markRaw, onMounted, reactive, ref } from 'vue';
 import { EditMemberGeneralBox, MemberStepView, startCheckout } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
-import RegisterItemRow from './components/group/RegisterItemRow.vue';
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
+import RegisterItemRow from './components/group/RegisterItemRow.vue';
 import SearchOrganizationMembersForGroupView from './SearchOrganizationMembersForGroupView.vue';
 
 const props = defineProps<{
-    members: PlatformMember[]
-    group: Group
     checkout: RegisterCheckout, // we should auto assign this checkout to all search results and newly created members
+    group?: Group // If you want to add new members to the cart
+    groupOrganization: Organization,
+    members?: PlatformMember[] // Optional: used to update the members after the checkout
 }>();
-
-function setOrganization(groupOrganization: Organization) {
-    props.checkout.setDefaultOrganization(groupOrganization)
-}
 
 onMounted(() => {
     // Initially show errors as soon as it is possible
@@ -94,7 +90,6 @@ async function addMember() {
             doSave: true,
             saveHandler: async (navigate: NavigationActions) => {
                 await navigate.dismiss({force: true})
-                props.members.push(member)
 
                 // todo: wire up views to check member information
             }
@@ -134,6 +129,7 @@ async function goToCheckout() {
             admin: true,
             checkout: props.checkout,
             context: context.value,
+            members: props.members,
             displayOptions: {action: 'show'}
         }, navigate)
     } catch (e) {

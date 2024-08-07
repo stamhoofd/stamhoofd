@@ -125,7 +125,8 @@ export class RecordAnswer extends AutoEncoder {
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
     decode(data: Data): RecordAnswer {
-        const type = data.field("settings").field("type").enum(RecordType)
+        const settings = data.field("settings").decode(RecordSettings as Decoder<RecordSettings>)
+        const type = settings.type
         return data.decode(this.getClassForType(type) as Decoder<RecordAnswer>)
     }
 

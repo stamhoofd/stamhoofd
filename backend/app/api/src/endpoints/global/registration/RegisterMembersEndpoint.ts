@@ -264,8 +264,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             registration.memberId = member.id
             registration.groupId = group.id
-            registration.cycle = group.cycle
             registration.price = 0 // will get filled by balance items themselves 
+            registration.groupPrice = item.groupPrice;
+            registration.options = item.options
 
             payRegistrations.push({
                 registration,
@@ -536,9 +537,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        const updatedMembers = await Member.getBlobByIds(...memberIds)
+
         return new Response(RegisterResponse.create({
             payment: payment ? PaymentStruct.create(payment) : null,
-            members: await AuthenticatedStructures.membersBlob(members),
+            members: await AuthenticatedStructures.membersBlob(updatedMembers),
             registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
             paymentUrl
         }));

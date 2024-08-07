@@ -239,34 +239,43 @@ export function useChooseFamilyMembersForGroup() {
 // ----------------------------
 // --------- Flow 3 -----------
 
-export async function chooseOrganizationMembersForGroup({members, group, items, context, navigate, owner, deleteRegistrations}: {
-    members: PlatformMember[], 
-    group: Group, 
+export async function chooseOrganizationMembersForGroup({members, group, organization, items, context, navigate, owner, deleteRegistrations}: {
+    members?: PlatformMember[], // Automatically add default items for these members to the checkout if group is also provided
+    group?: Group, 
+    organization?: Organization,
     context: SessionContext,
     items?: RegisterItem[], 
     deleteRegistrations?: RegistrationWithMember[],
     navigate: NavigationActions,
     owner: any
 }) {
-    const groupOrganization = await loadGroupOrganization(context, group.organizationId, owner);
+    if (!organization && !group) {
+        throw new Error('Either organization or group should be provided')
+    }
+
+    const groupOrganization = organization ?? await loadGroupOrganization(context, group!.organizationId, owner);
 
     // Create a new shared checkout for these members
     const checkout = new RegisterCheckout();
     checkout.asOrganizationId = context.organization?.id || null;
+    checkout.defaultOrganization = groupOrganization;
 
-    for (const member of members) {
-        member.family.checkout = checkout;
-        member.family.pendingRegisterItems = [];
+    if (members) {
+        for (const member of members) {
+            member.family.checkout = checkout;
+            member.family.pendingRegisterItems = [];
 
-        // Add default register item
-        if (items === undefined) {
-            const item = RegisterItem.defaultFor(member, group, groupOrganization);
-            checkout.add(item, {calculate: false});
+            if (items === undefined && group) {
+                const item = RegisterItem.defaultFor(member, group, groupOrganization);
+                checkout.add(item, {calculate: false});
+            }
         }
     }
 
     if (items !== undefined) {
         for (const item of items) {
+            item.member.family.checkout = checkout;
+            item.member.family.pendingRegisterItems = [];
             checkout.add(item, {calculate: false});
         }
     }
@@ -283,8 +292,9 @@ export async function chooseOrganizationMembersForGroup({members, group, items, 
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseOrganizationMembersForGroupView, {
-                    members,
                     group,
+                    members, // Makes sure we update the editing members after checkout (mainly needed for delete registrations where we don't have a reference to the platform member)
+                    groupOrganization,
                     checkout
                 })
             })

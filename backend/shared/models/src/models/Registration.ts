@@ -1,6 +1,6 @@
 import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { Email } from '@stamhoofd/email';
-import { EmailTemplateType, PaymentMethod, PaymentMethodHelper, Recipient, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
+import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -30,6 +30,12 @@ export class Registration extends Model {
 
     @column({ type: "string", foreignKey: Registration.group})
     groupId: string;
+    
+    @column({ type: "json", decoder: GroupPrice})
+    groupPrice: GroupPrice;
+
+    @column({ type: "json", decoder: new ArrayDecoder(RegisterItemOption) })
+    options: RegisterItemOption[] = [];
 
     /**
      * @deprecated
@@ -37,8 +43,11 @@ export class Registration extends Model {
     @column({ type: "string", nullable: true })
     paymentId: string | null = null
 
+    /**
+     * @deprecated
+     */
     @column({ type: "integer" })
-    cycle: number;
+    cycle: number = 0;
 
     @column({ type: "integer", nullable: true })
     price: number | null = null;
@@ -469,11 +478,33 @@ export class Registration extends Model {
             }
 
             if (updated.shouldIncludeStock()) {
-                const myStockReservations: StockReservation[] = [];
+                const groupStockReservations: StockReservation[] = [
+                    // Group level stock reservatiosn (stored in the group)
+                    StockReservation.create({
+                        objectId: updated.groupPrice.id,
+                        objectType: 'GroupPrice',
+                        amount: 1
+                    }),
+                    ...updated.options.map(o => {
+                        return StockReservation.create({
+                            objectId: o.option.id,
+                            objectType: 'GroupOption',
+                            amount: o.amount
+                        })
+                    })
+                ]
 
-                // todo: build
+                await Group.applyStockReservations(updated.groupId, groupStockReservations);
 
-                updated.stockReservations = myStockReservations;
+                updated.stockReservations = [
+                    // Global level stock reservations (stored in each group)
+                    StockReservation.create({
+                        objectId: updated.groupId,
+                        objectType: 'Group',
+                        amount: 1,
+                        children: groupStockReservations
+                    })
+                ];
                 await updated.save();
             } else {
                 if (updated.stockReservations.length) {

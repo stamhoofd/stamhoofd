@@ -116,7 +116,7 @@
                             {{ reducedPriceName }}: <span>{{ formatPrice(price.price.reducedPrice) }}</span>
                         </p>
 
-                        <p v-if="price.isSoldOut" class="style-description-small">
+                        <p v-if="price.isSoldOut(patched)" class="style-description-small">
                             Uitverkocht
                         </p>
                         <p v-else-if="price.stock" class="style-description-small">

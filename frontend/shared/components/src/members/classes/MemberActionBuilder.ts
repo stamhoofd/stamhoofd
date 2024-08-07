@@ -1,7 +1,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegisterItem, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..'
@@ -14,6 +14,7 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, Ta
 import { NavigationActions } from '../../types/NavigationActions'
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
+import { RegistrationActionBuilder } from './RegistrationActionBuilder'
 
 export function useDirectMemberActions(options?: {groups?: Group[], organizations?: Organization[]}) {
     return useMemberActions()(options)
@@ -77,6 +78,25 @@ export class MemberActionBuilder {
             }
         }
         return true
+    }
+
+    getRegistrationActionBuilder(members: PlatformMember[]) {
+        if (this.organizations.length !== 1) {
+            return;
+        }
+
+        const groupOrganization = this.organizations[0]
+        const registrations = members.flatMap(m => m.filterRegistrations({groups: this.groups, organizationId: groupOrganization.id}))
+
+        return new RegistrationActionBuilder({
+            context: this.context,
+            owner: this.owner,
+            present: this.present,
+            organization: groupOrganization,
+            registrations,
+            members,
+            platformFamilyManager: this.platformFamilyManager
+        })
     }
 
     getRegisterActions(organization?: Organization): TableAction<PlatformMember>[] {
@@ -157,6 +177,27 @@ export class MemberActionBuilder {
         ]
     }
 
+    getEditAction(): TableAction<PlatformMember>[] {
+        if (this.organizations.length !== 1 || this.groups.length === 0) {
+            return []
+        }
+
+        return [
+            new InMemoryTableAction({
+                name: "Bewerk inschrijving",
+                priority: 1,
+                groupIndex: 1,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled: this.hasWrite,
+                handler: async (members: PlatformMember[]) => {
+                    await this.editRegistrations(members)
+                },
+                icon: 'edit'
+            })
+        ]
+    }
+
     getUnsubscribeAction(): TableAction<PlatformMember>[] {
         if (this.groups.length === 0) {
             return []
@@ -203,9 +244,9 @@ export class MemberActionBuilder {
     getActions(): TableAction<PlatformMember>[] {
         return [
             new InMemoryTableAction({
-                name: "Bewerk",
+                name: "Bewerk lid",
                 icon: "edit",
-                priority: 0,
+                priority: 2,
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
@@ -231,7 +272,7 @@ export class MemberActionBuilder {
             new AsyncTableAction({
                 name: "E-mailen",
                 icon: "email",
-                priority: 10,
+                priority: 12,
                 groupIndex: 3,
                 handler: async (selection: TableActionSelection<PlatformMember>) => {
                     await this.openMail(selection)
@@ -275,6 +316,7 @@ export class MemberActionBuilder {
             }),
 
             ...this.getMoveAction(),
+            ...this.getEditAction(),
 
             ...this.getUnsubscribeAction(),
 
@@ -549,31 +591,11 @@ export class MemberActionBuilder {
     }
 
     async moveRegistrations(members: PlatformMember[], group: Group) {
-        const items: RegisterItem[] = [];
+        return this.getRegistrationActionBuilder(members)?.moveRegistrations(group)
+    }
 
-        // TODO:
-        const groupOrganization = this.organizations.find(o => o.id === group.organizationId)!
-
-        for (const member of members) {
-            const item = RegisterItem.defaultFor(member, group, groupOrganization);
-            item.replaceRegistrations = member.filterRegistrations({groups: this.groups}).map(r => RegistrationWithMember.from(r, member.patchedMember.tiny))
-            items.push(item);
-        }
-
-
-        return await chooseOrganizationMembersForGroup({
-            members, 
-            group,
-            context: this.context,
-            owner: this.owner,
-            items,
-            navigate: {
-                present: this.present,
-                show: this.present,
-                pop: () => Promise.resolve(),
-                dismiss: () => Promise.resolve()
-            }
-        })
+    async editRegistrations(members: PlatformMember[]) {
+        return this.getRegistrationActionBuilder(members)?.editRegistrations()
     }
 
     async register(members: PlatformMember[], group: Group) {

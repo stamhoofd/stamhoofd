@@ -1,5 +1,9 @@
 <template>
     <SaveView class="st-view register-item-view" v-on="isInCart ? {delete: deleteMe} : {}" :loading="saving" :save-text="isInCart ? 'Aanpassen' : 'Inschrijven'" :save-icon="isInCart ? 'edit' : 'basket'" :disabled="!!validationError" :title="item.group.settings.name" @save="addToCart">
+        <p class="style-title-prefix">
+            {{ item.member.patchedMember.name }}
+        </p>
+
         <h1>{{ item.group.settings.name }}</h1>
 
         <template v-if="showGroupInformation">
@@ -15,7 +19,8 @@
         </p>
 
         <p v-for="registration in item.replaceRegistrations" :key="registration.id" class="style-description">
-            Verplaatsen vanaf {{ registration.group.settings.name }}
+            <template v-if="registration.group.id !== item.group.id">Verplaatsen vanaf {{ registration.group.settings.name }}</template>
+            <template v-else>Bestaande inschrijving aanpassen</template>
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -30,7 +35,7 @@
                         {{ price.name || 'Naamloos' }}
                     </h4>
 
-                    <p v-if="price.getPendingStock(item) === 0" class="style-description-small">
+                    <p v-if="price.getRemainingStock(item) === 0" class="style-description-small">
                         Uitverkocht
                     </p>
 

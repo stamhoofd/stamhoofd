@@ -139,11 +139,11 @@ const stock = computed({
 })
 
 
-const usedStock = computed(() => patched.value.usedStock || 0);
+const usedStock = computed(() => patched.value.getUsedStock(props.group) || 0);
 
 const useStock = computed({
     get: () => patched.value.stock !== null,
-    set: (useStock) => addPatch({stock: useStock ? (patched.value.usedStock || 10) : null})
+    set: (useStock) => addPatch({stock: useStock ? (patched.value.getUsedStock(props.group) || 10) : null})
 })
 
 const maximum = computed({

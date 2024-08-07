@@ -2,6 +2,8 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerD
 import { v4 as uuidv4 } from "uuid";
 import { Group } from '../Group';
 import { StockReservation } from '../StockReservation';
+import { GroupPrice } from '../GroupSettings';
+import { RegisterItemOption } from './checkout/RegisterItem';
 
 export class Registration extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4()  })
@@ -18,6 +20,12 @@ export class Registration extends AutoEncoder {
     @field({ decoder: Group, version: 266 })
     group: Group
 
+    @field({ decoder: GroupPrice, version: 305 })
+    groupPrice: GroupPrice
+
+    @field({ decoder: new ArrayDecoder(RegisterItemOption), version: 305 })
+    options: RegisterItemOption[] = [];
+
     get groupId() {
         return this.group.id
     }
@@ -31,7 +39,7 @@ export class Registration extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: IntegerDecoder })
+    @field({ decoder: IntegerDecoder, optional: true })
     cycle: number = 0
 
     /// Set registeredAt to null if the member is on the waiting list for now
@@ -57,7 +65,7 @@ export class Registration extends AutoEncoder {
     /**
      * @deprecated - replaced by group type
      */
-    @field({ decoder: BooleanDecoder, version: 16 })
+    @field({ decoder: BooleanDecoder, version: 16, optional: true  })
     waitingList = false
 
     @field({ decoder: BooleanDecoder, version: 20 })
@@ -71,4 +79,18 @@ export class Registration extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(StockReservation), nullable: true, version: 299 })
     stockReservations: StockReservation[] = []
+
+    get description() {
+        const descriptions: string[] = []
+
+        if (this.group.settings.getFilteredPrices().length > 1) {
+            descriptions.push(this.groupPrice.name)
+        }
+        
+        for (const option of this.options) {
+            descriptions.push(option.optionMenu.name + ': ' + option.option.name + (option.option.allowAmount ? ` x ${option.amount}` : ""))
+        }
+
+        return descriptions.filter(d => !!d).join("\n")
+    }
 }
