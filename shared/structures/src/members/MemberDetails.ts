@@ -295,10 +295,6 @@ export class MemberDetails extends AutoEncoder {
                 this.notes = null;
             }
         }
-
-        if(this.uitpasNumber !== null && !DataValidator.isUitpasNumberValid(this.uitpasNumber)) {
-            this.uitpasNumber = null;
-        }
     }
 
     isEqual(other: MemberDetails): boolean {
