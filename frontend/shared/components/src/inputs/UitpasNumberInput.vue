@@ -1,0 +1,114 @@
+<template>
+    <STInputBox title="UiTPAS-nummer" error-fields="uitpasNumber" :error-box="errorBox" :class="props.class">
+        <input ref="input" v-model="uitpasNumberRaw" class="input" type="tel" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" :placeholder="placeholder" autocomplete="off" inputmode="numeric" maxlength="13" @keydown="preventInvalidUitpasNumberChars" @change="validate(false)">
+    </STInputBox>
+</template>
+
+<script lang="ts" setup>
+import { SimpleError } from '@simonbackx/simple-errors';
+import { DataValidator } from "@stamhoofd/utility";
+import { Ref, computed, onMounted, onUnmounted, ref } from 'vue';
+import { ErrorBox } from "../errors/ErrorBox";
+import { Validator } from "../errors/Validator";
+import STInputBox from "./STInputBox.vue";
+
+const props = defineProps({
+    validator: {
+        type: [Validator],
+        default: null
+    },
+    /**
+     * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
+     * Only used if required = false
+     */
+    nullable: {type: Boolean, default: false},
+    disabled: {type: Boolean, default: false},
+    class: {
+        type: [String],
+        default: null
+    },
+    required: {type: Boolean, default: true},
+});
+
+const model = defineModel<string | null>();
+const uitpasNumberRaw = ref('');
+const placeholder = computed(() => {
+    const base = "Bv. 4329032984732";
+    if(props.required) return base;
+    return `Optioneel. ${base}`
+});
+
+const input = ref<HTMLInputElement | null>(null);
+const valid = ref(true);
+const errorBox: Ref<ErrorBox | null> = ref(null);
+
+onMounted(() => {
+    if (props.validator) {
+        props.validator.addValidation(this, () => {
+            return validate(true)
+        })
+    }
+
+    uitpasNumberRaw.value = model.value ?? ""
+})
+
+onUnmounted(() => {
+    if(props.validator) {
+        props.validator.removeValidation(this);
+    }
+})
+
+function clearErrorBox(silent: boolean) {
+    if (!silent) {
+        errorBox.value = null
+    }
+}
+
+// todo: check if patch is added if model is  not changed, otherwise add helper methode updateModel
+
+function validate(final = true, silent = false): boolean {
+    uitpasNumberRaw.value = uitpasNumberRaw.value.trim();
+
+    if (!props.required && uitpasNumberRaw.value.length === 0) {
+        clearErrorBox(silent);
+        model.value = null;
+        return true
+    }
+
+    if (props.required && uitpasNumberRaw.value.length === 0 && !final) {
+        // Ignore empty email if not final
+        clearErrorBox(silent);
+
+        if (props.nullable) {
+            model.value = null;
+        } else {
+            model.value = "";
+        }
+
+        return false
+    }
+        
+    if (!DataValidator.isUitpasNumberValid(uitpasNumberRaw.value)) {
+        if (!silent) {
+            errorBox.value = new ErrorBox(new SimpleError({
+                code: "invalid_field",
+                message: "Vul een geldig UiTPAS-nummer in",
+                field: 'uitpasNumber'
+            }));
+        }
+        
+        return false
+    }
+
+    model.value = uitpasNumberRaw.value;
+    clearErrorBox(silent);
+
+    return true;
+}
+
+function preventInvalidUitpasNumberChars(e: KeyboardEvent) {
+    if(e.key && /^\D$/.test(e.key)) {
+        e.preventDefault();
+    }
+}
+</script>

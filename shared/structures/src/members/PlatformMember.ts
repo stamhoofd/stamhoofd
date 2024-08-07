@@ -522,7 +522,7 @@ export class PlatformMember implements ObjectWithRecords {
         return false;
     }
 
-    isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+    isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts' | 'uitpasNumber') {
         if (!this.isPropertyEnabledForPlatform(property)) {
             return false;
         }
@@ -534,7 +534,7 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isRequired(this)
     }
 
-    isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+    isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts' | 'uitpasNumber') {
         if (this.isPropertyRequiredForPlatform(property)) {
             return true;
         }

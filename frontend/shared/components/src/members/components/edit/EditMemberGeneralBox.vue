@@ -37,32 +37,45 @@
                     <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
                     <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator">
                         <template #right>
-                            <button class="button icon add gray" type="button" @click="addEmail" v-tooltip="'Alternatief e-mailadres toevoegen'"/>
+                            <button v-tooltip="'Alternatief e-mailadres toevoegen'" class="button icon add gray" type="button" @click="addEmail" />
                         </template>
                     </EmailInput>
                     <EmailInput 
+                        v-for="n in alternativeEmails.length" 
                         :model-value="getEmail(n - 1)" 
-                        @update:modelValue="setEmail(n - 1, $event)" 
+                        :key="n" 
                         :required="true" 
                         :title="'Alternatief e-mailadres ' + (alternativeEmails.length > 1 ? n : '') " 
-                        :placeholder="'Enkel van lid zelf'" 
-                        :validator="validator"  
-                        v-for="n in alternativeEmails.length" 
-                        :key="n"
+                        :placeholder="'Enkel van lid zelf'"  
+                        :validator="validator" 
+                        @update:model-value="setEmail(n - 1, $event)"
                     >
                         <template #right>
                             <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
                         </template>
                     </EmailInput>
                     <template v-if="(isPropertyEnabled('emailAddress') || email) && member.patchedMember.details.canHaveOwnAccount">
-                        <p class="style-description-small" v-if="member.patchedMember.details.parentsHaveAccess">{{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">één van de ingevoerde e-mailadressen</template><template v-else>het ingevoerde e-mailadres</template>. Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.</p>
-                        <p class="style-description-small" v-else>{{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">één van de ingevoerde e-mailadressen</template><template v-else>het ingevoerde e-mailadres</template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.</p>
+                        <p v-if="member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                            {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
+                                één van de ingevoerde e-mailadressen
+                            </template><template v-else>
+                                het ingevoerde e-mailadres
+                            </template>. Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
+                        </p>
+                        <p v-else class="style-description-small">
+                            {{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">
+                                één van de ingevoerde e-mailadressen
+                            </template><template v-else>
+                                het ingevoerde e-mailadres
+                            </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
+                        </p>
                     </template>
-                    <template v-if="isPropertyEnabled('uitpasNumber') || uitpasNumber">
-                        <STInputBox title="UiTPAS-nummer" error-fields="uitpasNumber" :error-box="errors.errorBox">
-                            <input v-model="uitpasNumber" @keydown="preventInvalidUitpasNumberChars" class="input" type="tel" placeholder="Bv. 4329032984732" autocomplete="off" inputmode="numeric" maxlength="13">
-                        </STInputBox>
-                    </template>
+                    <UitpasNumberInput
+                        v-if="isPropertyEnabled('uitpasNumber') || uitpasNumber"
+                        v-model="uitpasNumber"
+                        :required="isPropertyRequired('uitpasNumber')"
+                        :validator="validator"
+                    />
                 </template>
             </div>
             
@@ -70,14 +83,12 @@
                 <SelectionAddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
             </div>
         </div>
-
     </div>
 </template>
 
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Gender, PlatformMember } from '@stamhoofd/structures';
-import { DataValidator } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -89,6 +100,7 @@ import EmailInput from '../../../inputs/EmailInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
+import UitpasNumberInput from '../../../inputs/UitpasNumberInput.vue';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
 
@@ -131,14 +143,6 @@ useValidation(errors.validator, () => {
         }))
     }
 
-    if(uitpasNumber.value && !DataValidator.isUitpasNumberValid(uitpasNumber.value)) {
-        se.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Vul een geldig UiTPAS-nummer in",
-            field: "uitpasNumber"
-        }))
-    }
-
     if (se.errors.length > 0) {
         errors.errorBox = new ErrorBox(se)
         return false
@@ -147,16 +151,6 @@ useValidation(errors.validator, () => {
 
     return true
 });
-
-function validateUitpasNumber() {
-    if(uitpasNumber.value && !DataValidator.isUitpasNumberValid(uitpasNumber.value)) {
-        errors.errorBox.addError(new SimpleError({
-            code: "invalid_field",
-            message: "Vul een geldig UiTPAS-nummer in",
-            field: "uitpasNumber"
-        }))
-    }
-}
 
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
@@ -228,12 +222,6 @@ const uitpasNumber = computed({
         props.member.addDetailsPatch({uitpasNumber});
     }
 });
-
-function preventInvalidUitpasNumberChars(e: KeyboardEvent) {
-    if(e.key && /^\D$/.test(e.key)) {
-        e.preventDefault();
-    }
-}
 
 function deleteEmail(n: number) {
     const newEmails = [...alternativeEmails.value];
