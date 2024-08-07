@@ -70,7 +70,7 @@ export async function getScopedRegistrationRootFromUrl() {
 
 export async function getRootView(session: SessionContext, ownDomain = false) {
     const reactiveSession = reactive(session as any) as SessionContext
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
     await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country)
 
     // Set color

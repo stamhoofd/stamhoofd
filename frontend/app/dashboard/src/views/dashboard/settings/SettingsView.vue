@@ -417,7 +417,7 @@ defineRoutes([
         component: RecordsConfigurationView as ComponentOptions,
         paramsToProps() {
             return {
-                inheritedRecordsConfiguration: platform.value.config.recordsConfiguration,
+                inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({platform: platform.value}),
                 recordsConfiguration: $organizationManager.value.organization.meta.recordsConfiguration,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
                     await $organizationManager.value.patch(Organization.patch({

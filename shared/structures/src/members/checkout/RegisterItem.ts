@@ -91,8 +91,29 @@ export class RegisterItem {
             id: registration.id,
             member,
             group: registration.group,
-            organization
+            organization,
+            groupPrice: registration.groupPrice,
+            options: registration.options
         })
+    }
+
+    static defaultFor(member: PlatformMember, group: Group, organization: Organization) {
+        if (group.organizationId !== organization.id) {
+            throw new Error("Group and organization do not match in RegisterItem.defaultFor")
+        }
+
+        const item = new RegisterItem({
+            member,
+            group,
+            organization
+        });
+
+        //if (item.shouldUseWaitingList() && group.waitingList) {
+        //    group = group.waitingList
+        //    item = RegisterItem.defaultFor(member, group, organization);
+        //}
+
+        return item;
     }
 
     constructor(data: {
@@ -136,7 +157,7 @@ export class RegisterItem {
     }
 
     get showItemView() {
-        return this.shouldUseWaitingList() || this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
+        return this.shouldUseWaitingList() || !!this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
     }
 
     calculatePrice() {
@@ -164,7 +185,7 @@ export class RegisterItem {
             replacePrice += registration.price
 
             all.push({
-                name: 'Terugbetaling '+registration.group.settings.name,
+                name: this.checkout.isAdminFromSameOrganization ? 'Reeds aangerekend voor ' + registration.group.settings.name : 'Terugbetaling '+registration.group.settings.name,
                 price: -registration.price
             })
         }
@@ -177,12 +198,11 @@ export class RegisterItem {
                 price: this.calculatedPrice
             })
         }
-
         return [
             ...all,
             {
-                name: 'Totaal',
-                price: this.calculatedPrice - this.calculatedRefund
+                name: this.checkout.isAdminFromSameOrganization ? (this.totalPrice  >= 0 ? 'Openstaand bedrag stijgt met' : 'Openstaand bedrag daalt met') : 'Totaal',
+                price: this.checkout.isAdminFromSameOrganization ? Math.abs(this.totalPrice) : this.totalPrice
             }
         ];
     }
@@ -206,27 +226,20 @@ export class RegisterItem {
     }
 
     getFilteredPrices() {
-        return this.group.settings.prices.filter(p => {
-            if (p.hidden && !this.checkout.isAdminFromSameOrganization) {
-                return false
-            }
-            return true
-        })
+        const base = this.group.settings.getFilteredPrices({admin: this.checkout.isAdminFromSameOrganization})
+
+        if (!base.some(b => b.id === this.groupPrice.id)) {
+            return [this.groupPrice, ...base]
+        }
+        return base;
     }
 
     getFilteredOptionMenus() {
-        return this.group.settings.optionMenus.filter(p => {
-            return this.getFilteredOptions(p).length > 0
-        })
+        return this.group.settings.getFilteredOptionMenus({admin: this.checkout.isAdminFromSameOrganization})
     }
 
     getFilteredOptions(menu: GroupOptionMenu) {
-        return menu.options.filter(p => {
-            if (p.hidden && !this.checkout.isAdminFromSameOrganization) {
-                return false
-            }
-            return true
-        })
+        return menu.getFilteredOptions({admin: this.checkout.isAdminFromSameOrganization})
     }
 
     convert(): IDRegisterItem {
@@ -261,25 +274,6 @@ export class RegisterItem {
         return this.family.checkout
     }
 
-    static defaultFor(member: PlatformMember, group: Group, organization: Organization) {
-        if (group.organizationId !== organization.id) {
-            throw new Error("Group and organization do not match in RegisterItem.defaultFor")
-        }
-
-        const item = new RegisterItem({
-            member,
-            group,
-            organization
-        });
-
-        //if (item.shouldUseWaitingList() && group.waitingList) {
-        //    group = group.waitingList
-        //    item = RegisterItem.defaultFor(member, group, organization);
-        //}
-
-        return item;
-    }
-
     /**
      * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
      */
@@ -303,7 +297,8 @@ export class RegisterItem {
                     new SimpleError({
                         code: "product_unavailable",
                         message: "Product unavailable",
-                        human: "Eén of meerdere tarieven van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                        human: "Eén of meerdere tarieven van "+this.group.settings.name+" zijn niet meer beschikbaar",
+                        meta: {recoverable: true}
                     })
                 )
             } else {
@@ -322,7 +317,8 @@ export class RegisterItem {
                 errors.addError(new SimpleError({
                     code: "option_menu_unavailable",
                     message: "Option menu unavailable",
-                    human: "Eén of meerdere keuzemogelijkheden van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                    human: "Eén of meerdere keuzemogelijkheden van "+this.group.settings.name+" zijn niet meer beschikbaar",
+                    meta: {recoverable: true}
                 }))
                 continue
             }
@@ -339,7 +335,8 @@ export class RegisterItem {
                 errors.addError(new SimpleError({
                     code: "option_unavailable",
                     message: "Option unavailable",
-                    human: "Eén of meerdere keuzemogelijkheden van "+this.group.settings.name+" zijn niet meer beschikbaar"
+                    human: "Eén of meerdere keuzemogelijkheden van "+this.group.settings.name+" zijn niet meer beschikbaar",
+                    meta: {recoverable: true}
                 }))
                 continue
             }
@@ -354,7 +351,8 @@ export class RegisterItem {
                 new SimpleError({
                     code: "missing_menu",
                     message: "Missing menu's "+remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(", "),
-                    human: "Er zijn nieuwe keuzemogelijkheden voor "+this.group.settings.name+" waaruit je moet kiezen"
+                    human: "Er zijn nieuwe keuzemogelijkheden voor "+this.group.settings.name+" waaruit je moet kiezen",
+                    meta: {recoverable: true}
                 })
             )
         }
@@ -362,8 +360,12 @@ export class RegisterItem {
         errors.throwIfNotEmpty()
     }
 
+    willReplace(registrationId: string) {
+        return this.replaceRegistrations.some(rr => rr.id === registrationId)
+    }
+
     isAlreadyRegistered() {
-        return !!this.member.member.registrations.find(r => r.groupId === this.group.id && r.registeredAt !== null && r.deactivatedAt === null)
+        return !!this.member.member.registrations.find(r => !this.willReplace(r.id) && r.groupId === this.group.id && r.registeredAt !== null && r.deactivatedAt === null)
     }
     
     hasReachedCategoryMaximum(): boolean {
@@ -376,7 +378,7 @@ export class RegisterItem {
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {
                 const count = this.member.patchedMember.registrations.filter(r => {
-                    if (r.registeredAt !== null && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)) {
+                    if (!this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)) {
                         return true;
                     }
                     return false
@@ -400,7 +402,7 @@ export class RegisterItem {
     doesMeetRequireGroupIds() {
         if (this.group.settings.requireGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
-                return r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.requireGroupIds.includes(r.groupId)
+                return !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.requireGroupIds.includes(r.groupId)
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireGroupIds.includes(item.group.id))) {
@@ -410,7 +412,7 @@ export class RegisterItem {
 
         if (this.group.settings.requireDefaultAgeGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
-                return r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId)
+                return !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId)
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
@@ -423,7 +425,7 @@ export class RegisterItem {
     doesMeetRequireOrganizationIds() {
         if (this.group.settings.requireOrganizationIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
-                return r.group.type === GroupType.Membership && this.group.settings.requireOrganizationIds.includes(r.organizationId) && r.registeredAt !== null && r.deactivatedAt === null
+                return !this.willReplace(r.id) && r.group.type === GroupType.Membership && this.group.settings.requireOrganizationIds.includes(r.organizationId) && r.registeredAt !== null && r.deactivatedAt === null
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireOrganizationIds.includes(item.organization.id))) {

@@ -228,7 +228,6 @@ export class AuthenticatedStructures {
                 }
             }
 
-
             const blob = member.getStructureWithRegistrations()
             memberBlobs.push(
                 await Context.auth.filterMemberData(member, blob)

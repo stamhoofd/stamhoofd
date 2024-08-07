@@ -44,6 +44,7 @@ import MemberRegistrationRow from './MemberRegistrationRow.vue';
 import { Sorter } from '@stamhoofd/utility';
 import { useChooseGroupForMember } from '../checkout';
 import { Toast } from '../../overlays/Toast';
+import { useRegistrationActionBuilder } from '../classes/RegistrationActionBuilder';
 
 const props = defineProps<{
     member: PlatformMember
@@ -100,18 +101,15 @@ async function addRegistration() {
     await chooseGroupForMember({member: props.member, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}, startCheckoutFlow: true})
 }
 
-const buildActions = useMemberActions()
+const buildActions = useRegistrationActionBuilder()
 
 async function editRegistration(registration: Registration, event: MouseEvent) {
     const builder = buildActions({
-        groups: [registration.group],
-        organizations: props.member.organizations,
+        registration,
+        member: props.member
     })
 
-    const actions = [
-        ...builder.getUnsubscribeAction().map(a => a.setGroupIndex(0).setPriority(10)),
-        ...builder.getMoveAction().map(a => a.setGroupIndex(1).setPriority(5)),
-    ]
+    const actions = builder.getActions()
 
     if (actions.filter(a => a.enabled).length === 0) {
         Toast.warning('Er zijn geen acties beschikbaar voor deze inschrijving').show()

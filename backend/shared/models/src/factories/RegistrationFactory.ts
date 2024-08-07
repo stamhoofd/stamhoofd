@@ -7,7 +7,6 @@ import { Registration } from '../models/Registration';
 class Options {
     member: Member;
     group: Group;
-    waitingList?: boolean
 }
 
 export class RegistrationFactory extends Factory<Options, Registration> {
@@ -17,14 +16,8 @@ export class RegistrationFactory extends Factory<Options, Registration> {
         registration.groupId = this.options.group.id
         registration.periodId = this.options.group.periodId
         registration.organizationId = this.options.group.organizationId
-        registration.cycle = this.options.group.cycle
-
-        if (this.options.waitingList !== true) {
-            registration.registeredAt = new Date()
-            registration.registeredAt.setMilliseconds(0)
-        } else {
-            registration.waitingList = true
-        }
+        registration.registeredAt = new Date()
+        registration.registeredAt.setMilliseconds(0)
         
         await registration.save()
         return registration;

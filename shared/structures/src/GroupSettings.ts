@@ -217,6 +217,15 @@ export class GroupOptionMenu extends AutoEncoder {
     options: GroupOption[] = [
         GroupOption.create({})
     ]
+
+    getFilteredOptions(options?: {admin?: boolean}) {
+        return this.options.filter(p => {
+            if (p.hidden && !options?.admin) {
+                return false
+            }
+            return true
+        })
+    }
 }
 
 
@@ -385,7 +394,8 @@ export class GroupSettings extends AutoEncoder {
     @field({ 
         decoder: IntegerDecoder, 
         nullable: true, 
-        version: 139
+        version: 139, 
+        optional: true 
     })
     waitingListSize: number | null = null
 
@@ -433,13 +443,13 @@ export class GroupSettings extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: new ArrayDecoder(Image), version: 58 })
+    @field({ decoder: new ArrayDecoder(Image), version: 58, optional: true })
     images: Image[] = []
 
     /**
      * @deprecated
      */
-    @field({ decoder: StringDecoder, version: 76 })
+    @field({ decoder: StringDecoder, version: 76, optional: true })
     location = ""
 
     /**
@@ -490,20 +500,20 @@ export class GroupSettings extends AutoEncoder {
      * Require that the member is already registered for one of these groups before allowing to register for this group.
      * If it is empty, then it is not enforced
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), version: 100 })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 100, optional: true })
     requirePreviousGroupIds: string[] = []
 
     /**
      * @deprecated
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), version: 102 })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 102, optional: true })
     preventPreviousGroupIds: string[] = []
 
     /**
      * @deprecated
      * Information about previous cycles
      */
-    @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193 })
+    @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193, optional: true })
     cycleSettings: Map<number, CycleInformation> = new Map()
 
     /**
@@ -516,7 +526,7 @@ export class GroupSettings extends AutoEncoder {
         const d2 = new Date(d)
         d2.setUTCHours(-2, 0, 0, 0) // brussels time
         return d2
-    } })
+    }, optional: true })
     startDate: Date = new Date()
 
     /**
@@ -529,14 +539,14 @@ export class GroupSettings extends AutoEncoder {
         const d2 = new Date(d)
         d2.setUTCHours(23-2, 59, 0, 0) // brussels time
         return d2
-    } })
+    }, optional: true  })
     endDate: Date = new Date()
 
     /**
      * @deprecated
      * Dispay start and end date times
      */
-    @field({ decoder: BooleanDecoder, version: 78 })
+    @field({ decoder: BooleanDecoder, version: 78, optional: true  })
     displayStartEndTime = false
 
     /**
@@ -746,6 +756,20 @@ export class GroupSettings extends AutoEncoder {
         return filter
     }
 
+    getFilteredPrices(options?: {admin?: boolean}) {
+        return this.prices.filter(p => {
+            if (p.hidden && !options?.admin) {
+                return false
+            }
+            return true
+        })
+    }
+
+    getFilteredOptionMenus(options?: {admin?: boolean}) {
+        return this.optionMenus.filter(p => {
+            return p.getFilteredOptions(options).length > 0
+        })
+    }
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType()

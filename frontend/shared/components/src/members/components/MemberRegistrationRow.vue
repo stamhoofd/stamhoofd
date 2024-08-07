@@ -9,6 +9,7 @@
         <p v-if="registrationOrganization && (!organization || registrationOrganization.id !== organization.id)" class="style-description-small">
             {{ registrationOrganization.name }}
         </p>
+        <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
 
         <p v-if="registration.registeredAt" class="style-description-small">
             Ingeschreven op {{ formatDateTime(registration.registeredAt) }}

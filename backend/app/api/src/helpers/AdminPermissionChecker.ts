@@ -207,10 +207,11 @@ export class AdminPermissionChecker {
         return await this.hasFullAccess(organizationId)
     }
 
-    /**
-     * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
-     */
     async canAccessMember(member: MemberWithRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (this.isUserManager(member) && permissionLevel !== PermissionLevel.Full) {
+            return true;
+        }
+
         // Check user has permissions
         if (!this.user.permissions) {
             return false
@@ -761,18 +762,6 @@ export class AdminPermissionChecker {
                 for (const category of organization.meta.recordsConfiguration.recordCategories) {
                     recordCategories.push(category)
                 }
-
-                for (const [id] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
-                    if (recordCategories.find(c => c.id === id)) {
-                        // Already added
-                        continue;
-                    }
-    
-                    const category = this.platform.config.recordsConfiguration.recordCategories.find(c => c.id === id)
-                    if (category) {
-                        recordCategories.push(category)
-                    }
-                }
                 continue;
             }
 
@@ -788,17 +777,15 @@ export class AdminPermissionChecker {
                 }
             }
 
-            for (const [id] of organization.meta.recordsConfiguration.inheritedRecordCategories) {
-                if (recordCategories.find(c => c.id === id)) {
+            // Platform ones where we have been given permissions for in this organization
+            for (const category of this.platform.config.recordsConfiguration.recordCategories) {
+                if (recordCategories.find(c => c.id === category.id)) {
                     // Already added
                     continue;
                 }
 
-                if (permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, id, level)) {
-                    const category = this.platform.config.recordsConfiguration.recordCategories.find(c => c.id === id)
-                    if (category) {
-                        recordCategories.push(category)
-                    }
+                if (permissions.hasResourceAccess(PermissionsResourceType.RecordCategories, category.id, level)) {
+                    recordCategories.push(category)
                 }
             }
         }

@@ -40,7 +40,7 @@ export class PaymentGeneral extends Payment {
     }
 
     get members() {
-        const members = this.balanceItemPayments.flatMap(p => p.balanceItem.member ? [p.balanceItem.member] : [])
+        const members = this.balanceItemPayments.flatMap(p => p.balanceItem.registration?.member ? [p.balanceItem.registration?.member] : [])
 
         // Remove duplicates by id
         return members.filter((m, index) => members.findIndex(m2 => m2.id == m.id) === index)

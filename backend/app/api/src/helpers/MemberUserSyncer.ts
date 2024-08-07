@@ -1,6 +1,6 @@
 import { Member, MemberResponsibilityRecord, MemberWithRegistrations, User } from "@stamhoofd/models";
 import { SQL } from "@stamhoofd/sql";
-import { Permissions, UserPermissions } from "@stamhoofd/structures";
+import { MemberDetails, Permissions, UserPermissions } from "@stamhoofd/structures";
 
 export class MemberUserSyncerStatic {
     /**
@@ -8,15 +8,8 @@ export class MemberUserSyncerStatic {
      * - responsibilities have changed
      * - email addresses have changed
      */
-    async onChangeMember(member: MemberWithRegistrations) {
-        const userEmails = [...member.details.alternativeEmails]
-
-        if (member.details.email) {
-            userEmails.push(member.details.email)
-        }
-
-        const unverifiedEmails: string[] = member.details.unverifiedEmails;
-        const parentAndUnverifiedEmails = member.details.parentsHaveAccess ? member.details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(unverifiedEmails) : []
+    async onChangeMember(member: MemberWithRegistrations, unlinkUsers: boolean = false) {
+        const {userEmails, parentAndUnverifiedEmails} = this.getMemberAccessEmails(member.details)
 
         // Make sure all these users have access to the member
         for (const email of userEmails) {
@@ -29,12 +22,47 @@ export class MemberUserSyncerStatic {
             await this.linkUser(email, member, true)
         }
 
-        // Remove access of users that are not in this list
-        for (const user of member.users) {
-            if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
-                await this.unlinkUser(user, member)
+        if (unlinkUsers && !member.details.parentsHaveAccess) {
+            // Remove access of users that are not in this list
+            // NOTE: we should only do this once a year (preferably on the birthday of the member)
+            // only once because otherwise users loose the access to a member during the creation of the member, or when they have changed their email address
+            // users can regain access to a member after they have lost control by using the normal verification flow when detecting duplicate members
+
+            for (const user of member.users) {
+                if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
+                    await this.unlinkUser(user, member)
+                }
+            }
+        } else {
+            // Only auto unlink users that do not have an account
+            for (const user of member.users) {
+                if (!user.hasAccount() && !userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
+                    await this.unlinkUser(user, member)
+                }
             }
         }
+    }
+
+    getMemberAccessEmails(details: MemberDetails) {
+        const userEmails = [...details.alternativeEmails]
+
+        if (details.email) {
+            userEmails.push(details.email)
+        }
+
+        const unverifiedEmails: string[] = details.unverifiedEmails;
+        const parentAndUnverifiedEmails = details.parentsHaveAccess ? details.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails).concat(unverifiedEmails) : []
+
+        return {
+            userEmails,
+            parentAndUnverifiedEmails,
+            emails: userEmails.concat(parentAndUnverifiedEmails)
+        }
+    }
+
+    doesEmailHaveAccess(details: MemberDetails, email: string) {
+        const {emails} = this.getMemberAccessEmails(details)
+        return emails.includes(email)
     }
 
     async onDeleteMember(member: MemberWithRegistrations) {

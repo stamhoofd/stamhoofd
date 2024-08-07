@@ -10,7 +10,7 @@
             <EditMemberDataPermissionsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
-        <div v-if="isPropertyEnabled('parents')" class="container">
+        <div v-if="isPropertyEnabled('parents') || member.patchedMember.details.parents.length" class="container">
             <hr>
             <EditMemberParentsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
@@ -30,7 +30,7 @@
             <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :mark-reviewed="true" :level="level + 1" :validator="validator" />
         </div>
 
-        <div class="container">
+        <div class="container" v-if="app !== 'registration'">
             <hr>
             <EditMemberNotesBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator"/>
         </div>

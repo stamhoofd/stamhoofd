@@ -81,18 +81,6 @@ async function save() {
             return;
         }
 
-        if (props.markReviewed.length) {
-            const times = cloned.value.patchedMember.details.reviewTimes.clone();
-
-            for (const r of props.markReviewed) {
-                times.markReviewed(r as any, new Date())
-            }
-
-            cloned.value.addDetailsPatch({
-                reviewTimes: times
-            })
-        }
-
         if (props.doSave) {
             // Extra clone for saving, so the view doesn't change during saving
             const saveClone = cloned.value.clone();

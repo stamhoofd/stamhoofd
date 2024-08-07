@@ -706,6 +706,17 @@ export class MemberDetails extends AutoEncoder {
             }
         }
         this.recordAnswers = newAnswers
+
+        // Merge unverified data
+        this.unverifiedEmails = Formatter.uniqueArray(this.unverifiedEmails.concat(other.unverifiedEmails))
+        this.unverifiedPhones = Formatter.uniqueArray(this.unverifiedPhones.concat(other.unverifiedPhones))
+
+        // Merge unverified addresses
+        for (const address of other.unverifiedAddresses) {
+            if (!this.unverifiedAddresses.find(a => a.id === address.id)) {
+                this.unverifiedAddresses.push(address)
+            }
+        }
     }
 
     getEmailReplacements() {

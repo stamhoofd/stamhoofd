@@ -4,6 +4,7 @@ import { NavigationActions } from "../../../types/NavigationActions";
 import EditMemberParentsBox from "../../components/edit/EditMemberParentsBox.vue";
 import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
 import { markRaw } from "vue";
+import { PermissionLevel } from "@stamhoofd/structures";
 
 const outdatedTime = 60*1000*60*24*31*3 // 3 months
 
@@ -12,7 +13,12 @@ export const MemberParentsStep: EditMemberStep = {
         const member = manager.member
         const details = member.patchedMember.details;
 
-        if (!member.isPropertyEnabled('parents')) {
+        if (!member.isPropertyEnabled('parents', {
+            checkPermissions: manager.context.user ? {
+                level: PermissionLevel.Write,
+                user: manager.context.user
+            } : undefined
+        })) {
             return false;
         }
 

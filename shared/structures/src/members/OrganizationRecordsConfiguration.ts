@@ -219,7 +219,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         return this.mergeChildren(...([platformConfig, defaultGroupConfig, organizationConfig, groupConfig].filter(f => f !== null) as OrganizationRecordsConfiguration[]))
     }
 
-    static mergeChildren(...configs: OrganizationRecordsConfiguration[]) {
+    static mergeChildren(...configs: OrganizationRecordsConfiguration[]): OrganizationRecordsConfiguration {
         if (configs.length === 0) {
             throw new Error("At least one configuration is required")
         }

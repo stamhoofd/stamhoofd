@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { SessionContext } from '@stamhoofd/networking';
-import { PaymentStatus, PlatformFamily, RegisterCheckout, RegisterResponse } from '@stamhoofd/structures';
+import { PaymentStatus, PlatformFamily, PlatformMember, RegisterCheckout, RegisterResponse } from '@stamhoofd/structures';
 import { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { RegistrationSuccessView } from '../checkout';
@@ -10,7 +10,7 @@ import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
 import { GlobalEventBus } from '../../EventBus';
 
-export async function startCheckout({checkout, context, displayOptions, admin}: {checkout: RegisterCheckout, context: SessionContext, displayOptions: DisplayOptions, admin?: boolean}, navigate: NavigationActions) {
+export async function startCheckout({checkout, context, displayOptions, admin, members}: {checkout: RegisterCheckout, context: SessionContext, displayOptions: DisplayOptions, admin?: boolean, members?: PlatformMember[]}, navigate: NavigationActions) {
     checkout.validate({})
 
     const steps: ViewStep[] = [
@@ -19,22 +19,22 @@ export async function startCheckout({checkout, context, displayOptions, admin}: 
     ]
 
     const stepManager = new ViewStepsManager(steps, async (navigate: NavigationActions) => {
-        await register({checkout, context, admin}, navigate)
+        await register({checkout, context, admin, members}, navigate)
     }, displayOptions)
 
     await stepManager.saveHandler(null, navigate)
 }
 
 
-async function register({checkout, context, admin}: {checkout: RegisterCheckout, context: SessionContext, admin: boolean}, navigate: NavigationActions) {
+async function register({checkout, context, admin, members}: {checkout: RegisterCheckout, context: SessionContext, admin?: boolean, members?: PlatformMember[]}, navigate: NavigationActions) {
     const organization = checkout.singleOrganization!
     const server = context.getAuthenticatedServerForOrganization(organization.id)
 
     const idCheckout = checkout.convert()
 
     if (!admin) {
-        idCheckout.redirectUrl = new URL(organization.registerUrl+'/payment')
-        idCheckout.cancelUrl = new URL(organization.registerUrl+'/payment?cancel=true')    
+        idCheckout.redirectUrl = new URL(organization.registerUrl)
+        idCheckout.cancelUrl = new URL(organization.registerUrl)    
     } else {
         idCheckout.redirectUrl = new URL(window.location.href)
         idCheckout.cancelUrl = new URL(window.location.href)
@@ -53,7 +53,7 @@ async function register({checkout, context, admin}: {checkout: RegisterCheckout,
 
     // Copy data to members
     const passedFamilies = new Set<PlatformFamily>()
-    for (const member of checkout.cart.items.map(i => i.member)) {
+    for (const member of [...(members ?? []), ...checkout.cart.items.map(i => i.member)]) {
         if (passedFamilies.has(member.family)) {
             continue
         }

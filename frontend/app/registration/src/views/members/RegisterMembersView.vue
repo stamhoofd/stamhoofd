@@ -40,10 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@simonbackx/vue-app-navigation';
-import { ChooseGroupForMemberView, EditMemberGeneralBox, MemberStepView, NavigationActions, useChooseGroupForMember } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { EditMemberGeneralBox, MemberStepView, NavigationActions, useChooseGroupForMember } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { computed, markRaw, reactive } from 'vue';
 import { useMemberManager } from '../../getRootView';
 
@@ -70,15 +69,10 @@ async function addNewMember() {
             component: markRaw(EditMemberGeneralBox),
             saveHandler: async (navigate: NavigationActions) => {
                 memberManager.family.copyFromClone(clonedFamily)
-                await navigate.show({
-                    force: true,
-                    url: Formatter.slug(member.patchedMember.firstName),
-                    components: [
-                        new ComponentWithProperties(ChooseGroupForMemberView, {
-                            member
-                        })
-                    ],
-                    replace: 1
+                await chooseGroupForMember({
+                    member, 
+                    displayOptions: {action: 'show', replace: 100, force: true},
+                    customNavigate: navigate
                 })
             }
         }),
