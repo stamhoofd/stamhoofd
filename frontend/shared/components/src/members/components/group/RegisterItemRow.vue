@@ -32,6 +32,15 @@
             </footer>
         </template>
 
+        <p v-if="item.cartError" class="error-box small">
+            {{ item.cartError.getHuman() }}
+
+            <span v-if="canEdit" class="button text">
+                <span>Corrigeren</span>
+                <span class="icon arrow-right-small" />
+            </span>
+        </p>
+
         <template #right>
             <button class="button icon trash gray" type="button" @click.stop="deleteMe()" />
             <button v-if="canEdit" class="button icon edit gray" type="button"  />

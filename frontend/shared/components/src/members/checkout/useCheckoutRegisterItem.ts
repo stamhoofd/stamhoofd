@@ -102,8 +102,10 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
     }
 
     const manager = new MemberStepManager(context, member, steps, async (navigate) => {
-        // Move the item to the cart
-        member.family.checkout.remove(item, {calculate: false}); // Fast delete without price calculation
+        // Clear errors
+        item.cartError = null;
+
+        // Move the item to the cart (replace if it already exists)
         member.family.checkout.add(item); // With price calculation
         member.family.pendingRegisterItems = [];
 

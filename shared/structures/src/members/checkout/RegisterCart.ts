@@ -84,9 +84,14 @@ export class RegisterCart {
     }
 
     add(item: RegisterItem) {
+        if (this.contains(item)) {
+            return this.remove(item, item)
+        }
+
         if (!this.canAdd(item)) {
             return;
         }
+
         this.items.push(item)
     }
 
@@ -127,10 +132,10 @@ export class RegisterCart {
         return this.getMemberAndGroup(memberId, groupId) !== null;
     }
 
-    remove(item: RegisterItem) {
+    remove(item: RegisterItem, replaceWith?: RegisterItem) {
         for (const [i, otherItem] of this.items.entries()) {
-            if (otherItem.id === item.id) {
-                this.items.splice(i, 1);
+            if (otherItem.id === item.id || (otherItem.member.id === item.member.id && otherItem.groupId === item.groupId)) {
+                this.items.splice(i, 1, ...(replaceWith ? [replaceWith] : []));
                 break;
             }
         }

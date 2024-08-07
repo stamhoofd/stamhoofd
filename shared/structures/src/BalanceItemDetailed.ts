@@ -11,22 +11,6 @@ export class BalanceItemDetailed extends BalanceItem {
 
     @field({ decoder: Order, nullable: true })
     order: Order | null = null
-   
-    /**
-     * @deprecated
-     * Use registration.memberId instead
-     */
-    get memberId() {
-        return this.registration?.memberId ?? null
-    }
-
-    /**
-     * @deprecated
-     * Use registration.member instead
-     */
-    get member() {
-        return this.registration?.member ?? null
-    }
 }
 
 export class BalanceItemPaymentDetailed extends BalanceItemPayment {

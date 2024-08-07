@@ -153,7 +153,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Spinner, ErrorBox, GlobalEventBus, useAuth, useContext, useErrors, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemDetailed, FinancialSupportSettings, MemberBalanceItem, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { BalanceItemDetailed, FinancialSupportSettings, MemberBalanceItem, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember, RegistrationWithMember } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditBalanceItemView from '../../payments/EditBalanceItemView.vue';
@@ -306,7 +306,10 @@ async function createPayment() {
 
     const component = new ComponentWithProperties(EditPaymentView, {
         payment,
-        balanceItems: balanceItems.value.map(b => BalanceItemDetailed.create({...b, member: b.memberId ? getMember(b.memberId)?.patchedMember : null})),
+        balanceItems: balanceItems.value.map(b => BalanceItemDetailed.create({
+            ...b, 
+            registration: b.registration ? RegistrationWithMember.from(b.registration, getMember(b.registration.memberId)!.patchedMember.tiny) : null
+        })),
         family: props.member.family,
         isNew: true,
         saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
