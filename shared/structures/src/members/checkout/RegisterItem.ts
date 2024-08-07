@@ -514,6 +514,19 @@ export class RegisterItem {
         return false;
     }
 
+    get canRegisterIgnoreWaitingList() {
+        try {
+            this.validate({ignoreWaitingList: true})
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                return e.getHuman();
+            }
+            throw e;
+        }
+        return null;
+    }
+
+
     get validationError() {
         try {
             this.validate()
@@ -551,7 +564,7 @@ export class RegisterItem {
         return this.validationError === null
     }
 
-    validate(options?: {warnings?: boolean}) {
+    validate(options?: {warnings?: boolean, ignoreWaitingList?: boolean}) {
         this.cartError = null;
         this.refresh(this.group)
         const checkout = this.member.family.checkout;
@@ -698,7 +711,7 @@ export class RegisterItem {
                 }
             }
 
-            if (this.shouldUseWaitingList()) {
+            if (!options?.ignoreWaitingList && this.shouldUseWaitingList()) {
                 throw new SimpleError({
                     code: "waiting_list_required",
                     message: "Waiting list required",

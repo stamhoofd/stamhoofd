@@ -11,10 +11,10 @@
             <p v-if="item.group.settings.description" class="style-description" v-text="item.group.settings.description" />
         </template>
 
-        <p v-else-if="validationError" class="error-box">
+        <p v-if="validationError" class="error-box">
             {{ validationError }}
         </p>
-        <p v-if="item.cartError" class="error-box small">
+        <p v-else-if="item.cartError" class="error-box small">
             {{ item.cartError.getHuman() }}
         </p>
 
