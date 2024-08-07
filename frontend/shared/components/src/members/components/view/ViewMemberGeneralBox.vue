@@ -63,6 +63,13 @@
                     </template>
                 </dd>
             </template>
+
+            <template v-if="member.patchedMember.details.uitpasNumber">
+                <dt>UiTPAS-nummer</dt>
+                <dd v-copyable>
+                    {{ member.patchedMember.details.uitpasNumber }}
+                </dd>
+            </template>
         </dl>
     </div>
 </template>

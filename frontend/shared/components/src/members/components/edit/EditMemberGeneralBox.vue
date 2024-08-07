@@ -58,6 +58,11 @@
                         <p class="style-description-small" v-if="member.patchedMember.details.parentsHaveAccess">{{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">één van de ingevoerde e-mailadressen</template><template v-else>het ingevoerde e-mailadres</template>. Daarnaast kan je in één van de volgende stappen één of meerdere ouders toevoegen, met een e-mailadres, die ook toegang krijgen. Vul hier enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.</p>
                         <p class="style-description-small" v-else>{{ member.patchedMember.firstName }} kan zelf inloggen of registreren op <template v-if="alternativeEmails.length">één van de ingevoerde e-mailadressen</template><template v-else>het ingevoerde e-mailadres</template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.</p>
                     </template>
+                    <template v-if="isPropertyEnabled('uitpasNumber') || uitpasNumber">
+                        <STInputBox title="UiTPAS-nummer" error-fields="uitpasNumber" :error-box="errors.errorBox">
+                            <input v-model="uitpasNumber" @keydown="preventInvalidUitpasNumberChars" class="input" type="tel" placeholder="Bv. 4329032984732" autocomplete="off" inputmode="numeric" maxlength="13">
+                        </STInputBox>
+                    </template>
                 </template>
             </div>
             
@@ -70,10 +75,11 @@
 </template>
 
 <script setup lang="ts">
-import { Gender, PlatformMember } from '@stamhoofd/structures';
-
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Gender, PlatformMember } from '@stamhoofd/structures';
+import { DataValidator } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
@@ -85,7 +91,6 @@ import RadioGroup from '../../../inputs/RadioGroup.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
-import { useAppContext } from '../../../context/appContext';
 
 defineOptions({
     inheritAttrs: false
@@ -126,6 +131,14 @@ useValidation(errors.validator, () => {
         }))
     }
 
+    if(uitpasNumber.value && !DataValidator.isUitpasNumberValid(uitpasNumber.value)) {
+        se.addError(new SimpleError({
+            code: "invalid_field",
+            message: "Vul een geldig UiTPAS-nummer in",
+            field: "uitpasNumber"
+        }))
+    }
+
     if (se.errors.length > 0) {
         errors.errorBox = new ErrorBox(se)
         return false
@@ -134,6 +147,16 @@ useValidation(errors.validator, () => {
 
     return true
 });
+
+function validateUitpasNumber() {
+    if(uitpasNumber.value && !DataValidator.isUitpasNumberValid(uitpasNumber.value)) {
+        errors.errorBox.addError(new SimpleError({
+            code: "invalid_field",
+            message: "Vul een geldig UiTPAS-nummer in",
+            field: "uitpasNumber"
+        }))
+    }
+}
 
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
@@ -198,6 +221,19 @@ const availableAddresses = computed(() => {
     }
     return list
 });
+
+const uitpasNumber = computed({
+    get: () => props.member.patchedMember.details.uitpasNumber,
+    set: (uitpasNumber) => {
+        props.member.addDetailsPatch({uitpasNumber});
+    }
+});
+
+function preventInvalidUitpasNumberChars(e: KeyboardEvent) {
+    if(e.key && /^\D$/.test(e.key)) {
+        e.preventDefault();
+    }
+}
 
 function deleteEmail(n: number) {
     const newEmails = [...alternativeEmails.value];

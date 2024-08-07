@@ -77,6 +77,9 @@ export class MemberDetails extends AutoEncoder {
     @field({decoder: StringDecoder, nullable: true, version: 301})
     notes: string | null = null;
 
+    @field({decoder: StringDecoder, nullable: true, version: 305})
+    uitpasNumber: string | null = null;
+
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date("1970-01-01") })
     birthDay: Date | null = null
@@ -291,6 +294,10 @@ export class MemberDetails extends AutoEncoder {
             if(/^\s*$/.test(this.notes)) {
                 this.notes = null;
             }
+        }
+
+        if(this.uitpasNumber !== null && !DataValidator.isUitpasNumberValid(this.uitpasNumber)) {
+            this.uitpasNumber = null;
         }
     }
 
