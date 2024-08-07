@@ -12,22 +12,18 @@ import { ErrorBox } from "../errors/ErrorBox";
 import { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
 
-const props = defineProps({
-    validator: {
-        type: [Validator],
-        default: null
-    },
-    /**
-     * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
-     * Only used if required = false
-     */
-    nullable: {type: Boolean, default: false},
-    disabled: {type: Boolean, default: false},
-    class: {
-        type: [String],
-        default: null
-    },
-    required: {type: Boolean, default: true},
+const props = withDefaults(defineProps<{
+    validator?: Validator,
+    nullable?: boolean,
+    disabled?: boolean,
+    class?: string,
+    required?: boolean
+}>(), {
+    validator: undefined,
+    nullable: false,
+    disabled: false,
+    class: undefined,
+    required: true
 });
 
 const model = defineModel<string | null>();
