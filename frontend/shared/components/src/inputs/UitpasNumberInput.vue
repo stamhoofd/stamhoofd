@@ -93,6 +93,10 @@ function validate(final = true, silent = false): boolean {
 }
 
 function preventInvalidUitpasNumberChars(e: KeyboardEvent) {
+    // allow paste
+    if(e.ctrlKey || e.metaKey) return false;
+
+    // do not allow non-digits
     if(e.key && /^\D$/.test(e.key)) {
         e.preventDefault();
     }
