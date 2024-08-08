@@ -779,6 +779,17 @@ export class PlatformMember implements ObjectWithRecords {
         return false;
     }
 
+    canRegisterIgnoreWaitingList(group: Group, organization: Organization) {
+        const item = RegisterItem.defaultFor(this, group, organization);
+        
+        const error = item.canRegisterIgnoreWaitingList;
+        if (error === null) {
+            return true;
+        }
+        
+        return false;
+    }
+
     get patchedMember() {
         if (this._savingPatch) {
             return this.member.patch(this._savingPatch).patch(this.patch)

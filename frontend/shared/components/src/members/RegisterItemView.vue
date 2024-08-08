@@ -11,10 +11,10 @@
             <p v-if="item.group.settings.description" class="style-description" v-text="item.group.settings.description" />
         </template>
 
-        <p v-else-if="validationError" class="error-box">
+        <p v-if="validationError" class="error-box">
             {{ validationError }}
         </p>
-        <p v-if="item.cartError" class="error-box small">
+        <p v-else-if="item.cartError" class="error-box small">
             {{ item.cartError.getHuman() }}
         </p>
 
@@ -66,7 +66,7 @@
                         {{ formatPrice(option.price.forMember(item.member)) }} per stuk
                     </p>
 
-                    <p v-if="option.getRemainingStock(item) !== null && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
+                    <p v-if="option.getRemainingStock(item) && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
                         Nog {{ Formatter.pluralText(option.getRemainingStock(item)!, 'stuk', 'stuks') }} beschikbaar
                     </p>
 

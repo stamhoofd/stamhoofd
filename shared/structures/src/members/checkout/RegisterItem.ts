@@ -514,6 +514,19 @@ export class RegisterItem {
         return false;
     }
 
+    get canRegisterIgnoreWaitingList() {
+        try {
+            this.validate({ignoreWaitingList: true})
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                return e.getHuman();
+            }
+            throw e;
+        }
+        return null;
+    }
+
+
     get validationError() {
         try {
             this.validate()
@@ -551,7 +564,7 @@ export class RegisterItem {
         return this.validationError === null
     }
 
-    validate(options?: {warnings?: boolean}) {
+    validate(options?: {warnings?: boolean, ignoreWaitingList?: boolean}) {
         this.cartError = null;
         this.refresh(this.group)
         const checkout = this.member.family.checkout;
@@ -698,7 +711,7 @@ export class RegisterItem {
                 }
             }
 
-            if (this.shouldUseWaitingList()) {
+            if (!options?.ignoreWaitingList && this.shouldUseWaitingList()) {
                 throw new SimpleError({
                     code: "waiting_list_required",
                     message: "Waiting list required",
@@ -768,7 +781,10 @@ export class RegisterItem {
      * and with the removed registrations freed up, so this can be negative
      */
     getCartPendingStockReservations() {
-        const deleteRegistrations = this.checkout.cart.deleteRegistrations.filter(r => r.groupId === this.group.id)
+        const deleteRegistrations = [
+            ...this.checkout.cart.deleteRegistrations.filter(r => r.groupId === this.group.id),
+            ...this.replaceRegistrations.filter(r => r.groupId === this.group.id)
+        ]
 
         const cartIndex = this.checkout.cart.items.findIndex(i => i.id === this.id)
         const itemsBefore = this.checkout.cart.items.slice(0, cartIndex === -1 ? undefined : cartIndex)
@@ -781,10 +797,10 @@ export class RegisterItem {
 
 
     /**
-     * Stock that will be taken by this item
+     * Stock that will be taken or removed by this item
      */
     getPendingStockReservations() {
-        return [
+        const base = [
             // Global level stock reservations (stored in each group)
             StockReservation.create({
                 objectId: this.group.id,
@@ -807,6 +823,9 @@ export class RegisterItem {
                     })
                 ]
             })
-        ]
+        ];
+
+        const freed = this.replaceRegistrations.flatMap(r =>r.stockReservations)
+        return StockReservation.removed(base, freed);
     }
 }
