@@ -923,6 +923,7 @@ export class AdminPermissionChecker {
         // Has financial read access?
         if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Read)) {
             cloned.details.requiresFinancialSupport = null
+            cloned.details.uitpasNumber = null
             cloned.outstandingBalance = 0
 
             for (const registration of cloned.registrations) {
@@ -1012,6 +1013,14 @@ export class AdminPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
+                    statusCode: 400
+                })
+            }
+
+            if (data.details.uitpasNumber) {
+                throw new SimpleError({
+                    code: 'permission_denied',
+                    message: 'Je hebt geen toegangsrechten om het UiTPAS-nummer van dit lid aan te passen',
                     statusCode: 400
                 })
             }

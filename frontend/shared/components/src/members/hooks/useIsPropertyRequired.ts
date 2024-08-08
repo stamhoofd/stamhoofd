@@ -7,7 +7,7 @@ import { useAuth, useContext } from "../../hooks";
 export function useIsPropertyRequired(member: Ref<PlatformMember>) {
     const isAllOptional = useIsAllOptional(member);
 
-    return (property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') => {
+    return (property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts' | 'uitpasNumber') => {
         const m = member.value
         if (isAllOptional.value) {
             return m.isPropertyRequiredForPlatform(property) && (['birthDay'].includes(property))

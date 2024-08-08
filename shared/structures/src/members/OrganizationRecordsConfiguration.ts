@@ -1,12 +1,10 @@
-import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, Decoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { PropertyFilter } from "../filters/PropertyFilter"
-import { LegacyRecordType } from "./records/LegacyRecordType"
-import { RecordCategory } from "./records/RecordCategory"
-import { Platform } from "../Platform"
-import { Organization } from "../Organization"
 import { Group, GroupType } from "../Group"
-import { DefaultAgeGroup } from "../DefaultAgeGroup"
+import { Organization } from "../Organization"
+import { Platform } from "../Platform"
+import { RecordCategory } from "./records/RecordCategory"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",
@@ -152,6 +150,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     emergencyContacts: PropertyFilter | null = null
 
+    @field({ decoder: PropertyFilter, nullable: true, version: 305 })
+    uitpasNumber: PropertyFilter | null = null
+
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
     recordCategories: RecordCategory[] = []
 
@@ -240,6 +241,10 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         const clone = child.clone();
         if (parent.financialSupport !== null) {
             clone.financialSupport = parent.financialSupport;
+        }
+
+        if(parent.uitpasNumber !== null) {
+            clone.uitpasNumber = parent.uitpasNumber;
         }
 
         if (parent.dataPermission !== null) {

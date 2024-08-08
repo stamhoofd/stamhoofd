@@ -70,7 +70,7 @@ import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
 import FinancialSupportSettingsView from '../FinancialSupportSettingsView.vue';
 import { RecordEditorSettings } from '../RecordEditorSettings';
-type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
+type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts' | 'uitpasNumber';
 
 const props = withDefaults(
     defineProps<{
@@ -171,6 +171,7 @@ const properties = [
     buildPropertyRefs('address', 'Adres'),
     buildPropertyRefs('parents', 'Ouders'),
     buildPropertyRefs('emergencyContacts', 'Noodcontactpersonen'),
+    buildPropertyRefs('uitpasNumber', 'UiTPAS-nummer')
 ]
 
 watchEffect(() => {

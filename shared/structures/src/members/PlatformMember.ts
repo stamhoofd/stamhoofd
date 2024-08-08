@@ -5,6 +5,7 @@ import { Organization } from "../Organization"
 import { AccessRight, PermissionLevel, PermissionsResourceType } from "../Permissions"
 import { Platform } from "../Platform"
 import { UserPermissions } from "../UserPermissions"
+import { UserWithMembers } from "../UserWithMembers"
 import { Address } from "../addresses/Address"
 import { PropertyFilter } from "../filters/PropertyFilter"
 import { StamhoofdFilter } from "../filters/new/StamhoofdFilter"
@@ -12,15 +13,13 @@ import { EmergencyContact } from "./EmergencyContact"
 import { MemberDetails } from "./MemberDetails"
 import { MemberWithRegistrationsBlob, MembersBlob } from "./MemberWithRegistrationsBlob"
 import { ObjectWithRecords } from "./ObjectWithRecords"
+import { OrganizationRecordsConfiguration } from "./OrganizationRecordsConfiguration"
 import { Parent } from "./Parent"
 import { RegisterCheckout } from "./checkout/RegisterCheckout"
 import { RegisterItem } from "./checkout/RegisterItem"
 import { RecordAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
 import { RecordSettings } from "./records/RecordSettings"
-import { OrganizationRecordsConfiguration } from "./OrganizationRecordsConfiguration"
-import { User } from "../User"
-import { UserWithMembers } from "../UserWithMembers"
 
 export class PlatformFamily {
     members: PlatformMember[] = []
@@ -466,8 +465,9 @@ export class PlatformMember implements ObjectWithRecords {
         })
     }
 
-    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport') {
-        if (property === 'financialSupport' && !this.patchedMember.details.dataPermissions?.value) {
+    isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport' | 'uitpasNumber') {
+        if ((property === 'financialSupport' || property === 'uitpasNumber')
+            && !this.patchedMember.details.dataPermissions?.value) {
             return false;
         }
         
@@ -485,16 +485,17 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isEnabled(this)
     }
 
-    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport', options?: {checkPermissions?: {user: UserWithMembers, level: PermissionLevel}}) {
+    isPropertyEnabled(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport'|'uitpasNumber', options?: {checkPermissions?: {user: UserWithMembers, level: PermissionLevel}}) {
         if (this.isPropertyEnabledForPlatform(property)) {
             return true;
         }
 
-        if (property === 'financialSupport' && !this.patchedMember.details.dataPermissions?.value) {
+        if ((property === 'financialSupport' || property === 'uitpasNumber')
+            && !this.patchedMember.details.dataPermissions?.value) {
             return false;
         }
 
-        if (options?.checkPermissions && property === 'financialSupport') {
+        if (options?.checkPermissions && (property === 'financialSupport' || property === 'uitpasNumber')) {
             const isUserManager = options.checkPermissions.user.members.members.some(m => m.id === this.id)
             if (!isUserManager) {
                 // Need permission to view financial support
@@ -535,7 +536,7 @@ export class PlatformMember implements ObjectWithRecords {
         return false;
     }
 
-    isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+    isPropertyRequiredForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts' | 'uitpasNumber') {
         if (!this.isPropertyEnabledForPlatform(property)) {
             return false;
         }
@@ -547,7 +548,7 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isRequired(this)
     }
 
-    isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts') {
+    isPropertyRequired(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts' | 'uitpasNumber') {
         if (!this.isPropertyEnabled(property)) {
             return false;
         }
