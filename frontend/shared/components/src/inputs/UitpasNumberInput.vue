@@ -7,9 +7,10 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator } from "@stamhoofd/utility";
-import { Ref, computed, onMounted, onUnmounted, ref } from 'vue';
+import { Ref, computed, ref } from 'vue';
 import { ErrorBox } from "../errors/ErrorBox";
 import { Validator } from "../errors/Validator";
+import { useValidation } from '../errors/useValidation';
 import STInputBox from "./STInputBox.vue";
 
 const props = withDefaults(defineProps<{
@@ -27,7 +28,7 @@ const props = withDefaults(defineProps<{
 });
 
 const model = defineModel<string | null>();
-const uitpasNumberRaw = ref('');
+const uitpasNumberRaw = ref(model.value ?? "");
 const placeholder = computed(() => {
     const base = "Bv. 4329032984732";
     if(props.required) return base;
@@ -38,29 +39,17 @@ const input = ref<HTMLInputElement | null>(null);
 const valid = ref(true);
 const errorBox: Ref<ErrorBox | null> = ref(null);
 
-onMounted(() => {
-    if (props.validator) {
-        props.validator.addValidation(this, () => {
-            return validate(true)
-        })
-    }
-
-    uitpasNumberRaw.value = model.value ?? ""
-})
-
-onUnmounted(() => {
-    if(props.validator) {
-        props.validator.removeValidation(this);
-    }
-})
+if(props.validator) {
+    useValidation(props.validator, () => {
+        return validate(true)
+    });
+}
 
 function clearErrorBox(silent: boolean) {
     if (!silent) {
         errorBox.value = null
     }
 }
-
-// todo: check if patch is added if model is  not changed, otherwise add helper methode updateModel
 
 function validate(final = true, silent = false): boolean {
     uitpasNumberRaw.value = uitpasNumberRaw.value.trim();
