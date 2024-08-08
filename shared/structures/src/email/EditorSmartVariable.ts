@@ -19,7 +19,7 @@ import { Formatter } from "@stamhoofd/utility";
 import { STPackageType, STPackageTypeHelper } from "../billing/STPackage";
 import { PaymentDetailed } from "../members/PaymentDetailed";
 import { Group } from "../Group";
-import { GroupSettings } from "../GroupSettings";
+import { GroupPrice, GroupSettings } from "../GroupSettings";
 import { Member, TinyMember } from "../members/Member";
 import { MemberDetails } from "../members/MemberDetails";
 import { RegistrationWithMember } from "../members/RegistrationWithMember";
@@ -100,6 +100,7 @@ export class EditorSmartVariable extends AutoEncoder {
                             maxAge: 7
                         })
                     }),
+                    groupPrice: GroupPrice.create({}),
                     groupId: '',
                     cycle: 0,
                 }),
@@ -120,6 +121,7 @@ export class EditorSmartVariable extends AutoEncoder {
                             maxAge: 7
                         })
                     }),
+                    groupPrice: GroupPrice.create({}),
                     groupId: '',
                     cycle: 0,
                 })
