@@ -466,7 +466,8 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyEnabledForPlatform(property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport' | 'uitpasNumber') {
-        if (property === 'financialSupport' && !this.patchedMember.details.dataPermissions?.value) {
+        if ((property === 'financialSupport' || property === 'uitpasNumber')
+            && !this.patchedMember.details.dataPermissions?.value) {
             return false;
         }
         
@@ -489,11 +490,12 @@ export class PlatformMember implements ObjectWithRecords {
             return true;
         }
 
-        if (property === 'financialSupport' && !this.patchedMember.details.dataPermissions?.value) {
+        if ((property === 'financialSupport' || property === 'uitpasNumber')
+            && !this.patchedMember.details.dataPermissions?.value) {
             return false;
         }
 
-        if (options?.checkPermissions && property === 'financialSupport') {
+        if (options?.checkPermissions && (property === 'financialSupport' || property === 'uitpasNumber')) {
             const isUserManager = options.checkPermissions.user.members.members.some(m => m.id === this.id)
             if (!isUserManager) {
                 // Need permission to view financial support
