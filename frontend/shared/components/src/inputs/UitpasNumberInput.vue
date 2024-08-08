@@ -1,13 +1,13 @@
 <template>
     <STInputBox title="UiTPAS-nummer" error-fields="uitpasNumber" :error-box="errorBox" :class="props.class">
-        <input ref="input" v-model="uitpasNumberRaw" class="input" type="tel" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" :placeholder="placeholder" autocomplete="off" inputmode="numeric" maxlength="13" @keydown="preventInvalidUitpasNumberChars" @change="validate(false)">
+        <input ref="input" v-model="uitpasNumberRaw" class="input" type="tel"  :disabled="disabled" v-bind="$attrs" :placeholder="placeholder" autocomplete="off" inputmode="numeric" maxlength="13" @keydown="preventInvalidUitpasNumberChars" @change="validate(false)">
     </STInputBox>
 </template>
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator } from "@stamhoofd/utility";
-import { Ref, computed, ref } from 'vue';
+import { Ref, computed, ref, watch } from 'vue';
 import { ErrorBox } from "../errors/ErrorBox";
 import { Validator } from "../errors/Validator";
 import { useValidation } from '../errors/useValidation';
@@ -27,8 +27,12 @@ const props = withDefaults(defineProps<{
     required: true
 });
 
-const model = defineModel<string | null>();
+const model = defineModel<string | null>({required: true});
+
 const uitpasNumberRaw = ref(model.value ?? "");
+
+watch(model, (value) => uitpasNumberRaw.value = value ?? '');
+
 const placeholder = computed(() => {
     const base = "Bv. 4329032984732";
     if(props.required) return base;
@@ -36,7 +40,6 @@ const placeholder = computed(() => {
 });
 
 const input = ref<HTMLInputElement | null>(null);
-const valid = ref(true);
 const errorBox: Ref<ErrorBox | null> = ref(null);
 
 if(props.validator) {
@@ -52,8 +55,6 @@ function clearErrorBox(silent: boolean) {
 }
 
 function validate(final = true, silent = false): boolean {
-    uitpasNumberRaw.value = uitpasNumberRaw.value.trim();
-
     if (!props.required && uitpasNumberRaw.value.length === 0) {
         clearErrorBox(silent);
         model.value = null;
