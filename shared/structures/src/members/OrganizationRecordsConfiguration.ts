@@ -150,7 +150,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     emergencyContacts: PropertyFilter | null = null
 
-    @field({ decoder: PropertyFilter, nullable: true, version: 305 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 306 })
     uitpasNumber: PropertyFilter | null = null
 
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
