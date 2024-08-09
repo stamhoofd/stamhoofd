@@ -6,6 +6,7 @@ import NodeRSA from 'node-rsa';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -98,7 +99,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             organization.privateMeta.dnsRecords = []
 
             if (organization.privateMeta.pendingMailDomain !== null) {
-                const defaultFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
+                const defaultFromDomain = Formatter.slug(STAMHOOFD.platformName) + "." + organization.privateMeta.pendingMailDomain;
                 if (organization.privateMeta.pendingRegisterDomain === null || !organization.privateMeta.pendingRegisterDomain.endsWith('.' + organization.privateMeta.pendingMailDomain)) {
                     // We set a custom domainname for webshops already
                     // This is not used at this moment
@@ -109,8 +110,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 }
 
                 if (organization.privateMeta.mailFromDomain !== organization.privateMeta.pendingRegisterDomain) {
-                        
-                    organization.privateMeta.dnsRecords.push(DNSRecord.create({
+                        organization.privateMeta.dnsRecords.push(DNSRecord.create({
                             type: DNSRecordType.CNAME,
                             name: organization.privateMeta.mailFromDomain + ".",
                             // Use shops for mail domain, to allow reuse

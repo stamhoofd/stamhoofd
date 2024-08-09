@@ -66,6 +66,7 @@ declare global {
          */
         readonly userMode: 'organization'|'platform'
         readonly translationNamespace: string
+        readonly platformName: string
         readonly fixedCountry?: Country
     }
 
@@ -176,6 +177,7 @@ declare global {
         // Communication with other internal services
         readonly INTERNAL_SECRET_KEY: string
         readonly translationNamespace: string
+        readonly platformName: string
     }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment
