@@ -1,5 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Member } from '@stamhoofd/models';
+import { MemberUserSyncer } from '../helpers/MemberUserSyncer';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == "test") {
@@ -31,7 +32,7 @@ export default new Migration(async () => {
         const membersWithRegistrations = await Member.getBlobByIds(...rawMembers.map(m => m.id));
 
         for (const memberWithRegistrations of membersWithRegistrations) {
-            await memberWithRegistrations.updateMemberships();
+            await MemberUserSyncer.onChangeMember(memberWithRegistrations);
             c++;
 
             if (c%1000 === 0) {
@@ -41,6 +42,7 @@ export default new Migration(async () => {
                 process.stdout.write('\n');
             }
         }
+
 
         id = rawMembers[rawMembers.length - 1].id;
     }

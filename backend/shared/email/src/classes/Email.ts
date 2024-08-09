@@ -250,7 +250,7 @@ class EmailStatic {
 
         // Filter by environment
         if (STAMHOOFD.environment === 'staging') {
-            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com"))
+            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com") || mail.email === 'lennart@ksa.be')
         }
         if (STAMHOOFD.environment === 'development') {
             recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com"))
