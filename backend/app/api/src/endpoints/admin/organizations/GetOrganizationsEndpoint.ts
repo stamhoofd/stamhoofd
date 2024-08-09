@@ -19,6 +19,9 @@ export const filterCompilers: SQLFilterDefinitions = {
     id: createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'id')
     ),
+    uri: createSQLExpressionFilterCompiler(
+        SQL.column('organizations', 'uri')
+    ),
     name: createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'name')
     ),
@@ -156,6 +159,17 @@ const sorters: SQLSortDefinitions<Organization> = {
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: SQL.column('name'),
+                direction
+            })
+        }
+    },
+    'uri': {
+        getValue(a) {
+            return a.uri
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('uri'),
                 direction
             })
         }

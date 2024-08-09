@@ -125,6 +125,15 @@ const tableObjectFetcher = useTableObjectFetcher<Organization>({
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
+        id: 'uri',
+        name: "Groepsnummer", 
+        getValue: (organization) => organization.uri,
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        grow: true
+    }),
+
+    new Column<ObjectType, string>({
         id: 'name',
         name: "Naam", 
         getValue: (organization) => organization.name,
