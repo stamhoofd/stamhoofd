@@ -2,6 +2,8 @@ import {logger} from "@simonbackx/simple-logging";
 
 export function loadLogger() {
     logger.infectConsole();
+
+    logger.hideTags('silent-seed')
     
     // Requests
     logger.addClassStyle(['request', 'tag'], ['cyan']);
