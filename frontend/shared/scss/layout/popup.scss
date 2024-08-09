@@ -19,13 +19,13 @@
     --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(40px * var(--keyboard-closed, 1)));
     --popup-padding-bottom-outside: max(0px, calc(80px - var(--popup-padding-top-outside, 0px)));
 
-    @media (min-height: 1100px) {
+    @media (min-height: 1200px) {
         // Limit the total height of the popup to max(50vh, 1000px)
-        --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(calc(50vh - 500px) * var(--keyboard-closed, 1)));
-        --popup-padding-bottom-outside: calc(100vh - 1000px - var(--popup-padding-top-outside, 0px));
+        --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(calc(50vh - 550px) * var(--keyboard-closed, 1)));
+        --popup-padding-bottom-outside: calc(100vh - 1100px - var(--popup-padding-top-outside, 0px));
     }
 
-    @media (max-height: 900px) {
+    @media (max-height: 1000px) {
         // 20px on top, 0 bottom, unless the keyboard is open (then reverse)
         --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(20px * var(--keyboard-closed, 1)));
         --popup-padding-bottom-outside: calc(20px - var(--popup-padding-top-outside, 0px));
@@ -55,7 +55,7 @@
         transform-origin: 50% 0%;
         visibility: visible;
 
-        @media (max-height: 900px) {
+        @media (max-height: 1000px) {
             border-bottom-left-radius: 0px;
             border-bottom-right-radius: 0px;
         }
