@@ -137,6 +137,8 @@ declare global {
         readonly INTERNAL_SECRET_KEY: string
 
         readonly CRONS_DISABLED: boolean
+
+        readonly WHITELISTED_EMAIL_DESTINATIONS?: string[] // E-mails we are allowed to send e-mails to in case of staging or development environment
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

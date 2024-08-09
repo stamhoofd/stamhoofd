@@ -250,10 +250,12 @@ class EmailStatic {
 
         // Filter by environment
         if (STAMHOOFD.environment === 'staging') {
-            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com") || mail.email === 'lennart@ksa.be')
+            const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? []
+            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com") || whitelist.includes(mail.email.toLowerCase()))
         }
         if (STAMHOOFD.environment === 'development') {
-            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com"))
+            const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? []
+            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com") || whitelist.includes(mail.email.toLowerCase()))
         }
 
         if (recipients.length === 0) {
