@@ -22,16 +22,14 @@ export default new Migration(async () => {
                 value: id,
                 sign: '>'
             }
-        }, {limit: 500, sort: ['id']});
+        }, {limit: 1000, sort: ['id']});
 
         if (rawMembers.length === 0) {
             break;
         }
 
-        const membersWithRegistrations = await Member.getBlobByIds(...rawMembers.map(m => m.id));
-
-        for (const memberWithRegistrations of membersWithRegistrations) {
-            await memberWithRegistrations.updateMemberships();
+        for (const member of rawMembers) {
+            await Member.updateMembershipsForId(member.id, true);
             c++;
 
             if (c%1000 === 0) {

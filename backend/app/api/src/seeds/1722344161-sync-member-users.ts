@@ -23,7 +23,7 @@ export default new Migration(async () => {
                 value: id,
                 sign: '>'
             }
-        }, {limit: 500, sort: ['id']});
+        }, {limit: 1000, sort: ['id']});
 
         if (rawMembers.length === 0) {
             break;

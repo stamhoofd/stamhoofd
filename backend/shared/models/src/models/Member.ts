@@ -417,11 +417,13 @@ export class Member extends Model {
         });
     }
 
-    static async updateMembershipsForId(id: string) {
+    static async updateMembershipsForId(id: string, silent = false) {
         return await QueueHandler.schedule('updateMemberships-' + id, async function (this: undefined) {
             const me = await Member.getWithRegistrations(id)
             if (!me) {
-                console.log('Skipping automatic membership for: ' + id, ' - member not found')
+                if (!silent) {
+                    console.log('Skipping automatic membership for: ' + id, ' - member not found')
+                }
                 return
             }
             const platform = await Platform.getShared()
@@ -456,20 +458,26 @@ export class Member extends Model {
                 // Stop all active memberships taht were added automatically
                 for (const membership of activeMemberships) {
                     if (membership.canDelete() && membership.generated) {
-                        console.log('Removing membership because no longer registered member and not yet invoiced for: ' + me.id + ' - membership ' + membership.id)
+                        if (!silent) {
+                            console.log('Removing membership because no longer registered member and not yet invoiced for: ' + me.id + ' - membership ' + membership.id)
+                        }
                         membership.deletedAt = new Date()
                         await membership.save()
                     }
                 }
 
-                console.log('Skipping automatic membership for: ' + me.id, ' - no default memberships found')
+                if (!silent) {
+                    console.log('Skipping automatic membership for: ' + me.id, ' - no default memberships found')
+                }
                 return
             }
 
 
             if (activeMembershipsUndeletable.length) {
                 // Skip automatic additions
-                console.log('Skipping automatic membership for: ' + me.id, ' - already has active memberships')
+                if (!silent) {
+                    console.log('Skipping automatic membership for: ' + me.id, ' - already has active memberships')
+                }
                 return
             }
 
@@ -487,7 +495,9 @@ export class Member extends Model {
 
             // Check if already have the same membership
             if (activeMemberships.find(m => m.membershipTypeId == cheapestMembership.membership.id)) {
-                console.log('Skipping automatic membership for: ' + me.id, ' - already has this membership')
+                if (!silent) {
+                    console.log('Skipping automatic membership for: ' + me.id, ' - already has this membership')
+                }
                 return
             }
 
@@ -497,7 +507,9 @@ export class Member extends Model {
             }
 
             // Can we revive an earlier deleted membership?
-            console.log('Creating automatic membership for: ' + me.id + ' - membership type ' + cheapestMembership.membership.id)
+            if (!silent) {
+                console.log('Creating automatic membership for: ' + me.id + ' - membership type ' + cheapestMembership.membership.id)
+            }
             const membership = new MemberPlatformMembership();
             membership.memberId = me.id
             membership.membershipTypeId = cheapestMembership.membership.id
@@ -515,7 +527,9 @@ export class Member extends Model {
             // This reasoning allows us to replace an existing membership with a cheaper one (not date based ones, but type based ones)
             for (const toDelete of activeMemberships) {
                 if (toDelete.canDelete() && toDelete.generated) {
-                    console.log('Removing membership because cheaper membership found for: ' + me.id + ' - membership ' + toDelete.id)
+                    if (!silent) {
+                        console.log('Removing membership because cheaper membership found for: ' + me.id + ' - membership ' + toDelete.id)
+                    }
                     toDelete.deletedAt = new Date()
                     await toDelete.save()
                 }
