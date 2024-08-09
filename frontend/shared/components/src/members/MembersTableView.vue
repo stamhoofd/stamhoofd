@@ -169,6 +169,19 @@ const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
+        id: 'memberNumber',
+        name: "Lidnummer", 
+        getValue: (member) => member.member.details.memberNumber ?? '',
+        getStyle: (val) => val ? '' : 'gray',
+        format: (val) => val ? '' : 'Geen',
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        grow: true,
+        allowSorting: false,
+        enabled: false
+    }),
+
+    new Column<ObjectType, string>({
         id: 'name',
         name: "Naam", 
         getValue: (member) => member.member.name,
@@ -223,6 +236,7 @@ const allColumns: Column<ObjectType, any>[] = [
         },
         minimumWidth: 100,
         recommendedWidth: 120,
+        allowSorting: false
     }),
     new Column<ObjectType, string[]>({
         name: "Functies", 
@@ -260,11 +274,25 @@ if (app == 'admin' || (props.group && props.group.settings.requireOrganizationId
             id: 'organization',
             allowSorting: false,
             name: $t('shared.organization.singular'), 
-            getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? '', types: [GroupType.Membership]}), 
+            getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? platform.value.period.id, types: [GroupType.Membership]}), 
             format: (organizations) => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' en ') || $t('shared.notRegistered'),
             getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
             minimumWidth: 100,
             recommendedWidth: 300,
+        })
+    )
+
+    allColumns.push(
+        new Column<ObjectType, Organization[]>({
+            id: 'uri',
+            allowSorting: false,
+            name: $t('Groepsnummer'), 
+            getValue: (member) => member.filterOrganizations({periodId: props.periodId ?? props.group?.periodId ?? platform.value.period.id, types: [GroupType.Membership]}), 
+            format: (organizations) => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' en ') || $t('Geen'),
+            getStyle: (organizations) => organizations.length == 0 ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: false
         })
     )
 } else {
