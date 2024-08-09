@@ -1,8 +1,9 @@
 import { column, Database, Model } from '@simonbackx/simple-database';
-import { BalanceItemStatus, MemberBalanceItem, MemberBalanceItemPayment, OrderStatus, Payment as PaymentStruct, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, BalanceItemPaymentWithPayment, OrderStatus, Payment as PaymentStruct, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { Organization, Payment, Webshop } from './';
 
 /**
@@ -55,13 +56,25 @@ export class BalanceItem extends Model {
     dependingBalanceItemId: string | null = null;
 
     @column({ type: "string" })
+    type = BalanceItemType.Other
+
+    @column({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), type: 'json' })
+    relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map()
+
+    @column({ type: "string" })
     description = "";
 
     /**
      * Total prices
      */
     @column({ type: "integer" })
-    price: number;
+    amount = 1
+
+    /**
+     * Total prices
+     */
+    @column({ type: "integer" })
+    unitPrice: number;
 
     /**
      * Cached value, for optimizations
@@ -93,6 +106,10 @@ export class BalanceItem extends Model {
         skipUpdate: true
     })
     updatedAt: Date
+
+    get price() {
+        return this.unitPrice * this.amount;
+    }
 
     async markUpdated(payment: Payment, organization: Organization) {
         // For orders: mark order as changed (so they are refetched in front ends)
@@ -220,10 +237,10 @@ export class BalanceItem extends Model {
             if (bip.length === 0) {
                 // No payments associated with this item
                 item.status = BalanceItemStatus.Hidden
-                item.price = 0
+                item.unitPrice = 0
                 await item.save()
             } else {
-                item.price = 0
+                item.unitPrice = 0
                 await item.save()
             }
         }
@@ -351,39 +368,21 @@ export class BalanceItem extends Model {
         return {payments, balanceItemPayments}
     }
 
-    static async getMemberStructure(items: BalanceItem[]): Promise<MemberBalanceItem[]> {
+    static async getStructureWithPayments(items: BalanceItem[]): Promise<BalanceItemWithPayments[]> {
         if (items.length == 0) {
             return []
         }
 
-        const {Registration} = await import("./Registration");
-        const {Order} = await import("./Order");
-        const {Group} = await import("./Group");
-
         const {payments, balanceItemPayments} = await BalanceItem.loadPayments(items)
         
-        // Load members and orders
-        const registrationIds = Formatter.uniqueArray(items.flatMap(b => b.registrationId ? [b.registrationId] : []))
-        const orderIds = Formatter.uniqueArray(items.flatMap(b => b.orderId ? [b.orderId] : []))
-
-        const registrations = await Registration.getByIDs(...registrationIds)
-        const orders = await Order.getByIDs(...orderIds)
-
-        const groupIds = Formatter.uniqueArray(registrations.map(r => r.groupId))
-        const groups = await Group.getByIDs(...groupIds)
-    
         return items.map(item => {
             const thisBalanceItemPayments = balanceItemPayments.filter(p => p.balanceItemId === item.id)
-            const registration = registrations.find(r => r.id === item.registrationId)
-            const group = registration ? groups.find(g => g.id === registration.groupId) : null
 
-            return MemberBalanceItem.create({
+            return BalanceItemWithPayments.create({
                 ...item,
-                registration: registration && group ? registration.setRelation(Registration.group, group).getStructure() : null,
-                order: orders.find(o => o.id === item.orderId)?.getStructureWithoutPayment() ?? null,
                 payments: thisBalanceItemPayments.map(p => {
                     const payment = payments.find(pp => pp.id === p.paymentId)!
-                    return MemberBalanceItemPayment.create({
+                    return BalanceItemPaymentWithPayment.create({
                         ...p,
                         payment: PaymentStruct.create(payment)
                     })

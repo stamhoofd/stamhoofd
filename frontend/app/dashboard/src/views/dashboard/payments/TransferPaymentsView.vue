@@ -141,11 +141,11 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     async sms(payments: PaymentGeneral[]) {
-        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ "../sms/SMSView.vue"), {
-            customers: payments.flatMap(p => p.orders.map(o => o.data.customer)),
-            members: payments.flatMap(p => p.members)
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
+        //const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ "../sms/SMSView.vue"), {
+        //    customers: payments.flatMap(p => p.orders.map(o => o.data.customer)),
+        //    members: payments.flatMap(p => p.members)
+        //});
+        //this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async mail(payments: PaymentGeneral[]) {
@@ -181,8 +181,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new Column<PaymentGeneral, string>({
                 name: "Naam", 
                 getValue: (payment) => {
-                    const names = [...payment.orders.map(o => o.data.customer), ...payment.members.map(r => r.details)]
-                    return Formatter.groupNamesByFamily(names)
+                    return payment.memberNames
                 }, 
                 getStyle: (name) => name == "" ? "gray" : "",
                 format: (name) => name == "" ? "Onbekend" : name,
@@ -319,7 +318,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         let hasOrder = false
 
         for (const payment of payments) {
-            if (payment.orders.length > 0) {
+            if (payment.webshopIds.length > 0) {
                 hasOrder = true
             }
             if (paid) {

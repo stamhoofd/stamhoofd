@@ -141,7 +141,7 @@
                             <h2 v-else class="style-title-list">
                                 Markeer als terugbetaald
                             </h2>
-                            <p v-if="mappedPayment.orders.length" class="style-description">
+                            <p v-if="payment.webshopIds.length" class="style-description">
                                 Stuurt mogelijks een automatische e-mail ter bevestiging.
                             </p>
                             <template #right><button type="button" class="button secundary hide-smartphone">
@@ -198,9 +198,6 @@
                             <h3 class="style-title-list">
                                 {{ item.balanceItem.description }}
                             </h3>
-                            <p v-if="item.balanceItem.member" class="style-description-small">
-                                {{ item.balanceItem.member.name }}
-                            </p>
 
                             <p class="style-description-small">
                                 {{ formatDate(item.balanceItem.createdAt) }}
@@ -258,7 +255,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { ErrorBox, GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Spinner, Toast } from "@stamhoofd/components";
-import { BalanceItemDetailed, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, calculateVATPercentage } from "@stamhoofd/structures";
+import { BalanceItemDetailed, BalanceItemWithPayments, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, calculateVATPercentage } from "@stamhoofd/structures";
 
 import EditBalanceItemView from "./EditBalanceItemView.vue";
 
@@ -429,74 +426,74 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             return contactInfo;
         }
 
-        for (const member of this.payment.members) {
-
-            const key = 'member-' + member.id;
-            if (!added.has(key)) {
-                const values: string[] = [];
-                //if (member.details.phone) {
-                //    values.push(member.details.phone);
-                //}
+//        for (const member of this.payment.members) {
 //
-                //if (member.details.email) {
-                //    values.push(member.details.email);
-                //}
-
-                if (values.length) {
-                    contactInfo.push({
-                        title: member.name + ' (lid)',
-                        values
-                    })
-                }
-                added.add(key);
-
-                //for (const parent of member.details.parents) {
-                //    const key = 'parent-' + parent.name;
-                //    if (!added.has(key)) {
-                //        const values: string[] = [];
-                //        if (parent.phone) {
-                //            values.push(parent.phone);
-                //        }
+//            const key = 'member-' + member.id;
+//            if (!added.has(key)) {
+//                const values: string[] = [];
+//                //if (member.details.phone) {
+//                //    values.push(member.details.phone);
+//                //}
+////
+//                //if (member.details.email) {
+//                //    values.push(member.details.email);
+//                //}
 //
-                //        if (parent.email) {
-                //            values.push(parent.email);
-                //        }
+//                if (values.length) {
+//                    contactInfo.push({
+//                        title: member.name + ' (lid)',
+//                        values
+//                    })
+//                }
+//                added.add(key);
 //
-                //        if (values.length) {
-                //            contactInfo.push({
-                //                title: parent.name + ' (' + ParentTypeHelper.getName(parent.type) + ')',
-                //                values
-                //            })
-                //        }
+//                //for (const parent of member.details.parents) {
+//                //    const key = 'parent-' + parent.name;
+//                //    if (!added.has(key)) {
+//                //        const values: string[] = [];
+//                //        if (parent.phone) {
+//                //            values.push(parent.phone);
+//                //        }
+////
+//                //        if (parent.email) {
+//                //            values.push(parent.email);
+//                //        }
+////
+//                //        if (values.length) {
+//                //            contactInfo.push({
+//                //                title: parent.name + ' (' + ParentTypeHelper.getName(parent.type) + ')',
+//                //                values
+//                //            })
+//                //        }
+////
+//                //        added.add(key);
+//                //    }
+//                //}
+//            }
+//        }
 //
-                //        added.add(key);
-                //    }
-                //}
-            }
-        }
-
-        for (const order of this.payment.orders) {
-            const key = 'order-'+order.id;
-
-            if (!added.has(key)) {
-                const values: string[] = [];
-                if (order.data.customer.phone) {
-                    values.push(order.data.customer.phone);
-                }
-
-                if (order.data.customer.email) {
-                    values.push(order.data.customer.email);
-                }
-
-                if (values.length) {
-                    contactInfo.push({
-                        title: order.data.customer.name,
-                        values
-                    })
-                }
-                added.add(key);
-            }
-        }
+//        for (const order of this.payment.orders) {
+//            const key = 'order-'+order.id;
+//
+//            if (!added.has(key)) {
+//                const values: string[] = [];
+//                if (order.data.customer.phone) {
+//                    values.push(order.data.customer.phone);
+//                }
+//
+//                if (order.data.customer.email) {
+//                    values.push(order.data.customer.email);
+//                }
+//
+//                if (values.length) {
+//                    contactInfo.push({
+//                        title: order.data.customer.name,
+//                        values
+//                    })
+//                }
+//                added.add(key);
+//            }
+//        }
         return contactInfo;
     }
 
@@ -562,7 +559,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,
-                    decoder: new ArrayDecoder(MemberBalanceItem),
+                    decoder: new ArrayDecoder(BalanceItemWithPayments),
                     shouldRetry: false
                 });
                 await this.reload();

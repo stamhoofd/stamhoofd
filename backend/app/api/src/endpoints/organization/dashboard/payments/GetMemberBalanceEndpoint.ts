@@ -1,14 +1,14 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, Group, Member } from "@stamhoofd/models";
-import { MemberBalanceItem } from "@stamhoofd/structures";
+import { BalanceItemWithPayments } from "@stamhoofd/structures";
 
 import { Context } from "../../../../helpers/Context";
 
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
-type ResponseBody = MemberBalanceItem[]
+type ResponseBody = BalanceItemWithPayments[]
 
 export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -42,7 +42,7 @@ export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, Resp
         const balanceItems = await BalanceItem.balanceItemsForUsersAndMembers(organization.id, member.users.map(u => u.id), [member.id])
 
         return new Response(
-            await BalanceItem.getMemberStructure(balanceItems)
+            await BalanceItem.getStructureWithPayments(balanceItems)
         );
     }
 }

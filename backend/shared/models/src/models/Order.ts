@@ -2,7 +2,7 @@ import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from "@stamhoofd/queues";
-import { BalanceItemPaymentWithPrivatePayment,BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, MemberBalanceItemPayment, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPrivatePayment,BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, BalanceItemPaymentWithPayment, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
@@ -780,7 +780,7 @@ export class Order extends Model {
                     ...balanceItem,
                     payments: balanceItemPayments.filter(b => b.balanceItemId === balanceItem.id).map(balanceItemPayment => {
                         const payment = payments.find(pp => pp.id === balanceItemPayment.paymentId)!
-                        return MemberBalanceItemPayment.create({
+                        return BalanceItemPaymentWithPayment.create({
                             ...balanceItemPayment,
                             payment: PaymentStruct.create(payment)
                         })

@@ -21,10 +21,6 @@
                         autocomplete=""
                     >
                 </STInputBox>
-
-                <STInputBox title="Prijs" error-fields="price" :error-box="errors.errorBox">
-                    <PriceInput v-model="price" placeholder="Gratis" :min="null" :disabled="!!balanceItem.order" />
-                </STInputBox>
             </div>
             <div>
                 <STInputBox title="Datum" error-fields="createdAt" :error-box="errors.errorBox">
@@ -33,22 +29,44 @@
             </div>
         </div>
 
-        <template v-if="family && family.members.length > 1 && member">
-            <STInputBox title="Lid" error-fields="memberId" :error-box="errors.errorBox" class="max">
-                <RadioGroup>
-                    <Radio v-for="m in family.members" :key="m.id" v-model="memberId" :value="m.id">
-                        {{ m.patchedMember.name }}
-                    </Radio>
-                </RadioGroup>
+        <div class="split-inputs">
+            <STInputBox title="Eenheidsprijs" error-fields="unitPrice" :error-box="errors.errorBox">
+                <PriceInput v-model="unitPrice" placeholder="Gratis" :min="null" :disabled="!!balanceItem.order" />
             </STInputBox>
-        </template>
 
-        <template v-if="member && patchedBalanceItem.registration">
+            <STInputBox title="Aantal" error-fields="amount" :error-box="errors.errorBox">
+                <NumberInput v-model="amount" placeholder="1" :min="1" :disabled="!!balanceItem.order" :stepper="true" />
+            </STInputBox>
+        </div>
+
+        <STInputBox title="Totaalprijs" error-fields="unitPrice" :error-box="errors.errorBox" v-if="amount > 1">
+            <PriceInput :model-value="patchedBalanceItem.price" placeholder="Gratis" :min="null" :disabled="true" />
+        </STInputBox>
+
+        <template v-if="family && family.members.length > 1 && member">
             <hr>
-            <h2>Aangerekend voor</h2>
+            <h2>Lid</h2>
+            <p>Selecteer wie het bedrag verschuldigd is.</p>
 
             <STList>
-                <MemberRegistrationRow :member="member" :registration="patchedBalanceItem.registration" />
+                <STListItem v-for="m in family.members" :key="m.id" :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="memberId" :value="m.id" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ m.patchedMember.name }}
+                    </h3>
+                </STListItem>
+            </STList>
+        </template>
+
+        <template v-if="member && registration">
+            <hr>
+            <h2>Gekoppelde inschrijving</h2>
+
+            <STList>
+                <MemberRegistrationRow :member="member" :registration="registration" />
             </STList>
         </template>
 
@@ -149,19 +167,20 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { RadioGroup, PriceInput, DateSelection, CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemDetailed, BalanceItemStatus, MemberBalanceItem, PaymentMethod, PaymentMethodHelper, PlatformFamily } from '@stamhoofd/structures';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceInput, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { BalanceItem, BalanceItemDetailed, BalanceItemWithPayments, BalanceItemStatus, PaymentMethod, PaymentMethodHelper, PlatformFamily, Registration } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import MemberRegistrationRow from '../members/components/MemberRegistrationRow.vue';
 
 const props = defineProps<{
-    balanceItem: MemberBalanceItem|BalanceItemDetailed,
+    balanceItem: BalanceItemWithPayments|BalanceItem,
     isNew: boolean,
     saveHandler: ((patch: AutoEncoderPatchType<BalanceItem>) => Promise<void>),
 }>()
 
 const {hasChanges, addPatch, patch, patched: patchedBalanceItem} = usePatch(props.balanceItem);
 const family = ref(null) as Ref<PlatformFamily|null>;
+const registration = ref(null) as Ref<Registration|null>;
 const platformFamilyManager = usePlatformFamilyManager();
 const organization = useOrganization();
 const platform = usePlatform();
@@ -181,9 +200,14 @@ const description = computed({
     set: (value) => addPatch({description: value})
 })
 
-const price = computed({
-    get: () => patchedBalanceItem.value.price,
-    set: (value) => addPatch({price: value})
+const unitPrice = computed({
+    get: () => patchedBalanceItem.value.unitPrice,
+    set: (value) => addPatch({unitPrice: value})
+})
+
+const amount = computed({
+    get: () => patchedBalanceItem.value.amount,
+    set: (value) => addPatch({amount: value})
 })
 
 const createdAt = computed({
@@ -222,8 +246,8 @@ const outstanding = computed(() => {
     }
 })
 
-function hasPayments(balanceItem: MemberBalanceItem|BalanceItemDetailed): balanceItem is MemberBalanceItem {
-    return (balanceItem instanceof MemberBalanceItem)
+function hasPayments(balanceItem: BalanceItemWithPayments|BalanceItem): balanceItem is BalanceItemWithPayments {
+    return (balanceItem instanceof BalanceItemWithPayments)
 }
 
 async function save() {
@@ -262,7 +286,7 @@ async function doDelete() {
 
     try {
         loading.value = true
-        await props.saveHandler(MemberBalanceItem.patch({
+        await props.saveHandler(BalanceItemWithPayments.patch({
             status: BalanceItemStatus.Hidden,
             price: 0
         }))

@@ -1,28 +1,25 @@
 import { AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { Formatter } from "@stamhoofd/utility";
+import { Address, ValidatedAddress } from "../addresses/Address";
+import { Country } from "../addresses/CountryDecoder";
+import { BalanceItem } from "../BalanceItem";
+import { BalanceItemPaymentDetailed } from "../BalanceItemDetailed";
+import { STPackageType, STPackageTypeHelper } from "../billing/STPackage";
 import { Replacement } from "../endpoints/EmailRequest";
+import { Payment } from "../members/Payment";
+import { PaymentGeneral } from "../members/PaymentGeneral";
 import { Organization } from "../Organization";
 import { OrganizationMetaData } from "../OrganizationMetaData";
 import { OrganizationType } from "../OrganizationType";
 import { PaymentMethod } from "../PaymentMethod";
-import { Address, ValidatedAddress } from "../addresses/Address";
-import { Country } from "../addresses/CountryDecoder";
-import { Payment } from "../members/Payment";
 import { Cart } from "../webshops/Cart";
 import { CartItem, CartItemPrice } from "../webshops/CartItem";
 import { Customer } from "../webshops/Customer";
 import { Order, OrderData } from "../webshops/Order";
 import { Product, ProductPrice } from "../webshops/Product";
-import { TransferSettings, TransferDescriptionType } from "../webshops/TransferSettings";
+import { TransferDescriptionType, TransferSettings } from "../webshops/TransferSettings";
 import { WebshopPreview } from "../webshops/Webshop";
-import { WebshopTimeSlot, WebshopTakeoutMethod, WebshopMetaData } from "../webshops/WebshopMetaData";
-import { Formatter } from "@stamhoofd/utility";
-import { STPackageType, STPackageTypeHelper } from "../billing/STPackage";
-import { PaymentDetailed } from "../members/PaymentDetailed";
-import { Group } from "../Group";
-import { GroupPrice, GroupSettings } from "../GroupSettings";
-import { Member, TinyMember } from "../members/Member";
-import { MemberDetails } from "../members/MemberDetails";
-import { RegistrationWithMember } from "../members/RegistrationWithMember";
+import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from "../webshops/WebshopMetaData";
 
 export class EditorSmartVariable extends AutoEncoder {
     @field({ decoder: StringDecoder})
@@ -69,7 +66,7 @@ export class EditorSmartVariable extends AutoEncoder {
     }
 
     static get all() {
-        const exampleRegistrationPayment = PaymentDetailed.create({
+        const exampleRegistrationPayment = PaymentGeneral.create({
             id: "",
             method: PaymentMethod.Transfer,
             transferDescription: "+++111/111/111+++",
@@ -81,49 +78,22 @@ export class EditorSmartVariable extends AutoEncoder {
             }),
             createdAt: new Date(),
             updatedAt: new Date(),
-            registrations: [
-                RegistrationWithMember.create({
-                    organizationId: '',
-                    memberId: '',
-                    member: TinyMember.create({
-                        firstName: 'John',
-                        lastName: 'Doe'
-                    }),
-                    group: Group.create({
-                        settings: GroupSettings.create({
-                            name: "Kapoenen",
-                            startDate: new Date(),
-                            endDate: new Date(),
-                            registrationStartDate: new Date(),
-                            registrationEndDate: new Date(),
-                            minAge: 6,
-                            maxAge: 7
-                        })
-                    }),
-                    groupPrice: GroupPrice.create({}),
-                    groupId: '',
-                    cycle: 0,
+            balanceItemPayments: [
+                BalanceItemPaymentDetailed.create({
+                    price: 2500,
+                    balanceItem: BalanceItem.create({
+                        amount: 1,
+                        unitPrice: 2500,
+                        description: 'Inschrijving A'
+                    })
                 }),
-                RegistrationWithMember.create({
-                    organizationId: '',
-                    member: TinyMember.create({
-                        firstName: 'Jane',
-                        lastName: 'Doe'
-                    }),
-                    group: Group.create({
-                        settings: GroupSettings.create({
-                            name: "Kapoenen",
-                            startDate: new Date(),
-                            endDate: new Date(),
-                            registrationStartDate: new Date(),
-                            registrationEndDate: new Date(),
-                            minAge: 6,
-                            maxAge: 7
-                        })
-                    }),
-                    groupPrice: GroupPrice.create({}),
-                    groupId: '',
-                    cycle: 0,
+                BalanceItemPaymentDetailed.create({
+                    price: 3000,
+                    balanceItem: BalanceItem.create({
+                        amount: 1,
+                        unitPrice: 3000,
+                        description: 'Inschrijving B'
+                    })
                 })
             ]
         });
@@ -298,13 +268,13 @@ export class EditorSmartVariable extends AutoEncoder {
         variables.push(EditorSmartVariable.create({
             id: "overviewContext", 
             name: "Betaalcontext", 
-            example: "Inschrijving van John en Jane", 
+            example: "Inschrijving van " + exampleRegistrationPayment.memberNames
         }))
 
         variables.push(EditorSmartVariable.create({
             id: "memberNames", 
             name: "Naam leden", 
-            example: exampleRegistrationPayment.getMemberNames()
+            example: exampleRegistrationPayment.memberNames
         }))
 
         variables.push(EditorSmartVariable.create({

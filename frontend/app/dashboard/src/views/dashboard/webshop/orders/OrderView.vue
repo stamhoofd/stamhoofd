@@ -314,8 +314,8 @@ import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoE
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { PaymentView, EditPaymentView, CartItemRow, PriceBreakdownBox, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
-import { AccessRight, BalanceItemDetailed, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItemRow, EditPaymentView, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, PaymentView, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { AccessRight, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { WebshopManager } from "../WebshopManager";
@@ -749,10 +749,7 @@ export default class OrderView extends Mixins(NavigationMixin){
 
         const component = new ComponentWithProperties(EditPaymentView, {
             payment,
-            balanceItems: this.order.balanceItems.map(b => BalanceItemDetailed.create({
-                ...b, 
-                order: this.order
-            })),
+            balanceItems: this.order.balanceItems,
             isNew: true,
             saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
                 const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();

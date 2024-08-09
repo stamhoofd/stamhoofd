@@ -172,9 +172,3 @@ async function editThisMember() {
     await editMember(props.member);
 }
 </script>
-
-<style lang="scss">
-.member-segmented-view {
-    --st-popup-width: 900px;
-}
-</style>

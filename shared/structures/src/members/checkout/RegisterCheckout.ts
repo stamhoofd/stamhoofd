@@ -1,15 +1,15 @@
 import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from "@simonbackx/simple-encoding";
 
-import { MemberBalanceItem } from "../../BalanceItemDetailed";
+import { SimpleError } from "@simonbackx/simple-errors";
+import { BalanceItemWithPayments } from "../../BalanceItem";
 import { Group } from "../../Group";
 import { Organization } from "../../Organization";
 import { PaymentMethod } from "../../PaymentMethod";
 import { PriceBreakdown } from "../../PriceBreakdown";
 import { PlatformMember } from "../PlatformMember";
+import { RegistrationWithMember } from "../RegistrationWithMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 import { RegisterItem } from "./RegisterItem";
-import { RegistrationWithMember } from "../RegistrationWithMember";
-import { SimpleError } from "@simonbackx/simple-errors";
 
 export type RegisterContext = {
     members: PlatformMember[],
@@ -151,7 +151,7 @@ export class RegisterCheckout{
         }
     }
 
-    validate(data: {memberBalanceItems?: MemberBalanceItem[]}) {
+    validate(data: {memberBalanceItems?: BalanceItemWithPayments[]}) {
         if (!this.isAdminFromSameOrganization && this.cart.deleteRegistrations.length > 0) {
             throw new SimpleError({
                 code: "forbidden",

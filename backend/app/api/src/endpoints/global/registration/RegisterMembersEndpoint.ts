@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemStatus, IDRegisterCheckout, MemberBalanceItem, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from "@stamhoofd/structures";
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, BalanceItemWithPayments, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -177,7 +177,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Validate balance items (can only happen serverside)
         const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id)
-        let memberBalanceItemsStructs: MemberBalanceItem[] = []
+        let memberBalanceItemsStructs: BalanceItemWithPayments[] = []
         let balanceItemsModels: BalanceItem[] = []
         if (balanceItemIds.length > 0) {
             balanceItemsModels = await BalanceItem.where({ id: { sign:'IN', value: balanceItemIds }, organizationId: organization.id })
@@ -187,7 +187,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     message: "Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw."
                 })
             }
-            memberBalanceItemsStructs = await BalanceItem.getMemberStructure(balanceItemsModels)
+            memberBalanceItemsStructs = await BalanceItem.getStructureWithPayments(balanceItemsModels)
         }
 
         console.log('isAdminFromSameOrganization', checkout.isAdminFromSameOrganization)
@@ -365,33 +365,19 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        // Save registrations and add extra data if needed
-        for (const bundle of payRegistrations) {
-            const registration = bundle.registration;
-
-            registration.reservedUntil = null
-
-            if (shouldMarkValid) {
-                await registration.markValid()
-            } else {
-                // Reserve registration for 30 minutes (if needed)
-                const group = groups.find(g => g.id === registration.groupId)
-
-                if (group && group.settings.maxMembers !== null) {
-                    registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
-                }
-                await registration.save()
-            }
-
-            if (bundle.item.calculatedPrice === 0) {
-                continue;
+        async function createBalanceItem({registration, amount, unitPrice, description, type, relations}: {amount?: number, registration: RegistrationWithMemberAndGroup, unitPrice: number, description: string, relations: Map<BalanceItemRelationType, BalanceItemRelation>, type: BalanceItemType}) {
+            if (unitPrice === 0) {
+                return;
             }
 
             // Create balance item
             const balanceItem = new BalanceItem();
             balanceItem.registrationId = registration.id;
-            balanceItem.price = bundle.item.calculatedPrice
-            balanceItem.description = `Inschrijving ${registration.group.settings.name}`
+            balanceItem.unitPrice = unitPrice
+            balanceItem.amount = amount ?? 1
+            balanceItem.description = description
+            balanceItem.relations = relations
+            balanceItem.type = type
 
             // Who needs to receive this money?
             balanceItem.organizationId = organization.id;
@@ -410,8 +396,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // because otherwise the total price and pricePaid for the registration would be incorrect
                 //balanceItem2.registrationId = registration.id;
 
-                balanceItem2.price = bundle.item.calculatedPrice
-                balanceItem2.description = `Inschrijving ${registration.group.settings.name}`
+                balanceItem2.unitPrice = unitPrice
+                balanceItem2.amount = amount ?? 1
+                balanceItem2.description = description
+                balanceItem2.relations = relations
+                balanceItem2.type = type
 
                 // Who needs to receive this money?
                 balanceItem2.organizationId = request.body.asOrganizationId;
@@ -438,12 +427,103 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await balanceItem.save();
             createdBalanceItems.push(balanceItem)
         }
+
+        // Save registrations and add extra data if needed
+        for (const bundle of payRegistrations) {
+            const {item, registration} = bundle;
+            registration.reservedUntil = null
+
+            if (shouldMarkValid) {
+                await registration.markValid()
+            } else {
+                // Reserve registration for 30 minutes (if needed)
+                const group = groups.find(g => g.id === registration.groupId)
+
+                if (group && group.settings.maxMembers !== null) {
+                    registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
+                }
+                await registration.save()
+            }
+
+            if (item.calculatedPrice === 0) {
+                continue;
+            }
+
+            // Create balance items
+            const sharedRelations: [BalanceItemRelationType, BalanceItemRelation][] = [
+                [
+                    BalanceItemRelationType.Member, 
+                    BalanceItemRelation.create({
+                        id: item.member.id,
+                        name: item.member.patchedMember.name
+                    })
+                ],
+                [
+                    BalanceItemRelationType.Group, 
+                    BalanceItemRelation.create({
+                        id: item.group.id,
+                        name: item.group.settings.name
+                    })
+                ]
+            ]
+
+            if (item.group.settings.prices.length > 1) {
+                sharedRelations.push([
+                    BalanceItemRelationType.GroupPrice, 
+                    BalanceItemRelation.create({
+                        id: item.groupPrice.id,
+                        name: item.groupPrice.name
+                    })
+                ])
+            }
+
+            // Base price
+            await createBalanceItem({
+                registration, 
+                unitPrice: item.groupPrice.price.forMember(item.member),
+                type: BalanceItemType.Registration,
+                description: `${item.member.patchedMember.name} bij ${item.group.settings.name}`,
+                relations: new Map([
+                    ...sharedRelations
+                ])
+            })
+
+            // Options
+            for (const option of item.options) {
+                await createBalanceItem({
+                    registration, 
+                    amount: option.amount,
+                    unitPrice: option.option.price.forMember(item.member),
+                    type: BalanceItemType.Registration,
+                    description: `${option.optionMenu.name}: ${option.option.name}`,
+                    relations: new Map([
+                        ...sharedRelations,
+                        [
+                            BalanceItemRelationType.GroupOptionMenu, 
+                            BalanceItemRelation.create({
+                                id: option.optionMenu.id,
+                                name: option.optionMenu.name,
+                            })
+                        ],
+                        [
+                            BalanceItemRelationType.GroupOption, 
+                            BalanceItemRelation.create({
+                                id: option.option.id,
+                                name: option.option.name,
+                            })
+                        ]
+                    ])
+                })
+            }
+
+        }
         
         const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0]
         if (checkout.freeContribution && !request.body.asOrganizationId) {
             // Create balance item
             const balanceItem = new BalanceItem();
-            balanceItem.price = checkout.freeContribution
+            balanceItem.type = BalanceItemType.FreeContribution
+            balanceItem.unitPrice = checkout.freeContribution
             balanceItem.description = `Vrije bijdrage`
             balanceItem.pricePaid = 0;
             balanceItem.userId = user.id
@@ -462,7 +542,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (checkout.administrationFee && whoWillPayNow !== 'nobody') {
             // Create balance item
             const balanceItem = new BalanceItem();
-            balanceItem.price = checkout.administrationFee
+            balanceItem.type = BalanceItemType.AdministrationFee
+            balanceItem.unitPrice = checkout.administrationFee
             balanceItem.description = `Administratiekosten`
             balanceItem.pricePaid = 0;
             balanceItem.organizationId = organization.id;

@@ -22,9 +22,6 @@
                 <h3 class="style-title-list">
                     {{ item.description }}
                 </h3>
-                <p v-if="item.member && multipleMembers" class="style-description-small">
-                    {{ item.member.name }}
-                </p>
                 <p class="style-description-small">
                     {{ formatDate(item.createdAt) }}
                 </p>
@@ -141,7 +138,7 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableA
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PlatformFamily, TransferSettings, Version } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PlatformFamily, TransferSettings, Version } from '@stamhoofd/structures';
 
 import SaveView from "../navigation/SaveView.vue";
 import STInputBox from '../inputs/STInputBox.vue';
@@ -179,7 +176,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         payment: PaymentGeneral
 
     @Prop({ required: true })
-        balanceItems: BalanceItemDetailed[]
+        balanceItems: BalanceItem[]
 
     @Prop({ required: true })
         isNew!: boolean
@@ -321,11 +318,11 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         return this.patchedPayment.balanceItemPayments
     }
 
-    isItemSelected(item: BalanceItemDetailed) {
+    isItemSelected(item: BalanceItem) {
         return this.balanceItemPayments.find(p => p.balanceItem.id == item.id) != null
     }
 
-    setItemSelected(item: BalanceItemDetailed, selected: boolean) {
+    setItemSelected(item: BalanceItem, selected: boolean) {
         if (selected) {
             const add = BalanceItemPaymentDetailed.create({
                 balanceItem: item,
@@ -354,11 +351,11 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
         this.price = this.balanceItemPayments.reduce((total, p) => total + p.price, 0)
     }
 
-    getItemPrice(item: BalanceItemDetailed) {
+    getItemPrice(item: BalanceItem) {
         return this.balanceItemPayments.find(p => p.balanceItem.id == item.id)?.price
     }
 
-    setItemPrice(item: BalanceItemDetailed, price: number) {
+    setItemPrice(item: BalanceItem, price: number) {
         const id = this.balanceItemPayments.find(p => p.balanceItem.id == item.id)?.id
 
         if (id) {

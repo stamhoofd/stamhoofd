@@ -143,7 +143,7 @@ export class Registration extends Model {
             LEFT JOIN (
                 SELECT
                     registrationId,
-                    sum(price) AS price,
+                    sum(unitPrice * amount) AS price,
                     sum(pricePaid) AS pricePaid
                 FROM
                     balance_items
@@ -346,11 +346,7 @@ export class Registration extends Model {
         const template = templates[0]
 
         const paymentGeneral = await payment.getGeneralStructure();
-        const registrations = paymentGeneral.registrations
-        let groupIds = registrations.map(r => r.groupId);
-        
-        // Remove duplicate groupIds
-        groupIds = groupIds.filter((v, i, a) => a.indexOf(v) === i);
+        const groupIds = paymentGeneral.groupIds;
 
         const recipients = [
             Recipient.create({
@@ -386,7 +382,7 @@ export class Registration extends Model {
                     }),
                     Replacement.create({
                         token: "overviewContext",
-                        value: "Inschrijving van " + paymentGeneral.memberFirstNames
+                        value: "Inschrijving van " + paymentGeneral.memberNames
                     }),
                     Replacement.create({
                         token: "memberNames",

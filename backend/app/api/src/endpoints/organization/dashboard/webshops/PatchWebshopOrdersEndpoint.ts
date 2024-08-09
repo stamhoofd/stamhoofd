@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment,Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment,Webshop as WebshopStruct } from "@stamhoofd/structures";
 
 import { Context } from '../../../../helpers/Context';
 
@@ -157,11 +157,21 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         // Create balance item
                         const balanceItem = new BalanceItem();
                         balanceItem.orderId = order.id;
-                        balanceItem.price = totalPrice
+                        balanceItem.type = BalanceItemType.Order;
+                        balanceItem.unitPrice = totalPrice
                         balanceItem.description = webshop.meta.name
                         balanceItem.pricePaid = 0
                         balanceItem.organizationId = organization.id;
                         balanceItem.status = BalanceItemStatus.Pending;
+                        balanceItem.relations = new Map([
+                            [
+                                BalanceItemRelationType.Webshop, 
+                                BalanceItemRelation.create({
+                                    id: webshop.id,
+                                    name: webshop.meta.name,
+                                })
+                            ]
+                        ])
                         await balanceItem.save();
 
                         // Create one balance item payment to pay it in one payment
@@ -245,7 +255,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     const items = await BalanceItem.where({ orderId: model.id })
                     if (items.length >= 1) {
                         model.markUpdated()
-                        items[0].price = model.totalToPay
+                        items[0].unitPrice = model.totalToPay
                         items[0].description = model.generateBalanceDescription(webshop)
                         items[0].updateStatus();
                         await items[0].save()
@@ -258,7 +268,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         model.markUpdated()
                         const balanceItem = new BalanceItem();
                         balanceItem.orderId = model.id;
-                        balanceItem.price = model.totalToPay
+                        balanceItem.unitPrice = model.totalToPay
                         balanceItem.description = model.generateBalanceDescription(webshop)
                         balanceItem.pricePaid = 0
                         balanceItem.organizationId = organization.id;

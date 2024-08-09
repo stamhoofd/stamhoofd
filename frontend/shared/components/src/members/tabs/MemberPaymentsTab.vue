@@ -16,7 +16,7 @@
                 <STList>
                     <STListItem v-for="item in filteredBalanceItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
                         <h3 class="style-title-list">
-                            {{ item.description }}
+                            <span class="style-price" v-if="item.amount > 1">{{ item.amount }} x</span> {{ item.description }}
                         </h3>
                         <p v-if="item.memberId && getMember(item.memberId) && multipleMembers" class="style-description-small">
                             {{ getMember(item.memberId)!.patchedMember.name }}
@@ -151,9 +151,9 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Spinner, ErrorBox, GlobalEventBus, useAuth, useContext, useErrors, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { ErrorBox, GlobalEventBus, Spinner, useAuth, useContext, useErrors, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemDetailed, FinancialSupportSettings, MemberBalanceItem, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember, RegistrationWithMember } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, FinancialSupportSettings, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditBalanceItemView from '../../payments/EditBalanceItemView.vue';
@@ -165,7 +165,7 @@ const props = defineProps<{
 }>();
 
 const loadingPayments = ref(true);
-const balanceItems = ref<MemberBalanceItem[]>([]) as Ref<MemberBalanceItem[]>;
+const balanceItems = ref<BalanceItemWithPayments[]>([]) as Ref<BalanceItemWithPayments[]>;
 const owner = useRequestOwner();
 const context = useContext();
 const errors = useErrors();
@@ -202,7 +202,7 @@ const financialSupportWarningText = computed(() => {
 });
 
 const outstandingBalance = computed(() => {
-    return MemberBalanceItem.getOutstandingBalance(balanceItems.value)
+    return BalanceItemWithPayments.getOutstandingBalance(balanceItems.value)
 });
 
 const paymentIds = computed(() => {
@@ -253,7 +253,7 @@ async function reload() {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
             path: `/organization/members/${props.member.id}/balance`,
-            decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>),
+            decoder: new ArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>),
             owner
         });
         response.data.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
@@ -306,10 +306,7 @@ async function createPayment() {
 
     const component = new ComponentWithProperties(EditPaymentView, {
         payment,
-        balanceItems: balanceItems.value.map(b => BalanceItemDetailed.create({
-            ...b, 
-            registration: b.registration ? RegistrationWithMember.from(b.registration, getMember(b.registration.memberId)!.patchedMember.tiny) : null
-        })),
+        balanceItems: balanceItems.value,
         family: props.member.family,
         isNew: true,
         saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
@@ -343,22 +340,22 @@ async function openPayment(payment: Payment) {
     })
 }
 
-async function editBalanceItem(balanceItem: MemberBalanceItem) {
+async function editBalanceItem(balanceItem: BalanceItemWithPayments) {
     if (!hasWrite.value) {
         return
     }
     const component = new ComponentWithProperties(EditBalanceItemView, {
         balanceItem,
         isNew: false,
-        saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
-            const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
+        saveHandler: async (patch: AutoEncoderPatchType<BalanceItemWithPayments>) => {
+            const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
             patch.id = balanceItem.id;
             arr.addPatch(patch)
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/organization/balance',
                 body: arr,
-                decoder: new ArrayDecoder(MemberBalanceItem),
+                decoder: new ArrayDecoder(BalanceItemWithPayments),
                 shouldRetry: false
             });
             await reload();
@@ -374,20 +371,20 @@ async function editBalanceItem(balanceItem: MemberBalanceItem) {
 }
 
 async function createBalanceItem() {
-    const balanceItem = MemberBalanceItem.create({
+    const balanceItem = BalanceItemWithPayments.create({
         memberId: props.member.id
     })
     const component = new ComponentWithProperties(EditBalanceItemView, {
         balanceItem,
         isNew: true,
-        saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
-            const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
+        saveHandler: async (patch: AutoEncoderPatchType<BalanceItemWithPayments>) => {
+            const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
             arr.addPut(balanceItem.patch(patch))
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/organization/balance',
                 body: arr,
-                decoder: new ArrayDecoder(MemberBalanceItem),
+                decoder: new ArrayDecoder(BalanceItemWithPayments),
                 shouldRetry: false
             });
             await reload();

@@ -1,11 +1,10 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
+import { BalanceItemWithPayments } from "../../BalanceItem";
+import { RegistrationWithMember } from "../RegistrationWithMember";
 import { BalanceItemCartItem } from "./BalanceItemCartItem";
 import { RegisterContext } from "./RegisterCheckout";
 import { IDRegisterItem, RegisterItem } from "./RegisterItem";
-import { Registration } from "../Registration";
-import { RegistrationWithMember } from "../RegistrationWithMember";
-import { MemberBalanceItem } from "../../BalanceItemDetailed";
 
 export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
@@ -205,7 +204,7 @@ export class RegisterCart {
         return this.items[0].organization
     }
 
-    validate(data?: {memberBalanceItems?: MemberBalanceItem[]}) {
+    validate(data?: {memberBalanceItems?: BalanceItemWithPayments[]}) {
         const newItems: RegisterItem[] = []
         const errors = new SimpleErrors()
         for (const item of this.items) {

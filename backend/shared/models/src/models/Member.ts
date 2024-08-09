@@ -122,7 +122,7 @@ export class Member extends Model {
             LEFT JOIN (
                 SELECT
                     memberId,
-                    sum(price) - sum(pricePaid) AS outstandingBalance
+                    sum(unitPrice * amount) - sum(pricePaid) AS outstandingBalance
                 FROM
                     balance_items
                 WHERE status != 'Hidden'${firstWhere}

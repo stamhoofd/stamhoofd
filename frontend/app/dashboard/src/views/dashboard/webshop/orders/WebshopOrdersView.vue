@@ -544,7 +544,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
         // Listen for patches in payments
         GlobalEventBus.addListener(this, "paymentPatch", async (payment: PaymentGeneral) => {
-            if (payment && payment.id && payment.orders.find(o => o.webshopId === this.webshopManager.preview.id)) {
+            if (payment && payment.id && payment.webshopIds.find(webshopId => webshopId === this.webshopManager.preview.id)) {
                 await this.webshopManager.fetchNewTickets(false, false);
             }
             return Promise.resolve()

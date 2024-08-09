@@ -1,6 +1,6 @@
 import { AutoEncoder, field, IntegerDecoder } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
-import { MemberBalanceItem } from "../../BalanceItemDetailed"
+import { BalanceItemWithPayments } from "../../BalanceItem"
 
 /**
  * Contains an intention to pay for an outstanding balance item
@@ -10,8 +10,8 @@ export class BalanceItemCartItem extends AutoEncoder {
         return this.item.id
     }
 
-    @field({ decoder: MemberBalanceItem })
-    item: MemberBalanceItem
+    @field({ decoder: BalanceItemWithPayments })
+    item: BalanceItemWithPayments
 
     /**
      * Amount you want to pay of that balance item
@@ -19,7 +19,7 @@ export class BalanceItemCartItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     price = 0
 
-    validate(data: {balanceItems?: MemberBalanceItem[]}) {
+    validate(data: {balanceItems?: BalanceItemWithPayments[]}) {
         if (data.balanceItems !== undefined) {
             const found = data.balanceItems.find(b => b.id === this.item.id)
             if (!found) {
@@ -31,7 +31,7 @@ export class BalanceItemCartItem extends AutoEncoder {
             this.item = found
         }
 
-        const maxPrice = MemberBalanceItem.getOutstandingBalance([this.item]).total // Allow to start multiple payments for pending balance items in case of payment cancellations
+        const maxPrice = BalanceItemWithPayments.getOutstandingBalance([this.item]).total // Allow to start multiple payments for pending balance items in case of payment cancellations
 
         if (maxPrice === 0) {
             throw new SimpleError({

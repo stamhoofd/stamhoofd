@@ -337,16 +337,15 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective, EditResourceRolesView } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, CenteredMessage, EditResourceRolesView, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, EmailTemplate, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
-import EditWebshopEmailsView from './edit/EditWebshopEmailsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
 import EditWebshopInputFieldsView from './edit/EditWebshopInputFieldsView.vue';
 import EditWebshopLinkView from './edit/EditWebshopLinkView.vue';
@@ -580,7 +579,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     editEmails(animated = true) {
-        this.displayEditComponent(EditWebshopEmailsView, animated)
+        //this.displayEditComponent(EditWebshopEmailsView, animated)
     }
 
     editNotifications(animated = true) {

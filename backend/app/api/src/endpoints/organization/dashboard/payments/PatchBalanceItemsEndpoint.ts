@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, Member, Order, Registration, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, MemberBalanceItem, PermissionLevel } from "@stamhoofd/structures";
+import { BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, PermissionLevel } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
@@ -11,11 +11,11 @@ import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<MemberBalanceItem>
-type ResponseBody = MemberBalanceItem[]
+type Body = PatchableArrayAutoEncoder<BalanceItemWithPayments>
+type ResponseBody = BalanceItemWithPayments[]
 
 export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>, MemberBalanceItem.patchType() as Decoder<AutoEncoderPatchType<MemberBalanceItem>>, StringDecoder)
+    bodyDecoder = new PatchableArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>, BalanceItemWithPayments.patchType() as Decoder<AutoEncoderPatchType<BalanceItemWithPayments>>, StringDecoder)
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
@@ -53,7 +53,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 // Create a new balance item
                 const model = new BalanceItem();
                 model.description = put.description;
-                model.price = put.price;
+                model.amount = put.amount;
+                model.type = BalanceItemType.Other
+                model.unitPrice = put.unitPrice;
                 model.organizationId = organization.id;
                 model.createdAt = put.createdAt;
                 model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending;
@@ -75,19 +77,6 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     })
                 }
 
-                if (put.registration) {
-                    const registration = await Registration.getByID(put.registration.id)
-                    if (!registration || registration.memberId !== model.memberId || registration.organizationId !== organization.id) {
-                        throw new SimpleError({
-                            code: 'invalid_field',
-                            message: 'Registration not found',
-                            field: 'registration'
-                        })
-                    }
-                    model.registrationId = registration.id
-                    registrationIds.push(registration.id)
-                }
-
                 await model.save();
                 returnedModels.push(model);
             }
@@ -101,6 +90,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                         message: 'BalanceItem not found'
                     })
                 }
+
                 // Check permissions
                 if (model.memberId) {
                     // Update old
@@ -123,30 +113,16 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     model.createdAt = patch.createdAt
                 }
 
-                if (patch.registration) {
-                    const registration = await Registration.getByID(patch.registration.id)
-                    if (!registration || registration.memberId !== model.memberId || registration.organizationId !== organization.id) {
-                        throw new SimpleError({
-                            code: 'invalid_field',
-                            message: 'Registration not found',
-                            field: 'registration'
-                        })
-                    }
-                    model.registrationId = registration.id
-
-                    // Update new
-                    registrationIds.push(model.registrationId)
-                } else if (patch.registration === null) {
-                    model.registrationId = null
-                }
                 model.description = patch.description ?? model.description;
-                model.price = patch.price ?? model.price;
+                model.unitPrice = patch.unitPrice ?? model.unitPrice;
+                model.amount = patch.amount ?? model.amount;
 
                 if (model.orderId) {
                     // Not allowed to change this
                     const order = await Order.getByID(model.orderId)
                     if (order) {
-                        model.price = order.totalToPay
+                        model.unitPrice = order.totalToPay
+                        model.amount = 1
                     }
                 }
 
@@ -167,7 +143,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         await Registration.updateOutstandingBalance(Formatter.uniqueArray(registrationIds), organization.id)
 
          return new Response(
-            await BalanceItem.getMemberStructure(returnedModels)
+            await BalanceItem.getStructureWithPayments(returnedModels)
         );
     }
 

@@ -172,6 +172,8 @@ async function checkGlobalRoutes() {
                             cancel,
                             finishedHandler: function(this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
                                 if (payment && payment.status == PaymentStatus.Succeeded) {
+                                    // TODO: fetch appropriate data for this payment!
+                                    
                                     if (payment.registrations.length) {
                                         this.show({
                                             components: [

@@ -25,7 +25,6 @@ export class PaymentsExcelExport {
                 "ID",
                 "Naam",
                 "Omschrijving",
-                "Bestelnummer",
                 "Betaalmethode",
                 "Betaalprovider",
                 "Bestemming",
@@ -44,8 +43,6 @@ export class PaymentsExcelExport {
             let destination = 'Onbekend';
             let iban = 'Onbekend';
             let reference = '';
-            let webshop = '';
-            const groups: string[] = [];
 
             if (payment.transferSettings && payment.method === PaymentMethod.Transfer) {
                 destination = payment.transferSettings?.creditor ?? 'Rekeningnummer';
@@ -71,33 +68,29 @@ export class PaymentsExcelExport {
                 }
             }
 
-            for (const item of payment.balanceItemPayments) {
-                if (item.balanceItem.order) {
-                    const webshopId = item.balanceItem.order.webshopId
-                    webshop = this.webshops.find(w => w.id === webshopId)?.meta.name ?? 'Verwijderd';
-                    break;
-                }
+            //for (const item of payment.balanceItemPayments) {
+            //    if (item.balanceItem.order) {
+            //        const webshopId = item.balanceItem.order.webshopId
+            //        webshop = this.webshops.find(w => w.id === webshopId)?.meta.name ?? 'Verwijderd';
+            //        break;
+            //    }
+//
+            //    if (item.balanceItem.registration) {
+            //        const groupId = item.balanceItem.registration.groupId
+            //        const name = this.groups.find(g => g.id === groupId)?.settings.name
+//
+            //        if (name) {
+            //            groups.push(name)
+            //        }
+            //    }
+            //}
 
-                if (item.balanceItem.registration) {
-                    const groupId = item.balanceItem.registration.groupId
-                    const name = this.groups.find(g => g.id === groupId)?.settings.name
-
-                    if (name) {
-                        groups.push(name)
-                    }
-                }
-            }
-
-            const name = payment.orders.length > 0 ? payment.orders[0].data.customer.name : (payment.memberNames || 'Onbekend')
+            const name = 'Onbekend'; // payment.orders.length > 0 ? payment.orders[0].data.customer.name : (payment.memberNames || 'Onbekend')
 
             wsData.push([
                 payment.id,
                 name,
-                webshop ? webshop : (groups.length ? groups.join(', ') : payment.balanceItemPayments.map(bip => bip.balanceItem.description).join(", ")),
-                {
-                    value: (payment.balanceItemPayments[0]?.balanceItem?.order?.number ?? '/'),
-                    format: '0'
-                },
+                payment.balanceItemPayments.map(bip => bip.balanceItem.description).join(", "),
                 PaymentMethodHelper.getNameCapitalized(payment.method),
                 (payment.provider ?? '/'),
                 destination,
