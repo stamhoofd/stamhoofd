@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view member-view">
+    <div class="st-view member-segmented-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
                 <button v-if="hasPreviousMember || hasNextMember" v-tooltip="'Ga naar vorige lid'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousMember" @click="goBack" />
@@ -172,3 +172,9 @@ async function editThisMember() {
     await editMember(props.member);
 }
 </script>
+
+<style lang="scss">
+.member-segmented-view {
+    --st-popup-width: 900px;
+}
+</style>
