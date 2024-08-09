@@ -200,7 +200,7 @@ async function checkReplies() {
 let lastPostmarkCheck: Date | null = null
 let lastPostmarkId: string | null = null
 async function checkPostmarkBounces() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment !== "production") {
         return;
     }
     

@@ -25,7 +25,7 @@ export default new Migration(async () => {
                     value: id,
                     sign: '>'
                 }
-            }, {limit: 1000, sort: ['id']});
+            }, {limit: 500, sort: ['id']});
 
             if (rawMembers.length === 0) {
                 break;
@@ -33,19 +33,23 @@ export default new Migration(async () => {
 
             const membersWithRegistrations = await Member.getBlobByIds(...rawMembers.map(m => m.id));
 
-            for (const memberWithRegistrations of membersWithRegistrations) {
-                await MemberUserSyncer.onChangeMember(memberWithRegistrations);
-                c++;
+            const promises: Promise<any>[] = [];
 
-                if (c%1000 === 0) {
-                    process.stdout.write('.');
-                }
-                if (c%10000 === 0) {
-                    process.stdout.write('\n');
-                }
+            for (const memberWithRegistrations of membersWithRegistrations) {
+                promises.push((async () => {
+                    await MemberUserSyncer.onChangeMember(memberWithRegistrations);
+                    c++;
+
+                    if (c%1000 === 0) {
+                        process.stdout.write('.');
+                    }
+                    if (c%10000 === 0) {
+                        process.stdout.write('\n');
+                    }
+                })());
             }
 
-
+            await Promise.all(promises);
             id = rawMembers[rawMembers.length - 1].id;
         }
     })
