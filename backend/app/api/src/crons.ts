@@ -140,7 +140,7 @@ async function checkWebshopDNS() {
 }
 
 async function checkReplies() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment !== "production") {
         return;
     }
 
