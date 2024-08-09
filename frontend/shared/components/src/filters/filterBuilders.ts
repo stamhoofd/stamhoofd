@@ -39,24 +39,27 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
 
 export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform: Platform, options: {user?: User|null} = {}) {
     const all = [
-        ...memberWithRegistrationsBlobUIFilterBuilders.slice(1),
-        new StringFilterBuilder({
-            name: 'Groepsnummer',
-            key: 'uri',
-            wrapFilter: (filter) => {
-                return {
-                    registrations: {
-                        $elemMatch: {
-                            organization: filter,
-                            periodId: platform.period.id
-                        }
-                    }
-                }
-            }
-        }),
+        ...memberWithRegistrationsBlobUIFilterBuilders.slice(1)
     ]
 
     if (options.user?.permissions?.platform !== null) {
+        all.push(
+            new StringFilterBuilder({
+                name: 'Groepsnummer',
+                key: 'uri',
+                wrapFilter: (filter) => {
+                    return {
+                        registrations: {
+                            $elemMatch: {
+                                organization: filter,
+                                periodId: platform.period.id
+                            }
+                        }
+                    }
+                }
+            })
+        )
+
         all.push(
             new MultipleChoiceFilterBuilder({
                 name: 'Standaard leeftijdsgroep',
