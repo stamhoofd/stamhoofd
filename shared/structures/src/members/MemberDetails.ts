@@ -617,6 +617,10 @@ export class MemberDetails extends AutoEncoder {
         }
         this.parents.push(parent)
     }
+    
+    getShortCode(maxLength: number) {
+        return Formatter.firstLetters(this.firstName, maxLength)
+    }
 
     get canHaveOwnAccount() {
         return (this.age === null || (this.age >= 12))

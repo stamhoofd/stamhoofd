@@ -38,6 +38,15 @@ export class Formatter {
         return name.replace(/\s+/, " ");
     }
 
+    static stringToNumber(str: string, maxInt = 256) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+        }
+        return hash % maxInt;
+    }
+
     /**
      * 1 = january
      */

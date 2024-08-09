@@ -1,7 +1,7 @@
 <template>
     <button v-if="$user" class="button account-switcher" type="button" @click="showContextMenu">
         <figure>
-            <div class="letter-logo" :data-length="letters.length">
+            <div class="letter-logo" :data-length="letters.length" v-color="$user.memberId">
                 {{ letters }}
                 <span class="icon user" v-if="!letters" />
             </div>

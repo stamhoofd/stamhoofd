@@ -5,11 +5,28 @@ import { MemberStepView } from "../..";
 import { NavigationActions } from "../../../types/NavigationActions";
 import EditMemberFinancialSupportBox from "../../components/edit/EditMemberFinancialSupportBox.vue";
 import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
+import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
 
-const outdatedTime = 60*1000*60*24*365/2 // half year
+export class MemberFinancialSupportStep implements EditMemberStep {
+    options: MemberSharedStepOptions
 
-export const MemberFinancialSupportStep: EditMemberStep = {
-    isEnabled(manager: MemberStepManager) {
+    constructor(options: MemberSharedStepOptions) {
+        this.options = options
+    }
+
+    getName(manager: MemberStepManager) {
+        const recordsConfigurations = manager.member.filterRecordsConfigurations({currentPeriod: true})
+
+        for (const config of recordsConfigurations) {
+            if (config.financialSupport?.title) {
+                return config.financialSupport.title
+            }
+        }
+
+        return FinancialSupportSettings.defaultTitle
+    }
+
+    isEnabled(manager: MemberStepManager) {    
         const member = manager.member
         const details = member.patchedMember.details;
 
@@ -22,13 +39,20 @@ export const MemberFinancialSupportStep: EditMemberStep = {
             return false;
         }
 
-        if (details.requiresFinancialSupport === null || (details.requiresFinancialSupport.value === false && details.requiresFinancialSupport.isOutdated(outdatedTime))) {
+        if (details.requiresFinancialSupport === null) {
             return true;
         }
 
+        if (this.options.outdatedTime) {
+            if (details.requiresFinancialSupport.value === false && details.requiresFinancialSupport.isOutdated(this.options.outdatedTime)) {
+                return true;
+            }
+        }
+
         return false;
-    },
-    getComponent: function (manager: MemberStepManager): ComponentWithProperties {
+    }
+
+    getComponent(manager: MemberStepManager): ComponentWithProperties {
         const config = manager.member.platform.config.recordsConfiguration.financialSupport ?? manager.member.organizations.find(o => o.meta.recordsConfiguration.financialSupport)?.meta.recordsConfiguration.financialSupport ?? null
         return new ComponentWithProperties(MemberStepView, {
             title: config?.title ?? FinancialSupportSettings.defaultTitle,

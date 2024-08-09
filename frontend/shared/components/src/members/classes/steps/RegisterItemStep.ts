@@ -15,6 +15,10 @@ export class RegisterItemStep implements EditMemberStep {
         this.showGroupInformation = options?.showGroupInformation ?? false
     }
 
+    getName(manager: MemberStepManager) {
+        return this.item.group.settings.name
+    }
+
     isEnabled(_manager: MemberStepManager) {
         return this.item.showItemView || this.showGroupInformation
     }

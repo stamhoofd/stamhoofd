@@ -1,5 +1,5 @@
 <template>
-    <STListItem v-long-press="editRegistration" :selectable="isEditable" class="left-center hover-box" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
+    <STListItem v-long-press="editRegistration" :selectable="isEditable" class="hover-box" @contextmenu.prevent="editRegistration($event)" @click.prevent="editRegistration($event)">
         <template #left>
             <GroupIcon :group="group" :icon="registration.deactivatedAt ? 'canceled' : ''"/>
         </template>
@@ -20,11 +20,6 @@
 
         <p v-if="!registration.registeredAt && registration.canRegister" class="style-description-small">
             Uitgenodigd om in te schrijven
-        </p>
-
-        <!-- For permissions: the backend should set the price to zero, if this is visible we should fix it there -->
-        <p v-if="registration.price" class="style-description-small">
-            <span class="style-price-base">{{ formatPrice(registration.price) }}</span>
         </p>
 
         <template v-if="isEditable" #right>

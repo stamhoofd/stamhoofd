@@ -5,10 +5,19 @@ import EditMemberParentsBox from "../../components/edit/EditMemberParentsBox.vue
 import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
 import { markRaw } from "vue";
 import { PermissionLevel } from "@stamhoofd/structures";
+import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
 
-const outdatedTime = 60*1000*60*24*31*3 // 3 months
+export class MemberParentsStep implements EditMemberStep {
+    options: MemberSharedStepOptions
 
-export const MemberParentsStep: EditMemberStep = {
+    constructor(options: MemberSharedStepOptions) {
+        this.options = options
+    }
+
+    getName(manager: MemberStepManager) {
+        return 'Ouders'
+    }
+
     isEnabled(manager: MemberStepManager) {
         const member = manager.member
         const details = member.patchedMember.details;
@@ -26,13 +35,17 @@ export const MemberParentsStep: EditMemberStep = {
             return true;
         }
 
-        if (details.reviewTimes.isOutdated("parents", outdatedTime)) {
-            return true;
-        }
 
+        // Check if it has been a while since this information was reviewed
+        if (this.options.outdatedTime) {
+            if (details.reviewTimes.isOutdated("parents", this.options.outdatedTime)) {
+                return true;
+            }
+        }
         return false;
-    },
-    getComponent: function (manager: MemberStepManager): ComponentWithProperties {
+    }
+
+    getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
             title: 'Ouders',
             member: manager.member,

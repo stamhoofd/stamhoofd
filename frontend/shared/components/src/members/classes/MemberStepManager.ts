@@ -65,6 +65,7 @@ export class MemberStepManager {
 }
 
 export interface EditMemberStep {
+    getName(manager: MemberStepManager): string
     getComponent(manager: MemberStepManager): Promise<ComponentWithProperties>|ComponentWithProperties
     isEnabled(manager: MemberStepManager): boolean
 }

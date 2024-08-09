@@ -4,10 +4,19 @@ import { NavigationActions } from "../../../types/NavigationActions";
 import { MemberStepManager } from "../MemberStepManager";
 import { EditMemberStep } from "../MemberStepManager";
 import { markRaw } from "vue";
+import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
 
-const outdatedTime = 60*1000*60*24*31*3 // 3 months
+export class MemberGeneralStep implements EditMemberStep {
+    options: MemberSharedStepOptions
 
-export const MemberGeneralStep: EditMemberStep = {
+    constructor(options: MemberSharedStepOptions) {
+        this.options = options
+    }
+
+    getName(manager: MemberStepManager) {
+        return 'Algemene gegevens'
+    }
+
     isEnabled(manager: MemberStepManager) {
         const member = manager.member
         const details = member.patchedMember.details;
@@ -30,13 +39,16 @@ export const MemberGeneralStep: EditMemberStep = {
         }
 
         // Check if it has been a while since this information was reviewed
-        if (details.reviewTimes.isOutdated("details", outdatedTime)) {
-            return true;
+        if (this.options.outdatedTime) {
+            if (details.reviewTimes.isOutdated("details", this.options.outdatedTime)) {
+                return true;
+            }
         }
 
         return false;
-    },
-    getComponent: function (manager: MemberStepManager): ComponentWithProperties {
+    }
+
+    getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
             title: 'Algemene gegevens',
             member: manager.member,

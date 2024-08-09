@@ -9,7 +9,7 @@ import { Toast } from "../../overlays/Toast";
 import { DisplayOptions, NavigationActions, runDisplayOptions, useNavigationActions } from "../../types/NavigationActions";
 import ChooseOrganizationMembersForGroupView from "../ChooseOrganizationMembersForGroupView.vue";
 import { EditMemberStep, MemberStepManager } from "../classes/MemberStepManager";
-import { allMemberSteps } from "../classes/steps";
+import { getAllMemberSteps } from "../classes/steps";
 import { MemberRecordCategoryStep } from "../classes/steps/MemberRecordCategoryStep";
 import { RegisterItemStep } from "../classes/steps/RegisterItemStep";
 import { startCheckout } from "./startCheckout";
@@ -93,12 +93,7 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
     ]
 
     if (!admin) {
-        steps.push(...allMemberSteps)
-        
-        // We'll skip these steps for now for administrators - unless it is a requirement for the platform/owning organization is different
-        for (const recordCategory of member.getAllRecordCategories()) {
-            steps.push(new MemberRecordCategoryStep(recordCategory, item));
-        }
+        steps.push(...getAllMemberSteps(member, item))
     }
 
     const manager = new MemberStepManager(context, member, steps, async (navigate) => {

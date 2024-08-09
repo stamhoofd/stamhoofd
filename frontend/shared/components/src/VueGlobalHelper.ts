@@ -12,6 +12,7 @@ import { useContext, useOrganization, usePlatform, useUser } from "./hooks";
 import STInputBox from "./inputs/STInputBox.vue";
 import STListItem from "./layout/STListItem.vue";
 import STNavigationBar from "./navigation/STNavigationBar.vue";
+import { ColorDirective } from "./directives/ColorDirective";
 
 
 export type ComponentExposed<T> =
@@ -139,7 +140,8 @@ export class VueGlobalHelper {
             directives: {
                 tooltip: TooltipDirective,
                 copyable: CopyableDirective,
-                LongPress: LongPressDirective
+                LongPress: LongPressDirective,
+                color: ColorDirective
             },
             filters: {
                 price: Formatter.price.bind(Formatter),

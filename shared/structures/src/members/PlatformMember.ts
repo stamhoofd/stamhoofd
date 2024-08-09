@@ -828,10 +828,9 @@ export class PlatformMember implements ObjectWithRecords {
         
         // From organization
         const categories: RecordCategory[] = [];
-        const inheritedFilters = new Map<string, PropertyFilter[]>()
         const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.filterOrganizations({currentPeriod: true});
 
-        const recordsConfigurations = this.filterRecordsConfigurations({currentPeriod: true})
+        const recordsConfigurations = this.filterRecordsConfigurations({currentPeriod: true, groups: options.scopeGroup ? [options.scopeGroup] : null})
 
         for (const recordsConfiguration of recordsConfigurations) {
             for (const recordCategory of recordsConfiguration.recordCategories) {

@@ -5,23 +5,28 @@ import { MemberStepView } from "../..";
 import { NavigationActions } from "../../../types/NavigationActions";
 import EditMemberRecordCategoryBox from "../../components/edit/EditMemberRecordCategoryBox.vue";
 import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
-
-const outdatedTime = 60*1000*60*24*31*3 // 3 months
+import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
 
 export class MemberRecordCategoryStep implements EditMemberStep {
     recordCategory: RecordCategory
-    item: RegisterItem
+    item: RegisterItem|null
+    options: MemberSharedStepOptions
 
-    constructor(recordCategory: RecordCategory, item: RegisterItem) {
+    constructor(recordCategory: RecordCategory, item: RegisterItem|null, options: MemberSharedStepOptions) {
         this.recordCategory = recordCategory
         this.item = item
+        this.options = options
+    }
+    
+    getName(manager: MemberStepManager) {
+        return this.recordCategory.name
     }
 
     isEnabled(manager: MemberStepManager) {
         const member = manager.member
         const enabledCategories = member.getEnabledRecordCategories({ 
-            scopeOrganization: this.item.organization,
-            scopeGroup: this.item.group,   
+            scopeOrganization: this.item?.organization,
+            scopeGroup: this.item?.group,   
         })
 
         const enabled = !!enabledCategories.find(c => c.id == this.recordCategory.id);
@@ -41,9 +46,11 @@ export class MemberRecordCategoryStep implements EditMemberStep {
                 return true
             }
 
-            if (answer.isOutdated(outdatedTime)) {
-                // This answer is outdated
-                return true
+            if (this.options.outdatedTime) {
+                if (answer.isOutdated(this.options.outdatedTime)) {
+                    // This answer is outdated
+                    return true
+                }
             }
 
             try {

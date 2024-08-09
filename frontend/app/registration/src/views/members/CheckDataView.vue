@@ -14,8 +14,7 @@
                 <STList class="illustration-list">
                     <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
                         <template #left>
-                            <img v-if="member.patchedMember.details.gender === 'Female'" src="~@stamhoofd/assets/images/illustrations/member-female.svg">
-                            <img v-else src="~@stamhoofd/assets/images/illustrations/member-male.svg">
+                            <MemberIcon :member="member" />
                         </template>
 
                         <h2 class="style-title-list">
@@ -112,7 +111,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditMemberAllBox, EditParentView, MemberStepView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
+import { EditMemberAllBox, EditParentView, MemberIcon, MemberStepView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed, markRaw } from 'vue';
 import { useMemberManager } from '../../getRootView';

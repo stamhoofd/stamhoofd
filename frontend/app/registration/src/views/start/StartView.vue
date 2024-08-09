@@ -15,10 +15,50 @@
                 </button>
             </template>
 
-            <div v-else class="container">
+            <QuickActionsBox />
+
+            <div v-if="members.length > 0" class="container">
                 <hr>
                 <h2>
-                    Algemeen
+                    Leden
+                </h2>
+
+                <STList class="illustration-list">
+                    <STListItem v-for="member of members" :key="member.id" class="left-center right-stack" :selectable="true">
+                        <template #left>
+                            <MemberIcon :member="member" :icon="getRegistrationsForMember(member).length === 0 ? 'canceled' : ''" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ member.patchedMember.name }}
+                        </h3>
+                        <p v-if="getRegistrationsForMember(member).length" class="style-description-small">
+                            Ingeschreven voor {{ Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name), ', ', ' en ') }}.
+                        </p>
+                        <p v-else class="style-description-small">
+                            {{ member.patchedMember.firstName }} is momenteel niet ingeschreven.
+                        </p>
+
+
+                        <template #right>
+                            <span v-if="user && member.id === user.memberId" class="style-tag" v-color="member">Dit ben jij</span>
+                            <span class="icon gray arrow-right-small" />
+                        </template>
+                    </STListItem>
+                </STList>
+
+                <footer class="style-button-bar">
+                    <button class="button text" type="button" @click="registerMembers">
+                        <span class="icon add" />
+                        <span>Nieuw gezinslid</span>
+                    </button>
+                </footer>
+            </div>
+
+            <div v-if="members.length > 0" class="container">
+                <hr>
+                <h2>
+                    Acties
                 </h2>
 
                 <STList class="illustration-list">
@@ -63,8 +103,12 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { useMemberManager } from '../../getRootView';
+import { MemberIcon, useUser } from '@stamhoofd/components';
+import { GroupType, PlatformMember } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import { useMemberManager } from '../../getRootView';
+import QuickActionsBox from './components/QuickActionsBox.vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
@@ -86,6 +130,7 @@ defineRoutes([
 ])
 const $navigate = useNavigate();
 const memberManager = useMemberManager();
+const user = useUser();
 
 const members = computed(() => memberManager.family.members);
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
@@ -96,6 +141,14 @@ async function registerMembers() {
 
 async function checkData() {
     await $navigate(Routes.CheckData);
+}
+
+function getRegistrationsForMember(member: PlatformMember) {
+    return member.filterRegistrations({currentPeriod: true, types: [GroupType.Membership, GroupType.WaitingList]}).sort((a, b) => 
+        Sorter.stack(
+            Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt)
+        )
+    );
 }
 
 </script>

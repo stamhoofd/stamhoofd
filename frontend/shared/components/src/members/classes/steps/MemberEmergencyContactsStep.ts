@@ -5,11 +5,20 @@ import EditEmergencyContactsBox from "../../components/edit/EditEmergencyContact
 import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
 import { markRaw } from "vue";
 import { PermissionLevel } from "@stamhoofd/structures";
+import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
 
-const outdatedTime = 60*1000*60*24*31*3 // 3 months
+export class MemberEmergencyContactsStep implements EditMemberStep {
+    options: MemberSharedStepOptions
 
-export const MemberEmergencyContactsStep: EditMemberStep = {
-    isEnabled(manager: MemberStepManager) {
+    constructor(options: MemberSharedStepOptions) {
+        this.options = options
+    }
+
+    getName(manager: MemberStepManager) {
+        return 'Noodcontactpersonen'
+    }
+
+    isEnabled(manager: MemberStepManager) {    
         const member = manager.member
         const details = member.patchedMember.details;
 
@@ -26,13 +35,16 @@ export const MemberEmergencyContactsStep: EditMemberStep = {
             return true;
         }
 
-        if (details.reviewTimes.isOutdated("emergencyContacts", outdatedTime)) {
-            return true;
+        if (this.options.outdatedTime) {
+            if (details.reviewTimes.isOutdated("emergencyContacts", this.options.outdatedTime)) {
+                return true;
+            }
         }
 
         return false;
-    },
-    getComponent: function (manager: MemberStepManager): ComponentWithProperties {
+    }
+
+    getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
             title: 'Noodcontactpersonen',
             member: manager.member,
