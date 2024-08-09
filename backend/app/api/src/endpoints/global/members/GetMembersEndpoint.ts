@@ -252,37 +252,6 @@ const filterCompilers: SQLFilterDefinitions = {
         }
     ),
 
-    /**
-     * @deprecated?
-     */
-    activeRegistrations: createSQLRelationFilterCompiler(
-        SQL.select()
-        .from(
-            SQL.table('registrations')
-        ).join(
-            SQL.join(
-                SQL.table('groups')
-            ).where(
-                SQL.column('groups', 'id'),
-                SQL.column('registrations', 'groupId')
-            )
-        )
-        .where(
-            SQL.column('memberId'),
-            SQL.column('members', 'id'),
-        ).whereNot(
-            SQL.column('registeredAt'),
-            null,
-        ).where(
-            SQL.column('deactivatedAt'),
-            null,
-        ).where(
-            SQL.column('groups', 'deletedAt'),
-            null
-        ),
-        registrationFilterCompilers
-    ),
-
     organizations: createSQLRelationFilterCompiler(
         SQL.select()
         .from(

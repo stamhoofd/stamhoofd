@@ -6,7 +6,7 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { useContext } from '@stamhoofd/components';
+import { useContext, usePlatform } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { CountResponse, Organization } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
@@ -17,6 +17,7 @@ const props = defineProps<{
 const context = useContext()
 const count = ref(null as null | number);
 const owner = useRequestOwner()
+const platform = usePlatform()
 
 watch(() => props.organization.id, async () => {
     Request.cancelAll(owner);
@@ -25,9 +26,10 @@ watch(() => props.organization.id, async () => {
         path: `/members/count`,
         query: {
             filter: JSON.stringify({
-                activeRegistrations: {
+                registrations: {
                     $elemMatch: {
-                        organizationId: props.organization.id
+                        organizationId: props.organization.id,
+                        periodId: platform.value.period.id
                     }
                 }
             })
