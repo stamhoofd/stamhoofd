@@ -40,6 +40,20 @@ memberWithRegistrationsBlobUIFilterBuilders.unshift(
 export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform: Platform, options: {user?: User|null} = {}) {
     const all = [
         ...memberWithRegistrationsBlobUIFilterBuilders.slice(1),
+        new StringFilterBuilder({
+            name: 'Groepsnummer',
+            key: 'uri',
+            wrapFilter: (filter) => {
+                return {
+                    registrations: {
+                        $elemMatch: {
+                            organization: filter,
+                            periodId: platform.period.id
+                        }
+                    }
+                }
+            }
+        }),
     ]
 
     if (options.user?.permissions?.platform !== null) {
