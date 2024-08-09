@@ -77,7 +77,7 @@ export class MemberDetails extends AutoEncoder {
     @field({decoder: StringDecoder, nullable: true, version: 301})
     notes: string | null = null;
 
-    @field({decoder: StringDecoder, nullable: true, version: 305})
+    @field({decoder: StringDecoder, nullable: true, version: 306})
     uitpasNumber: string | null = null;
 
     @field({ decoder: DateDecoder })
