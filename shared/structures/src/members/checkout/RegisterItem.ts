@@ -769,13 +769,6 @@ export class RegisterItem {
         })
     }
 
-    get paymentConfiguration() {
-        if (this.calculatedPrice === 0) {
-            return null;
-        }
-        return this.organization.meta.registrationPaymentConfiguration
-    }
-
     /**
      * Returns the stock that will be taken (or freed if negative) by all the register items before this item
      * and with the removed registrations freed up, so this can be negative

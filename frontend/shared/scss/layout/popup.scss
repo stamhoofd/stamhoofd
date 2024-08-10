@@ -18,6 +18,7 @@
 
     --popup-padding-top-outside: max(var(--popup-padding-top-full, 0px), calc(40px * var(--keyboard-closed, 1)));
     --popup-padding-bottom-outside: max(0px, calc(80px - var(--popup-padding-top-outside, 0px)));
+    --st-horizontal-padding: var(--popup-horizontal-padding, 40px);
 
     @media (min-height: 1200px) {
         // Limit the total height of the popup to max(50vh, 1000px)

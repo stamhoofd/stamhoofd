@@ -8,36 +8,6 @@
         --st-horizontal-padding: 20px;
     }
 
-    #organization-switcher {
-        margin-bottom: 15px;
-        padding-left: 40px;
-        display: flex;
-        align-items: center;
-        touch-action: manipulation;
-        user-select: none;
-        cursor: pointer;
-        @extend .style-interactive-small;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        transition: opacity 0.2s;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        max-width: 100%;
-    
-        > .text {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: auto;
-            min-width: none;
-        }
-
-        &:active {  
-            opacity: 0.4;
-            transition: none;
-        }
-    }
-
     #logo {
         display: block;
         margin-bottom: 5px;

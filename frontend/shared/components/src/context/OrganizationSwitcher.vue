@@ -79,6 +79,8 @@ const open = async () => {
     }
 
     &.small {
+        --block-width: 30px;
+        
         > div h1 {
             font-size: 16px;
         }

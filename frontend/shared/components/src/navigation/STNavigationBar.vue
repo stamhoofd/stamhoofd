@@ -217,15 +217,6 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
         height: 42px; // 44px - 2 x border width thin
     }
 
-    &.block-width {
-        height: calc(var(--block-width, 45px) + 20px);
-
-        body.native-iOS & {
-            // Override
-            height: calc(var(--block-width, 45px) + 20px);
-        }
-    }
-
     &.large {
         height: 80px;
         //margin-top: calc(-1 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px));

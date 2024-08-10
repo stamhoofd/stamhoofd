@@ -664,6 +664,7 @@ async function addRegistrations() {
                                         new ComponentWithProperties(EditGroupView, {
                                             group: group,
                                             isNew: true,
+                                            isMultiOrganization: isNationalActivity.value,
                                             showToasts: false,
                                             saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                                                 addPatch({
@@ -688,6 +689,7 @@ async function addRegistrations() {
                 new ComponentWithProperties(EditGroupView, {
                     group: group,
                     isNew: true,
+                    isMultiOrganization: isNationalActivity.value,
                     showToasts: false,
                     saveHandler: (patch: AutoEncoderPatchType<Group>) => {
                         addPatch({

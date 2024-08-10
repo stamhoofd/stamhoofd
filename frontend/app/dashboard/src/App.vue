@@ -170,27 +170,26 @@ async function checkGlobalRoutes() {
                             server: session.authenticatedServer, 
                             paymentId,
                             cancel,
-                            finishedHandler: function(this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
+                            finishedHandler: async function(this: InstanceType<typeof NavigationMixin>, payment: PaymentGeneral | null) {
                                 if (payment && payment.status == PaymentStatus.Succeeded) {
                                     // TODO: fetch appropriate data for this payment!
                                     
-                                    if (payment.registrations.length) {
-                                        this.show({
+                                    if (payment.memberNames.length) {
+                                        await this.show({
                                             components: [
                                                 new ComponentWithProperties(RegistrationSuccessView, {
-                                                    registrations: payment.registrations
+                                                    registrations: [] // todo: fetch registrations
                                                 })
                                             ], 
                                             replace: 100, // autocorrects to all
                                             force: true
                                         })
                                     } else {
-                                        this.dismiss({force: true})
+                                        await this.dismiss({force: true})
                                         new CenteredMessage("Betaling voltooid", "De betaling werd voltooid.").addCloseButton().show()
                                     }
                                 } else {
-                                    this.dismiss({force: true})
-
+                                    await this.dismiss({force: true})
                                     new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton().show()
                                 }
                             } 
