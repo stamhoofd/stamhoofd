@@ -69,7 +69,7 @@
             </Checkbox>
 
             <template v-if="isPreventSelfAssignment">
-                <STInputBox title="Verduideliking voor een lid als hij niet kan inschrijven" class="max extra-padding">
+                <STInputBox title="Verduidelijking voor een lid als hij niet kan inschrijven" class="max extra-padding">
                     <textarea v-model="isPreventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultIsPreventSelfAssignmentText" />
                 </STInputBox>
             </template>
