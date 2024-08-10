@@ -555,7 +555,7 @@ const hiddenItemsCount = computed(() => {
 
 
 const filteredText = computed(() => {
-    return props.tableObjectFetcher.totalFilteredCount !== null ? `${props.tableObjectFetcher.totalFilteredCount}` : ''
+    return props.tableObjectFetcher.totalFilteredCount !== null ? Formatter.integer(props.tableObjectFetcher.totalFilteredCount) : ''
 });
 
 function getEventX(event: any) {
