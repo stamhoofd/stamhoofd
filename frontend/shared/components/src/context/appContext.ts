@@ -35,7 +35,7 @@ export const getAppDescription = (app: AppType|'auto', organization: Organizatio
     }
     if (!organization) {
         switch (app) {
-            case 'registration': return 'Schrijf je in bij een lokale groep';
+            case 'registration': return 'Jouw gegevens en inschrijvingen';
             case 'admin': return 'Portaal voor beroepskrachten'
         }
         return null
