@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, PatchMap } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors"
 import { BalanceItem, Document, DocumentTemplate, EmailTemplate, Event, Group, Member, MemberWithRegistrations, Order, Organization, Payment, Registration, User, Webshop } from "@stamhoofd/models"
-import { AccessRight, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
+import { AccessRight, FinancialSupportSettings, GroupCategory, GroupStatus, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordCategory } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
 
 /**
@@ -949,8 +949,9 @@ export class AdminPermissionChecker {
 
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
+        const isSetFinancialSupportTrue = data.details.requiresFinancialSupport?.value === true;
 
-        if(hasRecordAnswers || hasNotes) {
+        if(hasRecordAnswers || hasNotes || isSetFinancialSupportTrue) {
             const isUserManager = this.isUserManager(member);
 
             if (hasRecordAnswers) {
@@ -1004,6 +1005,20 @@ export class AdminPermissionChecker {
                     message: 'Cannot edit notes',
                     statusCode: 400
                 })
+            }
+
+            if(isSetFinancialSupportTrue) {
+                const financialSupport = this.platform.config.recordsConfiguration.financialSupport;
+                const isPreventSelfAssignment = financialSupport?.isPreventSelfAssignment === true;
+
+                if(isPreventSelfAssignment) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
+                        human: financialSupport.isPreventSelfAssignmentText ?? FinancialSupportSettings.defaultIsPreventSelfAssignmentText,
+                        statusCode: 400
+                    });
+                }
             }
         }
 
