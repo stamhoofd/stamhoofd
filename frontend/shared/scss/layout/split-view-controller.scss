@@ -45,6 +45,8 @@
         background: var(--color-current-background);
         overflow: hidden;
         overflow: clip;
+
+        --st-horizontal-padding: var(--split-view-detail-horizontal-padding, 40px);
     }
 
     &[data-has-detail="true"] {
