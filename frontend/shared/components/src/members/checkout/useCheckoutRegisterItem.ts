@@ -102,6 +102,11 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
         member.family.checkout.add(item); // With price calculation
         member.family.pendingRegisterItems = [];
 
+        if (!member.family.checkout.cart.contains(item)) {
+            Toast.error('We konden de inschrijving niet toevoegen aan je winkelmandje omdat er al andere zaken in staan die niet samen afgerekend kunnen worden. Reken eerst je huidige winkelmandje af, en ga daarna verder met de andere inschrijvingen.').show();
+            return;
+        }
+
         if (startCheckoutFlow) {
             // Automatically checkout the cart here
             // If needed, we'll need to start the normal checkout flow where we'll invoice between organizations (in case of registering members for other organizations)
@@ -185,14 +190,14 @@ export function useCheckoutDefaultItem() {
     const app = useAppContext()
     const owner = useRequestOwner()
 
-    return async ({group, member, groupOrganization, displayOptions, startCheckoutFlow}: {group: Group, member: PlatformMember, groupOrganization?: Organization, startCheckoutFlow?: boolean, displayOptions?: DisplayOptions}) => {
+    return async ({group, member, groupOrganization, displayOptions, startCheckoutFlow, customNavigate}: {group: Group, member: PlatformMember, groupOrganization?: Organization, startCheckoutFlow?: boolean, displayOptions?: DisplayOptions, customNavigate?: NavigationActions}) => {
         await checkoutDefaultItem({
             group, 
             member, 
             groupOrganization, 
             admin: app === 'dashboard' || app === 'admin', 
             displayOptions, 
-            navigate, 
+            navigate: customNavigate ?? navigate, 
             context: context.value,
             startCheckoutFlow,
             owner
@@ -343,7 +348,7 @@ export function useChooseGroupForMember() {
     const context = useContext();
     const app = useAppContext()
 
-    return async ({member, displayOptions, customNavigate}: {member: PlatformMember, displayOptions?: DisplayOptions, customNavigate?: NavigationActions}) => {
+    return async ({member, displayOptions, customNavigate, startCheckoutFlow}: {member: PlatformMember, displayOptions?: DisplayOptions, customNavigate?: NavigationActions, startCheckoutFlow?: boolean}) => {
         if (app !== 'registration') {
             member.family.checkout.clear()
         }
@@ -354,7 +359,7 @@ export function useChooseGroupForMember() {
             navigate: customNavigate ?? navigate, 
             context: context.value, 
             displayOptions, 
-            startCheckoutFlow: app !== 'registration'
+            startCheckoutFlow: startCheckoutFlow ?? (app !== 'registration')
         });
     }
 }

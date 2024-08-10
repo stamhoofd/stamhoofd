@@ -6,7 +6,7 @@
                 Ledenportaal
             </h1>
 
-            <p>Welkom op het ledenportaal.</p>
+            <p>{{ $t('Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.') }}</p>
 
             <template v-if="members.length == 0 && isAcceptingNewMembers">
                 <button class="button primary" type="button" @click="registerMembers">
@@ -52,7 +52,7 @@
                 </STList>
 
                 <footer class="style-button-bar">
-                    <button class="button text" type="button" @click="registerMembers">
+                    <button class="button text" type="button" @click="addNewMember">
                         <span class="icon add" />
                         <span>Nieuw gezinslid</span>
                     </button>
@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { MemberIcon, Toast, useUser } from '@stamhoofd/components';
+import { MemberIcon, Toast, useAddMember, useChooseGroupForMember, useUser } from '@stamhoofd/components';
 import { GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -169,6 +169,8 @@ const user = useUser();
 
 const members = computed(() => memberManager.family.members);
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
+const chooseGroupForMember = useChooseGroupForMember()
+const addMember = useAddMember()
 
 async function registerMembers() {
     await $navigate(Routes.RegisterMembers);
@@ -184,5 +186,18 @@ function getRegistrationsForMember(member: PlatformMember) {
             Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt)
         )
     );
+}
+
+async function addNewMember() {
+    await addMember(memberManager.family, {
+        displayOptions: {action: 'present', modalDisplayStyle: 'popup'},
+        async finishHandler(member, navigate) {
+            await chooseGroupForMember({
+                member,
+                displayOptions: {action: 'show', replace: 100, force: true},
+                customNavigate: navigate
+            })
+        },
+    });
 }
 </script>

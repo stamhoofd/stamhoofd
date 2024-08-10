@@ -88,10 +88,6 @@ export class RegisterCheckout{
         })
     }
 
-    get paymentConfiguration() {
-        return this.cart.paymentConfiguration
-    }
-
     get singleOrganization() {
         return this.cart.singleOrganization ?? this.defaultOrganization
     }
@@ -144,10 +140,10 @@ export class RegisterCheckout{
     updatePrices() {
         this.cart.calculatePrices()
 
-        if (this.isAdminFromSameOrganization) {
+        if (this.isAdminFromSameOrganization || !this.singleOrganization) {
             this.administrationFee = 0;
         } else {
-            this.administrationFee = this.paymentConfiguration?.administrationFee.calculate(this.cart.price) ?? 0
+            this.administrationFee = this.singleOrganization.meta.registrationPaymentConfiguration.administrationFee.calculate(this.cart.price) ?? 0
         }
     }
 

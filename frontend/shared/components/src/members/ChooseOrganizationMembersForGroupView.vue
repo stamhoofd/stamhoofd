@@ -3,8 +3,12 @@
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>
-        <h1 v-if="group">Inschrijvingen voor {{ group.settings.name }} wijzigen</h1>
-        <h1 v-else>Winkelmandje</h1>
+        <h1 v-if="group">
+            Inschrijvingen voor {{ group.settings.name }} wijzigen
+        </h1>
+        <h1 v-else>
+            Winkelmandje
+        </h1>
 
         <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
             De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via het ledenportaal.
@@ -13,7 +17,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         
         <STList>
-            <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.id" class="right-stack" :registration="registration" :checkout="checkout"  />
+            <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
             <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
         </STList>
         
@@ -21,7 +25,7 @@
             Voeg de leden toe die je wilt inschrijven
         </p>
 
-        <p class="style-button-bar" v-if="group">
+        <p v-if="group" class="style-button-bar">
             <button type="button" class="button text" @click="searchMembers">
                 <span class="icon search" />
                 <span>Zoek bestaande leden</span>
@@ -33,7 +37,7 @@
             </button>
         </p>
 
-        <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" v-if="!checkout.isAdminFromSameOrganization" />
+        <PriceBreakdownBox v-if="!checkout.isAdminFromSameOrganization" :price-breakdown="checkout.priceBreakown" />
     </SaveView>
 </template>
 
@@ -41,8 +45,8 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
-import { computed, markRaw, onMounted, reactive, ref } from 'vue';
-import { EditMemberGeneralBox, MemberStepView, startCheckout } from '.';
+import { computed, onMounted, ref } from 'vue';
+import { startCheckout, useAddMember, useCheckoutDefaultItem, useChooseGroupForMember } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
@@ -73,6 +77,9 @@ const navigate = useNavigationActions();
 const errors = useErrors();
 const saving = ref(false)
 const cartLength = computed(() => props.checkout.cart.count)
+const $addMember = useAddMember()
+const checkoutDefaultItem = useCheckoutDefaultItem()
+const chooseGroupForMember = useChooseGroupForMember()
 
 async function addMember() {
     const family = new PlatformFamily({
@@ -80,25 +87,29 @@ async function addMember() {
         platform: platform.value
     })
     family.checkout = props.checkout
-    const member = reactive(family.newMember() as any) as PlatformMember
-    
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(MemberStepView, {
-            title: 'Nieuw lid',
-            member,
-            component: markRaw(EditMemberGeneralBox), // Only this step, because it could be a reused member
-            doSave: true,
-            saveHandler: async (navigate: NavigationActions) => {
-                await navigate.dismiss({force: true})
 
-                // todo: wire up views to check member information
+    await $addMember(family, {
+        displayOptions: {action: 'present', modalDisplayStyle: 'popup'},
+        async finishHandler(member, navigate) {
+            if (!props.group) {
+                await chooseGroupForMember({
+                    member,
+                    displayOptions: {action: 'show', replace: 100, force: true},
+                    customNavigate: navigate,
+                    startCheckoutFlow: false
+                })
+                return
             }
-        }),
-    });
-    
-    await present({
-        components: [component],
-        modalDisplayStyle: "popup"
+
+            await checkoutDefaultItem({
+                member,
+                group: props.group,
+                groupOrganization: props.groupOrganization,
+                startCheckoutFlow: false,
+                displayOptions: {action: 'show', replace: 100, force: true},
+                customNavigate: navigate
+            })
+        },
     });
 }
 

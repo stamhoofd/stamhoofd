@@ -103,7 +103,7 @@ export class RegisterCart {
             return false;
         }
 
-        if (this.paymentConfiguration && item.paymentConfiguration && item.paymentConfiguration !== this.paymentConfiguration) {
+        if (this.singleOrganization && item.organization.id !== this.singleOrganization.id) {
             return false;
         }
         return true;
@@ -184,16 +184,6 @@ export class RegisterCart {
             + this.deleteRegistrations.reduce((total, item) => {
                 return total + item.price
             }, 0)
-    }
-
-    get paymentConfiguration() {
-        for (const item of this.items) {
-            const organization = item.organization
-
-            return organization.meta.registrationPaymentConfiguration
-        }
-
-        return null;
     }
 
     get singleOrganization() {
