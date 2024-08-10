@@ -60,6 +60,19 @@
             <STInputBox title="Benaming">
                 <input v-model="priceName" class="input" :placeholder="FinancialSupportSettings.defaultPriceName">
             </STInputBox>
+
+            <hr>
+            <h2>Verhinder automatische toekenning</h2>
+            <p>Als een lid gebruik wil maken van financiële ondersteuning dan zal hij goekeuring moeten vragen van een beheerder. In afwachting daarvan kan het lid niet inschrijven. Als het lid een UiTPAS-nummer met kansentarief opgeeft dan krijgt het lid wel automatisch financiële ondersteuning.</p>
+            <Checkbox v-model="isPreventSelfAssignment">
+                Verhinder automatische toekenning van financiële ondersteuning door een lid
+            </Checkbox>
+
+            <template v-if="isPreventSelfAssignment">
+                <STInputBox title="Verduideliking voor een lid als hij niet kan inschrijven" class="max extra-padding">
+                    <textarea v-model="isPreventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultIsPreventSelfAssignmentText" />
+                </STInputBox>
+            </template>
         </template>
     </SaveView>
 </template>
@@ -143,6 +156,24 @@ const priceName = computed({
     }
 });
 
+const isPreventSelfAssignment = computed({
+    get: () => patched.value.financialSupport?.isPreventSelfAssignment === true,
+    set: (isPreventSelfAssignment: boolean) => {
+        addPatch({
+            financialSupport: FinancialSupportSettings.patch({isPreventSelfAssignment})
+        });
+    }
+});
+
+const isPreventSelfAssignmentText = computed({
+    get: () => patched.value.financialSupport?.isPreventSelfAssignmentText ?? FinancialSupportSettings.defaultIsPreventSelfAssignmentText,
+    set: (isPreventSelfAssignmentText: string) => {
+        addPatch({
+            financialSupport: FinancialSupportSettings.patch({isPreventSelfAssignmentText})
+        });
+    }
+});
+
 async function save() {
     if (saving.value) {
         return;
@@ -169,3 +200,9 @@ defineExpose({
 })
 
 </script>
+
+<style lang="scss" scoped>
+.extra-padding {
+    padding-top: 20px;
+}
+</style>
