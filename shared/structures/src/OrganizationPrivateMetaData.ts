@@ -1,13 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
+import { Address } from './addresses/Address';
 import { DNSRecord } from "./DNSRecord";
+import { MemberResponsibility } from './MemberResponsibility';
 import { OrganizationEmail } from './OrganizationEmail';
 import { PayconiqAccount, PrivatePaymentConfiguration } from './PaymentConfiguration';
 import { PaymentMethod } from './PaymentMethod';
 import { PaymentProvider } from './PaymentProvider';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './Permissions';
 import { StripeMetaData } from './StripeAccount';
-import { MemberResponsibility } from './MemberResponsibility';
 
 export class CreditItem extends AutoEncoder {
     /**
@@ -238,6 +239,9 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 86, optional: true })
     VATNumber: string | null = null
+
+    @field({ decoder: new ArrayDecoder(Address), version: 310})
+    premises: Address[] = [];
 
     getPaymentProviderFor(method: PaymentMethod, stripeAccountMeta?: StripeMetaData | null): PaymentProvider | null  {
         if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {

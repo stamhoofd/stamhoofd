@@ -1,7 +1,6 @@
-import { AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-
 import { Country, CountryDecoder, CountryHelper } from './CountryDecoder';
 
 export class Address extends AutoEncoder {
@@ -27,6 +26,9 @@ export class Address extends AutoEncoder {
 
     @field({ decoder: CountryDecoder })
     country: Country;
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 310 })
+    premiseTypeIds: string[] = [];
 
     toString(): string {
         return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + CountryHelper.getName(this.country)
