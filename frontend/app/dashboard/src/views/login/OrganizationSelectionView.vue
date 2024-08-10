@@ -1,89 +1,63 @@
 <template>
     <LoadingView v-if="loadingDefault" />
     <div v-else>
-        <STGradientBackground />
+        <STGradientBackground v-if="!platform.config.horizontalLogo" />
 
-        <div class="st-view background transparent">
-            <STNavigationBar v-if="!isNative" :large="true" class="transparent">
-                <template #left>
-                    <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener" class="logo-container">
-                        <Logo class="responsive" />
-                        <span class="logo-text horizontal hide-medium" v-if="!isPlatform">Beheerders</span>
-                    </a>
-                </template>
+        <div class="st-view">
+            <STNavigationBar :large="!isNative" class="transparent" title="Beheer jouw groep" />
 
-                <template #right>
-                    <template v-if="$context.user">
-                        <InheritComponent name="tabbar-right" />
-                    </template>
-                    <template v-else>
-                        <a v-if="!isNative" class="button text only-icon-smartphone" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
-                            <span class="icon external" />
-                            <span>Terug naar website</span>
-                        </a>
+            <main class="center small organization-selection-view">
+                <h1>
+                    {{ $t('Zoek jouw vereniging') }}
+                </h1>
 
-                        <a v-if="!isNative" class="button primary" href="/aansluiten" @click.prevent="$navigate('join')">
-                            {{ $t("dashboard.join") }}
-                        </a>
-                    </template>
-                </template>
-            </STNavigationBar>
-            <STNavigationBar v-else title="Beheer jouw vereniging" class="transparent" />
+                <p class="style-description-block style-description-large">
+                    {{ $t('dashboard.organization-selection.welcome-description') }}
+                </p>
 
-            <main class="limit-width">
-                <div class="organization-selection-view" :class="{native: isNative}">
-                    <h1>
-                        {{ $t('dashboard.organization-selection.welcome-title') }}
-                    </h1>
+                <form class="input-icon-container icon search gray" @submit.prevent>
+                    <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('dashboard.organization-selection.search-placeholder')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
+                </form>
 
-                    <p class="style-description-block style-description-large">
-                        {{ $t('dashboard.organization-selection.welcome-description') }}
-                    </p>
-
-                    <form class="input-icon-container icon search gray" @submit.prevent>
-                        <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('dashboard.organization-selection.search-placeholder')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
-                    </form>
-
-                    <div v-if="showDevelopment" class="version-box">
-                        <VersionFooter />
-                    </div>
-                    <Spinner v-else-if="loadingResults" class="gray center" />
-                    <template v-else>
-                        <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
-                            <ContextLogo :organization="option.organization" :app="option.app" />
-                            <div>
-                                <h1>{{ getAppTitle(option.app, option.organization) }}</h1>
-
-                                <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
-                                    {{ getAppDescription(option.app, option.organization) }}
-                                </p>
-                                <p v-if="option.userDescription" class="style-description-small style-em">
-                                    Ingelogd als {{ option.userDescription }}
-                                </p>
-                                
-                                <span v-if="option.userDescription" class="icon gray sync floating" />
-                                <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
-                                <span v-if="isPlatform && option.context.hasPermissions()" class="icon privacy gray floating" />
-                            </div>
-                        </button>
-                    </template>
-
-                    <p v-if="!loadingResults && visibleOptions.length == 0 && query && !showDevelopment" class="info-box">
-                        Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
-                    </p>
-
-                    <footer v-if="!showDevelopment && !isPlatform">
-                        <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
-                            <span class="icon add" />
-                            <span>Mijn vereniging aansluiten</span>
-                        </a>
-
-                        <button class="button text full" type="button" @click="help">
-                            <span class="icon help" />
-                            <span>Mijn vereniging staat er niet tussen</span>
-                        </button>
-                    </footer>
+                <div v-if="showDevelopment" class="version-box">
+                    <VersionFooter />
                 </div>
+                <Spinner v-else-if="loadingResults" class="gray center" />
+                <template v-else>
+                    <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
+                        <ContextLogo :organization="option.organization" :app="option.app" />
+                        <div>
+                            <h1>{{ getAppTitle(option.app, option.organization) }}</h1>
+
+                            <p v-if="getAppDescription(option.app, option.organization)" class="style-description">
+                                {{ getAppDescription(option.app, option.organization) }}
+                            </p>
+                            <p v-if="option.userDescription" class="style-description-small style-em">
+                                Ingelogd als {{ option.userDescription }}
+                            </p>
+                            
+                            <span v-if="option.userDescription" class="icon gray sync floating" />
+                            <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
+                            <span v-if="isPlatform && option.context.hasPermissions()" class="icon privacy gray floating" />
+                        </div>
+                    </button>
+                </template>
+
+                <p v-if="!loadingResults && visibleOptions.length == 0 && query && !showDevelopment" class="info-box">
+                    Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
+                </p>
+
+                <footer v-if="!showDevelopment && !isPlatform">
+                    <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
+                        <span class="icon add" />
+                        <span>Mijn vereniging aansluiten</span>
+                    </a>
+
+                    <button class="button text full" type="button" @click="help">
+                        <span class="icon help" />
+                        <span>Mijn vereniging staat er niet tussen</span>
+                    </button>
+                </footer>
             </main>
         </div>
     </div>
@@ -93,10 +67,10 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, getAppDescription, getAppTitle, InheritComponent, Logo, Option, Spinner, STGradientBackground, Toast, useContextOptions, useUser } from '@stamhoofd/components';
+import { ContextLogo, getAppDescription, getAppTitle, Option, Spinner, STGradientBackground, Toast, useContextOptions, usePlatform } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import {throttle} from "@stamhoofd/utility"
+import { throttle } from "@stamhoofd/utility";
 import { computed, getCurrentInstance, onMounted, reactive, Ref, ref, shallowRef, watch } from 'vue';
 
 import VersionFooter from '../dashboard/settings/VersionFooter.vue';
@@ -114,6 +88,7 @@ const resultElements = reactive<HTMLElement[]>([])
 const visibleOptions = computed(() => query.value.length == 0 ? defaultOptions.value : results.value)
 const isPlatform = STAMHOOFD.userMode === 'platform'
 const instance = getCurrentInstance();
+const platform = usePlatform();
 
 onMounted(() => {
     console.info('Mounted OrganizationSelectionView', instance)
@@ -277,31 +252,18 @@ const $navigate = useNavigate()
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .organization-selection-view {
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
+     > h1 {
+        @media (min-height: 800px) {
+            padding-top: 40px;
+        }
 
-    @media (min-height: 800px) {
-        padding-top: 40px;
-    }
-
-    &.native {
-        padding-top: 0;
-    }
+        &.native {
+            padding-top: 0;
+        }
+     }
 
     .version-box {
         padding: 15px 0;
-    }
-
-    > h1 {
-        @extend .style-title-huge;
-        @extend .style-text-gradient;
-        padding-bottom: 10px;
-    }
-
-    > p:not([class]) {
-        @extend .style-description;
-        padding: 10px 0;
     }
 
     input.search {

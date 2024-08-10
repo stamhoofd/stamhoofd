@@ -8,6 +8,21 @@
             </h1>
 
             <STList class="illustration-list">    
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.CorporateIdentity)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/palette.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Huisstijl') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Stel de kleuren en huisstijl in van het platform') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Admins)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
@@ -165,6 +180,7 @@ import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsV
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 import EditEventTypesView from './event-types/EditEventTypesView.vue';
+import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -176,6 +192,7 @@ enum Routes {
     EmailTemplates = 'email-templates',
     EmailSettings = 'emailadressen',
     EventTypes = 'soorten-activiteiten',
+    CorporateIdentity = 'huisstijl'
 }
 
 const platform = usePlatform()
@@ -203,6 +220,11 @@ defineRoutes([
                 }
             }
         }
+    },
+    {
+        url: Routes.CorporateIdentity,
+        present: 'popup',
+        component: EditCorporateIdView as ComponentOptions,
     },
     {
         url: Routes.DefaultAgeGroups,

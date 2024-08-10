@@ -41,6 +41,10 @@ export class SessionManagerStatic {
             }
         }
 
+        return this.getLastGlobalSession()
+    }
+
+    async getLastGlobalSession() {
         const session = new SessionContext(null)
         await session.loadFromStorage()
         return session

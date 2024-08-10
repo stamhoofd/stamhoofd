@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix,SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, LoginView, ManageEventsView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AccountSwitcher, AsyncComponent, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, LoginView, ManageEventsView, NoPermissionsView,OrganizationSwitcher, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { PromiseView } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -49,26 +49,12 @@ export async function loadSessionFromUrl() {
     return session;
 }
 export function getLoginRoot() {
-    if (STAMHOOFD.userMode === 'platform') {
-        return new ComponentWithProperties(NavigationController, {
+    return new ComponentWithProperties(CoverImageContainer, {
+        root: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(LoginView, {
                 initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? ''
             })
         })
-    }
-
-    return new ComponentWithProperties(TabBarController, {
-        tabs: [
-            new TabBarItem({
-                icon: 'key',
-                name: 'Inloggen',
-                component: new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(LoginView, {
-                        initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? ''
-                    })
-                })
-            })
-        ]
     })
 }
 
@@ -79,9 +65,14 @@ export async function getOrganizationSelectionRoot() {
     await SessionManager.prepareSessionForUsage(session, false);
     await I18nController.loadDefault(reactiveSession, Country.Belgium, "nl")
 
-    const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
+    const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
 
-    let baseRoot = new ComponentWithProperties(OrganizationSelectionView, {});
+    let baseRoot = new ComponentWithProperties(CoverImageContainer, {
+        root: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(OrganizationSelectionView, {})
+        })
+    })
+    
 
     if (STAMHOOFD.userMode === 'platform') {
         // In platform mode, we need authentication
@@ -97,10 +88,11 @@ export async function getOrganizationSelectionRoot() {
             $platformManager: platformManager,
             reactive_navigation_url: "/",
             reactive_components: {
-                // Only display a right account switcher (if signed in), because we are already in the 'selection view', so adding another selection in the left top corner would be weird
+                "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
+                "tabbar-replacement": new ComponentWithProperties(ContextNavigationBar, {})
             },
-            stamhoofd_app: 'dashboard',
+            stamhoofd_app: 'auto',
         }),
         root: wrapWithModalStack(baseRoot)
     });
@@ -133,23 +125,18 @@ export async function getScopedDashboardRootFromUrl() {
 
 export async function getScopedAutoRootFromUrl() {
     const fromUrl = await loadSessionFromUrl()
-    const session = reactive(fromUrl ?? (await SessionManager.getLastSession())) as SessionContext;
+    const session = reactive(fromUrl ?? (await SessionManager.getLastGlobalSession())) as SessionContext;
     await SessionManager.prepareSessionForUsage(session, false);
-
+    
     return await getScopedAutoRoot(session)
 }
 
-export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {
-    if (!session.organization && !!session.auth.platformPermissions) {
-        const admin = await import('@stamhoofd/admin-frontend');
-        return await admin.getScopedAdminRoot(session, options);
-    }
-
-    if ((!session.user || !session.canGetCompleted()) && session.organization) {
+export async function getScopedAutoRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {    
+    if (!session.user) {
         // We can't really determine the automatic root view because we are not signed in
         // So return the login view, that will call getScopedAutoRoot again after login
         const reactiveSession = reactive(session) as SessionContext
-        const platformManager = await PlatformManager.createFromCache(reactiveSession, false)
+        const platformManager = await PlatformManager.createFromCache(reactiveSession, true)
         I18nController.loadDefault(reactiveSession, Country.Belgium, "nl", session?.organization?.address?.country).catch(console.error)
 
         return new ComponentWithProperties(ContextProvider, {
@@ -179,18 +166,20 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
             )
         });
     }
-    
-    if (!session.organization || !session.user) {
-        return getOrganizationSelectionRoot()
-    }
 
-    // Organization specific registration root
-    if (!session.auth.permissions && session.organization.meta.packages.useMembers) {
+    
+    // Make sure users without permissions always go to the member portal automatically
+    if (((!session.organization && !session.auth.userPermissions) || (session.organization && !session.auth.permissions)) && (STAMHOOFD.userMode === 'platform' || (session.organization && session.organization.meta.packages.useMembers))) {
         const registration = await import('@stamhoofd/registration');
         return await registration.getRootView(session)
     }
-    
-    return await getScopedDashboardRoot(session, options)
+
+    if (session.organization) {
+        return await getScopedDashboardRoot(session, options)
+    }
+
+    // Users with permissions should always have the option to choose the member portal or the dashboard
+    return getOrganizationSelectionRoot()
 }
 
 export async function getScopedDashboardRoot(session: SessionContext, options: {initialPresents?: PushOptions[]} = {}) {

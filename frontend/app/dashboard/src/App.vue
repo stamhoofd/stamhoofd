@@ -14,7 +14,7 @@ import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { EmailAddressSettings, PaymentGeneral, PaymentStatus, Token } from '@stamhoofd/structures';
-import { Ref, nextTick, onMounted, reactive, ref, markRaw, Raw } from 'vue';
+import { markRaw, nextTick, onMounted, Raw, reactive, Ref, ref } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRoot, getScopedDashboardRootFromUrl } from "./getRootViews";
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent>|null>;
@@ -44,6 +44,8 @@ const root = new ComponentWithProperties(PromiseView, {
                 app = 'dashboard';
             } else if (parts.length >= 1 && parts[0] == 'leden') {
                 app = 'registration';
+            } else if (parts.length >= 1 && parts[0] == 'auto') {
+                app = 'auto';
             }
 
             let component: ComponentWithProperties

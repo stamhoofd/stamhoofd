@@ -34,12 +34,14 @@
                 Ik heb kennis genomen van <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
             </Checkbox>
 
-            <LoadingButton :loading="loading" class="block bottom input-spacing">
-                <button class="button primary" type="submit">
-                    <span class="icon lock" />
-                    <span>Account aanmaken</span>
-                </button>
-            </LoadingButton>
+            <footer>
+                <LoadingButton :loading="loading" class="block input-spacing">
+                    <button class="button primary" type="submit">
+                        <span class="icon lock" />
+                        <span>Account aanmaken</span>
+                    </button>
+                </LoadingButton>
+            </footer>
         </main>
     </form>
 </template>

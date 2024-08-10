@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ColorHelper } from '@stamhoofd/components';
 import { SessionContext, Storage } from '@stamhoofd/networking';
 import { Platform, RegistrationPeriod, UserWithMembers, Version } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -20,6 +21,11 @@ export class PlatformManager {
         this.$platform = $platform
 
         $platform.setShared()
+
+        // Set color
+        if ($platform.config.color) {
+            ColorHelper.setColor($platform.config.color)
+        }
     }
 
     /**
@@ -55,6 +61,7 @@ export class PlatformManager {
 
     async forceUpdate() {
         this.$platform.deepSet(await PlatformManager.fetchPlatform(this.$context))
+        await this.savePlatform()
     }
 
     async patch(patch: AutoEncoderPatchType<Platform>, shouldRetry = false) {

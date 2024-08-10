@@ -872,8 +872,8 @@
         height: var(--block-width, 40px);
         border-radius: $border-radius;
         text-align: center;
-        background: $color-primary-background;
-        color: $color-primary;
+        background: $color-primary-light;
+        color: $color-primary-dark;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);
         font-size: 14px;

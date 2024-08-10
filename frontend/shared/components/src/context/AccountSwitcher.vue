@@ -12,6 +12,16 @@
             </span>
         </figure>
     </button>
+    <template v-else-if="!isNative">
+        <a class="button text only-icon-smartphone" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
+            <span class="icon external" />
+            <span>Terug naar website</span>
+        </a>
+
+        <a v-if="!isPlatform" class="button primary" href="/aansluiten" @click.prevent="$navigate('join')">
+            {{ $t("dashboard.join") }}
+        </a>
+    </template>
 </template>
 
 <script setup lang="ts" name="AccountSwitcher">
@@ -19,10 +29,13 @@ import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
+import { AppManager } from '@stamhoofd/networking';
 import { useUser } from '../hooks';
 
 const $user = useUser();
 const $navigate = useNavigate();
+const isNative = AppManager.shared.isNative
+const isPlatform = STAMHOOFD.userMode === 'platform'
 
 // todo: this isn't working yet on start
 defineRoutes([

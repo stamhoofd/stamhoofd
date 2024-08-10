@@ -3,19 +3,43 @@
         <div v-if="autoHeight" class="sizer" :style="sizerStyle">
             <div :style="sizerChildStyle" />
         </div>
-        <img v-if="elWidth" :src="src" :width="imgWidth" :height="imgHeight">
+
+        <picture v-if="elWidth">
+            <source 
+                v-if="imageDark && srcDark && (darkMode === 'Auto' || darkMode === 'On')"
+                :srcset="srcDark"
+                :media="darkMode === 'Auto' ? '(prefers-color-scheme: dark)' : ''"
+                :width="imgWidthDark" 
+                :height="imgHeightDark"
+            >
+            <img 
+                :src="src"
+                :width="imgWidth" 
+                :height="imgHeight"
+                :alt="alt"
+            >
+        </picture>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from '@simonbackx/vue-app-navigation/classes';
-import { Image } from '@stamhoofd/structures';
+import { DarkMode, Image } from '@stamhoofd/structures';
 
 
 @Component({})
 export default class ImageComponent extends Vue {
+    @Prop({ default: '' })
+        alt: string
+
     @Prop({ required: true })
         image: Image
+
+    @Prop({ default: null })
+        imageDark: Image|null
+
+    @Prop({ default: DarkMode.Auto})
+        darkMode: DarkMode
 
     /**
      * Update the height to match the image resolution.
@@ -34,6 +58,10 @@ export default class ImageComponent extends Vue {
         return this.image.getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined)
     }
 
+    get darkResolution() {
+        return (this.imageDark ?? this.image).getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined)
+    }
+
     get imgWidth() {
         return this.resolution.width
     }
@@ -44,6 +72,18 @@ export default class ImageComponent extends Vue {
 
     get src() {
         return this.resolution.file.getPublicPath();
+    }
+
+    get imgWidthDark() {
+        return this.darkResolution.width
+    }
+
+    get imgHeightDark() {
+        return this.darkResolution.height
+    }
+
+    get srcDark() {
+        return this.darkResolution.file.getPublicPath();
     }
 
     updateSize() {

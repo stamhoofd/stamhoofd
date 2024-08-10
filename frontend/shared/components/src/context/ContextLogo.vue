@@ -1,15 +1,15 @@
 <template>
     <figure class="context-logo">
         <OrganizationAvatar v-if="organization" :organization="organization" />
-        <Logo v-else class="small" />
+        <PlatformAvatar v-else />
     </figure>
 </template>
 
 <script setup lang="ts">
 import { Organization } from "@stamhoofd/structures";
-import Logo from "../icons/Logo.vue";
-import OrganizationAvatar from "./OrganizationAvatar.vue";
 import { AppType } from "./appContext";
+import OrganizationAvatar from "./OrganizationAvatar.vue";
+import PlatformAvatar from "./PlatformAvatar.vue";
 
 defineProps<{
     organization: Organization|undefined|null,

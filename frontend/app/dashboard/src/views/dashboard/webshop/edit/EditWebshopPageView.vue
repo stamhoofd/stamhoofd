@@ -119,7 +119,11 @@
             Je kan een logo voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen.
         </p>
 
-        <LogoEditor :meta-data="webshop.meta" :validator="validator" :default-to-organization="true" :dark-mode="darkMode" @patch="addMetaPatch" />
+        <Checkbox v-model="useLogo">
+            Logo van vereniging gebruiken
+        </Checkbox>
+
+        <LogoEditor v-if="useLogo" :meta-data="webshop.meta" :validator="validator" :dark-mode="darkMode" @patch="addMetaPatch" />
 
         <template v-if="hasTickets">
             <hr>
@@ -282,6 +286,14 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     set darkMode(darkMode: DarkMode) {
         const patch = WebshopMetaData.patch({ darkMode })
         this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+    }
+
+    get useLogo() {
+        return this.webshop.meta.useLogo
+    }
+
+    set useLogo(useLogo: boolean) {
+        this.addMetaPatch(WebshopMetaData.patch({ useLogo }))
     }
 
     get coverPhoto() {

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
@@ -9,6 +9,7 @@ import { RegistrationPeriod } from "./RegistrationPeriod";
 import { UserWithMembers } from "./UserWithMembers";
 import { Replacement } from "./endpoints/EmailRequest";
 import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
+import { Image } from "./files/Image";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -171,6 +172,27 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(PlatformEventType), version: 287 })
     eventTypes: PlatformEventType[] = []
+
+    @field({ decoder: Image, nullable: true, version: 310 })
+    coverPhoto: Image|null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 310 })
+    color: string | null = null
+
+    @field({ decoder: Image, nullable: true, version: 310 })
+    horizontalLogoDark: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 310 })
+    squareLogoDark: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 310 })
+    horizontalLogo: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 310 })
+    squareLogo: Image | null = null
+
+    @field({ decoder: BooleanDecoder, optional: true, version: 310 })
+    expandLogo = false
 
     getEmailReplacements() {
         // todo: implement real colors

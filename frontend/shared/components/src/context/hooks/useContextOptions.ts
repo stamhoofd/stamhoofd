@@ -64,59 +64,6 @@ export function useContextOptions() {
             })
         }
 
-        /*for (const context of availableContexts) {
-            if (!context.canGetCompleted()) {
-                continue;
-            }
-
-            // Do we have permissions to manage this organization?
-            const organization = context.organization
-            if (!organization) {
-                continue;
-            }
-
-            const user = context.user;
-
-            if (!user || !$organization.value || ($organization.value && organization.id !== $organization.value.id)) {
-                opts.push({
-                    id: 'org-'+organization.id,
-                    organization,
-                    app: 'auto',
-                    context,
-                    userDescription: user && (!$user.value || user.id !== $user.value.id) ? user.email : undefined
-                })
-                continue;
-            }
-
-            // Todo: this needs to be updated
-            const hasAccess = context.hasPermissions()
-            if (hasAccess) {
-                opts.push({
-                    id: 'dashboard-'+organization.id,
-                    organization,
-                    app: 'dashboard',
-                    context
-                })
-
-                const membersEnabled = organization.meta.packages.useMembers
-                if (STAMHOOFD.userMode !== 'platform' && membersEnabled) {
-                    opts.push({
-                        id: 'registration-'+organization.id,
-                        organization,
-                        app: 'registration',
-                        context
-                    })
-                }
-            } else {
-                opts.push({
-                    id: 'org-'+organization.id,
-                    organization,
-                    app: 'auto',
-                    context
-                })
-            }
-        }*/
-
         return opts;
     }
 
@@ -161,7 +108,7 @@ export function useContextOptions() {
     const selectOption = (option: Option) => {
         ReplaceRootEventBus.sendEvent("replace", PromiseComponent(async () => {
             return await buildRootForOption(option);
-        }))
+        })).catch(console.error)
     }
 
     const isCurrent = (option: Option) => {

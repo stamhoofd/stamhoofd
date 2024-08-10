@@ -1,54 +1,48 @@
 <template>
     <div>
-        <Checkbox v-if="defaultToOrganization" v-model="useOrg">
-            Logo van vereniging gebruiken
-        </Checkbox>
+        <div v-if="darkMode === 'Off' || darkMode === 'Auto'" class="split-inputs">
+            <div>
+                <ImageInput v-model="horizontalLogo" :placeholder="horizontalLogoPlaceholder" title="Horizontaal" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
 
-        <div v-if="!useOrg || !defaultToOrganization">
-            <div v-if="darkMode === 'Off' || darkMode === 'Auto'" class="split-inputs">
-                <div>
-                    <ImageInput v-model="horizontalLogo" :placeholder="horizontalLogoPlaceholder" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
-
-                    <p class="style-description-small">
-                        Voor grotere schermen.
-                    </p>
-                </div>
-
-                <div>
-                    <ImageInput v-model="squareLogo" :placeholder="squareLogoPlaceholder" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
-                    <p class="style-description-small">
-                        Voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
-                    </p>
-                </div>
-            </div>
-            <div v-if="darkMode === 'On' || darkMode === 'Auto'" class="split-inputs">
-                <div>
-                    <ImageInput v-model="horizontalLogoDark" :placeholder="horizontalLogoDarkPlaceholder" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :dark="true" />
-
-                    <p class="style-description-small">
-                        Voor grotere schermen. In donkere modus.
-                    </p>
-                </div>
-
-                <div>
-                    <ImageInput v-model="squareLogoDark" :placeholder="squareLogoDarkPlaceholder" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :dark="true" />
-                    <p class="style-description-small">
-                        Voor op kleine schermen. In donkere modus. Laat tekst zoveel mogelijk weg uit dit logo.
-                    </p>
-                </div>
+                <p class="style-description-small">
+                    Voor grotere schermen.
+                </p>
             </div>
 
-            <Checkbox v-model="expandLogo">
-                Logo groter weergeven (afgeraden)
-            </Checkbox>
+            <div>
+                <ImageInput v-model="squareLogo" :placeholder="squareLogoPlaceholder" title="Vierkant" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
+                <p class="style-description-small">
+                    Voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
+                </p>
+            </div>
         </div>
+        <div v-if="darkMode === 'On' || darkMode === 'Auto'" class="split-inputs">
+            <div>
+                <ImageInput v-model="horizontalLogoDark" :placeholder="horizontalLogoDarkPlaceholder" title="Horizontaal op donkere achtergrond" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :dark="true" />
+
+                <p class="style-description-small">
+                    Voor grotere schermen. In donkere modus.
+                </p>
+            </div>
+
+            <div>
+                <ImageInput v-model="squareLogoDark" :placeholder="squareLogoDarkPlaceholder" title="Vierkant" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :dark="true" />
+                <p class="style-description-small">
+                    Voor op kleine schermen. In donkere modus. Laat tekst zoveel mogelijk weg uit dit logo.
+                </p>
+            </div>
+        </div>
+
+        <Checkbox v-model="expandLogo">
+            Logo groter weergeven (afgeraden)
+        </Checkbox>
     </div>
 </template>
 
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { DarkMode, Image, OrganizationMetaData, ResolutionFit, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
+import { DarkMode, Image, OrganizationMetaData, PlatformConfig, ResolutionFit, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { Validator } from '../errors/Validator';
@@ -63,31 +57,20 @@ import ImageInput from '../inputs/ImageInput.vue';
 })
 export default class LogoEditor extends Mixins(NavigationMixin) {
     @Prop({ required: true }) 
-        metaData: WebshopMetaData | OrganizationMetaData
+        metaData: WebshopMetaData | OrganizationMetaData | PlatformConfig
     
     @Prop({ default: null }) 
         validator: Validator | null
 
-    @Prop({ default: false }) 
-        defaultToOrganization!: boolean
-
     @Prop({ default: DarkMode.Off }) 
         darkMode!: DarkMode
-
-    get useOrg() {
-        return !((this.metaData as any).useLogo ?? false)
-    }
-
-    set useOrg(useOrg: boolean) {
-        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData).patch({ useLogo: !useOrg }))
-    }
 
     get squareLogo() {
         return this.metaData.squareLogo
     }
 
     set squareLogo(image: Image | null) {
-        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData).patch({ squareLogo: image }))
+        this.$emit('patch', (this.metaData.constructor as typeof WebshopMetaData | typeof OrganizationMetaData | typeof PlatformConfig).patch({ squareLogo: image }))
     }
 
     get squareLogoPlaceholder() {

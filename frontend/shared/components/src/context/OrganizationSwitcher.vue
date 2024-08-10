@@ -1,7 +1,7 @@
 <template>
-    <button v-long-press="() => open()" class="organization-switcher" :class="{small}" type="button" @click="open" @contextmenu.prevent="open">
+    <PlatformLogo v-if="app === 'auto'" />
+    <button v-else v-long-press="($event) => open($event)" class="organization-switcher" :class="{small}" type="button" @click="open" @contextmenu.prevent="open($event)">
         <ContextLogo :organization="organization" :app="app" />
-
         <div>
             <h1>
                 <span>{{ small && organization ? organization.name : getAppTitle(app, organization) }}</span><span v-if="small" ref="arrow" class="icon arrow-down-small gray" />
@@ -18,13 +18,15 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 
 import { useOrganization } from '../hooks';
+import { usePositionableSheet } from '../tables';
 import { getAppDescription, getAppTitle, useAppContext } from './appContext';
-import ContextLogo from './ContextLogo.vue'
+import ContextLogo from './ContextLogo.vue';
 import OrganizationAppSelector from './OrganizationAppSelector.vue';
+import PlatformLogo from './PlatformLogo.vue';
 
-const present = usePresent();
 const organization = useOrganization();
 const app = useAppContext();
+const {presentPositionableSheet} = usePositionableSheet();
 
 withDefaults(
     defineProps<{
@@ -35,8 +37,12 @@ withDefaults(
     }
 )
 
-const open = async () => {
-    await present({
+const open = async (event: MouseEvent) => {
+    if (app === 'auto') {
+        return;
+    }
+    
+    await presentPositionableSheet(event, {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(OrganizationAppSelector, {})
@@ -45,12 +51,8 @@ const open = async () => {
                     reactive_navigation_disable_url: true
                 }
             })
-        ],
-        modalDisplayStyle: 'popup',
-        modalClass: 'positionable-sheet',
-        modalCssStyle: '--sheet-position-left: 20px; --sheet-position-top: 65px; --sheet-vertical-padding: 15px;',
-        
-    })
+        ]
+    }, {padding: 25})
 }
 </script>
 
