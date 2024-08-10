@@ -1,6 +1,6 @@
 <template>
     <form class="st-view" data-submit-last-field @submit.prevent="applyFilter">
-        <STNavigationBar :title="filter.name" :disable-dismiss="canPop" v-if="canDelete || canPop">
+        <STNavigationBar v-if="!popup || canDelete || canPop" :title="filter.name" :disable-dismiss="canPop">
             <template v-if="canDelete" #right>
                 <button class="button icon trash" type="button" @click="deleteFilter" />
             </template>
@@ -14,7 +14,7 @@
             <FramedComponent :root="filterComponent" />
         </main>
 
-        <STToolbar v-if="!live">
+        <STToolbar v-if="!live || !popup">
             <template #right>
                 <button class="button primary full" type="button" @click="applyFilter">
                     Toepassen
@@ -26,7 +26,7 @@
 
 
 <script lang="ts">
-import { FramedComponent, NavigationMixin, useCanPop } from "@simonbackx/vue-app-navigation";
+import { FramedComponent, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import Radio from "../inputs/Radio.vue";
@@ -76,6 +76,7 @@ export default class UIFilterEditor extends Mixins(NavigationMixin) {
 
     applyFilter() {
         if (!this.saveHandler) {
+            this.pop({force: true});
             return;
         }
 
