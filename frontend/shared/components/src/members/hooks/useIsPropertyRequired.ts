@@ -19,7 +19,7 @@ export function useIsPropertyRequired(member: Ref<PlatformMember>) {
 export function useIsPropertyEnabled(member: Ref<PlatformMember>, write: boolean) {
     const context = useContext()
 
-    return (property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport') => {
+    return (property: 'birthDay'|'gender'|'address'|'parents'|'emailAddress'|'phone'|'emergencyContacts'|'dataPermission'|'financialSupport'|'uitpasNumber') => {
         const m = member.value
         return m.isPropertyEnabled(property, context.value.user ? {
             checkPermissions: {

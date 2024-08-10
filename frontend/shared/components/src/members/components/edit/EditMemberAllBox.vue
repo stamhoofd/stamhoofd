@@ -25,6 +25,11 @@
             <EditMemberFinancialSupportBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
+        <div v-if="isPropertyEnabled('uitpasNumber') || member.patchedMember.details.uitpasNumber" class="container">
+            <hr>
+            <EditMemberUitpasBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+        </div>
+
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr>
             <EditMemberRecordCategoryBox v-bind="$attrs" :member="member" :category="category" :mark-reviewed="true" :level="level + 1" :validator="validator" />
@@ -53,6 +58,7 @@ import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
 import EditMemberNotesBox from './EditMemberNotesBox.vue';
 import EditMemberParentsBox from './EditMemberParentsBox.vue';
 import EditMemberRecordCategoryBox from './EditMemberRecordCategoryBox.vue';
+import EditMemberUitpasBox from './EditMemberUitpasBox.vue';
 import Title from './Title.vue';
 
 defineOptions({

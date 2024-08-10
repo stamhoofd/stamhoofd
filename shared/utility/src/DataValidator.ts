@@ -1,6 +1,6 @@
 
 export class DataValidator {
-    static readonly UITPAS_NUMBER_REGEX = /^\d{1,13}$/;
+    static readonly UITPAS_NUMBER_REGEX = /^\d{5,13}$/;
 
     static isEmailValid(str: string) {
         const blockList = ["gmail.be", "gmail.nl", "hotmail.c", "hotmail.co", "gmail.co", "gmail.c", "gmail.co", "gmal.com", "glail.com", "gmail.col", "gamil.com", "gmail.con", "icloud.be"]
@@ -21,5 +21,15 @@ export class DataValidator {
 
     static isUitpasNumberValid(str: string) {
         return this.UITPAS_NUMBER_REGEX.test(str);
+    }
+
+    static isUitpasNumberKansenTarief(str: string) {
+        const isValid = this.isUitpasNumberValid(str);
+        if (!isValid) {
+            return false;
+        }
+
+        const char = str[str.length - 2];
+        return char === '1';
     }
 }

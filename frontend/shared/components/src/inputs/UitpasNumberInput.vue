@@ -1,5 +1,5 @@
 <template>
-    <STInputBox title="UiTPAS-nummer" error-fields="uitpasNumber" :error-box="errorBox" :class="props.class">
+    <STInputBox :title="title" error-fields="uitpasNumber" :error-box="errorBox" :class="props.class">
         <input ref="input" v-model="uitpasNumberRaw" class="input" type="tel"  :disabled="disabled" v-bind="$attrs" :placeholder="placeholder" autocomplete="off" inputmode="numeric" maxlength="13" @keydown="preventInvalidUitpasNumberChars" @change="validate(false)">
     </STInputBox>
 </template>
@@ -16,12 +16,14 @@ import STInputBox from "./STInputBox.vue";
 const props = withDefaults(defineProps<{
     validator?: Validator,
     nullable?: boolean,
+    title?: string,
     disabled?: boolean,
     class?: string,
     required?: boolean
 }>(), {
     validator: undefined,
     nullable: false,
+    title: undefined,
     disabled: false,
     class: undefined,
     required: true
