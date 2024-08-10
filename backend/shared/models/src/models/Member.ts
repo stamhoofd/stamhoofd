@@ -1,11 +1,12 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { SQL } from "@stamhoofd/sql";
+import { scalarToSQLExpression, SQL, SQLWhereLike } from "@stamhoofd/sql";
 import { MemberDetails, MemberWithRegistrationsBlob, RegistrationWithMember as RegistrationWithMemberStruct, TinyMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Group, MemberPlatformMembership, Payment, Platform, Registration, User } from './';
+import { Group, MemberPlatformMembership, Organization, Payment, Platform, Registration, User } from './';
 export type MemberWithRegistrations = Member & { 
     users: User[], 
     registrations: (Registration & {group: Group})[] 
@@ -32,16 +33,14 @@ export class Member extends Model {
         type: "string", 
         beforeSave: function() {
             return this.details?.firstName ?? ''
-        },
-        skipUpdate: true
+        }
     })
     firstName: string
 
     @column({ type: "string", 
         beforeSave: function() {
             return this.details?.lastName ?? ''
-        },
-        skipUpdate: true })
+        } })
     lastName: string
 
     @column({ 
@@ -49,10 +48,18 @@ export class Member extends Model {
         nullable: true, 
         beforeSave: function(this: Member) {
             return this.details?.birthDay ? Formatter.dateIso(this.details.birthDay) : null
-        },
-        skipUpdate: true 
+        }
     })
     birthDay: string | null
+
+    @column({
+        type: "string", 
+        nullable: true,
+        beforeSave: function() {
+            return this.details?.memberNumber ?? null
+        }
+    })
+    memberNumber: string | null
 
     @column({ type: "json", decoder: MemberDetails })
     details: MemberDetails
@@ -419,6 +426,8 @@ export class Member extends Model {
 
     static async updateMembershipsForId(id: string) {
         return await QueueHandler.schedule('updateMemberships-' + id, async function (this: undefined) {
+            console.log('update memberships for id ', id);
+            
             const me = await Member.getWithRegistrations(id)
             if (!me) {
                 console.log('Skipping automatic membership for: ' + id, ' - member not found')
@@ -453,7 +462,7 @@ export class Member extends Model {
             const activeMembershipsUndeletable = activeMemberships.filter(m => !m.canDelete() || !m.generated)
 
             if (defaultMemberships.length == 0) {
-                // Stop all active memberships taht were added automatically
+                // Stop all active memberships that were added automatically
                 for (const membership of activeMemberships) {
                     if (membership.canDelete() && membership.generated) {
                         console.log('Removing membership because no longer registered member and not yet invoiced for: ' + me.id + ' - membership ' + membership.id)
@@ -509,6 +518,16 @@ export class Member extends Model {
             membership.expireDate = periodConfig.expireDate
             membership.generated = true;
 
+            if(me.details.memberNumber === null) {
+                try {
+                    await me.assignMemberNumber(membership);
+                } catch(error) {
+                    console.error(`Failed to assign member number for id ${me.id}: ${error.message}`);
+                    // If the assignment of the member number fails the membership is not created but the member is registered
+                    return;
+                }
+            }
+
             await membership.calculatePrice()
             await membership.save()
 
@@ -521,6 +540,119 @@ export class Member extends Model {
                 }
             }
         });
+    }
+
+    private async assignMemberNumber(membership: MemberPlatformMembership) {
+        const member: Member = this;
+
+        if (member.details?.memberNumber) {
+            console.log('Member already has member number, should not happen');
+            return
+        }
+        
+        return await QueueHandler.schedule('assignMemberNumber', async function (this: undefined) {
+            try {
+                const memberNumber = await member.createMemberNumber(membership);
+                member.details.memberNumber = memberNumber;
+                await member.save();
+            } catch(error) {
+                if(isSimpleError(error) || isSimpleErrors(error)) {
+                    throw error;
+                } else {
+                    console.error(error);
+                    throw new SimpleError({
+                        code: 'assign_member_number',
+                        message: error.message,
+                        human: "Er is iets misgegaan bij het aanmaken van het lidnummer.",
+                    })
+                }
+            }
+        });
+    }
+
+    async createMemberNumber(membership: MemberPlatformMembership): Promise<string> {
+        // example: 5301-101012-1
+
+        //#region get birth date part (ddmmjj)
+        const birthDay = this.details?.birthDay;
+        if(!birthDay) {
+            throw new SimpleError({
+                code: 'assign_member_number',
+                message: "Missing birthDay",
+                human: "Er kon geen lidnummer aangemaakt worden omdat er geen geboortedatum is ingesteld.",
+            });
+        }
+
+        const dayPart = birthDay.getDate().toString().padStart(2, '0');
+        const monthPart = (birthDay.getMonth() + 1).toString().padStart(2, '0');
+        const yearPart = birthDay.getFullYear().toString().slice(2, 4);
+        const birthDatePart = `${dayPart}${monthPart}${yearPart}`;
+        //#endregion
+
+        //#region get group number
+        const organizationId = membership.organizationId;
+        const organization = await Organization.getByID(organizationId);
+        if(!organization) {
+            throw new Error(`Organization with id ${organizationId} not found`);
+        }
+        const groupNumber = organization.uri;
+        //#endregion
+
+        //#region get follow up number
+        const firstPart = `${groupNumber}-${birthDatePart}-`;
+
+        const query = SQL.select()
+        .from(SQL.table('members'))
+        .where(
+            new SQLWhereLike(
+                SQL.column('members', 'memberNumber'),
+                scalarToSQLExpression(`${SQLWhereLike.escape(firstPart)}%`)
+            )
+        );
+
+        const count = await query.count();
+        console.log(`Found ${count} members with a memberNumber starting with ${firstPart}`);
+
+        let followUpNumber = count;
+        //#endregion
+
+        //#region check if memberNumber is unique
+        let doesExist = true;
+        let memberNumber: string = '';
+        let tries = 0;
+
+        while(doesExist) {
+            followUpNumber++;
+            memberNumber = firstPart + followUpNumber;
+
+            const result = await SQL.select()
+            .from(SQL.table('members'))
+            .where(
+                    SQL.column('members', 'memberNumber'),
+                    scalarToSQLExpression(memberNumber)
+            )
+            .first(false);
+
+            console.log(`Is ${memberNumber} unique? ${result === null}`);
+
+            if(result !== null) {
+                tries++;
+                if(tries > 9) {
+                    throw new SimpleError({
+                        code: 'assign_member_number',
+                        message: `Duplicate member numbers (last try: ${memberNumber}, tries: ${tries})`,
+                        human: "Er kon geen uniek lidnummer aangemaakt worden. Mogelijks zijn er teveel leden met dezelfde geboortedatum. Neem contact op met de vereniging.",
+                    });
+                }
+            } else {
+                doesExist = false;
+            }
+        }
+        //#endregion
+
+        console.log(`Created member number: ${memberNumber}`);
+
+        return memberNumber;
     }
 
     async updateMemberships() {
