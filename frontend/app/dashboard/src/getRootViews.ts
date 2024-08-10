@@ -143,7 +143,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
             context: markRaw({
                 $context: reactiveSession,
                 $platformManager: platformManager,
-                reactive_navigation_url: "auto/" + session.organization!.uri,
+                reactive_navigation_url: "auto" + (session.organization ? '/'+session.organization!.uri : ''),
                 reactive_components: {
                     "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                     "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
