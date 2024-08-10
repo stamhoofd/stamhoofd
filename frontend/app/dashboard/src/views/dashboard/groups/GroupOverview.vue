@@ -87,22 +87,7 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="editRestrictions(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/account.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            Inschrijvingsbeperkingen
-                        </h2>
-                        <p class="style-description">
-                            Pas aan wie kan inschrijven
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
+                    
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
@@ -220,11 +205,8 @@ import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettin
 
 import { computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
-import EditGroupPricesView from './edit/EditGroupPricesView.vue';
 import EditGroupRestrictionsView from './edit/EditGroupRestrictionsView.vue';
-import EditGroupWaitinglistView from './edit/EditGroupWaitinglistView.vue';
 
 const props = defineProps<{
     group: Group;
@@ -340,14 +322,6 @@ async function editGeneral(animated = true) {
 
 async function editRestrictions(animated = true) {
     await displayEditComponent(EditGroupRestrictionsView, animated)
-}
-
-async function editPrices(animated = true) {
-    await displayEditComponent(EditGroupPricesView, animated)
-}
-
-async function editWaitinglist(animated = true) {
-    await displayEditComponent(EditGroupWaitinglistView, animated)
 }
 
 async function editPermissions(animated = true) {

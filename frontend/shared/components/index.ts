@@ -111,6 +111,7 @@ export { default as WYSIWYGTextInput } from "./src/inputs/WYSIWYGTextInput.vue"
 export { default as TagIdsInput } from "./src/inputs/TagIdsInput.vue"
 export { default as DefaultAgeGroupIdsInput } from "./src/inputs/DefaultAgeGroupIdsInput.vue"
 export { default as GroupsInput } from "./src/inputs/GroupsInput.vue"
+export { default as GroupIdsInput } from "./src/inputs/GroupIdsInput.vue"
 
 // Shared views should be last
 export { default as AccountSettingsView } from "./src/views/AccountSettingsView.vue"

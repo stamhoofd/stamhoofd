@@ -1,5 +1,5 @@
 <template>
-    <LoadingView v-if="loadingOrganizer" :error-box="loadingExternalOrganizerErrorBox" />
+    <LoadingView v-if="loadingOrganizer || !period" :error-box="loadingExternalOrganizerErrorBox" />
     <SaveView v-else :loading="saving" :title="title" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
@@ -34,7 +34,9 @@
                             Geen automatische aansluiting of verzekeringen (!)
                         </option>
                         <option v-for="ageGroup of defaultAgeGroups" :key="ageGroup.id" :value="ageGroup.id">
-                            {{ ageGroup.name }}<template v-if="!ageGroup.defaultMembershipTypeId"> (niet automatisch)</template>
+                            {{ ageGroup.name }}<template v-if="!ageGroup.defaultMembershipTypeId">
+                                (niet automatisch)
+                            </template>
                         </option>
                     </Dropdown>
                 </STInputBox>
@@ -88,7 +90,7 @@
             </STList>
         </template>
 
-        <div class="container" v-if="type !== GroupType.WaitingList || patched.settings.prices.length !== 1 || patched.settings.prices[0]?.price.price">
+        <div v-if="type !== GroupType.WaitingList || patched.settings.prices.length !== 1 || patched.settings.prices[0]?.price.price" class="container">
             <hr>
             <h2 class="style-with-button">
                 <div>{{ $t('Tarieven') }}</div>
@@ -153,11 +155,52 @@
             </STListItem>
         </STList>
 
+        <div v-if="patched.type === GroupType.Membership" class="container">
+            <hr>
+            <h2>Restricties</h2>
+
+            <template v-if="isPropertyEnabled('birthDay')">
+                <div class="split-inputs">
+                    <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errors.errorBox">
+                        <AgeInput v-model="minAge" :year="period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                    </STInputBox>
+
+                    <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errors.errorBox">
+                        <AgeInput v-model="maxAge" :year="period.startDate.getFullYear()" placeholder="Onbeperkt" :nullable="true" />
+                    </STInputBox>
+                </div>
+                <p class="st-list-description">
+                    *Hoe oud het lid is op 31/12/{{ period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                        Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
+                    </template>
+                </p>
+            </template>
+
+            <STInputBox v-if="isPropertyEnabled('gender')" title="Jongens en meisjes" error-fields="genderType" :error-box="errors.errorBox" class="max">
+                <STList>
+                    <STListItem v-for="_genderType in genderTypes" :key="_genderType.value" element-name="label" :selectable="true">
+                        <template #left>
+                            <Radio v-model="genderType" :value="_genderType.value" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ _genderType.name }}
+                        </h3>
+                    </STListItem>
+                </STList>
+            </STInputBox>
+
+            <button v-if="requireGroupIds.length == 0" type="button" class="button text only-icon-smartphone" @click="addRequireGroupIds">
+                <span class="icon add" />
+                <span>Verplicht andere inschrijving</span>
+            </button>
+        </div>
+
         <hr>
         <h2>Beschikbaarheid</h2>
 
         <STList>
-            <STListItem :selectable="true" element-name="label" v-if="isMultiOrganization || allowRegistrationsByOrganization">
+            <STListItem v-if="isMultiOrganization || allowRegistrationsByOrganization" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="allowRegistrationsByOrganization" />
                 </template>
@@ -204,7 +247,7 @@
                 </div>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label" v-if="enableMaxMembers || type !== GroupType.WaitingList">
+            <STListItem v-if="enableMaxMembers || type !== GroupType.WaitingList" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="enableMaxMembers" />
                 </template>
@@ -220,7 +263,7 @@
                 </div>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label" v-if="enableMaxMembers">
+            <STListItem v-if="enableMaxMembers" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="waitingListIfFull" />
                 </template>
@@ -249,7 +292,6 @@
                     <h3 class="style-title-list">
                         Iedereen kan gelijk starten met inschrijven (tot het maximum)
                     </h3>
-
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label" :disabled="!waitingList">
@@ -265,7 +307,7 @@
                         Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest en nieuwe leden kunnen inschrijven op de wachtlijst.
                     </p>
 
-                    <p class="style-description-small" v-if="!waitingList">
+                    <p v-if="!waitingList" class="style-description-small">
                         Maak eerst een wachtlijst aan om deze optie te gebruiken.
                     </p>
 
@@ -278,7 +320,7 @@
 
                 <STListItem :selectable="true" element-name="label" :disabled="!waitingList">
                     <template #left>
-                        <Radio v-model="waitingListType" :value="WaitingListType.All" :disabled="!waitingList"/>
+                        <Radio v-model="waitingListType" :value="WaitingListType.All" :disabled="!waitingList" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -289,14 +331,14 @@
                         Iedereen moet manueel worden goedgekeurd. Betaling gebeurt pas bij de definitieve inschrijving.
                     </p>
 
-                    <p class="style-description-small" v-if="!waitingList">
+                    <p v-if="!waitingList" class="style-description-small">
                         Maak eerst een wachtlijst aan om deze optie te gebruiken.
                     </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label" :for="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate || waitingListType == WaitingListType.PreRegistrations)">
                     <template #left>
-                        <Radio v-model="waitingListType" :value="WaitingListType.PreRegistrations" :id="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate || waitingListType == WaitingListType.PreRegistrations)"/>
+                        <Radio :id="WaitingListType.PreRegistrations" v-model="waitingListType" :value="WaitingListType.PreRegistrations" :disabled="(!registrationStartDate || waitingListType == WaitingListType.PreRegistrations)" />
                     </template>
 
                     <h3 class="style-title-list">
@@ -307,7 +349,7 @@
                         Bestaande leden kunnen al vroeger beginnen met inschrijven.
                     </p>
 
-                    <p class="style-description-small" v-if="!registrationStartDate">
+                    <p v-if="!registrationStartDate" class="style-description-small">
                         Stel eerst een startdatum in voor de inschrijvingen om deze optie te kunnen gebruiken.
                     </p>
 
@@ -326,14 +368,15 @@
                     </div>
                 </STListItem>
             </STList>
-
         </template>
 
-        <div class="container" v-if="patched.waitingList || enableMaxMembers">
+        <div v-if="patched.waitingList || enableMaxMembers" class="container">
             <hr>
             <h2>Wachtlijst</h2>
             <p>Je kan een wachtlijst delen tussen verschillende leeftijdsgroepen. Op die manier kan je de wachtlijst makkelijk meerdere jaren aanhouden. Kies hieronder welke wachtlijst van toepassing is voor deze groep.</p>
-            <p class="style-description-block">Je kan indien gewenst ook nog vragen stellen aan leden die op de wachtlijst willen inschrijven.</p>
+            <p class="style-description-block">
+                Je kan indien gewenst ook nog vragen stellen aan leden die op de wachtlijst willen inschrijven.
+            </p>
 
             <STList v-if="availableWaitingLists.length">
                 <STListItem :selectable="true" element-name="label">
@@ -346,7 +389,7 @@
                     </h3>
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="label" v-for="{list, description} of availableWaitingLists" :key="list.id">
+                <STListItem v-for="{list, description} of availableWaitingLists" :key="list.id" :selectable="true" element-name="label">
                     <template #left>
                         <Radio v-model="waitingList" :value="list" />
                     </template>
@@ -363,7 +406,7 @@
                     </template>
                 </STListItem>
             </STList>
-            <p class="info-box" v-else>
+            <p v-else class="info-box">
                 Er zijn nog geen wachtlijsten aangemaakt.
             </p>
 
@@ -375,21 +418,27 @@
             </p>
         </div>
 
+        <JumpToContainer v-if="patched.type === GroupType.Membership" class="container" :visible="forceShowRequireGroupIds || !!requireGroupIds.length">
+            <GroupIdsInput v-model="requireGroupIds" :default-period-id="patched.periodId" title="Verplichte andere inschrijvingen" />
+        </JumpToContainer>
+
         <hr>
         <h2>Gegevensverzameling</h2>
         <p>Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.</p>
 
-        <InheritedRecordsConfigurationBox :overrideOrganization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
+        <InheritedRecordsConfigurationBox :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
     </SaveView>
 </template>
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { DateSelection, InheritedRecordsConfigurationBox, OrganizationAvatar, TimeInput, Dropdown, NumberInput, EditGroupView } from '@stamhoofd/components';
+import { AgeInput, DateSelection, Dropdown, EditGroupView, GroupIdsInput, InheritedRecordsConfigurationBox, NumberInput, OrganizationAvatar, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { Country, Group, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
+import { Country, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
+import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
 import { useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
@@ -398,8 +447,7 @@ import GroupOptionMenuBox from './components/GroupOptionMenuBox.vue';
 import GroupOptionMenuView from './components/GroupOptionMenuView.vue';
 import GroupPriceBox from './components/GroupPriceBox.vue';
 import GroupPriceView from './components/GroupPriceView.vue';
-import { useExternalOrganization, useFinancialSupportSettings } from './hooks';
-import { Formatter, StringCompare } from '@stamhoofd/utility';
+import { useExternalOrganization, useFinancialSupportSettings, useRegistrationPeriod } from './hooks';
 
 const props = withDefaults(
     defineProps<{
@@ -420,6 +468,12 @@ const props = withDefaults(
 const platform = usePlatform();
 const organization = useOrganization();
 const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
+const period = useRegistrationPeriod(computed(() => patched.value.periodId))
+const forceShowRequireGroupIds = ref(false)
+
+function addRequireGroupIds() {
+    forceShowRequireGroupIds.value = true
+}
 
 const {externalOrganization: externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox} = useExternalOrganization(
     computed({
@@ -536,6 +590,42 @@ const name = computed({
         }
     }
 })
+
+const minAge = computed({
+    get: () => patched.value.settings.minAge,
+    set: (minAge) => addPatch({
+        settings: GroupSettings.patch({
+            minAge
+        })
+    })
+})
+
+const maxAge = computed({
+    get: () => patched.value.settings.maxAge,
+    set: (maxAge) => addPatch({
+        settings: GroupSettings.patch({
+            maxAge
+        })
+    })
+})
+
+const genderType = computed({
+    get: () => patched.value.settings.genderType,
+    set: (genderType) => addPatch({
+        settings: GroupSettings.patch({
+            genderType
+        })
+    })
+});
+
+const requireGroupIds = computed({
+    get: () => patched.value.settings.requireGroupIds,
+    set: (requireGroupIds) => addPatch({
+        settings: GroupSettings.patch({
+            requireGroupIds: requireGroupIds as any
+        })
+    })
+});
 
 const allowRegistrationsByOrganization = computed({
     get: () => patched.value.settings.allowRegistrationsByOrganization,
@@ -816,7 +906,7 @@ async function addWaitingList() {
         })
     })
 
-     // Edit the group
+    // Edit the group
     await present({
         components: [
             new ComponentWithProperties(EditGroupView, {
@@ -832,6 +922,15 @@ async function addWaitingList() {
         ],
         modalDisplayStyle: 'popup'
     })
+}
+
+function isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address" | "gender") {
+    return !!OrganizationRecordsConfiguration.build({
+        platform: platform.value,
+        organization: externalOrganization.value,
+        group: patched.value,
+        includeGroup: true
+    })[name]
 }
 
 async function editWaitingList(waitingList: Group) {
@@ -855,6 +954,21 @@ async function editWaitingList(waitingList: Group) {
         modalDisplayStyle: 'popup'
     })
 }
+
+const genderTypes = [
+    {
+        value: GroupGenderType.Mixed,
+        name: "Gemengd",
+    },
+    {
+        value: GroupGenderType.OnlyFemale,
+        name: "Enkel meisjes",
+    },
+    {
+        value: GroupGenderType.OnlyMale,
+        name: "Enkel jongens",
+    },
+]
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {

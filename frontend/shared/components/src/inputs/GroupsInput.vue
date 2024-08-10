@@ -37,7 +37,7 @@ const props = withDefaults(
         nullable?: boolean
         date: Date // indication for selection the right groups in this period
     }>(), {
-        nullable: false,
+        nullable: false
     }
 )
 
@@ -61,7 +61,7 @@ const visiblePeriodIds = computed(() => {
     // Defualt show current
     return [
         platform.value.period.id,
-        organization.value?.period.id,
+        organization.value?.period.period.id,
     ]
 });
 
