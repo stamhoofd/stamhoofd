@@ -55,7 +55,11 @@ if (process.env.LOAD_ENV) {
 // https://vitejs.dev/config/
 export function buildConfig(options: {port: number}) {
     return {
-        resolve: {},
+        resolve: {
+            alias: {
+                '@stamhoofd/components': resolve(__dirname, './shared/components')
+            }
+        },
         plugins: [
             vue({
                 template: {

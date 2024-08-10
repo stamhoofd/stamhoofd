@@ -338,7 +338,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { BackButton, CenteredMessage, EditResourceRolesView, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { AccountSettingsView, BackButton, CenteredMessage, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, EmailTemplate, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -871,7 +871,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                 await this.splitViewController!.showDetail({
                     components: [
                         new ComponentWithProperties(NavigationController, { 
-                            root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ '@stamhoofd/components/src/views/AccountSettingsView.vue'), {}, { instant: false })
+                            root: new ComponentWithProperties(AccountSettingsView, {})
                         })
                     ],
                     animated: false
