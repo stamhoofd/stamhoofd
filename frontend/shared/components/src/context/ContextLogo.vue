@@ -1,6 +1,7 @@
 <template>
     <figure class="context-logo">
         <OrganizationAvatar v-if="organization" :organization="organization" />
+        <img v-else-if="app === 'admin'" src="@stamhoofd/assets/images/illustrations/laptop-key.svg" class="illustration">
         <PlatformAvatar v-else />
     </figure>
 </template>
@@ -37,6 +38,12 @@ defineProps<{
         > .stamhoofd-logo:last-child {
             display: block;
         }
+    }
+
+    img.illustration {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 }
 
