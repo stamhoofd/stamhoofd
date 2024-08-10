@@ -53,6 +53,7 @@
                             <span class="icon filter" />
                             <span class="hide-small">Filter</span>
                             <span v-if="hiddenItemsCount > 0" class="bubble primary">{{ filteredText }}</span>
+                            <span v-else-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary" />
                         </button>
                     </div>
                 </div>
@@ -145,7 +146,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simon
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
-import { SortItemDirection, Version } from "@stamhoofd/structures";
+import { isEmptyFilter, SortItemDirection, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from "vue";
