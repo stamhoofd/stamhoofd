@@ -205,8 +205,6 @@ export class ViewportHelper {
                 const bodyHeight = (window.innerHeight ?? document.body.clientHeight) + window.scrollY;
                 const bottomPadding = bodyHeight - window.visualViewport.height
 
-                console.log('set vh', viewportHeight, bodyHeight, bottomPadding, window.scrollY)
-
                 if (bottomPadding > 200) {
                     // We are showing the keyboard
                     document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
