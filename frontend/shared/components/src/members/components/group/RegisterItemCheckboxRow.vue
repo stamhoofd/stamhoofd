@@ -58,6 +58,11 @@ const checked = computed({
 
 
 async function editRegisterItem() {
+    if (checked.value && !registerItem.value?.showItemView) {
+        // Deselect
+        checked.value = false
+        return;
+    }
     await checkoutRegisterItem({
         item: registerItem.value,
         startCheckoutFlow: false,
