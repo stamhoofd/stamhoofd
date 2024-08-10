@@ -1,9 +1,7 @@
 <template>
-    <TableView ref="table" :prefix-column="prefixColumn" default-sort-direction="DESC" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="isLoadingOrders ? [] : orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="refresh(false)" @click="openOrder">
-        <template #empty>
-            Er zijn nog geen bestellingen.
-        </template>
-    </TableView>
+    <div>
+        Work in progress
+    </div>
 </template>
 
 <script lang="ts">
@@ -11,7 +9,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { Column, GlobalEventBus, InMemoryTableAction, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { Column, GlobalEventBus, InMemoryTableAction, TableAction, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethod, CheckoutMethodType, Filter, FilterDefinition, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -23,7 +21,6 @@ import OrderView from './OrderView.vue';
 
 @Component({
     components: {
-        TableView,
     },
 })
 export default class WebshopOrdersView extends Mixins(NavigationMixin) {
@@ -606,7 +603,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // (we don't need to decode all orders at the same time on the main thread)
 
             // We use a buffer to prevent DOM updates or Vue slowdown during streaming
-            let arrayBuffer: PrivateOrderWithTickets[] = []
+            const arrayBuffer: PrivateOrderWithTickets[] = []
 
             await this.webshopManager.streamOrders((order) => {
                 // Same orders could be seen twice
@@ -615,7 +612,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 )
             }, false)
 
-            let ticketBuffer: TicketPrivate[] = []
+            const ticketBuffer: TicketPrivate[] = []
 
             await this.webshopManager.streamTickets((ticket) => {
                 ticketBuffer.push(ticket)
@@ -729,13 +726,10 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     openOrder(order: PrivateOrderWithTickets) {
-        const table = this.$refs.table as TableView<PrivateOrderWithTickets> | undefined
         const component = new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(OrderView, { 
                 initialOrder: order,
-                webshopManager: this.webshopManager,
-                getNextOrder: table?.getNext,
-                getPreviousOrder: table?.getPrevious,
+                webshopManager: this.webshopManager
             })
         })
 

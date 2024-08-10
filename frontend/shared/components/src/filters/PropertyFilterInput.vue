@@ -249,21 +249,6 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             ],
             modalDisplayStyle: 'sheet'
         })
-
-        //this.present(new ComponentWithProperties(FilterEditor, {
-        //    title: "Verplicht als...",
-        //    selectedFilter: this.cachedRequiredFilter ?? new FilterGroup(this.definitions),
-        //    organization: this.organization,
-        //    setFilter: (requiredWhen: FilterGroup<any>) => {
-        //        this.$emit('update:modelValue', 
-        //            new PropertyFilter<any>(
-        //                this.modelValue.enabledWhen,
-        //                requiredWhen.encoded
-        //            )
-        //        )
-        //    },
-        //    definitions: this.definitions
-        //}).setDisplayStyle("popup"))
     }
 
     get enabledText() {

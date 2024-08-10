@@ -1,21 +1,18 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :column-configuration-id="'documents-' + template.id" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openDocument">
-        <template #empty>
-            Er zijn nog geen documenten aangemaakt. Controleer of er wel leden zijn die aan de voorwaarden voor dit document voldoen.
-        </template>
-    </TableView>
+    <div>
+        Work in progress
+    </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Column, InMemoryTableAction, TableAction, TableView, Toast } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { RecordWarning, RecordWarningType } from "@stamhoofd/structures";
-import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory } from "@stamhoofd/structures";
-import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Column, InMemoryTableAction, TableAction, Toast } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
+import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from "@stamhoofd/structures";
+import { Formatter, Sorter } from "@stamhoofd/utility";
 
 
 import { DocumentActionBuilder } from "./DocumentActionBuilder";
@@ -23,7 +20,7 @@ import DocumentView from "./DocumentView.vue";
 
 @Component({
     components: {
-        TableView
+        
     }
 })
 export default class DocumentsView extends Mixins(NavigationMixin) {
@@ -178,13 +175,10 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     }
 
     openDocument(document: Document) {
-        const table = this.$refs.table as TableView<Document> | undefined
         const component = new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(DocumentView, { 
                 document,
-                template: this.template,
-                getNext: table?.getNext,
-                getPrevious: table?.getPrevious,
+                template: this.template
             })
         })
 

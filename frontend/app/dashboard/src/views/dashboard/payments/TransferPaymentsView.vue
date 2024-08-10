@@ -1,12 +1,7 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openPayment">
-        <p class="style-description">
-            Als je de betaalmethode 'overschrijven' gebruikt, kan je hier aangeven welke betalingen je hebt ontvangen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 7 dagen zichtbaar).
-        </p>
-        <template #empty>
-            Er zijn nog geen overschrijvingen.
-        </template>
-    </TableView>
+    <div>
+        Work in progress
+    </div>
 </template>
 
 <script lang="ts">
@@ -14,14 +9,13 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
-import { CenteredMessage, Column, GlobalEventBus, InMemoryTableAction, LoadComponent, PaymentView, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Column, GlobalEventBus, InMemoryTableAction, PaymentView, TableAction, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 
 @Component({
     components: {
-        TableView,
     },
 })
 export default class TransferPaymentsView extends Mixins(NavigationMixin) {
@@ -58,12 +52,9 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     openPayment(payment: PaymentGeneral) {
-        const table = this.$refs.table as TableView<PaymentGeneral> | undefined
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PaymentView, {
-                initialPayment: payment,
-                getNext: table?.getNext,
-                getPrevious: table?.getPrevious
+                initialPayment: payment
             }),
         });
 
