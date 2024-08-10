@@ -20,14 +20,14 @@
             <EditEmergencyContactsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
-        <div v-if="isPropertyEnabled('financialSupport')" class="container">
-            <hr>
-            <EditMemberFinancialSupportBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
-        </div>
-
         <div v-if="isPropertyEnabled('uitpasNumber') || member.patchedMember.details.uitpasNumber" class="container">
             <hr>
             <EditMemberUitpasBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
+        </div>
+
+        <div v-if="isPropertyEnabled('financialSupport')" class="container">
+            <hr>
+            <EditMemberFinancialSupportBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
         <div v-for="category of recordCategories" :key="category.id" class="container">

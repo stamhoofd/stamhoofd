@@ -1,6 +1,6 @@
 
 export class DataValidator {
-    static readonly UITPAS_NUMBER_REGEX = /^\d{5,13}$/;
+    static readonly UITPAS_NUMBER_REGEX = /^\d{10,13}$/;
 
     static isEmailValid(str: string) {
         const blockList = ["gmail.be", "gmail.nl", "hotmail.c", "hotmail.co", "gmail.co", "gmail.c", "gmail.co", "gmal.com", "glail.com", "gmail.col", "gamil.com", "gmail.con", "icloud.be"]

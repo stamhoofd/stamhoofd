@@ -5,7 +5,15 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="requiresFinancialSupportCheckboxValue">
+        <template v-if="hasKansenTarief">
+            <Checkbox :model-value="true" :disabled="true">
+                {{ checkboxLabel }}
+            </Checkbox>
+            <p class="style-description-small">
+                Dit lid heeft recht op het kansentarief van de UiTPAS.
+            </p>
+        </template>
+        <Checkbox v-else v-model="requiresFinancialSupportCheckboxValue">
             {{ checkboxLabel }}
         </Checkbox>
 
@@ -20,16 +28,24 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="requiresFinancialSupportCheckboxValue">
+        <template v-if="hasKansenTarief">
+            <Checkbox :model-value="true" :disabled="true">
+                {{ checkboxLabel }}
+            </Checkbox>
+            <p class="style-description-small">
+                Je hebt recht op het kansentarief van de UiTPAS.
+            </p>
+        </template>
+        <Checkbox v-else v-model="requiresFinancialSupportCheckboxValue" :disabled="hasKansenTarief">
             {{ checkboxLabel }}
         </Checkbox>
     </div>
 </template>
 
 <script setup lang="ts">
-import { BooleanStatus, FinancialSupportSettings, PlatformMember } from '@stamhoofd/structures';
-
 import { SimpleError } from '@simonbackx/simple-errors';
+import { BooleanStatus, FinancialSupportSettings, PlatformMember } from '@stamhoofd/structures';
+import { DataValidator } from '@stamhoofd/utility';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -112,6 +128,12 @@ const requiresFinancialSupport = computed(() => props.member.patchedMember.detai
 
 watch(requiresFinancialSupport, (requiresFinancialSupport) => {
     requiresFinancialSupportCheckboxValue.value = requiresFinancialSupport;
+});
+
+const hasKansenTarief = computed(() => {
+    const uitpasNumber = props.member.patchedMember.details.uitpasNumber;
+    if(uitpasNumber === null) return false;
+    return DataValidator.isUitpasNumberKansenTarief(uitpasNumber)
 });
 
 const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.date ?? null);
