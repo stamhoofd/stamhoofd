@@ -189,7 +189,7 @@ export class MemberDetails extends AutoEncoder {
 
         // Remove email address on member if it was set on a parent too
         if (this.email !== null) {
-            this.email = this.email.toLocaleLowerCase().trim()
+            this.email = this.email.toLowerCase().trim()
 
             for (const parent of this.parents) {
                 if (parent.hasEmail(this.email)) {
@@ -386,6 +386,9 @@ export class MemberDetails extends AutoEncoder {
         return this.unverifiedEmails.length > 0 || this.unverifiedAddresses.length > 0 || this.unverifiedPhones.length > 0;
     }
 
+    /**
+     * @deprecated
+     */
     matchQuery(query: string): boolean {
         if (
             StringCompare.typoCount(this.firstName, query) < 2 ||
@@ -730,5 +733,24 @@ export class MemberDetails extends AutoEncoder {
                 value: this.lastName
             })
         ]
+    }
+
+    getMemberEmails() {
+        const userEmails = [...this.alternativeEmails]
+
+        if (this.email) {
+            userEmails.push(this.email)
+        }
+
+        return userEmails
+    }
+
+    getParentEmails() {
+        return this.parents.flatMap(p => p.email ? [p.email, ...p.alternativeEmails] : p.alternativeEmails)
+    }
+
+    hasEmail(email: string) {
+        const cleanedEmail = email.toLowerCase().trim()
+        return this.getMemberEmails().includes(cleanedEmail) || this.getParentEmails().includes(cleanedEmail)
     }
 }

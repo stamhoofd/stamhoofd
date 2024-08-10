@@ -5,7 +5,7 @@
             <span v-if="icon" class="icon gray small" :class="icon" />
         </aside>
     </figure>
-    <figure v-else v-color="member" class="style-image-with-icon">
+    <figure v-else v-color="member.id" class="style-image-with-icon">
         <figure>
             <span>{{ member.patchedMember.details.getShortCode(2) }}</span>
         </figure>

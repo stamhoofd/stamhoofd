@@ -12,7 +12,7 @@
         </h2>
 
         <STList>
-            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box" :selectbale="hasFullAccess" @click="editUser(user)">
+            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
                 <template v-if="user.hasAccount && user.verified" #left>
                     <span class="icon user small" />
                 </template>
@@ -47,12 +47,14 @@
                     Dit is een account van {{ member.patchedMember.firstName }} zelf
                 </p>
 
-                <p v-if="user.permissions" class="style-description-small">
+                <p v-if="user.permissions && app !== 'registration'" class="style-description-small">
                     Heeft toegang tot beheerdersportaal
                 </p>
 
-                <template #right v-if="hasWrite && user.hasAccount">
-                    <LoadingButton :loading="isDeletingUser(user)" class="hover-show"><button type="button" class="button icon trash" @click.stop="deleteUser(user)" /></LoadingButton>
+                <template v-if="hasWrite && user.hasAccount" #right>
+                    <LoadingButton :loading="isDeletingUser(user)" class="hover-show">
+                        <button type="button" class="button icon trash" @click.stop="deleteUser(user)" />
+                    </LoadingButton>
                 </template>
             </STListItem>
         </STList>
@@ -69,6 +71,7 @@ import EditAdminView from '../../../admins/EditAdminView.vue';
 import { useAuth, useContext } from '../../../hooks';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
+import { useAppContext } from '../../../context/appContext';
 
 defineOptions({
     inheritAttrs: false
@@ -80,6 +83,7 @@ const context = useContext();
 const present = usePresent();
 const editingUser = ref(new Set())
 const auth = useAuth()
+const app = useAppContext()
 const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, PermissionLevel.Write))
 const hasFullAccess = computed(() => auth.hasFullAccess())
 const deletingUsers = ref(new Set<string>())
@@ -117,37 +121,5 @@ async function deleteUser(user: User) {
 
 function isDeletingUser(user: User) {
     return deletingUsers.value.has(user.id)
-}
-
-async function editUser(user: User) {
-    if (!hasFullAccess.value) {
-        return
-    }
-    if (editingUser.value.has(user.id)) {
-        return
-    }
-    editingUser.value.add(user.id)
-    // First load the specific user
-    try {
-        const response = await context.value.authenticatedServer.request({
-            method: 'GET',
-            path: `/user/${user.id}`,
-            decoder: UserWithMembers as Decoder<UserWithMembers>
-        })
-
-        const userWithMembers = response.data;
-        await present({
-            components: [
-                new ComponentWithProperties(EditAdminView, {
-                    user: userWithMembers,
-                    isNew: false
-                })
-            ],
-            modalDisplayStyle: 'popup'
-        })
-    } catch (e) {
-        Toast.fromError(e).show()
-    }
-    editingUser.value.delete(user.id)
 }
 </script>

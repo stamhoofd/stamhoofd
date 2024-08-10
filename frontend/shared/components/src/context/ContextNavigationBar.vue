@@ -24,7 +24,6 @@ import InheritComponent from '../containers/InheritComponent.vue';
     grid-template-columns: 1fr auto;
     height: 100%;
     align-items: center;
-    --block-width: 25px;
 }
 
 </style>

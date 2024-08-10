@@ -10,7 +10,12 @@ export const ColorDirective: ObjectDirective<HTMLElement> = {
         }
         const id = typeof binding.value === "string" ? binding.value : binding.value.id;
 
+        if (id.startsWith("#")) {
+            return ColorHelper.setColor(id, el)
+        }
+
         const hue = Formatter.stringToNumber(id, 360);
+        console.log('hue', hue)
         const color = Colors.hslToHex({
             h: hue,
             s: 100,

@@ -44,7 +44,7 @@ export class Formatter {
             const char = str.charCodeAt(i);
             hash = (hash << 5) - hash + char;
         }
-        return hash % maxInt;
+        return Math.abs(hash) % maxInt;
     }
 
     /**

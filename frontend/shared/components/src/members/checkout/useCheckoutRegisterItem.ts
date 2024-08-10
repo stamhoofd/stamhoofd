@@ -4,17 +4,16 @@ import { SessionContext, useRequestOwner } from "@stamhoofd/networking";
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithMember } from "@stamhoofd/structures";
 import { ChooseGroupForMemberView } from "..";
 import { useAppContext } from "../../context/appContext";
+import { GlobalEventBus } from "../../EventBus";
 import { useContext } from "../../hooks";
 import { Toast } from "../../overlays/Toast";
 import { DisplayOptions, NavigationActions, runDisplayOptions, useNavigationActions } from "../../types/NavigationActions";
+import ChooseFamilyMembersForGroupView from "../ChooseFamilyMembersForGroupView.vue";
 import ChooseOrganizationMembersForGroupView from "../ChooseOrganizationMembersForGroupView.vue";
 import { EditMemberStep, MemberStepManager } from "../classes/MemberStepManager";
 import { getAllMemberSteps } from "../classes/steps";
-import { MemberRecordCategoryStep } from "../classes/steps/MemberRecordCategoryStep";
 import { RegisterItemStep } from "../classes/steps/RegisterItemStep";
 import { startCheckout } from "./startCheckout";
-import ChooseFamilyMembersForGroupView from "../ChooseFamilyMembersForGroupView.vue";
-import { GlobalEventBus } from "../../EventBus";
 
 export async function loadGroupOrganization(context: SessionContext, organizationId: string, owner: any) {
     if (organizationId === context.organization?.id) {
@@ -71,7 +70,6 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
     displayOptions?: DisplayOptions,
     startCheckoutFlow?: boolean
 }) {
-    console.log('checkoutRegisterItem', {item, admin, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow})
     const member = item.member;
 
     // Add it to the platform member
@@ -345,14 +343,18 @@ export function useChooseGroupForMember() {
     const context = useContext();
     const app = useAppContext()
 
-    return async ({member, displayOptions, startCheckoutFlow, customNavigate}: {member: PlatformMember, displayOptions?: DisplayOptions, startCheckoutFlow?: boolean, customNavigate?: NavigationActions}) => {
+    return async ({member, displayOptions, customNavigate}: {member: PlatformMember, displayOptions?: DisplayOptions, customNavigate?: NavigationActions}) => {
+        if (app !== 'registration') {
+            member.family.checkout.clear()
+        }
+
         await chooseGroupForMember({
             admin: app === 'dashboard' || app === 'admin', 
             member, 
             navigate: customNavigate ?? navigate, 
             context: context.value, 
             displayOptions, 
-            startCheckoutFlow
+            startCheckoutFlow: app !== 'registration'
         });
     }
 }

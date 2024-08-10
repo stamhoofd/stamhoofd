@@ -1,5 +1,5 @@
 <template>
-    <div class="container" v-if="!checkout.cart.isEmpty || membersWithMissingData.length">
+    <div v-if="!checkout.cart.isEmpty || membersWithMissingData.length || membersWithMissingEmail.length" class="container">
         <hr>
         <h2>
             Snelle acties
@@ -25,7 +25,7 @@
                 </template>
             </STListItem>
 
-            <STListItem v-for="{member, steps} of membersWithMissingData" :key="'missing'+member.id" class="left-center" :selectable="true" @click="fillInMemberMissingData(member)">
+            <STListItem v-for="{member, steps} of membersWithMissingData" :key="'missing-'+member.id" class="left-center" :selectable="true" @click="fillInMemberMissingData(member)">
                 <template #left>
                     <img src="~@stamhoofd/assets/images/illustrations/missing-data.svg" class="style-illustration-img">
                 </template>
@@ -40,12 +40,31 @@
                     <span class="icon arrow-right-small gray" />
                 </template>
             </STListItem>
+
+            <STListItem v-for="member of membersWithMissingEmail" :key="'missing-email-'+member.id" class="left-center" :selectable="true" @click="checkAllMemberData(member)">
+                <template #left>
+                    <img src="~@stamhoofd/assets/images/illustrations/email-warning.svg" class="style-illustration-img">
+                </template>
+                <h3 class="style-title-list">
+                    Het e-mailadres van dit account is niet toegevoegd bij {{ member.patchedMember.details.firstName }}
+                </h3>
+                <p v-if="member.patchedMember.details.parents.length || member.patchedMember.details.parentsHaveAccess" class="style-description-small">
+                    Voeg jouw e-mailadres ({{ user?.email }}) toe bij één van de ouders of bij {{ member.patchedMember.details.firstName }} als je {{ member.patchedMember.details.firstName }} zelf bent, anders verlies je in de toekomst automatisch de toegang tot dit lid. Je kan ook het e-mailadres van je account zelf wijzigen (rechts bovenaan) als je dit e-mailadres niet meer wilt gebruiken.
+                </p>
+                <p v-else class="style-description-small">
+                    Voeg jouw e-mailadres ({{ user?.email }}) toe bij het e-mailadres van {{ member.patchedMember.details.firstName }}, anders verlies je in de toekomst automatisch de toegang tot dit lid. Je kan ook het e-mailadres van je account zelf wijzigen (rechts bovenaan) als je dit e-mailadres niet meer wilt gebruiken.
+                </p>
+
+                <template #right>
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
         </STList>
     </div>
 </template>
 
 <script setup lang="ts">
-import { GlobalEventBus, useContext, useNavigationActions } from '@stamhoofd/components';
+import { GlobalEventBus, useContext, useEditMember, useNavigationActions, useUser } from '@stamhoofd/components';
 import { MemberStepManager } from '@stamhoofd/components/src/members/classes/MemberStepManager';
 import { getAllMemberSteps } from '@stamhoofd/components/src/members/classes/steps';
 import { GroupType, PlatformMember } from '@stamhoofd/structures';
@@ -58,6 +77,8 @@ const checkout = computed(() => memberManager.family.checkout)
 const cart = computed(() => checkout.value.cart)
 const context = useContext();
 const navigate = useNavigationActions();
+const user = useUser();
+const editMember = useEditMember();
 
 async function openCart() {
     await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
@@ -70,6 +91,10 @@ async function fillInMemberMissingData(member: PlatformMember) {
     }, {action: 'present', modalDisplayStyle: 'popup'});
 
     await manager.saveHandler(null, navigate)
+}
+
+async function checkAllMemberData(member: PlatformMember) {
+    await editMember(member, {title: 'Gegevens nakijken'})
 }
 
 const activeMembers = computed(() => memberManager.family.members.filter(m => m.filterRegistrations({currentPeriod: true, types: [GroupType.Membership]}).length > 0))
@@ -89,8 +114,11 @@ const membersWithMissingData = computed(() => activeMembers.value.flatMap(member
     }
 
     return [];
-
-
 }))
 
+const membersWithMissingEmail = computed(() => {
+    return activeMembers.value.filter(member => {
+        return !member.patchedMember.details.hasEmail(user.value?.email ?? '');
+    })
+});
 </script>

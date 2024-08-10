@@ -12,7 +12,7 @@
                 </h2>
 
                 <STList class="illustration-list">
-                    <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="editMember(member)">
+                    <STListItem v-for="member in members" :key="member.id" class="right-stack" :selectable="true" @click.stop="checkAllMemberData(member)">
                         <template #left>
                             <MemberIcon :member="member" />
                         </template>
@@ -20,12 +20,7 @@
                         <h2 class="style-title-list">
                             {{ member.patchedMember.name }}
                         </h2>
-                        <p v-if="member.groups.length > 0" class="style-description">
-                            Ingeschreven voor {{ member.groups.map(g => g.settings.name ).join(", ") }}
-                        </p>
-                        <p v-else class="style-description-small">
-                            Nog niet ingeschreven
-                        </p>
+
                         <p v-if="member.patchedMember.details.email" class="style-description">
                             {{ member.patchedMember.details.email }}
                         </p>
@@ -49,11 +44,12 @@
             <template v-if="parents.length">
                 <hr>
                 <h2>Ouders</h2>
+                <p>Ouders hebben automatisch toegang tot de gegevens van hun (minderjarige) kinderen. Vul dus de juiste e-mailadresen in voor elke ouder, zo ontvangt iedereen ook belangrijke communicatie.</p>
 
                 <STList class="illustration-list">
                     <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
                         <template #left>
-                            <img src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                            <img src="~@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
 
                         <h2 class="style-title-list">
@@ -79,14 +75,9 @@
             <template v-if="addresses.length">
                 <hr>
                 <h2>Adressen</h2>
-                <p>
-                    Je kan hier de adressen wijzigen voor iedereen met dat adres, of je kan hierboven bij een lid <template v-if="parents.length">
-                        of ouder
-                    </template> een nieuw adres toevoegen.
-                </p>
 
                 <STList class="illustration-list">
-                    <STListItem v-for="address in addresses" :key="address.toString()" class="right-stack" :selectable="true" @click.stop="editAddress(address)">
+                    <STListItem v-for="address in addresses" :key="address.toString()" class="right-stack" :selectable="false">
                         <template #left>
                             <img src="~@stamhoofd/assets/images/illustrations/house.svg">
                         </template>
@@ -97,11 +88,6 @@
                         <p class="style-description">
                             {{ address.postalCode }} {{ address.city }}
                         </p>
-
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
                     </STListItem>
                 </STList>
             </template>
@@ -111,9 +97,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditMemberAllBox, EditParentView, MemberIcon, MemberStepView, NavigationActions, usePlatformFamilyManager } from '@stamhoofd/components';
+import { EditParentView, MemberIcon, NavigationActions, useEditMember, usePlatformFamilyManager } from '@stamhoofd/components';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
-import { computed, markRaw } from 'vue';
+import { computed } from 'vue';
 import { useMemberManager } from '../../getRootView';
 
 const memberManager = useMemberManager();
@@ -123,18 +109,10 @@ const platformFamilyManager = usePlatformFamilyManager();
 const members = computed(() => memberManager.family.members);
 const parents = computed(() => memberManager.family.parents);
 const addresses = computed(() => memberManager.family.addresses);
+const editMember = useEditMember();
 
-async function editMember(member: PlatformMember) {
-    await present({
-        components: [
-            new ComponentWithProperties(MemberStepView, {
-                member,
-                title: 'Gegevens nakijken',
-                component: markRaw(EditMemberAllBox)
-            })
-        ],
-        modalDisplayStyle: "popup"
-    })
+async function checkAllMemberData(member: PlatformMember) {
+    await editMember(member, {title: 'Gegevens nakijken'})
 }
 
 function editAddress(_address: Address) {

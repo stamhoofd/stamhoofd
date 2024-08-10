@@ -6,6 +6,7 @@
             <span v-else-if="waitingList" class="icon gray clock small" />
         </aside>
     </figure>
+    <OrganizationAvatar v-else-if="organization && organization.meta.squareLogo" :organization="organization" />
     <figure v-else class="style-image-with-icon">
         <figure>
             <span>{{ group.settings.getShortCode(2) }}</span>
@@ -18,16 +19,18 @@
 </template>
 
 <script setup lang="ts">
-import { ImageComponent } from '@stamhoofd/components';
-import { Group, GroupType } from '@stamhoofd/structures';
+import { ImageComponent, OrganizationAvatar } from '@stamhoofd/components';
+import { Group, GroupType, Organization } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(
     defineProps<{
         group: Group;
+        organization?: Organization|null; // Optionally use organization logo if no other is available
         icon?: string;
     }>(), {
-        icon: ''
+        icon: '',
+        organization: null
     }
 );
 

@@ -37,6 +37,16 @@
     --color-secundary: #{$color-secundary-original};
     --color-tertiary: #{$color-tertiary-original};
     --color-warning: #{$color-warning};
+
+    --block-width: 40px;
+
+    @media (max-width: 400px) {
+        --block-width: 30px;
+    }
+
+    @media (max-width: 350px) {
+        --block-width: 25px;
+    }
 }
 
 body {

@@ -24,7 +24,7 @@
                 </h2>
 
                 <STList class="illustration-list">
-                    <STListItem v-for="member of members" :key="member.id" class="left-center right-stack" :selectable="true">
+                    <STListItem v-for="member of members" :key="member.id" class="right-stack" :selectable="true" @click="$navigate(Routes.ViewMember, {properties: {member}})">
                         <template #left>
                             <MemberIcon :member="member" :icon="getRegistrationsForMember(member).length === 0 ? 'canceled' : ''" />
                         </template>
@@ -32,6 +32,10 @@
                         <h3 class="style-title-list">
                             {{ member.patchedMember.name }}
                         </h3>
+                        <p v-if="member.patchedMember.details.birthDayFormatted" class="style-description-small">
+                            {{ member.patchedMember.details.birthDayFormatted }}
+                        </p>
+
                         <p v-if="getRegistrationsForMember(member).length" class="style-description-small">
                             Ingeschreven voor {{ Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name), ', ', ' en ') }}.
                         </p>
@@ -41,7 +45,7 @@
 
 
                         <template #right>
-                            <span v-if="user && member.id === user.memberId" class="style-tag" v-color="member">Dit ben jij</span>
+                            <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">Dit ben jij</span>
                             <span class="icon gray arrow-right-small" />
                         </template>
                     </STListItem>
@@ -103,7 +107,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { MemberIcon, useUser } from '@stamhoofd/components';
+import { MemberIcon, Toast, useUser } from '@stamhoofd/components';
 import { GroupType, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -112,7 +116,8 @@ import QuickActionsBox from './components/QuickActionsBox.vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
-    CheckData = 'checkData'
+    CheckData = 'checkData',
+    ViewMember = 'viewMember'
 }
 defineRoutes([
     {
@@ -126,6 +131,36 @@ defineRoutes([
         url: 'gegevens',
         component: async () => (await import('../members/CheckDataView.vue')).default as any,
         present: 'popup'
+    },
+    {
+        name: Routes.ViewMember,
+        url: 'leden/@id',
+        component: async () => (await import('../members/MemberView.vue')).default as any,
+        present: 'popup',
+        params: {
+            id: String
+        },
+        paramsToProps: async (params: {id: string}) => {
+            const member = members.value.find(m => m.id === params.id)
+            if (member) {
+                return {
+                    member
+                }
+            }
+            Toast.error('Lid niet gevonden').show()
+            throw new Error('member not found')
+        },
+
+        propsToParams(props) {
+            if (!("member" in props) || typeof props.member !== 'object' || props.member === null || !("id" in props.member)) {
+                throw new Error('Missing member')
+            }
+            return {
+                params: {
+                    id: props.member.id
+                }
+            }
+        }
     }
 ])
 const $navigate = useNavigate();
@@ -150,5 +185,4 @@ function getRegistrationsForMember(member: PlatformMember) {
         )
     );
 }
-
 </script>

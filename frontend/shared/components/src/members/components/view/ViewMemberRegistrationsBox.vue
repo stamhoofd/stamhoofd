@@ -11,40 +11,49 @@
             </div>
         </h2>
 
-        <p v-if="visibleRegistrations.length == 0 && period.id === defaultPeriod.id" class="info-box">
-            {{ member.patchedMember.firstName }} is niet ingeschreven
-        </p>
-        <p v-else-if="visibleRegistrations.length == 0" class="info-box">
-            {{ member.patchedMember.firstName }} was niet ingeschreven
-        </p>
+        <button v-if="!member.family.checkout.cart.isEmpty" class="info-box selectable icon" type="button" @click="openCart">
+            <span>Er staan inschrijvingen klaar in je mandje. Reken ze af om ze definitief te maken.</span>
+            <span class="button icon arrow-right-small" />
+        </button>
+        <template v-else>
+            <p v-if="visibleRegistrations.length == 0 && period.id === defaultPeriod.id" class="info-box">
+                {{ member.patchedMember.firstName }} is niet ingeschreven
+            </p>
+            <p v-else-if="visibleRegistrations.length == 0" class="info-box">
+                {{ member.patchedMember.firstName }} was niet ingeschreven
+            </p>
+        </template>
 
-        <STList v-if="hasWrite">
-            <MemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" @edit="(e) => editRegistration(registration, e)" />
+        <STList v-if="hasWrite && app !== 'registration'">
+            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" @edit="(e) => editRegistration(registration, e)" />
         </STList>
         <STList v-else>
-            <MemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" />
+            <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" />
         </STList>
 
-        <footer class="style-button-bar" v-if="hasDeleted && !showDeleted" @click="showDeleted = true;">
-            <button class="button text">Toon beëindigde inschrijvingen</button>
+        <footer v-if="hasDeleted && !showDeleted" class="style-button-bar">
+            <button class="button text" type="button" @click="showDeleted = true;">
+                Toon beëindigde inschrijvingen
+            </button>
         </footer>   
     </article>
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
-import { Ref, computed, ref } from 'vue';
-import { useAuth, useOrganization, usePlatform } from '../../hooks';
-import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import TableActionsContextMenu from '../../tables/TableActionsContextMenu.vue';
-import { useMemberActions } from '../classes/MemberActionBuilder';
-import MemberRegistrationRow from './MemberRegistrationRow.vue';
 import { Sorter } from '@stamhoofd/utility';
-import { useChooseGroupForMember } from '../checkout';
-import { Toast } from '../../overlays/Toast';
-import { useRegistrationActionBuilder } from '../classes/RegistrationActionBuilder';
+import { Ref, computed, ref } from 'vue';
+import { useAppContext } from '../../../context/appContext';
+import { GlobalEventBus } from '../../../EventBus';
+import { useAuth, useOrganization, usePlatform } from '../../../hooks';
+import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
+import { Toast } from '../../../overlays/Toast';
+import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
+import { useChooseGroupForMember } from '../../checkout';
+import { useRegistrationActionBuilder } from '../../classes/RegistrationActionBuilder';
+import ViewMemberRegistrationRow from './ViewMemberRegistrationRow.vue';
 
 const props = defineProps<{
     member: PlatformMember
@@ -63,13 +72,16 @@ const period = ref(defaultPeriod) as Ref<RegistrationPeriod>;
 const platformManager = usePlatformManager();
 const owner = useRequestOwner();
 const showDeleted = ref(false);
+const app = useAppContext()
 const hasDeleted = computed(() => {
     return filteredRegistrations.value.some(r => r.deactivatedAt);
 });
+const dismiss = useDismiss();
 
 platformManager.value.loadPeriods(false, true, owner).catch(console.error);
 
 const hasWrite = auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
+
 const filteredRegistrations = computed(() => {
     return props.member.patchedMember.registrations.filter(r => {
         if (organization.value && r.organizationId !== organization.value.id) {
@@ -97,8 +109,12 @@ const visibleRegistrations = computed(() => {
 const chooseGroupForMember = useChooseGroupForMember()
 
 async function addRegistration() {
-    props.member.family.checkout.clear()
-    await chooseGroupForMember({member: props.member, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}, startCheckoutFlow: true})
+    await chooseGroupForMember({member: props.member, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}})
+}
+
+async function openCart() {
+    await dismiss({force: true})
+    await GlobalEventBus.sendEvent('selectTabByName', 'mandje')
 }
 
 const buildActions = useRegistrationActionBuilder()

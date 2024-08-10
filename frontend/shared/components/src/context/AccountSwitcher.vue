@@ -1,9 +1,9 @@
 <template>
     <button v-if="$user" class="button account-switcher" type="button" @click="showContextMenu">
         <figure>
-            <div class="letter-logo" :data-length="letters.length" v-color="$user.memberId">
+            <div v-color="$user.memberId" class="letter-logo" :data-length="letters.length">
                 {{ letters }}
-                <span class="icon user" v-if="!letters" />
+                <span v-if="!letters" class="icon user" />
             </div>
 
             <span>
@@ -37,8 +37,8 @@ const letters = computed(() => {
     return $user.value ? Formatter.firstLetters($user.value.name, 3) : ''
 });
 
-const showContextMenu = () => {
-    $navigate('account');
+const showContextMenu = async () => {
+    await $navigate('account');
 };
 
 </script>
@@ -48,6 +48,12 @@ const showContextMenu = () => {
 @use '@stamhoofd/scss/base/text-styles' as *;
 
 .account-switcher {
+    --block-width: 35px;
+
+    .context-navigation-bar & {
+        --block-width: 25px;
+    }
+
     &:hover {
         opacity: 0.8;
     }

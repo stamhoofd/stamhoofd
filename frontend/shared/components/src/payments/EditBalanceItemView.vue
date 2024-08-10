@@ -39,7 +39,7 @@
             </STInputBox>
         </div>
 
-        <STInputBox title="Totaalprijs" error-fields="unitPrice" :error-box="errors.errorBox" v-if="amount > 1">
+        <STInputBox v-if="amount > 1" title="Totaalprijs" error-fields="unitPrice" :error-box="errors.errorBox">
             <PriceInput :model-value="patchedBalanceItem.price" placeholder="Gratis" :min="null" :disabled="true" />
         </STInputBox>
 
@@ -66,7 +66,7 @@
             <h2>Gekoppelde inschrijving</h2>
 
             <STList>
-                <MemberRegistrationRow :member="member" :registration="registration" />
+                <ViewMemberRegistrationRow :member="member" :registration="registration" />
             </STList>
         </template>
 
@@ -167,10 +167,9 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceInput, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemDetailed, BalanceItemWithPayments, BalanceItemStatus, PaymentMethod, PaymentMethodHelper, PlatformFamily, Registration } from '@stamhoofd/structures';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceInput, ViewMemberRegistrationRow, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PaymentMethod, PaymentMethodHelper, PlatformFamily, Registration } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
-import MemberRegistrationRow from '../members/components/MemberRegistrationRow.vue';
 
 const props = defineProps<{
     balanceItem: BalanceItemWithPayments|BalanceItem,

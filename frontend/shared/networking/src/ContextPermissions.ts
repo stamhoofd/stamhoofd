@@ -1,8 +1,8 @@
-import { AccessRight, Group, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User } from "@stamhoofd/structures";
+import { AccessRight, Group, Organization, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, User, UserWithMembers } from "@stamhoofd/structures";
 import { Ref, unref } from "vue";
 
 export class ContextPermissions {
-    reactiveUser: User|null|Ref<User|null>
+    reactiveUser: UserWithMembers|null|Ref<UserWithMembers|null>
     reactiveOrganization: Organization|null|Ref<Organization|null>
     reactivePlatform: Platform|Ref<Platform>
 
@@ -13,7 +13,7 @@ export class ContextPermissions {
     allowInheritingPermissions = true
     
     constructor(
-        user: User|null|undefined|Ref<User|null>, 
+        user: UserWithMembers|null|undefined|Ref<UserWithMembers|null>, 
         organization: Organization|null|undefined|Ref<Organization|null>,
         platform: Platform|Ref<Platform>,
         options?: {allowInheritingPermissions?: boolean}
@@ -101,6 +101,10 @@ export class ContextPermissions {
 
     canAccessPlatformMember(member: PlatformMember, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (this.hasFullPlatformAccess()) {
+            return true;
+        }
+
+        if (this.user && this.user.members.members.some(m => m.id === member.id)) {
             return true;
         }
 

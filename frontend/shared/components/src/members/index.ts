@@ -19,6 +19,7 @@ export { default as RegisterItemCheckboxRow } from "./components/group/RegisterI
 export { default as DeleteRegistrationRow } from "./components/group/DeleteRegistrationRow.vue"
 
 export * from "./checkout";
+export * from "./hooks";
+export * from "./components/view";
 
-export { default as MemberRegistrationRow } from "./components/MemberRegistrationRow.vue"
 export { default as MemberIcon } from "./components/MemberIcon.vue"

@@ -59,7 +59,7 @@ export function useAdmins() {
         return platformManager.value.$platform.admins ?? []
     })
 
-    const getPermissions = (user: User) => {
+    const getPermissions = (user: UserWithMembers) => {
         return new ContextPermissions(user, organization, platformManager.value.$platform, {allowInheritingPermissions: false}).permissions
     }
 

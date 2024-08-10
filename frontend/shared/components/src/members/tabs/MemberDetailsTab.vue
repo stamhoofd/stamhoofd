@@ -3,9 +3,9 @@
         <div>
             <ViewMemberWarningsBox v-if="isMobile" :member="member" />
             <ViewMemberGeneralBox :member="member" />
-            <MemberRegistrationsBox :member="member" />
+            <ViewMemberRegistrationsBox :member="member" />
             <ViewMemberUnverifiedBox :member="member" />
-            <ViewMemberNotesBox :member="member"/>
+            <ViewMemberNotesBox :member="member" />
             <ViewMemberParentsBox :member="member" />
             <ViewMemberEmergencyContactsBox :member="member" />
             <ViewMemberRecordCategoriesBox :member="member" />
@@ -23,16 +23,7 @@
 import { useIsMobile, usePlatformFamilyManager } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { onMounted } from 'vue';
-import MemberRegistrationsBox from '../components/MemberRegistrationsBox.vue';
-import ViewMemberAccountsBox from '../components/view/ViewMemberAccountsBox.vue';
-import ViewMemberEmergencyContactsBox from '../components/view/ViewMemberEmergencyContactsBox.vue';
-import ViewMemberFamilyBox from '../components/view/ViewMemberFamilyBox.vue';
-import ViewMemberGeneralBox from '../components/view/ViewMemberGeneralBox.vue';
-import ViewMemberNotesBox from '../components/view/ViewMemberNotesBox.vue';
-import ViewMemberParentsBox from '../components/view/ViewMemberParentsBox.vue';
-import ViewMemberRecordCategoriesBox from '../components/view/ViewMemberRecordCategoriesBox.vue';
-import ViewMemberUnverifiedBox from '../components/view/ViewMemberUnverifiedBox.vue';
-import ViewMemberWarningsBox from '../components/view/ViewMemberWarningsBox.vue';
+import { ViewMemberAccountsBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';
 
 const isMobile = useIsMobile();
 
