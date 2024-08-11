@@ -366,9 +366,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         async function createBalanceItem({registration, amount, unitPrice, description, type, relations}: {amount?: number, registration: RegistrationWithMemberAndGroup, unitPrice: number, description: string, relations: Map<BalanceItemRelationType, BalanceItemRelation>, type: BalanceItemType}) {
-            if (unitPrice === 0) {
-                return;
-            }
+            // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
 
             // Create balance item
             const balanceItem = new BalanceItem();
