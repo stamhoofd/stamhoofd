@@ -16,7 +16,6 @@
     <div v-else class="container">
         <Title v-bind="$attrs" :title="title" />
         <p class="style-description pre-wrap" v-text="description" />
-            
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -53,8 +52,8 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 const markReviewed = app !== 'dashboard' && app !== 'admin';
 
 useValidation(props.validator, async () => {
-    if (markReviewed && props.member.patchedMember.details.dataPermissions === null) {
-        // Force saving
+    if (markReviewed) {
+        // Force saving: increase saved date + make sure it is not null
         dataPermissions.value = dataPermissions.value as any
         await nextTick()
     }
