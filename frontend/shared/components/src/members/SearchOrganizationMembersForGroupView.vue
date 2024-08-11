@@ -219,6 +219,16 @@ function selectAllResults() {
     for (const member of fetcher.objects) {
         try {
             const item = RegisterItem.defaultFor(member, props.group, props.checkout.singleOrganization)
+            if (item.validationError) {
+                if (!item.validationErrorWithoutWaitingList && props.group.waitingList) {
+                    const item2 = RegisterItem.defaultFor(member, props.group.waitingList, props.checkout.singleOrganization)
+                    if (!item2.validationError) {
+                        props.checkout.add(item2)
+                    }
+                }
+
+                continue;
+            }
             props.checkout.add(item)
         } catch (e) {
             // prob invalid

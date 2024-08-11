@@ -18,7 +18,7 @@
 
         <p v-if="checked && registerItem && registerItem.description" class="style-description-small pre-wrap" v-text="registerItem.description" />
         <template #right>
-            <span v-if="(checked && registerItem?.group.type === GroupType.WaitingList) || (!disabled && validationError)" class="icon clock gray" />
+            <span v-if="(registerItem?.group.type === GroupType.WaitingList) || (!disabled && validationError)" class="icon clock gray" />
             <span v-if="checked && registerItem?.showItemView" class="button icon edit gray" />
         </template>
     </STListItem>
@@ -50,15 +50,15 @@ const registerItem = computed(() => {
         return inCartRegisterWaitingListItem.value
     }
 
-    if (!!validationError.value && canRegister.value && !!props.group.waitingList) {
+    if (!!validateRegisterItem.value.validationError && !validateRegisterItem.value.validationErrorWithoutWaitingList && !!props.group.waitingList) {
         return RegisterItem.defaultFor(props.member, props.group.waitingList, props.groupOrganization)
     }
     return RegisterItem.defaultFor(props.member, props.group, props.groupOrganization)
 })
 
-const validationError = computed(() => inCartRegisterItem.value ? null : validateRegisterItem.value.validationError)
-const canRegister = computed(() => inCartRegisterItem.value || inCartRegisterWaitingListItem.value ? true : !validateRegisterItem.value.validationErrorWithoutWaitingList)
-const validationWarning = computed(() => validationError.value ? null : validateRegisterItem.value.validationWarning)
+const validationError = computed(() => inCartRegisterItem.value ? null : (registerItem.value.validationError ?? validateRegisterItem.value.validationError))
+const canRegister = computed(() => inCartRegisterItem.value || inCartRegisterWaitingListItem.value ? true : (!registerItem.value.validationError))
+const validationWarning = computed(() => validationError.value ? null : registerItem.value.validationWarning)
 
 const disabled = computed(() => {
     return !canRegister.value
