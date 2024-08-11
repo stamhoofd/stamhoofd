@@ -16,7 +16,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
 
 export async function loadSessionFromUrl() {
     const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login', 'aansluiten'];
+    const ignoreUris = ['login', 'aansluiten', 'start', 'activiteiten', 'mandje' , 'leden'];
 
     let session: SessionContext|null = null;
 
