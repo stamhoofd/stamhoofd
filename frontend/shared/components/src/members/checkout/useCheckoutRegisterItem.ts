@@ -1,12 +1,12 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { SessionContext, useRequestOwner } from "@stamhoofd/networking";
-import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithMember } from "@stamhoofd/structures";
+import { Group, GroupType, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithMember } from "@stamhoofd/structures";
 import { ChooseGroupForMemberView } from "..";
 import { useAppContext } from "../../context/appContext";
 import { GlobalEventBus } from "../../EventBus";
 import { useContext } from "../../hooks";
-import { Toast } from "../../overlays/Toast";
+import { Toast, ToastButton } from "../../overlays/Toast";
 import { DisplayOptions, NavigationActions, runDisplayOptions, useNavigationActions } from "../../types/NavigationActions";
 import ChooseFamilyMembersForGroupView from "../ChooseFamilyMembersForGroupView.vue";
 import ChooseOrganizationMembersForGroupView from "../ChooseOrganizationMembersForGroupView.vue";
@@ -61,7 +61,7 @@ export async function loadGroupOrganization(context: SessionContext, organizatio
 // ----------------------------
 // --------- Flow 1 -----------
 
-export async function checkoutRegisterItem({item, admin, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow}: {
+export async function checkoutRegisterItem({item: originalItem, admin, context, displayOptions, navigate, showGroupInformation, startCheckoutFlow}: {
     item: RegisterItem,
     navigate: NavigationActions,
     context: SessionContext,
@@ -70,6 +70,14 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
     displayOptions?: DisplayOptions,
     startCheckoutFlow?: boolean
 }) {
+    let item = originalItem;
+
+    if (item.group.waitingList && item.validationError && !item.validationErrorWithoutWaitingList) {
+        // Should register for the waiting list
+        item = RegisterItem.defaultFor(item.member, item.group.waitingList, item.organization);
+        item.cartError = originalItem.cartError;
+    }
+
     const member = item.member;
 
     // Add it to the platform member
@@ -99,6 +107,9 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
         item.cartError = null;
 
         // Move the item to the cart (replace if it already exists)
+        if (item !== originalItem) {
+            member.family.checkout.remove(originalItem);
+        }
         member.family.checkout.add(item); // With price calculation
         member.family.pendingRegisterItems = [];
 
@@ -122,7 +133,11 @@ export async function checkoutRegisterItem({item, admin, context, displayOptions
             }
         } else {
             if (!admin) {
-                Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').show();
+                if (item.group.type === GroupType.WaitingList) {
+                    Toast.warning('De inschrijving op de wachtlijst is toegevoegd aan het winkelmandje. Bevestig de inschrijving door het winkelmandje te bevestigen.').setIcon('clock').show();
+                } else {
+                    Toast.success('Inschrijving toegevoegd aan winkelmandje. Ga naar het winkelmandje als je alle inschrijvingen hebt toegevoegd om af te rekenen.').setIcon('basket').show();
+                }
             }
 
             if (showGroupInformation) {

@@ -24,7 +24,7 @@
                 <button v-else-if="canDismiss && !$isAndroid && !$isMobile && !$isIOS" class="button navigation icon close" type="button" @click="dismiss" />
             </template>
         </STNavigationBar>
-        <main class="center">
+        <main class="center" :class="mainClass">
             <slot />
         </main>
         <STToolbar v-if="preferLargeButton || (!$isMobile && !$isIOS && !$isAndroid)">
@@ -107,6 +107,9 @@ export default class SaveView extends Mixins(NavigationMixin) {
 
     @Prop({ default: false })
         addExtraCancel!: boolean; // Add a large cancel button at the bottom
+
+    @Prop({ default: '' })
+        mainClass!: string;
 
     get canDelete() {
         // Check has delete listener

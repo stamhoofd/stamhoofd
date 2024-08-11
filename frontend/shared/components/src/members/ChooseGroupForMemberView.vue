@@ -89,7 +89,7 @@ const waitingLists = computed(() => {
     if (!selectedOrganization.value) {
         return []
     }
-    return (selectedOrganization.value.period.groups.filter(g => !props.member.canRegister(g, selectedOrganization.value!) && props.member.canRegisterIgnoreWaitingList(g, selectedOrganization.value!)).map(g => g.waitingList).filter(g => g != null)  as Group[]).filter((value, index, self) => self.findIndex((v) => value.id === v.id) === index)
+    return (selectedOrganization.value.period.groups.filter(g => !props.member.canRegister(g, selectedOrganization.value!) && props.member.validationErrorWithoutWaitingList(g, selectedOrganization.value!)).map(g => g.waitingList).filter(g => g != null)  as Group[]).filter((value, index, self) => self.findIndex((v) => value.id === v.id) === index)
 });
 
 function addOrganization(organization: Organization) {

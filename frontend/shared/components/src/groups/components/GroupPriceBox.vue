@@ -6,7 +6,7 @@
                 class="input"
                 type="text"
                 placeholder="Naam van dit tarief"
-                autocomplete=""
+                autocomplete="off"
             >
         </STInputBox>
 

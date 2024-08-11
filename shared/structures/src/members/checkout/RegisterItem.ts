@@ -4,12 +4,11 @@ import { v4 as uuidv4 } from "uuid"
 import { Group, GroupType } from "../../Group"
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from "../../GroupSettings"
 import { Organization } from "../../Organization"
+import { PriceBreakdown } from "../../PriceBreakdown"
+import { StockReservation } from "../../StockReservation"
 import { PlatformMember } from "../PlatformMember"
 import { Registration } from "../Registration"
 import { RegisterContext } from "./RegisterCheckout"
-import { StockReservation } from "../../StockReservation"
-import { RegistrationWithMember } from "../RegistrationWithMember"
-import { PriceBreakdown } from "../../PriceBreakdown"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -118,7 +117,10 @@ export class RegisterItem {
         organization: Organization,
         groupPrice?: GroupPrice,
         options?: RegisterItemOption[],
-        replaceRegistrations?: Registration[]
+        replaceRegistrations?: Registration[],
+        cartError?: SimpleError|SimpleErrors|null,
+        calculatedPrice?: number,
+        calculatedRefund?: number
     }) {
         this.id = data.id ?? uuidv4()
         this.member = data.member
@@ -128,6 +130,9 @@ export class RegisterItem {
         this.organization = data.organization
         this.options = data.options ?? []
         this.replaceRegistrations = data.replaceRegistrations ?? []
+        this.cartError = data.cartError ?? null
+        this.calculatedPrice = data.calculatedPrice ?? 0
+        this.calculatedRefund = data.calculatedRefund ?? 0
 
         // Select all defaults
         for (const optionMenu of this.group.settings.optionMenus) {
@@ -152,7 +157,7 @@ export class RegisterItem {
     }
 
     get showItemView() {
-        return !!this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
+        return !!this.replaceRegistrations.length || this.group.settings.prices.length !== 1 || this.group.settings.optionMenus.length > 0 || this.group.type === GroupType.WaitingList || this.group.settings.description.length > 2 || this.group.settings.prices[0].price.price > 0 || (!this.isInCart && !this.isValid)
     }
 
     calculatePrice() {
@@ -210,7 +215,10 @@ export class RegisterItem {
             organization: this.organization,
             groupPrice: this.groupPrice.clone(),
             options: this.options.map(o => o.clone()),
-            replaceRegistrations: this.replaceRegistrations.map(r => r.clone())
+            replaceRegistrations: this.replaceRegistrations.map(r => r.clone()),
+            cartError: this.cartError,
+            calculatedPrice: this.calculatedPrice,
+            calculatedRefund: this.calculatedRefund
         })
     }
 
@@ -478,11 +486,13 @@ export class RegisterItem {
     hasReachedGroupMaximum() {
         const available = this.group.settings.availableMembers
         if (available !== null) {
-            const count = this.checkout.cart.items.filter(item => item.group.id === this.group.id && item.member.member.id !== this.member.member.id && !item.waitingList).length
+            // Only count items before this item in the cart - or all if not yet in the cart
+            const myIndex = this.checkout.cart.items.findIndex(i => i.id === this.id)
+            const count = this.checkout.cart.items.slice(0, myIndex == -1 ? this.checkout.cart.items.length : myIndex).filter(item => item.group.id === this.group.id && item.member.member.id !== this.member.member.id).length
             if (count >= available) {
                 // Check if we have a reserved spot
                 const now = new Date()
-                const reserved = this.member.member.registrations.find(r => r.groupId === this.group.id && r.reservedUntil && r.reservedUntil > now && !r.waitingList && r.registeredAt === null && r.cycle === this.group.cycle)
+                const reserved = this.member.member.registrations.find(r => r.groupId === this.group.id && r.reservedUntil && r.reservedUntil > now && r.registeredAt === null)
                 if (!reserved) {
                     return true
                 }
@@ -491,7 +501,7 @@ export class RegisterItem {
         return false;
     }
 
-    get canRegisterIgnoreWaitingList() {
+    get validationErrorWithoutWaitingList() {
         try {
             this.validate({ignoreWaitingList: true})
         } catch (e) {
@@ -542,7 +552,6 @@ export class RegisterItem {
     }
 
     validate(options?: {warnings?: boolean, ignoreWaitingList?: boolean}) {
-        this.cartError = null;
         this.refresh(this.group)
         const checkout = this.member.family.checkout;
         const admin = checkout.isAdminFromSameOrganization && !options?.warnings

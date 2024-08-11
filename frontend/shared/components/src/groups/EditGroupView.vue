@@ -61,6 +61,16 @@
             </div>
         </template>
 
+        <STInputBox title="Beschrijving" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Zichtbaar voor leden tijdens het inschrijven. Hier kan je bijvoorbeeld inschrijvinginstructies kwijt, of informatie geven over prijzen."
+                autocomplete=""
+            />
+        </STInputBox>
+
 
         <template v-if="patched.type === GroupType.EventRegistration && !organization">
             <hr>
@@ -589,6 +599,15 @@ const name = computed({
             }
         }
     }
+})
+
+const description = computed({
+    get: () => patched.value.settings.description,
+    set: (description) => addPatch({
+        settings: GroupSettings.patch({
+            description
+        })
+    })
 })
 
 const minAge = computed({

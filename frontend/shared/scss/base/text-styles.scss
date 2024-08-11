@@ -310,21 +310,23 @@
     }
 }
 
-.style-price {
-    font-size: 14px;
+
+.style-price-base {
+    font-size: 15px;
     line-height: 1.4;
-    font-weight: 600;
+    font-weight: $font-weight-medium;
+    font-variant-numeric: tabular-nums;
+}
+
+.style-price {
+    @extend .style-price-base;
+    font-weight: $font-weight-semibold;
     color: $color-primary;
 }
 
-.style-price-base {
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 600;
-}
 
 .style-discount-old-price {
-    @extend .style-price;
+    @extend .style-price-base;
     text-decoration: line-through;
     color: $color-gray-4;
 }
@@ -1099,26 +1101,6 @@
 
 .title-suffix {
     @extend .style-description-small;
-}
-
-.pricing-box {
-    margin-top: auto;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: flex-end;
-
-    > * {
-        flex-basis: 400px;
-    }
-
-    &.max {
-        display: block;
-    }
-
-    .middle {
-        font-weight: 600;
-    }
 }
 
 .split-info {

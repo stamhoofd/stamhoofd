@@ -781,10 +781,10 @@ export class PlatformMember implements ObjectWithRecords {
         return false;
     }
 
-    canRegisterIgnoreWaitingList(group: Group, organization: Organization) {
+    validationErrorWithoutWaitingList(group: Group, organization: Organization) {
         const item = RegisterItem.defaultFor(this, group, organization);
         
-        const error = item.canRegisterIgnoreWaitingList;
+        const error = item.validationErrorWithoutWaitingList;
         if (error === null) {
             return true;
         }

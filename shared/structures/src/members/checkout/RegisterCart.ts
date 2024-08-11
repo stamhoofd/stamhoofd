@@ -200,6 +200,7 @@ export class RegisterCart {
         for (const item of this.items) {
             try {
                 item.validate()
+                item.cartError = null;
                 newItems.push(item)
             } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {

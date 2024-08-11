@@ -98,5 +98,15 @@ export class Event extends Model {
             group.settings.requirePlatformMembershipOn = this.endDate
         }
         await group.save()
+
+        if (group.waitingListId) {
+            const waitingList = await Group.getByID(group.waitingListId)
+            if (waitingList) {
+                if (group.settings.allowRegistrationsByOrganization) {
+                    waitingList.settings.allowRegistrationsByOrganization = true
+                }
+                await this.syncGroupRequirements(waitingList)
+            }
+        }
     }
 }

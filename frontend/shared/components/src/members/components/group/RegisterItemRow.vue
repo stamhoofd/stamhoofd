@@ -3,6 +3,9 @@
         <template v-if="showGroup" #left>
             <GroupIcon :group="item.group" :icon="item.replaceRegistrations.length ? 'sync' : ''" />
         </template>
+        <template v-else #left>
+            <MemberIcon :member="item.member" :icon="item.group.type === GroupType.WaitingList ? 'clock' : (item.replaceRegistrations.length ? 'sync' : '')" />
+        </template>
 
         <h3 class="style-title-list">
             <span>{{ item.member.patchedMember.name }}</span>
@@ -18,10 +21,10 @@
 
         <template v-if="item.totalPrice !== 0">
             <footer v-if="item.checkout.isAdminFromSameOrganization">
-                <p class="style-price" v-if="item.totalPrice >= 0">
+                <p v-if="item.totalPrice >= 0" class="style-price">
                     Openstaand bedrag stijgt met {{ formatPrice(item.totalPrice) }}
                 </p>
-                <p class="style-price" v-else>
+                <p v-else class="style-price">
                     Openstaand bedrag daalt met {{ formatPrice(-item.totalPrice) }}
                 </p>
             </footer>
@@ -43,16 +46,17 @@
 
         <template #right>
             <button class="button icon trash gray" type="button" @click.stop="deleteMe()" />
-            <button v-if="canEdit" class="button icon edit gray" type="button"  />
+            <button v-if="canEdit" class="button icon edit gray" type="button" />
         </template>
     </STListItem>
 </template>
 
 
 <script setup lang="ts">
-import { RegisterItem } from '@stamhoofd/structures';
+import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '../../checkout';
+import MemberIcon from '../MemberIcon.vue';
 import GroupIcon from './GroupIcon.vue';
 
 const props = withDefaults(
