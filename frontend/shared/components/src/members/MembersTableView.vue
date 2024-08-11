@@ -175,7 +175,7 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: (val) => val ? '' : 'gray',
         format: (val) => val ? '' : 'Geen',
         minimumWidth: 100,
-        recommendedWidth: 200,
+        recommendedWidth: 150,
         grow: true,
         allowSorting: false,
         enabled: false
@@ -250,7 +250,8 @@ const allColumns: Column<ObjectType, any>[] = [
         }, 
         getStyle: (list) => list.length === 0 ? "gray" : "",
         minimumWidth: 100,
-        recommendedWidth: 200
+        recommendedWidth: 200,
+        enabled: false
     }),
     new Column<ObjectType, string[]>({
         name: "Account", 
@@ -264,7 +265,8 @@ const allColumns: Column<ObjectType, any>[] = [
         }, 
         getStyle: (accounts) => accounts.length === 0 ? "gray" : "",
         minimumWidth: 100,
-        recommendedWidth: 200
+        recommendedWidth: 200,
+        enabled: false
     })
 ];
 
