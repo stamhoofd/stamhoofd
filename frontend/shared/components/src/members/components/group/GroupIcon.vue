@@ -6,7 +6,13 @@
             <span v-else-if="waitingList" class="icon gray clock small" />
         </aside>
     </figure>
-    <OrganizationAvatar v-else-if="organization && organization.meta.squareLogo" :organization="organization" />
+    <figure v-else-if="organization && organization.meta.squareLogo" class="style-image-with-icon">
+        <OrganizationAvatar :organization="organization" />
+        <aside>
+            <span v-if="icon" class="icon gray small" :class="icon" />
+            <span v-else-if="waitingList" class="icon gray clock small" />
+        </aside>
+    </figure>
     <figure v-else class="style-image-with-icon">
         <figure>
             <span>{{ group.settings.getShortCode(2) }}</span>
