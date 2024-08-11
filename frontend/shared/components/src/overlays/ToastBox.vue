@@ -152,6 +152,13 @@ export default class ToastBox extends Vue {
     > div > div {
         transition: transform 0.35s, opacity 0.35s;
         transform: scale(1, 1) translate(0, 0);
+        cursor: pointer;
+        touch-action: manipulation;
+
+        &:hover {
+            transform: scale(0.98, 0.98) translateY(5px);
+            opacity: 0.8;
+        }
     }
 
     .move-enter-from, .move-leave-to
@@ -160,6 +167,7 @@ export default class ToastBox extends Vue {
         transform: scale(0.9, 0.9) translateY(100%);
         transform-origin: center center;
     }
+
 
     .move-leave-active {
         height: 0;
