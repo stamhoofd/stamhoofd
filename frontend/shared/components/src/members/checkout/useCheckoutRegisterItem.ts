@@ -273,8 +273,14 @@ export async function chooseOrganizationMembersForGroup({members, group, organiz
 
     // Create a new shared checkout for these members
     const checkout = new RegisterCheckout();
-    checkout.asOrganizationId = context.organization?.id || null;
     checkout.defaultOrganization = groupOrganization;
+
+    if (!context.organization) {
+        // Administration panel: register as organizing organization
+        checkout.asOrganizationId = groupOrganization.id
+    } else {
+        checkout.asOrganizationId = context.organization.id
+    }
 
     if (members) {
         for (const member of members) {
