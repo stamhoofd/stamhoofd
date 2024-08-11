@@ -9,6 +9,7 @@ import { StockReservation } from "../../StockReservation"
 import { PlatformMember } from "../PlatformMember"
 import { Registration } from "../Registration"
 import { RegisterContext } from "./RegisterCheckout"
+import { Formatter } from "@stamhoofd/utility"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -126,7 +127,25 @@ export class RegisterItem {
         this.member = data.member
         this.group = data.group
 
-        this.groupPrice = data.groupPrice ?? this.group.settings.prices[0] ?? GroupPrice.create({name: 'Ongeldig tarief', id: ''})
+        if (!data.groupPrice) {
+            const prices = this.getFilteredPrices()
+            for (const price of prices) {
+                const stock = price.getRemainingStock(this)
+                if (stock !== 0) {
+                    this.groupPrice = price
+                    break
+                }
+            }
+
+            if (!this.groupPrice) {
+                // Probably all sold out
+                // Select the first one anyway
+                this.groupPrice = prices[0] ?? GroupPrice.create({name: 'Ongeldig tarief', id: ''})
+            }
+        } else {
+            this.groupPrice = data.groupPrice
+        }
+
         this.organization = data.organization
         this.options = data.options ?? []
         this.replaceRegistrations = data.replaceRegistrations ?? []
@@ -141,13 +160,36 @@ export class RegisterItem {
                     continue
                 }
 
-                this.options.push(
-                    RegisterItemOption.create({
-                        option: optionMenu.options[0],
-                        optionMenu: optionMenu,
-                        amount: 1
-                    })
-                )
+                let added = false;
+                const options = this.getFilteredOptions(optionMenu)
+
+                for (const option of options) {
+                    const stock = option.getRemainingStock(this)
+                    if (stock === 0) {
+                        continue
+                    }
+
+                    this.options.push(
+                        RegisterItemOption.create({
+                            option,
+                            optionMenu: optionMenu,
+                            amount: 1
+                        })
+                    )
+                    added = true;
+                    break;
+                }
+
+                if (!added && options.length > 0) {
+                    // Add the first (this one is sold out, but still required for correct error handling)
+                    this.options.push(
+                        RegisterItemOption.create({
+                            option: options[0],
+                            optionMenu: optionMenu,
+                            amount: 1
+                        })
+                    )
+                }
             }
         }
     }
@@ -231,7 +273,7 @@ export class RegisterItem {
     getFilteredPrices() {
         const base = this.group.settings.getFilteredPrices({admin: this.checkout.isAdminFromSameOrganization})
 
-        if (!base.some(b => b.id === this.groupPrice.id)) {
+        if (this.groupPrice && !base.some(b => b.id === this.groupPrice.id)) {
             return [this.groupPrice, ...base]
         }
         return base;
@@ -484,20 +526,48 @@ export class RegisterItem {
     }
 
     hasReachedGroupMaximum() {
-        const available = this.group.settings.availableMembers
-        if (available !== null) {
-            // Only count items before this item in the cart - or all if not yet in the cart
-            const myIndex = this.checkout.cart.items.findIndex(i => i.id === this.id)
-            const count = this.checkout.cart.items.slice(0, myIndex == -1 ? this.checkout.cart.items.length : myIndex).filter(item => item.group.id === this.group.id && item.member.member.id !== this.member.member.id).length
-            if (count >= available) {
-                // Check if we have a reserved spot
-                const now = new Date()
-                const reserved = this.member.member.registrations.find(r => r.groupId === this.group.id && r.reservedUntil && r.reservedUntil > now && r.registeredAt === null)
-                if (!reserved) {
-                    return true
+        const available = this.group.settings.getRemainingStock(this)
+        
+        if (available !== null && available <= 0) {
+            return true;
+        }
+
+        // If all prices are sold out -> also reached maximum
+        const prices = this.getFilteredPrices()
+        if (prices.length > 0) {
+            let allPricesSoldOut = true;
+            for (const price of prices) {
+                const remaining = price.getRemainingStock(this)
+                if (remaining === null || remaining > 0) {
+                    allPricesSoldOut = false;
+                    break;
+                }
+            }
+
+            if (allPricesSoldOut) {
+                return true;
+            }
+        }
+
+        // If non-multiple choice option menu's are sold out -> also reached maximum
+        const optionMenus = this.getFilteredOptionMenus()
+        for (const menu of optionMenus) {
+            if (!menu.multipleChoice) {
+                let allOptionsSoldOut = true;
+                for (const option of menu.options) {
+                    const remaining = option.getRemainingStock(this)
+                    if (remaining === null || remaining > 0) {
+                        allOptionsSoldOut = false;
+                        break;
+                    }
+                }
+
+                if (allOptionsSoldOut) {
+                    return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -650,7 +720,6 @@ export class RegisterItem {
                 }
             }
         
-
             // Check if registrations are limited
             if (!this.doesMeetRequireGroupIds()) {
                 throw new SimpleError({
@@ -739,6 +808,31 @@ export class RegisterItem {
                     human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet`,
                     meta: {recoverable: true}
                 })
+            }
+
+            // Only check individual stock if we haven't reached the maximum - otherwise it won't suggest to use the waiting list
+            if (!reachedMaximum) {
+                // Check individual stock
+                if (this.groupPrice.getRemainingStock(this) === 0) {
+                    throw new SimpleError({
+                        code: "stock_empty",
+                        message: "Stock empty",
+                        human: `Het tarief ${this.groupPrice.name} is uitverkocht`,
+                        meta: {recoverable: true}
+                    })
+                }
+
+                for (const option of this.options) {
+                    const remaining = option.option.getRemainingStock(this)
+                    if (remaining !== null && remaining < option.amount) {
+                        throw new SimpleError({
+                            code: "stock_empty",
+                            message: "Stock empty",
+                            human: remaining === 0 ? `De keuzemogelijkheid ${option.option.name} is uitverkocht` : `Er zijn nog maar ${Formatter.pluralText(remaining, 'stuk', 'stuks')} beschikbaar van ${option.option.name}`,
+                            meta: {recoverable: true}
+                        })
+                    }
+                }
             }
         }
 

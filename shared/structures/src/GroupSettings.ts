@@ -368,6 +368,7 @@ export class GroupSettings extends AutoEncoder {
     waitingListIfFull = true
 
     /**
+     * @deprecated
      * If maxMembers is not null, this will get filled in by the backend
      */
     @field({ 
@@ -378,6 +379,7 @@ export class GroupSettings extends AutoEncoder {
     registeredMembers: number | null = 0
 
     /**
+     * @deprecated
      * Amount of members that is reserved (e.g in payment process, or a member on the waiting list that is invited)
      */
     @field({ 
@@ -398,6 +400,44 @@ export class GroupSettings extends AutoEncoder {
         optional: true 
     })
     waitingListSize: number | null = null
+
+    getUsedStock(group: Group) {
+        const groupStockReservations = group.stockReservations
+        return StockReservation.getAmount('GroupPrice', null, groupStockReservations)
+    }
+
+    /**
+     * Can be negative is we are editing items, positive if other items in the cart cause stock changes
+     */
+    getPendingStock(item: RegisterItem) {
+        const stock = item.getCartPendingStockReservations() // this is positive if it will be used
+        return StockReservation.getAmount(
+            'Group', 
+            item.group.id, 
+            stock
+        )
+    }
+
+    isSoldOut(item: RegisterItem|Group): boolean {
+        if (this.maxMembers === null) {
+            return false
+        }
+        if (item instanceof Group) {
+            return this.getUsedStock(item) >= this.maxMembers
+        }
+        return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.maxMembers
+    }
+
+    getRemainingStock(item: RegisterItem|Group): number | null {
+        if (this.maxMembers === null) {
+            return null
+        }
+        if (item instanceof Group) {
+            return Math.max(0, this.maxMembers - this.getUsedStock(item))
+        }
+        return Math.max(0, this.maxMembers - this.getPendingStock(item) - this.getUsedStock(item.group))
+
+    }
 
     get isFull() {
         return this.maxMembers !== null && this.registeredMembers !== null && (this.registeredMembers + (this.reservedMembers ?? 0)) >= this.maxMembers

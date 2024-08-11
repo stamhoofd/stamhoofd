@@ -485,7 +485,7 @@ const errorMessage = computed(() => {
 const lastRefresh = ref(new Date())
 function refresh() {
     lastRefresh.value = new Date()
-    props.tableObjectFetcher.reset()
+    props.tableObjectFetcher.reset(true, true)
 }
 
 const lastFilteredCount = ref(null) as Ref<number|null>

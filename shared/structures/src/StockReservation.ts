@@ -18,10 +18,10 @@ export class StockReservation extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StockReservation), field: 'c' })
     children: StockReservation[] = [];
 
-    static getAmount(type: string, id: string, list: StockReservation[]) {
+    static getAmount(type: string, id: string|null, list: StockReservation[]) {
         let amount = 0;
         for (const reservation of list) {
-            if (reservation.objectType === type && reservation.objectId === id) {
+            if (reservation.objectType === type && (id === null || reservation.objectId === id)) {
                 amount += reservation.amount;
             }
         }

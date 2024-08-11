@@ -263,7 +263,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    Limiteer maximum aantal inschrijvingen
+                    Limiteer maximum aantal inschrijvingen  (waarvan nu {{ usedStock }} ingenomen of gereserveerd)
                 </h3>
 
                 <div v-if="enableMaxMembers" class="split-inputs option" @click.stop.prevent>
@@ -480,6 +480,7 @@ const organization = useOrganization();
 const {patched, hasChanges, addPatch, patch} = usePatch(props.group);
 const period = useRegistrationPeriod(computed(() => patched.value.periodId))
 const forceShowRequireGroupIds = ref(false)
+const usedStock = computed(() => patched.value.settings.getUsedStock(patched.value) || 0);
 
 function addRequireGroupIds() {
     forceShowRequireGroupIds.value = true
