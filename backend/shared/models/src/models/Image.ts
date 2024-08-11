@@ -34,12 +34,14 @@ export class Image extends Model {
         }
 
         let fileType = 'png';
-        if (fileType == "image/jpeg" || fileType == "image/jpg") {
+        if (type == "image/jpeg" || type == "image/jpg") {
             fileType = "jpg";
         }
-        if (fileType === "image/svg+xml" || fileType === "image/svg") {
+        if (type === "image/svg+xml" || type === "image/svg") {
             fileType = "svg";
         }
+
+        console.log('creating image', fileType, type, resolutions)
 
         const supportsTransparency = fileType == "png" || fileType == "svg"
         const promises: Promise<{data: Buffer;info: sharp.OutputInfo}>[] = [];
