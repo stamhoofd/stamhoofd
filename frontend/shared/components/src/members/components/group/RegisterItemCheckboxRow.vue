@@ -50,7 +50,7 @@ const registerItem = computed(() => {
         return inCartRegisterWaitingListItem.value
     }
 
-    if (!!validateRegisterItem.value.validationError && !validateRegisterItem.value.validationErrorWithoutWaitingList && !!props.group.waitingList) {
+    if (!!validateRegisterItem.value.validationError && !validateRegisterItem.value.validationErrorForWaitingList && !!props.group.waitingList) {
         return RegisterItem.defaultFor(props.member, props.group.waitingList, props.groupOrganization)
     }
     return RegisterItem.defaultFor(props.member, props.group, props.groupOrganization)
@@ -84,6 +84,10 @@ async function editRegisterItem() {
     if (checked.value && !registerItem.value?.showItemView) {
         // Deselect
         checked.value = false
+        return;
+    }
+
+    if (disabled.value) {
         return;
     }
 

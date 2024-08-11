@@ -571,9 +571,9 @@ export class RegisterItem {
         return false;
     }
 
-    get validationErrorWithoutWaitingList() {
+    get validationErrorForWaitingList() {
         try {
-            this.validate({ignoreWaitingList: true})
+            this.validate({forWaitingList: true})
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 return e.getHuman();
@@ -621,13 +621,21 @@ export class RegisterItem {
         return this.validationError === null
     }
 
-    validate(options?: {warnings?: boolean, ignoreWaitingList?: boolean}) {
+    validate(options?: {warnings?: boolean, forWaitingList?: boolean}) {
         this.refresh(this.group)
         const checkout = this.member.family.checkout;
         const admin = checkout.isAdminFromSameOrganization && !options?.warnings
         
         if (this.group.organizationId !== this.organization.id) {
             throw new Error("Group and organization do not match in RegisterItem.validate")
+        }
+
+        if (options?.forWaitingList && !this.group.waitingList) {
+            throw new SimpleError({
+                code: "missing_waiting_list",
+                message: "No waiting list",
+                human: `Je kan niet inschrijven voor de wachtlijst`
+            })
         }
 
         if (checkout.asOrganizationId && !checkout.isAdminFromSameOrganization  && !this.group.settings.allowRegistrationsByOrganization) {
@@ -692,20 +700,22 @@ export class RegisterItem {
         }
 
         if (!admin) {
-            if (this.group.notYetOpen) {
-                throw new SimpleError({
-                    code: "not_yet_open",
-                    message: "Not yet open",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn nog niet geopend.`
-                })
-            }
+            if (!options?.forWaitingList) {
+                if (this.group.notYetOpen) {
+                    throw new SimpleError({
+                        code: "not_yet_open",
+                        message: "Not yet open",
+                        human: `De inschrijvingen voor ${this.group.settings.name} zijn nog niet geopend.`
+                    })
+                }
 
-            if (this.group.closed) {
-                throw new SimpleError({
-                    code: "closed",
-                    message: "Closed",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn gesloten.`
-                })
+                if (this.group.closed) {
+                    throw new SimpleError({
+                        code: "closed",
+                        message: "Closed",
+                        human: `De inschrijvingen voor ${this.group.settings.name} zijn gesloten.`
+                    })
+                }
             }
 
             // Check if it fits
@@ -768,7 +778,7 @@ export class RegisterItem {
 
             const reachedMaximum = this.hasReachedGroupMaximum()
 
-            if (!options?.ignoreWaitingList) {
+            if (!options?.forWaitingList) {
                 // More detailed error messages
                 if (this.group.settings.waitingListType === WaitingListType.All) {
                     throw new SimpleError({
@@ -833,6 +843,12 @@ export class RegisterItem {
                         })
                     }
                 }
+            }
+
+            if (options?.forWaitingList) {
+                // Also check waiting list itself
+                const item = RegisterItem.defaultFor(this.member, this.group.waitingList!, this.organization)
+                item.validate({warnings: options?.warnings})
             }
         }
 

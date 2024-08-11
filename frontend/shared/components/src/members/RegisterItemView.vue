@@ -37,9 +37,9 @@
         <template v-if="!suggestWaitingList">
             <div v-if="item.getFilteredPrices().length > 1" class="container">
                 <STList>
-                    <STListItem v-for="price in item.getFilteredPrices()" :key="price.id" :selectable="!price.isSoldOut(item)" :disabled="price.isSoldOut(item)" element-name="label">
+                    <STListItem v-for="price in item.getFilteredPrices()" :key="price.id" :selectable="!price.isSoldOut(item) || admin" :disabled="price.isSoldOut(item) && !admin" element-name="label">
                         <template #left>
-                            <Radio v-model="item.groupPrice" :value="price" :name="'groupPrice'" :disabled="price.isSoldOut(item)" />
+                            <Radio v-model="item.groupPrice" :value="price" :name="'groupPrice'" :disabled="price.isSoldOut(item) && !admin" />
                         </template>
                         <h4 class="style-title-list">
                             {{ price.name || 'Naamloos' }}
@@ -64,10 +64,10 @@
                 </p>
 
                 <STList>
-                    <STListItem v-for="option in item.getFilteredOptions(menu)" :key="option.id" :selectable="!option.isSoldOut(item)" :disabled="option.isSoldOut(item)" element-name="label">
+                    <STListItem v-for="option in item.getFilteredOptions(menu)" :key="option.id" :selectable="!option.isSoldOut(item) || admin" :disabled="option.isSoldOut(item)&& !admin" element-name="label">
                         <template #left>
-                            <Radio v-if="!menu.multipleChoice" :model-value="getOptionSelected(menu, option)" :value="true" :disabled="option.isSoldOut(item)" @update:model-value="setOptionSelected(menu, option, $event)" />
-                            <Checkbox v-else :value="option" :disabled="option.isSoldOut(item)" :model-value="getOptionSelected(menu, option)" @update:model-value="setOptionSelected(menu, option, $event)" />
+                            <Radio v-if="!menu.multipleChoice" :model-value="getOptionSelected(menu, option)" :value="true" :disabled="option.isSoldOut(item) && !admin" @update:model-value="setOptionSelected(menu, option, $event)" />
+                            <Checkbox v-else :value="option" :disabled="option.isSoldOut(item) && !admin" :model-value="getOptionSelected(menu, option)" @update:model-value="setOptionSelected(menu, option, $event)" />
                         </template>
                         <h4 class="style-title-list">
                             {{ option.name || 'Naamloos' }}
@@ -116,7 +116,6 @@ import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
     item: RegisterItem,
-    admin: boolean,
     saveHandler: (newItem: RegisterItem, navigation: NavigationActions) => Promise<void>|void,
     showGroupInformation: boolean
 }>();
@@ -129,8 +128,9 @@ const isInCart = computed(() => checkout.value.cart.contains(props.item))
 const pop = usePop()
 const show = useShow()
 const validationError = computed(() => props.item.validationError)
-const validationErrorWithoutWaitingList = computed(() => props.item.validationErrorWithoutWaitingList)
-const suggestWaitingList = computed(() => !!validationError.value && !validationErrorWithoutWaitingList.value)
+const validationErrorForWaitingList = computed(() => props.item.validationErrorForWaitingList)
+const suggestWaitingList = computed(() => !!validationError.value && !validationErrorForWaitingList.value)
+const admin = computed(() => checkout.value.isAdminFromSameOrganization)
 
 async function openWaitingList() {
     if (saving.value || !props.item.group.waitingList) {

@@ -26,16 +26,6 @@
                     <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" @click="openGroup(group)" />
                 </STList>
             </div>
-
-            <div v-if="waitingLists.length" class="container">
-                <hr v-if="tree.categories.length || !allowChangingOrganization">
-                <h2>
-                    Wachtlijsten
-                </h2>
-                <STList class="illustration-list">
-                    <RegisterMemberGroupRow v-for="group in waitingLists" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" @click="openGroup(group)" />
-                </STList>
-            </div>
         </main>
     </div>
 </template>
@@ -80,16 +70,9 @@ const tree = computed(() => {
         admin: !!auth.permissions, 
         smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
         filterGroups: (g) => {
-            return props.member.canRegister(g, selectedOrganization.value!)
+            return props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!)
         }
     })
-});
-
-const waitingLists = computed(() => {
-    if (!selectedOrganization.value) {
-        return []
-    }
-    return (selectedOrganization.value.period.groups.filter(g => !props.member.canRegister(g, selectedOrganization.value!) && props.member.validationErrorWithoutWaitingList(g, selectedOrganization.value!)).map(g => g.waitingList).filter(g => g != null)  as Group[]).filter((value, index, self) => self.findIndex((v) => value.id === v.id) === index)
 });
 
 function addOrganization(organization: Organization) {

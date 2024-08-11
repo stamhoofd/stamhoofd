@@ -220,7 +220,7 @@ function selectAllResults() {
         try {
             const item = RegisterItem.defaultFor(member, props.group, props.checkout.singleOrganization)
             if (item.validationError) {
-                if (!item.validationErrorWithoutWaitingList && props.group.waitingList) {
+                if (!item.validationErrorForWaitingList && props.group.waitingList) {
                     const item2 = RegisterItem.defaultFor(member, props.group.waitingList, props.checkout.singleOrganization)
                     if (!item2.validationError) {
                         props.checkout.add(item2)

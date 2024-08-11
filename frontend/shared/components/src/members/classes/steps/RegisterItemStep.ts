@@ -6,12 +6,10 @@ import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
 
 export class RegisterItemStep implements EditMemberStep {
     item: RegisterItem
-    admin: boolean
     showGroupInformation: boolean
 
-    constructor(item: RegisterItem, options?: {admin?: boolean, showGroupInformation?: boolean}) {
+    constructor(item: RegisterItem, options?: {showGroupInformation?: boolean}) {
         this.item = item
-        this.admin = options?.admin ?? false
         this.showGroupInformation = options?.showGroupInformation ?? false
     }
 
@@ -28,7 +26,6 @@ export class RegisterItemStep implements EditMemberStep {
             showGroupInformation: this.showGroupInformation,
             member: manager.member,
             item: this.item.clone(),
-            admin: this.admin,
             saveHandler: async (item: RegisterItem, navigate: NavigationActions) => {
                 this.item.copyFrom(item)
                 await manager.saveHandler(this, navigate)

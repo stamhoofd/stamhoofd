@@ -72,7 +72,7 @@ export async function checkoutRegisterItem({item: originalItem, admin, context, 
 }) {
     let item = originalItem;
 
-    if (item.group.waitingList && item.validationError && !item.validationErrorWithoutWaitingList) {
+    if (item.group.waitingList && item.validationError && !item.validationErrorForWaitingList) {
         // Should register for the waiting list
         item = RegisterItem.defaultFor(item.member, item.group.waitingList, item.organization);
         item.cartError = originalItem.cartError;
@@ -95,7 +95,7 @@ export async function checkoutRegisterItem({item: originalItem, admin, context, 
 
     // Check which steps need a review or are not complete
     const steps: EditMemberStep[] = [
-        new RegisterItemStep(item, {admin, showGroupInformation}),
+        new RegisterItemStep(item, {showGroupInformation}),
     ]
 
     if (!admin) {
