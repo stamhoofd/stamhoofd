@@ -6,7 +6,7 @@
             <span v-else-if="toast.icon" class="first icon" :class="toast.icon" />
             <div>
                 <div>{{ message }}</div>
-                <button v-if="toast.button" class="button text" type="button" @click.stop="clickedButton">
+                <button v-if="toast.button" class="button text increase-click-area" type="button" @click.stop="clickedButton">
                     {{ toast.button.text }}
                 </button>
             </div>
@@ -32,7 +32,7 @@ import { Toast } from './Toast';
 })
 export default class ToastView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    toast: Toast
+        toast: Toast
 
     get message() {
         return this.toast.message
@@ -41,7 +41,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
     isClosing = false
 
     @Prop({default: null})
-    onClose: (() => void) | null
+        onClose: (() => void) | null
 
     mounted() {
         if (this.toast.autohideAfter) {

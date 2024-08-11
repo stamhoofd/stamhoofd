@@ -155,7 +155,7 @@ export default class ToastBox extends Vue {
         cursor: pointer;
         touch-action: manipulation;
 
-        &:hover {
+        &:hover:not(:has(button:hover)) {
             transform: scale(0.98, 0.98) translateY(5px);
             opacity: 0.8;
         }
