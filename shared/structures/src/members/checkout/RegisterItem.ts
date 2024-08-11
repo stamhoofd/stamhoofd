@@ -108,11 +108,6 @@ export class RegisterItem {
             organization
         });
 
-        //if (item.shouldUseWaitingList() && group.waitingList) {
-        //    group = group.waitingList
-        //    item = RegisterItem.defaultFor(member, group, organization);
-        //}
-
         return item;
     }
 
@@ -157,7 +152,7 @@ export class RegisterItem {
     }
 
     get showItemView() {
-        return this.shouldUseWaitingList() || !!this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
+        return !!this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
     }
 
     calculatePrice() {
@@ -480,24 +475,6 @@ export class RegisterItem {
         return descriptions.filter(d => !!d).join("\n")
     }
 
-    shouldUseWaitingList() {
-        if (this.group.settings.waitingListType === WaitingListType.All) {
-            return true;
-        }
-        const existingMember = this.isExistingMemberOrFamily()
-
-        if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
-            return true;
-        }
-
-        if (this.group.waitingList) {
-            if (this.hasReachedGroupMaximum()) {
-                return true;
-            }
-        }
-        return false
-    }
-
     hasReachedGroupMaximum() {
         const available = this.group.settings.availableMembers
         if (available !== null) {
@@ -711,20 +688,46 @@ export class RegisterItem {
                 }
             }
 
-            if (!options?.ignoreWaitingList && this.shouldUseWaitingList()) {
-                throw new SimpleError({
-                    code: "waiting_list_required",
-                    message: "Waiting list required",
-                    human: `${this.member.member.firstName} kan momenteel enkel voor de wachtlijst van ${this.group.settings.name} inschrijven.`,
-                    meta: {recoverable: true}
-                })
+            const reachedMaximum = this.hasReachedGroupMaximum()
+
+            if (!options?.ignoreWaitingList) {
+                // More detailed error messages
+                if (this.group.settings.waitingListType === WaitingListType.All) {
+                    throw new SimpleError({
+                        code: "waiting_list_required",
+                        message: "Waiting list required",
+                        human: `Iedereen moet zich eerst op de wachtlijst inschrijven`,
+                        meta: {recoverable: true}
+                    })
+                }
+        
+                if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
+                    throw new SimpleError({
+                        code: "waiting_list_required",
+                        message: "Waiting list required",
+                        human: `Nieuwe leden moeten zich eerst op de wachtlijst inschrijven`,
+                        meta: {recoverable: true}
+                    })
+                }
+        
+                if (this.group.waitingList) {
+                    if (reachedMaximum) {
+                        throw new SimpleError({
+                            code: "waiting_list_required",
+                            message: "Waiting list required",
+                            human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst`,
+                            meta: {recoverable: true}
+                        })
+                    }
+                }
             }
 
-            if (this.hasReachedGroupMaximum()) {
+            if (reachedMaximum && !this.group.waitingList) {
+                // Reached maximum without waiting lists
                 throw new SimpleError({
                     code: "maximum_reached",
                     message: "Maximum reached",
-                    human: this.group.waitingList ? `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.` : `De inschrijvingen voor ${this.group.settings.name} zijn volzet. `,
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet`,
                     meta: {recoverable: true}
                 })
             }
