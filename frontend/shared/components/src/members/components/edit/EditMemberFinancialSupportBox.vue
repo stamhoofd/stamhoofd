@@ -53,8 +53,8 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 const markReviewed = app !== 'dashboard' && app !== 'admin';
 
 useValidation(props.validator, async () => {
-    if (markReviewed && props.member.patchedMember.details.requiresFinancialSupport === null) {
-        // Force saving
+    if (markReviewed) {
+        // Force saving: update date + make sure it is not null
         requiresFinancialSupport.value = requiresFinancialSupport.value as any
         await nextTick()
     }
