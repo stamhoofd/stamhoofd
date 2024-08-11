@@ -120,25 +120,24 @@ export default class ToastBox extends Vue {
     right: 0;
     z-index: 10001;
     overflow: visible;
-    padding: 10px 20px;
+    padding: 0 10px;
     pointer-events:none;   
-    width: 350px + 40px;
+    width: 450px;
     padding-bottom: 0;
     padding-top: calc(10px + var(--st-safe-area-top, 0px));
 
-    @media (max-width: 450px) {
-        padding-right: 15px;
-        padding-left: 15px;
+    @media (max-width: 550px) {
+        padding: 0 5px;
         width: 100%;
     }
 
     max-width: 100vw;
     box-sizing: border-box;
-    transition: transform 0.2s;
+    transition: transform 0.3s;
 
     transform: translateY(
         calc(
-            -10px 
+            -5px 
             - max(
                 var(--st-safe-area-bottom, 0px), 
                 var(--keyboard-height, 0px)
@@ -151,19 +150,14 @@ export default class ToastBox extends Vue {
     }
 
     > div > div {
-        transition: transform 0.3s, opacity 0.3s;
+        transition: transform 0.35s, opacity 0.35s;
         transform: scale(1, 1) translate(0, 0);
     }
 
     .move-enter-from, .move-leave-to
         /* .list-complete-leave-active below version 2.1.8 */ {
         opacity: 0;
-        transform: scale(0.8, 0.8) translateY(30px);
-        transform-origin: right center;
-    }
-
-    .move-leave-to {
-        transform: scale(0.8, 0.8) translateY(30px);
+        transform: scale(0.9, 0.9) translateY(100%);
         transform-origin: center center;
     }
 

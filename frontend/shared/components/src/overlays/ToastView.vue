@@ -82,18 +82,22 @@ export default class ToastView extends Mixins(NavigationMixin) {
 
 .toast-view-container {
     padding: 5px 0;
+
+    @media (max-width: 550px) {
+        padding: 2.5px 0;
+    }
 }
 
 .toast-view {
     touch-action: manipulation;
     user-select: none;
     cursor: pointer;
-    padding: 15px 30px;
-    width: 350px;
+    padding: 15px;
+    width: 450px;
     max-width: 100%;
 
-    @media (max-width: 450px) {
-        padding: 15px 20px;
+    @media (max-width: 550px) {
+        padding: 15px 10px;
         width: 100%;
     }
 
@@ -113,9 +117,14 @@ export default class ToastView extends Mixins(NavigationMixin) {
     font-weight: $font-weight-semibold;
     color: $color-primary;
 
+    @media (max-width: 700px) {
+        font-size: 14px;
+    }
+
     div, .icon.dark {
         color: $color-dark;
     }
+
 
     position: relative;
     overflow: hidden;
@@ -144,8 +153,13 @@ export default class ToastView extends Mixins(NavigationMixin) {
     }
 
     .icon.first {
-        margin-left: -10px;
-        margin-right: 10px;
+        margin-left: 5px;
+        margin-right: 15px;
+
+        @media (max-width: 700px) {
+            margin-left: 0px;
+            margin-right: 10px;
+        }
     }
 
     &.green {
