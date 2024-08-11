@@ -173,7 +173,7 @@ const allColumns: Column<ObjectType, any>[] = [
         name: "Lidnummer", 
         getValue: (member) => member.member.details.memberNumber ?? '',
         getStyle: (val) => val ? '' : 'gray',
-        format: (val) => val ? '' : 'Geen',
+        format: (val) => val ? val : 'Geen',
         minimumWidth: 100,
         recommendedWidth: 150,
         grow: true,
