@@ -53,7 +53,7 @@
                         </h2>
                     </STListItem>
 
-                    <STListItem v-if="event.group" :selectable="!event.group.closed" class="right-stack"  @click="!event.group.closed ? openGroup() : undefined">
+                    <STListItem v-if="event.group" :selectable="!event.group.closed" class="right-stack" @click="!event.group.closed ? openGroup() : undefined">
                         <template #left>
                             <span class="icon edit" />
                         </template>
