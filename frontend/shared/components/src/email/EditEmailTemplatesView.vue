@@ -30,7 +30,7 @@
                     {{ (!organization ? EmailTemplate.getPlatformTypeDescription(emailTemplate.type) : null) ?? EmailTemplate.getTypeDescription(emailTemplate.type) }}
                 </p>
 
-                <p v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type)" class="style-description-small">
+                <p v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
                     Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.
                 </p>
 

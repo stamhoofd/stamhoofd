@@ -15,7 +15,7 @@
 
             <template v-if="event.group && (!organization || event.organizationId === organization.id || event.group.settings.allowRegistrationsByOrganization)">
                 <hr>
-                <h2>Bekijken</h2>
+                <h2>Inschrijvingen</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
@@ -54,7 +54,7 @@
 
             <template v-if="hasFullAccess">
                 <hr>
-                <h2>Instellingen</h2>
+                <h2 v-if="event.group && (!organization || event.organizationId === organization.id || event.group.settings.allowRegistrationsByOrganization)">Instellingen</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Edit)">
@@ -95,7 +95,7 @@
                             Automatische e-mails
                         </h2>
                         <p class="style-description">
-                            Wijzig de inhoud van automatische e-mails naar leden.
+                            Wijzig de inhoud van automatische e-mails naar leden die zijn of worden ingeschreven.
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

@@ -146,7 +146,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.TrialMembersExpirationReminder: return 'Billing: Herinnering verlopen proefperiode pakket ledenadministratie'
             case EmailTemplateType.OrderNotification: return 'Webshop: Bestelling notificatie voor beheerderss'
 
-            case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingen: Inschrijvingsbevestiging'
+            case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingen: Bevestiging'
             case EmailTemplateType.RegistrationTransferDetails: return 'Inschrijvingen: Betaalinstructies met overschrijving'
 
             case EmailTemplateType.OrderConfirmationOnline: return 'Webshop: Bestelling bevestiging online betaling'
@@ -228,7 +228,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultMembersEmail: return 'Als iemand een nieuwe e-mail opstelt, gericht aan leden, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.'
 
             case EmailTemplateType.OrderNotification: return 'E-mail die webshop eigenaren ontvangen wanneer er een bestelling is geplaatst (indien ze die functie hebben ingeschakeld)'
-            case EmailTemplateType.RegistrationConfirmation: return 'Na het inschrijven ontvangen de leden deze e-mail'
+            case EmailTemplateType.RegistrationConfirmation: return 'Leden en ouders (die toegang hebben of moeten krijgen) ontvangen deze e-mail nadat ze worden ingeschreven of zelf inschrijven.'
 
             case EmailTemplateType.OrderConfirmationOnline: return 'Wanneer een besteller online betaald (of totaalbedrag is 0 euro)'
             case EmailTemplateType.OrderConfirmationTransfer: return 'Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd'
