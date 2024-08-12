@@ -70,9 +70,12 @@
                 autocomplete=""
             />
         </STInputBox>
+        <p v-if="patched.type === GroupType.EventRegistration" class="style-description-small">
+            De beschrijving is zichtbaar als leden doorklikken om in te schrijven voor de activiteit.
+        </p>
 
 
-        <template v-if="patched.type === GroupType.EventRegistration && !organization">
+        <template v-if="patched.type === GroupType.EventRegistration && !organization && isMultiOrganization">
             <hr>
             <h2>Organisator</h2>
             <p>Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.</p>
@@ -81,7 +84,7 @@
             </p>
 
             <STList>
-                <STListItem v-if="externalOrganization" :selectable="true" @click="chooseOrganizer('Kies een organisator')">
+                <STListItem v-if="externalOrganization" :selectable="isNew" @click="isNew ? chooseOrganizer('Kies een organisator') : undefined">
                     <template #left>
                         <OrganizationAvatar :organization="externalOrganization" />
                     </template>
@@ -93,7 +96,7 @@
                         {{ externalOrganization.address.anonymousString(Country.Belgium) }}
                     </p>
 
-                    <template #right>
+                    <template #right v-if="isNew">
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>

@@ -47,11 +47,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ patched.group ? $t('Bewerk inschrijvinginstellingen') : $t('Inschrijvingen verzamelen') }}
+                    {{ patched.group ? $t('Bewerk inschrijvingsinstellingen') : $t('Inschrijvingen verzamelen') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Enkel leden kunnen inschrijven voor een activiteit.
+                    Laat leden inschrijven voor deze activiteit via het ledenportaal
                 </p>
             </STListItem>
         </STList>

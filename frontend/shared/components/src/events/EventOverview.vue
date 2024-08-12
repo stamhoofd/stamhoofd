@@ -53,7 +53,6 @@
             </template>
 
             <template v-if="hasFullAccess">
-
                 <hr>
                 <h2>Instellingen</h2>
 
@@ -66,7 +65,22 @@
                             Instellingen
                         </h2>
                         <p class="style-description">
-                            Wijzig de instellingen van deze activiteit.
+                            Wijzig de naam, beschrijving, datum en beschikbaarheid.
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditGroup)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/list.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            Inschrijvingsinstellingen
+                        </h2>
+                        <p class="style-description">
+                            Wijzig hoe leden kunnen inschrijven, de tarieven en de verzamelde gegevens.
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -94,11 +108,13 @@
 </template>
 
 <script setup lang="ts">
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EmailTemplateType, Event } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, Group } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
 import { EditEmailTemplatesView } from '../email';
-import { useOrganization } from '../hooks';
+import EditGroupView from '../groups/EditGroupView.vue';
+import { useContext, useOrganization } from '../hooks';
 import { MembersTableView } from '../members';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
@@ -110,6 +126,7 @@ const props = defineProps<{
 const title = computed(() => props.event.name);
 const $navigate = useNavigate();
 const organization = useOrganization();
+const context = useContext()
 
 const hasFullAccess = computed(() => {
     return !organization.value || props.event.organizationId === organization.value.id;
@@ -119,6 +136,7 @@ enum Routes {
     Registrations = 'inschrijvingen',
     WaitingList = 'wachtlijst',
     Edit = "instellingen",
+    EditGroup = "inschrijvingsinstellingen",
     EditEmails = "emails"
 }
 
@@ -155,6 +173,59 @@ defineRoutes([
             return {
                 event: props.event,
                 isNew: false
+            }
+        }
+    },
+    {
+        url: Routes.EditGroup,
+        component: EditGroupView as ComponentOptions,
+        present: 'popup',
+        paramsToProps: () => {
+            if (!props.event.group) {
+                throw new Error('Missing group')
+            }
+
+            return {
+                group: props.event.group,
+                isMultiOrganization: !props.event.organizationId,
+                isNew: false,
+                showToasts: true,
+                saveHandler: async (patch: AutoEncoderPatchType<Group>) => {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+                    
+                    arr.addPatch(Event.patch({
+                        id: props.event.id,
+                        group: patch
+                    }))
+
+                    const response = await context.value.authenticatedServer.request({
+                        method: 'PATCH',
+                        path: '/events',
+                        body: arr,
+                        decoder: new ArrayDecoder(Event as Decoder<Event>),
+                    })
+
+                    // Make sure original event is patched
+                    deepSetArray([props.event], response.data)
+                },
+                deleteHandler: async () => {
+                    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+                    
+                    arr.addPatch(Event.patch({
+                        id: props.event.id,
+                        group: null
+                    }))
+
+                    const response = await context.value.authenticatedServer.request({
+                        method: 'PATCH',
+                        path: '/events',
+                        body: arr,
+                        decoder: new ArrayDecoder(Event as Decoder<Event>),
+                    })
+
+                    // Make sure original event is patched
+                    deepSetArray([props.event], response.data)
+                }
             }
         }
     },
