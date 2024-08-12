@@ -26,7 +26,7 @@
 
         <hr>
         <h2 class="style-with-button">
-            <div>Vierkante foto</div>
+            <div>Vierkante foto of icoontje</div>
             <div>
                 <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
                     <span class="icon trash" />
