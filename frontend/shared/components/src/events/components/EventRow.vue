@@ -3,14 +3,18 @@
         <template #left>
             <EventImageBox :event="event" />
         </template>
-        <p class="style-title-prefix style-limit-lines">
-            {{ levelPrefix }}<template v-if="prefix">: {{ prefix }}</template>
+        <p v-if="levelPrefix" class="style-title-prefix style-limit-lines">
+            {{ levelPrefix }}
         </p>
         <h3 class="style-title-list larger">
             <span>{{ event.name }}</span>
         </h3>
         <p class="style-description-small">
             {{ Formatter.capitalizeFirstLetter(event.dateRange) }}
+        </p>
+
+        <p v-if="prefix" class="style-description-small">
+            Voor {{ prefix }}
         </p>
 
         <p v-if="event.meta.location?.name || event.meta.location?.address?.city" class="style-description-small">
@@ -56,7 +60,9 @@ const levelPrefix = computed(() => {
         }
     } else {
         // Name of the organization
-        prefixes.push(props.event.organizationId)
+        if (props.event.meta.organizationCache?.name) {
+            prefixes.push(props.event.meta.organizationCache?.name)
+        }
     }
 
     return Formatter.joinLast(prefixes, ', ', ' en ')
