@@ -20,6 +20,7 @@
         "dev:backend": "concurrently -r 'yarn -s build:shared:watch' 'lerna run dev:backend --stream --parallel' 'yarn caddy' 'yarn dns' 'yarn mail'",
         "app:release": "cd devops && yarn -s build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
         "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s build:shared'",
+        "build:full": "yarn -s clear && yarn -s build",
         "build": "cd shared/locales && yarn -s build && cd ../utility && yarn -s build && cd ../structures && yarn -s build && cd ../..",
         "clear": "rm -rf shared/*/dist shared/*/esm/dist frontend/app/*/dist backend/shared/*/dist backend/app/*/dist",
         "build:frontend": "yarn -s build && cd frontend/app/registration && yarn -s build:production && cd ../dashboard && yarn -s build:production && cd ../registration && yarn -s build:production",
