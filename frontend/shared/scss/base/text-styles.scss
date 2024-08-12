@@ -169,11 +169,11 @@
     font-weight: $font-weight-semibold;
     color: $color-primary;
     text-transform: uppercase;
-    padding-bottom: 5px;
+    margin-bottom: 5px;
 
     @media (max-width: 400px) {
         font-size: 10px;
-        padding-bottom: 4px;
+        margin-bottom: 4px;
     }
 }
 
@@ -183,11 +183,11 @@
     font-weight: $font-weight-semibold;
     color: $color-primary;
     text-transform: uppercase;
-    padding-bottom: 3px;
+    margin-bottom: 3px;
 
     @media (max-width: 400px) {
         font-size: 10px;
-        padding-bottom: 4px;
+        margin-bottom: 4px;
     }
 }
 
