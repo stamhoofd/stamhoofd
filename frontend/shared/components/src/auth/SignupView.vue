@@ -10,7 +10,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" :autofocus="true" title="Persoonlijk e-mailadres" name="username" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="true" title="Persoonlijk e-mailadres" name="username" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
@@ -18,11 +18,11 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox title="Kies een wachtwoord">
-                        <input v-model="password" name="new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                        <input id="new-password" v-model="password" name="new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
                     </STInputBox>
 
                     <STInputBox title="Herhaal wachtwoord">
-                        <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="(event) => passwordRepeat = event.target.value" @change="(event) => passwordRepeat = event.target.value">
+                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="(event) => passwordRepeat = event.target.value" @change="(event) => passwordRepeat = event.target.value">
                     </STInputBox>
                 </div>
                 <div>
@@ -36,7 +36,7 @@
 
             <footer>
                 <LoadingButton :loading="loading" class="block input-spacing">
-                    <button class="button primary" type="submit">
+                    <button id="submit" class="button primary" type="submit">
                         <span class="icon lock" />
                         <span>Account aanmaken</span>
                     </button>
@@ -54,9 +54,9 @@ import { computed, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
+import { useContext, useOrganization } from '../hooks';
 import EmailInput from '../inputs/EmailInput.vue';
 import PasswordStrength from '../inputs/PasswordStrength.vue';
-import { useContext, useOrganization } from '../hooks';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 
 const props = withDefaults(

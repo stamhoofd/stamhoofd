@@ -7,11 +7,11 @@
         <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email">
 
         <STInputBox title="Kies een wachtwoord">
-            <input v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+            <input id="new-password" v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
         </STInputBox>
 
         <STInputBox title="Herhaal wachtwoord">
-            <input v-model="passwordRepeat" enterkeyhint="go" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
+            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
         </STInputBox>
 
         <PasswordStrength v-model="password" />
@@ -23,7 +23,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { ErrorBox, LoadingButton, PasswordStrength, SaveView, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
-import { LoginHelper, SessionManager } from '@stamhoofd/networking';
+import { LoginHelper } from '@stamhoofd/networking';
 
 @Component({
     components: {
