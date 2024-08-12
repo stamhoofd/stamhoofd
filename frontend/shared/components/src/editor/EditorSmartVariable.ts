@@ -112,7 +112,7 @@ export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
                 'span',
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 mergeAttributes({ 'data-type': this.name }, this.options.HTMLAttributes, HTMLAttributes),
-                smartVariable?.example ?? "", // Empty string won't get rendered but kept for reference in case the smart variable is found again later
+                smartVariable?.example || this.name, // Empty string won't get rendered but kept for reference in case the smart variable is found again later
             ]
         }
         const dom = document.createElement('div')
