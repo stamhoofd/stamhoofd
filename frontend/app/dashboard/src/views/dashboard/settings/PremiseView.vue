@@ -6,7 +6,7 @@
             <p class="style-description-block">
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates assumenda dolore doloribus cum molestiae minima cumque impedit, cupiditate architecto dolor consequatur repudiandae rerum deserunt dolorum, accusantium sit at iure recusandae!
             </p>
-            
+
             <div class="container">
                 <h2>Adres</h2>
                 <AddressInput v-model="address" title="" :validator="errors.validator" :link-country-to-locale="true" />
@@ -15,7 +15,7 @@
             <template v-if="premiseTypes.length">
                 <hr>
                 <div class="container">
-                    <h2>Type</h2>
+                    <h2>Soort</h2>
                     <STList>
                         <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label">
                             <template #left>
@@ -66,7 +66,7 @@ const {saving, hasChanges, save, patched, addPatch, shouldNavigateAway} = useEdi
     toPatch: props.premise
 });
 
-const premiseTypes = computed(() => platform$.value.config.premiseTypes ?? []);
+const premiseTypes = computed(() => platform$.value.config.premiseTypes);
 
 const premiseTypeIds = computed({
     get: () => patched.value.premiseTypeIds,
@@ -82,7 +82,7 @@ function selectPremiseType(isSelected: boolean, premiseType: PlatformPremiseType
         if(premiseTypeIds.value.includes(premiseTypeId)) {
             console.error(`${premiseType.name} is already selected`);
         } else {
-            premiseTypeIds.value.push(premiseTypeId);
+            premiseTypeIds.value = [...premiseTypeIds.value, premiseTypeId];
         }
     } else {
         premiseTypeIds.value = premiseTypeIds.value.filter(id => id !== premiseTypeId);

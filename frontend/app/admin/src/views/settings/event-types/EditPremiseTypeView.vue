@@ -27,6 +27,21 @@
             />
         </STInputBox>
 
+        <hr>
+        <h2>{{ $t('Limieten') }}</h2>
+
+        <p class="style-description-small">Stel optioneel limieten voor het aantal gebouwen van deze soort per groep in.</p>
+
+        <div class="split-inputs">
+            <STInputBox :title="$t('Minimum aantal')" error-fields="minimumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="min" :placeholder="$t('Geen')" :required="false" />
+            </STInputBox>
+
+            <STInputBox :title="$t('Maximum aantal')" error-fields="maximumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="max" :placeholder="$t('Onbeperkt')" :required="false" />
+            </STInputBox>
+        </div>
+
         <div v-if="!isNew && deleteHandler" class="container">
             <hr>
             <h2>
@@ -45,7 +60,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, NumberInput, SaveView, useErrors, usePatch } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformPremiseType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
@@ -63,6 +78,9 @@ const props = defineProps<{
 }>();
 const title = computed(() => props.isNew ? $t('Nieuw soort gebouw') : $t('Wijzig soort gebouw'));
 const pop = usePop();
+
+const min = ref<number | null>(null);
+const max = ref<number | null>(null);
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
 
