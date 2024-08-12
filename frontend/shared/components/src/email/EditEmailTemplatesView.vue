@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="loading" :error-box="errors.errorBox" />
-    <SaveView v-else :title="viewTitle" @save="save" :loading="saving" :save-text="onSelect ? 'Sluiten' : 'Opslaan'">
+    <SaveView v-else :title="viewTitle" :loading="saving" :save-text="onSelect ? 'Sluiten' : 'Opslaan'" @save="save">
         <h1>{{ viewTitle }}</h1>
         <SegmentedControl v-if="tabItems.length > 1" v-model="tab" :items="tabItems.map(i => i.id)" :labels="tabItems.map(i => i.label)" />
 
@@ -8,26 +8,33 @@
 
         <STList v-if="editableList.length">
             <STListItem v-for="emailTemplate in editableList" :key="emailTemplate.type + ':' + emailTemplate.id" :selectable="true" class="right-stack" @click="doSelectItem(emailTemplate)">
+                <template #left>
+                    <span v-if="!emailTemplate.id && organization && emailTemplate.html" v-tooltip="'De standaard e-mail wordt gebruikt'" class="icon email gray" />
+                    <span v-else-if="!emailTemplate.id" v-tooltip="'Niet actief'" class="icon help gray" />
+                    <span v-else v-tooltip="'Aangepast vanaf standaard template'" class="icon layered">
+                        <span class="icon email-edited-layer-1 gray" />
+                        <span class="icon email-edited-layer-2 primary" />
+                    </span>
+                </template>
+                
+                <p v-if="getTemplatePrefix(emailTemplate)" class="style-title-prefix-list">
+                    {{ getTemplatePrefix(emailTemplate) }}
+                </p>
                 
                 <h2 class="style-title-list">
                     {{ EmailTemplate.isSavedEmail(emailTemplate.type) ? emailTemplate.subject : EmailTemplate.getTypeTitle(emailTemplate.type) }}
                 </h2>
-                <p v-if="!EmailTemplate.isSavedEmail(emailTemplate.type) && emailTemplate.subject" class="style-description-small">
-                    "{{ emailTemplate.subject }}"
-                </p>
 
                 <p class="style-description-small">
                     {{ (!organization ? EmailTemplate.getPlatformTypeDescription(emailTemplate.type) : null) ?? EmailTemplate.getTypeDescription(emailTemplate.type) }}
                 </p>
 
-                <p class="style-description-small" v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type)">
+                <p v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type)" class="style-description-small">
                     Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.
                 </p>
 
-                <p class="style-description-small">
-                    <span v-if="!emailTemplate.id && organization && emailTemplate.html" class="style-tag">Standaard</span>
-                    <span v-else-if="!emailTemplate.id" class="style-tag warn">Ontbreekt</span>
-                    <span v-else>Laatst gewijzigd op {{ formatDateTime(emailTemplate.updatedAt) }}</span>
+                <p class="style-description-small" v-if="emailTemplate.id">
+                    Laatst gewijzigd op {{ formatDateTime(emailTemplate.updatedAt) }}
                 </p>
 
                 <template #right>
@@ -61,27 +68,35 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SegmentedControl, useContext, useErrors, useOrganization, usePatchArray } from '@stamhoofd/components';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from "uuid";
-import { Ref, computed, ref } from 'vue';
-import EditEmailTemplateView from './EditEmailTemplateView.vue';
-import { Sorter } from '@stamhoofd/utility';
+import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useContext, useErrors, useOrganization, usePatchArray } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from "uuid";
+import { computed, Ref, ref } from 'vue';
+import EditEmailTemplateView from './EditEmailTemplateView.vue';
 
 const props = withDefaults(
     defineProps<{
         types: EmailTemplateType[];
-        groupId?: string|null;
+        groups: Group[]|null;
         webshopId?: string|null;
         onSelect?: ((template: EmailTemplate) => boolean|Promise<boolean>) | null;
         createOption?: EmailTemplate|null;
         allowEditGenerated?: boolean;
     }>(), {
-        groupId: null,
+        groups: null,
         webshopId: null,
-        types: () => [...Object.values(EmailTemplateType)],
+        types: () => {
+            return [...Object.values(EmailTemplateType)].filter(type => {
+                const app = useAppContext()
+                if (app === 'admin') {
+                    return EmailTemplate.allowPlatformLevel(type)
+                }
+                return EmailTemplate.allowOrganizationLevel(type)
+            })
+        },
         onSelect: null,
         createOption: null,
         allowEditGenerated: true
@@ -107,22 +122,22 @@ const tabItems = props.onSelect ? [
         label: 'Opgeslagen'
     }
 ] : (
-        props.allowEditGenerated ? [
-            {
-                id: 'auto',
-                label: 'Automatische'
-            },
-            {
-                id: 'userGenerated',
-                label: 'Opgeslagen'
-            },
-        ] : [
-            {
-                id: 'auto',
-                label: 'Automatische'
-            }
-        ]
-    );
+    props.allowEditGenerated ? [
+        {
+            id: 'auto',
+            label: 'Automatische'
+        },
+        {
+            id: 'userGenerated',
+            label: 'Opgeslagen'
+        },
+    ] : [
+        {
+            id: 'auto',
+            label: 'Automatische'
+        }
+    ]
+);
 
 const tab = ref(tabItems[0].id);
 
@@ -141,31 +156,49 @@ const editableList = computed(() => {
         if (EmailTemplate.isSavedEmail(type)) {
             continue;
         }
-        if (!base.find(t => t.type === type)) {
-            let defaultTemplate: EmailTemplate | null = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === null) ?? null;
 
-            if (org) {
-                defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === org.id) ?? defaultTemplate ?? null;
+        for (const group of (props.groups ?? [null])) {
+            if (!base.find(t => t.type === type && t.groupId === (group?.id ?? null))) {
+                let defaultTemplate: EmailTemplate | null = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === null) ?? null;
+
+                if (org) {
+                    defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === org.id) ?? defaultTemplate ?? null;
+                }
+                
+                base.push(
+                    EmailTemplate.create({
+                        ...defaultTemplate,
+                        id: '', // clear
+                        organizationId: organization.value?.id ?? null,
+                        groupId: group?.id ?? null,
+                        webshopId: props.webshopId,
+                        type
+                    })
+                );
             }
-            
-            base.push(
-                EmailTemplate.create({
-                    ...defaultTemplate,
-                    id: '', // clear
-                    organizationId: organization.value?.id ?? null,
-                    groupId: props.groupId,
-                    webshopId: props.webshopId,
-                    type
-                })
-            );
         }
     }
 
     // Now order by type
-    base.sort((a, b) => a.type.localeCompare(b.type));
+    base.sort((a, b) => {
+        return Sorter.stack(
+            Sorter.byStringValue(a.groupId ?? '', b.groupId ?? ''),
+            EmailTemplate.getTypeTitle(a.type).localeCompare(EmailTemplate.getTypeTitle(b.type))
+        )
+    });
 
     return base;
 })
+
+function getTemplatePrefix(emailTemplate: EmailTemplate) {
+    if (emailTemplate.groupId && props.groups) {
+        const group = props.groups.find(g => g.id === emailTemplate.groupId)
+        if (group) {
+            return group.settings.name
+        }
+    }
+    return '';
+}
 
 async function editEmail(emailTemplate: EmailTemplate) {
     await present({
@@ -230,8 +263,9 @@ async function loadTemplates() {
             method: "GET",
             path: "/email-templates",
             query: { 
-                groupId: props.groupId,
-                webshopId: props.webshopId
+                groupIds: props.groups !== null ? [props.groups.map(g => g.id)].join(',') : null,
+                webshopId: props.webshopId,
+                types: props.types.join(','),
             },
             shouldRetry: true,
             owner,

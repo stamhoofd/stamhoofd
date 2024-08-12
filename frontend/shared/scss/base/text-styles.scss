@@ -429,6 +429,10 @@
         margin-top: 8px;
         margin-bottom: 8px;
     }
+
+    > .style-tag:only-child {
+        margin: 4px 0;
+    }
 }
 
 .style-price-big {

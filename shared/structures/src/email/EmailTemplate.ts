@@ -137,17 +137,17 @@ export class EmailTemplate extends AutoEncoder {
     static getTypeTitle(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail: return 'Opgeslagen e-mail naar leden'
-            case EmailTemplateType.DefaultMembersEmail: return 'Standaard e-mail naar leden'
+            case EmailTemplateType.DefaultMembersEmail: return 'Placeholder: Standaard e-mail naar leden'
 
-            case EmailTemplateType.MembersExpirationReminder: return 'Herinnering verlopen pakket ledenadministratie'
-            case EmailTemplateType.WebshopsExpirationReminder: return 'Herinnering verlopen pakket webshops'
-            case EmailTemplateType.SingleWebshopExpirationReminder: return 'Herinnering verlopen pakket enkele webshop'
-            case EmailTemplateType.TrialWebshopsExpirationReminder: return 'Herinnering verlopen proefperiode pakket webshops'
-            case EmailTemplateType.TrialMembersExpirationReminder: return 'Herinnering verlopen proefperiode pakket ledenadministratie'
-            case EmailTemplateType.OrderNotification: return 'Bestelling notificatie'
+            case EmailTemplateType.MembersExpirationReminder: return 'Billing: Herinnering verlopen pakket ledenadministratie'
+            case EmailTemplateType.WebshopsExpirationReminder: return 'Billing: Herinnering verlopen pakket webshops'
+            case EmailTemplateType.SingleWebshopExpirationReminder: return 'Billing: Herinnering verlopen pakket enkele webshop'
+            case EmailTemplateType.TrialWebshopsExpirationReminder: return 'Billing: Herinnering verlopen proefperiode pakket webshops'
+            case EmailTemplateType.TrialMembersExpirationReminder: return 'Billing: Herinnering verlopen proefperiode pakket ledenadministratie'
+            case EmailTemplateType.OrderNotification: return 'Webshop: Bestelling notificatie voor beheerderss'
 
-            case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingsbevestiging'
-            case EmailTemplateType.RegistrationTransferDetails: return 'Betaalinstructies voor inschrijving met overschrijving'
+            case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingen: Inschrijvingsbevestiging'
+            case EmailTemplateType.RegistrationTransferDetails: return 'Inschrijvingen: Betaalinstructies met overschrijving'
 
             case EmailTemplateType.OrderConfirmationOnline: return 'Webshop: Bestelling bevestiging online betaling'
             case EmailTemplateType.OrderConfirmationTransfer: return 'Webshop: Bestelling bevestiging overschrijving'
@@ -159,11 +159,11 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.TicketsConfirmationPOS: return 'Webshop: Tickets bevestiging betaling aan de kassa'
             case EmailTemplateType.TicketsReceivedTransfer: return 'Webshop: Tickets ontvangen overschrijving'
 
-            case EmailTemplateType.OrganizationUnstableDNS: return 'Organisatie: instabiele DNS'
-            case EmailTemplateType.OrganizationInvalidDNS: return 'Organisatie: ongeldige DNS'
-            case EmailTemplateType.OrganizationValidDNS: return 'Organisatie: geldige DNS'
-            case EmailTemplateType.OrganizationStableDNS: return 'Organisatie: stabiele DNS'
-            case EmailTemplateType.OrganizationDNSSetupComplete: return 'Organisatie: DNS setup compleet'
+            case EmailTemplateType.OrganizationUnstableDNS: return 'DNS: instabiele DNS'
+            case EmailTemplateType.OrganizationInvalidDNS: return 'DNS: ongeldige DNS'
+            case EmailTemplateType.OrganizationValidDNS: return 'DNS: geldige DNS'
+            case EmailTemplateType.OrganizationStableDNS: return 'DNS: stabiele DNS'
+            case EmailTemplateType.OrganizationDNSSetupComplete: return 'DNS: DNS setup compleet'
 
             case EmailTemplateType.OrganizationDripWelcome: return 'Organisatie: drip welkom'
             case EmailTemplateType.OrganizationDripWebshopTrialCheckin: return 'Organisatie: drip webshop proefperiode checkin'
@@ -174,6 +174,16 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.OrganizationDripWebshopNotRenewed: return 'Organisatie: drip webshop niet verlengd'
             case EmailTemplateType.OrganizationDripMembersNotRenewed: return 'Organisatie: drip ledenadministratie niet verlengd'
         }
+    }
+
+    static allowPlatformLevel(type: EmailTemplateType): boolean {
+        if (STAMHOOFD.userMode === 'platform') {
+            if (type.includes('Drip') || type.includes('Expiration')) {
+                return false;
+            }
+        }
+
+        return true
     }
 
     static allowOrganizationLevel(type: EmailTemplateType): boolean {

@@ -67,6 +67,10 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
                 throw Context.auth.error();
             }
 
+            if (!EmailTemplateStruct.allowPlatformLevel(struct.type) && !organization) {
+                throw Context.auth.error();
+            }
+
             const template = new EmailTemplate()
             template.id = struct.id
             template.organizationId = organization?.id ?? null

@@ -351,7 +351,7 @@ async function editEmails(animated = true) {
     await present({
         components: [
             new ComponentWithProperties(EditEmailTemplatesView, {
-                groupId: props.group.id,
+                groups: props.group.waitingList ? [props.group, props.group.waitingList] : [props.group],
                 allowEditGenerated: false,
                 types: [
                     EmailTemplateType.RegistrationConfirmation

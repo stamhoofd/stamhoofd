@@ -1,53 +1,16 @@
-import { AutoEncoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Organization, Payment } from "@stamhoofd/models";
 import { PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus } from "@stamhoofd/structures";
 
+import { StringArrayDecoder } from "../../../../decoders/StringArrayDecoder";
 import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
 import { Context } from "../../../../helpers/Context";
+import { StringNullableDecoder } from "../../../../decoders/StringNullableDecoder";
 
 type Params = Record<string, never>;
 type Body = undefined
 type ResponseBody = PaymentGeneral[]
-
-export class StringArrayDecoder<T> implements Decoder<T[]> {
-    decoder: Decoder<T>;
-
-    constructor(decoder: Decoder<T>) {
-        this.decoder = decoder;
-    }
-
-    decode(data: Data): T[] {
-        const strValue = data.string;
-
-        // Split on comma
-        const parts = strValue.split(",");
-        return parts
-            .map((v, index) => {
-                return data.clone({ 
-                    data: v, 
-                    context: data.context, 
-                    field: data.addToCurrentField(index) 
-                }).decode(this.decoder)
-            });
-    }
-}
-
-export class StringNullableDecoder<T> implements Decoder<T | null> {
-    decoder: Decoder<T>;
-
-    constructor(decoder: Decoder<T>) {
-        this.decoder = decoder;
-    }
-
-    decode(data: Data): T | null {
-        if (data.value === 'null') {
-            return null;
-        }
-
-        return data.decode(this.decoder);
-    }
-}
 
 
 class Query extends AutoEncoder {
