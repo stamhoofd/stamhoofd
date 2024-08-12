@@ -110,7 +110,6 @@ async function save() {
     }
 
     saving.value = false;
-
 }
 
 const shouldNavigateAway = async () => {

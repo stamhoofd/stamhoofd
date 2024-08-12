@@ -5,6 +5,7 @@ export * from "./src/PriceBreakdown"
 
 // General
 export * from "./src/addresses/Address"
+export * from "./src/addresses/Premise"
 export * from "./src/addresses/City"
 export * from "./src/addresses/CountryDecoder"
 export * from "./src/addresses/Province"

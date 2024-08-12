@@ -26,8 +26,8 @@ import { Component, Prop, Vue, Watch } from "@simonbackx/vue-app-navigation/clas
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Address, Country, CountryHelper, ValidatedAddress } from "@stamhoofd/structures";
 
-import {ErrorBox} from "../errors/ErrorBox";
-import {Validator} from "../errors/Validator";
+import { ErrorBox } from "../errors/ErrorBox";
+import { Validator } from "../errors/Validator";
 import Dropdown from './Dropdown.vue';
 import STInputBox from './STInputBox.vue';
 
@@ -148,7 +148,7 @@ export default class AddressInput extends Vue {
                 return this.isValid(true, false)
             })
         }
-
+        
         if (this.modelValue) {
             this.addressLine1 = this.modelValue.street.length > 0 ? (this.modelValue.street+" "+this.modelValue.number) : (this.modelValue.number+"")
             this.city = this.modelValue.city

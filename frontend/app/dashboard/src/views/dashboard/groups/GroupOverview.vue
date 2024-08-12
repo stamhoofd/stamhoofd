@@ -220,7 +220,6 @@ import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettin
 
 import { computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
-import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
 import EditGroupPricesView from './edit/EditGroupPricesView.vue';
 import EditGroupRestrictionsView from './edit/EditGroupRestrictionsView.vue';

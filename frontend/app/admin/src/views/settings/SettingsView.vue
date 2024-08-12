@@ -178,7 +178,7 @@ import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@sta
 import { ComponentOptions } from 'vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditEventTypesView from './event-types/EditEventTypesView.vue';
-import EditBuildingTypesView from './event-types/EditPremiseTypesView.vue';
+import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
@@ -259,7 +259,7 @@ defineRoutes([
     {
         url: Routes.Premises,
         present: 'popup',
-        component: EditBuildingTypesView as ComponentOptions,
+        component: EditPremiseTypesView as ComponentOptions,
     }
 ])
 const $navigate = useNavigate()
