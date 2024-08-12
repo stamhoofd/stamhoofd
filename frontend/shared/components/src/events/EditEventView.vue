@@ -19,7 +19,7 @@
                 >
             </STInputBox>
 
-            <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox">
+            <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox" v-if="platform.config.eventTypes.length">
                 <Dropdown
                     v-model="typeId"
                 >
@@ -351,7 +351,9 @@ const multipleDays = computed({
 watchEffect(() => {
     const t = type.value
     if (!t) {
-        addPatch({typeId: platform.value.config.eventTypes[0].id})
+        if (platform.value.config.eventTypes.length) {
+            addPatch({typeId: platform.value.config.eventTypes[0].id})
+        }
         return;
     }
 
