@@ -35,6 +35,18 @@ export class PlatformPremiseType extends AutoEncoder {
 
     @field({ decoder: StringDecoder, version: 312 })
     description = ''
+
+    /**
+     * Maximum number of premises allowed for this premise type
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 317 })
+    max: null | number = null
+        
+    /**
+    * Minimum number of premises allowed for this premise type
+    */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 317 })
+    min: null | number = null
 }
 
 export class PlatformMembershipTypeConfigPrice extends AutoEncoder {

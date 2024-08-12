@@ -79,9 +79,6 @@ const props = defineProps<{
 const title = computed(() => props.isNew ? $t('Nieuw soort gebouw') : $t('Wijzig soort gebouw'));
 const pop = usePop();
 
-const min = ref<number | null>(null);
-const max = ref<number | null>(null);
-
 const {patched, addPatch, hasChanges, patch} = usePatch(props.type);
 
 const save = async () => {
@@ -129,10 +126,17 @@ const name = computed({
 
 const description = computed({
     get: () => patched.value.description,
-    set: (description) => {
-        console.log(description)
-        addPatch({description})
-    },
+    set: (description) => addPatch({description})
+});
+
+const min = computed({
+    get: () => patched.value.min,
+    set: (min) => addPatch({min}),
+});
+
+const max = computed({
+    get: () => patched.value.max,
+    set: (max) => addPatch({max}),
 });
 
 const shouldNavigateAway = async () => {
