@@ -23,11 +23,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, LoadComponent, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { WebshopPreview, WebshopStatus } from "@stamhoofd/structures";
 import { Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 
@@ -43,11 +42,6 @@ import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
     },
 })
 export default class WebshopArchiveView extends Mixins(NavigationMixin) {
-    mounted() {
-        UrlHelper.setUrl("/webshop-archive")    
-        document.title = "Stamhoofd - Webshop archief"
-    }
-
     get organization() {
         return this.$organization
     }

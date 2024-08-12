@@ -86,7 +86,7 @@ export async function getOrganizationSelectionRoot() {
         context: markRaw({
             $context: reactiveSession,
             $platformManager: platformManager,
-            reactive_navigation_url: "/",
+            //reactive_navigation_url: "/",
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
@@ -143,7 +143,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: {initi
             context: markRaw({
                 $context: reactiveSession,
                 $platformManager: platformManager,
-                reactive_navigation_url: "auto" + (session.organization ? '/'+session.organization!.uri : ''),
+                //reactive_navigation_url: "auto" + (session.organization ? '/'+session.organization!.uri : ''),
                 reactive_components: {
                     "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                     "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),
@@ -304,7 +304,7 @@ export async function getScopedDashboardRoot(session: SessionContext, options: {
             $context: reactiveSession,
             $platformManager: platformManager,
             $organizationManager: new OrganizationManager(reactiveSession),
-            reactive_navigation_url: "beheerders/" + session.organization!.uri,
+            //reactive_navigation_url: "beheerders/" + session.organization!.uri,
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),

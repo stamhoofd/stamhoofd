@@ -80,12 +80,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, DateOption, GraphView, Spinner, STInputBox, STList, STListItem,STNavigationBar, Toast,   } from "@stamhoofd/components";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, Checkbox, DateOption, GraphView, Spinner, STInputBox, STList, STListItem, STNavigationBar, Toast, } from "@stamhoofd/components";
 import { GraphViewConfiguration } from "@stamhoofd/components/src/views/GraphViewConfiguration";
-import { AppManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking';
 import { Category, Graph, GraphData, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { WebshopManager } from '../WebshopManager';
 
@@ -434,10 +434,6 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
     mounted() {
         this.reload().catch(console.error)
-
-        // Set url
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/statistics")
-        document.title = this.preview.meta.name+" - Statistieken"
     }
 
     get totalByCategory(): {name: string, products: { amount: number, name: string, description: string, price: number, category: Category|null }[]}[] {

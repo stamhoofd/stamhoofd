@@ -120,12 +120,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, LoadingView } from "@stamhoofd/components";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, LoadingView, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { NetworkManager, Storage } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import SignupAccountView from './SignupAccountView.vue';
 
@@ -189,7 +189,6 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     umbrellaOrganization: UmbrellaOrganization | null = null
 
     mounted() {
-        UrlHelper.setUrl("/aansluiten")   
         this.loadRegisterCode().catch(e => {
             console.error(e)
         })
@@ -209,7 +208,6 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             } catch (e) {
                 console.error(e)
             }
-            //UrlHelper.setUrl("/aansluiten/?code="+encodeURIComponent(this.initialRegisterCode.code)+"&org="+encodeURIComponent(this.initialRegisterCode.organization))
         }
         try {
             const currentCount = await Storage.keyValue.getItem("what-is-new")

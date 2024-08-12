@@ -19,11 +19,9 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SaveView, STErrorsDefault, STInputBox } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { SaveView, STErrorsDefault, STInputBox } from "@stamhoofd/components";
+import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import EditWebshopMixin from './EditWebshopMixin';
@@ -37,10 +35,6 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMixin) {
-    mounted() {
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/payments")
-    }
-
     get viewTitle() {
         return "Betaalmethodes"
     }

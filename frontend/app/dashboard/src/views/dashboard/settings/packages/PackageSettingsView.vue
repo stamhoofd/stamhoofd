@@ -84,15 +84,13 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import flagIcon from "@stamhoofd/assets/images/illustrations/package-activities.svg"
-import groupIcon from "@stamhoofd/assets/images/illustrations/package-members.svg"
-import experimentIcon from "@stamhoofd/assets/images/illustrations/package-trial.svg"
-import cartIcon from "@stamhoofd/assets/images/illustrations/package-webshops.svg"
-import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "@simonbackx/vue-app-navigation/classes";
+import flagIcon from "@stamhoofd/assets/images/illustrations/package-activities.svg";
+import groupIcon from "@stamhoofd/assets/images/illustrations/package-members.svg";
+import experimentIcon from "@stamhoofd/assets/images/illustrations/package-trial.svg";
+import cartIcon from "@stamhoofd/assets/images/illustrations/package-webshops.svg";
+import { BackButton, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from "@stamhoofd/structures";
 
 
 import PackageConfirmView from "./PackageConfirmView.vue";

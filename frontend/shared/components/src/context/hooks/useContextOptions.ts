@@ -1,9 +1,9 @@
-import { SessionContext, SessionManager } from "@stamhoofd/networking";
+import { SessionContext, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Organization } from "@stamhoofd/structures";
 
 import { PromiseComponent } from "../../containers/AsyncComponent";
-import { ReplaceRootEventBus } from "../../overlays/ModalStackEventBus";
 import { useOrganization, useUser } from '../../hooks';
+import { ReplaceRootEventBus } from "../../overlays/ModalStackEventBus";
 import { AppType, useAppContext } from "../appContext";
 
 export type Option = {
@@ -12,6 +12,32 @@ export type Option = {
     organization: Organization|null,
     context: SessionContext,
     userDescription?: string
+}
+
+export function appToUri(app: AppType|'auto') {
+    switch (app) {
+        case 'admin':
+            return 'administratie';
+        case 'dashboard':
+            return 'beheerders';
+        case 'registration':
+            return 'leden';
+        case 'auto':
+            return 'auto';
+    }
+}
+
+export function uriToApp(uri: string) {
+    switch (uri) {
+        case 'administratie':
+            return 'admin';
+        case 'beheerders':
+            return 'dashboard';
+        case 'leden':
+            return 'registration';
+        default:
+            return 'auto';
+    }
 }
 
 export function useContextOptions() {
@@ -105,7 +131,27 @@ export function useContextOptions() {
         throw new Error('This app is not yet supported')
     }
 
-    const selectOption = (option: Option) => {
+    const selectOption = (option: Option) => {     
+        // Try to maintain the same URL for the new scope, to improve switching behaviour per tab
+        let href = window.location.href
+        let oldPrefix = ''
+        if ($organization.value) {
+            oldPrefix = '/' + appToUri(app) + '/'+$organization.value.uri
+        } else {
+            oldPrefix = '/' + appToUri(app)
+        }
+        let newPrefix = '';
+        if (option.organization) {
+            newPrefix = '/' + appToUri(option.app) + '/' + option.organization.uri
+        } else {
+            newPrefix = '/' + appToUri(option.app)
+        }
+        console.log(href, oldPrefix, newPrefix)
+        if (oldPrefix) {
+            href = href.replace(oldPrefix, newPrefix)
+        }
+        UrlHelper.shared = new UrlHelper(href)
+
         ReplaceRootEventBus.sendEvent("replace", PromiseComponent(async () => {
             return await buildRootForOption(option);
         })).catch(console.error)

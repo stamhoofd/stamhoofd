@@ -10,9 +10,8 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { Column, InMemoryTableAction, TableAction, Toast } from "@stamhoofd/components";
-import { UrlHelper } from "@stamhoofd/networking";
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from "@stamhoofd/structures";
-import { Formatter, Sorter } from "@stamhoofd/utility";
+import { Sorter } from "@stamhoofd/utility";
 
 
 import { DocumentActionBuilder } from "./DocumentActionBuilder";
@@ -35,16 +34,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        // Set url
-        this.updateUrl()
-        UrlHelper.shared.clear()
-
         this.reload().catch(console.error);
-    }
-
-    updateUrl() {
-        UrlHelper.setUrl("/documents/"+Formatter.slug(this.template.id))
-        document.title = this.template.privateSettings.templateDefinition.name + " - Documenten"
     }
 
     get estimatedRows() {

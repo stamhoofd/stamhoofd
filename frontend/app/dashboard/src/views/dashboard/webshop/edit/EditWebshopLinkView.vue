@@ -121,11 +121,10 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Dropdown, PrefixInput, SaveView, Spinner, STErrorsDefault, STInputBox, Toast, Tooltip } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import EditWebshopMixin from "./EditWebshopMixin";
@@ -186,7 +185,6 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     mounted() {
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/link")
         this.selectedDomain = this.webshop.meta.domainActive ? this.webshop.domain : (this.webshop.domain ? '' : null)
     }
 

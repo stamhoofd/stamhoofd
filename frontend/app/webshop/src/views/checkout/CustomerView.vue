@@ -22,17 +22,16 @@
 
         <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
-        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="this.$checkoutManager.checkout.fieldAnswers" :error-box="errorBox" />
+        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="$checkoutManager.checkout.fieldAnswers" :error-box="errorBox" />
     </SaveView>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
@@ -152,10 +151,6 @@ export default class CustomerView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
-    }
-
-    mounted() {
-        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Customer.toLowerCase())
     }
 }
 </script>

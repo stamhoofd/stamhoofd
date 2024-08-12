@@ -348,8 +348,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, CenteredMessage, PriceBreakdownBox, DetailedTicketView, ErrorBox, LoadingButton, LoadingView, Logo, OrganizationLogo, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
+import { CartItemRow, CenteredMessage, DetailedTicketView, ErrorBox, LoadingButton, LoadingView, Logo, OrganizationLogo, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { CartItem, Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -559,14 +558,11 @@ export default class OrderView extends Mixins(NavigationMixin){
             })
         }
         if (this.order) {
-            UrlHelper.setUrl("/order/"+this.order.id)
             this.checkTickets().catch(console.error)
             return;
         }
         // Load order
         if (this.orderId) {
-            UrlHelper.setUrl("/order/"+this.orderId)
-
             this.$webshopManager.server
                 .request({
                     method: "GET",
@@ -594,7 +590,6 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }).then(response => {
                     const order = response.data
                     this.order = order
-                    UrlHelper.setUrl("/order/"+this.order.id)
                     this.checkTickets().catch(console.error)
                 }).catch(e => {
                     // too: handle this

@@ -2,7 +2,9 @@
     <LoadingView v-if="loading" />
     <div v-else class="st-view background">
         <STNavigationBar title="Beheerders">
-            <template #right><button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" /></template>
+            <template #right>
+                <button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
+            </template>
         </STNavigationBar>
 
     
@@ -13,7 +15,9 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="createUser">
-                    <template #left><img src="@stamhoofd/assets/images/illustrations/laptop-add.svg"></template>
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
+                    </template>
                     <h2 class="style-title-list">
                         Nieuwe API-key
                     </h2>
@@ -67,7 +71,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { SessionManager } from '@stamhoofd/networking';
 import { ApiUser, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -96,10 +100,6 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         this.load().catch(e => {
             console.error(e)
         })
-
-        this.setUrl("/api-keys")
-        document.title = "Stamhoofd - API-keys"
-        UrlHelper.shared.clear()
     }
 
     async load() {

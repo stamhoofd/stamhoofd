@@ -27,7 +27,6 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
 
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
@@ -148,12 +147,6 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-    }
-
-    mounted() {
-        // We can clear now
-        UrlHelper.shared.clear()
-        this.setUrl("/registration-payments")
     }
 }
 </script>

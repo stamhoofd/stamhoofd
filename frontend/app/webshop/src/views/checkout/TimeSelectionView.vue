@@ -26,24 +26,25 @@
                     Tussen {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                 </p>
 
-                <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                <span v-else-if="slot.listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                <template #right>
+                    <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
+                </template>
+                <template #right>
+                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                </template>
             </STListItem>
         </STList>
     </SaveView>
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { CheckoutMethodType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -122,8 +123,6 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Time.toLowerCase())
-
         // Force minimum selection
         this.selectedSlot = this.selectedSlot as any
     }

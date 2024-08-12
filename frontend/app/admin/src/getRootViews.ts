@@ -114,7 +114,7 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         context: markRaw({
             $context: reactiveSession,
             $platformManager: platformManager,
-            reactive_navigation_url: "administratie",
+            //reactive_navigation_url: "administratie",
             reactive_components: {
                 "tabbar-left": new ComponentWithProperties(OrganizationSwitcher, {}),
                 "tabbar-right": new ComponentWithProperties(AccountSwitcher, {}),

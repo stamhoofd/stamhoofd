@@ -36,11 +36,10 @@
 <script lang="ts">
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { GroupAvatar, Spinner,STList, STListItem, STNavigationBar, Toast } from "@stamhoofd/components";
-import { UrlHelper } from "@stamhoofd/networking";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { GroupAvatar, Spinner, STList, STListItem, STNavigationBar, Toast } from "@stamhoofd/components";
 import { Group } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GroupOverview from "./GroupOverview.vue";
@@ -63,10 +62,6 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        // Set url
-        UrlHelper.setUrl("/archived-groups")
-        document.title = "Stamhoofd - Archief"
-
         // Load deleted groups
         this.load().catch(console.error)
     }

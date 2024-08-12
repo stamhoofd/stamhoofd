@@ -47,21 +47,22 @@
         </main>
 
         <STToolbar v-if="!noDatabaseSupport">
-            <template #right><button class="button primary" type="button" @click="start">
-                <span class="icon play" />
-                <span>Starten</span>
-            </button></template>
+            <template #right>
+                <button class="button primary" type="button" @click="start">
+                    <span class="icon play" />
+                    <span>Starten</span>
+                </button>
+            </template>
         </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import { WebshopManager } from "../WebshopManager";
 import TicketScannerView from "./TicketScannerView.vue";
@@ -105,12 +106,6 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.isChecking = false
         })
-    }
-
-    mounted() {
-        // Set url
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshopManager.preview.meta.name)+"/tickets/setup")
-        document.title = this.webshopManager.preview.meta.name+" - Tickets scannen"
     }
 
     formatDateRange(dateRange: ProductDateRange) {

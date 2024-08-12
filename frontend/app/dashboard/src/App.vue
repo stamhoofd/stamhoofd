@@ -9,7 +9,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
-import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PaymentPendingView, PromiseView, RegistrationSuccessView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ContextProvider, ForgotPasswordResetView, ModalStackEventBus, PaymentPendingView, PromiseView, RegistrationSuccessView, ReplaceRootEventBus, Toast, ToastBox, uriToApp } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
@@ -38,13 +38,9 @@ const root = new ComponentWithProperties(PromiseView, {
             let app: 'dashboard' | 'admin' | 'registration' | 'auto' = 'auto';
 
             const parts = UrlHelper.shared.getParts();
-            if (parts.length >= 1 && parts[0] == 'administratie') {
-                app = 'admin';
-            } else if (parts.length >= 1 && parts[0] == 'beheerders') {
-                app = 'dashboard';
-            } else if (parts.length >= 1 && parts[0] == 'leden') {
-                app = 'registration';
-            } else if (parts.length >= 1 && parts[0] == 'auto') {
+            if (parts.length >= 1) {
+                app = uriToApp(parts[0])
+            } else {
                 app = 'auto';
             }
 
@@ -221,6 +217,7 @@ onMounted(() => {
     })
 
     ReplaceRootEventBus.addListener(this, "replace", async (component: ComponentWithProperties) => {
+        component.setCheckRoutes()
         stack.replace(component, false)
     })
     

@@ -10,12 +10,10 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, DetailedTicketView,LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { TicketPublic } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, DetailedTicketView, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { TicketPublic } from '@stamhoofd/structures';
 
-import { WebshopManager } from '../../classes/WebshopManager';
 
 
 @Component({
@@ -92,10 +90,6 @@ export default class TicketView extends Mixins(NavigationMixin){
 
     created() {
         this.downloadTickets().catch(console.error)
-    }
-
-    mounted() {
-        UrlHelper.setUrl("/tickets/"+this.secret)
     }
 }
 </script>

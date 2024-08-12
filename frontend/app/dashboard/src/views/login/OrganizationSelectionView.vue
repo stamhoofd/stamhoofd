@@ -38,7 +38,7 @@
                             
                             <span v-if="option.userDescription" class="icon gray sync floating" />
                             <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
-                            <span v-if="isPlatform && option.context.hasPermissions()" class="icon privacy gray floating" />
+                            <span v-if="isPlatform && option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
                         </div>
                     </button>
                 </template>

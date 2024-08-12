@@ -84,11 +84,9 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { Checkbox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Discount, DiscountCode, PrivateWebshop, Version, WebshopMetaData } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast } from "@stamhoofd/components";
+import { Discount, DiscountCode, PrivateWebshop, Version, WebshopMetaData } from "@stamhoofd/structures";
 import EditDiscountCodeView from "./discounts/EditDiscountCodeView.vue";
 import EditDiscountView from "./discounts/EditDiscountView.vue";
 
@@ -111,7 +109,6 @@ export default class EditWebshopDiscountsView extends Mixins(EditWebshopMixin) {
     patchDiscountCodes: PatchableArrayAutoEncoder<DiscountCode> = new PatchableArray()
 
     mounted() {
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/discounts")
         this.fetchDiscountCodes().catch(console.error)
     }
 

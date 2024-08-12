@@ -339,9 +339,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { AccountSettingsView, BackButton, CenteredMessage, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, EmailTemplate, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
@@ -612,79 +610,6 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                 displayedComponent
             ]
         });
-    }
-
-    mounted() {
-        const parts = UrlHelper.shared.getParts()
-        //const params = UrlHelper.shared.getSearchParams()
-
-        // We can clear now
-        UrlHelper.shared.clear()
-
-        // Set url
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name))
-        document.title = "Stamhoofd - " + this.preview.meta.name
-        this.refreshOnReturn()
-
-        if (parts.length == 3 && parts[0] == 'webshops' && parts[2] == 'orders') {
-            this.openOrders(false)
-        }
-
-        if (parts.length == 3 && parts[0] == 'webshops' && parts[2] == 'seating') {
-            this.openSeating(false)
-        }
-
-        if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'tickets') {
-            this.openTickets(false)
-        }
-
-        if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'statistics') {
-            this.openStatistics(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'general') {
-            this.editGeneral(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && (parts[3] == 'products' || parts[3] == 'tickets')) {
-            this.editProducts(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'checkout-methods' && !this.isTicketsOnly) {
-            this.editCheckoutMethods(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'payments') {
-            this.editPaymentMethods(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'discounts') {
-            this.editDiscounts(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'records') {
-            this.editRecordSettings(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'permissions') {
-            this.editPermissions(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'notifications') {
-            this.editNotifications(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'page') {
-            this.editPage(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'link') {
-            this.editLink(false)
-        }
-
-        if (parts.length >= 4 && parts[0] == 'webshops' && parts[2] == 'settings' && parts[3] == 'emails') {
-            this.editEmails(false)
-        }
     }
 
     created() {

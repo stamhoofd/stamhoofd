@@ -44,11 +44,10 @@
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { LoadingView,STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { LoadingView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { DocumentTemplatePrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import DocumentTemplateOverview from "./DocumentTemplateOverview.vue";
@@ -70,9 +69,6 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
     loading = true
 
     mounted() {
-        // First set current url already, to fix back
-        UrlHelper.setUrl("/documents")
-        document.title = "Stamhoofd - Documenten"
         this.loadTemplates().catch(console.error)
     }
 

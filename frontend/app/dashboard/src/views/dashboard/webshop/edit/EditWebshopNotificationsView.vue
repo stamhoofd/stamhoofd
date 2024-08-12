@@ -5,9 +5,11 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :modelValue="getEmail(n - 1)" placeholder="E-mailadres" :validator="validator" @update:modelValue="setEmail(n - 1, $event)">
-            <template #right><span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
-            <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" /></template>
+        <EmailInput v-for="n in emailCount" :key="n" :title="'E-mailadres '+n" :model-value="getEmail(n - 1)" placeholder="E-mailadres" :validator="validator" @update:model-value="setEmail(n - 1, $event)">
+            <template #right>
+                <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
+                <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+            </template>
         </EmailInput>
 
         <p v-if="emailCount == 0" class="info-box">
@@ -31,9 +33,7 @@ import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { EmailInput, SaveView, STErrorsDefault, STInputBox, TooltipDirective } from "@stamhoofd/components";
-import { UrlHelper } from "@stamhoofd/networking";
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 
 
 import EditWebshopMixin from "./EditWebshopMixin";
@@ -76,7 +76,6 @@ export default class EditWebshopNotificationsView extends Mixins(EditWebshopMixi
     }
 
     mounted() {
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/notifications")
         this.checkBounces().catch(console.error)
     }
 
