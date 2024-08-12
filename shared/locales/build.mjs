@@ -15,8 +15,8 @@ async function fileExists(file) {
 const namespaces = ["stamhoofd", "digit"]
 
 for (const namespace of namespaces) {
-    await fs.rm("./dist/"+namespace, { recursive: true, force: true })
-    await fs.rm("./esm/dist/"+namespace, { recursive: true, force: true })
+    //await fs.rm("./dist/"+namespace, { recursive: true, force: true })
+    //await fs.rm("./esm/dist/"+namespace, { recursive: true, force: true })
     await fs.mkdir("./dist/"+namespace, { recursive: true })
     await fs.mkdir("./esm/dist/"+namespace, { recursive: true })
 }
@@ -190,8 +190,22 @@ for (const country of countries) {
             }
 
             runReplacements(json)
-            fs.writeFile("./dist/"+namespace+"/"+locale+".json", JSON.stringify(json));
-            fs.writeFile("./esm/dist/"+namespace+"/"+locale+".json", JSON.stringify(json));
+            const data = JSON.stringify(json)
+
+            try {
+                const existingData = await fs.readFile("./dist/"+namespace+"/"+locale+".json", {encoding: 'utf8'});
+                const existingDataEsm = await fs.readFile("./esm/dist/"+namespace+"/"+locale+".json", {encoding: 'utf8'});
+
+                if (existingData !== data || existingDataEsm !== data) {
+                    console.log(namespace + '/'+ locale + ' has changed')
+                    await fs.writeFile("./dist/"+namespace+"/"+locale+".json", data);
+                    await fs.writeFile("./esm/dist/"+namespace+"/"+locale+".json", data);
+                }
+            } catch (e) {
+                await fs.writeFile("./dist/"+namespace+"/"+locale+".json", data);
+                await fs.writeFile("./esm/dist/"+namespace+"/"+locale+".json", data);
+            }
+
         }
     }
 }

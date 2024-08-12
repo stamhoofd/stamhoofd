@@ -104,6 +104,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8080"
@@ -123,6 +126,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8083"
@@ -146,6 +152,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8882"
@@ -167,6 +176,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8082"
@@ -187,6 +199,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8081"
@@ -208,6 +223,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8081"
@@ -220,6 +238,9 @@
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
+                                    "load_balancing": {
+                                        "retries": 5
+                                    },
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8082"

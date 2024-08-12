@@ -17,7 +17,7 @@
         "esm/dist"
     ],
     "scripts": {
-        "build": " tsc -b . esm",
+        "build": "tsc -b . esm",
         "build:full": "rm -rf ./dist && rm -rf ./esm/dist && tsc -b . esm",
         "test": "jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"

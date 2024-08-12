@@ -4,6 +4,7 @@ import fs from 'fs';
 import path, { resolve } from 'path';
 
 import iconConfig from './shared/assets/images/icons/icons.font';
+import { UserConfig } from 'vite';
 
 const use_env: Record<string, string> = {}
 
@@ -53,7 +54,7 @@ if (process.env.LOAD_ENV) {
 }
 
 // https://vitejs.dev/config/
-export function buildConfig(options: {port: number}) {
+export function buildConfig(options: {port: number, clientFiles?: string[]}): UserConfig {
     return {
         resolve: {
             alias: {
@@ -79,16 +80,28 @@ export function buildConfig(options: {port: number}) {
             host: '127.0.0.1',
             port: options.port,
             strictPort: true,
+            warmup: {
+                clientFiles: [
+                    ...(options?.clientFiles ?? []),
+                    resolve(__dirname, './shared') + '/**/*.vue',
+                    resolve(__dirname, './shared') + '/**/*.ts'
+                ]
+            }
             //hmr: {
             //    clientPort: 443
             //}
 
         },
-        build: {
+        build: process.env.NODE_ENV !== 'production' ? {
             sourcemap: 'inline',
             rollupOptions: {
-                treeshake: false,
+                treeshake: false, // Increases performance
+            },
+            watch: {
+                buildDelay: 1000
             }
+        } : {
+
         }
     }
 }
