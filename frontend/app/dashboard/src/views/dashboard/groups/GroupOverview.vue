@@ -28,10 +28,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        Leden
+                        Ingeschreven leden
                     </h2>
                     <p class="style-description">
-                        Bekijk, beheer, exporteer, e-mail of SMS leden.
+                        Bekijk, beheer, exporteer of e-mail ingeschreven leden.
                     </p>
                     <template #right>
                         <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
@@ -113,10 +113,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                         </template>
                         <h2 class="style-title-list">
-                            Beschrijving, locatie en foto's
+                            Foto's en icoontje
                         </h2>
                         <p class="style-description">
-                            Wijzig de informatie die zichtbaar is op het ledenportaal.
+                            Stel een foto en icoontje van deze groep in.
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

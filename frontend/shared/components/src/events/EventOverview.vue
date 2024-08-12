@@ -26,7 +26,7 @@
                             Ingeschreven leden
                         </h2>
                         <p class="style-description">
-                            Bekijk, beheer, exporteer, e-mail of SMS ingeschreven leden.
+                            Bekijk, beheer, exporteer of e-mail ingeschreven leden.
                         </p>
                         <template #right>
                             <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
