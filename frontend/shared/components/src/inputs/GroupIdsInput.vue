@@ -140,7 +140,7 @@ const allGroups = computed({
 })
 
 function getGroupValue(group: NamedObject) {
-    return !!model.value?.find(id => id === group.id) ?? false;
+    return !!model.value?.find(id => id === group.id);
 }
 
 function setGroupValue(group: NamedObject, value: boolean) {
