@@ -206,7 +206,7 @@ export default class EditorView extends Mixins(NavigationMixin) {
     editor = this.buildEditor()
 
     beforeUnmount() {
-        this.editor.destroy()
+        //this.editor.destroy()
     }
 
     openLinkEditor() {

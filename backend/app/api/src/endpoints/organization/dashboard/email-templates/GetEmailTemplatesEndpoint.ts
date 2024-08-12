@@ -61,7 +61,16 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
         })
 
         
-        const templates = organization ? (await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupIds ? {sign: 'IN', value: request.query.groupIds} : null, type: {sign: 'IN', value: types}})) : [];        
+        const templates = organization ? 
+            (
+                await EmailTemplate.where({ organizationId: organization.id, webshopId: request.query.webshopId ?? null, groupId: request.query.groupIds ? {sign: 'IN', value: request.query.groupIds} : null, type: {sign: 'IN', value: types}})
+            ) 
+            : (
+                // Required for event emails when logged in as the platform admin
+                (request.query.webshopId || request.query.groupIds) ? 
+                    await EmailTemplate.where({ webshopId: request.query.webshopId ?? null, groupId: request.query.groupIds ? {sign: 'IN', value: request.query.groupIds} : null, type: {sign: 'IN', value: types}}) 
+                    : []
+            );        
         const defaultTemplates = await EmailTemplate.where({ organizationId: null, type: {sign: 'IN', value: types} });
         return new Response([...templates, ...defaultTemplates].map(template => EmailTemplateStruct.create(template)))
     }

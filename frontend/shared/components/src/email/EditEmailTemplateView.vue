@@ -1,5 +1,6 @@
 <template>
     <EditorView ref="editorView" class="mail-view" title="E-mail template" save-text="Opslaan" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="save">
+        <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
             Nieuwe template
         </h1>
@@ -40,11 +41,16 @@ import { useErrors } from '../errors/useErrors';
 import { usePatch } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
-const props = defineProps<{
-    emailTemplate: EmailTemplate;
-    isNew: boolean;
-    saveHandler: (patch: AutoEncoderPatchType<EmailTemplate>) => Promise<void>;
-}>();
+const props = withDefaults(
+    defineProps<{
+        emailTemplate: EmailTemplate;
+        isNew: boolean;
+        saveHandler: (patch: AutoEncoderPatchType<EmailTemplate>) => Promise<void>;
+        prefix?: string|null
+    }>(), {
+        prefix: null
+    }
+)
 
 const {patched, addPatch, hasChanges, patch} = usePatch(props.emailTemplate);
 const errors = useErrors()

@@ -9,10 +9,11 @@
         <STList v-if="editableList.length">
             <STListItem v-for="emailTemplate in editableList" :key="emailTemplate.type + ':' + emailTemplate.id" :selectable="true" class="right-stack" @click="doSelectItem(emailTemplate)">
                 <template #left>
-                    <span v-if="!emailTemplate.id && organization && emailTemplate.html" v-tooltip="'De standaard e-mail wordt gebruikt'" class="icon email gray" />
-                    <span v-else-if="!emailTemplate.id" v-tooltip="'Niet actief'" class="icon help gray" />
+                    <span v-if="EmailTemplate.isSavedEmail(emailTemplate.type)" class="icon email-template" />
+                    <span v-else-if="!emailTemplate.id && emailTemplate.html" v-tooltip="'De standaard e-mail wordt gebruikt'" class="icon email" />
+                    <span v-else-if="!emailTemplate.id" v-tooltip="'Niet actief'" class="icon help" />
                     <span v-else v-tooltip="'Aangepast vanaf standaard template'" class="icon layered">
-                        <span class="icon email-edited-layer-1 gray" />
+                        <span class="icon email-edited-layer-1" />
                         <span class="icon email-edited-layer-2 primary" />
                     </span>
                 </template>
@@ -33,7 +34,7 @@
                     Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.
                 </p>
 
-                <p class="style-description-small" v-if="emailTemplate.id">
+                <p v-if="emailTemplate.id" class="style-description-small">
                     Laatst gewijzigd op {{ formatDateTime(emailTemplate.updatedAt) }}
                 </p>
 
@@ -49,10 +50,12 @@
             Geen emailtemplates gevonden
         </p>
 
+        <hr v-if="tab === 'userGenerated'">
+
         <p v-if="tab === 'userGenerated' && createOption">
             <button class="button text" type="button" @click="addCreateOption">
                 <span class="icon download" />
-                <span>Huidige opslaan als template</span>
+                <span>Huidige e-mail opslaan</span>
             </button>
         </p>
 
@@ -66,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useContext, useErrors, useOrganization, usePatchArray } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
@@ -148,8 +151,8 @@ const editableList = computed(() => {
     }
 
     // All auto
-    const org = organization.value;
-    const base = patched.value.filter(t => !EmailTemplate.isSavedEmail(t.type) && props.types.includes(t.type) && (!org || t.organizationId === org.id));
+    const orgId = organization.value ?? props.groups?.[0]?.organizationId ?? null;
+    const base = patched.value.filter(t => !EmailTemplate.isSavedEmail(t.type) && props.types.includes(t.type) && ((t.groupId === null && props.groups === null) || (props.groups && props.groups.some(g => g.id === t.groupId))) && (!orgId || t.organizationId === orgId));
 
     // Create missing ones
     for (const type of props.types) {
@@ -161,8 +164,8 @@ const editableList = computed(() => {
             if (!base.find(t => t.type === type && t.groupId === (group?.id ?? null))) {
                 let defaultTemplate: EmailTemplate | null = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === null) ?? null;
 
-                if (org) {
-                    defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === org.id) ?? defaultTemplate ?? null;
+                if (orgId) {
+                    defaultTemplate = patched.value.find(template => template.type === type && template.groupId === null && template.webshopId === null && template.organizationId === orgId) ?? defaultTemplate ?? null;
                 }
                 
                 base.push(
@@ -204,6 +207,7 @@ async function editEmail(emailTemplate: EmailTemplate) {
     await present({
         components: [
             new ComponentWithProperties(EditEmailTemplateView, {
+                prefix: getTemplatePrefix(emailTemplate),
                 emailTemplate,
                 isNew: !emailTemplate.id,
                 saveHandler: async (patch: AutoEncoderPatchType<EmailTemplate>) => {
@@ -302,7 +306,7 @@ async function saveWithoutDismiss() {
 
     saving.value = true;
     try {
-        const response = await context.value.authenticatedServer.request({
+        await context.value.authenticatedServer.request({
             method: "PATCH",
             path: "/email-templates",
             shouldRetry: false,
@@ -310,8 +314,6 @@ async function saveWithoutDismiss() {
             body: patch.value,
             decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>)
         })
-
-        deepSetArray(templates.value, response.data, {keepMissing: true})
 
         await loadTemplates()
         patch.value = new PatchableArray()

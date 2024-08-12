@@ -72,6 +72,21 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            Automatische e-mails
+                        </h2>
+                        <p class="style-description">
+                            Wijzig de inhoud van automatische e-mails naar leden.
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
         </main>
@@ -80,12 +95,13 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { Event } from '@stamhoofd/structures';
+import { EmailTemplateType, Event } from '@stamhoofd/structures';
 import { ComponentOptions, computed } from 'vue';
+import { EditEmailTemplatesView } from '../email';
+import { useOrganization } from '../hooks';
 import { MembersTableView } from '../members';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
-import { useOrganization } from '../hooks';
 
 const props = defineProps<{
     event: Event;
@@ -102,7 +118,8 @@ const hasFullAccess = computed(() => {
 enum Routes {
     Registrations = 'inschrijvingen',
     WaitingList = 'wachtlijst',
-    Edit = "instellingen"
+    Edit = "instellingen",
+    EditEmails = "emails"
 }
 
 defineRoutes([
@@ -138,6 +155,24 @@ defineRoutes([
             return {
                 event: props.event,
                 isNew: false
+            }
+        }
+    },
+    {
+        url: Routes.EditEmails,
+        component: EditEmailTemplatesView as ComponentOptions,
+        present: 'popup',
+        paramsToProps: () => {
+            if (!props.event.group) {
+                throw new Error('Missing group')
+            }
+            
+            return {
+                groups: props.event.group.waitingList ? [props.event.group, props.event.group.waitingList] : [props.event.group],
+                allowEditGenerated: false,
+                types: [
+                    EmailTemplateType.RegistrationConfirmation
+                ]
             }
         }
     },

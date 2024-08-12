@@ -1,9 +1,10 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { EmailTemplate } from '@stamhoofd/models';
+import { EmailTemplate, Group, Webshop } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
 type Body = PatchableArrayAutoEncoder<EmailTemplateStruct>;
@@ -76,6 +77,22 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             template.organizationId = organization?.id ?? null
             template.webshopId = struct.webshopId
             template.groupId = struct.groupId
+
+            if (struct.groupId) {
+                const group = await Group.getByID(struct.groupId)
+                if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Full)) {
+                    throw Context.auth.error();
+                }
+                template.organizationId = group.organizationId
+            }
+
+            if (struct.webshopId) {
+                const webshop = await Webshop.getByID(struct.webshopId)
+                if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+                    throw Context.auth.error();
+                }
+                template.organizationId = webshop.organizationId
+            }
 
             template.html = struct.html
             template.subject = struct.subject
