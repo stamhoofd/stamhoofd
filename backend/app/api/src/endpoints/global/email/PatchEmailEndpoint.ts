@@ -100,6 +100,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
+            model.throwIfNotReadyToSend()
             model.send().catch(console.error)
         }
 
