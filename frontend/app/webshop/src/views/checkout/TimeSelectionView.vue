@@ -28,8 +28,6 @@
 
                 <template #right>
                     <span v-if="slot.listedRemainingStock === 0" class="style-tag error">Volzet</span>
-                </template>
-                <template #right>
                     <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
