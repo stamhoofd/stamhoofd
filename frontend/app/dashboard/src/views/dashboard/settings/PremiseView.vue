@@ -24,6 +24,7 @@
                             <h2 class="style-title-list">
                                 {{ premiseType.name }}
                             </h2>
+                            <p v-if="premiseType.description" class="style-description-small">{{ premiseType.description }}</p>
                         </STListItem>
                     </STList>
                 </div>
