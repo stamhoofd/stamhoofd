@@ -87,7 +87,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
+                    <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                         </template>
