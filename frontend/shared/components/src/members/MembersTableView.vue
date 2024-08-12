@@ -11,7 +11,7 @@
         @click="showMember"
     >
         <template #empty>
-            Er zijn nog geen leden ingeschreven.
+            Geen leden ingeschreven
         </template>
     </ModernTableView>
 </template>
@@ -19,9 +19,9 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, GlobalEventBus, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useContext, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useContext, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupPrice, GroupType, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterItemOption, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupPrice, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterItemOption, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from "vue";
 import { useDirectMemberActions } from "./classes/MemberActionBuilder";
@@ -33,11 +33,17 @@ const props = withDefaults(
     defineProps<{
         group?: Group | null,
         category?: GroupCategoryTree | null,
-        periodId?: string | null
+        periodId?: string | null,
+        responsibility?: MemberResponsibility | null, // for now only for saving column config
+        customFilter?: StamhoofdFilter|null,
+        customTitle?: string|null
     }>(), {
         group: null,
         category: null,
-        periodId: null
+        periodId: null,
+        customFilter: null,
+        customTitle: null,
+        responsibility: null
     }
 )
 
@@ -49,6 +55,10 @@ const filterBuilders = computed(() => {
     })
 })
 const title = computed(() => {
+    if (props.customTitle) {
+        return props.customTitle
+    }
+    
     if (props.group) {
         return props.group.settings.name
     }
@@ -73,7 +83,7 @@ useGlobalEventListener('members-added', async () => {
 })
 
 const configurationId = computed(() => {
-    return 'members-'+app+'-org-' + (organization.value?.id ?? 'null')+ '-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '')
+    return 'members-'+app+'-org-' + (organization.value?.id ?? 'null')+ '-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '') + (props.responsibility ? '-responsibility-'+props.responsibility.id : '')
 })
 const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false)
 
@@ -105,6 +115,10 @@ function extendSort(list: SortList): SortList  {
 }
 
 function getRequiredFilter(): StamhoofdFilter|null  {
+    if (props.customFilter) {
+        return props.customFilter
+    }
+
     if (!props.group && !props.category) {
         return null
     }

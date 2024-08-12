@@ -90,7 +90,16 @@
                         Aantal leden
                     </h3>
                     <p v-copyable class="style-definition-text">
-                        <MemberCountSpan :organization="organization" />
+                        <MemberCountSpan
+                            :filter="{
+                                registrations: {
+                                    $elemMatch: {
+                                        organizationId: organization.id,
+                                        periodId: platform.period.id
+                                    }
+                                }
+                            }"
+                        />
                     </p>
                 </STListItem>
             </STList>
@@ -165,17 +174,15 @@
 
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, MemberCountSpan, Toast, useAuth, useContext, useKeyUpDown, usePlatform } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, ref } from 'vue';
-import MemberCountSpan from './components/MemberCountSpan.vue';
-import SelectOrganizationTagsView from './tags/SelectOrganizationTagsView.vue';
 import EditOrganizationView from './EditOrganizationView.vue';
-import { save } from 'pdfkit';
+import SelectOrganizationTagsView from './tags/SelectOrganizationTagsView.vue';
 
 const props = defineProps<{
     organization: Organization,

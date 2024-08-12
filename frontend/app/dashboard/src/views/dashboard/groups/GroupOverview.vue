@@ -23,7 +23,7 @@
             <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center right-stack" @click="openMembers(true)">
+                <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
@@ -39,7 +39,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="group.waitingList" :selectable="true" class="left-center right-stack" @click="openMembers(true, {group: group.waitingList})">
+                <STListItem v-if="group.waitingList" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
@@ -55,7 +55,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openMembers(true)" v-for="responsibility of linkedResponsibilities" :key="responsibility.id">
+                <STListItem v-for="responsibility of linkedResponsibilities" :key="responsibility.id" :selectable="true" class="left-center right-stack" @click="openResponsibility(responsibility)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
                     </template>
@@ -63,6 +63,7 @@
                         {{ responsibility.name }}
                     </h2>
                     <template #right>
+                        <MemberCountSpan :filter="getResponsibilityFilter(responsibility)" class="style-description-small" />
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -198,12 +199,13 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, useNavigationController, usePresent, useShow } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from "@stamhoofd/components";
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from "@stamhoofd/components";
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
-import { computed } from 'vue';
+import { Formatter } from '@stamhoofd/utility';
+import { ComponentOptions, computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
 import EditGroupRestrictionsView from './edit/EditGroupRestrictionsView.vue';
@@ -219,7 +221,6 @@ const isArchive = computed(() => props.group.status === GroupStatus.Archived)
 const isOpen = computed(() => !props.group.closed)
 const auth = useAuth();
 const hasFullPermissions = computed(() => auth.canAccessGroup(props.group, PermissionLevel.Full))
-const show = useShow();
 const organizationManager = useOrganizationManager()
 const organization = useOrganization()
 const navigationController = useNavigationController()
@@ -227,8 +228,87 @@ const present = usePresent()
 const isLocked = computed(() => props.period.period.locked)
 const platform = usePlatform();
 
+enum Routes {
+    "Members" = "Members",
+    "WaitingList" = "WaitingList",
+    "Responsibility" = "Responsibility"
+}
+
+defineRoutes([
+    {
+        url: 'inschrijvingen',
+        name: Routes.Members,
+        component: MembersTableView as ComponentOptions,
+        paramsToProps: () => {
+            return {
+                group: props.group
+            }
+        }
+    },
+    {
+        url: 'wachtlijst',
+        name: Routes.WaitingList,
+        component: MembersTableView as ComponentOptions,
+        paramsToProps: () => {
+            if (!props.group.waitingList) {
+                throw new Error('No waiting list')
+            }
+            return {
+                group: props.group.waitingList
+            }
+        }
+    },
+    {
+        url: Routes.Members,
+        component: MembersTableView as ComponentOptions,
+        present: 'popup',
+        paramsToProps: () => {
+            return {
+                group: props.group
+            }
+        }
+    },
+    {
+        url: '/r/@slug',
+        name: Routes.Responsibility,
+        params: {
+            slug: String
+        },
+        component: MembersTableView as ComponentOptions,
+        paramsToProps(params: {slug: string}) {
+            const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug)
+
+            if (!responsibility) {
+                throw new Error('Responsibility not found')
+            }
+
+            return {
+                responsibility,
+                customTitle: responsibility.name + ' ('+ props.group.settings.name + ')',
+                customFilter: getResponsibilityFilter(responsibility)
+            }
+        },
+        propsToParams(props) {
+            if (!("responsibility" in props)) {
+                throw new Error('Missing responsibility')
+            }
+
+            return {
+                params: {
+                    slug: Formatter.slug((props.responsibility as MemberResponsibility).name as string)
+                }
+            }
+        }
+    }
+])
+
+const navigate = useNavigate()
 const linkedResponsibilities = computed(() => {
     if (props.group.defaultAgeGroupId === null) {
+        return []
+    }
+
+    if (!auth.hasFullAccess()) {
         return []
     }
 
@@ -236,15 +316,24 @@ const linkedResponsibilities = computed(() => {
     return platform.value.config.responsibilities.filter(r => r.defaultAgeGroupIds !== null && r.defaultAgeGroupIds.includes(id) && (r.organizationTagIds === null || organization.value?.meta.matchTags(r.organizationTagIds)))
 })
 
-async function openMembers(animated = true, options: { group?: Group } = {}) {
-    await show({
-        components: [
-            new ComponentWithProperties(MembersTableView, {
-                group: options?.group ?? props.group
-            })
-        ],
-        animated,
-        adjustHistory: animated
+function getResponsibilityFilter(responsibility: MemberResponsibility) {
+    return {
+        responsibilities: {
+            $elemMatch: {
+                responsibilityId: responsibility.id,
+                group: {
+                    id: props.group.id
+                }
+            }
+        }
+    }
+}
+
+async function openResponsibility(responsibility: MemberResponsibility) {
+    await navigate(Routes.Responsibility, {
+        params: {
+            slug: Formatter.slug(responsibility.name)
+        }
     })
 }
 
