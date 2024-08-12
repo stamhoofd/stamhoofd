@@ -104,8 +104,8 @@ export async function getScopedAdminRoot(session: SessionContext, options: {init
         icon: 'category',
         name: 'Meer',
         items: [
-            financesTab,
-            settingsTab
+            settingsTab,
+            financesTab
         ]
     });
 
