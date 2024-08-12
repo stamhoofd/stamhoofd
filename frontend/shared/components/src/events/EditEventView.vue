@@ -19,7 +19,7 @@
                 >
             </STInputBox>
 
-            <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox" v-if="platform.config.eventTypes.length">
+            <STInputBox v-if="platform.config.eventTypes.length" title="Type" error-fields="type" :error-box="errors.errorBox">
                 <Dropdown
                     v-model="typeId"
                 >
@@ -168,7 +168,7 @@
 
             <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze leeftijdsgroepen.</p>
 
-            <p class="info-box" v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id">
+            <p v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id" class="info-box">
                 Je kan dit voorlopig enkel bewerken via het beheerdersportaal van de organisator.
             </p>
             <GroupsInput v-else v-model="groups" :date="startDate" />
