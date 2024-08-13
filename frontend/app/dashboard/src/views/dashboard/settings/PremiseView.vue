@@ -3,37 +3,33 @@
         <div class="container">
             <h1>{{ title }}</h1>
             <hr>
-            <div class="container">
-                <h2>Adres</h2>
-                <AddressInput v-model="address" title="" :validator="errors.validator" :link-country-to-locale="true" />
-            </div>
+            <h2>Adres</h2>
+            <AddressInput v-model="address" title="" :validator="errors.validator" :link-country-to-locale="true" />
         
-            <template v-if="premiseTypes.length">
+            <div v-if="premiseTypes.length" class="container">
                 <hr>
-                <div class="container">
-                    <h2>Soort</h2>
-                    <STList>
-                        <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
-                            <template #left>
-                                <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" />
-                            </template>
-                            <div class="checkbox-label">
-                                <h2 class="style-title-list">
-                                    {{ premiseType.name }}
-                                </h2>
-                                <p v-if="premiseType.description" class="style-description-small">
-                                    {{ premiseType.description }}
-                                </p>
-                            </div>
+                <h2>Soort</h2>
+                <STList>
+                    <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
+                        <template #left>
+                            <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" />
+                        </template>
+                        <div class="checkbox-label">
+                            <h2 class="style-title-list">
+                                {{ premiseType.name }}
+                            </h2>
+                            <p v-if="premiseType.description" class="style-description-small">
+                                {{ premiseType.description }}
+                            </p>
+                        </div>
 
-                            <template #right>
-                                <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
-                                <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van deze soort is bereikt. Verwijder eerst een ander gebouw van deze soort om deze soort te selecteren.'" class="icon info-circle hover-show" />
-                            </template>
-                        </STListItem>
-                    </STList>
-                </div>
-            </template>
+                        <template #right>
+                            <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van deze soort is bereikt. Verwijder eerst een ander gebouw van deze soort om deze soort te selecteren.'" class="icon info-circle hover-show" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
         </div>
     </SaveView>
 </template>
@@ -148,7 +144,7 @@ function updatePremiseTypeWarnings() {
             const min = type.min;
 
             if(min !== null && count <= min) {
-                const message = `Het minimum aantal van dit soort is ${min}.`;
+                const message = `Het minimum aantal van deze soort is ${min}.`;
                 warnings.set(id, message);
             }
         }

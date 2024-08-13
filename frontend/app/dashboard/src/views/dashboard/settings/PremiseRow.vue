@@ -17,6 +17,7 @@
 <script lang="ts" setup>
 import { useCountry, usePlatform } from '@stamhoofd/components';
 import { CountryHelper, Premise } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -46,10 +47,7 @@ const title = computed(() => {
         });
 
     if(typeNames.length === 1) return typeNames[0];
-
-    const firstTypes = typeNames.slice(0, typeNames.length - 1).join(', ');
-
-    return `${firstTypes} & ${typeNames[typeNames.length - 1]}`;
+    return Formatter.joinLast(typeNames, ', ', ' en ');
 });
 
 const premiseString = computed(() => {
