@@ -34,19 +34,19 @@ export class PlatformPremiseType extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ''
 
-    @field({ decoder: StringDecoder, version: 312 })
+    @field({ decoder: StringDecoder, version: 319 })
     description = ''
 
     /**
      * Maximum number of premises allowed for this premise type
      */
-    @field({ decoder: IntegerDecoder, nullable: true, version: 317 })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 319 })
     max: null | number = null
         
     /**
     * Minimum number of premises allowed for this premise type
     */
-    @field({ decoder: IntegerDecoder, nullable: true, version: 317 })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 319 })
     min: null | number = null
 }
 
@@ -184,7 +184,7 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(OrganizationTag), version: 260 })
     tags: OrganizationTag[] = []
 
-    @field({ decoder: new ArrayDecoder(PlatformPremiseType), version: 311 })
+    @field({ decoder: new ArrayDecoder(PlatformPremiseType), version: 319 })
     premiseTypes: PlatformPremiseType[] = []
 
     @field({ decoder: new ArrayDecoder(DefaultAgeGroup), version: 261 })

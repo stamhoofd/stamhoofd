@@ -240,7 +240,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 86, optional: true })
     VATNumber: string | null = null
 
-    @field({ decoder: new ArrayDecoder(Premise), version: 316})
+    @field({ decoder: new ArrayDecoder(Premise), version: 319})
     premises: Premise[] = [];
 
     getPaymentProviderFor(method: PaymentMethod, stripeAccountMeta?: StripeMetaData | null): PaymentProvider | null  {
