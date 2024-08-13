@@ -37,6 +37,27 @@ export enum BalanceItemRelationType {
     "Member" = "Member", // Contains the name of the member you registered
 }
 
+export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
+    switch (type) {
+        case BalanceItemRelationType.Webshop: return "Webshop"
+        case BalanceItemRelationType.Group: return "Inschrijving"
+        case BalanceItemRelationType.GroupPrice: return "Tarief"
+        case BalanceItemRelationType.GroupOptionMenu: return "Keuzemenu"
+        case BalanceItemRelationType.GroupOption: return "Keuze"
+        case BalanceItemRelationType.Member: return "Lid"
+    }
+}
+
+export function shouldAggregateOnRelationType(type: BalanceItemRelationType, allRelations: Map<BalanceItemRelationType, BalanceItemRelation>): boolean {
+    switch (type) {
+        case BalanceItemRelationType.GroupPrice: 
+            // Only aggregate on group price if it is not for a specific option (we'll combine all options in one group, regardless of the corresponding groupPrice)
+            return !allRelations.has(BalanceItemRelationType.GroupOption)
+        case BalanceItemRelationType.Member: return true
+    }
+    return false;
+}
+
 /**
  * Helps you understand what a balance item is for. It can be for multiple things at the same time, e.g. when it is an option to buy a ticket, it is also a ticket.
  */

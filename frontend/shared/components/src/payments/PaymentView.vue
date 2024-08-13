@@ -127,11 +127,13 @@
                             <p class="style-description">
                                 Wijzig de status terug naar 'wacht op betaling'.
                             </p>
-                            <template #right><button type="button" class="button secundary hide-smartphone">
-                                <span class="icon clock" />
-                                <span>Heractiveer</span>
-                            </button>
-                            <button type="button" class="button icon success only-smartphone" /></template>
+                            <template #right>
+                                <button type="button" class="button secundary hide-smartphone">
+                                    <span class="icon clock" />
+                                    <span>Heractiveer</span>
+                                </button>
+                                <button type="button" class="button icon success only-smartphone" />
+                            </template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markPaid">
@@ -144,12 +146,14 @@
                             <p v-if="payment.webshopIds.length" class="style-description">
                                 Stuurt mogelijks een automatische e-mail ter bevestiging.
                             </p>
-                            <template #right><button type="button" class="button secundary hide-smartphone">
-                                <span class="icon success" />
-                                <span v-if="payment.price >= 0">Betaald</span>
-                                <span v-else>Terugbetaald</span>
-                            </button>
-                            <button type="button" class="button icon success only-smartphone" /></template>
+                            <template #right>
+                                <button type="button" class="button secundary hide-smartphone">
+                                    <span class="icon success" />
+                                    <span v-if="payment.price >= 0">Betaald</span>
+                                    <span v-else>Terugbetaald</span>
+                                </button>
+                                <button type="button" class="button icon success only-smartphone" />
+                            </template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isSucceeded" :selectable="true" @click="markPending">
@@ -165,11 +169,13 @@
                             <p v-else class="style-description">
                                 Betaling per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.
                             </p>
-                            <template #right><button type="button" class="button secundary hide-smartphone">
-                                <span class="icon undo" />
-                                <span v-if="payment.price >= 0">Niet betaald</span>
-                                <span v-else>Niet terugbetaald</span>
-                            </button><button type="button" class="button icon undo only-smartphone" /></template>
+                            <template #right>
+                                <button type="button" class="button secundary hide-smartphone">
+                                    <span class="icon undo" />
+                                    <span v-if="payment.price >= 0">Niet betaald</span>
+                                    <span v-else>Niet terugbetaald</span>
+                                </button><button type="button" class="button icon undo only-smartphone" />
+                            </template>
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markFailed">
@@ -182,10 +188,12 @@
                             <p v-else class="style-description">
                                 Annuleer de betaling als je denkt dat deze niet meer betaald zal worden.
                             </p>
-                            <template #right><button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon canceled" />
-                                <span>Annuleren</span>
-                            </button><button type="button" class="button icon canceled only-smartphone" /></template>
+                            <template #right>
+                                <button type="button" class="button secundary danger hide-smartphone">
+                                    <span class="icon canceled" />
+                                    <span>Annuleren</span>
+                                </button><button type="button" class="button icon canceled only-smartphone" />
+                            </template>
                         </STListItem>
                     </STList>
                 </template>
@@ -195,39 +203,44 @@
                     <h2>Overzicht</h2>
                     <STList>
                         <STListItem v-for="item in payment.balanceItemPayments" :key="item.id" :selectable="true" @click="editBalanceItem(item.balanceItem)">
+                            <template #left>
+                                <span class="style-amount min-width">{{ formatFloat(item.amount) }}</span>
+                            </template>
+
+                            <p v-if="item.itemPrefix" class="style-title-prefix-list">
+                                {{ item.itemPrefix }}
+                            </p>
+
                             <h3 class="style-title-list">
-                                {{ item.balanceItem.description }}
+                                {{ item.itemTitle }}
                             </h3>
+
+                            <p v-if="item.itemDescription" class="style-description-small">
+                                {{ item.itemDescription }}
+                            </p>
 
                             <p class="style-description-small">
                                 {{ formatDate(item.balanceItem.createdAt) }}
                             </p>
-                            <p v-if="item.price < 0" class="style-description-small">
-                                Terugbetaling van {{ formatPrice(-item.price) }}
+
+                            <p v-if="item.amount !== 1" class="style-description-small">
+                                {{ formatPrice(item.unitPrice) }}
                             </p>
-                            <p v-else-if="item.balanceItem.status === 'Hidden' || (item.price !== 0 && item.balanceItem.price === 0)" class="style-tag error">
-                                Deze schuld werd verwijderd na betaling
+
+                            <p v-if="item.price < 0" class="style-tag">
+                                Terugbetaling
                             </p>
-                            <p v-else-if="item.price !== item.balanceItem.price" class="style-description-small">
-                                Slechts deel van het totaalbedrag, {{ formatPrice(item.price) }} / {{ formatPrice(item.balanceItem.price) }}
+                            <p v-else-if="item.balanceItem.status === 'Hidden' || item.balanceItem.amount === 0" class="style-tag error">
+                                Deze schuld werd verwijderd na betaling. Het verschil zal bij volgende betalingen in rekening gebracht worden.
                             </p>
+                            
                             <template #right>
-                                {{ formatPrice(item.price) }}
+                                <span class="style-price-base">{{ formatPrice(item.price) }}</span>
                             </template>
                         </STListItem>
                     </STList>
 
-                    <div class="pricing-box">
-                        <STList>
-                            <STListItem>
-                                Totaal
-
-                                <template #right>
-                                    {{ formatPrice(payment.price) }}
-                                </template>
-                            </STListItem>
-                        </STList>
-                    </div>
+                    <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: payment.price}]" />
                 </template>
 
                 <hr>
@@ -255,8 +268,9 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { ErrorBox, GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Spinner, Toast } from "@stamhoofd/components";
-import { BalanceItemDetailed, BalanceItemWithPayments, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, calculateVATPercentage } from "@stamhoofd/structures";
+import { BalanceItem, BalanceItemWithPayments, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, calculateVATPercentage } from "@stamhoofd/structures";
 
+import PriceBreakdownBox from "../views/PriceBreakdownBox.vue";
 import EditBalanceItemView from "./EditBalanceItemView.vue";
 
 @Component({
@@ -265,7 +279,8 @@ import EditBalanceItemView from "./EditBalanceItemView.vue";
         STList,
         STListItem,
         STErrorsDefault,
-        Spinner
+        Spinner,
+        PriceBreakdownBox
     }
 })
 export default class PaymentView extends Mixins(NavigationMixin) {
@@ -426,74 +441,74 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             return contactInfo;
         }
 
-//        for (const member of this.payment.members) {
-//
-//            const key = 'member-' + member.id;
-//            if (!added.has(key)) {
-//                const values: string[] = [];
-//                //if (member.details.phone) {
-//                //    values.push(member.details.phone);
-//                //}
-////
-//                //if (member.details.email) {
-//                //    values.push(member.details.email);
-//                //}
-//
-//                if (values.length) {
-//                    contactInfo.push({
-//                        title: member.name + ' (lid)',
-//                        values
-//                    })
-//                }
-//                added.add(key);
-//
-//                //for (const parent of member.details.parents) {
-//                //    const key = 'parent-' + parent.name;
-//                //    if (!added.has(key)) {
-//                //        const values: string[] = [];
-//                //        if (parent.phone) {
-//                //            values.push(parent.phone);
-//                //        }
-////
-//                //        if (parent.email) {
-//                //            values.push(parent.email);
-//                //        }
-////
-//                //        if (values.length) {
-//                //            contactInfo.push({
-//                //                title: parent.name + ' (' + ParentTypeHelper.getName(parent.type) + ')',
-//                //                values
-//                //            })
-//                //        }
-////
-//                //        added.add(key);
-//                //    }
-//                //}
-//            }
-//        }
-//
-//        for (const order of this.payment.orders) {
-//            const key = 'order-'+order.id;
-//
-//            if (!added.has(key)) {
-//                const values: string[] = [];
-//                if (order.data.customer.phone) {
-//                    values.push(order.data.customer.phone);
-//                }
-//
-//                if (order.data.customer.email) {
-//                    values.push(order.data.customer.email);
-//                }
-//
-//                if (values.length) {
-//                    contactInfo.push({
-//                        title: order.data.customer.name,
-//                        values
-//                    })
-//                }
-//                added.add(key);
-//            }
-//        }
+        //        for (const member of this.payment.members) {
+        //
+        //            const key = 'member-' + member.id;
+        //            if (!added.has(key)) {
+        //                const values: string[] = [];
+        //                //if (member.details.phone) {
+        //                //    values.push(member.details.phone);
+        //                //}
+        ////
+        //                //if (member.details.email) {
+        //                //    values.push(member.details.email);
+        //                //}
+        //
+        //                if (values.length) {
+        //                    contactInfo.push({
+        //                        title: member.name + ' (lid)',
+        //                        values
+        //                    })
+        //                }
+        //                added.add(key);
+        //
+        //                //for (const parent of member.details.parents) {
+        //                //    const key = 'parent-' + parent.name;
+        //                //    if (!added.has(key)) {
+        //                //        const values: string[] = [];
+        //                //        if (parent.phone) {
+        //                //            values.push(parent.phone);
+        //                //        }
+        ////
+        //                //        if (parent.email) {
+        //                //            values.push(parent.email);
+        //                //        }
+        ////
+        //                //        if (values.length) {
+        //                //            contactInfo.push({
+        //                //                title: parent.name + ' (' + ParentTypeHelper.getName(parent.type) + ')',
+        //                //                values
+        //                //            })
+        //                //        }
+        ////
+        //                //        added.add(key);
+        //                //    }
+        //                //}
+        //            }
+        //        }
+        //
+        //        for (const order of this.payment.orders) {
+        //            const key = 'order-'+order.id;
+        //
+        //            if (!added.has(key)) {
+        //                const values: string[] = [];
+        //                if (order.data.customer.phone) {
+        //                    values.push(order.data.customer.phone);
+        //                }
+        //
+        //                if (order.data.customer.email) {
+        //                    values.push(order.data.customer.email);
+        //                }
+        //
+        //                if (values.length) {
+        //                    contactInfo.push({
+        //                        title: order.data.customer.name,
+        //                        values
+        //                    })
+        //                }
+        //                added.add(key);
+        //            }
+        //        }
         return contactInfo;
     }
 
@@ -544,15 +559,15 @@ export default class PaymentView extends Mixins(NavigationMixin) {
         this.markingPaid = false;
     }
 
-    editBalanceItem(balanceItem: BalanceItemDetailed) {
+    editBalanceItem(balanceItem: BalanceItem) {
         if (!this.canWrite) {
             return
         }
         const component = new ComponentWithProperties(EditBalanceItemView, {
             balanceItem,
             isNew: false,
-            saveHandler: async (patch: AutoEncoderPatchType<BalanceItemDetailed>) => {
-                const arr: PatchableArrayAutoEncoder<BalanceItemDetailed> = new PatchableArray();
+            saveHandler: async (patch: AutoEncoderPatchType<BalanceItem>) => {
+                const arr: PatchableArrayAutoEncoder<BalanceItem> = new PatchableArray();
                 patch.id = balanceItem.id;
                 arr.addPatch(patch)
                 await this.$context.authenticatedServer.request({

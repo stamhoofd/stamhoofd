@@ -110,50 +110,33 @@ export class Payment extends Model {
         }
 
         const {balanceItemPayments, balanceItems} = await Payment.loadBalanceItems(payments)
-        const {registrations, orders, groups} = await Payment.loadBalanceItemRelations(balanceItems);
         
-        return await this.getGeneralStructureFromRelations({
+        return this.getGeneralStructureFromRelations({
             payments,
-            registrations,
-            orders,
             balanceItemPayments,
-            balanceItems,
-            groups
+            balanceItems
         }, includeSettlements)
     }
 
-    static async getGeneralStructureFromRelations({payments, registrations, orders, balanceItemPayments, balanceItems, groups}: {
+    static getGeneralStructureFromRelations({payments, balanceItemPayments, balanceItems}: {
         payments: Payment[];
-        registrations: import("./Member").RegistrationWithMember[];
-        orders: import("./Order").Order[];
         balanceItemPayments: import("./BalanceItemPayment").BalanceItemPayment[];
         balanceItems: import("./BalanceItem").BalanceItem[];
-        groups: import("./Group").Group[];
-    }, includeSettlements = false): Promise<PaymentGeneral[]> {
+    }, includeSettlements = false): PaymentGeneral[] {
         if (payments.length === 0) {
             return []
         }
-        const {Member} = (await import("./Member"));
 
         return payments.map(payment => {
             return PaymentGeneral.create({
                 ...payment,
                 balanceItemPayments: balanceItemPayments.filter(item => item.paymentId === payment.id).map((item) => {
                     const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)
-                    const registration = balanceItem?.registrationId ? registrations.find(r => r.id === balanceItem.registrationId) : null
-                    const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
-                    const group = registration ? groups.find(g => g.id === registration.groupId) : null
-
-                    if (registration && !group) {
-                        throw new Error("Group "+registration.groupId+" not found")
-                    }
 
                     return BalanceItemPaymentDetailed.create({
                         ...item,
                         balanceItem: BalanceItemDetailed.create({
-                            ...balanceItem,
-                            registration: registration ? Member.getRegistrationWithMemberStructure(registration.setRelation(Registration.group, group!)) : null,
-                            order: order ? OrderStruct.create({...order, payment: null}) : null
+                            ...balanceItem
                         })
                     })
                 }),
@@ -202,9 +185,6 @@ export class Payment extends Model {
         const registrations = await Member.getRegistrationWithMembersByIDs(registrationIds)
         const orders = await Order.getByIDs(...orderIds)
 
-        const groupIds = Formatter.uniqueArray(registrations.map(r => r.groupId))
-        const groups = await (await import("./Group")).Group.getByIDs(...groupIds)
-
-        return {registrations, orders, groups}
+        return {registrations, orders}
     }
 }

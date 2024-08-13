@@ -12,7 +12,6 @@
     </div>
 </template>
 
-
 <script lang="ts" setup>
 import { PriceBreakdown } from '@stamhoofd/structures';
 

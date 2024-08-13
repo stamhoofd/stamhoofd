@@ -79,15 +79,24 @@
 
         <STList v-if="tab === 'type'">
             <STListItem v-for="detail in typeDetails" :key="detail.id" :selectable="!!detail.filter" class="right-stack" @click="openFilter(detail)">
+                <template #left v-if="detail.amount !== undefined">
+                    <span class="style-amount min-width">{{ formatFloat(detail.amount) }}</span>
+                </template>
+
+                <p class="style-title-prefix-list" v-if="detail.prefix">
+                    {{ detail.prefix }}
+                </p>
+
                 <h3 class="style-title-list">
                     {{ detail.name }}
                 </h3>
                 <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
+                <p v-if="detail.unitPrice !== undefined" class="style-description-small">{{ formatPrice(detail.unitPrice) }}</p>
 
                 <template #right>
-                    {{ formatPrice(detail.price) }}
+                    <span class="style-price">{{ formatPrice(detail.price) }}</span>
+                    <span v-if="detail.filter" class="icon arrow-right-small gray" />
                 </template>
-                <template v-if="detail.filter" #right><span class="icon arrow-right-small gray" /></template>
             </STListItem>
         </STList>
 
@@ -99,25 +108,9 @@
                 <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
 
                 <template #right>
-                    {{ formatPrice(detail.price) }}
+                    <span class="style-price">{{ formatPrice(detail.price) }}</span>
+                    <span v-if="detail.filter" class="icon arrow-right-small gray" />
                 </template>
-                <template v-if="detail.filter" #right><span class="icon arrow-right-small gray" /></template>
-            </STListItem>
-        </STList>
-
-        <STList v-if="tab === 'order'">
-            <STListItem v-for="detail in orderDetails" :key="detail.id" :selectable="!!detail.filter" class="right-stack" @click="openFilter(detail)">
-                <h3 class="style-title-list">
-                    <template v-if="detail.count">
-                        {{ detail.count }} ×
-                    </template>{{ detail.name }}
-                </h3>
-                <p v-if="detail.description" class="style-description-small pre-wrap" v-text="detail.description" />
-
-                <template #right>
-                    {{ formatPrice(detail.price) }}
-                </template>
-                <template v-if="detail.filter" #right><span class="icon arrow-right-small gray" /></template>
             </STListItem>
         </STList>
     </SaveView>
@@ -125,12 +118,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, DateSelection, LoadingButton,SaveView, SegmentedControl,STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { BalanceItemPaymentDetailed, calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentProvider, StripeAccount } from "@stamhoofd/structures";
-import { PaymentGeneral } from "@stamhoofd/structures";
-import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, DateSelection, LoadingButton, SaveView, SegmentedControl, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BalanceItemPaymentDetailed, calculateVATPercentage, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, StripeAccount } from "@stamhoofd/structures";
+import { Formatter, Sorter } from "@stamhoofd/utility";
 
 export type PaymentFilter = {
     filterBalanceItems?: (payment: BalanceItemPaymentDetailed) => boolean
@@ -139,19 +130,24 @@ export type PaymentFilter = {
 
 class Detail {
     id: string;
+    prefix?: string;
     name: string;
     description?: string;
+
+    unitPrice?: number;
     price: number;
-    count?: number;
+    amount?: number;
     filter?: PaymentFilter
     
-    constructor({id, name, description, price, filter, count}: {id: string, count?: number, name: string, description?: string, price: number, filter?: PaymentFilter}) {
+    constructor({id, prefix, name, description, price, filter, amount, unitPrice}: {id: string, prefix?: string, amount?: number, name: string, description?: string, unitPrice?: number, price: number, filter?: PaymentFilter}) {
         this.id = id
+        this.prefix = prefix
         this.name = name
         this.description = description
+        this.unitPrice = unitPrice
         this.price = price
         this.filter = filter
-        this.count = count
+        this.amount = amount
     }
 }
 
@@ -186,7 +182,6 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
 
     typeDetails: Detail[] = []
     accountDetails: Detail[] = []
-    orderDetails: Detail[] = []
 
     exporting = false
 
@@ -201,11 +196,6 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
 
         if (this.typeDetails.length > 1) {
             tabs.push({id: "type", label: "Opsplitsing"})
-        }
-
-        if (this.orderDetails.length > 0) {
-            // Also show when only 1
-            tabs.push({id: "order", label: "Artikels"})
         }
 
         return tabs
@@ -241,7 +231,6 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
     mounted() {
         this.buildTypeDetails()
         this.buildAccountDetails()
-        this.buildOrderDetails()
 
         this.tab = this.segmentedControlItems[0]
     }
@@ -354,174 +343,36 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
                     continue;
                 }
 
-                let id = bp.balanceItem.description
-                let name = bp.balanceItem.description ?? "Onbekend"
-                let description = ""
-                let filter;
-
-                const balanceItem = bp.balanceItem;
+                const id = bp.groupCode
                 const price = bp.price;
-
-                if (balanceItem.order) {
-                    id = balanceItem.order.webshopId
-                    name = this.organization.webshops.find(w => w.id === id)?.meta?.name ?? id
-                    filter = {
-                        filterBalanceItems: (b: BalanceItemPaymentDetailed) => {
-                            if (b.balanceItem.order) {
-                                return b.balanceItem.order.webshopId === id
-                            }
-                            return false;
-                        }
-                    }
-                } else if (balanceItem.registration) {
-                    const groupId = balanceItem.registration.groupId
-                    const cycle = balanceItem.registration.cycle
-
-                    id = groupId + ':' + cycle
-
-                    const group = this.organization.groups.find(g => g.id === groupId);
-                    const groupName = group?.settings.name ?? groupId
-
-                    name = !group ? (balanceItem.description || 'Onbekende inschrijving (verwijderde groep)') : ("Inschrijving " + groupName);
-                    description = !group ? 'Verwijderde groep' : '';
-
-                    filter = {
-                        filterBalanceItems: (b: BalanceItemPaymentDetailed) => {
-                            if (b.balanceItem.registration) {
-                                return b.balanceItem.registration.groupId === groupId && b.balanceItem.registration.cycle === cycle
-                            }
-                            return false;
-                        }
-                    }
-                } else {
-                    filter = {
-                        filterBalanceItems: (b: BalanceItemPaymentDetailed) => {
-                            return b.balanceItem.description === id
-                        }
+                
+                const filter = {
+                    filterBalanceItems: (b: BalanceItemPaymentDetailed) => {
+                        return b.groupCode === id
                     }
                 }
 
                 if (!details.has(id)) {                    
                     details.set(id, new Detail({
                         id,
-                        name,
-                        description,
-                        price: 0,
+                        prefix: bp.groupPrefix,
+                        name: bp.groupTitle,
+                        description: bp.groupDescription ?? undefined,
+                        unitPrice: bp.unitPrice,
+                        price: 0, // todo,
+                        amount: 0, // todo
                         filter
                     }))
                 }
                 const detail = details.get(id)!
                 detail.price += price
+                detail.amount = (detail.amount ?? 0) + bp.amount
             }
         }
 
         this.typeDetails = [
             ...details.values(),
-        ].sort((a, b) => Sorter.byNumberProperty(a, b, "price"))
-    }
-
-    buildOrderDetails() {
-        const details = new Map<string, Detail>()
-        
-        for (const payment of this.payments) {
-            // If it is for an order, group by webshops
-            for (const bp of payment.balanceItemPayments) {
-                if (!this.doesMatchFilter(bp)) {
-                    continue;
-                }
-
-                const balanceItem = bp.balanceItem;
-
-                if (!balanceItem.order) {
-                    // Order details not available: should all be related to an order
-                    return [];
-                }
-
-                if (bp.price !== balanceItem.order.data.totalPrice) {
-                    let id = bp.price < 0 ? 'reimbured-order' : 'edited-order'
-                    let name = bp.price < 0 ? 'Terugbetaling bestelling' : 'Gewijzigde bestelling'
-                    let description = ''
-
-                    if (!details.has(id)) {                    
-                        details.set(id, new Detail({
-                            id,
-                            name,
-                            description,
-                            price: 0,
-                            count: 0
-                        }))
-                    }
-                    const detail = details.get(id)!
-                    detail.price += bp.price ?? 0
-                    detail.count = (detail.count ?? 0) + 1
-
-                    continue;
-                }
-
-                for (const item of balanceItem.order.data.cart.items) {
-                    let id = item.code
-                    let name = item.product.name
-                    let description = item.description
-
-                    if (!details.has(id)) {                    
-                        details.set(id, new Detail({
-                            id,
-                            name,
-                            description,
-                            price: 0,
-                            count: 0
-                        }))
-                    }
-                    const detail = details.get(id)!
-                    detail.price += item.price ?? 0
-                    detail.count = (detail.count ?? 0) + item.amount
-                }
-
-                // Delivery price
-                if (balanceItem.order.data.deliveryPrice) {
-                    let id = "delivery-price"
-                    let name = "Leveringskost"
-                    let description = ""
-
-                    if (!details.has(id)) {                    
-                        details.set(id, new Detail({
-                            id,
-                            name,
-                            description,
-                            price: 0,
-                            count: 0
-                        }))
-                    }
-                    const detail = details.get(id)!
-                    detail.price += balanceItem.order.data.deliveryPrice
-                    detail.count = (detail.count ?? 0) + 1
-                }
-
-                // Administratie price
-                if (balanceItem.order.data.administrationFee) {
-                    let id = "administration-price"
-                    let name = "Administratiekosten"
-                    let description = ""
-
-                    if (!details.has(id)) {                    
-                        details.set(id, new Detail({
-                            id,
-                            name,
-                            description,
-                            price: 0,
-                            count: 0
-                        }))
-                    }
-                    const detail = details.get(id)!
-                    detail.price += balanceItem.order.data.administrationFee
-                    detail.count = (detail.count ?? 0) + 1
-                }
-            }
-        }
-
-        this.orderDetails = [
-            ...details.values(),
-        ].sort((a, b) => Sorter.byNumberProperty(a, b, "price"))
+        ].sort((a, b) => Sorter.byStringProperty(a, b, "id"))
     }
 
     buildAccountDetails() {

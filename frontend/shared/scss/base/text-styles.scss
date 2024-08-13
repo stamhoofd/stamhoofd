@@ -310,12 +310,20 @@
     }
 }
 
-
 .style-price-base {
     font-size: 15px;
     line-height: 1.4;
     font-weight: $font-weight-medium;
     font-variant-numeric: tabular-nums;
+}
+
+.style-amount {
+    @extend .style-price-base;
+
+    &.min-width {
+        display: inline-block;
+        min-width: 50px;
+    }
 }
 
 .style-price {

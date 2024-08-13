@@ -237,10 +237,10 @@ export class BalanceItem extends Model {
             if (bip.length === 0) {
                 // No payments associated with this item
                 item.status = BalanceItemStatus.Hidden
-                item.unitPrice = 0
+                item.amount = 0
                 await item.save()
             } else {
-                item.unitPrice = 0
+                item.amount = 0
                 await item.save()
             }
         }

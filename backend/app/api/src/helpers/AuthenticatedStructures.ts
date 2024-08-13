@@ -26,7 +26,7 @@ export class AuthenticatedStructures {
         }
 
         const {balanceItemPayments, balanceItems} = await Payment.loadBalanceItems(payments)
-        const {registrations, orders, groups} = await Payment.loadBalanceItemRelations(balanceItems);
+        const {registrations, orders} = await Payment.loadBalanceItemRelations(balanceItems);
 
         if (checkPermissions) {
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
@@ -41,13 +41,10 @@ export class AuthenticatedStructures {
 
         const includeSettlements = checkPermissions && !!Context.user && !!Context.user.permissions
 
-        return await Payment.getGeneralStructureFromRelations({
+        return Payment.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,
-            balanceItems,
-            registrations,
-            orders,
-            groups
+            balanceItems
         }, includeSettlements)
     }
 

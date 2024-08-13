@@ -56,6 +56,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.amount = put.amount;
                 model.type = BalanceItemType.Other
                 model.unitPrice = put.unitPrice;
+                model.amount = put.amount;
                 model.organizationId = organization.id;
                 model.createdAt = put.createdAt;
                 model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending;
@@ -88,6 +89,14 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'BalanceItem not found'
+                    })
+                }
+
+                if (patch.unitPrice !== undefined) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'You cannot change the unit price of a balance item',
+                        human: 'Het is niet mogelijk om de eenheidsprijs van een openstaande schuld te wijzigen. Je kan de openstaande schuld verwijderen en opnieuw aanmaken indien noodzakelijk.'
                     })
                 }
 

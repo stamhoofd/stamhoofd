@@ -58,6 +58,7 @@ declare module 'vue' {
         formatTime: typeof Formatter.time,
         formatCountry: typeof CountryHelper.getName,
         formatInteger: typeof Formatter.integer,
+        formatFloat: typeof Formatter.float,
         pluralText: typeof Formatter.pluralText,
     }
 }

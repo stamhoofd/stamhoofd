@@ -292,6 +292,14 @@ export class Formatter {
         return v;
     }
 
+    static float(value: number): string {
+        const formatted = new Intl.NumberFormat("nl-BE", {maximumFractionDigits: 2}).format(Math.abs(value));
+
+        const v = (value < 0 ? "- " : "")+formatted;
+
+        return v;
+    }
+
     static percentage(value: number): string {
         const formatted = new Intl.NumberFormat("nl-BE").format(Math.abs(value/100));
 
