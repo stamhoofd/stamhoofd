@@ -1,10 +1,10 @@
 <template>
     <STListItem :selectable="true" class="right-stack">
         <h2 class="style-title-list">
-            {{ title }}
+            {{ addressString }}
         </h2>
         <p class="style-description-small">
-            {{ premiseString }}
+            {{ premiseTypesString }}
         </p>
 
         <template #right>
@@ -29,7 +29,7 @@ const platform = usePlatform();
 
 const platformPremiseTypes = computed(() => platform.value.config.premiseTypes ?? [])
 
-const title = computed(() => {
+const premiseTypesString = computed(() => {
     const premiseTypeIds = props.premise.premiseTypeIds;
 
     if(!premiseTypeIds.length) return 'Gebouw';
@@ -54,7 +54,7 @@ const title = computed(() => {
     return Formatter.joinLast(typeNames, ', ', ' en ');
 });
 
-const premiseString = computed(() => {
+const addressString = computed(() => {
     const address = props.premise.address;
     const base = `${address.street} ${address.number}, ${address.postalCode} ${address.city}`;
     if(currentCountry.value !== address.country) {
