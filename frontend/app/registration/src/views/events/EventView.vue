@@ -15,6 +15,10 @@
 
                 <div v-if="event.meta.description.html" class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
 
+                <p class="info-box icon basket" v-if="differentOrganization">
+                    Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met de inschrijving voor deze activiteit.
+                </p>
+
                 <STList>
                     <STListItem>
                         <template #left>
@@ -53,7 +57,7 @@
                         </h2>
                     </STListItem>
 
-                    <STListItem v-if="event.group" :selectable="!event.group.closed" class="right-stack" @click="!event.group.closed ? openGroup() : undefined">
+                    <STListItem v-if="event.group" :selectable="!differentOrganization && !event.group.closed" class="right-stack" @click="!differentOrganization && !event.group.closed ? openGroup() : undefined">
                         <template #left>
                             <span class="icon edit" />
                         </template>
@@ -63,10 +67,10 @@
                             <span v-else-if="event.group.notYetOpen">Inschrijven mogelijk vanaf {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
                             <span v-else-if="event.group.closed">De inschrijvingen zijn gesloten</span>
                             <span v-else-if="event.group.settings.registrationEndDate">Inschrijven kan tot {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
-                            <span v-else>Schrijf je nu in</span>
+                            <span v-else>Inschrijvingen zijn geopend</span>
                         </h2>
 
-                        <template v-if="!event.group.closed" #right>
+                        <template v-if="!differentOrganization && !event.group.closed" #right>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -76,7 +80,7 @@
                     <hr>
 
                     <p class="style-button-bar right-align">
-                        <button class="button primary" type="button" @click="openGroup">
+                        <button class="button primary" type="button" @click="openGroup" :disabled="!!differentOrganization">
                             <span>Inschrijven</span>
                             <span class="icon arrow-right" />
                         </button>
@@ -86,7 +90,7 @@
 
             <STToolbar v-if="$isMobile && event.group">
                 <template #right>
-                    <button class="button primary" type="button" @click="openGroup">
+                    <button class="button primary" type="button" @click="openGroup" :disabled="!!differentOrganization">
                         <span>Inschrijven</span>
                         <span class="icon arrow-right" />
                     </button>
@@ -117,6 +121,7 @@ const googleMapsUrl = computed(() => {
     return null;
 });
 const groupOrganization = ref<Organization | null>(null);
+const differentOrganization = computed(() => props.event.group && !memberManager.family.checkout.cart.isEmpty && memberManager.family.checkout.singleOrganization?.id !== props.event.group.organizationId)
 
 function setOrganization(o: Organization) {
     groupOrganization.value = o as any;

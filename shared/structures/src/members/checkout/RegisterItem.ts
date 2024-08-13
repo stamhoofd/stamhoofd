@@ -631,15 +631,12 @@ export class RegisterItem {
             throw new Error("Group and organization do not match in RegisterItem.validate")
         }
 
-        if (!this.isInCart) {
-            this.calculatePrice()
-        }
-
-        if (this.calculatedPrice !== 0 && this.checkout.singleOrganization && this.checkout.singleOrganization.id !== this.organization.id) {
+        if (this.checkout.singleOrganization && this.checkout.singleOrganization.id !== this.organization.id) {
             throw new SimpleError({
                 code: "multiple_organizations",
                 message: "Cannot add items of multiple organizations to the checkout",
-                human: `Reken eerst jouw huidige winkelmandje af. Inschrijvingen voor ${this.group.settings.name} moeten aan een andere organisatie betaald worden en kan je daardoor niet samen afrekenen.`
+                human: `Reken eerst jouw huidige winkelmandje af. Inschrijvingen voor ${this.group.settings.name} moeten aan een andere organisatie betaald worden en kan je daardoor niet samen afrekenen.`,
+                meta: {recoverable: true}
             })
         }
 

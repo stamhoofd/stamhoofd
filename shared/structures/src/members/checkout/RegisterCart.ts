@@ -103,9 +103,9 @@ export class RegisterCart {
             return false;
         }
 
-        if (this.singleOrganization && item.organization.id !== this.singleOrganization.id) {
-            return false;
-        }
+        //if (this.singleOrganization && item.organization.id !== this.singleOrganization.id) {
+        //    return false;
+        //}
         return true;
     }
 
@@ -191,8 +191,7 @@ export class RegisterCart {
             return null;
         }
 
-        // First non-zero organization or the first item
-        return (this.items.find(i => i.calculatedPrice !== 0) ?? this.items[0]).organization
+        return this.items[0].organization
     }
 
     validate(data?: {memberBalanceItems?: BalanceItemWithPayments[]}) {
