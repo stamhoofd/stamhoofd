@@ -205,11 +205,11 @@
                             <p v-if="item.price < 0" class="style-description-small">
                                 Terugbetaling van {{ formatPrice(-item.price) }}
                             </p>
+                            <p v-else-if="item.balanceItem.status === 'Hidden' || (item.price !== 0 && item.balanceItem.price === 0)" class="style-tag error">
+                                Deze schuld werd verwijderd na betaling
+                            </p>
                             <p v-else-if="item.price !== item.balanceItem.price" class="style-description-small">
                                 Slechts deel van het totaalbedrag, {{ formatPrice(item.price) }} / {{ formatPrice(item.balanceItem.price) }}
-                            </p>
-                            <p v-if="item.balanceItem.status === 'Hidden'" class="style-tag error">
-                                Verwijderd
                             </p>
                             <template #right>
                                 {{ formatPrice(item.price) }}
