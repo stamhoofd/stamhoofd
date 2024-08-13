@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <div class="container">
             <h1>{{ title }}</h1>
 
@@ -19,7 +19,7 @@
                     <STList>
                         <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label">
                             <template #left>
-                                <Checkbox :model-value="isPremiseTypeSelected(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" />
+                                <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" />
                             </template>
                             <h2 class="style-title-list">
                                 {{ premiseType.name }}
@@ -62,7 +62,7 @@ const errors = useErrors();
 const platform$ = usePlatform();
 const organizationManager$ = useOrganizationManager();
 
-const {saving, hasChanges, save, patched, addPatch, shouldNavigateAway} = useEditPopup({
+const {saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway} = useEditPopup({
     errors,
     saveHandler: props.saveHandler,
     deleteHandler: props.deleteHandler,
@@ -126,6 +126,11 @@ function isPremiseTypeDisabled(premiseType: PlatformPremiseType) {
     // }
 
     return false;
+}
+
+
+async function deleteMe() {
+    await doDelete('Ben je zeker dat je dit gebouw wil verwijderen?');
 }
 
 defineExpose({

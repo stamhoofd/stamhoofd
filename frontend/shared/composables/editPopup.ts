@@ -1,6 +1,6 @@
 import { AutoEncoder, AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { usePop } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, useErrors, usePatch } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, Toast, useErrors, usePatch } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { Ref, readonly, ref } from "vue";
 
@@ -25,25 +25,22 @@ export function useEditPopup<T extends AutoEncoder>({errors, saveHandler, delete
         saving.value = false;
     };
 
-    const doDelete = async () => {
-        if (saving.value || deleting.value) {
+    const doDelete = async (text: string, confirmText?: string, description?: string) => {
+        if (saving.value || deleting.value || !deleteHandler) {
             return;
         }
-    
-        if (!deleteHandler) {
-            return;
-        }
-    
-        if (!await CenteredMessage.confirm($t('Ben je zeker dat je dit soort gebouw wilt verwijderen?'), $t('Verwijderen'), $t('Dit kan nare gevolgen hebben als er al gebouwen van dit type zijn'))) {
+
+        if (!await CenteredMessage.confirm(text, confirmText ?? $t('shared.confirmDelete'), description)) {
             return
         }
             
         deleting.value = true;
+
         try {
             await deleteHandler()
             await pop({ force: true }) 
         } catch (e) {
-            errors.errorBox = new ErrorBox(e)
+            Toast.fromError(e).show();
         }
     
         deleting.value = false;
