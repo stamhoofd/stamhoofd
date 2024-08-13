@@ -144,7 +144,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.SingleWebshopExpirationReminder: return 'Billing: Herinnering verlopen pakket enkele webshop'
             case EmailTemplateType.TrialWebshopsExpirationReminder: return 'Billing: Herinnering verlopen proefperiode pakket webshops'
             case EmailTemplateType.TrialMembersExpirationReminder: return 'Billing: Herinnering verlopen proefperiode pakket ledenadministratie'
-            case EmailTemplateType.OrderNotification: return 'Webshop: Bestelling notificatie voor beheerderss'
+            case EmailTemplateType.OrderNotification: return 'Webshop: Bestelling notificatie voor beheerders'
 
             case EmailTemplateType.RegistrationConfirmation: return 'Inschrijvingen: Bevestiging'
             case EmailTemplateType.RegistrationTransferDetails: return 'Inschrijvingen: Betaalinstructies met overschrijving'
