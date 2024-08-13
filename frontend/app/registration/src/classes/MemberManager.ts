@@ -116,6 +116,11 @@ export class MemberManager {
     }
 
     async loadMembers() {
+        if (this.$context.user?.members) {
+            this.family.insertFromBlob(this.$context.user.members)
+            return
+        }
+        
         const response = await this.$context.authenticatedServer.request({
             method: "GET",
             path: "/user/members",
