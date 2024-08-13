@@ -3,7 +3,7 @@
         <template #left>
             <EventImageBox :event="event" />
         </template>
-        <p v-if="levelPrefix" class="style-title-prefix style-limit-lines">
+        <p v-if="levelPrefix" class="style-title-prefix-list style-limit-lines">
             {{ levelPrefix }}
         </p>
         <h3 class="style-title-list larger">

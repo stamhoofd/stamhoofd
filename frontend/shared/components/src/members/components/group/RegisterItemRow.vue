@@ -7,16 +7,21 @@
             <MemberIcon :member="item.member" :icon="item.group.type === GroupType.WaitingList ? 'clock' : (item.replaceRegistrations.length ? 'sync' : '')" />
         </template>
 
-        <h3 class="style-title-list">
-            <span>{{ item.member.patchedMember.name }}</span>
-        </h3>
+        <template v-if="showGroup">
+            <p class="style-title-prefix-list">
+                {{ item.member.patchedMember.name }}
+            </p>
 
-        <p v-if="!item.organization" class="style-description">
-            {{ item.organization }}
-        </p>
-        <p v-if="showGroup" class="style-description">
-            Inschrijven voor {{ item.group.settings.name }}
-        </p>
+            <h3 class="style-title-list">
+                {{ item.group.settings.name }}
+            </h3>
+        </template>
+        <template v-else>
+            <h3 class="style-title-list">
+                {{ item.member.patchedMember.name }}
+            </h3>
+        </template>
+
         <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
 
         <template v-if="item.totalPrice !== 0">
@@ -62,7 +67,7 @@ import GroupIcon from './GroupIcon.vue';
 const props = withDefaults(
     defineProps<{
         item: RegisterItem;
-        showGroup: boolean;
+        showGroup?: boolean;
     }>(),
     {
         showGroup: true

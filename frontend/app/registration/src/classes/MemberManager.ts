@@ -2,9 +2,9 @@
 
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { Document, IDRegisterCheckout, MembersBlob, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
-import { reactive } from 'vue';
-import { watch } from 'vue';
+import { Document, GroupsWithOrganizations, IDRegisterCheckout, MembersBlob, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { reactive, watch } from 'vue';
 
 /**
  * Controls the fetching and decrypting of members
@@ -36,18 +36,62 @@ export class MemberManager {
             this.saveCheckout().catch(console.error)
         }, { deep: true });
     }
+    
+    async loadGroupsById(groupIds: string[], skipOrganizationIds: string[] = [], {owner, shouldRetry}: {owner?: any, shouldRetry?: boolean} = {}) {
+        if (groupIds.length === 0) {
+            return GroupsWithOrganizations.create({
+                groups: [],
+                organizations: []
+            })
+        }
+
+        const response = await this.$context.authenticatedServer.request({
+            method: 'GET',
+            path: '/groups',
+            query: {
+                ids: groupIds.join(','),
+                excludeOrganizationIds: skipOrganizationIds.length ? Formatter.uniqueArray(skipOrganizationIds).join(',') : undefined 
+            },
+            decoder: GroupsWithOrganizations as Decoder<GroupsWithOrganizations>,
+            owner,
+            shouldRetry: shouldRetry ?? false,
+        })
+        
+        return response.data
+    }
+
+    get storageKey() {
+        return "register_checkout_" + (STAMHOOFD.userMode === 'platform' ? 'platform' : (this.$context.organization?.id ?? "platform"))
+    }
 
     async loadCheckout() {
         console.log('Loading checkout')
 
         try {
-            const storedData = await Storage.keyValue.getItem("register_checkout_" + (this.$context.organization?.id ?? "platform"));
+            // Note: we should always use the platform one for platforms, since the focused organization isn't a hard requirement
+            const storedData = await Storage.keyValue.getItem(this.storageKey);
             if (storedData) {
                 const json = JSON.parse(storedData);
                 const data = new ObjectData(json, {version: 0})
                 const decoder = new VersionBoxDecoder(IDRegisterCheckout as Decoder<IDRegisterCheckout>)
                 const idCheckout = data.decode(decoder).data
-                const checkout = idCheckout.hydrate({family: this.family})
+
+                const groupIds = idCheckout.groupIds
+
+                const knownGroups = this.family.organizations.flatMap(o => o.period.groups)
+                const requestGroupIds = groupIds.filter(id => !knownGroups.some(g => g.id == id))
+
+                const groupsWithOrganizations = await this.loadGroupsById(requestGroupIds, this.family.organizations.map(o => o.id), {
+                    owner: {},
+                    shouldRetry: true
+                })
+                
+                const checkout = idCheckout.hydrate({
+                    members: this.family.members,
+                    groups: [...knownGroups, ...groupsWithOrganizations.groups],
+                    organizations: [...this.family.organizations, ...groupsWithOrganizations.organizations],
+                })
+
                 this.family.checkout = checkout
                 this.watchCheckout()
             }
@@ -61,7 +105,7 @@ export class MemberManager {
         try {
             const versionBox = new VersionBox(this.family.checkout.convert())
             const encoded = JSON.stringify(versionBox.encode({version: Version}))
-            await Storage.keyValue.setItem("register_checkout_" + (this.$context.organization?.id ?? "platform"), encoded);
+            await Storage.keyValue.setItem(this.storageKey, encoded);
         } catch (e) {
             console.error(e)
         }

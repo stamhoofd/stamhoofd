@@ -102,10 +102,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id)
 
         const memberIds = Formatter.uniqueArray(
-            [...request.body.cart.items.map(i => i.memberId), ...deleteRegistrationModels.map(i => i.memberId)]
+            [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId)]
         )
         const members = await Member.getBlobByIds(...memberIds)
-        const groupIds = Formatter.uniqueArray(request.body.cart.items.map(i => i.groupId))
+        const groupIds = request.body.groupIds
         const groups = await Group.getByIDs(...groupIds)
 
         for (const group of groups) {
