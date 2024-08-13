@@ -64,15 +64,20 @@
             <hr>
             <h2>Verhinder automatische toekenning</h2>
             <p>Als een lid gebruik wil maken van financiële ondersteuning dan zal hij goekeuring moeten vragen van een beheerder. In afwachting daarvan kan het lid niet inschrijven. Als het lid een UiTPAS-nummer met kansentarief opgeeft dan krijgt het lid wel automatisch financiële ondersteuning.</p>
-            <Checkbox v-model="preventSelfAssignment">
-                Verhinder automatische toekenning van financiële ondersteuning door een lid
-            </Checkbox>
 
-            <template v-if="preventSelfAssignment">
-                <STInputBox title="Verduidelijking voor een lid als hij niet kan inschrijven" class="max extra-padding">
-                    <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText" />
-                </STInputBox>
-            </template>
+            <STList>
+                <STListItem>
+                    <Checkbox v-model="preventSelfAssignment">
+                        Verhinder automatische toekenning van financiële ondersteuning door een lid
+                    </Checkbox>
+
+                    <template v-if="preventSelfAssignment">
+                        <STInputBox title="Verduidelijking voor een lid als hij niet kan inschrijven" class="max extra-padding">
+                            <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText" />
+                        </STInputBox>
+                    </template>
+                </STListItem>
+            </STList>
         </template>
     </SaveView>
 </template>
@@ -198,11 +203,4 @@ const shouldNavigateAway = async () => {
 defineExpose({
     shouldNavigateAway
 })
-
 </script>
-
-<style lang="scss" scoped>
-.extra-padding {
-    padding-top: 20px;
-}
-</style>
