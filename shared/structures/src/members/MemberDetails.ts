@@ -295,6 +295,12 @@ export class MemberDetails extends AutoEncoder {
                 this.notes = null;
             }
         }
+
+        // set requires financial support if uitpasNumber has 'kansentarief'
+        const hasFinancialSupport = !!this.requiresFinancialSupport?.value;
+        if((hasFinancialSupport === false) && this.uitpasNumber !== null && DataValidator.isUitpasNumberKansenTarief(this.uitpasNumber)) {
+            this.requiresFinancialSupport = BooleanStatus.create({value: true});
+        }
     }
 
     isEqual(other: MemberDetails): boolean {

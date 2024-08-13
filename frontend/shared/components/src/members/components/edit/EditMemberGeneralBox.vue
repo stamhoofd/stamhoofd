@@ -70,12 +70,6 @@
                             </template>. Vul enkel een e-mailadres van {{ member.patchedMember.firstName }} zelf in.
                         </p>
                     </template>
-                    <UitpasNumberInput
-                        v-if="isPropertyEnabled('uitpasNumber') || uitpasNumber"
-                        v-model="uitpasNumber"
-                        :required="isPropertyRequired('uitpasNumber')"
-                        :validator="validator"
-                    />
                 </template>
             </div>
             
@@ -100,7 +94,6 @@ import EmailInput from '../../../inputs/EmailInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import RadioGroup from '../../../inputs/RadioGroup.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
-import UitpasNumberInput from '../../../inputs/UitpasNumberInput.vue';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
 
@@ -214,13 +207,6 @@ const availableAddresses = computed(() => {
         list.push(props.member.patchedMember.details.address)
     }
     return list
-});
-
-const uitpasNumber = computed({
-    get: () => props.member.patchedMember.details.uitpasNumber,
-    set: (uitpasNumber) => {
-        props.member.addDetailsPatch({uitpasNumber});
-    }
 });
 
 function deleteEmail(n: number) {

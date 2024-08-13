@@ -1,5 +1,6 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { FinancialSupportSettings, PermissionLevel } from "@stamhoofd/structures";
+import { DataValidator } from "@stamhoofd/utility";
 import { markRaw } from "vue";
 import { MemberStepView } from "../..";
 import { NavigationActions } from "../../../types/NavigationActions";
@@ -37,6 +38,13 @@ export class MemberFinancialSupportStep implements EditMemberStep {
             } : undefined
         })) {
             return false;
+        }
+        
+        if(details.uitpasNumber !== null) {
+            // if uitpas number is 'kansentarief' this step can be skipped
+            if(DataValidator.isUitpasNumberKansenTarief(details.uitpasNumber)) {
+                return false;
+            }
         }
 
         if (details.requiresFinancialSupport === null) {
