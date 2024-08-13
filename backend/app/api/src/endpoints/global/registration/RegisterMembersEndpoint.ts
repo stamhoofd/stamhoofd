@@ -190,8 +190,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             memberBalanceItemsStructs = await BalanceItem.getStructureWithPayments(balanceItemsModels)
         }
 
-        console.log('isAdminFromSameOrganization', checkout.isAdminFromSameOrganization)
-
         // Validate the cart
         checkout.validate({memberBalanceItems: memberBalanceItemsStructs})
 
@@ -432,7 +430,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.reservedUntil = null
 
             if (shouldMarkValid) {
-                await registration.markValid()
+                await registration.markValid({skipEmail: bundle.item.replaceRegistrations.length > 0})
             } else {
                 // Reserve registration for 30 minutes (if needed)
                 const group = groups.find(g => g.id === registration.groupId)
@@ -443,7 +441,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 await registration.save()
             }
 
-            if (item.calculatedPrice === 0) {
+            // Note: we should always create the balance items: even when the price is zero
+            // Otherwise we don't know which registrations to activate after payment
+            
+            if (shouldMarkValid && item.calculatedPrice === 0) {
                 continue;
             }
 
