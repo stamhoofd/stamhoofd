@@ -26,24 +26,30 @@ const props = defineProps<{
 const currentCountry = useCountry();
 const platform = usePlatform();
 
-const premiseTypes = computed(() => platform.value.config.premiseTypes ?? [])
+const platformPremiseTypes = computed(() => platform.value.config.premiseTypes ?? [])
 
 const title = computed(() => {
     const premiseTypeIds = props.premise.premiseTypeIds;
 
     if(!premiseTypeIds.length) return 'Gebouw';
 
-    const typeNames = premiseTypeIds.map(premiseTypeId => {
-        const premiseType = premiseTypes.value.find(t => t.id === premiseTypeId);
-        if(!premiseType) return 'Onbekend';
-        return premiseType.name;
-    });
+    const allTypes = platformPremiseTypes.value;
+    
+    const typeNames = premiseTypeIds
+        .map(id => allTypes.findIndex(t => t.id === id))
+        // sort in same order as platform premise types
+        .sort()
+        .map(i => {
+            if(i === -1) return 'Onbekend';
+            const name = allTypes[i].name;
+            return name;
+        });
 
     if(typeNames.length === 1) return typeNames[0];
 
     const firstTypes = typeNames.slice(0, typeNames.length - 1).join(', ');
 
-    return `${firstTypes} & ${typeNames[typeNames.length - 1]}`
+    return `${firstTypes} & ${typeNames[typeNames.length - 1]}`;
 });
 
 const premiseString = computed(() => {

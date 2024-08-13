@@ -2,11 +2,7 @@
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <div class="container">
             <h1>{{ title }}</h1>
-
-            <p class="style-description-block">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates assumenda dolore doloribus cum molestiae minima cumque impedit, cupiditate architecto dolor consequatur repudiandae rerum deserunt dolorum, accusantium sit at iure recusandae!
-            </p>
-
+            <hr>
             <div class="container">
                 <h2>Adres</h2>
                 <AddressInput v-model="address" title="" :validator="errors.validator" :link-country-to-locale="true" />
@@ -17,14 +13,23 @@
                 <div class="container">
                     <h2>Soort</h2>
                     <STList>
-                        <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label">
+                        <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
                             <template #left>
                                 <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" />
                             </template>
-                            <h2 class="style-title-list">
-                                {{ premiseType.name }}
-                            </h2>
-                            <p v-if="premiseType.description" class="style-description-small">{{ premiseType.description }}</p>
+                            <div class="checkbox-label">
+                                <h2 class="style-title-list">
+                                    {{ premiseType.name }}
+                                </h2>
+                                <p v-if="premiseType.description" class="style-description-small">
+                                    {{ premiseType.description }}
+                                </p>
+                            </div>
+
+                            <template #right>
+                                <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
+                                <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van deze soort is bereikt. Verwijder eerst een ander gebouw van deze soort om deze soort te selecteren.'" class="icon info-circle hover-show" />
+                            </template>
                         </STListItem>
                     </STList>
                 </div>
@@ -37,9 +42,8 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { AddressInput, SaveView, useErrors, usePlatform } from "@stamhoofd/components";
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { useOrganizationManager } from '@stamhoofd/networking';
 import { PlatformPremiseType, Premise } from "@stamhoofd/structures";
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useEditPopup } from '../../../../../../shared/composables/editPopup';
 
 const props = withDefaults(
@@ -48,7 +52,7 @@ const props = withDefaults(
         isNew: boolean;
         saveHandler: (premise: AutoEncoderPatchType<Premise>) => Promise<void>;
         deleteHandler?: (() => Promise<void>)|null;
-        showToasts?: boolean;
+        premiseTypeCount: Map<string, {type: PlatformPremiseType, count: number}>
     }>(),
     {
         deleteHandler: null,
@@ -60,7 +64,6 @@ const $t = useTranslate();
 const title = computed(() => props.isNew ? $t('Nieuw gebouw') : $t('Wijzig gebouw'));
 const errors = useErrors();
 const platform$ = usePlatform();
-const organizationManager$ = useOrganizationManager();
 
 const {saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway} = useEditPopup({
     errors,
@@ -70,6 +73,7 @@ const {saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway
 });
 
 const premiseTypes = computed(() => platform$.value.config.premiseTypes);
+const premiseTypeWarnings = ref<Map<string, string>>(new Map());
 
 const premiseTypeIds = computed({
     get: () => patched.value.premiseTypeIds,
@@ -78,10 +82,7 @@ const premiseTypeIds = computed({
     }
 });
 
-const allPremiseTypeIdsOfOrganization = computed(() => organizationManager$.value?.organization.privateMeta?.premises
-    .filter(premise => premise.id !== props.premise.id)
-    .flatMap(premise => premise.premiseTypeIds) ?? []
-);
+const originalPremiseTypeIds = new Set(patched.value.premiseTypeIds);
 
 const address = computed({
     get: () => patched.value.address,
@@ -102,32 +103,59 @@ function selectPremiseType(isSelected: boolean, premiseType: PlatformPremiseType
     } else {
         premiseTypeIds.value = premiseTypeIds.value.filter(id => id !== premiseTypeId);
     }
+
+    updatePremiseTypeWarnings();
 }
 
 function isPremiseTypeSelected(premiseType: PlatformPremiseType) {
     return premiseTypeIds.value.includes(premiseType.id);
 }
 
-function isPremiseTypeDisabled(premiseType: PlatformPremiseType) {
+function isPremiseTypeDisabled(premiseType: PlatformPremiseType) {    
     // todo: handle min on higher level?
     const max = premiseType.max;
     const min = premiseType.min;
     if(max === null && min === null) return false;
 
     const premiseTypeId = premiseType.id;
-    const count = allPremiseTypeIdsOfOrganization.value.filter(id => id === premiseTypeId).length;
 
-    if(max !== null && count >= max && !isPremiseTypeSelected(premiseType)) {
-        return true;
+    const typeCount = props.premiseTypeCount.get(premiseTypeId);
+
+    if(!typeCount) {
+        console.error(`Premise type ${premiseTypeId} not found in premiseTypeCount`);
+        return;
     }
 
-    // if(min !== null && count < min && isPremiseTypeSelected(premiseType)) {
-    //     return true;
-    // }
+    const count = typeCount.count;
+
+    if(max !== null && count >= max && !originalPremiseTypeIds.has(premiseTypeId)) {
+        return true;
+    }
 
     return false;
 }
 
+function updatePremiseTypeWarnings() {
+    const currentPremiseTypeIds = new Set(premiseTypeIds.value);
+    const warnings = new Map<string, string>();
+
+    for(const [id, {count, type}] of props.premiseTypeCount.entries()) {
+        const isSelected = currentPremiseTypeIds.has(id);
+        if(isSelected) continue;
+        const wasSelected = originalPremiseTypeIds.has(id);
+        const isChanged = isSelected !== wasSelected;
+        if(isChanged) {
+            const min = type.min;
+
+            if(min !== null && count <= min) {
+                const message = `Het minimum aantal van dit soort is ${min}.`;
+                warnings.set(id, message);
+            }
+        }
+    }
+
+    premiseTypeWarnings.value = warnings;
+}
 
 async function deleteMe() {
     await doDelete('Ben je zeker dat je dit gebouw wil verwijderen?');
@@ -137,3 +165,12 @@ defineExpose({
     shouldNavigateAway
 });
 </script>
+
+<style lang="scss" scoped>
+.checkbox-label {
+    min-height: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+</style>
