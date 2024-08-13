@@ -65,19 +65,35 @@
         <hr>
         <h2>Geavanceerde instellingen</h2>
 
-        <Checkbox v-if="!enableBuckaroo" key="mollie" v-model="forceMollie">
-            Mollie (betaalprovider)
-        </Checkbox>
-        <p class="style-description-small">
-            Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
-        </p>
+        <STList>
+            <STListItem :selectable="true" element-name="label" v-if="!enableBuckaroo">
+                <template #left>
+                    <Checkbox v-model="forceMollie" />
+                </template>
 
-        <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)">
-            Kortingen en kortingscodes in webshops
-        </Checkbox>
-        <p class="style-description-small">
-            Volg de ontwikkeling van kortingen op webshops via <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">de feedback tool</a>
-        </p>
+                <h3 class="style-title-list">
+                    Mollie (betaalprovider)
+                </h3>
+
+                <p class="style-description-small">
+                    Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
+                </p>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label" v-if="!enableBuckaroo">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Kortingen en kortingscodes in webshops
+                </h3>
+
+                <p class="style-description-small">
+                    Volg de ontwikkeling van kortingen op webshops via <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">de feedback tool</a>
+                </p>
+            </STListItem>
+        </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>
