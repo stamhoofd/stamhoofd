@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, User, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, UserPermissions } from "@stamhoofd/structures";
+import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
+import { BuckarooSettings, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -98,6 +98,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
+                organization.privateMeta.premises = patchObject(organization.privateMeta.premises, request.body.privateMeta.premises);
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
                 organization.privateMeta.responsibilities = request.body.privateMeta.responsibilities.applyTo(organization.privateMeta.responsibilities)
                 organization.privateMeta.inheritedResponsibilityRoles = request.body.privateMeta.inheritedResponsibilityRoles.applyTo(organization.privateMeta.inheritedResponsibilityRoles)

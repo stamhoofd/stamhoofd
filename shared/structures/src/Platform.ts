@@ -2,14 +2,14 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { v4 as uuidv4 } from "uuid";
 
 import { DefaultAgeGroup } from "./DefaultAgeGroup";
+import { Replacement } from "./endpoints/EmailRequest";
+import { Image } from "./files/Image";
 import { MemberResponsibility } from "./MemberResponsibility";
+import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 import { OrganizationEmail } from "./OrganizationEmail";
 import { PermissionRoleDetailed } from "./Permissions";
 import { RegistrationPeriod } from "./RegistrationPeriod";
 import { UserWithMembers } from "./UserWithMembers";
-import { Replacement } from "./endpoints/EmailRequest";
-import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
-import { Image } from "./files/Image";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -25,6 +25,29 @@ export class OrganizationTag extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     name = ''
+}
+
+export class PlatformPremiseType extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    name = ''
+
+    @field({ decoder: StringDecoder, version: 319 })
+    description = ''
+
+    /**
+     * Maximum number of premises allowed for this premise type
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 319 })
+    max: null | number = null
+        
+    /**
+    * Minimum number of premises allowed for this premise type
+    */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 319 })
+    min: null | number = null
 }
 
 export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
@@ -132,7 +155,7 @@ export class PlatformEventType extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ''
 
-    @field({ decoder: StringDecoder })
+    @field({ decoder: StringDecoder})
     description = ''
 
     /**
@@ -160,6 +183,9 @@ export class PlatformConfig extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(OrganizationTag), version: 260 })
     tags: OrganizationTag[] = []
+
+    @field({ decoder: new ArrayDecoder(PlatformPremiseType), version: 319 })
+    premiseTypes: PlatformPremiseType[] = []
 
     @field({ decoder: new ArrayDecoder(DefaultAgeGroup), version: 261 })
     defaultAgeGroups: DefaultAgeGroup[] = []

@@ -92,6 +92,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/house.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Gebouwen
+                    </h2>
+                    <p class="style-description">
+                        Beheer de gebouwen
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <template v-if="membersPackage">
@@ -309,21 +324,22 @@ import { defineRoutes, useNavigate, usePresent } from "@simonbackx/vue-app-navig
 import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { useOrganizationManager, useRequestOwner } from "@stamhoofd/networking";
 import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from "@stamhoofd/structures";
-import { ComponentOptions, computed, ref, Ref } from "vue";
-import { buildManageGroupsComponent } from "./buildManageGroupsComponent";
+import { ComponentOptions, Ref, computed, ref } from "vue";
 import GeneralSettingsView from "./GeneralSettingsView.vue";
 import LabsView from "./LabsView.vue";
-import FreeContributionSettingsView from "./modules/members/FreeContributionSettingsView.vue";
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
-import BillingWarningBox from './packages/BillingWarningBox.vue';
-import PackageSettingsView from "./packages/PackageSettingsView.vue";
 import PaymentSettingsView from "./PaymentSettingsView.vue";
 import PersonalizeSettingsView from "./PersonalizeSettingsView.vue";
+import PremisesView from "./PremisesView.vue";
 import PrivacySettingsView from "./PrivacySettingsView.vue";
 import ReferralView from "./ReferralView.vue";
 import RegistrationPageSettingsView from "./RegistrationPageSettingsView.vue";
 import RegistrationPaymentSettingsView from "./RegistrationPaymentSettingsView.vue";
 import SSOSettingsView from "./SSOSettingsView.vue";
+import { buildManageGroupsComponent } from "./buildManageGroupsComponent";
+import FreeContributionSettingsView from "./modules/members/FreeContributionSettingsView.vue";
+import BillingWarningBox from './packages/BillingWarningBox.vue';
+import PackageSettingsView from "./packages/PackageSettingsView.vue";
 
 enum Routes {
     General = 'algemeen',
@@ -341,7 +357,8 @@ enum Routes {
     SingleSignOn = 'sso',
     Packages = 'pakketten',
     Referrals = 'referrals',
-    Labs = 'experimenten'
+    Labs = 'experimenten',
+    Premises = 'gebouwen',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -455,6 +472,11 @@ defineRoutes([
         url: Routes.Labs,
         present: 'popup',
         component: LabsView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.Premises,
+        present: 'popup',
+        component: PremisesView as unknown as ComponentOptions,
     }
 ])
 const $navigate = useNavigate()

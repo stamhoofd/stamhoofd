@@ -1,0 +1,172 @@
+<template>
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
+        <div class="container">
+            <h1>{{ title }}</h1>
+            <hr>
+            <h2>Adres</h2>
+            <AddressInput v-model="address" title="" :validator="errors.validator" :link-country-to-locale="true" />
+        
+            <div v-if="premiseTypes.length" class="container">
+                <hr>
+                <h2>Soort</h2>
+                <STList>
+                    <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
+                        <template #left>
+                            <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" />
+                        </template>
+                        <div class="checkbox-label">
+                            <h2 class="style-title-list">
+                                {{ premiseType.name }}
+                            </h2>
+                            <p v-if="premiseType.description" class="style-description-small">
+                                {{ premiseType.description }}
+                            </p>
+                        </div>
+
+                        <template #right>
+                            <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van deze soort is bereikt. Verwijder eerst een ander gebouw van deze soort om deze soort te selecteren.'" class="icon info-circle hover-show" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
+        </div>
+    </SaveView>
+</template>
+
+<script lang="ts" setup>
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AddressInput, SaveView, useErrors, usePlatform } from "@stamhoofd/components";
+import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { PlatformPremiseType, Premise } from "@stamhoofd/structures";
+import { computed, ref } from 'vue';
+import { useEditPopup } from '../../../../../../shared/composables/editPopup';
+
+const props = withDefaults(
+    defineProps<{
+        premise: Premise;
+        isNew: boolean;
+        saveHandler: (premise: AutoEncoderPatchType<Premise>) => Promise<void>;
+        deleteHandler?: (() => Promise<void>)|null;
+        premiseTypeCount: Map<string, {type: PlatformPremiseType, count: number}>
+    }>(),
+    {
+        deleteHandler: null,
+    }
+);
+
+const $t = useTranslate();
+
+const title = computed(() => props.isNew ? $t('Nieuw gebouw') : $t('Wijzig gebouw'));
+const errors = useErrors();
+const platform$ = usePlatform();
+
+const {saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway} = useEditPopup({
+    errors,
+    saveHandler: props.saveHandler,
+    deleteHandler: props.deleteHandler,
+    toPatch: props.premise
+});
+
+const premiseTypes = computed(() => platform$.value.config.premiseTypes);
+const premiseTypeWarnings = ref<Map<string, string>>(new Map());
+
+const premiseTypeIds = computed({
+    get: () => patched.value.premiseTypeIds,
+    set: (premiseTypeIds) => {
+        addPatch({premiseTypeIds: premiseTypeIds as any});
+    }
+});
+
+const originalPremiseTypeIds = new Set(patched.value.premiseTypeIds);
+
+const address = computed({
+    get: () => patched.value.address,
+    set: (address) => {
+        addPatch({address});
+    }
+})
+
+function selectPremiseType(isSelected: boolean, premiseType: PlatformPremiseType) {
+    const premiseTypeId = premiseType.id;
+
+    if(isSelected) {
+        if(premiseTypeIds.value.includes(premiseTypeId)) {
+            console.error(`${premiseType.name} is already selected`);
+        } else {
+            premiseTypeIds.value = [...premiseTypeIds.value, premiseTypeId];
+        }
+    } else {
+        premiseTypeIds.value = premiseTypeIds.value.filter(id => id !== premiseTypeId);
+    }
+
+    updatePremiseTypeWarnings();
+}
+
+function isPremiseTypeSelected(premiseType: PlatformPremiseType) {
+    return premiseTypeIds.value.includes(premiseType.id);
+}
+
+function isPremiseTypeDisabled(premiseType: PlatformPremiseType) {    
+    // todo: handle min on higher level?
+    const max = premiseType.max;
+    const min = premiseType.min;
+    if(max === null && min === null) return false;
+
+    const premiseTypeId = premiseType.id;
+
+    const typeCount = props.premiseTypeCount.get(premiseTypeId);
+
+    if(!typeCount) {
+        console.error(`Premise type ${premiseTypeId} not found in premiseTypeCount`);
+        return;
+    }
+
+    const count = typeCount.count;
+
+    if(max !== null && count >= max && !originalPremiseTypeIds.has(premiseTypeId)) {
+        return true;
+    }
+
+    return false;
+}
+
+function updatePremiseTypeWarnings() {
+    const currentPremiseTypeIds = new Set(premiseTypeIds.value);
+    const warnings = new Map<string, string>();
+
+    for(const [id, {count, type}] of props.premiseTypeCount.entries()) {
+        const isSelected = currentPremiseTypeIds.has(id);
+        if(isSelected) continue;
+        const wasSelected = originalPremiseTypeIds.has(id);
+        const isChanged = isSelected !== wasSelected;
+        if(isChanged) {
+            const min = type.min;
+
+            if(min !== null && count <= min) {
+                const message = `Het minimum aantal van deze soort is ${min}.`;
+                warnings.set(id, message);
+            }
+        }
+    }
+
+    premiseTypeWarnings.value = warnings;
+}
+
+async function deleteMe() {
+    await doDelete('Ben je zeker dat je dit gebouw wil verwijderen?');
+}
+
+defineExpose({
+    shouldNavigateAway
+});
+</script>
+
+<style lang="scss" scoped>
+.checkbox-label {
+    min-height: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+</style>

@@ -1,6 +1,6 @@
 <template>
     <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box" :class="{indent}">
-        <h4 v-if="title">
+        <h4 :style="{display: title ? 'flex' : 'none'}">
             <label>{{ title }}</label>
             <div class="right">
                 <slot name="right" />
@@ -12,7 +12,7 @@
 
 
 <script lang="ts">
-import { Component, Prop,Vue } from "@simonbackx/vue-app-navigation/classes";
+import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsInput from '../errors/STErrorsInput.vue';

@@ -128,6 +128,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/house.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Soorten gebouwen') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Stel in welke soorten gebouwen groepen kunnen toevoegen') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
 
@@ -172,15 +187,16 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, RecordsConfigurationView, Toast, usePlatform, EditEmailTemplatesView, EmailSettingsView, EditResponsibilitiesView } from '@stamhoofd/components';
+import { AdminsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, RecordsConfigurationView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
+import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
+import EditEventTypesView from './event-types/EditEventTypesView.vue';
+import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
-import EditEventTypesView from './event-types/EditEventTypesView.vue';
-import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 
 enum Routes {
     Admins = 'beheerders',
@@ -192,7 +208,8 @@ enum Routes {
     EmailTemplates = 'email-templates',
     EmailSettings = 'emailadressen',
     EventTypes = 'soorten-activiteiten',
-    CorporateIdentity = 'huisstijl'
+    CorporateIdentity = 'huisstijl',
+    Premises = 'gebouwen',
 }
 
 const platform = usePlatform()
@@ -260,6 +277,11 @@ defineRoutes([
         url: Routes.EventTypes,
         present: 'popup',
         component: EditEventTypesView as ComponentOptions,
+    },
+    {
+        url: Routes.Premises,
+        present: 'popup',
+        component: EditPremiseTypesView as ComponentOptions,
     }
 ])
 const $navigate = useNavigate()

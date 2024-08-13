@@ -55,13 +55,13 @@ export class FinancialSupportSettings extends AutoEncoder {
      * Whether a member can self assign financial support.
      * If false a member who chooses financial support cannot self subscribe.
      */
-    @field({ decoder: BooleanDecoder, optional: true, version: 318 })
+    @field({ decoder: BooleanDecoder, optional: true, version: 319 })
     preventSelfAssignment = false
 
     /**
      * The text that a member sees if he cannot inscribe with financial support.
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 318 })
+    @field({ decoder: StringDecoder, nullable: true, version: 319 })
     preventSelfAssignmentText: string | null = null
 
     static get defaultDescription() {
