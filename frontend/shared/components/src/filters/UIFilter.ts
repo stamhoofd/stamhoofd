@@ -110,10 +110,10 @@ export function filterToString(filter: StamhoofdFilter, builder: UIFilterBuilder
 export function propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
     if (filter.enabledWhen === null || isEmptyFilter(filter.enabledWhen)) {
         if (filter.requiredWhen === null) {
-            return 'Stap kan worden overgeslagen';
+            return 'Optioneel';
         }
         if (isEmptyFilter(filter.requiredWhen)) {
-            return 'Verplichte vragenlijst';
+            return 'Verplicht';
         }
 
         return "Verplicht in te vullen als: "+ filterToString(filter.requiredWhen, builder) + ' (anders optioneel)'
