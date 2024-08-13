@@ -64,13 +64,13 @@
             <hr>
             <h2>Verhinder automatische toekenning</h2>
             <p>Als een lid gebruik wil maken van financiële ondersteuning dan zal hij goekeuring moeten vragen van een beheerder. In afwachting daarvan kan het lid niet inschrijven. Als het lid een UiTPAS-nummer met kansentarief opgeeft dan krijgt het lid wel automatisch financiële ondersteuning.</p>
-            <Checkbox v-model="isPreventSelfAssignment">
+            <Checkbox v-model="preventSelfAssignment">
                 Verhinder automatische toekenning van financiële ondersteuning door een lid
             </Checkbox>
 
-            <template v-if="isPreventSelfAssignment">
+            <template v-if="preventSelfAssignment">
                 <STInputBox title="Verduidelijking voor een lid als hij niet kan inschrijven" class="max extra-padding">
-                    <textarea v-model="isPreventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultIsPreventSelfAssignmentText" />
+                    <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText" />
                 </STInputBox>
             </template>
         </template>
@@ -156,20 +156,20 @@ const priceName = computed({
     }
 });
 
-const isPreventSelfAssignment = computed({
-    get: () => patched.value.financialSupport?.isPreventSelfAssignment === true,
-    set: (isPreventSelfAssignment: boolean) => {
+const preventSelfAssignment = computed({
+    get: () => patched.value.financialSupport?.preventSelfAssignment === true,
+    set: (preventSelfAssignment: boolean) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({isPreventSelfAssignment})
+            financialSupport: FinancialSupportSettings.patch({preventSelfAssignment})
         });
     }
 });
 
-const isPreventSelfAssignmentText = computed({
-    get: () => patched.value.financialSupport?.isPreventSelfAssignmentText ?? FinancialSupportSettings.defaultIsPreventSelfAssignmentText,
-    set: (isPreventSelfAssignmentText: string) => {
+const preventSelfAssignmentText = computed({
+    get: () => patched.value.financialSupport?.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText,
+    set: (preventSelfAssignmentText: string) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({isPreventSelfAssignmentText})
+            financialSupport: FinancialSupportSettings.patch({preventSelfAssignmentText})
         });
     }
 });

@@ -55,14 +55,14 @@ export class FinancialSupportSettings extends AutoEncoder {
      * Whether a member can self assign financial support.
      * If false a member who chooses financial support cannot self subscribe.
      */
-    @field({ decoder: BooleanDecoder, optional: true, version: 308 })
-    isPreventSelfAssignment = false
+    @field({ decoder: BooleanDecoder, optional: true, version: 318 })
+    preventSelfAssignment = false
 
     /**
      * The text that a member sees if he cannot inscribe with financial support.
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 309 })
-    isPreventSelfAssignmentText: string | null = null
+    @field({ decoder: StringDecoder, nullable: true, version: 318 })
+    preventSelfAssignmentText: string | null = null
 
     static get defaultDescription() {
         return "We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om."
@@ -84,7 +84,7 @@ export class FinancialSupportSettings extends AutoEncoder {
         return "Gebruikt financiële ondersteuning"
     }
 
-    static get defaultIsPreventSelfAssignmentText() {
+    static get defaultPreventSelfAssignmentText() {
         return "Er is goedkeuring nodig om in te schrijven met financiële ondersteuning. Gelieve de groep te contacteren."
     }
 }

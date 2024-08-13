@@ -1009,13 +1009,13 @@ export class AdminPermissionChecker {
 
             if(isSetFinancialSupportTrue) {
                 const financialSupport = this.platform.config.recordsConfiguration.financialSupport;
-                const isPreventSelfAssignment = financialSupport?.isPreventSelfAssignment === true;
+                const preventSelfAssignment = financialSupport?.preventSelfAssignment === true;
 
-                if(isPreventSelfAssignment) {
+                if(preventSelfAssignment) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
-                        human: financialSupport.isPreventSelfAssignmentText ?? FinancialSupportSettings.defaultIsPreventSelfAssignmentText,
+                        human: financialSupport.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText,
                         statusCode: 400
                     });
                 }

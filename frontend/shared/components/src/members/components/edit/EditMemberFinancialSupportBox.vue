@@ -95,18 +95,18 @@ function tryCreateRequiresFinancialSupportPatch(requiresFinancialSupport: boolea
         return props.member.platform.config.recordsConfiguration.financialSupport;
     }
 
-    function getIsPreventSelfAssignment(financialSupportSettings: FinancialSupportSettings | null): boolean {
-        return !!financialSupportSettings?.isPreventSelfAssignment;
+    function getPreventSelfAssignment(financialSupportSettings: FinancialSupportSettings | null): boolean {
+        return !!financialSupportSettings?.preventSelfAssignment;
     }
 
     if(!isAdmin) {
         const settings = getFinancialSupportSettings();
 
-        if(requiresFinancialSupport && getIsPreventSelfAssignment(settings)) {
+        if(requiresFinancialSupport && getPreventSelfAssignment(settings)) {
             throw new SimpleError({
                 code: 'financial-support-prevent-assignment',
                 message: 'self assignment of financial support is not allowed',
-                human: settings?.isPreventSelfAssignmentText ?? FinancialSupportSettings.defaultIsPreventSelfAssignmentText
+                human: settings?.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText
             });
         }
     }
