@@ -82,19 +82,11 @@
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>
             <h2>
-                Instellingen beheerd door Stamhoofd
+                Platforminstellingen (enkel voor platformbeheerders)
             </h2>
 
             <Checkbox v-model="useTestPayments">
                 Activeer test-modus voor betalingen
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('stamhoofd-pay-by-transfer')" @update:model-value="setFeatureFlag('stamhoofd-pay-by-transfer', !!$event)">
-                Stamhoofd betalen via overschrijving
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('stamhoofd-pay-by-saved')" @update:model-value="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
-                Stamhoofd betalen via opgeslagen betaalmethode
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">

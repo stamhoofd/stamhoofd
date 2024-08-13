@@ -262,7 +262,7 @@
         <template v-if="isStamhoofd">
             <hr>
             <h2>
-                Instellingen beheerd door Stamhoofd
+                Platforminstellingen (enkel voor platformbeheerders)
             </h2>
 
             <Checkbox v-model="useTestPayments">
@@ -271,14 +271,6 @@
 
             <Checkbox v-model="enableBuckaroo">
                 Gebruik Buckaroo voor online betalingen
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('stripe')" @update:model-value="setFeatureFlag('stripe', !!$event)">
-                Stripe koppeling toestaan
-            </Checkbox>
-
-            <Checkbox v-if="!enableBuckaroo" v-model="forceMollie">
-                Mollie koppeling toestaan
             </Checkbox>
 
             <div v-if="enableBuckaroo" class="split-inputs">
