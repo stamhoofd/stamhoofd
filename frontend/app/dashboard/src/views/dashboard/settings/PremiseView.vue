@@ -107,10 +107,12 @@ const hasUnknownType = unknownTypeIds.length > 0;
 const isUnknownTypeSelected = ref(hasUnknownType);
 
 function selectUnkownType(isSelected: boolean) {
+    const knownTypeIds = premiseTypeIds.value.filter(id => distinctPlatformTypeIds.has(id));
+
     if(isSelected) {
-        premiseTypeIds.value = premiseTypeIds.value.concat(unknownTypeIds);
+        premiseTypeIds.value = knownTypeIds.concat(unknownTypeIds);
     } else {
-        premiseTypeIds.value = premiseTypeIds.value.filter(id => distinctPlatformTypeIds.has(id));
+        premiseTypeIds.value = knownTypeIds;
     }
 
     isUnknownTypeSelected.value = isSelected;
