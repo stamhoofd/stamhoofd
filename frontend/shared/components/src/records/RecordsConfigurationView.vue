@@ -71,20 +71,22 @@ import { CenteredMessage, ErrorBox, memberWithRegistrationsBlobUIFilterBuilders,
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
-import DataPermissionSettingsView from './DataPermissionSettingsView.vue';
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
-import FinancialSupportSettingsView from './FinancialSupportSettingsView.vue';
 import { RecordEditorSettings } from './RecordEditorSettings';
 import InheritedRecordsConfigurationBox from './components/InheritedRecordsConfigurationBox.vue';
 import RecordCategoryRow from './components/RecordCategoryRow.vue';
 
 type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts';
 
-const props = defineProps<{
-    recordsConfiguration: OrganizationRecordsConfiguration,
-    inheritedRecordsConfiguration?: OrganizationRecordsConfiguration,
-    saveHandler: (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => Promise<void>
-}>();
+const props = withDefaults(
+    defineProps<{
+        recordsConfiguration: OrganizationRecordsConfiguration,
+        inheritedRecordsConfiguration?: OrganizationRecordsConfiguration|null,
+        saveHandler: (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => Promise<void>
+    }>(), {
+        inheritedRecordsConfiguration: null
+    }
+);
 
 enum Routes {
     NewRecordCategory = "newRecordCategory",
@@ -149,34 +151,6 @@ defineRoutes([
             }
         },
         present: 'popup'
-    },
-    {
-        name: Routes.DataPermissions,
-        url: 'toestemming-gegevensverzameling',
-        component: DataPermissionSettingsView as ComponentOptions,
-        paramsToProps() {
-            return {
-                recordsConfiguration: patched.value,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                    addPatch(patch)
-                }
-            }
-        },
-        present: 'popup'
-    },
-    {
-        name: Routes.FinancialSupport,
-        url: 'financiele-ondersteuning',
-        component: FinancialSupportSettingsView as ComponentOptions,
-        paramsToProps() {
-            return {
-                recordsConfiguration: patched.value,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                    addPatch(patch)
-                }
-            }
-        },
-        present: 'popup'
     }
 ])
 
@@ -185,6 +159,7 @@ const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
 const {patch, patched, addPatch, hasChanges} = usePatch(props.recordsConfiguration);
+
 const $t = useTranslate();
 const $navigate = useNavigate();
 const organization = useOrganization()
