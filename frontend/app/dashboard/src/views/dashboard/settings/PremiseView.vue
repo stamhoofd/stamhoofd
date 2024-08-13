@@ -4,13 +4,13 @@
             <h1>{{ title }}</h1>
             <hr>
             <h2>Adres</h2>
-            <AddressInput v-model="address" title="" :validator="errors.validator" :link-country-to-locale="true" />
+            <AddressInput v-model="address" :validator="errors.validator" :link-country-to-locale="true" />
         
-            <div v-if="premiseTypes.length" class="container">
+            <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr>
                 <h2>Soort</h2>
                 <STList>
-                    <STListItem v-for="premiseType of premiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
+                    <STListItem v-for="premiseType of platformPremiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
                         <template #left>
                             <Checkbox :model-value="isPremiseTypeSelected(premiseType)" :disabled="isPremiseTypeDisabled(premiseType)" @update:model-value="($event: boolean) => selectPremiseType($event, premiseType)" />
                         </template>
@@ -27,6 +27,19 @@
                             <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
                             <span v-else-if="isPremiseTypeDisabled(premiseType)" v-tooltip="'Het maximum aantal van deze soort is bereikt. Verwijder eerst een ander gebouw van deze soort om deze soort te selecteren.'" class="icon info-circle hover-show" />
                         </template>
+                    </STListItem>
+                    <STListItem v-if="hasUnknownType" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox :model-value="isUnknownTypeSelected" @update:model-value="selectUnkownType" />
+                        </template>
+                        <div class="checkbox-label">
+                            <h2 class="style-title-list">
+                                Onbekend
+                            </h2>
+                            <p class="style-description-small">
+                                Deze soort is onbekend. Waarschijnlijk is deze soort verwijderd.
+                            </p>
+                        </div>
                     </STListItem>
                 </STList>
             </div>
@@ -68,7 +81,7 @@ const {saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway
     toPatch: props.premise
 });
 
-const premiseTypes = computed(() => platform$.value.config.premiseTypes);
+const platformPremiseTypes = computed(() => platform$.value.config.premiseTypes);
 const premiseTypeWarnings = ref<Map<string, string>>(new Map());
 
 const premiseTypeIds = computed({
@@ -78,14 +91,33 @@ const premiseTypeIds = computed({
     }
 });
 
-const originalPremiseTypeIds = new Set(patched.value.premiseTypeIds);
-
 const address = computed({
     get: () => patched.value.address,
     set: (address) => {
         addPatch({address});
     }
 })
+
+const originalPremiseTypeIds = new Set(patched.value.premiseTypeIds);
+
+//#region unknown types
+const distinctPlatformTypeIds = new Set(platformPremiseTypes.value.map(type => type.id));
+const unknownTypeIds = Array.from(originalPremiseTypeIds).filter(id => !distinctPlatformTypeIds.has(id));
+const hasUnknownType = unknownTypeIds.length > 0;
+const isUnknownTypeSelected = ref(hasUnknownType);
+
+function selectUnkownType(isSelected: boolean) {
+    const knownTypeIds = premiseTypeIds.value.filter(id => distinctPlatformTypeIds.has(id));
+
+    if(isSelected) {
+        premiseTypeIds.value = knownTypeIds.concat(unknownTypeIds);
+    } else {
+        premiseTypeIds.value = knownTypeIds;
+    }
+
+    isUnknownTypeSelected.value = isSelected;
+}
+//#endregion
 
 function selectPremiseType(isSelected: boolean, premiseType: PlatformPremiseType) {
     const premiseTypeId = premiseType.id;
@@ -107,8 +139,7 @@ function isPremiseTypeSelected(premiseType: PlatformPremiseType) {
     return premiseTypeIds.value.includes(premiseType.id);
 }
 
-function isPremiseTypeDisabled(premiseType: PlatformPremiseType) {    
-    // todo: handle min on higher level?
+function isPremiseTypeDisabled(premiseType: PlatformPremiseType) {
     const max = premiseType.max;
     const min = premiseType.min;
     if(max === null && min === null) return false;
