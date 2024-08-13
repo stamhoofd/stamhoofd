@@ -1,7 +1,7 @@
 <template>
     <div>
-        <picture v-if="horizontalLogo" class="organization-logo horizontal" :class="{expand, 'hide-smartphone': !!squareLogo}">
-            <source 
+        <figure v-if="horizontalLogo" class="organization-logo horizontal" :class="{expand, 'hide-smartphone': !!squareLogo}">
+            <!--<source 
                 v-if="horizontalLogoDark && (darkMode === 'Auto' || darkMode === 'On')"
                 :srcset="logoHorizontalSrcSet(horizontalLogoDark)"
                 :media="darkMode === 'Auto' ? '(prefers-color-scheme: dark)' : ''"
@@ -15,10 +15,11 @@
                 :height="getHorizontalResolution(horizontalLogo).height"
                 :alt="name"
             >
-        </picture>
+            -->
+        </figure>
 
-        <picture v-if="squareLogo" class="organization-logo" :class="{expand, 'only-smartphone': !!horizontalLogo}">
-            <source 
+        <figure v-if="squareLogo" class="organization-logo" :class="{expand, 'only-smartphone': !!horizontalLogo}">
+            <!--<source 
                 v-if="darkMode === 'Auto' || darkMode === 'On'"
                 :srcset="logoSrcSet(squareLogoDark)"
                 :media="darkMode === 'Auto' ? '(prefers-color-scheme: dark)' : ''"
@@ -31,8 +32,8 @@
                 :width="getResolution(squareLogo).width"
                 :height="getResolution(squareLogo).height"
                 :alt="name"
-            >
-        </picture>
+            >-->
+        </figure>
 
         <span v-if="!horizontalLogo && !squareLogo" class="organization-logo-text">
             {{ name }}

@@ -8,7 +8,7 @@
             <STErrorsDefault :error-box="errorBox" />
             <EmailInput v-model="email" title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :validator="validator" class="max" />
         
-            <LoadingButton :loading="loading" class="block bottom">
+            <LoadingButton :loading="loading" class="block">
                 <button class="button primary full" type="submit">
                     Opnieuw instellen
                 </button>

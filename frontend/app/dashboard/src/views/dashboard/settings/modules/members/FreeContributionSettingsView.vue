@@ -52,7 +52,6 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
 
 

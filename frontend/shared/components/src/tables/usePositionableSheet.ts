@@ -1,8 +1,14 @@
 import { PushOptions, usePresent } from "@simonbackx/vue-app-navigation";
 
-function calculateModalPosition(event: MouseEvent) {
-    const padding = 15;
-    let width = 400;
+export type PositionableSheetOptions = {
+    width?: number, padding?: number 
+}
+
+function calculateModalPosition(event: MouseEvent, options?: PositionableSheetOptions) {
+    const padding = options?.padding ?? 15;
+    const innerPadding = 15;
+
+    let width = options?.width ?? 400;
     const button = event.currentTarget as HTMLElement
     const bounds = button.getBoundingClientRect()
     const win = window,
@@ -11,14 +17,14 @@ function calculateModalPosition(event: MouseEvent) {
         body = doc.getElementsByTagName("body")[0],
         clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
 
-    let left = bounds.left - padding;
+    let left = bounds.left - innerPadding;
 
-    if (left + width > clientWidth + padding) {
-        left = clientWidth - padding - width;
+    if (left + width > clientWidth + innerPadding) {
+        left = clientWidth - innerPadding - width;
 
-        if (left < padding) {
-            left = padding;
-            width = clientWidth - padding * 2;
+        if (left < innerPadding) {
+            left = innerPadding;
+            width = clientWidth - innerPadding * 2;
         }
     }
 
@@ -31,11 +37,11 @@ export function usePositionableSheet() {
     const present = usePresent();
     
     return {
-        presentPositionableSheet: async (event: MouseEvent, options: PushOptions) => {
+        presentPositionableSheet: async (event: MouseEvent, options: PushOptions, positionOptions?: PositionableSheetOptions) => {
             await present({
                 modalDisplayStyle: 'popup',
                 modalClass: 'positionable-sheet',
-                modalCssStyle: calculateModalPosition(event),
+                modalCssStyle: calculateModalPosition(event, positionOptions),
                 ...options
             })
         }

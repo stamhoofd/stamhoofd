@@ -59,10 +59,9 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { OpenIDClientConfiguration } from "@stamhoofd/structures";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { OpenIDClientConfiguration } from "@stamhoofd/structures";
 
 
 

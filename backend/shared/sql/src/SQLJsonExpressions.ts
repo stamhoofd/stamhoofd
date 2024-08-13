@@ -1,6 +1,22 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from "./SQLExpression";
 import { SQLSafeValue } from "./SQLExpressions";
 
+export class SQLJsonUnquote implements SQLExpression {
+    target: SQLExpression
+
+    constructor(target: SQLExpression) {
+        this.target = target;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'JSON_UNQUOTE(',
+                this.target.getSQL(options),
+            ')'
+        ])
+    }
+}
+
 /**
  * Same as target->path, JSON_EXTRACT(target, path)
  */

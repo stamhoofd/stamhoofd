@@ -249,19 +249,31 @@ class EmailStatic {
         }
 
         // Filter by environment
-        if (STAMHOOFD.environment === 'staging') {
+        if (STAMHOOFD.environment !== 'production') {
             const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? []
-            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com") || whitelist.includes(mail.email.toLowerCase()))
-        }
-        if (STAMHOOFD.environment === 'development') {
-            const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? []
-            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com") || whitelist.includes(mail.email.toLowerCase()))
+
+            if (!whitelist.includes('*') && !whitelist.includes('*@*')) {
+                recipients = recipients.filter(mail => {
+                    const l = mail.email.toLowerCase();
+                    if (whitelist.includes(l)) {
+                        return true;
+                    }
+
+                    const domainIndex = l.indexOf('@');
+                    const domain = l.substring(domainIndex)
+
+                    if (whitelist.includes('*' + domain)) {
+                        return true;
+                    }
+
+                    console.warn("Filtered email to " + l + ": not whitelisted in WHITELISTED_EMAIL_DESTINATIONS")
+                    return false;
+                })
+            }
         }
 
         if (recipients.length === 0) {
             // Invalid string
-            console.warn("Filtered all emails due to environment filter '"+data.to+"'. E-mail skipped")
-
             try {
                 data.callback?.(
                     new SimpleError({

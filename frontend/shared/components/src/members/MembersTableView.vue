@@ -11,7 +11,7 @@
         @click="showMember"
     >
         <template #empty>
-            Er zijn nog geen leden ingeschreven.
+            Geen leden ingeschreven
         </template>
     </ModernTableView>
 </template>
@@ -19,9 +19,9 @@
 <script lang="ts" setup>
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, GlobalEventBus, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useContext, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useContext, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupType, LimitedFilteredRequest, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupPrice, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterItemOption, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from "vue";
 import { useDirectMemberActions } from "./classes/MemberActionBuilder";
@@ -33,11 +33,17 @@ const props = withDefaults(
     defineProps<{
         group?: Group | null,
         category?: GroupCategoryTree | null,
-        periodId?: string | null
+        periodId?: string | null,
+        responsibility?: MemberResponsibility | null, // for now only for saving column config
+        customFilter?: StamhoofdFilter|null,
+        customTitle?: string|null
     }>(), {
         group: null,
         category: null,
-        periodId: null
+        periodId: null,
+        customFilter: null,
+        customTitle: null,
+        responsibility: null
     }
 )
 
@@ -49,6 +55,10 @@ const filterBuilders = computed(() => {
     })
 })
 const title = computed(() => {
+    if (props.customTitle) {
+        return props.customTitle
+    }
+    
     if (props.group) {
         return props.group.settings.name
     }
@@ -73,7 +83,7 @@ useGlobalEventListener('members-added', async () => {
 })
 
 const configurationId = computed(() => {
-    return 'members-'+app+'-org-' + (organization.value?.id ?? 'null')+ '-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '')
+    return 'members-'+app+'-org-' + (organization.value?.id ?? 'null')+ '-'+(props.group ? '-group-'+props.group.id : '')+ (props.category ? '-category-'+props.category.id : '') + (props.responsibility ? '-responsibility-'+props.responsibility.id : '')
 })
 const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false)
 
@@ -105,6 +115,10 @@ function extendSort(list: SortList): SortList  {
 }
 
 function getRequiredFilter(): StamhoofdFilter|null  {
+    if (props.customFilter) {
+        return props.customFilter
+    }
+
     if (!props.group && !props.category) {
         return null
     }
@@ -173,9 +187,9 @@ const allColumns: Column<ObjectType, any>[] = [
         name: "Lidnummer", 
         getValue: (member) => member.member.details.memberNumber ?? '',
         getStyle: (val) => val ? '' : 'gray',
-        format: (val) => val ? '' : 'Geen',
+        format: (val) => val ? val : 'Geen',
         minimumWidth: 100,
-        recommendedWidth: 200,
+        recommendedWidth: 150,
         grow: true,
         allowSorting: false,
         enabled: false
@@ -250,7 +264,8 @@ const allColumns: Column<ObjectType, any>[] = [
         }, 
         getStyle: (list) => list.length === 0 ? "gray" : "",
         minimumWidth: 100,
-        recommendedWidth: 200
+        recommendedWidth: 200,
+        enabled: false
     }),
     new Column<ObjectType, string[]>({
         name: "Account", 
@@ -264,9 +279,53 @@ const allColumns: Column<ObjectType, any>[] = [
         }, 
         getStyle: (accounts) => accounts.length === 0 ? "gray" : "",
         minimumWidth: 100,
-        recommendedWidth: 200
+        recommendedWidth: 200,
+        enabled: false
     })
 ];
+
+if (props.group) {
+    if (props.group.settings.prices.length > 1) {
+        allColumns.push(
+            new Column<ObjectType, GroupPrice[]>({
+                id: 'groupPrice',
+                allowSorting: false,
+                name: $t('Tarief'), 
+                getValue: (member) => member.filterRegistrations({groups: [props.group!]}).map(r => r.groupPrice), 
+                format: (prices) => Formatter.joinLast(prices.map(o => o.name).sort(), ', ', ' en ') || $t('Geen'),
+                getStyle: (prices) => prices.length == 0 ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 300,
+            })
+        )
+    }
+    
+    for (const optionMenu of props.group.settings.optionMenus) {
+        allColumns.push(
+            new Column<ObjectType, RegisterItemOption[]>({
+                id: 'optionMenu-'+optionMenu.id,
+                allowSorting: false,
+                name: optionMenu.name, 
+                getValue: (member) => member.filterRegistrations({groups: [props.group!]}).flatMap(r => {
+                    const option = r.options.find(o => o.optionMenu.id === optionMenu.id)
+                    if (!option) {
+                        return []
+                    }
+                    return [option]
+                }),
+                format: (values) => {
+                    if (values.length == 0) {
+                        return 'Geen'
+                    }
+                    return values.map(v => v.option.allowAmount || v.amount > 1 ? (v.amount + 'x ' + v.option.name) : v.option.name).join(', ')
+                }, 
+                getStyle: (values) => values.length == 0 ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 200,
+            })
+        )
+    }
+}
 
 if (app == 'admin' || (props.group && props.group.settings.requireOrganizationIds.length !== 1 && props.group.type === GroupType.EventRegistration)) {
     allColumns.push(
@@ -338,7 +397,8 @@ if (app == 'admin' || (props.group && props.group.settings.requireOrganizationId
                 }, 
                 getStyle: (v) => v <= 0 ? "gray" : "",
                 minimumWidth: 70,
-                recommendedWidth: 80
+                recommendedWidth: 80,
+                enabled: false
             })
         )
 

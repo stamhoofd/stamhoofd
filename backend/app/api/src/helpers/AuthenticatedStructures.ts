@@ -154,6 +154,19 @@ export class AuthenticatedStructures {
         })
     }
 
+    static async organizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
+        // for now simple loop
+        if (organizations.length > 10) {
+            console.warn('Trying to load too many organizations at once: ' + organizations.length)
+        }
+
+        const structs: OrganizationStruct[] = [];
+        for (const organization of organizations) {
+            structs.push(await this.organization(organization))
+        }
+        return structs
+    }
+
     static async adminOrganizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
         const structs: OrganizationStruct[] = [];
 

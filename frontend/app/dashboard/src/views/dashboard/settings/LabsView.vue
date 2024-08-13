@@ -65,36 +65,44 @@
         <hr>
         <h2>Geavanceerde instellingen</h2>
 
-        <Checkbox v-if="!enableBuckaroo" key="mollie" v-model="forceMollie">
-            Mollie (betaalprovider)
-        </Checkbox>
-        <p class="style-description-small">
-            Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
-        </p>
+        <STList>
+            <STListItem :selectable="true" element-name="label" v-if="!enableBuckaroo">
+                <template #left>
+                    <Checkbox v-model="forceMollie" />
+                </template>
 
-        <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)">
-            Kortingen en kortingscodes in webshops
-        </Checkbox>
-        <p class="style-description-small">
-            Volg de ontwikkeling van kortingen op webshops via <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">de feedback tool</a>
-        </p>
+                <h3 class="style-title-list">
+                    Mollie (betaalprovider)
+                </h3>
+
+                <p class="style-description-small">
+                    Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
+                </p>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label" v-if="!enableBuckaroo">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('webshop-discounts')" @update:model-value="setFeatureFlag('webshop-discounts', !!$event)" />
+                </template>
+
+                <h3 class="style-title-list">
+                    Kortingen en kortingscodes in webshops
+                </h3>
+
+                <p class="style-description-small">
+                    Volg de ontwikkeling van kortingen op webshops via <a href="https://feedback.stamhoofd.app/48" class="inline-link" target="_blank">de feedback tool</a>
+                </p>
+            </STListItem>
+        </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>
             <h2>
-                Instellingen beheerd door Stamhoofd
+                Platforminstellingen (enkel voor platformbeheerders)
             </h2>
 
             <Checkbox v-model="useTestPayments">
                 Activeer test-modus voor betalingen
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('stamhoofd-pay-by-transfer')" @update:model-value="setFeatureFlag('stamhoofd-pay-by-transfer', !!$event)">
-                Stamhoofd betalen via overschrijving
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('stamhoofd-pay-by-saved')" @update:model-value="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
-                Stamhoofd betalen via opgeslagen betaalmethode
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
@@ -121,7 +129,6 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, Checkbox, ErrorBox, InputSheet, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -272,12 +279,6 @@ export default class LabsView extends Mixins(NavigationMixin) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-    }
-
-    mounted() {
-        // We can clear now
-        UrlHelper.shared.clear()
-        this.setUrl("/labs")
     }
 
     beforeUnmount() {

@@ -10,6 +10,7 @@ import { PlatformMember } from "../PlatformMember";
 import { RegistrationWithMember } from "../RegistrationWithMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 import { RegisterItem } from "./RegisterItem";
+import { Formatter } from "@stamhoofd/utility";
 
 export type RegisterContext = {
     members: PlatformMember[],
@@ -64,6 +65,14 @@ export class IDRegisterCheckout extends AutoEncoder {
         checkout.paymentMethod = this.paymentMethod
         checkout.asOrganizationId = this.asOrganizationId
         return checkout
+    }
+
+    get memberIds() {
+        return Formatter.uniqueArray(this.cart.items.map(i => i.memberId))
+    }
+
+    get groupIds() {
+        return Formatter.uniqueArray(this.cart.items.map(i => i.groupId))
     }
 }
 

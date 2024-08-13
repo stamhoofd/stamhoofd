@@ -3,25 +3,33 @@
         <template v-if="showGroup" #left>
             <GroupIcon :group="item.group" :icon="item.replaceRegistrations.length ? 'sync' : ''" />
         </template>
+        <template v-else #left>
+            <MemberIcon :member="item.member" :icon="item.group.type === GroupType.WaitingList ? 'clock' : (item.replaceRegistrations.length ? 'sync' : '')" />
+        </template>
 
-        <h3 class="style-title-list">
-            <span>{{ item.member.patchedMember.name }}</span>
-        </h3>
+        <template v-if="showGroup">
+            <p class="style-title-prefix-list">
+                {{ item.member.patchedMember.name }}
+            </p>
 
-        <p v-if="!item.organization" class="style-description">
-            {{ item.organization }}
-        </p>
-        <p v-if="showGroup" class="style-description">
-            Inschrijven voor {{ item.group.settings.name }}
-        </p>
+            <h3 class="style-title-list">
+                {{ item.group.settings.name }}
+            </h3>
+        </template>
+        <template v-else>
+            <h3 class="style-title-list">
+                {{ item.member.patchedMember.name }}
+            </h3>
+        </template>
+
         <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
 
         <template v-if="item.totalPrice !== 0">
             <footer v-if="item.checkout.isAdminFromSameOrganization">
-                <p class="style-price" v-if="item.totalPrice >= 0">
+                <p v-if="item.totalPrice >= 0" class="style-price">
                     Openstaand bedrag stijgt met {{ formatPrice(item.totalPrice) }}
                 </p>
-                <p class="style-price" v-else>
+                <p v-else class="style-price">
                     Openstaand bedrag daalt met {{ formatPrice(-item.totalPrice) }}
                 </p>
             </footer>
@@ -43,22 +51,23 @@
 
         <template #right>
             <button class="button icon trash gray" type="button" @click.stop="deleteMe()" />
-            <button v-if="canEdit" class="button icon edit gray" type="button"  />
+            <button v-if="canEdit" class="button icon edit gray" type="button" />
         </template>
     </STListItem>
 </template>
 
 
 <script setup lang="ts">
-import { RegisterItem } from '@stamhoofd/structures';
+import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '../../checkout';
+import MemberIcon from '../MemberIcon.vue';
 import GroupIcon from './GroupIcon.vue';
 
 const props = withDefaults(
     defineProps<{
         item: RegisterItem;
-        showGroup: boolean;
+        showGroup?: boolean;
     }>(),
     {
         showGroup: true

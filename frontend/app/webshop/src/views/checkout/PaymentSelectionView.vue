@@ -1,6 +1,8 @@
 <template>
     <SaveView :title="title" :loading="loading" save-text="Bestelling bevestigen" :prefer-large-button="true" @save="goNext">
-        <template #left v-if="checkout.totalPrice > 0"><span>Totaal: {{ formatPrice(checkout.totalPrice) }}</span></template>
+        <template v-if="checkout.totalPrice > 0" #left>
+            <span>Totaal: {{ formatPrice(checkout.totalPrice) }}</span>
+        </template>
 
         <h1>{{ title }}</h1>
 
@@ -23,16 +25,14 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, SaveView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { UrlHelper } from '@stamhoofd/networking';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import OrderView from '../orders/OrderView.vue';
-import { CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
     components: {
@@ -214,10 +214,6 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
-    }
-
-    mounted() {
-        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Payment.toLowerCase())
     }
 }
 </script>

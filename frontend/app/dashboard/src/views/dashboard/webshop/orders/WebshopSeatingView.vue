@@ -2,7 +2,9 @@
     <LoadingView v-if="loading || !seatingPlan" />
     <div v-else class="st-view webshop-seating-view">
         <STNavigationBar title="Zaaloverzicht">
-            <template v-if="hasFullPermissions" #right><button class="icon navigation edit button" type="button" @click="editSeatingPlan" /></template>
+            <template v-if="hasFullPermissions" #right>
+                <button class="icon navigation edit button" type="button" @click="editSeatingPlan" />
+            </template>
         </STNavigationBar>
 
         <main>
@@ -45,11 +47,9 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox,STNavigationBar, Toast } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { ContextMenu, ContextMenuItem, LoadingView, SeatSelectionBox, STNavigationBar, Toast } from "@stamhoofd/components";
+import { PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 
 
 import EditSeatingPlanView from "../edit/seating/EditSeatingPlanView.vue";
@@ -99,12 +99,6 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
         this.loadOrders().catch(console.error)
     }
     
-    mounted() {
-        // Set url
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/seating")
-        document.title = this.preview.meta.name+" - Zaalplan"
-    }
-
     beforeUnmount() {
         this.webshopManager.ordersEventBus.removeListener(this)
         this.webshopManager.ticketsEventBus.removeListener(this)
@@ -313,7 +307,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
             // (we don't need to decode all orders at the same time on the main thread)
 
             // We use a buffer to prevent DOM updates or Vue slowdown during streaming
-            let arrayBuffer: PrivateOrderWithTickets[] = []
+            const arrayBuffer: PrivateOrderWithTickets[] = []
 
             await this.webshopManager.streamOrders((order) => {
                 // Same orders could be seen twice
@@ -322,7 +316,7 @@ export default class WebshopSeatingView extends Mixins(NavigationMixin) {
                 )
             }, false)
 
-            let ticketBuffer: TicketPrivate[] = []
+            const ticketBuffer: TicketPrivate[] = []
 
             await this.webshopManager.streamTickets((ticket) => {
                 ticketBuffer.push(ticket)

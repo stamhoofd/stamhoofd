@@ -262,7 +262,7 @@
         <template v-if="isStamhoofd">
             <hr>
             <h2>
-                Instellingen beheerd door Stamhoofd
+                Platforminstellingen (enkel voor platformbeheerders)
             </h2>
 
             <Checkbox v-model="useTestPayments">
@@ -271,14 +271,6 @@
 
             <Checkbox v-model="enableBuckaroo">
                 Gebruik Buckaroo voor online betalingen
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('stripe')" @update:model-value="setFeatureFlag('stripe', !!$event)">
-                Stripe koppeling toestaan
-            </Checkbox>
-
-            <Checkbox v-if="!enableBuckaroo" v-model="forceMollie">
-                Mollie koppeling toestaan
             </Checkbox>
 
             <div v-if="enableBuckaroo" class="split-inputs">
@@ -324,7 +316,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, LoadingButton, LoadingView, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
-import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPatch, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -683,9 +675,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
         console.log(urlParams);
 
-        // We can clear now
-        UrlHelper.shared.clear()
-
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
             const code = urlParams.get('code');
             const state = urlParams.get('state');
@@ -704,7 +693,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 this.updateMollie().catch(console.error);
             }
         }
-        this.setUrl("/payments")
         this.lastAddedStripeAccount = urlParams.get('recheck-stripe-account')
         this.doRefresh()
         this.refreshOnReturn()

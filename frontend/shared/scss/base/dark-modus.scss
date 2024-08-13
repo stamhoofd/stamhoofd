@@ -1,7 +1,19 @@
 @use "./variables.scss" as *;
 
+body {
+    // Indicate both are supported
+    color-scheme: light dark;
+}
+
 body.dark {
+    // Force dark
+    color-scheme: dark;
     @include dark-modus;
+}
+
+body.light {
+    // Force light mode
+    color-scheme: light;
 }
 
 body:not(.light) {

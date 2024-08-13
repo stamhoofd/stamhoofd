@@ -1,14 +1,13 @@
 {
     "replacements": {
-        "verenigingen": "lokale groepen",
-        "vereniging": "lokale groep",
-        "Verenigingen": "Lokale groepen",
-        "Vereniging": "Lokale groep"
+        "verenigingen": "groepen",
+        "vereniging": "groep",
+        "Verenigingen": "Groepen",
+        "Vereniging": "Groep"
     },
     "dashboard": {
         "organization-selection": {
-            "welcome-title": "Zoek jouw vereniging",
-            "welcome-description": "Welkom op Ravot. Zoek hieronder de lokale groep waar je wilt inschrijven of ga naar het algemene ledenportaal."
+            "welcome-description": "Welkom op Ravot. Zoek hieronder de groep waar je wilt inschrijven of ga naar het algemene ledenportaal."
         }
     },
     "Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven.": "Welkom op het ledenportaal, hier kan je jouw gegevens beheren en je inschrijven bij een KSA groep of voor een activiteit."

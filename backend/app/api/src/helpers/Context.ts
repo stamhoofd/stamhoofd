@@ -60,6 +60,27 @@ export class ContextInstance {
         return c;
     }
 
+    static async startForUser<T>(user: User, organization: Organization|null, handler: () => Promise<T>): Promise<T> {
+        const request = new Request({
+            method: 'GET',
+            url: '/',
+            host: ''
+        })
+        const context = new ContextInstance(request);
+
+        if (organization) {
+            context.organization = organization
+            context.i18n.switchToLocale({ country: organization.address.country })
+        }
+
+        context.user = user
+        context.#auth = new AdminPermissionChecker(user, await Platform.getSharedPrivateStruct(), context.organization);
+
+        return await this.asyncLocalStorage.run(context, async () => {
+            return await handler()
+        });
+    }
+
     static async start<T>(request: Request, handler: () => Promise<T>): Promise<T> {
         const context = new ContextInstance(request);
 

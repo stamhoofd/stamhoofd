@@ -63,13 +63,14 @@ import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
 import { getEventUIFilterBuilders } from '../filters/filterBuilders';
 import { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
-import { useContext, useOrganization, usePlatform, useUser } from '../hooks';
+import { useAuth, useContext, useOrganization, usePlatform, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
 import { Toast } from '../overlays/Toast';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
 import EventRow from './components/EventRow.vue';
 import EditEventView from './EditEventView.vue';
 import EventOverview from './EventOverview.vue';
+import { useAppContext } from '../context';
 
 type ObjectType = Event;
 
@@ -87,6 +88,8 @@ const organization = useOrganization();
 const platform = usePlatform()
 const $navigate = useNavigate();
 const {presentPositionableSheet} = usePositionableSheet()
+const app = useAppContext();
+const auth = useAuth();
 
 const filterBuilders = getEventUIFilterBuilders(platform.value, organization.value ? [organization.value] : [])
 
@@ -260,6 +263,15 @@ function blurFocus() {
 }
 
 async function addEvent(template?: Event) {
+    if (platform.value.config.eventTypes.length === 0) {
+        if (auth.hasFullPlatformAccess()) {
+            Toast.error('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.').show()
+        } else {
+            Toast.error('Activiteiten werden nog niet correct geconfigureerd. Vraag een hoofdbeheerder om dit in orde te brengen.').show()
+        }
+        return
+    }
+
     const event = (template?.clone() ?? Event.create({}))
     event.id = Event.create({}).id
     event.organizationId = organization.value?.id ?? null

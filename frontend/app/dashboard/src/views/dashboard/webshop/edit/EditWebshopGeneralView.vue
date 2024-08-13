@@ -181,9 +181,7 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import EditWebshopMixin from './EditWebshopMixin';
@@ -203,9 +201,7 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
-    mounted() {
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/general")
-        
+    mounted() {        
         // Auto assign roles
         if (this.isNew && this.$organizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(this.$context.organizationPermissions)) {
             // By default, add full permissions for all the roles this user has, that also have create webshop permissions

@@ -52,7 +52,6 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 import { AddDiscountCodeBox, CartItemRow, CartItemView, ErrorBox, LoadingButton, PriceBreakdownBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, DiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -158,8 +157,6 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl("/cart")
-
         this.check().catch(console.error)
     }
 

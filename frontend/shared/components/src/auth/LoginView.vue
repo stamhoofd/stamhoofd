@@ -1,12 +1,13 @@
 <template>
     <form class="st-view login-view" data-submit-last-field @submit.prevent="submit">
-        <STNavigationBar title="Inloggen" />
-        <main class="center small">
-            <h1>Inloggen</h1>
+        <STNavigationBar :large="true" title="Inloggen" class="transparent" />
+
+        <main class="center small allow-vertical-center">
+            <h1>Inloggen bij KSA</h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" title="E-mailadres" :validator="errors.validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
@@ -18,11 +19,11 @@
                         <span class="icon help" />
                     </button>
                 </template>
-                <input v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
+                <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="(event) => password = event.target.value" @change="(event) => password = event.target.value">
             </STInputBox>
 
-            <LoadingButton :loading="loading" class="block bottom">
-                <button class="button primary full" type="submit">
+            <LoadingButton :loading="loading" class="block">
+                <button id="submit" class="button primary full" type="submit">
                     <span class="lock icon" />
                     <span>Inloggen</span>
                 </button>
@@ -49,8 +50,8 @@ import { onMounted, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import EmailInput from '../inputs/EmailInput.vue';
 import { useContext } from '../hooks';
+import EmailInput from '../inputs/EmailInput.vue';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 import ForgotPasswordView from './ForgotPasswordView.vue';
 

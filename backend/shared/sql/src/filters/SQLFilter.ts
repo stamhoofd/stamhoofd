@@ -3,7 +3,7 @@ import { StamhoofdFilter, StamhoofdKeyFilterValue } from "@stamhoofd/structures"
 import { SQL } from "../SQL";
 import { SQLExpression } from "../SQLExpression";
 import { SQLArray, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
-import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch } from "../SQLJsonExpressions";
+import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote } from "../SQLJsonExpressions";
 import { SQLSelect } from "../SQLSelect";
 import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from "../SQLWhere";
 
@@ -123,8 +123,25 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             }
 
             const v = f.$in.map(a => norm(a));
+            const nullIncluded = v.includes(null);
 
             if (isJSONObject) {
+                if (nullIncluded) {
+                    // PROBLEM: The sql expression can either not exist (= resolve to mysql null), contains null in json (= JSON null), or contain a value.
+                    // that makes comparing more difficult, to combat this, we still need to use SQLJsonOverlaps with the JSON null value
+                    return new SQLWhereOr([
+                        new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()), // checks path not exists (= mysql null)
+                        new SQLWhereEqual(
+                            new SQLJsonOverlaps(
+                                sqlExpression, 
+                                convertToExpression(JSON.stringify(v)) // contains json null
+                            ), 
+                            SQLWhereSign.Equal, 
+                            new SQLSafeValue(1)
+                        )
+                    ]);
+                }
+
                 // else
                 return new SQLWhereEqual(
                     new SQLJsonOverlaps(
@@ -136,7 +153,6 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 );
             }
 
-            const nullIncluded = v.includes(null);
             if (nullIncluded) {
                 const remaining = v.filter(v => v !== null);
                 if (remaining.length === 0) {

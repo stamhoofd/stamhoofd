@@ -43,11 +43,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { AnyCheckoutMethod, CheckoutMethod, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { AnyCheckoutMethod, CheckoutMethod, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
 
 
 import EditWebshopMixin from './EditWebshopMixin';
@@ -63,10 +61,6 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
     },
 })
 export default class EditWebshopCheckoutMethodsView extends Mixins(EditWebshopMixin) {
-    mounted() {
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/checkout-methods")
-    }
-    
     get viewTitle() {
         return "Afhaal- en leveringsopties"
     }

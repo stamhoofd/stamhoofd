@@ -4,12 +4,12 @@ import { v4 as uuidv4 } from "uuid"
 import { Group, GroupType } from "../../Group"
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from "../../GroupSettings"
 import { Organization } from "../../Organization"
+import { PriceBreakdown } from "../../PriceBreakdown"
+import { StockReservation } from "../../StockReservation"
 import { PlatformMember } from "../PlatformMember"
 import { Registration } from "../Registration"
 import { RegisterContext } from "./RegisterCheckout"
-import { StockReservation } from "../../StockReservation"
-import { RegistrationWithMember } from "../RegistrationWithMember"
-import { PriceBreakdown } from "../../PriceBreakdown"
+import { Formatter } from "@stamhoofd/utility"
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -108,11 +108,6 @@ export class RegisterItem {
             organization
         });
 
-        //if (item.shouldUseWaitingList() && group.waitingList) {
-        //    group = group.waitingList
-        //    item = RegisterItem.defaultFor(member, group, organization);
-        //}
-
         return item;
     }
 
@@ -123,16 +118,40 @@ export class RegisterItem {
         organization: Organization,
         groupPrice?: GroupPrice,
         options?: RegisterItemOption[],
-        replaceRegistrations?: Registration[]
+        replaceRegistrations?: Registration[],
+        cartError?: SimpleError|SimpleErrors|null,
+        calculatedPrice?: number,
+        calculatedRefund?: number
     }) {
         this.id = data.id ?? uuidv4()
         this.member = data.member
         this.group = data.group
 
-        this.groupPrice = data.groupPrice ?? this.group.settings.prices[0] ?? GroupPrice.create({name: 'Ongeldig tarief', id: ''})
+        if (!data.groupPrice) {
+            const prices = this.getFilteredPrices()
+            for (const price of prices) {
+                const stock = price.getRemainingStock(this)
+                if (stock !== 0) {
+                    this.groupPrice = price
+                    break
+                }
+            }
+
+            if (!this.groupPrice) {
+                // Probably all sold out
+                // Select the first one anyway
+                this.groupPrice = prices[0] ?? GroupPrice.create({name: 'Ongeldig tarief', id: ''})
+            }
+        } else {
+            this.groupPrice = data.groupPrice
+        }
+
         this.organization = data.organization
         this.options = data.options ?? []
         this.replaceRegistrations = data.replaceRegistrations ?? []
+        this.cartError = data.cartError ?? null
+        this.calculatedPrice = data.calculatedPrice ?? 0
+        this.calculatedRefund = data.calculatedRefund ?? 0
 
         // Select all defaults
         for (const optionMenu of this.group.settings.optionMenus) {
@@ -141,13 +160,36 @@ export class RegisterItem {
                     continue
                 }
 
-                this.options.push(
-                    RegisterItemOption.create({
-                        option: optionMenu.options[0],
-                        optionMenu: optionMenu,
-                        amount: 1
-                    })
-                )
+                let added = false;
+                const options = this.getFilteredOptions(optionMenu)
+
+                for (const option of options) {
+                    const stock = option.getRemainingStock(this)
+                    if (stock === 0) {
+                        continue
+                    }
+
+                    this.options.push(
+                        RegisterItemOption.create({
+                            option,
+                            optionMenu: optionMenu,
+                            amount: 1
+                        })
+                    )
+                    added = true;
+                    break;
+                }
+
+                if (!added && options.length > 0) {
+                    // Add the first (this one is sold out, but still required for correct error handling)
+                    this.options.push(
+                        RegisterItemOption.create({
+                            option: options[0],
+                            optionMenu: optionMenu,
+                            amount: 1
+                        })
+                    )
+                }
             }
         }
     }
@@ -157,7 +199,7 @@ export class RegisterItem {
     }
 
     get showItemView() {
-        return this.shouldUseWaitingList() || !!this.replaceRegistrations.length || this.group.settings.prices.length > 1 || this.group.settings.optionMenus.length > 0 || (!this.isInCart && !this.isValid)
+        return !!this.replaceRegistrations.length || this.group.settings.prices.length !== 1 || this.group.settings.optionMenus.length > 0 || this.group.type === GroupType.WaitingList || this.group.settings.description.length > 2 || this.group.settings.prices[0].price.price > 0 || (!this.isInCart && !this.isValid)
     }
 
     calculatePrice() {
@@ -215,7 +257,10 @@ export class RegisterItem {
             organization: this.organization,
             groupPrice: this.groupPrice.clone(),
             options: this.options.map(o => o.clone()),
-            replaceRegistrations: this.replaceRegistrations.map(r => r.clone())
+            replaceRegistrations: this.replaceRegistrations.map(r => r.clone()),
+            cartError: this.cartError,
+            calculatedPrice: this.calculatedPrice,
+            calculatedRefund: this.calculatedRefund
         })
     }
 
@@ -223,12 +268,13 @@ export class RegisterItem {
         this.groupPrice = item.groupPrice.clone()
         this.options = item.options.map(o => o.clone())
         this.calculatedPrice = item.calculatedPrice
+        this.calculatedRefund = item.calculatedRefund
     }
 
     getFilteredPrices() {
         const base = this.group.settings.getFilteredPrices({admin: this.checkout.isAdminFromSameOrganization})
 
-        if (!base.some(b => b.id === this.groupPrice.id)) {
+        if (this.groupPrice && !base.some(b => b.id === this.groupPrice.id)) {
             return [this.groupPrice, ...base]
         }
         return base;
@@ -480,43 +526,55 @@ export class RegisterItem {
         return descriptions.filter(d => !!d).join("\n")
     }
 
-    shouldUseWaitingList() {
-        if (this.group.settings.waitingListType === WaitingListType.All) {
-            return true;
-        }
-        const existingMember = this.isExistingMemberOrFamily()
-
-        if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
+    hasReachedGroupMaximum() {
+        const available = this.group.settings.getRemainingStock(this)
+        
+        if (available !== null && available <= 0) {
             return true;
         }
 
-        if (this.group.waitingList) {
-            if (this.hasReachedGroupMaximum()) {
+        // If all prices are sold out -> also reached maximum
+        const prices = this.getFilteredPrices()
+        if (prices.length > 0) {
+            let allPricesSoldOut = true;
+            for (const price of prices) {
+                const remaining = price.getRemainingStock(this)
+                if (remaining === null || remaining > 0) {
+                    allPricesSoldOut = false;
+                    break;
+                }
+            }
+
+            if (allPricesSoldOut) {
                 return true;
             }
         }
-        return false
-    }
 
-    hasReachedGroupMaximum() {
-        const available = this.group.settings.availableMembers
-        if (available !== null) {
-            const count = this.checkout.cart.items.filter(item => item.group.id === this.group.id && item.member.member.id !== this.member.member.id && !item.waitingList).length
-            if (count >= available) {
-                // Check if we have a reserved spot
-                const now = new Date()
-                const reserved = this.member.member.registrations.find(r => r.groupId === this.group.id && r.reservedUntil && r.reservedUntil > now && !r.waitingList && r.registeredAt === null && r.cycle === this.group.cycle)
-                if (!reserved) {
-                    return true
+        // If non-multiple choice option menu's are sold out -> also reached maximum
+        const optionMenus = this.getFilteredOptionMenus()
+        for (const menu of optionMenus) {
+            if (!menu.multipleChoice) {
+                let allOptionsSoldOut = true;
+                for (const option of menu.options) {
+                    const remaining = option.getRemainingStock(this)
+                    if (remaining === null || remaining > 0) {
+                        allOptionsSoldOut = false;
+                        break;
+                    }
+                }
+
+                if (allOptionsSoldOut) {
+                    return true;
                 }
             }
         }
+
         return false;
     }
 
-    get canRegisterIgnoreWaitingList() {
+    get validationErrorForWaitingList() {
         try {
-            this.validate({ignoreWaitingList: true})
+            this.validate({forWaitingList: true})
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 return e.getHuman();
@@ -564,14 +622,30 @@ export class RegisterItem {
         return this.validationError === null
     }
 
-    validate(options?: {warnings?: boolean, ignoreWaitingList?: boolean}) {
-        this.cartError = null;
+    validate(options?: {warnings?: boolean, forWaitingList?: boolean}) {
         this.refresh(this.group)
         const checkout = this.member.family.checkout;
         const admin = checkout.isAdminFromSameOrganization && !options?.warnings
         
         if (this.group.organizationId !== this.organization.id) {
             throw new Error("Group and organization do not match in RegisterItem.validate")
+        }
+
+        if (this.checkout.singleOrganization && this.checkout.singleOrganization.id !== this.organization.id) {
+            throw new SimpleError({
+                code: "multiple_organizations",
+                message: "Cannot add items of multiple organizations to the checkout",
+                human: `Reken eerst jouw huidige winkelmandje af. Inschrijvingen voor ${this.group.settings.name} moeten aan een andere organisatie betaald worden en kan je daardoor niet samen afrekenen.`,
+                meta: {recoverable: true}
+            })
+        }
+
+        if (options?.forWaitingList && !this.group.waitingList) {
+            throw new SimpleError({
+                code: "missing_waiting_list",
+                message: "No waiting list",
+                human: `Je kan niet inschrijven voor de wachtlijst`
+            })
         }
 
         if (checkout.asOrganizationId && !checkout.isAdminFromSameOrganization  && !this.group.settings.allowRegistrationsByOrganization) {
@@ -636,20 +710,22 @@ export class RegisterItem {
         }
 
         if (!admin) {
-            if (this.group.notYetOpen) {
-                throw new SimpleError({
-                    code: "not_yet_open",
-                    message: "Not yet open",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn nog niet geopend.`
-                })
-            }
+            if (!options?.forWaitingList) {
+                if (this.group.notYetOpen) {
+                    throw new SimpleError({
+                        code: "not_yet_open",
+                        message: "Not yet open",
+                        human: `De inschrijvingen voor ${this.group.settings.name} zijn nog niet geopend.`
+                    })
+                }
 
-            if (this.group.closed) {
-                throw new SimpleError({
-                    code: "closed",
-                    message: "Closed",
-                    human: `De inschrijvingen voor ${this.group.settings.name} zijn gesloten.`
-                })
+                if (this.group.closed) {
+                    throw new SimpleError({
+                        code: "closed",
+                        message: "Closed",
+                        human: `De inschrijvingen voor ${this.group.settings.name} zijn gesloten.`
+                    })
+                }
             }
 
             // Check if it fits
@@ -664,7 +740,6 @@ export class RegisterItem {
                 }
             }
         
-
             // Check if registrations are limited
             if (!this.doesMeetRequireGroupIds()) {
                 throw new SimpleError({
@@ -711,22 +786,79 @@ export class RegisterItem {
                 }
             }
 
-            if (!options?.ignoreWaitingList && this.shouldUseWaitingList()) {
+            const reachedMaximum = this.hasReachedGroupMaximum()
+
+            if (!options?.forWaitingList) {
+                // More detailed error messages
+                if (this.group.settings.waitingListType === WaitingListType.All) {
+                    throw new SimpleError({
+                        code: "waiting_list_required",
+                        message: "Waiting list required",
+                        human: `Iedereen moet zich eerst op de wachtlijst inschrijven`,
+                        meta: {recoverable: true}
+                    })
+                }
+        
+                if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
+                    throw new SimpleError({
+                        code: "waiting_list_required",
+                        message: "Waiting list required",
+                        human: `Nieuwe leden moeten zich eerst op de wachtlijst inschrijven`,
+                        meta: {recoverable: true}
+                    })
+                }
+        
+                if (this.group.waitingList) {
+                    if (reachedMaximum) {
+                        throw new SimpleError({
+                            code: "waiting_list_required",
+                            message: "Waiting list required",
+                            human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst`,
+                            meta: {recoverable: true}
+                        })
+                    }
+                }
+            }
+
+            if (reachedMaximum && !this.group.waitingList) {
+                // Reached maximum without waiting lists
                 throw new SimpleError({
-                    code: "waiting_list_required",
-                    message: "Waiting list required",
-                    human: `${this.member.member.firstName} kan momenteel enkel voor de wachtlijst van ${this.group.settings.name} inschrijven.`,
+                    code: "maximum_reached",
+                    message: "Maximum reached",
+                    human: `De inschrijvingen voor ${this.group.settings.name} zijn volzet`,
                     meta: {recoverable: true}
                 })
             }
 
-            if (this.hasReachedGroupMaximum()) {
-                throw new SimpleError({
-                    code: "maximum_reached",
-                    message: "Maximum reached",
-                    human: this.group.waitingList ? `De inschrijvingen voor ${this.group.settings.name} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst.` : `De inschrijvingen voor ${this.group.settings.name} zijn volzet. `,
-                    meta: {recoverable: true}
-                })
+            // Only check individual stock if we haven't reached the maximum - otherwise it won't suggest to use the waiting list
+            if (!reachedMaximum) {
+                // Check individual stock
+                if (this.groupPrice.getRemainingStock(this) === 0) {
+                    throw new SimpleError({
+                        code: "stock_empty",
+                        message: "Stock empty",
+                        human: `Het tarief ${this.groupPrice.name} is uitverkocht`,
+                        meta: {recoverable: true}
+                    })
+                }
+
+                for (const option of this.options) {
+                    const remaining = option.option.getRemainingStock(this)
+                    if (remaining !== null && remaining < option.amount) {
+                        throw new SimpleError({
+                            code: "stock_empty",
+                            message: "Stock empty",
+                            human: remaining === 0 ? `De keuzemogelijkheid ${option.option.name} is uitverkocht` : `Er zijn nog maar ${Formatter.pluralText(remaining, 'stuk', 'stuks')} beschikbaar van ${option.option.name}`,
+                            meta: {recoverable: true}
+                        })
+                    }
+                }
+            }
+
+            if (options?.forWaitingList) {
+                // Also check waiting list itself
+                const item = RegisterItem.defaultFor(this.member, this.group.waitingList!, this.organization)
+                item.validate({warnings: options?.warnings})
             }
         }
 

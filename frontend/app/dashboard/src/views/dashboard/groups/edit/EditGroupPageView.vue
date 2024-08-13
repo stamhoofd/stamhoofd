@@ -6,26 +6,6 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STInputBox title="Beschrijving" error-fields="settings.description" :error-box="errorBox" class="max">
-            <textarea
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Zichtbaar voor leden tijdens het inschrijven"
-                autocomplete=""
-            />
-        </STInputBox>
-
-        <STInputBox title="Locatie" error-fields="settings.location" :error-box="errorBox">
-            <input
-                v-model="location"
-                class="input"
-                type="text"
-                placeholder="Optioneel"
-                autocomplete=""
-            >
-        </STInputBox>
-
         <hr>
         <h2 class="style-with-button">
             <div>Omslagfoto</div>
@@ -46,7 +26,7 @@
 
         <hr>
         <h2 class="style-with-button">
-            <div>Vierkante foto</div>
+            <div>Vierkante foto of icoontje</div>
             <div>
                 <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
                     <span class="icon trash" />

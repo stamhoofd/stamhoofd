@@ -1,6 +1,6 @@
 <template>
     <header class="st-navigation-bar-container">
-        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled }">
+        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }">
             <InheritComponent name="tabbar-replacement" />
         </div>
         <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
@@ -189,6 +189,10 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
 
     @media (min-width: 550px) {
         height: 55px;
+    }
+
+    &.large {
+        height: 80px;
     }
 
     body.native-iOS & {

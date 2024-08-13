@@ -9,7 +9,7 @@
     },
     "license": "UNLICENCED",
     "scripts": {
-        "dev": "concurrently -r \"rm -rf ./dist && wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --delay 200ms --exec node --enable-source-maps ./dist/index.js --signal SIGTERM\" 'yarn build --watch --preserveWatchOutput'",
+        "dev": "echo 'Waiting for shared backend packages...' && wait-on ../../shared/env/dist/index.js && echo 'Start building backend API' && concurrently -r 'yarn build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "dev:backend": "yarn dev",
         "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/src/seeds && tsc -b",
         "build:full": "yarn clear && yarn build",

@@ -22,7 +22,9 @@
             <template v-if="categories.length > 0">
                 <STList>
                     <STListItem v-if="categories.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
-                        <template #left><span class="icon group" /></template>
+                        <template #left>
+                            <span class="icon group" />
+                        </template>
 
                         <h2 class="style-title-list bolder">
                             Alle leden
@@ -30,11 +32,15 @@
                         <p class="style-description-small">
                             Bekijk alle leden samen
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="categories.length > 1 && hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                        <template #left><span class="icon clock" /></template>
+                        <template #left>
+                            <span class="icon clock" />
+                        </template>
 
                         <h2 class="style-title-list bolder">
                             Gemeenschappelijke wachtlijsten
@@ -42,7 +48,9 @@
                         <p class="style-description-small">
                             Bekijk alle wachtlijsten samen
                         </p>
-                        <template #right><span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-for="category in categories" :key="category.id" :selectable="true" @click="openCategory(category)">
@@ -63,27 +71,37 @@
             <template v-else-if="groups.length > 0">
                 <STList>
                     <STListItem v-if="groups.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
-                        <template #left><span class="icon group" /></template>
+                        <template #left>
+                            <span class="icon group" />
+                        </template>
 
                         <h2 class="style-title-list bolder">
                             Alle leden
                         </h2>
-                        <template #right><span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
-                        <span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
 
                     <STListItem v-if="hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                        <template #left><span class="icon clock" /></template>
+                        <template #left>
+                            <span class="icon clock" />
+                        </template>
 
                         <h2 class="style-title-list bolder">
                             Gemeenschappelijke wachtlijsten
                         </h2>
-                        <template #right><span v-if="getMemberCount({waitingList: true}) !== null" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
-                        <span class="icon arrow-right-small gray" /></template>
+                        <template #right>
+                            <span v-if="getMemberCount({waitingList: true}) !== null" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
                     </STListItem>
                     
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                        <template #left><GroupAvatar :group="group" /></template>
+                        <template #left>
+                            <GroupAvatar :group="group" />
+                        </template>
                         <h3 class="style-title-list">
                             {{ group.settings.name }}
                         </h3>
@@ -122,11 +140,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ContextMenu, ContextMenuItem, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, ContextMenu, ContextMenuItem, ErrorBox, GroupAvatar, MembersTableView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from "@stamhoofd/structures";
 
 
 import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
@@ -155,11 +171,6 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
         period: OrganizationRegistrationPeriod
-
-    mounted() {
-        UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
-        document.title = "Stamhoofd - "+ this.category.settings.name
-    }
 
     get parentCategories() {
         return [

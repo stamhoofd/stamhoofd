@@ -4,7 +4,6 @@
     },
     "dashboard": {
         "organization-selection": {
-            "welcome-title": "Zoek jouw lokale groep",
             "welcome-description": "Welkom op Ravot. Zoek hieronder jouw lokale groep om je in te schrijven of om jouw gegevens te beheren."
         }
     }

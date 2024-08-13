@@ -50,9 +50,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-en
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, EditRecordCategoryView, RecordCategoryRow, RecordEditorSettings, STErrorsDefault, STList, STListItem, SaveView, checkoutUIFilterBuilders } from "@stamhoofd/components";
-import { UrlHelper } from "@stamhoofd/networking";
 import { Checkout, PatchAnswers, PrivateWebshop, RecordCategory, WebshopMetaData } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
@@ -66,10 +64,6 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) {
-    mounted() {
-        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/records")
-    }
-
     get categories() {
         return this.webshop.meta.recordCategories;
     }

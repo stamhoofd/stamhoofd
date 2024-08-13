@@ -8,6 +8,7 @@
                 ref="numberInput" 
                 inputmode="numeric" 
                 class="input" 
+                autocomplete="one-time-code"
                 :name="'search-code_'+index" 
                 @input="onInput(index - 1)" 
                 @click="selectNext(index - 1)" 

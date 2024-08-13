@@ -15,7 +15,7 @@
             </label>
 
             <hr v-if="canOpenTemplates">
-            <button v-if="canOpenTemplates" v-tooltip="'Templates'" class="button icon lightning" type="button" @click="openTemplates" />
+            <button v-if="canOpenTemplates" v-tooltip="'Templates'" class="button icon email-template" type="button" @click="openTemplates" />
         </template>
 
         <!-- List -->

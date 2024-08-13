@@ -8,6 +8,21 @@
             </h1>
 
             <STList class="illustration-list">    
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.CorporateIdentity)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/palette.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Huisstijl') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Stel de kleuren en huisstijl in van het platform') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Admins)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
@@ -176,6 +191,7 @@ import { AdminsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSett
 import { usePlatformManager } from '@stamhoofd/networking';
 import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
+import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditEventTypesView from './event-types/EditEventTypesView.vue';
 import EditPremiseTypesView from './event-types/EditPremiseTypesView.vue';
@@ -192,6 +208,7 @@ enum Routes {
     EmailTemplates = 'email-templates',
     EmailSettings = 'emailadressen',
     EventTypes = 'soorten-activiteiten',
+    CorporateIdentity = 'huisstijl',
     Premises = 'gebouwen',
 }
 
@@ -220,6 +237,11 @@ defineRoutes([
                 }
             }
         }
+    },
+    {
+        url: Routes.CorporateIdentity,
+        present: 'popup',
+        component: EditCorporateIdView as ComponentOptions,
     },
     {
         url: Routes.DefaultAgeGroups,
