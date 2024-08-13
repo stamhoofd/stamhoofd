@@ -4,7 +4,7 @@
 
         <main>
             <h1 v-if="!popup">
-                Kies een lokale groep
+                {{ $t('Kies een vereniging') }}
             </h1>
 
             <template v-if="currentOptions.length">

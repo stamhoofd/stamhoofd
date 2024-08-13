@@ -127,12 +127,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { STBillingStatus, STCredit, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import GeneralSettingsView from "../GeneralSettingsView.vue";
@@ -167,7 +166,6 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        UrlHelper.setUrl("/finances/billing");
         this.reload().catch(e => {
             console.error(e)
         })

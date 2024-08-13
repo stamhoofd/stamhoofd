@@ -103,9 +103,9 @@ export class RegisterCart {
             return false;
         }
 
-        if (this.singleOrganization && item.organization.id !== this.singleOrganization.id) {
-            return false;
-        }
+        //if (this.singleOrganization && item.organization.id !== this.singleOrganization.id) {
+        //    return false;
+        //}
         return true;
     }
 
@@ -200,6 +200,7 @@ export class RegisterCart {
         for (const item of this.items) {
             try {
                 item.validate()
+                item.cartError = null;
                 newItems.push(item)
             } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {

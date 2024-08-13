@@ -110,6 +110,11 @@ async function save() {
     saving.value = true;
 
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
+        
         if (hasChangesPeriods.value) {
             await context.value.authenticatedServer.request({
                 method: 'PATCH',

@@ -2,7 +2,7 @@ import { AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 import { Address, ValidatedAddress } from "../addresses/Address";
 import { Country } from "../addresses/CountryDecoder";
-import { BalanceItem } from "../BalanceItem";
+import { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from "../BalanceItem";
 import { BalanceItemPaymentDetailed } from "../BalanceItemDetailed";
 import { STPackageType, STPackageTypeHelper } from "../billing/STPackage";
 import { Replacement } from "../endpoints/EmailRequest";
@@ -84,7 +84,16 @@ export class EditorSmartVariable extends AutoEncoder {
                     balanceItem: BalanceItem.create({
                         amount: 1,
                         unitPrice: 2500,
-                        description: 'Inschrijving A'
+                        description: 'Inschrijving A',
+                        relations: new Map([
+                            [
+                                BalanceItemRelationType.Member,
+                                BalanceItemRelation.create({
+                                    id: 'example-member-1',
+                                    name: 'Jan Jansens'
+                                })
+                            ]
+                        ])
                     })
                 }),
                 BalanceItemPaymentDetailed.create({
@@ -92,7 +101,16 @@ export class EditorSmartVariable extends AutoEncoder {
                     balanceItem: BalanceItem.create({
                         amount: 1,
                         unitPrice: 3000,
-                        description: 'Inschrijving B'
+                        description: 'Inschrijving B',
+                        relations: new Map([
+                            [
+                                BalanceItemRelationType.Member,
+                                BalanceItemRelation.create({
+                                    id: 'example-member-2',
+                                    name: 'Peter Jansens'
+                                })
+                            ]
+                        ])
                     })
                 })
             ]

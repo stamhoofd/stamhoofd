@@ -29,6 +29,12 @@ export class NamedObject extends AutoEncoder {
 }
 
 export class EventMeta extends AutoEncoder {
+    /**
+     * Contains the name of the organization for displaying the event
+     */
+    @field({ decoder: NamedObject, nullable: true, version: 311 })
+    organizationCache: NamedObject | null = null
+
     @field({ decoder: RichText })
     description = RichText.create({})
 

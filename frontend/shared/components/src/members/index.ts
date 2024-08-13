@@ -23,3 +23,4 @@ export * from "./hooks";
 export * from "./components/view";
 
 export { default as MemberIcon } from "./components/MemberIcon.vue"
+export { default as MemberCountSpan } from "./components/MemberCountSpan.vue"

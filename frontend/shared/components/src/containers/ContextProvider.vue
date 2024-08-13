@@ -9,6 +9,7 @@
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Vue } from "@simonbackx/vue-app-navigation/classes";
 import { isReactive } from "vue";
+import { appToUri } from "../context";
 
 @Component({
     components: {
@@ -19,6 +20,15 @@ import { isReactive } from "vue";
             // If this.context is a proxy, it will auto unwrap all the reference properties it has
             // which will break reactivity on scalar values (e.g. Computed<null> will be unwrapped to null)
             throw new Error('ContextProvider.context is reactive, which will break reactivity of the context properties')
+        }
+
+        if (!this.context.stamhoofd_app) {
+            console.error('Missing stamhoofd_app in ContextProvider.context')
+        } else if (!this.context.$context) {
+            console.error('Missing $context in ContextProvider.context')
+        } else {
+            // Build reactive url
+            this.context.reactive_navigation_url = appToUri(this.context.stamhoofd_app) + (this.context.$context.organization ? '/'+this.context.$context.organization!.uri : '')
         }
 
         return this.context;

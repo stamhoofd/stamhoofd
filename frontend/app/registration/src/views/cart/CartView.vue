@@ -12,6 +12,8 @@
             <p v-else>
                 Voeg alle inschrijvingen toe aan het mandje en bevestig ze.
             </p>
+            
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="cart.isEmpty" class="info-box">
                 Jouw mandje is leeg. Schrijf een lid in via het tabblad 'Start'.
@@ -37,8 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ErrorBox, PriceBreakdownBox, startCheckout, useContext, useErrors, useNavigationActions, useOrganization, RegisterItemRow } from '@stamhoofd/components';
-import { RegisterItem } from '@stamhoofd/structures';
+import { ErrorBox, PriceBreakdownBox, RegisterItemRow, startCheckout, useContext, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { useMemberManager } from '../../getRootView';
 
@@ -54,14 +55,17 @@ const loading = ref(false)
 
 onMounted(() => {
     checkout.value.updatePrices()
+
+    try {
+        errors.errorBox = null
+        checkout.value.validate({})
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    }
 })
 onActivated(() => {
     checkout.value.updatePrices()
 })
-
-function deleteItem(item: RegisterItem) {
-    cart.value.remove(item)
-}
 
 async function goToCheckout() {
     if (loading.value) {

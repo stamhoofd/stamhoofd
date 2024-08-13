@@ -102,10 +102,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id)
 
         const memberIds = Formatter.uniqueArray(
-            [...request.body.cart.items.map(i => i.memberId), ...deleteRegistrationModels.map(i => i.memberId)]
+            [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId)]
         )
         const members = await Member.getBlobByIds(...memberIds)
-        const groupIds = Formatter.uniqueArray(request.body.cart.items.map(i => i.groupId))
+        const groupIds = request.body.groupIds
         const groups = await Group.getByIDs(...groupIds)
 
         for (const group of groups) {
@@ -189,8 +189,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
             memberBalanceItemsStructs = await BalanceItem.getStructureWithPayments(balanceItemsModels)
         }
-
-        console.log('isAdminFromSameOrganization', checkout.isAdminFromSameOrganization)
 
         // Validate the cart
         checkout.validate({memberBalanceItems: memberBalanceItemsStructs})
@@ -366,9 +364,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         async function createBalanceItem({registration, amount, unitPrice, description, type, relations}: {amount?: number, registration: RegistrationWithMemberAndGroup, unitPrice: number, description: string, relations: Map<BalanceItemRelationType, BalanceItemRelation>, type: BalanceItemType}) {
-            if (unitPrice === 0) {
-                return;
-            }
+            // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
 
             // Create balance item
             const balanceItem = new BalanceItem();
@@ -434,7 +430,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.reservedUntil = null
 
             if (shouldMarkValid) {
-                await registration.markValid()
+                await registration.markValid({skipEmail: bundle.item.replaceRegistrations.length > 0})
             } else {
                 // Reserve registration for 30 minutes (if needed)
                 const group = groups.find(g => g.id === registration.groupId)
@@ -445,7 +441,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 await registration.save()
             }
 
-            if (item.calculatedPrice === 0) {
+            // Note: we should always create the balance items: even when the price is zero
+            // Otherwise we don't know which registrations to activate after payment
+            
+            if (shouldMarkValid && item.calculatedPrice === 0) {
                 continue;
             }
 

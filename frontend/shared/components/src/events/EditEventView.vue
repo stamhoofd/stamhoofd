@@ -19,7 +19,7 @@
                 >
             </STInputBox>
 
-            <STInputBox title="Type" error-fields="type" :error-box="errors.errorBox">
+            <STInputBox v-if="platform.config.eventTypes.length" title="Type" error-fields="type" :error-box="errors.errorBox">
                 <Dropdown
                     v-model="typeId"
                 >
@@ -47,11 +47,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ patched.group ? $t('Bewerk inschrijvinginstellingen') : $t('Inschrijvingen verzamelen') }}
+                    {{ patched.group ? $t('Bewerk inschrijvingsinstellingen') : $t('Inschrijvingen verzamelen') }}
                 </h3>
 
                 <p class="style-description-small">
-                    Enkel leden kunnen inschrijven voor een activiteit.
+                    Laat leden inschrijven voor deze activiteit via het ledenportaal
                 </p>
             </STListItem>
         </STList>
@@ -168,7 +168,7 @@
 
             <p>De activiteit is enkel zichtbaar voor leden die ingeschreven zijn bij één van deze leeftijdsgroepen.</p>
 
-            <p class="info-box" v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id">
+            <p v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id" class="info-box">
                 Je kan dit voorlopig enkel bewerken via het beheerdersportaal van de organisator.
             </p>
             <GroupsInput v-else v-model="groups" :date="startDate" />
@@ -351,7 +351,9 @@ const multipleDays = computed({
 watchEffect(() => {
     const t = type.value
     if (!t) {
-        addPatch({typeId: platform.value.config.eventTypes[0].id})
+        if (platform.value.config.eventTypes.length) {
+            addPatch({typeId: platform.value.config.eventTypes[0].id})
+        }
         return;
     }
 

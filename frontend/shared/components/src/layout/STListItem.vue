@@ -59,8 +59,7 @@ export default class STListItem extends Vue {
     }
 
     onClick(event) {
-        const isDragging =
-      this.$parent?.$parent?.$el.className.indexOf("is-dragging") !== -1;
+        const isDragging = this.$parent?.$parent?.$el?.className?.indexOf("is-dragging") >= 0;
         if (isDragging) {
             console.log("canceled list item click because of drag");
             return;

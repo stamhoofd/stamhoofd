@@ -37,7 +37,7 @@ const props = withDefaults(
         nullable?: boolean
         date: Date // indication for selection the right groups in this period
     }>(), {
-        nullable: false,
+        nullable: false
     }
 )
 
@@ -61,7 +61,7 @@ const visiblePeriodIds = computed(() => {
     // Defualt show current
     return [
         platform.value.period.id,
-        organization.value?.period.id,
+        organization.value?.period.period.id,
     ]
 });
 
@@ -102,7 +102,7 @@ const allGroups = computed({
 })
 
 function getGroupValue(group: NamedObject) {
-    return !!model.value?.find(v => v.id === group.id) ?? false;
+    return !!model.value?.find(v => v.id === group.id);
 }
 
 function setGroupValue(group: NamedObject, value: boolean) {

@@ -26,14 +26,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { AddressInput, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -109,10 +107,6 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
-    }
-
-    mounted() {
-        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Address.toLowerCase())
     }
 }
 </script>

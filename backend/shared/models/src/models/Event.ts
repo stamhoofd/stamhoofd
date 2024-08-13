@@ -1,6 +1,6 @@
 
 import { column, Model } from "@simonbackx/simple-database";
-import { EventMeta, Event as EventStruct } from '@stamhoofd/structures';
+import { EventMeta, Event as EventStruct, GroupType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { Group } from "./Group";
 
@@ -83,6 +83,11 @@ export class Event extends Model {
         group.settings.requireDefaultAgeGroupIds = this.meta.defaultAgeGroupIds ?? []
         group.settings.requireGroupIds = this.meta.groups?.map(g => g.id) ?? []
 
+        if (group.type === GroupType.EventRegistration) {
+            // Don't change the name of the waiting list
+            group.settings.name = this.name
+        }
+
         if (this.organizationId) {
             // This is a not-national event, so require the organization
             group.settings.requireOrganizationIds = [this.organizationId]
@@ -98,5 +103,15 @@ export class Event extends Model {
             group.settings.requirePlatformMembershipOn = this.endDate
         }
         await group.save()
+
+        if (group.waitingListId) {
+            const waitingList = await Group.getByID(group.waitingListId)
+            if (waitingList) {
+                if (group.settings.allowRegistrationsByOrganization) {
+                    waitingList.settings.allowRegistrationsByOrganization = true
+                }
+                await this.syncGroupRequirements(waitingList)
+            }
+        }
     }
 }

@@ -30,14 +30,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
@@ -111,10 +109,6 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
-    }
-
-    mounted() {
-        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Method.toLowerCase())
     }
 }
 </script>

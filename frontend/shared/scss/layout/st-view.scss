@@ -87,12 +87,12 @@ body.modern.web-iOS {
                 @media (min-width: 900px) {
                     // Auto center all views on desktop
                     --st-horizontal-padding: 0px;
-                    --st-view-center-padding: calc((100vw - var(--st-view-max-width, 800px)) / 2);
-                    --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 800px)) / 2));     
+                    --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2);
+                    --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2));     
 
                     .split-view-controller > .detail & {
-                        --st-view-center-padding: calc((100vw - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2);
-                        --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2));     
+                        --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2);
+                        --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2));     
                     }
                 }
             }
@@ -103,8 +103,8 @@ body.modern.web-iOS {
                 @media (min-width: 500px) {
                     // Auto center all views on desktop
                     --st-horizontal-padding: 0px;
-                    --st-view-center-padding: calc((100vw - var(--st-view-max-width, 800px)) / 2);
-                    --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--st-view-max-width, 800px)) / 2));     
+                    --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2);
+                    --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2));     
                 }
             }
 
@@ -134,10 +134,7 @@ body.modern.web-iOS {
     
         // Windows scrollbars
         scrollbar-gutter: stable;
-    
-        // Flexbox negative margins are broken on iOS 16 and Safari 16...
-        // display: flex;
-        // flex-direction: column;
+
     
         touch-action: auto;
     

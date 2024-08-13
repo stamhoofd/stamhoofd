@@ -169,11 +169,11 @@
     font-weight: $font-weight-semibold;
     color: $color-primary;
     text-transform: uppercase;
-    padding-bottom: 5px;
+    margin-bottom: 5px;
 
     @media (max-width: 400px) {
         font-size: 10px;
-        padding-bottom: 4px;
+        margin-bottom: 4px;
     }
 }
 
@@ -183,11 +183,11 @@
     font-weight: $font-weight-semibold;
     color: $color-primary;
     text-transform: uppercase;
-    padding-bottom: 3px;
+    margin-bottom: 3px;
 
     @media (max-width: 400px) {
         font-size: 10px;
-        padding-bottom: 4px;
+        margin-bottom: 4px;
     }
 }
 
@@ -310,21 +310,23 @@
     }
 }
 
-.style-price {
-    font-size: 14px;
+
+.style-price-base {
+    font-size: 15px;
     line-height: 1.4;
-    font-weight: 600;
+    font-weight: $font-weight-medium;
+    font-variant-numeric: tabular-nums;
+}
+
+.style-price {
+    @extend .style-price-base;
+    font-weight: $font-weight-semibold;
     color: $color-primary;
 }
 
-.style-price-base {
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 600;
-}
 
 .style-discount-old-price {
-    @extend .style-price;
+    @extend .style-price-base;
     text-decoration: line-through;
     color: $color-gray-4;
 }
@@ -426,6 +428,10 @@
     &.for-input {
         margin-top: 8px;
         margin-bottom: 8px;
+    }
+
+    > .style-tag:only-child {
+        margin: 4px 0;
     }
 }
 
@@ -872,8 +878,8 @@
         height: var(--block-width, 40px);
         border-radius: $border-radius;
         text-align: center;
-        background: $color-primary-background;
-        color: $color-primary;
+        background: $color-primary-light;
+        color: $color-primary-dark;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);
         font-size: 14px;
@@ -1099,26 +1105,6 @@
 
 .title-suffix {
     @extend .style-description-small;
-}
-
-.pricing-box {
-    margin-top: auto;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: flex-end;
-
-    > * {
-        flex-basis: 400px;
-    }
-
-    &.max {
-        display: block;
-    }
-
-    .middle {
-        font-weight: 600;
-    }
 }
 
 .split-info {

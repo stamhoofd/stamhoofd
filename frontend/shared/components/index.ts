@@ -60,14 +60,10 @@ export { default as STList } from "./src/layout/STList.vue"
 export { default as STListItem } from "./src/layout/STListItem.vue"
 
 // Other
-export { default as AccountSwitcher } from "./src/context/AccountSwitcher.vue"
-export * from "./src/context/appContext.ts"
-export { default as ContextLogo } from "./src/context/ContextLogo.vue"
-export { default as ContextNavigationBar } from "./src/context/ContextNavigationBar.vue"
-export * from "./src/context/hooks/useContextOptions.ts"
-export { default as OrganizationAvatar } from "./src/context/OrganizationAvatar.vue"
-export { default as OrganizationLogo } from "./src/context/OrganizationLogo.vue"
-export { default as OrganizationSwitcher } from "./src/context/OrganizationSwitcher.vue"
+
+export * from "./src/context"
+
+
 export { default as GroupAvatar } from "./src/GroupAvatar.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
@@ -115,6 +111,7 @@ export { default as WYSIWYGTextInput } from "./src/inputs/WYSIWYGTextInput.vue"
 export { default as TagIdsInput } from "./src/inputs/TagIdsInput.vue"
 export { default as DefaultAgeGroupIdsInput } from "./src/inputs/DefaultAgeGroupIdsInput.vue"
 export { default as GroupsInput } from "./src/inputs/GroupsInput.vue"
+export { default as GroupIdsInput } from "./src/inputs/GroupIdsInput.vue"
 
 // Shared views should be last
 export { default as AccountSettingsView } from "./src/views/AccountSettingsView.vue"

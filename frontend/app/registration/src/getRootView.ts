@@ -21,7 +21,6 @@ export function useMemberManager() {
 }
 
 export async function getScopedRegistrationRootFromUrl() {
-    // UrlHelper.fixedPrefix = "beheerders";
     const parts = UrlHelper.shared.getParts();
     const ignoreUris = ['login', 'start'];
 
@@ -46,9 +45,6 @@ export async function getScopedRegistrationRootFromUrl() {
             session = new SessionContext(organization)
             await session.loadFromStorage()
             await SessionManager.prepareSessionForUsage(session, false);
-
-            // UrlHelper.fixedPrefix = "beheerders/" + organization.uri;
-
         } catch (e) {
             console.error('Failed to load organization from uri', uri);
         }
@@ -102,9 +98,9 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
             $context: reactiveSession,
             $memberManager,
             $platformManager: platformManager,
-            reactive_navigation_url: ownDomain ? "" : (
+            /*reactive_navigation_url: ownDomain ? "" : (
                 session.organization ? ("leden/" + session.organization.uri) : 'leden'
-            ),
+            ),*/
             reactive_components: {
                 "tabbar-left": ownDomain ? new ComponentWithProperties(OrganizationLogo, {
                     organization: reactiveSession.organization

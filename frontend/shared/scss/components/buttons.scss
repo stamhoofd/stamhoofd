@@ -274,6 +274,17 @@
             bottom: -5px;
         }
 
+        &.increase-click-area:after {
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -20px;
+            right: -20px;
+            bottom: -10px;
+        }
+
+
         &.navigation:last-child:after {
             right: -20px;
         }
@@ -470,7 +481,7 @@
 
 .button.navigation {
     font-size: 17px;
-    font-weight: $font-weight-medium;
+    font-weight: $font-weight-semibold;
     color: $color-gray-4;
 
     overflow: visible;

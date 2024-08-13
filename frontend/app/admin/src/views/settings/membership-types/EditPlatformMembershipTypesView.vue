@@ -97,6 +97,10 @@ async function save() {
     saving.value = true;
 
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
         await platformManager.value.patch(Platform.patch({
             config: PlatformConfig.patch({
                 membershipTypes: patch.value

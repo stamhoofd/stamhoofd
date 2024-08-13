@@ -36,13 +36,17 @@
                         <h2 class="style-title-list">
                             Delen op Facebook
                         </h2>
-                        <template #left><span class="icon share" /></template>
+                        <template #left>
+                            <span class="icon share" />
+                        </template>
                     </STListItem>
                     <STListItem v-if="canShare" :selectable="true" @click="share">
                         <h2 class="style-title-list">
                             Verstuur de link via SMS, e-mail, WhatsApp...
                         </h2>
-                        <template #left><span class="icon share" /></template>
+                        <template #left>
+                            <span class="icon share" />
+                        </template>
                     </STListItem>
                     <STListItem v-if="!isNative" :selectable="true" @click="downloadQR">
                         <h2 class="style-title-list">
@@ -51,7 +55,9 @@
                         <p class="style-description-small">
                             Als je fysiek bij iemand bent, dan kan die deze QR-code scannen om de link te gebruiken. 
                         </p>
-                        <template #left><span class="icon qr-code" /></template>
+                        <template #left>
+                            <span class="icon qr-code" />
+                        </template>
                     </STListItem>
                 </STList>
 
@@ -64,16 +70,28 @@
                         <STListItem v-for="n in 9" :key="n">
                             {{ n }}e vereniging
 
-                            <template #right><span class="style-tag large">€ {{ n * 10 }}</span></template>
-                            <template v-if="referredCount >= n" #left><span class="icon star yellow" /></template>
-                            <template v-else #left><span class="icon star-line light-gray" /></template>
+                            <template #right>
+                                <span class="style-tag large">€ {{ n * 10 }}</span>
+                            </template>
+                            <template v-if="referredCount >= n" #left>
+                                <span class="icon star yellow" />
+                            </template>
+                            <template v-else #left>
+                                <span class="icon star-line light-gray" />
+                            </template>
                         </STListItem>
                         <STListItem>
                             10e, 11e, 12e... vereniging
 
-                            <template #right><span class="style-tag large">€ 100</span></template>
-                            <template v-if="referredCount >= 10" #left><span class="icon star yellow" /></template>
-                            <template v-else #left><span class="icon star-line light-gray" /></template>
+                            <template #right>
+                                <span class="style-tag large">€ 100</span>
+                            </template>
+                            <template v-if="referredCount >= 10" #left>
+                                <span class="icon star yellow" />
+                            </template>
+                            <template v-else #left>
+                                <span class="icon star-line light-gray" />
+                            </template>
                         </STListItem>
                     </STList>            
                 </template>    
@@ -85,7 +103,7 @@
                 <STList v-if="status.usedCodes.length > 0">
                     <STListItem v-for="used in status.usedCodes" :key="used.id" class="right-description">
                         <template #left>
-                            <span  v-if="used.creditValue !== null" class="icon success green" />
+                            <span v-if="used.creditValue !== null" class="icon success green" />
                             <span v-else class="icon clock gray" />
                         </template>
 
@@ -130,11 +148,11 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, Checkbox, LoadingView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { AppManager } from "@stamhoofd/networking";
 import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import BillingSettingsView from "./packages/BillingSettingsView.vue";

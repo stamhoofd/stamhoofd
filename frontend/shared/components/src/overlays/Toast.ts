@@ -24,7 +24,7 @@ export class Toast {
     progress: number | null = null
     button: ToastButton | null = null
 
-    autohideAfter: number | null = 5000
+    autohideAfter: number | null = 7000
 
     doHide: (() => void) | null = null
     action:  (() => void) | null = null
@@ -91,6 +91,11 @@ export class Toast {
 
     setAction(action: (() => void) | null) {
         this.action = action 
+        return this
+    }
+
+    setIcon(icon: string | null) {
+        this.icon = icon
         return this
     }
 

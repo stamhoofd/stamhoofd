@@ -10,7 +10,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b && mkdir -p ./dist/migrations && cp ./src/migrations/*.sql ./dist/migrations",
+        "build": "tsc -b && mkdir -p ./dist/migrations && rsync --exclude='*.ts' --exclude='*.js' -r --checksum ./src/migrations/ ./dist/migrations/",
         "build:full": "rm -rf ./dist && yarn build"
     },
     "peerDependencies": {

@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
+import { Group, GroupsWithOrganizations, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -166,6 +166,9 @@ export class OrganizationManager {
 
         return response.data.sort((a, b) => b.settings.endDate.getTime() - a.settings.endDate.getTime())
     }
+
+
+
 
     /**
      * Save organization in localstorage

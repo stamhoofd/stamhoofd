@@ -1,15 +1,16 @@
 <template>
     <figure class="context-logo">
         <OrganizationAvatar v-if="organization" :organization="organization" />
-        <Logo v-else class="small" />
+        <img v-else-if="app === 'admin'" src="@stamhoofd/assets/images/illustrations/laptop-key.svg" class="illustration">
+        <PlatformAvatar v-else />
     </figure>
 </template>
 
 <script setup lang="ts">
 import { Organization } from "@stamhoofd/structures";
-import Logo from "../icons/Logo.vue";
-import OrganizationAvatar from "./OrganizationAvatar.vue";
 import { AppType } from "./appContext";
+import OrganizationAvatar from "./OrganizationAvatar.vue";
+import PlatformAvatar from "./PlatformAvatar.vue";
 
 defineProps<{
     organization: Organization|undefined|null,
@@ -37,6 +38,12 @@ defineProps<{
         > .stamhoofd-logo:last-child {
             display: block;
         }
+    }
+
+    img.illustration {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 }
 

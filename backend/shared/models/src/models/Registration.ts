@@ -196,7 +196,7 @@ export class Registration extends Model {
         await Member.updateMembershipsForId(this.memberId)
     }
 
-    async markValid(this: Registration) {
+    async markValid(this: Registration, options?: {skipEmail?: boolean}) {
         if (this.registeredAt !== null && this.deactivatedAt === null) {
             await this.save();
             return false;
@@ -212,9 +212,11 @@ export class Registration extends Model {
         const {Member} = await import('./Member');
         await Member.updateMembershipsForId(this.memberId)
 
-        await this.sendEmailTemplate({
-            type: EmailTemplateType.RegistrationConfirmation
-        });
+        if (options?.skipEmail !== true) {
+            await this.sendEmailTemplate({
+                type: EmailTemplateType.RegistrationConfirmation
+            });
+        }
 
         const member = await Member.getByID(this.memberId);
         if (member) {

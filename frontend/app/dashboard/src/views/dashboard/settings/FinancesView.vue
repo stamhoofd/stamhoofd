@@ -118,7 +118,6 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { BackButton, LoadComponent, LoadingView, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, STBillingStatus, STCredit } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -289,24 +288,6 @@ export default class FinancesView extends Mixins(NavigationMixin) {
         this.reload().catch(e => {
             console.error(e)
         })
-
-        // First set current url already, to fix back
-        this.setUrl("", "Boekhouding - " + this.$organization.name)
-
-        if (this.$url.match('transfers')) {
-            // Open mollie settings
-            this.openTransfers(false).catch(console.error)
-        }
-    
-        if (this.$url.match('billing')) {
-            this.openBilling(false)
-        }
-
-        if (this.$url.match('packages')) {
-            this.openPackages(false)
-        }
-
-        UrlHelper.shared.clear()
     }
 }
 </script>

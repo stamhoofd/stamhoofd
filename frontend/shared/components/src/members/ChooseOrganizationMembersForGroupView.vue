@@ -1,5 +1,5 @@
 <template>
-    <SaveView save-text="Bevestigen" :save-badge="cartLength" :disabled="cartLength === 0" title="Inschrijvingen wijzigen" :loading="saving" @save="goToCheckout">
+    <SaveView save-text="Bevestigen" mainClass="flex" :save-badge="cartLength" :disabled="cartLength === 0" title="Inschrijvingen wijzigen" :loading="saving" @save="goToCheckout">
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>
@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, PriceBreakdownBox, STErrorsDefault, useErrors } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout, useAddMember, useCheckoutDefaultItem, useChooseGroupForMember } from '.';
@@ -52,6 +52,7 @@ import { NavigationActions, useNavigationActions } from '../types/NavigationActi
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
 import RegisterItemRow from './components/group/RegisterItemRow.vue';
 import SearchOrganizationMembersForGroupView from './SearchOrganizationMembersForGroupView.vue';
+import { useTranslate } from '@stamhoofd/frontend-i18n';
 
 const props = defineProps<{
     checkout: RegisterCheckout, // we should auto assign this checkout to all search results and newly created members
@@ -80,6 +81,7 @@ const cartLength = computed(() => props.checkout.cart.count)
 const $addMember = useAddMember()
 const checkoutDefaultItem = useCheckoutDefaultItem()
 const chooseGroupForMember = useChooseGroupForMember()
+const $t = useTranslate();
 
 async function addMember() {
     const family = new PlatformFamily({
@@ -149,5 +151,17 @@ async function goToCheckout() {
         saving.value = false
     }
 }
+
+const shouldNavigateAway = async () => {
+    if (props.checkout.cart.isEmpty) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'))
+}
+
+defineExpose({
+    shouldNavigateAway
+})
+
 
 </script>

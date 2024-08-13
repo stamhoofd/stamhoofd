@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Event, Group, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { Event as EventStruct, GroupType, PermissionLevel } from "@stamhoofd/structures";
+import { Event as EventStruct, GroupType, NamedObject, PermissionLevel } from "@stamhoofd/structures";
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -81,6 +81,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.endDate = put.endDate
             event.meta = put.meta
             event.typeId = await PatchEventsEndpoint.validateEventType(put.typeId)
+            event.meta.organizationCache = eventOrganization ? NamedObject.create({id: eventOrganization.id, name: eventOrganization.name}) : null
             await PatchEventsEndpoint.checkEventLimits(event)
 
             if (!(await Context.auth.canAccessEvent(event, PermissionLevel.Full))) {
@@ -128,6 +129,16 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.name = patch.name ?? event.name
             event.startDate = patch.startDate ?? event.startDate
             event.endDate = patch.endDate ?? event.endDate
+
+            if (patch.meta?.organizationCache) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Cannot patch organizationCache',
+                    human: 'Je kan de organizationCache niet aanpassen via een patch',
+                    field: 'meta.organizationCache'
+                })
+            }
+
             event.meta = patchObject(event.meta, patch.meta)
 
             if (patch.organizationId !== undefined) {
@@ -156,6 +167,15 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     })
                 }
                 event.organizationId = patch.organizationId
+                event.meta.organizationCache = eventOrganization ? NamedObject.create({id: eventOrganization.id, name: eventOrganization.name}) : null
+            } else {
+                // Update cache
+                if (event.organizationId) {
+                    const eventOrganization = await Organization.getByID(event.organizationId)
+                    if (eventOrganization) {
+                        event.meta.organizationCache = NamedObject.create({id: eventOrganization.id, name: eventOrganization.name})
+                    }
+                }
             }
 
             event.typeId = patch.typeId ? (await PatchEventsEndpoint.validateEventType(patch.typeId)) : event.typeId
