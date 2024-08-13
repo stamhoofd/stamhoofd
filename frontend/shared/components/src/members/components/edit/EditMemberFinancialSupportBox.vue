@@ -5,7 +5,15 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="requiresFinancialSupport">
+        <template v-if="hasKansenTarief">
+            <Checkbox :model-value="true" :disabled="true">
+                {{ checkboxLabel }}
+            </Checkbox>
+            <p class="style-description-small">
+                Dit lid heeft recht op het kansentarief van de UiTPAS.
+            </p>
+        </template>
+        <Checkbox v-else v-model="requiresFinancialSupportCheckboxValue">
             {{ checkboxLabel }}
         </Checkbox>
 
@@ -20,16 +28,25 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="requiresFinancialSupport">
+        <template v-if="hasKansenTarief">
+            <Checkbox :model-value="true" :disabled="true">
+                {{ checkboxLabel }}
+            </Checkbox>
+            <p class="style-description-small">
+                Je hebt recht op het kansentarief van de UiTPAS.
+            </p>
+        </template>
+        <Checkbox v-else v-model="requiresFinancialSupportCheckboxValue" :disabled="hasKansenTarief">
             {{ checkboxLabel }}
         </Checkbox>
     </div>
 </template>
 
 <script setup lang="ts">
+import { SimpleError } from '@simonbackx/simple-errors';
 import { BooleanStatus, FinancialSupportSettings, PlatformMember } from '@stamhoofd/structures';
-
-import { computed, nextTick } from 'vue';
+import { DataValidator } from '@stamhoofd/utility';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
@@ -53,11 +70,9 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 const markReviewed = app !== 'dashboard' && app !== 'admin';
 
 useValidation(props.validator, async () => {
-    if (markReviewed) {
-        // Force saving: update date + make sure it is not null
-        requiresFinancialSupport.value = requiresFinancialSupport.value as any
-        await nextTick()
-    }
+    // Save
+    tryCreateRequiresFinancialSupportPatch(requiresFinancialSupportCheckboxValue.value);
+    await nextTick()
 
     // Sync checkbox across family
     for (const member of props.member.family.members) {
@@ -75,21 +90,52 @@ useValidation(props.validator, async () => {
     return true;
 });
 
-const requiresFinancialSupport = computed({
-    get: () => props.member.patchedMember.details.requiresFinancialSupport?.value ?? false,
-    set: (requiresFinancialSupport) => {
-        if (requiresFinancialSupport === (props.member.member.details.requiresFinancialSupport?.value ?? false) && !markReviewed) {
-            return props.member.addDetailsPatch({
-                requiresFinancialSupport: props.member.member.details.requiresFinancialSupport ?? null
-            })
+function tryCreateRequiresFinancialSupportPatch(requiresFinancialSupport: boolean) {
+    function getFinancialSupportSettings(): FinancialSupportSettings | null {
+        return props.member.platform.config.recordsConfiguration.financialSupport;
+    }
+
+    function getPreventSelfAssignment(financialSupportSettings: FinancialSupportSettings | null): boolean {
+        return !!financialSupportSettings?.preventSelfAssignment;
+    }
+
+    if(!isAdmin) {
+        const settings = getFinancialSupportSettings();
+
+        if(requiresFinancialSupport && getPreventSelfAssignment(settings)) {
+            throw new SimpleError({
+                code: 'financial-support-prevent-assignment',
+                message: 'self assignment of financial support is not allowed',
+                human: settings?.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText
+            });
         }
+    }
+
+    if (requiresFinancialSupport === (props.member.member.details.requiresFinancialSupport?.value ?? false) && !markReviewed) {
         return props.member.addDetailsPatch({
-            requiresFinancialSupport: BooleanStatus.create({
-                value: requiresFinancialSupport
-            })
+            requiresFinancialSupport: props.member.member.details.requiresFinancialSupport ?? null
         })
     }
+    return props.member.addDetailsPatch({
+        requiresFinancialSupport: BooleanStatus.create({
+            value: requiresFinancialSupport
+        })
+    })
+}
+
+const requiresFinancialSupportCheckboxValue = ref(props.member.patchedMember.details.requiresFinancialSupport?.value ?? false);
+const requiresFinancialSupport = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.value ?? false);
+
+watch(requiresFinancialSupport, (requiresFinancialSupport) => {
+    requiresFinancialSupportCheckboxValue.value = requiresFinancialSupport;
 });
+
+const hasKansenTarief = computed(() => {
+    const uitpasNumber = props.member.patchedMember.details.uitpasNumber;
+    if(uitpasNumber === null) return false;
+    return DataValidator.isUitpasNumberKansenTarief(uitpasNumber)
+});
+
 const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.date ?? null);
 
 const configuration = computed(() => {
