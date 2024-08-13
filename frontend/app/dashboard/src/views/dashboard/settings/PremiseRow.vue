@@ -36,15 +36,19 @@ const title = computed(() => {
 
     const allTypes = platformPremiseTypes.value;
     
-    const typeNames = premiseTypeIds
-        .map(id => allTypes.findIndex(t => t.id === id))
-        // sort in same order as platform premise types
-        .sort()
-        .map(i => {
-            if(i === -1) return 'Onbekend';
-            const name = allTypes[i].name;
-            return name;
-        });
+    const typeNames = Array.from(
+        // remove duplicates (for example 'Onbekend')
+        new Set(premiseTypeIds
+            .map(id => allTypes.findIndex(t => t.id === id))
+            // sort in same order as platform premise types
+            .sort()
+            .map(i => {
+                if(i === -1) return 'Onbekend';
+                const name = allTypes[i].name;
+                return name;
+            })
+        )
+    );
 
     if(typeNames.length === 1) return typeNames[0];
     return Formatter.joinLast(typeNames, ', ', ' en ');
