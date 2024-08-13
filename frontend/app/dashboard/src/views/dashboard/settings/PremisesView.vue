@@ -4,7 +4,7 @@
             Gebouwen
         </h1>
         <p class="style-description-block">
-            Hier kan u een overzicht van de gebouwen van de groep bijhouden.
+            Hier kan je een overzicht van de gebouwen van de groep bijhouden.
         </p>
         
         <STErrorsDefault :error-box="errorBox" />
