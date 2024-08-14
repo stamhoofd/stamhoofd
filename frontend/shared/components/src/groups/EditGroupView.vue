@@ -705,7 +705,7 @@ const maxMembers = computed({
 })
 
 const enableMaxMembers = computed({
-    get: () => !!patched.value.settings.maxMembers,
+    get: () => patched.value.settings.maxMembers !== null,
     set: (enableMaxMembers) => {
         if (!enableMaxMembers) {
             addPatch({
