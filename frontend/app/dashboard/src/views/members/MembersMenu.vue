@@ -139,7 +139,7 @@ const getCategoryIcon = (category: GroupCategoryTree) => {
 }
 
 const isCategoryDeactivated = (category: GroupCategoryTree) => {
-    return $organization.value!.isCategoryDeactivated(category)
+    return period.value.isCategoryDeactivated($organization.value!, category)
 }
 
 enum Routes {

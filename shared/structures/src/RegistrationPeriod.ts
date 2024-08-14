@@ -143,6 +143,17 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         console.warn("Root category ID is missing in categories. Migration might be needed")
         return GroupCategoryTree.create({ })
     }
+
+    isCategoryDeactivated(organization: Organization, category: GroupCategoryTree) {
+        if (organization.meta.packages.useActivities) {
+            return false
+        }
+        const cleanedTree = this.getCategoryTree({maxDepth: 1})
+        if (cleanedTree.categories.find( c => c.id === category.id)) {
+            return false
+        }
+        return true
+    }
 }
 
 export class RegistrationPeriodList extends AutoEncoder {

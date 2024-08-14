@@ -12,10 +12,6 @@
                 <span v-if="!isPublic" v-tooltip="'Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.'" class="icon lock small" />
                 <span v-if="parentCategories.length" class="button icon arrow-swap" />
             </h1>
-
-            <p v-if="organization.isCategoryDeactivated(category)" class="error-box">
-                Deze categorie is niet zichtbaar voor leden omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Er kan dan maar één categorie in gebruik zijn. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.
-            </p>
           
             <STErrorsDefault :error-box="errorBox" />
 
@@ -31,22 +27,6 @@
                         </h2>
                         <p class="style-description-small">
                             Bekijk alle leden samen
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="categories.length > 1 && hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                        <template #left>
-                            <span class="icon clock" />
-                        </template>
-
-                        <h2 class="style-title-list bolder">
-                            Gemeenschappelijke wachtlijsten
-                        </h2>
-                        <p class="style-description-small">
-                            Bekijk alle wachtlijsten samen
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -80,20 +60,6 @@
                         </h2>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                        <template #left>
-                            <span class="icon clock" />
-                        </template>
-
-                        <h2 class="style-title-list bolder">
-                            Gemeenschappelijke wachtlijsten
-                        </h2>
-                        <template #right>
-                            <span v-if="getMemberCount({waitingList: true}) !== null" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -239,19 +205,6 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         return this.tree.getMemberCount({waitingList})
     }
 
-    get hasMultipleWaitingLists() {
-        let c = 0;
-        for (const group of this.tree.getAllGroups()) {
-            if (group.settings.canHaveWaitingListWithoutMax || group.getMemberCount({waitingList: true}) !== 0) {
-                c += 1;
-                if (c > 1) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
     get tree() {
         return GroupCategoryTree.build(this.reactiveCategory, this.period, {permissions: this.$context.auth.permissions})
     }
@@ -302,24 +255,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         }))
     }
 
-    openAll(animated = true, cycleOffset?: number) {
+    openAll(animated = true) {
         this.show({
             components: [
                 new ComponentWithProperties(MembersTableView, {
-                    category: this.tree,
-                    initialCycleOffset: cycleOffset
-                })
-            ],
-            animated
-        })
-    }
-
-    openWaitingList(animated = true) {
-        this.show({
-            components: [
-                new ComponentWithProperties(MembersTableView, {
-                    category: this.tree,
-                    waitingList: true
+                    category: this.tree
                 })
             ],
             animated

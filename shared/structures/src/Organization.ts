@@ -149,16 +149,6 @@ export class Organization extends AutoEncoder {
         return this.getCategoryTree({maxDepth})
     }
 
-    isCategoryDeactivated(category: GroupCategoryTree) {
-        if (this.meta.packages.useActivities) {
-            return false
-        }
-        const cleanedTree = this.getCategoryTree({maxDepth: 1})
-        if (cleanedTree.categories.find( c => c.id === category.id)) {
-            return false
-        }
-        return true
-    }
 
     /**
      * Only set for users with full access to the organization
