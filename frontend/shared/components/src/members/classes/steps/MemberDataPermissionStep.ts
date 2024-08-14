@@ -17,15 +17,8 @@ export class MemberDataPermissionStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        const recordsConfigurations = manager.member.filterRecordsConfigurations({currentPeriod: true})
-
-        for (const config of recordsConfigurations) {
-            if (config.dataPermission?.title) {
-                return config.dataPermission.title
-            }
-        }
-
-        return DataPermissionsSettings.defaultTitle
+        const settings = manager.member.platform.config.dataPermission ?? DataPermissionsSettings.create({})
+        return settings.title
     }
 
     isEnabled(manager: MemberStepManager) {    

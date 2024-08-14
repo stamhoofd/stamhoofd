@@ -15,7 +15,7 @@
             >
         </STInputBox>
 
-        <ReduceablePriceInput v-model="price" title="Meer of minkost" :error-box="errors.errorBox" />
+        <ReduceablePriceInput v-model="price" :group="group" title="Meer of minkost" :error-box="errors.errorBox" :validator="errors.validator" />
 
         <STList>
             <STListItem :selectable="true" element-name="label">

@@ -22,7 +22,7 @@ export function useAddMember() {
                     family.copyFromClone(clonedFamily)
 
                     // Find the member
-                    const realMember = family.members.find(m => m.id == clonedFamily.members[0].id)
+                    const realMember = family.members.find(m => m.id == clonedFamily.members[clonedFamily.members.length - 1].id)
                     if (!realMember) {
                         await navigate.dismiss({force: true})
                         return;

@@ -38,21 +38,6 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Records)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('admin.settings.records.title') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('admin.settings.records.description') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.RegistrationPeriods)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
@@ -145,6 +130,55 @@
                 </STListItem>
             </STList>
 
+            <hr>
+            <h2>Gegevensverzameling</h2>
+
+            <STList class="illustration-list">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Records)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('admin.settings.records.title') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('admin.settings.records.description') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.FinancialSupport)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/discount.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Wijzig de instellingen rond financiële ondersteuning') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Toestemming gegevensverzameling') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Wijzig de instellingen rond toestemming voor gegevensverzameling') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
 
             <hr>
             <h2>E-mails</h2>
@@ -187,9 +221,9 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, RecordsConfigurationView, Toast, usePlatform } from '@stamhoofd/components';
+import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
@@ -210,6 +244,8 @@ enum Routes {
     EventTypes = 'soorten-activiteiten',
     CorporateIdentity = 'huisstijl',
     Premises = 'gebouwen',
+    FinancialSupport = 'financiele-ondersteuning',
+    DataPermissions = 'toestemming-gegevensverzameling',
 }
 
 const platform = usePlatform()
@@ -237,6 +273,46 @@ defineRoutes([
                 }
             }
         }
+    },
+    {
+        name: Routes.FinancialSupport,
+        url: 'financiele-ondersteuning',
+        component: FinancialSupportSettingsView as ComponentOptions,
+        paramsToProps() {
+            return {
+                financialSupport: platform.value.config.financialSupport ?? FinancialSupportSettings.create({}),
+                saveHandler: async (patch: AutoEncoderPatchType<FinancialSupportSettings>) => {
+                    const isNew = !platform.value.config.financialSupport
+                    await platformManager.value.patch(Platform.patch({
+                        config: PlatformConfig.patch({
+                            financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch
+                        })
+                    }))
+                    Toast.success("De aanpassingen zijn opgeslagen").show();
+                }
+            }
+        },
+        present: 'popup'
+    },
+    {
+        name: Routes.DataPermissions,
+        url: 'toestemming-gegevensverzameling',
+        component: DataPermissionSettingsView as ComponentOptions,
+        paramsToProps() {
+            return {
+                dataPermission: platform.value.config.dataPermission ?? DataPermissionsSettings.create({}),
+                saveHandler: async (patch: AutoEncoderPatchType<DataPermissionsSettings>) => {
+                    const isNew = !platform.value.config.dataPermission
+                    await platformManager.value.patch(Platform.patch({
+                        config: PlatformConfig.patch({
+                            dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch
+                        })
+                    }))
+                    Toast.success("De aanpassingen zijn opgeslagen").show();
+                }
+            }
+        },
+        present: 'popup'
     },
     {
         url: Routes.CorporateIdentity,

@@ -1,11 +1,11 @@
-import { ArrayDecoder,AutoEncoder, DateDecoder, field, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from "@simonbackx/simple-encoding"
 
 /**
  * Keep a timestamp of when certain information was reviewed of a member
  */
 export class ReviewTime extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    name: "records" | "parents" | "emergencyContacts" | "details"
+    name: "records" | "parents" | "emergencyContacts" | "details" | 'uitpasNumber'
 
     /**
      * Date that this section was reviewed
@@ -18,7 +18,7 @@ export class ReviewTimes extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ReviewTime) })
     times: ReviewTime[] = []
 
-    markReviewed(name: "records" | "parents" | "emergencyContacts" | "details", date?: Date) {
+    markReviewed(name: "records" | "parents" | "emergencyContacts" | "details" | 'uitpasNumber', date?: Date) {
         for (const time of this.times) {
             if (time.name === name) {
                 if (date && date < time.reviewedAt) {
@@ -35,11 +35,11 @@ export class ReviewTimes extends AutoEncoder {
         }))
     }
 
-    removeReview(name: "records" | "parents" | "emergencyContacts" | "details") {
+    removeReview(name: "records" | "parents" | "emergencyContacts" | "details" | 'uitpasNumber') {
         this.times = this.times.filter(t => t.name !== name)
     }
 
-    getLastReview(name?: "records" | "parents" | "emergencyContacts" | "details"): Date | undefined {
+    getLastReview(name?: "records" | "parents" | "emergencyContacts" | "details" | 'uitpasNumber'): Date | undefined {
         if (!name) {
             if (this.times.length == 0) {
                 return
@@ -55,11 +55,11 @@ export class ReviewTimes extends AutoEncoder {
 
     merge(other: ReviewTimes) {
         for (const time of other.times) {
-            this.markReviewed(time.name as any, time.reviewedAt)
+            this.markReviewed(time.name, time.reviewedAt)
         }
     }
 
-    isOutdated(name: "records" | "parents" | "emergencyContacts" | "details", timeoutMs: number): boolean {
+    isOutdated(name: "records" | "parents" | "emergencyContacts" | "details" | 'uitpasNumber', timeoutMs: number): boolean {
         const time = this.getLastReview(name)
         if (!time) {
             return true

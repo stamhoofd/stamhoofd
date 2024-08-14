@@ -1,180 +1,165 @@
 <template>
-    <SaveView :loading="saving" title="Financiële ondersteuning" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save">
         <h1>
-            Financiële ondersteuning
+            {{ title || FinancialSupportSettings.defaultTitle }}
         </h1>
-        <p>Net voor het betalen van inschrijvingen is het in Stamhoofd mogelijk om te vragen of een gezin wenst gebruik te maken van financiële ondersteuning. Dit kunnen ze kenbaar maken door heel laagdrempelig een aankruisvakje aan te vinken. Als je deze functie aanzet kan je per inschrijvingsgroep een verminderd tarief instellen dat automatisch wordt toegepast, of je kan deze informatie zelf gebruiken voor andere zaken (bv. uitdelen tweedehands materiaal).</p>
 
+        <p>Net voor het betalen van inschrijvingen is het mogelijk om te vragen of een gezin wenst gebruik te maken van financiële ondersteuning. Of dat aanstaat kan je op verschillende niveau's configureren, o.a. via 'Gegevens van leden'. Maar als het ingeschakeld is, bepaal je hier hoe het werkt voor alle groepen.</p>
+         
         <p class="info-box">
-            Wil je dat leden een kaart of bewijs voorleggen, dan raden we aan om dit achteraf manueel (en discreet) te controleren. Leg dit dan uit in de beschrijving (kan je hieronder zelf intypen als je het aanzet). Dat houdt de drempel voldoende laag voor kansarme gezinnen (er is al genoeg administratie en regelgeving). Je kan dit later altijd corrigeren wanneer een lid foutief het aankruisvakje heeft aangeduid, het omgekeerde is veel moeilijker.
+            Leden die een UiTPAS-nummer met kansentarief ingaven, slaan deze stap automatisch over
         </p>
 
-        <p class="info-box icon privacy">
-            Om in orde te zijn met de GDPR-wetgeving moet je altijd toestemming gekregen hebben voor je deze informatie kan opslaan. Je kan deze toestemming aanzetten via de instellingen.
-        </p>
-            
-        <STErrorsDefault :error-box="errors.errorBox" />          
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox v-model="enabled">
-            Vraag of het gezin financiële ondersteuning nodig heeft (kansarm gezin)
-        </Checkbox>
-
-        <template v-if="enabled">
-            <hr>
-            <h2>Wijzig uitleg voor leden</h2>
-            <p>Kies zelf de uitleg en titels die zichtbaar zijn voor leden op de pagina (net voor het afrekenen).</p>
-
-            <STInputBox title="Titel" class="max">
+        <template v-if="!inheritedFinancialSupport">
+            <STInputBox title="Benaming" class="max">
                 <input v-model="title" class="input" :placeholder="FinancialSupportSettings.defaultTitle">
             </STInputBox>
             <p class="style-description-small">
-                De titel bovenaan de pagina waar leden zelf kunnen aangeven dat ze deze financiële ondersteuning nodig hebben. Normaal neem je hier gewoon '{{ FinancialSupportSettings.defaultTitle }}', maar als je bijvoorbeeld met een UiTPAS werkt, kan je dat wat wijzigen naar bijvoorbeeld 'UiTPAS kansentarief'.
+                De benaming van het systeem voor financiële ondersteuning. Bijvoorbeeld: "Financiële ondersteuning" of "Kansentarief"
             </p>
-
-            <STInputBox title="Beschrijving" class="max">
-                <textarea v-model="description" class="input" :placeholder="FinancialSupportSettings.defaultDescription" />
-            </STInputBox>
-            <p class="style-description-small">
-                Tekst onder de titel. Leg hier uit wat voor financiële ondersteuning je geeft en wie er gebruik van kan maken. Leg uit dat ze discreet kunnen aanvinken dat ze gebruik willen maken van de ondersteuning.
-            </p>
-
-            <STInputBox title="Tekst naast aankruisvakje" class="max">
-                <input v-model="checkboxLabel" class="input" :placeholder="FinancialSupportSettings.defaultCheckboxLabel">
-            </STInputBox>
-            <p class="style-description-small">
-                Deze tekst is zichtbaar naast het aankruisvakje (dat ze moeten aanvinken als ze de ondersteuning willen gebruiken). Zorg dat je duidelijk bent, bv. "{{ FinancialSupportSettings.defaultCheckboxLabel }}"
-            </p>
-
-            <hr>
-            <h2>Waarschuwing bij leden</h2>
-            <p>Als een lid gebruik wil maken van de financiële ondersteuning, dan tonen we dit als waarschuwing als je dat lid bekijkt in Stamhoofd. Je kan zelf de tekst in deze waarschuwing wijzigen. Dit is niet zichtbaar voor de leden zelf.</p>
-            
-            <STInputBox title="Waarschuwingstekst" class="max">
-                <input v-model="warningText" class="input" :placeholder="FinancialSupportSettings.defaultWarningText">
-            </STInputBox>
-
-            <hr>
-            <h2>Benaming verlaagd tarief</h2>
-            <p>Overal in het systeem krijg je nu de optie om een 2de prijs in te vullen voor personen met deze financiële ondersteuning. Je kan deze prijs daar een naam geven.</p>
-            
-            <STInputBox title="Benaming">
-                <input v-model="priceName" class="input" :placeholder="FinancialSupportSettings.defaultPriceName">
-            </STInputBox>
-
-            <hr>
-            <h2>Verhinder automatische toekenning</h2>
-            <p>Als een lid gebruik wil maken van financiële ondersteuning dan zal hij goekeuring moeten vragen van een beheerder. In afwachting daarvan kan het lid niet inschrijven. Als het lid een UiTPAS-nummer met kansentarief opgeeft dan krijgt het lid wel automatisch financiële ondersteuning.</p>
-
-            <STList>
-                <STListItem>
-                    <Checkbox v-model="preventSelfAssignment">
-                        Verhinder automatische toekenning van financiële ondersteuning door een lid
-                    </Checkbox>
-
-                    <template v-if="preventSelfAssignment">
-                        <STInputBox title="Verduidelijking voor een lid als hij niet kan inschrijven" class="max extra-padding">
-                            <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText" />
-                        </STInputBox>
-                    </template>
-                </STListItem>
-            </STList>
         </template>
+
+        <hr>
+        <h2>Wijzig uitleg voor leden</h2>
+        <p>Kies zelf de uitleg en titels die zichtbaar zijn voor leden op de pagina (net voor het afrekenen).</p>
+
+        <STInputBox title="Beschrijving" class="max">
+            <textarea v-model="description" class="input" :placeholder="inheritedFinancialSupport?.description || FinancialSupportSettings.defaultDescription" />
+        </STInputBox>
+        <p class="style-description-small">
+            Tekst onder de titel. Leg hier uit wat voor financiële ondersteuning je geeft en wie er gebruik van kan maken. Leg uit dat ze discreet kunnen aanvinken dat ze gebruik willen maken van de ondersteuning.
+        </p>
+
+        <STInputBox title="Tekst naast aankruisvakje" class="max">
+            <input v-model="checkboxLabel" class="input" :placeholder="inheritedFinancialSupport?.checkboxLabel || FinancialSupportSettings.defaultCheckboxLabel">
+        </STInputBox>
+        <p class="style-description-small">
+            Deze tekst is zichtbaar naast het aankruisvakje (dat ze moeten aanvinken als ze de ondersteuning willen gebruiken). Zorg dat je duidelijk bent, bv. "{{ FinancialSupportSettings.defaultCheckboxLabel }}"
+        </p>
+
+        <hr>
+        <h2>Waarschuwing bij leden</h2>
+        <p>Als een lid gebruik wil maken van de financiële ondersteuning, dan tonen we dit als waarschuwing als je dat lid bekijkt. Je kan zelf de tekst in deze waarschuwing wijzigen. Dit is niet zichtbaar voor de leden zelf.</p>
+        
+        <STInputBox title="Waarschuwingstekst" class="max">
+            <input v-model="warningText" class="input" :placeholder="inheritedFinancialSupport?.warningText || FinancialSupportSettings.defaultWarningText">
+        </STInputBox>
+
+        <hr>
+        <h2>Benaming verlaagd tarief</h2>
+        <p>Overal in het systeem krijg je nu de optie om een 2de prijs in te vullen voor personen met deze financiële ondersteuning. Je kan deze prijs daar een naam geven.</p>
+        
+        <STInputBox title="Benaming">
+            <input v-model="priceName" class="input" :placeholder="inheritedFinancialSupport?.priceName || FinancialSupportSettings.defaultPriceName">
+        </STInputBox>
+
+        <hr>
+        <h2>Verhinder automatische toekenning</h2>
+        <p>Normaal wordt de financiële ondersteuning automatisch goedgekeurd zodra een lid bij het inschrijven het aanvinkvakje aankruist. Je kan dit uitschakelen. In dat geval kan een lid niet verder met inschrijven als ze gebruik willen maken van de financiële ondersteuning. Een beheerder moet het dan zelf eerst aanvinken bij dat lid alvorens het lid verder kan inschrijven aan de verlaagde tarieven. Als het lid een UiTPAS-nummer met kansentarief opgeeft dan krijgt het lid wel automatisch financiële ondersteuning en kan het lid meteen inschrijven met de verlaagde tarieven.</p>
+
+        <STList>
+            <STListItem>
+                <Checkbox v-model="preventSelfAssignment" :locked="inheritedFinancialSupport?.preventSelfAssignment">
+                    Verhinder automatische toekenning van financiële ondersteuning door een lid
+                </Checkbox>
+
+                <template v-if="preventSelfAssignment">
+                    <STInputBox title="Verduidelijking voor een lid als hij niet kan inschrijven" class="max extra-padding">
+                        <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText" />
+                    </STInputBox>
+                </template>
+            </STListItem>
+        </STList>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { FinancialSupportSettings, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
+import { FinancialSupportSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { usePatch } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
-const props = defineProps<{
-    recordsConfiguration: OrganizationRecordsConfiguration,
-    saveHandler: (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => Promise<void>
-}>();
+const props = withDefaults(
+    defineProps<{
+        financialSupport: FinancialSupportSettings,
+        inheritedFinancialSupport?: FinancialSupportSettings|null,
+        saveHandler: (patch: AutoEncoderPatchType<FinancialSupportSettings>) => Promise<void>
+    }>(), {
+        inheritedFinancialSupport: null
+    }
+);
 
-const {patched, patch, addPatch, hasChanges} = usePatch(props.recordsConfiguration);
+const {patched, patch, addPatch, hasChanges} = usePatch(props.financialSupport);
 const errors = useErrors();
 const pop = usePop();
 
 const saving = ref(false);
 
-const enabled = computed({
-    get: () => patched.value.financialSupport !== null,
-    set: (value: boolean) => {
-        if (value) {
-            addPatch({
-                financialSupport: props.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
-            });
-        } else {
-            addPatch({financialSupport: null});
-        }
-    }
-});
-
 const title = computed({
-    get: () => patched.value.financialSupport?.title ?? "",
+    get: () => patched.value.title,
     set: (title) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({title})
+            title
         });
     }
 });
 
 const description = computed({
-    get: () => patched.value.financialSupport?.description ?? "",
+    get: () => patched.value.description,
     set: (description) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({description})
+            description
         });
     }
 });
 
 const checkboxLabel = computed({
-    get: () => patched.value.financialSupport?.checkboxLabel ?? "",
+    get: () => patched.value.checkboxLabel ?? "",
     set: (checkboxLabel) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({checkboxLabel})
+            checkboxLabel
         });
     }
 });
 
 const warningText = computed({
-    get: () => patched.value.financialSupport?.warningText ?? "",
+    get: () => patched.value.warningText ?? "",
     set: (warningText) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({warningText})
+            warningText
         });
     }
 });
 
 const priceName = computed({
-    get: () => patched.value.financialSupport?.priceName ?? "",
+    get: () => patched.value.priceName ?? "",
     set: (priceName) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({priceName})
+            priceName
         });
     }
 });
 
 const preventSelfAssignment = computed({
-    get: () => patched.value.financialSupport?.preventSelfAssignment === true,
+    get: () => patched.value.preventSelfAssignment === true || props.inheritedFinancialSupport?.preventSelfAssignment === true,
     set: (preventSelfAssignment: boolean) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({preventSelfAssignment})
+            preventSelfAssignment
         });
     }
 });
 
 const preventSelfAssignmentText = computed({
-    get: () => patched.value.financialSupport?.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText,
-    set: (preventSelfAssignmentText: string) => {
+    get: () => patched.value.preventSelfAssignmentText,
+    set: (preventSelfAssignmentText) => {
         addPatch({
-            financialSupport: FinancialSupportSettings.patch({preventSelfAssignmentText})
+            preventSelfAssignmentText
         });
     }
 });

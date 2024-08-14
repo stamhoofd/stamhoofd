@@ -5,7 +5,7 @@ import { DefaultAgeGroup } from "./DefaultAgeGroup";
 import { Replacement } from "./endpoints/EmailRequest";
 import { Image } from "./files/Image";
 import { MemberResponsibility } from "./MemberResponsibility";
-import { OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
+import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from "./members/OrganizationRecordsConfiguration";
 import { OrganizationEmail } from "./OrganizationEmail";
 import { PermissionRoleDetailed } from "./Permissions";
 import { RegistrationPeriod } from "./RegistrationPeriod";
@@ -178,6 +178,18 @@ export class PlatformEventType extends AutoEncoder {
 }
 
 export class PlatformConfig extends AutoEncoder {
+    /**
+     * Cotnains the text and settings for when financial support is enabled - not whether it is enabled
+     */
+    @field({ decoder: FinancialSupportSettings, nullable: true, version: 320 })
+    financialSupport: FinancialSupportSettings | null = null
+
+    /**
+     * Contains the text and settings for when data permissions are enabled - not whether it is enabled
+     */
+    @field({ decoder: DataPermissionsSettings, nullable: true, version: 320 })
+    dataPermission: DataPermissionsSettings | null = null
+    
     @field({ decoder: OrganizationRecordsConfiguration, version: 253 })
     recordsConfiguration = OrganizationRecordsConfiguration.create({})
 

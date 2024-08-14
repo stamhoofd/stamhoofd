@@ -17,8 +17,8 @@
             {{ checkboxLabel }}
         </Checkbox>
 
-        <p v-if="dataPermissionsChangeDate" class="style-description-small">
-            Laatst gewijzigd op {{ formatDate(dataPermissionsChangeDate) }}
+        <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
+            Laatst nagekeken op {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" @click="clear" v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'">Wissen</button>.
         </p>
     </div>
     <div v-else class="container">
@@ -53,6 +53,7 @@ import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import Title from './Title.vue';
+import { useFinancialSupportSettings } from '../../../groups';
 
 defineOptions({
     inheritAttrs: false
@@ -61,13 +62,13 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
-    parentErrorBox?: ErrorBox | null
+    parentErrorBox?: ErrorBox | null,
+    willMarkReviewed?: boolean
 }>();
 
 const errors = useErrors({validator: props.validator});
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
-const markReviewed = app !== 'dashboard' && app !== 'admin';
 
 useValidation(props.validator, async () => {
     // Save
@@ -76,10 +77,10 @@ useValidation(props.validator, async () => {
 
     // Sync checkbox across family
     for (const member of props.member.family.members) {
-        if (member.id !== props.member.member.id) {
+        if (member.id !== props.member.patchedMember.id) {
             const expectedValue = member.isPropertyEnabled("financialSupport") ? (props.member.patchedMember.details.requiresFinancialSupport ?? null) : null;
 
-            if (expectedValue?.value ?? null !== member.patchedMember.details.requiresFinancialSupport?.value ?? null) {
+            if (expectedValue !== null && expectedValue.value !== (member.patchedMember.details.requiresFinancialSupport?.value ?? null)) {
                 member.addDetailsPatch({
                     requiresFinancialSupport: expectedValue
                 })
@@ -91,31 +92,25 @@ useValidation(props.validator, async () => {
 });
 
 function tryCreateRequiresFinancialSupportPatch(requiresFinancialSupport: boolean) {
-    function getFinancialSupportSettings(): FinancialSupportSettings | null {
-        return props.member.platform.config.recordsConfiguration.financialSupport;
-    }
-
-    function getPreventSelfAssignment(financialSupportSettings: FinancialSupportSettings | null): boolean {
-        return !!financialSupportSettings?.preventSelfAssignment;
+    function getPreventSelfAssignment(financialSupportSettings: FinancialSupportSettings): boolean {
+        return financialSupportSettings.preventSelfAssignment;
     }
 
     if(!isAdmin) {
-        const settings = getFinancialSupportSettings();
-
-        if(requiresFinancialSupport && getPreventSelfAssignment(settings)) {
+        if(requiresFinancialSupport && getPreventSelfAssignment(financialSupportSettings.value)) {
             throw new SimpleError({
-                code: 'financial-support-prevent-assignment',
-                message: 'self assignment of financial support is not allowed',
-                human: settings?.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText
+                code: 'financial_support_prevent_assignment',
+                message: 'Self assignment of financial support is not allowed',
+                human: financialSupportSettings.value.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText
             });
         }
     }
 
-    if (requiresFinancialSupport === (props.member.member.details.requiresFinancialSupport?.value ?? false) && !markReviewed) {
-        return props.member.addDetailsPatch({
-            requiresFinancialSupport: props.member.member.details.requiresFinancialSupport ?? null
-        })
+    if (requiresFinancialSupport === (props.member.member.details.requiresFinancialSupport?.value ?? false) && !props.willMarkReviewed) {
+        // Do not patch: hasn't changed
+        return;
     }
+    
     return props.member.addDetailsPatch({
         requiresFinancialSupport: BooleanStatus.create({
             value: requiresFinancialSupport
@@ -138,11 +133,16 @@ const hasKansenTarief = computed(() => {
 
 const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.date ?? null);
 
-const configuration = computed(() => {
-    return props.member.platform.config.recordsConfiguration.financialSupport ?? props.member.organizations.find(o => o.meta.recordsConfiguration.dataPermission)?.meta.recordsConfiguration.financialSupport ?? null
-});
-const title = computed(() => configuration.value?.title ?? FinancialSupportSettings.defaultTitle);
-const description = computed(() => configuration.value?.description ?? FinancialSupportSettings.defaultDescription);
-const checkboxLabel = computed(() => configuration.value?.checkboxLabel ?? FinancialSupportSettings.defaultCheckboxLabel);
+const {financialSupportSettings} = useFinancialSupportSettings()
+
+const title = computed(() => financialSupportSettings.value.title);
+const description = computed(() => financialSupportSettings.value.description);
+const checkboxLabel = computed(() => financialSupportSettings.value.checkboxLabel);
+
+function clear() {
+    props.member.addDetailsPatch({
+        requiresFinancialSupport: null
+    })
+}
 
 </script>

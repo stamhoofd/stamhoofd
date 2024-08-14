@@ -16,15 +16,8 @@ export class MemberFinancialSupportStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        const recordsConfigurations = manager.member.filterRecordsConfigurations({currentPeriod: true})
-
-        for (const config of recordsConfigurations) {
-            if (config.financialSupport?.title) {
-                return config.financialSupport.title
-            }
-        }
-
-        return FinancialSupportSettings.defaultTitle
+        const settings = manager.member.platform.config.financialSupport ?? FinancialSupportSettings.create({})
+        return settings.title
     }
 
     isEnabled(manager: MemberStepManager) {    

@@ -7,9 +7,6 @@
             <p class="style-title-list">
                 Toestemming gegevensverzameling
             </p>
-            <template v-if="!dataPermissions.locked.value && dataPermissions.enabled.value" #right>
-                <button class="button gray icon settings" type="button" @click.stop="dataPermissions.edit" />
-            </template>
         </STListItem>
 
         <STListItem element-name="label" :selectable="!financialSupport.locked.value" class="right-stack">
@@ -17,11 +14,10 @@
                 <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? 'Verplicht op een hoger niveau' : ''" :disabled="financialSupport.locked.value" />
             </template>
             <p class="style-title-list">
-                Financiële ondersteuning
+                {{ financialSupportSettings.title }}
             </p>
             <template #right>
                 <span v-tooltip="'Vereist toestemming voor gegevensverzameling'" class="gray icon privacy" />
-                <button v-if="!financialSupport.locked.value && financialSupport.enabled.value" class="button gray icon settings" type="button" @click.stop="financialSupport.edit" />
             </template>
         </STListItem>
 
@@ -60,15 +56,13 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, PropertyFilterView, Toast, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useOrganization } from '@stamhoofd/components';
+import { PatchMap } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { NavigationActions, PropertyFilterView, Toast, memberWithRegistrationsBlobUIFilterBuilders, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
-import { ComponentOptions, computed, ref, watchEffect } from 'vue';
-import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
+import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { computed, ref, watchEffect } from 'vue';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
-import FinancialSupportSettingsView from '../FinancialSupportSettingsView.vue';
 import { RecordEditorSettings } from '../RecordEditorSettings';
 type PropertyName = 'emailAddress'|'phone'|'gender'|'birthDay'|'address'|'parents'|'emergencyContacts' | 'uitpasNumber';
 
@@ -87,46 +81,11 @@ const props = withDefaults(
 const emit = defineEmits(['patch:recordsConfiguration'])
 const {patched, addPatch} = useEmitPatch<OrganizationRecordsConfiguration>(props, emit, 'recordsConfiguration');
 const $t = useTranslate();
-const $navigate = useNavigate();
 const baseOrg = useOrganization()
 const organization = computed(() => props.overrideOrganization ?? baseOrg.value)
 const present = usePresent();
 const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0]
-
-enum Routes {
-    DataPermissions = "dataPermissions",
-    FinancialSupport = "financialSupport"
-}
-defineRoutes([
-    {
-        name: Routes.DataPermissions,
-        url: 'toestemming-gegevensverzameling',
-        component: DataPermissionSettingsView as ComponentOptions,
-        paramsToProps() {
-            return {
-                recordsConfiguration: patched.value,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                    addPatch(patch)
-                }
-            }
-        },
-        present: 'popup'
-    },
-    {
-        name: Routes.FinancialSupport,
-        url: 'financiele-ondersteuning',
-        component: FinancialSupportSettingsView as ComponentOptions,
-        paramsToProps() {
-            return {
-                recordsConfiguration: patched.value,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                    addPatch(patch)
-                }
-            }
-        },
-        present: 'popup'
-    }
-])
+const {financialSupportSettings} = useFinancialSupportSettings()
 
 const family = new PlatformFamily({
     platform: Platform.shared,
@@ -186,26 +145,19 @@ watchEffect(() => {
 const dataPermissions = {
     locked: computed(() => !!props.inheritedRecordsConfiguration?.dataPermission && !patched.value.dataPermission),
     enabled: computed({
-        get: () => !!props.inheritedRecordsConfiguration?.dataPermission || patched.value.dataPermission !== null,
+        get: () => !!props.inheritedRecordsConfiguration?.dataPermission || patched.value.dataPermission,
         set: (value: boolean) => {
-            if (value) {
-                addPatch({
-                    dataPermission: props.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
-                });
-            } else {
-                addPatch({dataPermission: null});
-            }
+            addPatch({
+                dataPermission: value
+            });
         }
-    }),
-    edit: async () => {
-        await $navigate(Routes.DataPermissions)
-    }
+    })
 }
 
 const financialSupport = {
     locked: computed(() => !!props.inheritedRecordsConfiguration?.financialSupport && !patched.value.financialSupport),
     enabled: computed({
-        get: () => !!props.inheritedRecordsConfiguration?.financialSupport || patched.value.financialSupport !== null,
+        get: () => !!props.inheritedRecordsConfiguration?.financialSupport || patched.value.financialSupport,
         set: (value: boolean) => {
             if (value) {
                 if (!dataPermissions.enabled.value) {
@@ -213,16 +165,15 @@ const financialSupport = {
                     return
                 }
                 addPatch({
-                    financialSupport: props.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
+                    financialSupport: true
                 });
             } else {
-                addPatch({financialSupport: null});
+                addPatch({
+                    financialSupport: false
+                });
             }
         }
-    }),
-    edit: async () => {
-        await $navigate(Routes.FinancialSupport)
-    }
+    })
 }
 
 // Methods

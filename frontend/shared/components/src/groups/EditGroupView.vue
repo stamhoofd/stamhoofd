@@ -539,7 +539,9 @@ const saving = ref(false);
 const deleting = ref(false);
 const $t = useTranslate();
 const pop = usePop();
-const {priceName: reducedPriceName} = useFinancialSupportSettings()
+const {priceName: reducedPriceName} = useFinancialSupportSettings({
+    group: patched
+})
 const present = usePresent();
 const didSetAutomaticGroup = ref(false)
 
@@ -829,6 +831,10 @@ async function save() {
 
     saving.value = true;
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
         await props.saveHandler(patch.value);
         if (props.showToasts) {
             await Toast.success($t('shared.confirmation.saved')).show();

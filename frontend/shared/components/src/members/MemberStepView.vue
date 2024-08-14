@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="saveText" @save="save">
-        <component :is="component" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" v-bind="$attrs" :level="1" />
+        <component :is="component" :validator="errors.validator" :parent-error-box="errors.errorBox" :member="cloned" :will-mark-reviewed="willMarkReviewed" v-bind="$attrs" :level="1" />
     </SaveView>
 </template>
 
@@ -11,6 +11,7 @@ import { PlatformMember, Version } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
 
 import { onActivated } from 'vue';
+import { useAppContext } from '../context';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
@@ -49,13 +50,16 @@ const pop = usePop();
 const loading = ref(false);
 const errors = useErrors()
 const manager = usePlatformFamilyManager();
+const app = useAppContext();
+const isAdmin = app === 'dashboard' || app === 'admin';
+const willMarkReviewed = !isAdmin;
 
 onActivated(() => {
     cloned.value = props.member.clone() 
 });
 
 function patchMemberWithReviewed(member: PlatformMember) {
-    if (props.markReviewed.length) {
+    if (props.markReviewed.length && willMarkReviewed) {
         const times = member.patchedMember.details.reviewTimes.clone();
 
         for (const r of props.markReviewed) {

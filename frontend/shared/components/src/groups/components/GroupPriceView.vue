@@ -55,6 +55,10 @@ async function save() {
 
     saving.value = true;
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
         await props.saveHandler(patch.value);
         await pop({force: true})
     } catch (e) {

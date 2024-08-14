@@ -20,6 +20,7 @@ import { computed } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
 
 defineOptions({
     inheritAttrs: false
@@ -55,6 +56,9 @@ const autoCompletedAnswers = computed(() => {
     return answerClone
 });
 
+const {financialSupportSettings} = useFinancialSupportSettings()
+const {dataPermissionSettings} = useDataPermissionSettings()
+
 const warnings = computed(() => {
     const warnings: RecordWarning[] = []
 
@@ -65,7 +69,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('financialSupport')) {
         if (props.member.patchedMember.details.requiresFinancialSupport && props.member.patchedMember.details.requiresFinancialSupport.value) {
             warnings.push(RecordWarning.create({
-                text: platform.value.config.recordsConfiguration.financialSupport?.warningText ?? organization.value?.meta.recordsConfiguration.financialSupport?.warningText ?? FinancialSupportSettings.defaultWarningText,
+                text: financialSupportSettings.value.warningText,
                 type: RecordWarningType.Error
             }))
         }
@@ -74,7 +78,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('dataPermission')) {
         if (props.member.patchedMember.details.dataPermissions && !props.member.patchedMember.details.dataPermissions.value) {
             warnings.push(RecordWarning.create({
-                text: platform.value.config.recordsConfiguration.dataPermission?.warningText ?? organization.value?.meta.recordsConfiguration.dataPermission?.warningText ?? DataPermissionsSettings.defaultWarningText,
+                text: dataPermissionSettings.value.warningText,
                 type: RecordWarningType.Error
             }))
         }

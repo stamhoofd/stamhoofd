@@ -77,6 +77,12 @@
                 <SelectionAddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : ' (optioneel)')" :validator="validator" />
             </div>
         </div>
+
+        <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
+            Laatst nagekeken op {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                Wissen
+            </button>.
+        </p>
     </div>
 </template>
 
@@ -104,13 +110,15 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
-    parentErrorBox?: ErrorBox | null
+    parentErrorBox?: ErrorBox | null,
+    willMarkReviewed?: boolean
 }>()
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true)
 const errors = useErrors({validator: props.validator});
 const app = useAppContext()
+const isAdmin = app === 'dashboard' || app === 'admin';
 
 const title = computed(() => {
     if (props.member.isNew) {
@@ -227,5 +235,17 @@ function setEmail(index: number, value: string) {
     const newEmails = [...alternativeEmails.value];
     newEmails[index] = value;
     alternativeEmails.value = newEmails;
+}
+
+const reviewDate = computed(() => {
+    return props.member.patchedMember.details.reviewTimes.getLastReview('details');
+});
+
+function clear() {
+    const times = props.member.patchedMember.details.reviewTimes.clone();
+    times.removeReview('details');
+    props.member.addDetailsPatch({
+        reviewTimes: times
+    })
 }
 </script>

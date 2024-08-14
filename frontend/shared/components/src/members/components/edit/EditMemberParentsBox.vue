@@ -48,6 +48,12 @@
                 <span>Ouder toevoegen</span>
             </button>
         </div>
+
+        <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
+            Laatst nagekeken op {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                Wissen
+            </button>.
+        </p>
     </div>
 </template>
 
@@ -66,6 +72,7 @@ import STList from '../../../layout/STList.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditParentView from './EditParentView.vue';
 import Title from './Title.vue';
+import { useAppContext } from '../../../context';
 
 defineOptions({
     inheritAttrs: false
@@ -73,7 +80,8 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
-    parentErrorBox?: ErrorBox | null
+    parentErrorBox?: ErrorBox,
+    willMarkReviewed?: boolean
 }>();
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
@@ -97,6 +105,8 @@ useValidation(errors.validator, () => {
 
     return true
 });
+const app = useAppContext()
+const isAdmin = app === 'dashboard' || app === 'admin';
 
 const initialParents = computed(() => props.member.member.details.parents);
 const parents = computed(() => props.member.patchedMember.details.parents);
@@ -170,6 +180,18 @@ async function addParent() {
             })
         ],
         modalDisplayStyle: "popup"
+    })
+}
+
+const reviewDate = computed(() => {
+    return props.member.patchedMember.details.reviewTimes.getLastReview('parents');
+});
+
+function clear() {
+    const times = props.member.patchedMember.details.reviewTimes.clone();
+    times.removeReview('parents');
+    props.member.addDetailsPatch({
+        reviewTimes: times
     })
 }
 </script>

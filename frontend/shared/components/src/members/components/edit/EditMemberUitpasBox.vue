@@ -12,6 +12,12 @@
             :validator="validator"
             :title="isAdmin ? undefined : 'UiTPAS-nummer'"
         />
+
+        <p v-if="!willMarkReviewed && isAdmin && reviewDate" class="style-description-small">
+            Laatst gewijzigd op {{ formatDate(reviewDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                Wissen
+            </button>.
+        </p>
     </div>
 </template>
 
@@ -33,7 +39,8 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
-    parentErrorBox?: ErrorBox | null
+    parentErrorBox?: ErrorBox | null,
+    willMarkReviewed?: boolean
 }>();
 
 const app = useAppContext();
@@ -47,4 +54,17 @@ const uitpasNumber = computed({
         props.member.addDetailsPatch({uitpasNumber});
     }
 });
+
+const reviewDate = computed(() => {
+    return props.member.patchedMember.details.reviewTimes.getLastReview('uitpasNumber');
+});
+
+function clear() {
+    const times = props.member.patchedMember.details.reviewTimes.clone();
+    times.removeReview('uitpasNumber');
+    props.member.addDetailsPatch({
+        reviewTimes: times
+    })
+}
+
 </script>

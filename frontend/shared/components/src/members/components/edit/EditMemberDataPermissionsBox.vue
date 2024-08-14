@@ -9,8 +9,10 @@
             Er werd toestemming gegeven
         </Checkbox>
 
-        <p v-if="dataPermissionsChangeDate" class="style-description-small">
-            Laatst gewijzigd op {{ formatDate(dataPermissionsChangeDate) }}
+        <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
+            Laatst nagekeken op {{ formatDate(dataPermissionsChangeDate) }}. <button v-tooltip="'Het lid zal deze stap terug moeten doorlopen via het ledenportaal'" type="button" class="inline-link" @click="clear">
+                Wissen
+            </button>.
         </p>
     </div>
     <div v-else class="container">
@@ -26,15 +28,16 @@
 </template>
 
 <script setup lang="ts">
-import { BooleanStatus, DataPermissionsSettings, PlatformMember } from '@stamhoofd/structures';
+import { BooleanStatus, PlatformMember } from '@stamhoofd/structures';
 
 import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context/appContext';
+import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
-import Title from './Title.vue';
-import { ErrorBox } from '../../../errors/ErrorBox';
 import { useValidation } from '../../../errors/useValidation';
+import { useDataPermissionSettings } from '../../../groups';
+import Title from './Title.vue';
 
 defineOptions({
     inheritAttrs: false
@@ -43,16 +46,16 @@ defineOptions({
 const props = defineProps<{
     member: PlatformMember,
     validator: Validator,
-    parentErrorBox?: ErrorBox | null
+    parentErrorBox?: ErrorBox | null,
+    willMarkReviewed?: boolean
 }>();
 
 const errors = useErrors({validator: props.validator});
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
-const markReviewed = app !== 'dashboard' && app !== 'admin';
 
 useValidation(props.validator, async () => {
-    if (markReviewed) {
+    if (props.willMarkReviewed) {
         // Force saving: increase saved date + make sure it is not null
         dataPermissions.value = dataPermissions.value as any
         await nextTick()
@@ -63,7 +66,7 @@ useValidation(props.validator, async () => {
 const dataPermissions = computed({
     get: () => props.member.patchedMember.details.dataPermissions?.value ?? false,
     set: (dataPermissions) => {
-        if (dataPermissions === (props.member.member.details.dataPermissions?.value ?? false) && !markReviewed) {
+        if (dataPermissions === (props.member.member.details.dataPermissions?.value ?? false) && !props.willMarkReviewed) {
             return props.member.addDetailsPatch({
                 dataPermissions: props.member.member.details.dataPermissions ?? null
             })
@@ -77,11 +80,16 @@ const dataPermissions = computed({
 });
 const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.dataPermissions?.date ?? null);
 
-const configuration = computed(() => {
-    return props.member.platform.config.recordsConfiguration.dataPermission ?? props.member.organizations.find(o => o.meta.recordsConfiguration.dataPermission)?.meta.recordsConfiguration.dataPermission ?? null
-});
-const title = computed(() => configuration.value?.title ?? DataPermissionsSettings.defaultTitle);
-const description = computed(() => configuration.value?.description ?? DataPermissionsSettings.defaultDescription);
-const checkboxLabel = computed(() => configuration.value?.checkboxLabel ?? DataPermissionsSettings.defaultCheckboxLabel);
+const {dataPermissionSettings} = useDataPermissionSettings()
+
+const title = computed(() => dataPermissionSettings.value.title);
+const description = computed(() => dataPermissionSettings.value.description);
+const checkboxLabel = computed(() => dataPermissionSettings.value.checkboxLabel);
+
+function clear() {
+    props.member.addDetailsPatch({
+        dataPermissions: null
+    })
+}
 
 </script>

@@ -31,8 +31,10 @@ export class MemberUitpasStep implements EditMemberStep {
             return false;
         }
 
-        if (details.uitpasNumber === null) {
-            return true;
+        if (this.options.outdatedTime) {
+            if (details.reviewTimes.isOutdated("uitpasNumber", this.options.outdatedTime)) {
+                return true;
+            }
         }
 
         return false;
@@ -44,6 +46,7 @@ export class MemberUitpasStep implements EditMemberStep {
             member: manager.member,
             component: markRaw(EditMemberUitpasBox),
             saveText: "Doorgaan",
+            markReviewed: ['uitpasNumber'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate)
             }

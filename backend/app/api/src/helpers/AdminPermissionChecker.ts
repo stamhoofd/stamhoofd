@@ -814,7 +814,7 @@ export class AdminPermissionChecker {
     async hasFinancialMemberAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         const isUserManager = this.isUserManager(member)
 
-        if (isUserManager) {
+        if (isUserManager && level === PermissionLevel.Read) {
             return true;
         }
 
@@ -846,6 +846,15 @@ export class AdminPermissionChecker {
                 continue;
             }
 
+            if (isUserManager) {
+                // Requirements are higher: you need financial access to write your own financial
+                // data changes
+                if (permissions.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+                    return true;
+                }
+                continue;
+            }
+
             if (permissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
                 return true;
             }
@@ -854,8 +863,16 @@ export class AdminPermissionChecker {
         // Platform data
         const platformPermissions = this.platformPermissions
         if (platformPermissions) {
-            if (platformPermissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
-                return true;
+            if (isUserManager) {
+                // Requirements are higher: you need financial access to write your own financial
+                // data changes
+                if (platformPermissions.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+                    return true;
+                }
+            } else {
+                if (platformPermissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                    return true;
+                }
             }
         }
 
@@ -950,94 +967,97 @@ export class AdminPermissionChecker {
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
         const isSetFinancialSupportTrue = data.details.requiresFinancialSupport?.value === true;
+        const isUserManager = this.isUserManager(member);
 
-        if(hasRecordAnswers || hasNotes || isSetFinancialSupportTrue) {
-            const isUserManager = this.isUserManager(member);
-
-            if (hasRecordAnswers) {
-                if (!(data.details.recordAnswers instanceof PatchMap)) {
-                    throw new SimpleError({
-                        code: 'invalid_request',
-                        message: 'Cannot PUT recordAnswers',
-                        statusCode: 400
-                    })
-                }
-                
-                const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
-
-                for (const [key, value] of data.details.recordAnswers.entries()) {
-                    let name: string | undefined = undefined
-                    if (value) {
-                        if (value.isPatch()) {
-                            throw new SimpleError({
-                                code: 'invalid_request',
-                                message: 'Cannot PATCH a record answer object',
-                                statusCode: 400
-                            })
-                        }
-
-                        const id = value.settings.id
-
-                        if (id !== key) {
-                            throw new SimpleError({
-                                code: 'invalid_request',
-                                message: 'Record answer key does not match record id',
-                                statusCode: 400
-                            })
-                        }
-
-                        name = value.settings.name
-                    }
-
-                    if (!isUserManager && !records.has(key)) {
-                        throw new SimpleError({
-                            code: 'permission_denied',
-                            message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
-                            statusCode: 400
-                        })
-                    }
-                }
-            }
-
-            if(hasNotes && isUserManager) {
+        if (hasRecordAnswers) {
+            if (!(data.details.recordAnswers instanceof PatchMap)) {
                 throw new SimpleError({
-                    code: 'permission_denied',
-                    message: 'Cannot edit notes',
+                    code: 'invalid_request',
+                    message: 'Cannot PUT recordAnswers',
                     statusCode: 400
                 })
             }
+            
+            const records = isUserManager ? new Set() : await this.getAccessibleRecordSet(member, PermissionLevel.Write)
 
-            if(isSetFinancialSupportTrue) {
-                const financialSupport = this.platform.config.recordsConfiguration.financialSupport;
-                const preventSelfAssignment = financialSupport?.preventSelfAssignment === true;
+            for (const [key, value] of data.details.recordAnswers.entries()) {
+                let name: string | undefined = undefined
+                if (value) {
+                    if (value.isPatch()) {
+                        throw new SimpleError({
+                            code: 'invalid_request',
+                            message: 'Cannot PATCH a record answer object',
+                            statusCode: 400
+                        })
+                    }
 
-                if(preventSelfAssignment) {
+                    const id = value.settings.id
+
+                    if (id !== key) {
+                        throw new SimpleError({
+                            code: 'invalid_request',
+                            message: 'Record answer key does not match record id',
+                            statusCode: 400
+                        })
+                    }
+
+                    name = value.settings.name
+                }
+
+                if (!isUserManager && !records.has(key)) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
-                        human: financialSupport.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText,
+                        message: `Je hebt geen toegangsrechten om het antwoord op ${name ?? 'deze vraag'} aan te passen voor dit lid`,
                         statusCode: 400
-                    });
+                    })
                 }
             }
         }
 
+        if (hasNotes && isUserManager) {
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'Cannot edit notes',
+                statusCode: 400
+            })
+        }
+
         // Has financial write access?
         if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Write)) {
+            if (isUserManager && isSetFinancialSupportTrue) {
+                const financialSupportSettings = this.platform.config.financialSupport;
+                const preventSelfAssignment = financialSupportSettings?.preventSelfAssignment === true;
+    
+                if(preventSelfAssignment) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'No permissions to enable financial support for your own members',
+                        human: financialSupportSettings.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText,
+                        statusCode: 400
+                    });
+                }
+            }
+    
             if (data.details.requiresFinancialSupport) {
-                throw new SimpleError({
-                    code: 'permission_denied',
-                    message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
-                    statusCode: 400
-                })
+                if (isUserManager) {
+                    // Already handled
+                } else {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
+                        statusCode: 400
+                    })
+                }
             }
 
-            if (data.details.uitpasNumber) {
-                throw new SimpleError({
-                    code: 'permission_denied',
-                    message: 'Je hebt geen toegangsrechten om het UiTPAS-nummer van dit lid aan te passen',
-                    statusCode: 400
-                })
+            if (!isUserManager) {
+                if (data.details.uitpasNumber) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'Je hebt geen toegangsrechten om het UiTPAS-nummer van dit lid aan te passen',
+                        statusCode: 400
+                    })
+                }
             }
 
             if (data.outstandingBalance) {

@@ -10,7 +10,7 @@
             >
         </STInputBox>
 
-        <ReduceablePriceInput v-model="groupPrice" :error-box="errors.errorBox" />
+        <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" />
 
         <STList>
             <STListItem v-if="!isSingle || hidden" :selectable="true" element-name="label">

@@ -132,7 +132,9 @@ const props = withDefaults(
 const emit = defineEmits(['patch:optionMenu', 'delete', 'patch:group'])
 const {patched, addPatch} = useEmitPatch<GroupOptionMenu>(props, emit, 'optionMenu');
 const present = usePresent();
-const {priceName: reducedPriceName} = useFinancialSupportSettings()
+const {priceName: reducedPriceName} = useFinancialSupportSettings({
+    group: computed(() => props.group)
+})
 const {up, canMoveUp, canMoveDown, down} = usePatchMoveUpDown(props.optionMenu.id, computed(() => props.group.settings.optionMenus), (patch) => {
     emit('patch:group', Group.patch({
         settings: GroupSettings.patch({

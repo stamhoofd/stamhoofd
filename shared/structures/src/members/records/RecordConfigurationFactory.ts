@@ -135,12 +135,12 @@ export class RecordConfigurationFactory {
     static setDefaultDataPermissions(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
         // For now, only enable parents for youth and sport organizations
         if (configuration.recordCategories.flatMap(c => c.getAllRecords()).find(r => r.sensitive)) {
-            configuration.dataPermission = DataPermissionsSettings.create({})
+            configuration.dataPermission = true
         }
 
         if (type === OrganizationType.LGBTQ || type === OrganizationType.Politics || type === OrganizationType.Union) {
             // Sensitive membership: need to ask permission
-            configuration.dataPermission = DataPermissionsSettings.create({})
+            configuration.dataPermission = true
         }
     }
 

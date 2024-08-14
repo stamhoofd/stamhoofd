@@ -138,13 +138,27 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      * If the organizations provides support for families in financial difficulties
      */
     @field({ decoder: FinancialSupportSettings, nullable: true, version: 117 })
-    financialSupport: FinancialSupportSettings | null = null
+    @field({ 
+        decoder: BooleanDecoder, 
+        version: 320, 
+        upgrade: (old: any) => {
+            return !!old
+        }
+    })
+    financialSupport = false
 
     /**
      * Ask permissions to collect data
      */
     @field({ decoder: DataPermissionsSettings, nullable: true, version: 117 })
-    dataPermission: DataPermissionsSettings | null = null
+    @field({ 
+        decoder: BooleanDecoder, 
+        version: 320, 
+        upgrade: (old: any) => {
+            return !!old
+        }
+    })
+    dataPermission = false
 
     @field({ decoder: PropertyFilter, nullable: true, version: 124 })
     emailAddress: PropertyFilter | null = null
@@ -256,16 +270,17 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      */
     static mergeChild(parent: OrganizationRecordsConfiguration, child: OrganizationRecordsConfiguration): OrganizationRecordsConfiguration {
         const clone = child.clone();
-        if (parent.financialSupport !== null) {
+        
+        if (parent.financialSupport !== false) {
             clone.financialSupport = parent.financialSupport;
+        }
+
+        if (parent.dataPermission !== false) {
+            clone.dataPermission = parent.dataPermission;
         }
 
         if(parent.uitpasNumber !== null) {
             clone.uitpasNumber = parent.uitpasNumber;
-        }
-
-        if (parent.dataPermission !== null) {
-            clone.dataPermission = parent.dataPermission;
         }
 
         if (parent.emailAddress !== null) {
