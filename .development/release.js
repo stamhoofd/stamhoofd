@@ -27,13 +27,29 @@ async function processFile(filePath) {
         parenthesisDepth: 0, // 0 when atStack if not @field, then 1 once first ( is found, 2 if second ( is found, etc.
         curlyBracketsDepth: 0, // 0 when atStack if not @field, then 1 once first { is found, 2 if second { is found, etc.
         contentStack: '', // contents inside @field({ (so atStack is @field, parenthesisDepth is 1 and curlyBracketsDepth is 1)
+        commentLineStack: ''
     }
 
     let newContent = null;
     
-    // Loop all characters in a state machine
+    // Loop all characters in a simple state machine
     for (let i = 0; i < content.length; i++) {
         const char = content[i];
+
+        if (state.commentLineStack === '//') {
+            // Ignore until next line
+            if (char === '\n') {
+                state.commentLineStack = '';
+            }
+            continue;
+        }
+
+        if (char === '/') {
+            state.commentLineStack += '/'
+        } else {
+            state.commentLineStack = '';
+        }
+
         if (state.atStack === '@field') {
             switch (char) {
                 case '(':
@@ -145,7 +161,9 @@ async function loopFolder(folderPath) {
 async function run() {
     if (!dryRun) {
         // Update remotes
+        console.log('Updating remotes...');
         await exec('git remote update');
+        console.log('Remotes updated.');
 
         // First check if we are on the main branch and no changes are pending
         const {stdout} = await exec('git status --porcelain');
