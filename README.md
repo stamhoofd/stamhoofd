@@ -94,7 +94,7 @@ exit
 
 To run everything locally, we run everything on a fake TLD domain and host the dashboard on dashboard.stamhoofd. We use Caddy and Coredns to wire everything together. You can follow the following steps to run everything:
 
-1. When switching branches, cloning the repo or when pulling changes, run `yarn install && yarn build` first in the project root
+1. When switching branches, cloning the repo or when pulling changes, run `yarn install` first in the project root
 2. Use `yarn build:shared` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
 3. Run migrations by running `yarn migrate` in the root folder
 4. Run `yarn dev`. This will start all servers. If something fails, try to run it again and/or fix the error.
@@ -149,7 +149,7 @@ You can use the following commands in both `/frontend/app/registration` and `/fr
   <dt><code>yarn build:production</code></dt>
   <dd>Build the whole app into /dist, with optimizations</dd>
 
-  <dt><code>yarn serve</code></dt>
+  <dt><code>yarn dev</code></dt>
   <dd>Serve the frontend locally with HMR (use this for development in combination with <code>yarn start</code> in the backend)</dd>
 </dl>
 

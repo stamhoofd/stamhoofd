@@ -10,8 +10,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b && mkdir -p ./dist/migrations && rsync --exclude='*.ts' --exclude='*.js' -r --checksum ./src/migrations/ ./dist/migrations/",
-        "build:full": "rm -rf ./dist && yarn build"
+        "build": "tsc -b && mkdir -p ./dist/migrations && rsync --exclude='*.ts' --exclude='*.js' -r --checksum ./src/migrations/ ./dist/migrations/"
     },
     "peerDependencies": {
         "@simonbackx/simple-errors": "^1.4"

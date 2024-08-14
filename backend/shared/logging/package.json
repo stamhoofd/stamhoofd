@@ -10,8 +10,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b",
-        "build:full": "rm -rf ./dist && yarn build"
+        "build": "tsc -b"
     },
     "dependencies": {
         "@simonbackx/simple-logging": "^1.0.1"

@@ -10,7 +10,6 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b",
-        "build:full": "rm -rf ./dist && yarn build"
+        "build": "tsc -b"
     }
 }

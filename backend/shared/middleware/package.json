@@ -10,8 +10,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b",
-        "build:full": "rm -rf ./dist && yarn build"
+        "build": "tsc -b"
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.13.0",
