@@ -1,11 +1,52 @@
-import { AutoEncoder, DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+import { Address } from '../addresses/Address';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod';
 import { PaymentProvider } from '../PaymentProvider';
 import { PaymentStatus } from '../PaymentStatus';
 import { TransferSettings } from '../webshops/TransferSettings';
+
+export class Company extends AutoEncoder {
+    /**
+     * Legal name of the organization (optional)
+     */
+    @field({ decoder: StringDecoder })
+    name = ''
+
+    @field({ decoder: StringDecoder, nullable: true })
+    VATNumber: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true })
+    companyNumber: string | null = null
+
+    @field({ decoder: Address, nullable: true })
+    address: Address | null = null;
+}
+
+/**
+ * Who is paying / paid, and how can we contact them
+ */
+export class PaymentCustomer extends AutoEncoder {
+    @field({ decoder: StringDecoder, nullable: true })
+    firstName: string | null = null;
+    
+    @field({ decoder: StringDecoder, nullable: true })
+    lastName: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    email: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true })
+    phone: string | null = null
+
+    /**
+     * As soon as this is set, we can assume that the customer is a company
+     */
+    @field({ decoder: Company, nullable: true })
+    company: Company | null = null
+}
 
 export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -25,6 +66,9 @@ export class Payment extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(PaymentProvider), nullable: true, version: 152 })
     provider: PaymentProvider | null = null
+
+    @field({ decoder: PaymentCustomer, nullable: true, ...NextVersion})
+    customer: PaymentCustomer | null = null
 
     @field({ decoder: IntegerDecoder })
     price = 0

@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, BalanceItemWithPayments, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from "@stamhoofd/structures";
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, BalanceItemWithPayments, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version, PaymentCustomer } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -678,10 +678,34 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         const payment = new Payment()
-        payment.userId = user.id
 
         // Who will receive this money?
         payment.organizationId = organization.id
+
+        // Who paid
+        payment.payingUserId = user.id
+        payment.payingOrganizationId = checkout.asOrganizationId ?? null
+
+        // Fill in customer:
+        payment.customer = PaymentCustomer.create({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+        })
+
+        if (checkout.asOrganizationId) {
+            // Fill in company
+            const asOrganization = await Organization.getByID(checkout.asOrganizationId)
+            if (!asOrganization) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, de organisatie die je probeert te gebruiken lijkt niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                })
+                return;
+            }
+
+            payment.customer.company = asOrganization.generateCompany()
+        }
 
         payment.method = checkout.paymentMethod
         payment.status = PaymentStatus.Created

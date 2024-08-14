@@ -1,4 +1,3 @@
-import { CheckoutMethodType } from "./webshops/WebshopMetaData";
 
 export enum PaymentMethod {
     Unknown = "Unknown",

@@ -1,9 +1,9 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, Member as MemberStruct, Order as OrderStruct, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings } from '@stamhoofd/structures';
+import { column, Model } from '@simonbackx/simple-database';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization, Registration } from './';
+import { Organization } from './';
 
 export class Payment extends Model {
     static table = "payments"
@@ -18,6 +18,9 @@ export class Payment extends Model {
     @column({ type: "string" })
     method: PaymentMethod;
 
+    @column({ type: "json", decoder: PaymentCustomer, nullable: true })
+    customer: PaymentCustomer | null = null
+
     @column({ type: "string", nullable: true })
     provider: PaymentProvider | null = null;
 
@@ -27,11 +30,32 @@ export class Payment extends Model {
     @column({ type: "string", nullable: true })
     organizationId: string| null = null
 
-    // Link a user for debugging
+    /**
+     * payingUserId
+     */
     @column({ type: "string", nullable: true })
-    userId: string | null = null;
+    payingUserId: string | null = null;
 
-    // Link a user for debugging
+    /**
+     * @deprecated
+     */
+    get userId() {
+        return this.payingUserId
+    }
+
+    /**
+     * @deprecated
+     */
+    set userId(id: string|null) {
+        this.payingUserId = id
+    }
+
+    /**
+     * If an organization paid, this contains the organization id
+     */
+    @column({ type: "string", nullable: true })
+    payingOrganizationId: string | null = null;
+
     @column({ type: "string", nullable: true })
     stripeAccountId: string | null = null;
 
