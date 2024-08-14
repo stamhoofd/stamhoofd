@@ -2,8 +2,8 @@ import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, EnumDe
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { MemberResponsibilityRecord } from './members/MemberResponsibilityRecord';
 import { MemberResponsibility } from './MemberResponsibility';
+import { MemberResponsibilityRecord } from './members/MemberResponsibilityRecord';
 
 /**
  * PermissionLevels are used to grant permissions to specific resources or system wide
@@ -897,5 +897,9 @@ export class LoadedPermissions {
         }
         return p
     
+    }
+
+    get isEmpty() {
+        return this.level === PermissionLevel.None && (this.roles.length === 0 || this.roles.every(r => r.isEmpty)) && this.resources.size === 0
     }
 }
