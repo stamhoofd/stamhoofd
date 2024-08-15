@@ -40,7 +40,7 @@
         "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules",
         "clear-vite-cache": "rm -rf frontend/app/*/node_modules/.vite",
 
-        "ship": "node ./.development/release.js && yarn -s clear:shared && yarn -s build:shared && lerna publish --no-private"
+        "ship": "node ./.development/increase-structures-version.js && yarn -s clear:shared && yarn -s build:shared && lerna publish --no-private"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",

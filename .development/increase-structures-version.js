@@ -159,11 +159,11 @@ async function loopFolder(folderPath) {
 }
 
 async function run() {
+    console.log(chalk.bold(chalk.blueBright('Increasing structures version to ' + nextVersion + '... (if changed)\n')));
+
     if (!dryRun) {
         // Update remotes
-        console.log('Updating remotes...');
         await exec('git remote update');
-        console.log('Remotes updated.');
 
         // First check if we are on the main branch and no changes are pending
         const {stdout} = await exec('git status --porcelain');
@@ -211,6 +211,12 @@ async function run() {
         }
 
         console.log(chalk.bold('Found and wrote new fields. Structures version bumped from ' + currentVersion + ' to ' + chalk.yellow(nextVersion)));
+
+        // Release to GitHub
+        console.log(chalk.bold('Commiting and pushing changes...'));
+        await exec('git add . && git commit -m "Increased structures to version ' + nextVersion + '" && git push');
+
+        console.log(chalk.green('✔ Increased structures to version ' + nextVersion + ' successfully!'));
     }
 }
 
