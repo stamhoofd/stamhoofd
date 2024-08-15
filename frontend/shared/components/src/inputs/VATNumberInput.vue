@@ -78,7 +78,16 @@ export default class VATNumberInput extends Vue {
             return true
         }
 
-        if (this.VATNumberRaw.substr(0, 2) != this.country) {
+        if (this.required && this.VATNumberRaw.length === 0) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                "code": "invalid_field",
+                "message": "Vul een BTW-nummer in",
+                "field": "VATNumber"
+            }))
+            return false
+        }
+
+        if (this.VATNumberRaw.length > 2 && this.VATNumberRaw.substr(0, 2) !== this.country) {
             // Add required country in VAT number
             this.VATNumberRaw = this.country+this.VATNumberRaw
         }
@@ -89,7 +98,7 @@ export default class VATNumberInput extends Vue {
         if (!result.isValid) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
-                "message": "Ongeldig BTW-nummer: "+this.VATNumberRaw,
+                "message": "Ongeldig BTW-nummer: "+ this.VATNumberRaw,
                 "field": "VATNumber"
             }))
             return false

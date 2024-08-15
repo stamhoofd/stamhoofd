@@ -26,7 +26,7 @@
                         Algemeen
                     </h2>
                     <p class="style-description">
-                        Naam, adres en website
+                        Naam, adres, website en facturatiegegevens
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -317,7 +317,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AdminsView, EditEmailTemplatesView, EmailSettingsView, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from "@stamhoofd/components";
+import { AdminsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, usePlatform, useSalesDisabled } from "@stamhoofd/components";
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { defineRoutes, useNavigate, usePresent } from "@simonbackx/vue-app-navigation";
@@ -325,7 +325,6 @@ import { useTranslate } from "@stamhoofd/frontend-i18n";
 import { useOrganizationManager, useRequestOwner } from "@stamhoofd/networking";
 import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from "@stamhoofd/structures";
 import { ComponentOptions, Ref, computed, ref } from "vue";
-import GeneralSettingsView from "./GeneralSettingsView.vue";
 import LabsView from "./LabsView.vue";
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import PaymentSettingsView from "./PaymentSettingsView.vue";
@@ -369,7 +368,7 @@ const present = usePresent();
 defineRoutes([
     {
         url: Routes.General,
-        component: GeneralSettingsView as unknown as ComponentOptions,
+        component: GeneralSettingsView as ComponentOptions,
         present: 'popup'
     },
     {

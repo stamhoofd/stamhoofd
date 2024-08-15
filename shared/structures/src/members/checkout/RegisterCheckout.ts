@@ -1,16 +1,17 @@
 import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from "@simonbackx/simple-encoding";
 
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Formatter } from "@stamhoofd/utility";
 import { BalanceItemWithPayments } from "../../BalanceItem";
 import { Group } from "../../Group";
 import { Organization } from "../../Organization";
+import { PaymentCustomer } from "../../PaymentCustomer";
 import { PaymentMethod } from "../../PaymentMethod";
 import { PriceBreakdown } from "../../PriceBreakdown";
 import { PlatformMember } from "../PlatformMember";
 import { RegistrationWithMember } from "../RegistrationWithMember";
 import { IDRegisterCart, RegisterCart } from "./RegisterCart";
 import { RegisterItem } from "./RegisterItem";
-import { Formatter } from "@stamhoofd/utility";
 
 export type RegisterContext = {
     members: PlatformMember[],
@@ -51,6 +52,9 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     asOrganizationId: string | null = null
 
+    @field({ decoder: PaymentCustomer, nullable: true, ...NextVersion })
+    customer: PaymentCustomer | null = null
+
     /**
      * Cached price so we can detect inconsistencies between frontend and backend
      */
@@ -64,6 +68,7 @@ export class IDRegisterCheckout extends AutoEncoder {
         checkout.freeContribution = this.freeContribution
         checkout.paymentMethod = this.paymentMethod
         checkout.asOrganizationId = this.asOrganizationId
+        checkout.customer = this.customer
         return checkout
     }
 
@@ -81,6 +86,7 @@ export class RegisterCheckout{
     administrationFee = 0;
     freeContribution = 0
     paymentMethod: PaymentMethod | null = null
+    customer: PaymentCustomer | null = null
     asOrganizationId: string | null = null
 
     // Default hint for empty carts to know the organization to use
@@ -93,7 +99,8 @@ export class RegisterCheckout{
             freeContribution: this.freeContribution,
             paymentMethod: this.paymentMethod,
             totalPrice: this.totalPrice,
-            asOrganizationId: this.asOrganizationId
+            asOrganizationId: this.asOrganizationId,
+            customer: this.customer
         })
     }
 
@@ -174,6 +181,7 @@ export class RegisterCheckout{
         this.cart.items = []
         this.cart.balanceItems = []
         this.cart.deleteRegistrations = []
+        this.customer = null
     }
 
     get totalPrice() {

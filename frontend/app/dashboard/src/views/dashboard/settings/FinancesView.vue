@@ -35,81 +35,6 @@
                     </template>
                 </STListItem>
             </STList>
-
-            <template v-if="hasFinanceAccess">
-                <hr>
-                <h2>Betalingen aan Stamhoofd</h2>
-                <BillingWarningBox v-if="hasFinanceAccess" @billing="openPendingInvoice(true)" />
-
-                <STList class="illustration-list">    
-                    <STListItem v-if="status && status.pendingInvoice && status.pendingInvoice.meta.priceWithoutVAT" :selectable="true" class="left-center right-stack" @click="openPendingInvoice(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg"></template>
-                        <h2 v-if="!isPaymentFailed" class="style-title-list">
-                            Volgende aanrekening
-                        </h2>
-                        <h2 v-else class="style-title-list">
-                            Openstaand bedrag
-                        </h2>
-                        <p v-if="!isPaymentFailed" class="style-description">
-                            Dit bedrag zal bij jouw volgende afrekening automatisch afgerekend worden.
-                        </p>
-                        <p v-else class="style-description">
-                            Betaal je openstaande bedrag.
-                        </p>
-                        <template #right>
-                            <span v-if="!isPaymentFailed" class="style-description-small">
-                                {{ formatPrice(status.pendingInvoice.meta.priceWithoutVAT) }}
-                            </span>
-                            <span v-else class="style-tag error">
-                                {{ formatPrice(status.pendingInvoice.meta.priceWithoutVAT) }}
-                            </span>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="status && status.credits.length" :selectable="true" class="left-center" @click="showCreditsHistory(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/credits.svg"></template>
-                        <h2 class="style-title-list">
-                            Tegoed
-                        </h2>
-                        <p class="style-description">
-                            Dit bedrag zal automatisch gebruikt worden om jouw volgende aankoop te betalen.
-                        </p>
-                        <template #right>
-                            <span class="style-description-small">
-                                {{ formatPrice(balance) }}
-                            </span>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/stock.svg"></template>
-                        <h2 class="style-title-list">
-                            Pakketten aankopen
-                        </h2>
-                        <p class="style-description">
-                            Wijzig je pakketten of activeer nieuwe functies
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
-                        <template #left><img src="@stamhoofd/assets/images/illustrations/transfer.svg"></template>
-                        <h2 class="style-title-list">
-                            Facturen en betalingen
-                        </h2>
-                        <p class="style-description">
-                            Download jouw facturen en bekijk jouw tegoed.
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
         </main>
     </div>
 </template>
@@ -124,7 +49,6 @@ import { Formatter } from '@stamhoofd/utility';
 
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
-import BillingSettingsView from './packages/BillingSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 import PackageSettingsView from "./packages/PackageSettingsView.vue";
 
@@ -252,33 +176,6 @@ export default class FinancesView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(ConfigurePaymentExportView, {})
-                })
-            ]
-        })
-    }
-
-    openBilling(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(BillingSettingsView, {})
-                })
-            ]
-        })
-    }
-
-    openPackages(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: animated,
-            modalDisplayStyle: "popup",
-            url: 'packages',
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(PackageSettingsView, {})
                 })
             ]
         })

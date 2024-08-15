@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,46 +7,7 @@ import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, Payment
 import { PaymentProvider } from '../PaymentProvider';
 import { PaymentStatus } from '../PaymentStatus';
 import { TransferSettings } from '../webshops/TransferSettings';
-
-export class Company extends AutoEncoder {
-    /**
-     * Legal name of the organization (optional)
-     */
-    @field({ decoder: StringDecoder })
-    name = ''
-
-    @field({ decoder: StringDecoder, nullable: true })
-    VATNumber: string | null = null
-
-    @field({ decoder: StringDecoder, nullable: true })
-    companyNumber: string | null = null
-
-    @field({ decoder: Address, nullable: true })
-    address: Address | null = null;
-}
-
-/**
- * Who is paying / paid, and how can we contact them
- */
-export class PaymentCustomer extends AutoEncoder {
-    @field({ decoder: StringDecoder, nullable: true })
-    firstName: string | null = null;
-    
-    @field({ decoder: StringDecoder, nullable: true })
-    lastName: string | null = null;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    email: string | null = null
-
-    @field({ decoder: StringDecoder, nullable: true })
-    phone: string | null = null
-
-    /**
-     * As soon as this is set, we can assume that the customer is a company
-     */
-    @field({ decoder: Company, nullable: true })
-    company: Company | null = null
-}
+import { PaymentCustomer } from '../PaymentCustomer';
 
 export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

@@ -1029,13 +1029,4 @@ export class Organization extends Model {
 
         return providers
     }
-
-    generateCompany() {
-        return Company.create({
-            name: this.meta.companyName || this.name,
-            address: this.meta.companyAddress ?? this.address,
-            VATNumber: this.meta.VATNumber,
-            companyNumber: this.meta.companyNumber,
-        })
-    }
 }

@@ -8,10 +8,8 @@ import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
 import { LoadedPermissions } from './Permissions';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod';
-import { User } from './User';
-import { Webshop, WebshopPreview } from './webshops/Webshop';
-import { OrganizationAdmins } from './endpoints/OrganizationAdmins';
 import { UserWithMembers } from './UserWithMembers';
+import { Webshop, WebshopPreview } from './webshops/Webshop';
 
 export class Organization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

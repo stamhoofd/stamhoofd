@@ -1,13 +1,14 @@
-import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, isPatchableArray, ObjectData, PatchableArrayAutoEncoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel } from "@stamhoofd/structures";
+import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
+import { ViesHelper } from '../../../../helpers/ViesHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -208,6 +209,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (request.body.meta) {
+                if (request.body.meta.companies) {
+                   await this.validateCompanies(organization, request.body.meta.companies)
+                }
+
                 const savedPackages = organization.meta.packages
                 organization.meta.patchOrPut(request.body.meta)
                 organization.meta.packages = savedPackages
@@ -365,6 +370,53 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         errors.throwIfNotEmpty()
         return new Response(await AuthenticatedStructures.organization(organization));
+    }
+
+    async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company>|Company[]) {
+        if (isPatchableArray(companies)) {
+            for (const patch of companies.getPatches()) {
+                // Changed VAT number
+                const original = organization.meta.companies.find(c => c.id === patch.id)
+
+                if (!original) {
+                    throw new Error('Could not find company')
+                }
+                
+                // Changed VAT number
+                const prepatched = original.patch(patch)
+                await ViesHelper.checkCompany(prepatched, patch)
+            }
+
+            let c = 0;
+            for (const {put} of companies.getPuts()) {
+                c++;
+                
+                if ((organization.meta.companies.length + c) > 5) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Too many companies",
+                        human: "Je kan maximaal 5 bedrijven toevoegen",
+                        field: "companies"
+                    })
+                }
+
+                await ViesHelper.checkCompany(put, put)
+            }
+
+        } else {
+            if (companies.length > 5) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Too many companies",
+                    human: "Je kan maximaal 5 bedrijven toevoegen",
+                    field: "companies"
+                })
+            }
+
+            for (const company of companies) {
+                await ViesHelper.checkCompany(company, company)
+            }
+        }
     }
 }
 

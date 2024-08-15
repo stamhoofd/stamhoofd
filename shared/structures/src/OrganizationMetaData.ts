@@ -7,14 +7,15 @@ import { Replacement } from './endpoints/EmailRequest';
 import { File } from './files/File';
 import { Image } from './files/Image';
 import { GroupCategory } from './GroupCategory';
-import { OldGroupPrices } from './OldGroupPrices';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
+import { OldGroupPrices } from './OldGroupPrices';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
 import { PaymentConfiguration } from './PaymentConfiguration';
 import { PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 import { TransferSettings } from './webshops/TransferSettings';
+import { Company } from './Company';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
@@ -370,22 +371,41 @@ export class OrganizationMetaData extends AutoEncoder {
     recordsConfiguration: OrganizationRecordsConfiguration
 
     /**
-     * Legal name of the organization (optional)
+     * @deprecated Moved to companies
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 113 })
+    @field({ decoder: StringDecoder, nullable: true, version: 113, field: 'companyName', optional: true })
     companyName: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, version: 113 })
+    /**
+     * @deprecated Moved to companies
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 113, field: 'VATNumber', optional: true })
     VATNumber: string | null = null
 
-    @field({ decoder: StringDecoder, nullable: true, version: 113 })
+    /**
+     * @deprecated Moved to companies
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 113, field: 'companyNumber', optional: true })
     companyNumber: string | null = null
 
     /**
-     * Legal name of the organization (optional)
+     * @deprecated Moved to companies
      */
-    @field({ decoder: Address, nullable: true, version: 113 })
+    @field({ decoder: Address, nullable: true, version: 113, field: 'companyAddress', optional: true })
     companyAddress: Address | null = null;
+
+    @field({ decoder: new ArrayDecoder(Company), upgrade: function(this: OrganizationMetaData) {
+        return this.companyName || this.VATNumber || this.companyNumber || this.companyAddress ? [
+            Company.create({
+                id: 'default', // required we have stable ids in upgrades
+                name: this.companyName ?? '',
+                VATNumber: this.VATNumber,
+                companyNumber: this.companyNumber,
+                address: this.companyAddress
+            })
+        ] : []
+    }, ...NextVersion })
+    companies: Company[] = []
 
     /**
      * @deprecated

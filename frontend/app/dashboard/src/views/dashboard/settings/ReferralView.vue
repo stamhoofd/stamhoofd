@@ -15,11 +15,6 @@
                 Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.
             </p>
 
-            <button class="button text" type="button" @click="showBilling">
-                <span class="icon card" />
-                <span>Toon mijn tegoed</span>
-            </button>
-
             <Spinner v-if="loading" />
             <template v-if="!loading && status">
                 <hr>
@@ -154,9 +149,6 @@ import { AppManager } from "@stamhoofd/networking";
 import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 
-
-import BillingSettingsView from "./packages/BillingSettingsView.vue";
-
 @Component({
     components: {
         STNavigationBar,
@@ -256,12 +248,6 @@ export default class ReferralView extends Mixins(NavigationMixin) {
 
     openFacebookShare() {
         window.open("https://www.facebook.com/sharer/sharer.php?u=https://"+this.$t('shared.domains.marketing')+"&quote="+encodeURIComponent(this.referralText), "pop", "width=600, height=400, scrollbars=no");
-    }
-
-    showBilling() {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(BillingSettingsView)
-        }).setDisplayStyle("popup"))
     }
 
     copyElement(event) {

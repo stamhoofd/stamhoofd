@@ -96,7 +96,7 @@
                         {{ externalOrganization.address.anonymousString(Country.Belgium) }}
                     </p>
 
-                    <template #right v-if="isNew">
+                    <template v-if="isNew" #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -446,7 +446,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AgeInput, DateSelection, Dropdown, EditGroupView, GroupIdsInput, InheritedRecordsConfigurationBox, NumberInput, OrganizationAvatar, TimeInput } from '@stamhoofd/components';
+import { AgeInput, DateSelection, Dropdown, EditGroupView, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, NumberInput, OrganizationAvatar, TimeInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Country, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupType, OrganizationRecordsConfiguration, WaitingListType } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
@@ -831,6 +831,7 @@ async function save() {
 
     saving.value = true;
     try {
+        errors.errorBox = null;
         if (!await errors.validator.validate()) {
             saving.value = false;
             return;
@@ -841,7 +842,7 @@ async function save() {
         }
         await pop({force: true})
     } catch (e) {
-        Toast.fromError(e).show();
+        errors.errorBox = new ErrorBox(e)
     } finally {
         saving.value = false;
     }

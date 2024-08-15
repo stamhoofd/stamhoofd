@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, BalanceItemWithPayments, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version, PaymentCustomer } from "@stamhoofd/structures";
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -694,17 +694,43 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         })
 
         if (checkout.asOrganizationId) {
-            // Fill in company
-            const asOrganization = await Organization.getByID(checkout.asOrganizationId)
-            if (!asOrganization) {
+            if (!checkout.customer) {
                 throw new SimpleError({
-                    code: "invalid_data",
-                    message: "Oeps, de organisatie die je probeert te gebruiken lijkt niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                    code: "missing_fields",
+                    message: "customer is required when paying as an organization",
+                    human: "Vul je facturatiegegevens in om verder te gaan."
                 })
-                return;
             }
 
-            payment.customer.company = asOrganization.generateCompany()
+            if (!checkout.customer.company) {
+                throw new SimpleError({
+                    code: "missing_fields",
+                    message: "customer.company is required when paying as an organization",
+                    human: "Als je een betaling uitvoert in naam van je vereniging, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen."
+                })
+            }
+
+            const payingOrganization = await Organization.getByID(checkout.asOrganizationId);
+            if (!payingOrganization) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, de organisatie waarvoor je probeert te betalen lijkt niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
+            // Search company id
+            // this avoids needing to check the VAT number every time
+            const id = checkout.customer.company.id
+            const foundCompany = payingOrganization.meta.companies.find(c => c.id === id)
+
+            if (!foundCompany) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+
+            payment.customer.company = foundCompany
         }
 
         payment.method = checkout.paymentMethod

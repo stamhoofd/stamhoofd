@@ -1,7 +1,7 @@
 <template>
     <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @update="onUpdate">
         <template #item="{element, index}">
-            <slot name="item" v-bind="{item: element, index}" />
+            <slot name="item" v-bind="{item: element as T, index}" />
         </template>
     </Sortable>
     <TransitionGroup v-else-if="withAnimation" tag="div" name="list" class="st-list">
