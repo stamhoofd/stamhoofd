@@ -36,8 +36,14 @@ export class MemberUserSyncerStatic {
         } else {
             // Only auto unlink users that do not have an account
             for (const user of member.users) {
-                if (!user.hasAccount() && !userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
-                    await this.unlinkUser(user, member)
+                if (!userEmails.includes(user.email) && !parentAndUnverifiedEmails.includes(user.email)) {
+                    if (!user.hasAccount()) {
+                        await this.unlinkUser(user, member)
+                    } else {
+                        // Make sure only linked as a parent, not as user self
+                        // This makes sure we don't inherit permissions and aren't counted as 'begin' the member
+                        await this.linkUser(user.email, member, true)
+                    }
                 }
             }
         }
