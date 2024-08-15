@@ -67,7 +67,7 @@ export class Payment extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PaymentProvider), nullable: true, version: 152 })
     provider: PaymentProvider | null = null
 
-    @field({ decoder: PaymentCustomer, nullable: true, ...NextVersion})
+    @field({ decoder: PaymentCustomer, nullable: true, version: 321})
     customer: PaymentCustomer | null = null
 
     @field({ decoder: IntegerDecoder })
