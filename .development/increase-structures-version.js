@@ -9,10 +9,12 @@ const excludedFolder = ['node_modules', 'dist'];
 const util = require('node:util');
 const exec = util.promisify(require('node:child_process').exec);
 
-const currentVersion = require('@stamhoofd/structures').Version;
-const nextVersion = currentVersion + 1;
+// Note: we should not import the compiled structures directly here, since they would need to be compiled first
+let currentVersion = 0;
+let nextVersion = 0;
+let replaceBy = 'version: ' + nextVersion;
+
 const needle = '...NextVersion';
-const replaceBy = 'version: ' + nextVersion;
 const dryRun = false;
 let foundUsage = false;
 
@@ -142,6 +144,25 @@ async function processFile(filePath) {
     }
 }
 
+async function readVersion() {
+    const versionPath = path.join(__dirname, '..', 'shared/structures/src/Version.ts');
+    const content = await fs.readFile(versionPath, 'utf8');
+    const match = content.match(/Version = (\d+)/);
+    if (match) {
+        const v = parseInt(match[1]);
+        if (v === 0 || isNaN(v)) {
+            throw new Error('Failed to read current version');
+        }
+
+        currentVersion = v;
+        nextVersion = v + 1;
+        replaceBy = 'version: ' + nextVersion;
+
+    } else {
+        throw new Error('Failed to read current version');
+    }
+}
+
 async function loopFolder(folderPath) {
     // Loop all directories and files
     const files = await fs.readdir(folderPath);
@@ -159,6 +180,8 @@ async function loopFolder(folderPath) {
 }
 
 async function run() {
+    await readVersion();
+
     console.log(chalk.bold(chalk.blueBright('Increasing structures version to ' + nextVersion + '... (if changed)\n')));
 
     if (!dryRun) {
@@ -205,6 +228,11 @@ async function run() {
         const versionPath = path.join(__dirname, '..', 'shared/structures/src/Version.ts');
         const currentContent = await fs.readFile(versionPath, 'utf8');
         const newContent = currentContent.replace('Version = ' + currentVersion, 'Version = ' + nextVersion);
+
+        if (newContent === currentContent) {
+            console.error(chalk.red('Failed to update version in Version.ts. Please revert changes using Git.'));
+            process.exit(1);
+        }
         
         if (!dryRun) {
             await fs.writeFile(versionPath, newContent);
