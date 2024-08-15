@@ -15,6 +15,7 @@ export * from "./helpers/EmailBuilder"
 export * from "./helpers/GroupBuilder"
 export * from "./helpers/RateLimiter"
 export * from "./helpers/WebshopCounter"
+export * from "./helpers/MemberMerger"
 
 // Models
 export * from "./models"
