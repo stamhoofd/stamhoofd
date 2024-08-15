@@ -404,7 +404,7 @@ export class OrganizationMetaData extends AutoEncoder {
                 address: this.companyAddress
             })
         ] : []
-    }, ...NextVersion })
+    }, version: 322 })
     companies: Company[] = []
 
     /**

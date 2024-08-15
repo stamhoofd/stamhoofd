@@ -52,7 +52,7 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     asOrganizationId: string | null = null
 
-    @field({ decoder: PaymentCustomer, nullable: true, ...NextVersion })
+    @field({ decoder: PaymentCustomer, nullable: true, version: 322 })
     customer: PaymentCustomer | null = null
 
     /**
