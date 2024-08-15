@@ -1,54 +1,88 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
-import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { Organization, Payment } from "@stamhoofd/models";
-import { PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus } from "@stamhoofd/structures";
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { Decoder } from '@simonbackx/simple-encoding';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Payment } from '@stamhoofd/models';
+import { SQL, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler } from "@stamhoofd/sql";
+import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import { StringArrayDecoder } from "../../../../decoders/StringArrayDecoder";
-import { AuthenticatedStructures } from "../../../../helpers/AuthenticatedStructures";
-import { Context } from "../../../../helpers/Context";
-import { StringNullableDecoder } from "../../../../decoders/StringNullableDecoder";
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../../helpers/Context';
 
 type Params = Record<string, never>;
-type Body = undefined
-type ResponseBody = PaymentGeneral[]
+type Query = LimitedFilteredRequest;
+type Body = undefined;
+type ResponseBody = PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>
 
+const filterCompilers: SQLFilterDefinitions = {
+    ...baseSQLFilterCompilers,
+    id: createSQLColumnFilterCompiler('id'),
+    method: createSQLColumnFilterCompiler('method'),
+    status: createSQLColumnFilterCompiler('status'),
+    organizationId: createSQLColumnFilterCompiler('organizationId'),
+    createdAt: createSQLColumnFilterCompiler('createdAt'),
+    paidAt: createSQLColumnFilterCompiler('paidAt', {nullable: true}),
+    price: createSQLColumnFilterCompiler('price'),
+    provider: createSQLColumnFilterCompiler('provider', {nullable: true}),
+}
 
-class Query extends AutoEncoder {
-    /**
-     * Usage in combination with paidSince is special!
-     */
-    @field({ decoder: StringDecoder, optional: true })
-    afterId?: string
-
-    /**
-     * Return all payments that were paid after (and including) this date. 
-     * Only returns orders **equal** to this date if afterId is not provided or if the id of those payments is also higher.
-     */
-    @field({ decoder: DateDecoder, optional: true })
-    paidSince?: Date
-
-    @field({ decoder: DateDecoder, optional: true })
-    paidBefore?: Date
-
-    @field({ decoder: IntegerDecoder, optional: true })
-    limit?: number
-
-    @field({ decoder: new StringArrayDecoder(new EnumDecoder(PaymentMethod)), optional: true })
-    methods?: PaymentMethod[]
-
-    @field({ decoder: new StringArrayDecoder(new StringNullableDecoder(new EnumDecoder(PaymentProvider))), optional: true })
-    providers?: (PaymentProvider|null)[]
+const sorters: SQLSortDefinitions<Payment> = {
+    'id': {
+        getValue(a) {
+            return a.id
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('id'),
+                direction
+            })
+        }
+    },
+    'createdAt': {
+        getValue(a) {
+            return Formatter.dateTimeIso(a.createdAt, 'UTC')
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('createdAt'),
+                direction
+            })
+        }
+    },
+    'paidAt': {
+        getValue(a) {
+            return a.paidAt !== null ? Formatter.dateTimeIso(a.paidAt, 'UTC') : null
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('paidAt'),
+                direction
+            })
+        }
+    },
+    'price': {
+        getValue(a) {
+            return a.price
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('price'),
+                direction
+            })
+        }
+    }
 }
 
 export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    protected queryDecoder = Query;
+    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/payments", {});
+        const params = Endpoint.parseParameters(request.url, "/payments", {});
 
         if (params) {
             return [true, params as Params];
@@ -56,115 +90,119 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+    static async buildQuery(q: CountFilteredRequest|LimitedFilteredRequest) {
+        const organization = Context.organization
+        let scopeFilter: StamhoofdFilter|undefined = undefined;
+
+        if (!organization) {
+            throw Context.auth.error()
+        }
 
         if (!await Context.auth.canManagePayments(organization.id)) {
             throw Context.auth.error()
-        } 
+        }
 
-        return new Response(
-            (await this.getPayments(organization, request.query))
-        );
+        scopeFilter = {
+            organizationId: organization.id
+        };
+        
+        const query = SQL
+            .select()
+            .from(
+                SQL.table('payments')
+            );
+            
+        if (scopeFilter) {
+            query.where(compileToSQLFilter(scopeFilter, filterCompilers))
+        }
+
+        if (q.filter) {
+            query.where(compileToSQLFilter(q.filter, filterCompilers))
+        }
+
+        if (q.search) {
+            // todo
+
+            let searchFilter: StamhoofdFilter|null = null
+            searchFilter = {
+                name: {
+                    $contains: q.search
+                }
+            }
+
+            if (searchFilter) {
+                query.where(compileToSQLFilter(searchFilter, filterCompilers))
+            }
+        }
+
+        if (q instanceof LimitedFilteredRequest) {
+            if (q.pageFilter) {
+                query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
+            }
+
+            query.orderBy(compileToSQLSorter(q.sort, sorters))
+            query.limit(q.limit)
+        }
+       
+        return query
     }
 
-    async getPayments(organization: Organization, query: Query) {
-        const paidSince = query.paidSince ?? new Date(Date.now() - (24 * 60 * 60 * 1000 * 7 ))
-        paidSince.setMilliseconds(0)
-        const payments: Payment[] = []
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const query = await this.buildQuery(requestQuery)
+        const data = await query.fetch()
+        
+        const payments = Payment.fromRows(data, 'payments')
 
-        if (query.afterId) {
-            // First return all payments with id > afterId and paidAt == paidSince
-            payments.push(...await Payment.where({
-                organizationId: organization.id, 
-                paidAt: {
-                    sign: '=', 
-                    value: paidSince
-                },
-                id: {
-                    sign: '>',
-                    value: query.afterId ?? ""
-                },
-                method: {
-                    sign: 'IN', 
-                    value: query.methods ?? [PaymentMethod.Transfer]
-                },
-                provider: {
-                    sign: 'IN', 
-                    value: query.providers ?? [null]
-                }
-            }, {
-                limit: query.limit ?? undefined,
-                sort: [{
-                    column: "id",
-                    direction: "ASC"
-                }]
-            }));
-        }
+        let next: LimitedFilteredRequest|undefined;
 
-        payments.push(...await Payment.where({
-            organizationId: organization.id, 
-            paidAt: query.paidBefore ? [{
-                sign: query.afterId  ? '>' : '>=', 
-                value: paidSince
-            }, {
-                sign: '<=', 
-                value: query.paidBefore
-            }] : {
-                sign: query.afterId  ? '>' : '>=', 
-                value: paidSince
-            },
-            method: {
-                sign: 'IN', 
-                value: query.methods ?? [PaymentMethod.Transfer]
-            },
-            provider: {
-                sign: 'IN', 
-                value: query.providers ?? [null]
+        if (payments.length >= requestQuery.limit) {
+            const lastObject = payments[payments.length - 1];
+            const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: requestQuery.filter,
+                pageFilter: nextFilter,
+                sort: requestQuery.sort,
+                limit: requestQuery.limit,
+                search: requestQuery.search
+            })
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
+                console.error('Found infinite loading loop for', requestQuery);
+                next = undefined;
             }
-        }, {
-            limit: query.limit ? (query.limit - payments.length) : undefined,
-            sort: [{
-                column: "paidAt",
-                direction: "ASC"
-            }, 
-            {
-                column: "id",
-                direction: "ASC"
-            }]
-        }));
-
-
-        if (!query.paidSince && !query.methods && !query.providers) {
-            // Default behaviour is to return all not-paid transfer payments that are not yet paid
-
-            payments.push(...
-                await Payment.where({
-                    organizationId: organization.id, 
-                    paidAt: null,
-                    method: PaymentMethod.Transfer,
-                    status: {
-                        sign: '!=',
-                        value: PaymentStatus.Failed
-                    }
-                })
-            );
-
-            payments.push(...
-                await Payment.where({
-                    organizationId: organization.id, 
-                    paidAt: null,
-                    updatedAt: {
-                        sign: '>', 
-                        value: new Date(Date.now() - (24 * 60 * 60 * 1000 * 7 ))
-                    },
-                    method: PaymentMethod.Transfer,
-                    status: PaymentStatus.Failed
-                })
-            );
         }
 
-        return await AuthenticatedStructures.paymentsGeneral(payments, true)
+        return new PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>({
+            results: await AuthenticatedStructures.paymentsGeneral(payments, false),
+            next
+        });
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>) {
+        await Context.setOrganizationScope();
+        await Context.authenticate()
+
+        const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
+
+        if (request.query.limit > maxLimit) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be more than ' + maxLimit
+            })
+        }
+
+        if (request.query.limit < 1) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'limit',
+                message: 'Limit can not be less than 1'
+            })
+        }
+        
+        return new Response(
+            await GetPaymentsEndpoint.buildData(request.query)
+        );
     }
 }

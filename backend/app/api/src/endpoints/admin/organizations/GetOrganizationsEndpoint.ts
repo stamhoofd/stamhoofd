@@ -30,33 +30,23 @@ export const filterCompilers: SQLFilterDefinitions = {
     ),
     city: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
-        undefined,
-        true,
-        false
+        {isJSONValue: true}
     ),
     country: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.country'),
-        undefined,
-        true,
-        false
+        {isJSONValue: true}
     ),
     umbrellaOrganization: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.umbrellaOrganization'),
-        undefined,
-        true,
-        false
+        {isJSONValue: true}
     ),
     type: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.type'),
-        undefined,
-        true,
-        false
+        {isJSONValue: true}
     ),
     tags: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
-        undefined,
-        true,
-        true
+        {isJSONValue: true, isJSONObject: true}
     ),
     packages: createSQLRelationFilterCompiler(
         SQL.select().from(
@@ -103,9 +93,7 @@ export const filterCompilers: SQLFilterDefinitions = {
             ...baseSQLFilterCompilers,
             "type": createSQLExpressionFilterCompiler(
                 SQL.jsonValue(SQL.column('meta'), '$.value.type'),
-                undefined,
-                true,
-                false
+                {isJSONValue: true}
             )
         }
     ),

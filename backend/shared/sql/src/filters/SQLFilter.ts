@@ -65,7 +65,9 @@ export function createSQLFilterNamespace(definitions: SQLFilterDefinitions): SQL
     }
 }
 
-export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null, isJSONValue = false, isJSONObject = false): SQLFilterCompiler {
+type SQLExpressionFilterOptions = {normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null, isJSONValue?: boolean, isJSONObject?: boolean, nullable?: boolean}
+
+export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, {normalizeValue, isJSONObject = false, isJSONValue = false, nullable = false}: SQLExpressionFilterOptions = {}): SQLFilterCompiler {
     const norm = normalizeValue ?? ((v) => v);
     const convertToExpression = isJSONValue ? scalarToSQLJSONExpression : scalarToSQLExpression
 
@@ -172,15 +174,6 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             if (isJSONObject) {
                 const v = norm(f.$eq);
 
-                // if (typeof v === 'string') {
-                //     return new SQLWhereEqual(
-                //         new SQLJsonSearch(sqlExpression, 'one', convertToExpression(v)), 
-                //         SQLWhereSign.Equal, 
-                //         new SQLNull()
-                //     );
-                // }
-
-                // else
                 return new SQLWhereEqual(
                     new SQLJsonContains(
                         sqlExpression, 
@@ -204,6 +197,8 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 // > null is same as not equal to null (everything is larger than null in mysql) - to be consistent with order by behaviour
                 return new SQLWhereEqual(sqlExpression, SQLWhereSign.NotEqual, convertToExpression(null));
             }
+
+            // For MySQL null values are never included in greater than, but we need this for consistent sorting behaviour
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.Greater, convertToExpression(norm(f.$gt)));
         }
 
@@ -232,6 +227,17 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 // <= null is same as equal to null
                 return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, convertToExpression(norm(f.$lte)));
             }
+
+            const base = new SQLWhereEqual(sqlExpression, SQLWhereSign.LessEqual, convertToExpression(norm(f.$lte)));
+
+            if (nullable) {
+                return new SQLWhereOr([
+                    // Null values are also smaller than any value  - required for sorting
+                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()),
+                   base
+                ]);
+            }
+            
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.LessEqual, convertToExpression(norm(f.$lte)));
         }
 
@@ -247,7 +253,18 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 // < null is always nothing, there is nothing smaller than null in MySQL - to be consistent with order by behaviour
                 return new SQLWhereEqual(new SQLSafeValue(1), SQLWhereSign.Equal, new SQLSafeValue(0));
             }
-            return new SQLWhereEqual(sqlExpression, SQLWhereSign.Less, convertToExpression(norm(f.$lt)));
+
+            const base = new SQLWhereEqual(sqlExpression, SQLWhereSign.Less, convertToExpression(norm(f.$lt)))
+
+            if (nullable) {
+                return new SQLWhereOr([
+                    // Null values are also smaller than any value  - required for sorting
+                    new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()),
+                   base
+                ]);
+            }
+
+            return base;
         }
 
         if ('$contains' in f) {
@@ -279,9 +296,9 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
     }
 }
 
-export function createSQLColumnFilterCompiler(name: string | SQLColumnExpression, normalizeValue?: (v: SQLScalarValue|null) => SQLScalarValue|null): SQLFilterCompiler {
+export function createSQLColumnFilterCompiler(name: string | SQLColumnExpression, options?: SQLExpressionFilterOptions): SQLFilterCompiler {
     const column = name instanceof SQLColumnExpression ? name : SQL.column(name);
-    return createSQLExpressionFilterCompiler(column, normalizeValue)
+    return createSQLExpressionFilterCompiler(column, options)
 }
 
 export const baseSQLFilterCompilers: SQLFilterDefinitions = {

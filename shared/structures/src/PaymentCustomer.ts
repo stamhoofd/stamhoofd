@@ -22,4 +22,36 @@ export class PaymentCustomer extends AutoEncoder {
      */
     @field({ decoder: Company, nullable: true })
     company: Company | null = null
+
+    get name() {
+        if (this.firstName && this.lastName) {
+            return `${this.firstName} ${this.lastName}`
+        }
+        
+        return this.firstName || this.lastName
+    }
+
+    get dynamicName() {
+        if (this.company) {
+            return this.company.name || this.company.companyNumber || 'Onbekend bedrijf'
+        }
+
+        if (this.firstName && this.lastName) {
+            return `${this.firstName} ${this.lastName}`
+        }
+        
+        return this.firstName || this.lastName || this.email || this.phone || 'Onbekende klant'
+    }
+
+    get dynamicEmail() {
+        if (this.company) {
+            return this.company.name || this.company.companyNumber || 'Onbekend bedrijf'
+        }
+
+        if (this.firstName && this.lastName) {
+            return `${this.firstName} ${this.lastName}`
+        }
+        
+        return this.firstName || this.lastName || this.email || this.phone || 'Onbekende klant'
+    }
 }

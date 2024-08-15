@@ -1,4 +1,4 @@
-import { Organization, Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
+import { Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, StamhoofdFilter, User } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Gender } from "../../../../../shared/structures/esm/dist/src/members/Gender";
 import { GroupUIFilterBuilder } from "./GroupUIFilter";
@@ -6,6 +6,43 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./Mul
 import { NumberFilterBuilder } from "./NumberUIFilter";
 import { StringFilterBuilder } from "./StringUIFilter";
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from "./UIFilter";
+
+export const paymentsUIFilterBuilders: UIFilterBuilders = [
+    new MultipleChoiceFilterBuilder({
+        name: 'Betaalmethode',
+        options: Object.values(PaymentMethod).map(method => {
+            return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
+        }),
+        buildFilter: (choices) => {
+            return {
+                method: {
+                    $in: choices.map(c => c)
+                }
+            }
+        }
+    }),
+
+    new MultipleChoiceFilterBuilder({
+        name: 'Status',
+        options: Object.values(PaymentStatus).map(method => {
+            return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
+        }),
+        buildFilter: (choices) => {
+            return {
+                status: {
+                    $in: choices.map(c => c)
+                }
+            }
+        }
+    })
+];
+
+// Recursive: self referencing groups
+paymentsUIFilterBuilders.unshift(
+    new GroupUIFilterBuilder({
+        builders: paymentsUIFilterBuilders
+    })
+)
 
 // This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
 export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [

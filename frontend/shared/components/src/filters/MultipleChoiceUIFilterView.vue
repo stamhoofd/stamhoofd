@@ -1,6 +1,6 @@
 <template>
     <STList>
-        <STListItem v-for="option of options" :key="option.id" :selectable="true" element-name="label">
+        <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
             <template #left>
                 <Checkbox :model-value="isOptionSelected(option)" @update:model-value="setOptionSelected(option, $event)" />
             </template>
@@ -40,7 +40,7 @@ export default class MultipleChoiceUIFilterView extends Mixins(NavigationMixin) 
     }
 
     isOptionSelected(option: MultipleChoiceUIFilterOption) {
-        return !!this.filter.options.find(i => i.name === option.name)
+        return !!this.filter.options.find(i => i.value === option.value)
     }
 
     setOptionSelected(option: MultipleChoiceUIFilterOption, selected: boolean) {
@@ -48,7 +48,7 @@ export default class MultipleChoiceUIFilterView extends Mixins(NavigationMixin) 
             return
         }
         if (!selected) {
-            const index = this.filter.options.findIndex(i => i.name === option.name)
+            const index = this.filter.options.findIndex(i => i.value === option.value)
             if (index != -1) {
                 this.filter.options.splice(index, 1)
             }

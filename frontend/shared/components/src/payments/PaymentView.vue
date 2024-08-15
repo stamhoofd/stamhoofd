@@ -115,6 +115,89 @@
                     </STListItem>
                 </STList>
 
+                <hr>
+                <h2>Facturatiegegevens</h2>
+                
+                <p class="info-box" v-if="!payment.customer">
+                    Deze betaling heeft geen facturatiegegevens.
+                </p>
+                <STList class="info" v-else-if="payment.customer.company">
+                    <STListItem>
+                        <h3 class="style-definition-label">
+                            Bedrijfsnaam
+                        </h3>
+                        <p class="style-definition-text style-copyable"  v-copyable>
+                            {{ payment.customer.company.name }}
+                        </p>
+                        <p class="style-description" v-if="!payment.customer.company.VATNumber && !payment.customer.company.companyNumber">
+                            Feitelijke vereniging
+                        </p>
+
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.VATNumber">
+                        <h3 class="style-definition-label">
+                            BTW-nummer
+                        </h3>
+                        <p class="style-definition-text style-copyable"  v-copyable>
+                            {{ payment.customer.company.VATNumber || 'Niet BTW-plichtig'}}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.companyNumber && (!payment.customer.company.VATNumber || (payment.customer.company.companyNumber !== payment.customer.company.VATNumber && payment.customer.company.companyNumber !== payment.customer.company.VATNumber.slice(2)))">
+                        <h3 class="style-definition-label">
+                            Ondernemingsnummer
+                        </h3>
+                        <p class="style-definition-text style-copyable" v-copyable>
+                            {{ payment.customer.company.companyNumber || 'Niet BTW-plichtig'}}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.address">
+                        <h3 class="style-definition-label">
+                            Adres
+                        </h3>
+                        <p class="style-definition-text style-copyable"  v-copyable>
+                            {{ payment.customer.company.address.toString() }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.administrationEmail">
+                        <h3 class="style-definition-label">
+                            E-mailadres
+                        </h3>
+                        <p class="style-definition-text style-copyable"  v-copyable>
+                            {{ payment.customer.company.administrationEmail }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.name">
+                        <h3 class="style-definition-label">
+                            Contactpersoon
+                        </h3>
+                        <p class="style-definition-text style-copyable" v-copyable>
+                            {{ payment.customer.name }}
+                        </p>
+                        <p class="style-description style-copyable" v-if="payment.customer.email" v-copyable>
+                            {{ payment.customer.email }}
+                        </p>
+                    </STListItem>
+                </STList>
+
+                <STList class="info" v-else>
+                    <STListItem>
+                        <h3 class="style-definition-label">
+                            Contactpersoon
+                        </h3>
+                        <p class="style-definition-text style-copyable" v-copyable>
+                            {{ payment.customer.name || 'Naamloos' }}
+                        </p>
+                        <p class="style-description style-copyable" v-if="payment.customer.email" v-copyable>
+                            {{ payment.customer.email }}
+                        </p>
+                    </STListItem>
+                </STList>
+
                 <template v-if="isManualMethod && canWrite">
                     <hr>
                     <h2>Acties</h2>
@@ -202,7 +285,7 @@
                     <hr>
                     <h2>Overzicht</h2>
                     <STList>
-                        <STListItem v-for="item in payment.balanceItemPayments" :key="item.id" :selectable="true" @click="editBalanceItem(item.balanceItem)">
+                        <STListItem v-for="item in sortedItems" :key="item.id" :selectable="true" @click="editBalanceItem(item.balanceItem)">
                             <template #left>
                                 <span class="style-amount min-width">{{ formatFloat(item.amount) }}</span>
                             </template>
@@ -230,12 +313,12 @@
                             <p v-if="item.price < 0" class="style-tag">
                                 Terugbetaling
                             </p>
-                            <p v-else-if="item.balanceItem.status === 'Hidden' || item.balanceItem.amount === 0" class="style-tag error">
+                            <p v-else-if="payment.paidAt && (item.balanceItem.status === 'Hidden' || item.balanceItem.amount === 0)" class="style-tag error">
                                 Deze schuld werd verwijderd na betaling. Het verschil zal bij volgende betalingen in rekening gebracht worden.
                             </p>
                             
                             <template #right>
-                                <span class="style-price-base">{{ formatPrice(item.price) }}</span>
+                                <span class="style-price-base">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>
                             </template>
                         </STListItem>
                     </STList>
@@ -243,20 +326,7 @@
                     <PriceBreakdownBox :price-breakdown="[{name: 'Totaal', price: payment.price}]" />
                 </template>
 
-                <hr>
-                <h2>Contactgegevens</h2>
-                
-                <p v-if="contactInfo.length == 0" class="info-box">
-                    Er zijn geen contactgegevens beschikbaar.
-                </p>
-                <STList v-else class="info">
-                    <STListItem v-for="(info, index) of contactInfo" :key="index">
-                        <h3 class="style-definition-label">
-                            {{ info.title }}
-                        </h3>
-                        <p v-for="(value, index2) of info.values" :key="index2" v-copyable class="style-definition-text style-copyable" v-text="value" />
-                    </STListItem>
-                </STList>
+
             </template>
         </main>
     </div>
@@ -270,6 +340,7 @@ import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes"
 import { ErrorBox, GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Spinner, Toast } from "@stamhoofd/components";
 import { BalanceItem, BalanceItemWithPayments, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, calculateVATPercentage } from "@stamhoofd/structures";
 
+import { Sorter } from "@stamhoofd/utility";
 import PriceBreakdownBox from "../views/PriceBreakdownBox.vue";
 import EditBalanceItemView from "./EditBalanceItemView.vue";
 
@@ -316,11 +387,20 @@ export default class PaymentView extends Mixins(NavigationMixin) {
         return this.$context.organizationAuth.canAccessPayment(this.payment, PermissionLevel.Write)
     }
 
-    @Prop({ default: null })
-        getNext!: (PaymentGeneral) => PaymentGeneral | null;
+    get sortedItems() {
+        return this.payment?.balanceItemPayments.slice().sort((a, b) => {
+            return Sorter.stack(
+                Sorter.byNumberValue(a.price, b.price),
+                Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description)
+            )
+        })
+    }
 
     @Prop({ default: null })
-        getPrevious!: (PaymentGeneral) => PaymentGeneral | null;
+        getNext!: (payment: Payment) => Payment | null;
+
+    @Prop({ default: null })
+        getPrevious!: (payment: Payment) => Payment | null;
 
     get hasNext(): boolean {
         if (!this.getNext) {
@@ -431,85 +511,6 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false;
-    }
-
-    get contactInfo() {
-        const added = new Set<string>()
-        const contactInfo: {title: string, values:string[]}[] = [];
-
-        if (!this.payment) {
-            return contactInfo;
-        }
-
-        //        for (const member of this.payment.members) {
-        //
-        //            const key = 'member-' + member.id;
-        //            if (!added.has(key)) {
-        //                const values: string[] = [];
-        //                //if (member.details.phone) {
-        //                //    values.push(member.details.phone);
-        //                //}
-        ////
-        //                //if (member.details.email) {
-        //                //    values.push(member.details.email);
-        //                //}
-        //
-        //                if (values.length) {
-        //                    contactInfo.push({
-        //                        title: member.name + ' (lid)',
-        //                        values
-        //                    })
-        //                }
-        //                added.add(key);
-        //
-        //                //for (const parent of member.details.parents) {
-        //                //    const key = 'parent-' + parent.name;
-        //                //    if (!added.has(key)) {
-        //                //        const values: string[] = [];
-        //                //        if (parent.phone) {
-        //                //            values.push(parent.phone);
-        //                //        }
-        ////
-        //                //        if (parent.email) {
-        //                //            values.push(parent.email);
-        //                //        }
-        ////
-        //                //        if (values.length) {
-        //                //            contactInfo.push({
-        //                //                title: parent.name + ' (' + ParentTypeHelper.getName(parent.type) + ')',
-        //                //                values
-        //                //            })
-        //                //        }
-        ////
-        //                //        added.add(key);
-        //                //    }
-        //                //}
-        //            }
-        //        }
-        //
-        //        for (const order of this.payment.orders) {
-        //            const key = 'order-'+order.id;
-        //
-        //            if (!added.has(key)) {
-        //                const values: string[] = [];
-        //                if (order.data.customer.phone) {
-        //                    values.push(order.data.customer.phone);
-        //                }
-        //
-        //                if (order.data.customer.email) {
-        //                    values.push(order.data.customer.email);
-        //                }
-        //
-        //                if (values.length) {
-        //                    contactInfo.push({
-        //                        title: order.data.customer.name,
-        //                        values
-        //                    })
-        //                }
-        //                added.add(key);
-        //            }
-        //        }
-        return contactInfo;
     }
 
     markingPaid = false;

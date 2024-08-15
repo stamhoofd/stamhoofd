@@ -75,25 +75,12 @@ Email.recipientLoaders.set(EmailRecipientFilterType.MemberUnverified, {
 
 const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    "price": createSQLColumnFilterCompiler('price'),
+    "price": createSQLColumnFilterCompiler('price', {nullable: true}),
     "pricePaid": createSQLColumnFilterCompiler('pricePaid'),
-    "waitingList": createSQLColumnFilterCompiler('waitingList'),
     "canRegister": createSQLColumnFilterCompiler('canRegister'),
-    "cycle": createSQLColumnFilterCompiler('cycle'),
-
-    "cycleOffset": createSQLExpressionFilterCompiler({
-        getSQL(options) {
-            return joinSQLQuery([
-                SQL.column('groups', 'cycle').getSQL(options),
-                ' - ',
-                SQL.column('registrations', 'cycle').getSQL(options)
-            ])
-        },
-    }),
-
     "organizationId": createSQLColumnFilterCompiler('organizationId'),
     "groupId": createSQLColumnFilterCompiler('groupId'),
-    "registeredAt": createSQLColumnFilterCompiler('registeredAt'),
+    "registeredAt": createSQLColumnFilterCompiler('registeredAt', {nullable: true}),
     "periodId": createSQLColumnFilterCompiler(SQL.column('registrations', 'periodId')),
 
     "group": createSQLFilterNamespace({
@@ -105,7 +92,7 @@ const registrationFilterCompilers: SQLFilterDefinitions = {
         status: createSQLExpressionFilterCompiler(
             SQL.column('groups', 'status')
         ),
-        defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId')),
+        defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId'), {nullable: true}),
     })
 }
 
@@ -120,20 +107,21 @@ const filterCompilers: SQLFilterDefinitions = {
         )
     ),
     age: createSQLExpressionFilterCompiler(
-        new SQLAge(SQL.column('birthDay'))
+        new SQLAge(SQL.column('birthDay')), 
+        {nullable: true}
     ),
     gender: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.gender'),
-        undefined,
-        true,
-        false
+        {isJSONValue: true}
     ),
-    birthDay: createSQLColumnFilterCompiler('birthDay', (d) => {
-        if (typeof d === 'number') {
-            const date = new Date(d)
-            return Formatter.dateIso(date);
+    birthDay: createSQLColumnFilterCompiler('birthDay', {
+        normalizeValue: (d) => {
+            if (typeof d === 'number') {
+                const date = new Date(d)
+                return Formatter.dateIso(date);
+            }
+            return d;
         }
-        return d;
     }),
     organizationName: createSQLExpressionFilterCompiler(
         SQL.column('organizations', 'name')
@@ -141,16 +129,12 @@ const filterCompilers: SQLFilterDefinitions = {
 
     email: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.email'),
-        undefined,
-        true,
-        false
+        {isJSONValue: true}
     ),
 
     parentEmail: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('details'), '$.value.parents[*].email'),
-        undefined,
-        true,
-        true
+        {isJSONValue: true, isJSONObject: true}
     ),
 
     registrations: createSQLRelationFilterCompiler(

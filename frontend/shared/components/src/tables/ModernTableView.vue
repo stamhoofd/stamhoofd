@@ -1714,6 +1714,10 @@ defineExpose({
         color: $color-gray-1;
         background: $color-background-shade;
     }
+
+    &[data-style="code"] > span {
+        font-family: monospace;
+    }
 }
 
 .table-with-columns {

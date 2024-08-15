@@ -21,7 +21,7 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
 import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useContext, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupPrice, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterItemOption, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, assertSort, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupPrice, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterItemOption, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from "vue";
 import { useDirectMemberActions } from "./classes/MemberActionBuilder";
@@ -54,6 +54,7 @@ const filterBuilders = computed(() => {
         user: auth.user,
     })
 })
+
 const title = computed(() => {
     if (props.customTitle) {
         return props.customTitle
@@ -106,12 +107,7 @@ function extendSort(list: SortList): SortList  {
         return l;
     })
 
-    if (list.find(l => l.key === 'id')) {
-        return list;
-    }
-
-    // Always add id as an extra sort key for sorters that are not unique
-    return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
+    return assertSort(list, [{key: 'id'}])
 }
 
 function getRequiredFilter(): StamhoofdFilter|null  {
@@ -136,7 +132,7 @@ function getRequiredFilter(): StamhoofdFilter|null  {
     }
 }
 
-const tableObjectFetcher = useTableObjectFetcher<PlatformMember>({
+const tableObjectFetcher = useTableObjectFetcher<ObjectType>({
     requiredFilter: getRequiredFilter(),
     async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
         console.log('Members.fetch', data);
@@ -486,7 +482,7 @@ const actionBuilder = useDirectMemberActions({
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup()
 
-const actions: TableAction<PlatformMember>[] = [
+const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
         name: "Leden inschrijven",
         icon: "add",

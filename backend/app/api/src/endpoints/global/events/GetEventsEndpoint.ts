@@ -24,21 +24,15 @@ const filterCompilers: SQLFilterDefinitions = {
     endDate: createSQLColumnFilterCompiler('endDate'),
     groupIds: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('meta'), '$.value.groups[*].id'),
-        undefined,
-        true,
-        true
+        {isJSONValue: true, isJSONObject: true}
     ),
     defaultAgeGroupIds: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
-        undefined,
-        true,
-        true
+        {isJSONValue: true, isJSONObject: true}
     ),
     organizationTagIds: createSQLExpressionFilterCompiler(
         SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds'),
-        undefined,
-        true,
-        true
+        {isJSONValue: true, isJSONObject: true}
     )
 }
 
