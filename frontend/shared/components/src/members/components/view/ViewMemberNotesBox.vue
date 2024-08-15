@@ -5,10 +5,12 @@
             <h2 class="style-with-button">
                 <div>Notities</div>
                 <div class="hover-show">
-                <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember" />
-            </div>
+                    <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember" />
+                </div>
             </h2>
-            <p class="style-description-small">{{ notes }}</p>
+            <p class="style-description-small notes">
+                {{ notes }}
+            </p>
         </div>  
     </div>
 </template>
@@ -42,7 +44,6 @@ async function editThisMember() {
 
 <style lang="scss" scoped>
 .notes {
-    grid-column: span 2;
     white-space: pre-line;
 }
 </style>
