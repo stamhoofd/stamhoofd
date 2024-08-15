@@ -12,6 +12,14 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "never"
     },
+    "github.copilot.enable": {
+        "*": true,
+        "vue": true,
+        "markdown": false,
+        "plaintext": false,
+        "yaml": false,
+        "json": false
+    },
     "editor.codeLens": false,
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.formatOnPaste": false,
