@@ -193,12 +193,14 @@ const allColumns: Column<ObjectType, any>[] = [
         recommendedWidth: 150,
     }),
 
-    new Column<ObjectType, Date|null>({
+    new Column<ObjectType, PaymentGeneral>({
         id: 'paidAt',
         name: "Betaald op", 
-        getValue: (object) => object.paidAt,
-        format: (value, width) => value ? (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true)) : 'Niet betaald',
-        getStyle: (value) => !value ? 'error' : '',
+        getValue: (object) => object,
+        format: (value, width) => value.paidAt ? (width < 150 ? Formatter.dateNumber(value.paidAt) : Formatter.date(value.paidAt, true)) : (
+            value.status === PaymentStatus.Failed ? 'Geannuleerd' : 'Niet betaald'
+        ),
+        getStyle: (value) => !value.paidAt ? (value.status === PaymentStatus.Failed ? 'gray' : 'error'): '',
         minimumWidth: 120,
         recommendedWidth: 150,
     }),

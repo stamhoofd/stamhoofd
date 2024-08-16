@@ -37,6 +37,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Payments)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        Alle betalingen
+                    </h2>
+                    <p class="style-description">
+                        Controleer alle betalingen die in het systeem aanwezig zijn, inclusief eventueel mislukte betaalpogingen.
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
         </main>
     </div>
@@ -52,7 +67,8 @@ import ConfigurePaymentExportView from './administration/ConfigurePaymentExportV
 
 enum Routes {
     Transfers = "Transfers",
-    Export = "Export"
+    Export = "Export",
+    Payments = "Payments"
 }
 
 defineRoutes([
@@ -68,6 +84,22 @@ defineRoutes([
                         $in: [
                             PaymentStatus.Pending,
                             PaymentStatus.Created
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    {
+        name: Routes.Payments,
+        url: 'betalingen',
+        component: PaymentsTableView as ComponentOptions,
+        paramsToProps() {
+            return {
+                defaultFilter: {
+                    status: {
+                        $in: [
+                            PaymentStatus.Succeeded
                         ]
                     }
                 }
