@@ -169,7 +169,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     })
                 }
 
-                if (patch.method || patch.paidAt !== undefined) {
+                if (patch.method || patch.paidAt !== undefined || patch.status !== undefined) {
                     if (payment.method && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(payment.method)) {
                         throw new SimpleError({
                             code: "invalid_field",
