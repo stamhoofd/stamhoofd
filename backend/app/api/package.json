@@ -48,6 +48,14 @@
         "node-rsa": "1.1.1",
         "openid-client": "^5.4.0",
         "postmark": "4.0.2",
-        "stripe": "^16.6.0"
+        "stripe": "^16.6.0",
+        "@stamhoofd/structures": "2.12.0",
+        "@stamhoofd/models": "2.12.0",
+        "@stamhoofd/queues": "2.10.2",
+        "@stamhoofd/email": "2.10.2",
+        "@stamhoofd/utility": "2.10.2",
+        "@stamhoofd/backend-i18n": "2.10.2",
+        "@stamhoofd/sql": "2.10.2",
+        "@stamhoofd/backend-middleware": "2.10.2"
     }
 }
