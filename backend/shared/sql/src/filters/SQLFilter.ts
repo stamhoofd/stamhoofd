@@ -1,8 +1,8 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { StamhoofdFilter, StamhoofdKeyFilterValue } from "@stamhoofd/structures";
+import { StamhoofdFilter } from "@stamhoofd/structures";
 import { SQL } from "../SQL";
 import { SQLExpression } from "../SQLExpression";
-import { SQLArray, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
+import { SQLArray, SQLCast, SQLColumnExpression, SQLNull, SQLSafeValue, SQLScalarValue, scalarToSQLExpression, scalarToSQLJSONExpression } from "../SQLExpressions";
 import { SQLJsonContains, SQLJsonOverlaps, SQLJsonSearch, SQLJsonUnquote } from "../SQLJsonExpressions";
 import { SQLSelect } from "../SQLSelect";
 import { SQLWhere, SQLWhereAnd, SQLWhereEqual, SQLWhereExists, SQLWhereLike, SQLWhereNot, SQLWhereOr, SQLWhereSign } from "../SQLWhere";
@@ -281,6 +281,16 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                     ), 
                     SQLWhereSign.NotEqual, 
                     new SQLNull()
+                );
+            }
+
+            if (isJSONValue) {
+                // We need to do case insensitive search, so need to convert the sqlExpression from utf8mb4 to varchar
+                return new SQLWhereLike(
+                    new SQLCast(new SQLJsonUnquote(sqlExpression), 'CHAR'), 
+                    convertToExpression(
+                        '%'+SQLWhereLike.escape(f.$contains)+'%'
+                    )
                 );
             }
             

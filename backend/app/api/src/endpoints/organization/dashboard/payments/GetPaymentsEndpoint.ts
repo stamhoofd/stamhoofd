@@ -3,7 +3,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
-import { SQL, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler } from "@stamhoofd/sql";
+import { SQLJsonUnquote, SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, SQLCast } from "@stamhoofd/sql";
 import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -15,6 +15,18 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>
 
+const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
+    ...baseSQLFilterCompilers,
+    "id": createSQLColumnFilterCompiler(SQL.column('balance_item_payments', 'id')),
+    "price": createSQLColumnFilterCompiler(SQL.column('balance_item_payments', 'price')),
+    
+    "balanceItem": createSQLFilterNamespace({
+        ...baseSQLFilterCompilers,
+        id: createSQLColumnFilterCompiler(SQL.column('balance_items', 'id')),
+        description: createSQLColumnFilterCompiler(SQL.column('balance_items', 'description')),
+    })
+}
+
 const filterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
@@ -25,6 +37,66 @@ const filterCompilers: SQLFilterDefinitions = {
     paidAt: createSQLColumnFilterCompiler('paidAt', {nullable: true}),
     price: createSQLColumnFilterCompiler('price'),
     provider: createSQLColumnFilterCompiler('provider', {nullable: true}),
+    customer: createSQLFilterNamespace({
+        ...baseSQLFilterCompilers,
+        email: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('customer'), '$.value.email'),
+            {isJSONValue: true}
+        ),
+        firstName: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('customer'), '$.value.firstName'),
+            {isJSONValue: true}
+        ),
+        lastName: createSQLExpressionFilterCompiler(
+            SQL.jsonValue(SQL.column('customer'), '$.value.lastName'),
+            {isJSONValue: true}
+        ),
+        name: createSQLExpressionFilterCompiler(
+            new SQLCast(
+                new SQLConcat(
+                    new SQLJsonUnquote(SQL.jsonValue(SQL.column('customer'), '$.value.firstName')),
+                    new SQLScalar(' '),
+                    new SQLJsonUnquote(SQL.jsonValue(SQL.column('customer'), '$.value.lastName')),
+                ),
+                'CHAR'
+            )
+        ),
+        company: createSQLFilterNamespace({
+            name: createSQLExpressionFilterCompiler(
+                SQL.jsonValue(SQL.column('customer'), '$.value.company.name'),
+                {isJSONValue: true}
+            ),
+            VATNumber: createSQLExpressionFilterCompiler(
+                SQL.jsonValue(SQL.column('customer'), '$.value.company.VATNumber'),
+                {isJSONValue: true}
+            ),
+            companyNumber: createSQLExpressionFilterCompiler(
+                SQL.jsonValue(SQL.column('customer'), '$.value.company.companyNumber'),
+                {isJSONValue: true}
+            ),
+            administrationEmail: createSQLExpressionFilterCompiler(
+                SQL.jsonValue(SQL.column('customer'), '$.value.company.administrationEmail'),
+                {isJSONValue: true}
+            ),
+        })
+    }),
+    balanceItemPayments: createSQLRelationFilterCompiler(
+        SQL.select()
+        .from(
+            SQL.table('balance_item_payments')
+        ).join(
+            SQL.join(
+                SQL.table('balance_items')
+            ).where(
+                SQL.column('balance_items', 'id'),
+                SQL.column('balance_item_payments', 'balanceItemId')
+            )
+        ).where(
+            SQL.column('paymentId'),
+            SQL.column('payments', 'id')
+        ),
+        balanceItemPaymentsCompilers
+    ),
 }
 
 const sorters: SQLSortDefinitions<Payment> = {
@@ -125,10 +197,59 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             let searchFilter: StamhoofdFilter|null = null
             searchFilter = {
-                name: {
-                    $contains: q.search
-                }
+                $or: [
+                    {
+                        customer: {
+                            name: {
+                                $contains: q.search
+                            }
+                        }
+                    },
+                    {
+                        customer: {
+                            company: {
+                                name: {
+                                    $contains: q.search
+                                }
+                            }
+                        }
+                    },
+                    {
+                        balanceItemPayments: {
+                            $elemMatch: {
+                                balanceItem: {
+                                    description: {
+                                        $contains: q.search
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
             }
+
+            if (q.search.includes('@')) {
+                searchFilter = {
+                    $or: [
+                        {
+                            customer: {
+                                email: {
+                                    $contains: q.search
+                                }
+                            }
+                        },
+                        {
+                            customer: {
+                                company: {
+                                    administrationEmail: {
+                                        $contains: q.search
+                                    }
+                                }
+                            }
+                        },
+                    ]
+                }
+            } 
 
             if (searchFilter) {
                 query.where(compileToSQLFilter(searchFilter, filterCompilers))

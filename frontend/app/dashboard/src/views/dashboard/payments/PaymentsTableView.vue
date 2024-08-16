@@ -144,6 +144,7 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: (value) => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
+        allowSorting: false,
     }),
 
     new Column<ObjectType, string>({
@@ -154,6 +155,7 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: (value) => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
+        allowSorting: false,
     }),
 
     new Column<ObjectType, Date>({
@@ -214,6 +216,7 @@ const allColumns: Column<ObjectType, any>[] = [
         },
         minimumWidth: 50,
         recommendedWidth: 100,
+        allowSorting: false,
     }),
     
 ];

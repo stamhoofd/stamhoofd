@@ -1,6 +1,7 @@
 export * from "./src/SQL"
 export * from "./src/SQLExpression"
 export * from "./src/SQLExpressions"
+export * from "./src/SQLJsonExpressions"
 export * from "./src/SQLWhere"
 export * from "./src/SQLSelect"
 export * from "./src/filters/SQLFilter"

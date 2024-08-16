@@ -150,6 +150,26 @@ export class SQLAge implements SQLExpression {
     }
 }
 
+export class SQLCast implements SQLExpression {
+    value: SQLExpression
+    as = 'CHAR'
+
+    constructor(value: SQLExpression, as = 'CHAR') {
+        this.value = value;
+        this.as = as;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'CAST( ',
+                this.value.getSQL(options),
+            ' AS ',
+                this.as,
+            ')'
+        ])
+    }
+}
+
 export class SQLJSONValue implements SQLExpression {
     value: null|true|false;
 
