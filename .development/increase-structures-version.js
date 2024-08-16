@@ -33,6 +33,7 @@ async function processFile(filePath) {
     }
 
     let newContent = null;
+    let offset = 0;
     
     // Loop all characters in a simple state machine
     for (let i = 0; i < content.length; i++) {
@@ -84,8 +85,8 @@ async function processFile(filePath) {
                             if (state.contentStack.endsWith(needle)) {
                                 // Found!
 
-                                const startIndex = i - needle.length + 1;
-                                const endIndex = i;
+                                const startIndex = i - needle.length + 1 + offset;
+                                const endIndex = i + offset; 
 
                                 // Replace
                                 if (!newContent) {
@@ -93,6 +94,8 @@ async function processFile(filePath) {
                                     newContent = content;
                                 }
                                 newContent = newContent.substring(0, startIndex) + replaceBy + newContent.substring(endIndex + 1);
+
+                                offset += replaceBy.length - needle.length;
 
                                 state.contentStack = ''
                             }
@@ -136,10 +139,12 @@ async function processFile(filePath) {
         }
     }
 
-    if (!dryRun) {
-        if (newContent) {
-            foundUsage = true;
+    if (newContent) {
+        foundUsage = true;
+        if (!dryRun) {
             await fs.writeFile(filePath, newContent);
+        } else {
+            console.log(chalk.yellow('Dry run: ' + filePath + ' not updated.'));
         }
     }
 }
@@ -236,13 +241,20 @@ async function run() {
         
         if (!dryRun) {
             await fs.writeFile(versionPath, newContent);
+        } else {
+            console.log(chalk.yellow('Dry run: Version.ts not updated.'));
         }
 
         console.log(chalk.bold('Found and wrote new fields. Structures version bumped from ' + currentVersion + ' to ' + chalk.yellow(nextVersion)));
 
         // Release to GitHub
         console.log(chalk.bold('Commiting and pushing changes...'));
-        await exec('git add . && git commit -m "Increased structures to version ' + nextVersion + '" && git push');
+
+        if (!dryRun) {
+            await exec('git add . && git commit -m "Increased structures to version ' + nextVersion + '" && git push');
+        } else {
+            console.log(chalk.yellow('Dry run: Changes not commited or pushed.'));
+        }
 
         console.log(chalk.green('✔ Increased structures to version ' + nextVersion + ' successfully!'));
     }
