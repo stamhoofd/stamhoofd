@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend",
-    "version": "2.14.0",
+    "version": "2.15.0",
     "main": "./dist/index.js",
     "exports": {
         ".": {
@@ -41,7 +41,7 @@
         "@stamhoofd/models": "^2.13.0",
         "@stamhoofd/queues": "^2.13.0",
         "@stamhoofd/sql": "^2.13.0",
-        "@stamhoofd/structures": "^2.14.0",
+        "@stamhoofd/structures": "^2.15.0",
         "@stamhoofd/utility": "^2.13.0",
         "aws-sdk": "^2.885.0",
         "axios": "1.6.8",
