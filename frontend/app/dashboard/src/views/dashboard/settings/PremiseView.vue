@@ -2,9 +2,34 @@
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <div class="container">
             <h1>{{ title }}</h1>
-            <hr>
-            <h2>Adres</h2>
-            <AddressInput v-model="address" :validator="errors.validator" :link-country-to-locale="true" />
+
+            <div class="split-inputs">
+                <div>
+                    <STInputBox :title="$t('shared.name')" error-fields="name" :error-box="errors.errorBox">
+                        <input
+                            id="premise-name"
+                            v-model="name"
+                            class="input"
+                            type="text"
+                            :placeholder="`${$t('shared.optional')}. ${$t('Naam van het gebouw')}`"
+                            autocomplete=""
+                        >
+                    </STInputBox>
+                </div>
+                <div>
+                    <AddressInput v-model="address" :title="$t('shared.address')" :validator="errors.validator" :link-country-to-locale="true" />
+                </div>
+            </div>
+            <STInputBox :title="$t('shared.description')" error-fields="description" :error-box="errors.errorBox" class="max">
+                <textarea
+                    id="premise-description"
+                    v-model="description"
+                    class="input"
+                    type="text"
+                    :placeholder="`${$t('shared.optional')}. ${$t('Beschrijving van het gebouw')}`"
+                    autocomplete=""
+                />
+            </STInputBox>
         
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr>
@@ -84,10 +109,17 @@ const {saving, doDelete, hasChanges, save, patched, addPatch, shouldNavigateAway
 const platformPremiseTypes = computed(() => platform$.value.config.premiseTypes);
 const premiseTypeWarnings = ref<Map<string, string>>(new Map());
 
-const premiseTypeIds = computed({
-    get: () => patched.value.premiseTypeIds,
-    set: (premiseTypeIds) => {
-        addPatch({premiseTypeIds: premiseTypeIds as any});
+const name = computed({
+    get: () => patched.value.name,
+    set: (name) => {
+        addPatch({name});
+    }
+});
+
+const description = computed({
+    get: () => patched.value.description,
+    set: (description) => {
+        addPatch({description});
     }
 });
 
@@ -96,7 +128,14 @@ const address = computed({
     set: (address) => {
         addPatch({address});
     }
-})
+});
+
+const premiseTypeIds = computed({
+    get: () => patched.value.premiseTypeIds,
+    set: (premiseTypeIds) => {
+        addPatch({premiseTypeIds: premiseTypeIds as any});
+    }
+});
 
 const originalPremiseTypeIds = new Set(patched.value.premiseTypeIds);
 

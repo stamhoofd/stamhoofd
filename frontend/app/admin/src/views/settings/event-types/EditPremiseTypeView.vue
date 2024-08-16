@@ -22,7 +22,7 @@
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('Optioneel Geef een beschrijving van dit soort gebouw.')"
+                :placeholder="$t('Optioneel. Geef een beschrijving van dit soort gebouw.')"
                 autocomplete=""
             />
         </STInputBox>

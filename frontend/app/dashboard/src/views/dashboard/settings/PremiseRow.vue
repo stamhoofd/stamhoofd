@@ -1,8 +1,12 @@
 <template>
     <STListItem :selectable="true" class="right-stack">
         <h2 class="style-title-list">
-            {{ addressString }}
+            {{ name ? name : addressString }}
         </h2>
+        
+        <p v-if="name" class="style-description-small">
+            {{ addressString }}
+        </p>
         <p class="style-description-small">
             {{ premiseTypesString }}
         </p>
@@ -26,6 +30,8 @@ const props = defineProps<{
 
 const currentCountry = useCountry();
 const platform = usePlatform();
+
+const name = computed(() => props.premise.name);
 
 const platformPremiseTypes = computed(() => platform.value.config.premiseTypes ?? [])
 
