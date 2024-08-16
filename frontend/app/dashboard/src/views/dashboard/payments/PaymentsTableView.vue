@@ -89,7 +89,7 @@ defineRoutes([
 ])
 
 const configurationId = computed(() => {
-    return 'payments'
+    return 'payments-' + (props.methods?.join('-') ?? '')
 })
 
 const context = useContext();
@@ -156,7 +156,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'id',
         name: "ID", 
-        getValue: (object) => object.id,
+        getValue: (object) => object.id.substring(0, 8),
         getStyle: () => 'code',
         minimumWidth: 50,
         recommendedWidth: 50,
@@ -184,13 +184,25 @@ const allColumns: Column<ObjectType, any>[] = [
         allowSorting: false,
     }),
 
+    new Column<ObjectType, string | null>({
+        id: 'transferDescription',
+        name: "Mededeling", 
+        getValue: (object) => object.transferDescription,
+        format: (value) => value || 'Geen',
+        getStyle: (value) => !value ? 'gray' : '',
+        minimumWidth: 120,
+        recommendedWidth: 250,
+        allowSorting: false,
+        enabled: props.methods?.includes(PaymentMethod.Transfer) ?? false
+    }),
+
     new Column<ObjectType, Date>({
         id: 'createdAt',
         name: "Aangemaakt op", 
         getValue: (object) => object.createdAt,
         format: (value, width) => width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true),
         minimumWidth: 120,
-        recommendedWidth: 150,
+        recommendedWidth: 120,
     }),
 
     new Column<ObjectType, PaymentGeneral>({
@@ -203,6 +215,7 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: (value) => !value.paidAt ? (value.status === PaymentStatus.Failed ? 'gray' : 'error'): '',
         minimumWidth: 120,
         recommendedWidth: 150,
+        enabled: !(props.methods?.includes(PaymentMethod.Transfer) ?? false)
     }),
 
     new Column<ObjectType, PaymentMethod>({
@@ -213,6 +226,7 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 120,
         recommendedWidth: 100,
         allowSorting: false,
+        enabled: !props.methods || props.methods.length > 1
     }),
 
     new Column<ObjectType, number>({
