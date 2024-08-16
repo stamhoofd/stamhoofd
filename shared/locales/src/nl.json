@@ -19,7 +19,6 @@
     "admin.organizations.tags": "Tags",
     "admin.organizations.uri.description": "De URI is een unieke en leesbare code voor deze vereniging, bestaande uit enkel kleine letters en koppeltekens. Deze wordt in de URL-balk van de browser gebruikt op enkele plaatsen, maar is anders niet zichtbaar.",
     "admin.organizations.uri.label": "URI",
-    "admin.organizations.uriLabel": "URI",
     "admin.organizations.website.description": "De link naar de website van deze vereniging.",
     "admin.settings.admins.description": "Beheer de beheerders van het platform",
     "admin.settings.admins.title": "Beheerders",
