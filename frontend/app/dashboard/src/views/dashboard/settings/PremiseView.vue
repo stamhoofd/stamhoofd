@@ -2,34 +2,28 @@
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
         <div class="container">
             <h1>{{ title }}</h1>
-
-            <div class="split-inputs">
-                <div>
-                    <STInputBox :title="$t('shared.name')" error-fields="name" :error-box="errors.errorBox">
-                        <input
-                            id="premise-name"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            :placeholder="`${$t('shared.optional')}. ${$t('Naam van het gebouw')}`"
-                            autocomplete=""
-                        >
-                    </STInputBox>
-                </div>
-                <div>
-                    <AddressInput v-model="address" :title="$t('shared.address')" :validator="errors.validator" :link-country-to-locale="true" />
-                </div>
-            </div>
+            
+            <STInputBox :title="$t('shared.name')" error-fields="name" :error-box="errors.errorBox">
+                <input
+                    id="premise-name"
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    :placeholder="$t('Naam van het gebouw')"
+                    autocomplete=""
+                >
+            </STInputBox>
             <STInputBox :title="$t('shared.description')" error-fields="description" :error-box="errors.errorBox" class="max">
                 <textarea
                     id="premise-description"
                     v-model="description"
                     class="input"
                     type="text"
-                    :placeholder="`${$t('shared.optional')}. ${$t('Beschrijving van het gebouw')}`"
+                    :placeholder="$t('Beschrijving van het gebouw')"
                     autocomplete=""
                 />
             </STInputBox>
+            <AddressInput v-model="address" :title="$t('shared.address')" :validator="errors.validator" :link-country-to-locale="true" />
         
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr>
