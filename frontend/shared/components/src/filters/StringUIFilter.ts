@@ -1,8 +1,17 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { StamhoofdFilter, StringFilterMode } from "@stamhoofd/structures";
+import { StamhoofdFilter } from "@stamhoofd/structures";
 
 import StringUIFilterView from "./StringUIFilterView.vue";
 import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+
+export enum StringFilterMode {
+    Contains = "Contains",
+    Equals = "Equals",
+    NotContains = "NotContains",
+    NotEquals = "NotEquals",
+    NotEmpty = "NotEmpty",
+    Empty = "Empty"
+}
 
 export class StringUIFilter extends UIFilter {
     builder!: StringFilterBuilder
