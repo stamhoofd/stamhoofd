@@ -18,7 +18,7 @@ export type RegistrationWithMember = Registration & { member: Member }
 export class Member extends Model {
     static table = "members"
 
-    // Columns
+    //#region Columns
     @column({
         primary: true, type: "string", beforeSave(value) {
             return value ?? uuidv4();
@@ -91,6 +91,7 @@ export class Member extends Model {
         skipUpdate: true
     })
     updatedAt: Date
+    //#endregion
 
     static registrations = new OneToManyRelation(Member, Registration, "registrations", "memberId")
 
