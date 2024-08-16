@@ -10,7 +10,7 @@ export class Premise extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 323 })
     name: string = '';
 
-    @field({ decoder: StringDecoder, ..version: 323)
+    @field({ decoder: StringDecoder, version: 323})
     description: string = '';
 
     @field({ decoder: new ArrayDecoder(StringDecoder)})
