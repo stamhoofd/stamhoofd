@@ -1,5 +1,5 @@
 import { PlainObject } from "@simonbackx/simple-encoding";
-import { SortItemDirection, SortList } from "./SortList";
+import { SortList } from "./SortList";
 
 export type SortDefinition<T, B extends PlainObject = PlainObject> = {
     getValue(a: T): B

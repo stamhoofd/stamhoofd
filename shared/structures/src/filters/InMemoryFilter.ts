@@ -1,7 +1,6 @@
-import { PlainObject } from "@simonbackx/simple-encoding";
 import { StringCompare } from "@stamhoofd/utility";
 
-import { StamhoofdCompareValue, StamhoofdFilter, StamhoofdKeyFilter, StamhoofdKeyFilterValue } from "./StamhoofdFilter";
+import { StamhoofdCompareValue, StamhoofdFilter } from "./StamhoofdFilter";
 
 export type InMemoryFilterRunner = (object: any) => boolean;
 

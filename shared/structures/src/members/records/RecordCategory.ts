@@ -2,16 +2,11 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from 
 import { isSimpleError, isSimpleErrors, SimpleErrors } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../../filters/ChoicesFilter";
-import { DateFilterDefinition } from "../../filters/DateFilter";
-import { FilterDefinition } from "../../filters/FilterDefinition";
-import { StamhoofdFilter } from "../../filters/new/StamhoofdFilter";
-import { NumberFilterDefinition } from "../../filters/NumberFilter";
+import { StamhoofdFilter } from "../../filters/StamhoofdFilter";
 import { PropertyFilter } from "../../filters/PropertyFilter";
-import { StringFilterDefinition } from "../../filters/StringFilter";
 import { ObjectWithRecords } from "../ObjectWithRecords";
-import { RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer } from "./RecordAnswer";
-import { RecordSettings, RecordType } from "./RecordSettings";
+import { RecordAnswer } from "./RecordAnswer";
+import { RecordSettings } from "./RecordSettings";
 
 export interface Filterable {
     doesMatchFilter(filter: StamhoofdFilter): boolean

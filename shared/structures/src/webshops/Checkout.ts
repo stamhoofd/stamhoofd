@@ -1,18 +1,17 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NonScalarIdentifiable, NumberDecoder, PatchableArray, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 
 import { ValidatedAddress } from '../addresses/Address';
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
-import { FilterDefinition } from '../filters/FilterDefinition';
-import { StamhoofdFilter } from '../filters/new/StamhoofdFilter';
+import { StamhoofdFilter } from '../filters/StamhoofdFilter';
 import { I18n } from '../I18nInterface';
 import { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords';
 import { RecordAnswer, RecordAnswerDecoder } from '../members/records/RecordAnswer';
-import { Filterable, RecordCategory } from '../members/records/RecordCategory';
+import { RecordCategory } from '../members/records/RecordCategory';
 import { RecordSettings } from '../members/records/RecordSettings';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
+import { PriceBreakdown } from '../PriceBreakdown';
 import { User } from '../User';
 import { Cart } from './Cart';
 import { Customer } from './Customer';
@@ -21,7 +20,6 @@ import { DiscountCode } from './DiscountCode';
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
-import { PriceBreakdown } from '../PriceBreakdown';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })

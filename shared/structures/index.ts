@@ -159,22 +159,13 @@ export * from "./src/email/EmailAddressSettings"
 export * from "./src/email/EmailTemplate"
 
 // Filters
-export * from "./src/filters/new/FilteredRequest"
-export * from "./src/filters/new/InMemoryFilter"
-export * from "./src/filters/new/InMemorySorter"
-export * from "./src/filters/new/Sorters"
-export * from "./src/filters/new/SortList"
-export * from "./src/filters/new/StamhoofdFilter"
-
-// Filters old
-export * from "./src/filters/ChoicesFilter"
-export * from "./src/filters/DateFilter"
-export * from "./src/filters/FilterDefinition"
-export * from "./src/filters/FilterGroup"
-export * from "./src/filters/NumberFilter"
+export * from "./src/filters/FilteredRequest"
+export * from "./src/filters/InMemoryFilter"
+export * from "./src/filters/InMemorySorter"
+export * from "./src/filters/Sorters"
+export * from "./src/filters/SortList"
+export * from "./src/filters/StamhoofdFilter"
 export * from "./src/filters/PropertyFilter"
-export * from "./src/filters/RegistrationsFilter"
-export * from "./src/filters/StringFilter"
 
 // Balance
 export * from "./src/BalanceItem"

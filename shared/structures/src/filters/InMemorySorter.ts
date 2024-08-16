@@ -1,7 +1,7 @@
 import { PlainObject } from "@simonbackx/simple-encoding";
 import { Sorter } from "@stamhoofd/utility";
 
-import { MemberSummary } from "../../admin/MemberSummary";
+import { MemberSummary } from "../admin/MemberSummary";
 import { SortDefinition } from "./Sorters";
 import { SortList } from "./SortList";
 

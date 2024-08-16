@@ -1,10 +1,9 @@
 
 import { Data, Encodeable, EncodeContext, PlainObject } from "@simonbackx/simple-encoding"
 
-import { FilterGroupEncoded } from "./FilterGroup"
-import { StamhoofdFilterDecoder } from "./new/FilteredRequest"
-import { StamhoofdFilter } from "./new/StamhoofdFilter"
 import { Filterable } from "../members/records/RecordCategory"
+import { StamhoofdFilterDecoder } from "./FilteredRequest"
+import { StamhoofdFilter } from "./StamhoofdFilter"
 
 export class PropertyFilter implements Encodeable {
     constructor(enabledWhen: StamhoofdFilter | null, requiredWhen: StamhoofdFilter | null) {
@@ -52,16 +51,8 @@ export class PropertyFilter implements Encodeable {
 
     static decode<T>(data: Data): PropertyFilter {
         if (data.context.version < 251) {
-            // Legacy filters: convert to StamhoofdFilter
-            const oldData = {
-                enabledWhen: data.field("enabledWhen").decode(FilterGroupEncoded),
-                requiredWhen: data.field("requiredWhen").nullable(FilterGroupEncoded)
-            };
-
-            return new PropertyFilter(
-                oldData.enabledWhen ? convertFilterGroupEncoded(oldData.enabledWhen) : null,
-                oldData.requiredWhen ? convertFilterGroupEncoded(oldData.requiredWhen) : null
-            )   
+            console.error('PropertyFilter: legacy filter detected - this is not implemented yet. Possible data loss.')
+            return PropertyFilter.createDefault()
         }
 
         return new PropertyFilter(
@@ -69,12 +60,4 @@ export class PropertyFilter implements Encodeable {
             data.field("requiredWhen").nullable(StamhoofdFilterDecoder)
         )
     }
-}
-
-
-function convertFilterGroupEncoded(obj: FilterGroupEncoded<any>): StamhoofdFilter|null {
-    if (obj === null) {
-        return null;
-    }
-    return {}
 }

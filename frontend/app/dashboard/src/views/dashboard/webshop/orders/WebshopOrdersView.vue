@@ -10,7 +10,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 import { Column, GlobalEventBus, InMemoryTableAction, TableAction, Toast } from "@stamhoofd/components";
-import { CheckoutMethod, CheckoutMethodType, Filter, FilterDefinition, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 
@@ -710,7 +710,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return [...cities.entries()].sort((a, b) => Sorter.byStringValue(a[0], b[0]))
     }
 
-    get filterDefinitions(): FilterDefinition<PrivateOrder, Filter<PrivateOrder>, any>[] {
+    get filterDefinitions(): any[] {
         return []
     }
 

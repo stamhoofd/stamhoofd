@@ -10,7 +10,7 @@ import { PlatformMember } from './members/PlatformMember';
 import { StockReservation } from './StockReservation';
 import { RegisterItem } from './members/checkout/RegisterItem';
 import { Group } from './Group';
-import { StamhoofdFilter } from './filters/new/StamhoofdFilter';
+import { StamhoofdFilter } from './filters/StamhoofdFilter';
 import { Gender } from './members/Gender';
 
 export class ReduceablePrice extends AutoEncoder {

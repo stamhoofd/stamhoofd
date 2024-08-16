@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
-import { StamhoofdFilter } from "./filters/new/StamhoofdFilter";
+import { StamhoofdFilter } from "./filters/StamhoofdFilter";
 import { ObjectWithRecords, PatchAnswers } from "./members/ObjectWithRecords";
 import { RecordAnswer, RecordAnswerDecoder } from "./members/records/RecordAnswer";
 import { RecordCategory } from "./members/records/RecordCategory";

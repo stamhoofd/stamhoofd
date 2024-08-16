@@ -1,4 +1,4 @@
-import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from "./new/InMemoryFilter";
+import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from "./InMemoryFilter";
 
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
