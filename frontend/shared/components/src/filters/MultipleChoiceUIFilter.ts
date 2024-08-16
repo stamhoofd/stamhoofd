@@ -3,7 +3,7 @@ import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import MultipleChoiceUIFilterView from "./MultipleChoiceUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterWrapper } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 
 export class MultipleChoiceUIFilterOption {
     name: string;
@@ -19,11 +19,8 @@ export class MultipleChoiceUIFilter extends UIFilter {
     builder: MultipleChoiceFilterBuilder
     options: MultipleChoiceUIFilterOption[] = []
 
-    doBuild(): StamhoofdFilter|null {
-        if (this.options.length === 0) {
-            return null;
-        }
-        return this.builder.buildFilter(this.options.map(o => o.value))
+    doBuild(): StamhoofdFilter {
+        return this.options.map(o => o.value)
     }
 
     flatten() {
@@ -58,20 +55,52 @@ export class MultipleChoiceUIFilter extends UIFilter {
 }
 
 type FilterWrapper = ((values: StamhoofdCompareValue[]) => StamhoofdFilter);
+type FilterUnwrapper = ((filter: StamhoofdFilter) => unknown);
 
 export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoiceUIFilter> {
     name = ""
     options: MultipleChoiceUIFilterOption[] = []
-    buildFilter: FilterWrapper
+    wrapper?: WrapperFilter;
+    buildFilter?: FilterWrapper
+    unbuildFilter?: FilterUnwrapper | null | undefined;
 
-    constructor(data: {name: string, options: MultipleChoiceUIFilterOption[], buildFilter: FilterWrapper}) {
+    constructor(data: {
+        name: string, 
+        options: MultipleChoiceUIFilterOption[], 
+        wrapper?: WrapperFilter,
+        buildFilter?: FilterWrapper,
+        unbuildFilter?: FilterUnwrapper | null | undefined
+    }) {
         this.name = data.name;
         this.options = data.options;
+        this.wrapper = data.wrapper;
         this.buildFilter = data.buildFilter
+        this.unbuildFilter = data.unbuildFilter
     }
+
     wrapFilter?: UIFilterWrapper | null | undefined;
     
-    fromFilter(_filter: StamhoofdFilter): UIFilter | null {
+    fromFilter(filter: StamhoofdFilter): UIFilter | null {
+        const match = unwrapFilterForBuilder(this, filter)
+        if (!match.match || match.markerValue === undefined) {
+            return null;
+        }
+        const response = match.markerValue
+        
+        if (Array.isArray(response)) {
+            // Check if all the options are valid
+            const options = this.options.filter(o => response.includes(o.value));
+            
+            if (options.length === response.length) {
+                const uiFilter = new MultipleChoiceUIFilter({
+                    builder: this
+                })
+                uiFilter.options = options;
+
+                return uiFilter;
+            }
+        }
+
         return null;
     }
     

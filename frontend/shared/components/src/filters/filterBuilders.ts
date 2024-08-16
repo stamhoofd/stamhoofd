@@ -5,7 +5,7 @@ import { GroupUIFilterBuilder } from "./GroupUIFilter";
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from "./MultipleChoiceUIFilter";
 import { NumberFilterBuilder } from "./NumberUIFilter";
 import { StringFilterBuilder } from "./StringUIFilter";
-import { UIFilter, UIFilterBuilder, UIFilterBuilders } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterBuilders, UIFilterWrapperMarker, unwrapFilter } from "./UIFilter";
 
 export const paymentsUIFilterBuilders: UIFilterBuilders = [
     new MultipleChoiceFilterBuilder({
@@ -13,11 +13,9 @@ export const paymentsUIFilterBuilders: UIFilterBuilders = [
         options: Object.values(PaymentMethod).map(method => {
             return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
         }),
-        buildFilter: (choices) => {
-            return {
-                method: {
-                    $in: choices.map(c => c)
-                }
+        wrapper: {
+            method: {
+                $in: UIFilterWrapperMarker
             }
         }
     }),
@@ -27,11 +25,9 @@ export const paymentsUIFilterBuilders: UIFilterBuilders = [
         options: Object.values(PaymentStatus).map(method => {
             return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
         }),
-        buildFilter: (choices) => {
-            return {
-                status: {
-                    $in: choices.map(c => c)
-                }
+        wrapper: {
+            status: {
+                $in: UIFilterWrapperMarker
             }
         }
     })
@@ -57,11 +53,9 @@ export const memberWithRegistrationsBlobUIFilterBuilders: UIFilterBuilders = [
             new MultipleChoiceUIFilterOption('Man', Gender.Male),
             new MultipleChoiceUIFilterOption('Andere', Gender.Other)
         ],
-        buildFilter: (choices) => {
-            return {
-                gender: {
-                    $in: choices.map(c => c)
-                }
+        wrapper: {
+            gender: {
+                $in: UIFilterWrapperMarker
             }
         }
     })
@@ -84,13 +78,11 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             new StringFilterBuilder({
                 name: 'Groepsnummer',
                 key: 'uri',
-                wrapFilter: (filter) => {
-                    return {
-                        registrations: {
-                            $elemMatch: {
-                                organization: filter,
-                                periodId: platform.period.id
-                            }
+                wrapper: {
+                    registrations: {
+                        $elemMatch: {
+                            organization: UIFilterWrapperMarker,
+                            periodId: platform.period.id
                         }
                     }
                 }
@@ -103,17 +95,15 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                 options: platform.config.defaultAgeGroups.map(group => {
                     return new MultipleChoiceUIFilterOption(group.name, group.id);
                 }),
-                buildFilter: (choices) => {
-                    return {
-                        registrations: {
-                            $elemMatch: {
-                                group: {
-                                    defaultAgeGroupId: {
-                                        $in: choices.map(c => c)
-                                    }
-                                },
-                                periodId: platform.period.id
-                            }
+                wrapper: {
+                    registrations: {
+                        $elemMatch: {
+                            group: {
+                                defaultAgeGroupId: {
+                                    $in: UIFilterWrapperMarker
+                                }
+                            },
+                            periodId: platform.period.id
                         }
                     }
                 }
@@ -126,15 +116,13 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                 options: platform.config.responsibilities.map(responsibility => {
                     return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
                 }),
-                buildFilter: (choices) => {
-                    return {
-                        responsibilities: {
-                            $elemMatch: {
-                                responsibilityId: {
-                                    $in: choices.map(c => c)
-                                },
-                                endDate: null
-                            }
+                wrapper: {
+                    responsibilities: {
+                        $elemMatch: {
+                            responsibilityId: {
+                                $in: UIFilterWrapperMarker
+                            },
+                            endDate: null
                         }
                     }
                 }
@@ -152,16 +140,14 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                     options: platform.config.defaultAgeGroups.filter(group => responsibility.defaultAgeGroupIds?.includes(group.id)).map(group => {
                         return new MultipleChoiceUIFilterOption(group.name, group.id);
                     }),
-                    buildFilter: (choices) => {
-                        return {
-                            responsibilities: {
-                                $elemMatch: {
-                                    responsibilityId: responsibility.id,
-                                    endDate: null,
-                                    group: {
-                                        defaultAgeGroupId: {
-                                            $in: choices.map(c => c)
-                                        }
+                    wrapper: {
+                        responsibilities: {
+                            $elemMatch: {
+                                responsibilityId: responsibility.id,
+                                endDate: null,
+                                group: {
+                                    defaultAgeGroupId: {
+                                        $in: UIFilterWrapperMarker
                                     }
                                 }
                             }
@@ -284,6 +270,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             options: platform.config.membershipTypes.map(type => {
                 return new MultipleChoiceUIFilterOption(type.name, type.id);
             }),
+            // todo
             buildFilter: (choices) => {
                 const d = new Date()
                 d.setHours(12);
@@ -378,13 +365,11 @@ export const organizationsUIFilterBuilders: UIFilterBuilders = [
     new GroupUIFilterBuilder({
         name: 'Leden',
         builders: organizationMemberUIFilterBuilders,
-        wrapFilter: (f) => {
-            return {
-                members: {
-                    $elemMatch: f
-                }
+        wrapper: {
+            members: {
+                $elemMatch: UIFilterWrapperMarker
             }
-        },
+        }
     }),
     new MultipleChoiceFilterBuilder({
         name: 'Actief',
@@ -392,11 +377,9 @@ export const organizationsUIFilterBuilders: UIFilterBuilders = [
             new MultipleChoiceUIFilterOption('Actief', 1),
             new MultipleChoiceUIFilterOption('Inactief', 0)
         ],
-        buildFilter: (choices) => {
-            return {
-                active: {
-                    $in: choices.map(c => c)
-                }
+        wrapper: {
+            active: {
+                $in: UIFilterWrapperMarker
             }
         }
     })
@@ -435,11 +418,9 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
             new MultipleChoiceUIFilterOption('Nationale activiteiten', null),
             ...organizations.map(org => new MultipleChoiceUIFilterOption(org.name, org.id))
         ],
-        buildFilter: (choices) => {
-            return {
-                organizationId: {
-                    $in: choices.map(c => c)
-                }
+        wrapper: {
+            organizationId: {
+                $in: UIFilterWrapperMarker
             }
         }
     })
@@ -449,13 +430,12 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
         const defaultAgeGroupFilter = new MultipleChoiceFilterBuilder({
             name: 'Standaard leeftijdsgroep',
             options: [
+                new MultipleChoiceUIFilterOption('Iedereen', null),
                 ...platform.config.defaultAgeGroups.map(g => new MultipleChoiceUIFilterOption(g.name, g.id))
             ],
-            buildFilter: (choices) => {
-                return {
-                    defaultAgeGroupIds: {
-                        $in: [null, ...choices.map(c => c)]
-                    }
+            wrapper: {
+                defaultAgeGroupIds: {
+                    $in: UIFilterWrapperMarker
                 }
             }
         });
@@ -466,15 +446,14 @@ export function getEventUIFilterBuilders(platform: Platform, organizations: Orga
         const groupFilter = new MultipleChoiceFilterBuilder({
             name: 'Inschrijvingsgroep',
             options: [
+                new MultipleChoiceUIFilterOption('Iedereen', null),
                 ...organizations
                     .flatMap(g => g.period.publicCategoryTree.getAllGroups().map(gg => { return {organization: g, group: gg}}))
                     .map(g => new MultipleChoiceUIFilterOption((organizations.length > 1 ? (g.organization.name + ' - ') : '') + g.group.settings.name, g.group.id))
             ],
-            buildFilter: (choices) => {
-                return {
-                    groupIds: {
-                        $in: [null, ...choices.map(c => c)]
-                    }
+            wrapper: {
+                groupIds: {
+                    $in: UIFilterWrapperMarker
                 }
             }
         });

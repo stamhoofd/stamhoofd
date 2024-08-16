@@ -52,8 +52,7 @@
                         <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter" />
                             <span class="hide-small">Filter</span>
-                            <span v-if="hiddenItemsCount > 0" class="bubble primary">{{ filteredText }}</span>
-                            <span v-else-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary" />
+                            <span v-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary" />
                         </button>
                     </div>
                 </div>
@@ -146,7 +145,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simon
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
-import { isEmptyFilter, SortItemDirection, Version } from "@stamhoofd/structures";
+import { isEmptyFilter, SortItemDirection, StamhoofdFilter, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from "vue";
@@ -219,6 +218,7 @@ const props = withDefaults(
         prefixColumn?: Column<Value, any>|null,
         defaultSortColumn?: Column<Value, any>|null,
         defaultSortDirection?: SortItemDirection|null,
+        defaultFilter?: StamhoofdFilter|null
     }>(), {
         backHint: null,
         estimatedRows: 30,
@@ -227,6 +227,7 @@ const props = withDefaults(
         defaultSortColumn: null,
         defaultSortDirection: null,
         actions: () => [],
+        defaultFilter: null
     }
 )
 const reactiveColumns = reactive(props.allColumns) as Column<Value, any>[]
@@ -246,7 +247,20 @@ const wrapColumns = isMobile;
 
 const showSelection = ref(!isMobile.value)
 const isIOS = useIsIOS()
-const titleSuffix = computed(() => props.tableObjectFetcher.totalCount === null ? '' : Formatter.integer(props.tableObjectFetcher.totalCount))
+const titleSuffix = computed(() => {
+    if (props.tableObjectFetcher.totalCount === null) {
+        return '';
+    }
+
+    const count = Formatter.integer(props.tableObjectFetcher.totalCount)
+
+    if (props.tableObjectFetcher.totalFilteredCount !== null && props.tableObjectFetcher.totalFilteredCount !== props.tableObjectFetcher.totalCount) {
+        const filtered = Formatter.integer(props.tableObjectFetcher.totalFilteredCount)
+        return `${filtered} van ${count}`
+    }
+
+    return count
+})
 
 const instance = getCurrentInstance()
 const hasClickListener = computed(() => !!instance?.vnode.props?.onClick)
@@ -258,7 +272,7 @@ const sortDirection = ref(props.defaultSortDirection ?? SortItemDirection.ASC) a
 const values = computed(() => props.tableObjectFetcher.objects)
 const visibleRows = ref([]) as Ref<VisibleRow<Value>[]>;
 const searchQuery = ref("")
-const selectedUIFilter = ref(null) as Ref<null|UIFilter>;
+const selectedUIFilter = ref(props.filterBuilders?.length && props.defaultFilter ? props.filterBuilders[0]?.fromFilter(props.defaultFilter) : null) as Ref<null|UIFilter>;
 
 watchEffect(() => {
     props.tableObjectFetcher.setSearchQuery(searchQuery.value)

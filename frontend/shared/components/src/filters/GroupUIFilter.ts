@@ -2,7 +2,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdFilter } from "@stamhoofd/structures";
 
 import GroupUIFilterView from "./GroupUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterWrapper } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 import { UnknownFilterBuilder } from "./UnknownUIFilter";
 
 export enum GroupUIFilterMode {
@@ -106,11 +106,13 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     builders: UIFilterBuilder[] = []
     name = "Complexe filtergroep"
     wrapFilter?: UIFilterWrapper|null
+    wrapper?: WrapperFilter
     
-    constructor({builders, name, wrapFilter}: {builders: UIFilterBuilder[], name?: string, wrapFilter?: UIFilterWrapper|null}) {
+    constructor({builders, name, wrapFilter, wrapper}: {builders: UIFilterBuilder[], name?: string, wrapFilter?: UIFilterWrapper|null, wrapper?: WrapperFilter}) {
         this.builders = builders
         this.name = name ?? this.name
         this.wrapFilter = wrapFilter ?? null
+        this.wrapper = wrapper
     }
 
     create(): GroupUIFilter {
@@ -120,6 +122,13 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
+        const result = unwrapFilterForBuilder(this, filter);
+        if (!result.match) {
+            filter = [] 
+        } else {
+            filter = result.markerValue ?? []
+        }
+
         let allowSelf = false;
         let mode = GroupUIFilterMode.And;
         if (typeof filter === 'object' && filter !== null && ("$and" in filter)) {
@@ -136,20 +145,34 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
 
         // Match
         const subfilters: UIFilter[] = [];
+        const queue = Array.isArray(filter) ? filter.slice() : [filter];
+        let c = 0;
 
-        for (const f of Array.isArray(filter) ? filter : [filter]) {
+        while(queue.length && c < 200) {
+            c++;
+            const f = queue.shift();
+            if (f === undefined) {
+                break;
+            }
+
             for (const builder of [...this.builders, new UnknownFilterBuilder()]) {
                 if (builder === this && !allowSelf) {
                     continue;
                 }
                 const decoded = builder.fromFilter(f);
                 if (decoded !== null) {
-                    subfilters.push(decoded);
+                    // do we have a leftover?
+                    const unwrappedF = unwrapFilterForBuilder(builder, f);
+
+                    subfilters.push(decoded.flatten() ?? decoded);
+
+                    if (unwrappedF.leftOver) {
+                        // Keep processing this leftover one
+                        queue.push(unwrappedF.leftOver);
+                    }
                     break;
                 }
             }
-
-            // todo: add default encoding here
         }
 
         const groupFilter = this.create();

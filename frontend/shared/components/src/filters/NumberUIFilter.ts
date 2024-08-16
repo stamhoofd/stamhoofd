@@ -2,7 +2,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdFilter } from "@stamhoofd/structures";
 
 import NumberUIFilterView from "./NumberUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilter } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilter, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 import { Formatter } from "@stamhoofd/utility";
 
 export enum UINumberFilterMode {
@@ -89,29 +89,31 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     name = ""
     wrapFilter?: UIFilterWrapper | null
     unwrapFilter?: UIFilterUnwrapper | null;
+    wrapper?: WrapperFilter;
 
     floatingPoint = false
     currency = false
 
-    constructor(data: {key: string, name: string, wrapFilter?: UIFilterWrapper, unwrapFilter?: UIFilterUnwrapper}) {
+    constructor(data: {key: string, name: string, wrapFilter?: UIFilterWrapper, unwrapFilter?: UIFilterUnwrapper, wrapper?: WrapperFilter}) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter
         this.name = data.name;
+        this.wrapper = data.wrapper;
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const unwrapped = (this.unwrapFilter ? this.unwrapFilter(filter) : filter) as any;
-        if (unwrapped === null) {
+        const {markerValue: unwrapped} = unwrapFilterForBuilder(this, filter)
+        if (unwrapped === null || unwrapped === undefined) {
             return null;
         }
         if (!(typeof unwrapped === 'object')) {
             return null;
         }
 
-        const equals = unwrapFilter(unwrapped, [this.key, '$eq']);
+        const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']);
 
-        if (equals && typeof equals === 'number') {
+        if (typeof equals === 'number') {
             return new NumberUIFilter({
                 builder: this,
                 value: equals,
@@ -119,9 +121,9 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
             })
         }
 
-        const notEquals = unwrapFilter(unwrapped, ['$not', this.key, '$eq']);
+        const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
 
-        if (notEquals && typeof notEquals === 'number') {
+        if (typeof notEquals === 'number') {
             return new NumberUIFilter({
                 builder: this,
                 value: notEquals,
@@ -129,9 +131,9 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
             })
         }
 
-        const lessThan = unwrapFilter(unwrapped, [this.key, '$lt']);
+        const lessThan = unwrapFilterByPath(unwrapped, [this.key, '$lt']);
 
-        if (lessThan && typeof lessThan === 'number') {
+        if (typeof lessThan === 'number') {
             return new NumberUIFilter({
                 builder: this,
                 value: lessThan,
@@ -139,9 +141,9 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
             })
         }
 
-        const greaterThan = unwrapFilter(unwrapped, [this.key, '$gt']);
+        const greaterThan = unwrapFilterByPath(unwrapped, [this.key, '$gt']);
 
-        if (greaterThan && typeof greaterThan === 'number') {
+        if (typeof greaterThan === 'number') {
             return new NumberUIFilter({
                 builder: this,
                 value: greaterThan,

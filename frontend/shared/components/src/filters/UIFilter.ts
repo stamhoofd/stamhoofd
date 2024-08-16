@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { isEmptyFilter,PropertyFilter, StamhoofdFilter } from "@stamhoofd/structures";
+import { isEmptyFilter,PropertyFilter, StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 export type UIFilterWrapper = ((value: StamhoofdFilter) => StamhoofdFilter);
@@ -12,13 +12,234 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
      */
     create(): F
     name: string
+    wrapper?: WrapperFilter
+
+    // More complicated wrapper support:
     wrapFilter?: UIFilterWrapper|null
     unwrapFilter?: UIFilterUnwrapper|null
 
     fromFilter(filter: StamhoofdFilter): UIFilter|null
 }
 
-export function unwrapFilter(filter: StamhoofdFilter, keyPath: (string|number)[]): StamhoofdFilter|null {
+export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter} {
+    if (builder.wrapper) {
+        return unwrapFilter(filter, builder.wrapper);
+    }
+
+    if (builder.unwrapFilter) {
+        const r = builder.unwrapFilter(filter);
+        return {
+            match: true,
+            markerValue: r
+        }
+    }
+
+    return {
+        match: true,
+        markerValue: filter
+    };
+}
+
+export const UIFilterWrapperMarker = Symbol('UIFilterWrapperMarker')
+export type WrapperFilter = StamhoofdFilter<StamhoofdCompareValue | typeof UIFilterWrapperMarker>
+
+export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): StamhoofdFilter {
+    // Replace the UIFilterWrapperMarker symbol in wrap with filter
+    if (wrap === UIFilterWrapperMarker) {
+        return filter;
+    }
+
+    if (typeof wrap === 'object' && wrap !== null) {
+        const o = {};
+        for (const key in wrap) {
+            (o as any)[key] = wrapFilter(filter, (wrap as any)[key]);
+        }
+        return o;
+    }
+
+    if (Array.isArray(wrap)) {
+        return wrap.map(w => wrapFilter(filter, w));
+    }
+
+    return wrap;
+}
+
+/**
+ * Essentially, this checks if filter and wrap are the same, but ignoring comparison if wrap is UIFilterWrapperMarker
+ * If multiple UIFilterWrapperMarker are used, their value should be the same - otherwise undefined is returned
+ * Returns the filter at UIFilterWrapperMarker if it is found
+ * If no UIFilterWrapperMarker is found, the filter is returned if it is the same as wrap
+ */
+export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): {match: boolean, markerValue?: StamhoofdFilter|undefined, leftOver?: StamhoofdFilter} {
+    // Replace the UIFilterWrapperMarker symbol in wrap with filter
+    if (wrap === UIFilterWrapperMarker) {
+        return {
+            match: true,
+            markerValue: filter
+        }
+    }
+
+    if (Array.isArray(wrap)) {
+        if (!Array.isArray(filter)) {
+            return {
+                match: false
+            }
+        }
+
+        if (filter.length !== wrap.length) {
+            return {
+                match: false
+            }
+        }
+
+        const remaining = filter.slice();
+        let pendingMarkerValue = undefined;
+
+        // Order should not matter in an Array
+        for (const item of wrap) {
+            // Check if we find a match
+            if (item === UIFilterWrapperMarker) {
+                // Usage like this is dangerous and unpredictable
+                console.warn("UIFilterWrapperMarker in array is not supported as this requires checking in any possible permutation of the array.");
+                return {
+                    match: false
+                }
+            }
+
+            let found = false;
+            for (let i = 0; i < remaining.length; i++) {
+                const same = unwrapFilter(remaining[i], item);
+
+                if (same.match && !same.leftOver) {
+                    if (same.markerValue) {
+                        if (pendingMarkerValue !== undefined) {
+                            // Check if equal
+                            const {match, leftOver} = unwrapFilter(pendingMarkerValue, same.markerValue);
+                            
+                            if (!match || leftOver) {
+                                // Pattern did match, but multiple marker values with different values
+                                return {
+                                    match: false
+                                }
+                            }
+                        }
+
+                        pendingMarkerValue = same.markerValue;
+                    }
+
+                    remaining.splice(i, 1);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                return {
+                    match: false
+                }
+            }
+        }
+        
+        if (remaining.length > 0) {
+            return {
+                match: false
+            }
+        }
+
+        return {
+            match: true,
+            markerValue: pendingMarkerValue
+        }
+    }
+
+    if (wrap instanceof Date) {
+        if (filter instanceof Date) {
+            return {
+                match: filter.getTime() === wrap.getTime()
+            }
+        }
+
+        return {
+            match: false
+        }
+    }
+
+    if (typeof wrap === 'object' && wrap !== null) {
+        if (typeof filter !== 'object' || filter === null) {
+            // Not the same
+            return {
+                match: false
+            };
+        }
+
+        let pendingMarkerValue = undefined;
+        for (const key in wrap) {
+            const filterValue = (filter as any)[key];
+
+            if (filterValue === undefined) {
+                // Required key not found
+                return {
+                    match: false
+                }
+            }
+
+            const wrapValue = (wrap as any)[key];
+
+            const same = unwrapFilter(filterValue, wrapValue);
+
+            if (!same.match || same.leftOver) {
+                // Not matching
+                return {
+                    match: false
+                }
+            }
+
+            // We have a match
+            if (same.markerValue) {
+                if (pendingMarkerValue !== undefined) {
+                    // Check if equal
+                    const {match, leftOver} = unwrapFilter(pendingMarkerValue, same.markerValue);
+                    
+                    if (!match || leftOver) {
+                        // Pattern did match, but multiple marker values with different values
+                        return {
+                            match: false
+                        }
+                    }
+                }
+
+                pendingMarkerValue = same.markerValue;
+            }
+        }
+
+        // We have a match
+        const leftOverKeys = Object.keys(filter).filter(k => !(k in wrap));
+        const leftOver = {};
+        for (const key of leftOverKeys) {
+            (leftOver as any)[key] = (filter as any)[key];
+        }
+
+        return {
+            match: true,
+            markerValue: pendingMarkerValue,
+            leftOver: leftOverKeys.length ? leftOver : undefined
+        };
+    }
+
+    // Only scalar values at this point
+    // No marker found
+    if (filter == wrap) {
+        return {
+            match: true
+            // No marker value
+        };
+    }
+    return {
+        match: false
+    };
+}
+
+export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string|number)[]): StamhoofdFilter|null {
     if (keyPath.length === 0) {
         return filter;
     }
@@ -31,7 +252,7 @@ export function unwrapFilter(filter: StamhoofdFilter, keyPath: (string|number)[]
         if (first >= filter.length) {
             return null;
         }
-        return unwrapFilter((filter as any)[first], keyPath.slice(1));
+        return unwrapFilterByPath((filter as any)[first], keyPath.slice(1));
     }
 
     if (!(typeof filter === 'object')) {
@@ -44,7 +265,7 @@ export function unwrapFilter(filter: StamhoofdFilter, keyPath: (string|number)[]
 
     
     if (first in filter) {
-        return unwrapFilter((filter as any)[first], keyPath.slice(1));
+        return unwrapFilterByPath((filter as any)[first], keyPath.slice(1));
     }
 
     return null;
@@ -73,6 +294,11 @@ export abstract class UIFilter {
         if (b !== null && this.builder.wrapFilter) {
             return this.builder.wrapFilter(b)
         }
+
+        if (this.builder.wrapper) {
+            return wrapFilter(b, this.builder.wrapper)
+        }
+        
         return b
     }
     

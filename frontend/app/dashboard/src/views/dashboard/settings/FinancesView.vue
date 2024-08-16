@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components';
-import { AccessRight } from '@stamhoofd/structures';
+import { AccessRight, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
@@ -60,6 +60,19 @@ defineRoutes([
         name: Routes.Transfers,
         url: 'overschrijvingen',
         component: PaymentsTableView as ComponentOptions,
+        paramsToProps() {
+            return {
+                methods: [PaymentMethod.Transfer],
+                defaultFilter: {
+                    status: {
+                        $in: [
+                            PaymentStatus.Pending,
+                            PaymentStatus.Created
+                        ]
+                    }
+                }
+            }
+        }
     },
     {
         name: Routes.Export,

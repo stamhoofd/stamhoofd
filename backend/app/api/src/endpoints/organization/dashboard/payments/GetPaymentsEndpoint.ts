@@ -3,7 +3,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
-import { SQLJsonUnquote, SQL, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, SQLCast } from "@stamhoofd/sql";
+import { SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
 import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -34,6 +34,7 @@ const filterCompilers: SQLFilterDefinitions = {
     status: createSQLColumnFilterCompiler('status'),
     organizationId: createSQLColumnFilterCompiler('organizationId'),
     createdAt: createSQLColumnFilterCompiler('createdAt'),
+    updatedAt: createSQLColumnFilterCompiler('updatedAt'),
     paidAt: createSQLColumnFilterCompiler('paidAt', {nullable: true}),
     price: createSQLColumnFilterCompiler('price'),
     provider: createSQLColumnFilterCompiler('provider', {nullable: true}),

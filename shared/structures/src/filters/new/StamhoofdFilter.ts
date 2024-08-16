@@ -1,35 +1,35 @@
 import { AssertSortList, SortItemDirection, SortList } from "./SortList"
 
-export type StamhoofdAndFilter = {
-    $and: StamhoofdFilter
+export type StamhoofdAndFilter<T = StamhoofdCompareValue> = {
+    $and: StamhoofdFilter<T>
 }
 
-export type StamhoofdOrFilter = {
-    $or: StamhoofdFilter
+export type StamhoofdOrFilter<T = StamhoofdCompareValue> = {
+    $or: StamhoofdFilter<T>
 }
 
-export type StamhoofdNotFilter = {
-    $not: StamhoofdFilter
+export type StamhoofdNotFilter<T = StamhoofdCompareValue> = {
+    $not: StamhoofdFilter<T>
 }
 
 export type StamhoofdCompareValue = string|number|Date|null|boolean
 
-export type StamhoofdKeyFilterValue = 
-    {$eq: StamhoofdCompareValue}
-    |{$in: StamhoofdCompareValue[]}
-    |{$neq: StamhoofdCompareValue}
-    |{$gt: StamhoofdCompareValue}
-    |{$lt: StamhoofdCompareValue}
+export type StamhoofdKeyFilterValue<T = StamhoofdCompareValue> = 
+    {$eq: T}
+    |{$in: T[]}
+    |{$neq: T}
+    |{$gt: T}
+    |{$lt: T}
     |{$contains: string}
-    |{$length: StamhoofdFilter}
-    |{$elemMatch: StamhoofdFilter}
-    |StamhoofdCompareValue;
+    |{$length: StamhoofdFilter<T>}
+    |{$elemMatch: StamhoofdFilter<T>}
+    |T;
 
-export type StamhoofdKeyFilter = {
-    [k in string]: StamhoofdFilter
+export type StamhoofdKeyFilter<T = StamhoofdCompareValue> = {
+    [k in string]: StamhoofdFilter<T>
 }
 
-export type StamhoofdFilter = StamhoofdAndFilter | StamhoofdOrFilter | StamhoofdNotFilter | StamhoofdKeyFilterValue | StamhoofdKeyFilter | StamhoofdFilter[]
+export type StamhoofdFilter<T = StamhoofdCompareValue> = StamhoofdAndFilter<T> | StamhoofdOrFilter<T>  | StamhoofdNotFilter<T>  | StamhoofdKeyFilterValue<T>  | StamhoofdKeyFilter<T> | StamhoofdFilter<T>[]
 
 
 export function isEmptyFilter(filter: StamhoofdFilter) {

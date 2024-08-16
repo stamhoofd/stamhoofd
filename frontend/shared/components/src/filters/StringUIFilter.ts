@@ -2,7 +2,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { StamhoofdFilter, StringFilterMode } from "@stamhoofd/structures";
 
 import StringUIFilterView from "./StringUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilter } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterByPath, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 
 export class StringUIFilter extends UIFilter {
     builder!: StringFilterBuilder
@@ -149,24 +149,28 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
     name = ""
     wrapFilter?: UIFilterWrapper | null
     unwrapFilter?: UIFilterUnwrapper | null;
+    wrapper?: WrapperFilter;
 
-    constructor(data: {key: string, name: string, wrapFilter?: UIFilterWrapper, unwrapFilter?: UIFilterUnwrapper}) {
+    constructor(data: {key: string, name: string, wrapFilter?: UIFilterWrapper, unwrapFilter?: UIFilterUnwrapper, wrapper?: WrapperFilter}) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter
+        this.wrapper = data.wrapper;
         this.name = data.name;
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const unwrapped = (this.unwrapFilter ? this.unwrapFilter(filter) : filter) as any;
-        if (unwrapped === null) {
+        const {markerValue: unwrapped} = unwrapFilterForBuilder(this, filter)
+        
+        if (unwrapped === null || unwrapped === undefined) {
             return null;
         }
+
         if (!(typeof unwrapped === 'object')) {
             return null;
         }
 
-        const contains = unwrapFilter(unwrapped, [this.key, '$contains']);
+        const contains = unwrapFilterByPath(unwrapped, [this.key, '$contains']);
 
         if (contains && typeof contains === 'string') {
             return new StringUIFilter({
@@ -176,7 +180,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             })
         }
 
-        const notContains = unwrapFilter(unwrapped, ['$not', this.key, '$contains']);
+        const notContains = unwrapFilterByPath(unwrapped, ['$not', this.key, '$contains']);
 
         if (notContains && typeof notContains === 'string') {
             return new StringUIFilter({
@@ -186,7 +190,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             })
         }
 
-        const equals = unwrapFilter(unwrapped, [this.key, '$eq']);
+        const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']);
 
         if (equals && typeof equals === 'string') {
             return new StringUIFilter({
@@ -196,7 +200,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             })
         }
 
-        const notEquals = unwrapFilter(unwrapped, ['$not', this.key, '$eq']);
+        const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
 
         if (notEquals && typeof notEquals === 'string') {
             return new StringUIFilter({
@@ -206,7 +210,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             })
         }
 
-        const empty = unwrapFilter(unwrapped, ['$or', 0, this.key, '$eq']);
+        const empty = unwrapFilterByPath(unwrapped, ['$or', 0, this.key, '$eq']);
 
         if (empty === '') {
             return new StringUIFilter({
@@ -216,7 +220,7 @@ export class StringFilterBuilder implements UIFilterBuilder<StringUIFilter> {
             })
         }
 
-        const notEmpty = unwrapFilter(unwrapped, ['$not', '$or', 0, this.key, '$eq']);
+        const notEmpty = unwrapFilterByPath(unwrapped, ['$not', '$or', 0, this.key, '$eq']);
 
         if (notEmpty === '') {
             return new StringUIFilter({

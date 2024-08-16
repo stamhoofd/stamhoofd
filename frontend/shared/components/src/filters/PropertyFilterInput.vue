@@ -182,7 +182,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
                         filter,
                         saveHandler: (filter: UIFilter) => {
                             this.cachedEnabledFilter = filter.build();
-                            
+                            console.log('set enabled when', filter, this.cachedEnabledFilter)
                             this.$emit('update:modelValue', 
                                 new PropertyFilter(
                                     this.cachedEnabledFilter,

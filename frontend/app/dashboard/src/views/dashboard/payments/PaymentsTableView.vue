@@ -5,6 +5,7 @@
         :filter-builders="filterBuilders" 
         :default-sort-direction="SortItemDirection.DESC" 
         :default-sort-column="allColumns.find(c => c.id == 'createdAt')"
+        :default-filter="defaultFilter"
         :title="title" 
         :column-configuration-id="configurationId" 
         :actions="actions"
@@ -20,10 +21,21 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, useTableObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref } from 'vue';
+import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
+
+const props = withDefaults(
+    defineProps<{
+        methods?: PaymentMethod[]|null,
+        defaultFilter?: StamhoofdFilter|null
+    }>(), {
+        methods: null,
+        defaultFilter: null
+    }
+)
 
 type ObjectType = PaymentGeneral;
 
@@ -85,15 +97,22 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const filterBuilders = paymentsUIFilterBuilders
 const title = 'Betalingen'
 const $navigate = useNavigate();
+const markPaid = useMarkPaymentsPaid()
 
 function getRequiredFilter(): StamhoofdFilter|null  {
+    if (props.methods !== null) {
+        return {
+            method: {
+                $in: props.methods
+            }
+        }
+    }
     return null;
 }
 
 function extendSort(list: SortList): SortList  {
     return assertSort(list, [{key: 'id'}])
 }
-
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>({
     requiredFilter: getRequiredFilter(),
@@ -226,6 +245,32 @@ async function showPayment(payment: PaymentGeneral) {
 }
 
 const actions: TableAction<ObjectType>[] = [
-    // todo
+    new InMemoryTableAction({
+        name: "Markeer als betaald",
+        icon: "success",
+        priority: 2,
+        groupIndex: 1,
+        needsSelection: true,
+        allowAutoSelectAll: false,
+        handler: async (payments: PaymentGeneral[]) => {
+            // Mark paid
+            await markPaid(payments, true)
+        }
+    }),
+    new InMemoryTableAction({
+        name: "Markeer als niet betaald",
+        icon: "canceled",
+        priority: 1,
+        groupIndex: 1,
+        needsSelection: true,
+        allowAutoSelectAll: false,
+        handler: async (payments: PaymentGeneral[]) => {
+            // Mark paid
+            await markPaid(payments, false)
+        }
+    }),
 ]
+
+
+
 </script>
