@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend",
-    "version": "2.12.0",
+    "version": "2.13.0",
     "main": "./dist/index.js",
     "exports": {
         ".": {
@@ -35,6 +35,14 @@
         "@simonbackx/simple-database": "1.24.0",
         "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/backend-i18n": "^2.13.0",
+        "@stamhoofd/backend-middleware": "^2.13.0",
+        "@stamhoofd/email": "^2.13.0",
+        "@stamhoofd/models": "^2.13.0",
+        "@stamhoofd/queues": "^2.13.0",
+        "@stamhoofd/sql": "^2.13.0",
+        "@stamhoofd/structures": "^2.13.0",
+        "@stamhoofd/utility": "^2.13.0",
         "aws-sdk": "^2.885.0",
         "axios": "1.6.8",
         "cookie": "^0.5.0",
@@ -48,14 +56,6 @@
         "node-rsa": "1.1.1",
         "openid-client": "^5.4.0",
         "postmark": "4.0.2",
-        "stripe": "^16.6.0",
-        "@stamhoofd/structures": "2.12.0",
-        "@stamhoofd/models": "2.12.0",
-        "@stamhoofd/queues": "2.10.2",
-        "@stamhoofd/email": "2.10.2",
-        "@stamhoofd/utility": "2.10.2",
-        "@stamhoofd/backend-i18n": "2.10.2",
-        "@stamhoofd/sql": "2.10.2",
-        "@stamhoofd/backend-middleware": "2.10.2"
+        "stripe": "^16.6.0"
     }
 }

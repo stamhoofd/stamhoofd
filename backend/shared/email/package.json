@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/email",
-    "version": "2.10.2",
+    "version": "2.13.0",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
