@@ -1,3 +1,4 @@
+import { Formatter } from "@stamhoofd/utility";
 
 export enum PaymentMethod {
     Unknown = "Unknown",
@@ -32,13 +33,16 @@ export function downgradePaymentMethodArrayV150(newerValue: PaymentMethod[]): Pa
 
 
 export class PaymentMethodHelper {
-    static getName(method: PaymentMethod, context: null | "takeout" | "delivery" = null): string {
+    static getName(method: PaymentMethod, context: null | "takeout" | "delivery" | 'Takeout' | 'Delivery' | 'OnSite' = null): string {
         switch(method) {
             case PaymentMethod.Unknown: return "onbekende betaalmethode";
             case PaymentMethod.PointOfSale: {
                 switch (context) {
                     case "takeout": return "bij afhalen";
                     case "delivery": return "bij levering";
+                    case "Takeout": return "bij afhalen";
+                    case "Delivery": return "bij levering";
+                    case "OnSite": return "ter plaatse";
                     default: return "ter plaatse";
                 }
             }
@@ -51,26 +55,22 @@ export class PaymentMethodHelper {
         }
     }
 
-    static getNameCapitalized(method: PaymentMethod, context: null | "takeout" | "delivery" | 'Takeout' | 'Delivery' | 'OnSite' = null): string {
+    static getPluralName(method: PaymentMethod): string {
         switch(method) {
-            case PaymentMethod.Unknown: return "Onbekende betaalmethode";
+            case PaymentMethod.Unknown: return "onbekende betaalmethodes";
             case PaymentMethod.PointOfSale: {
-                switch (context) {
-                    case "takeout":
-                    case 'Takeout': 
-                        return "Bij afhalen";
-                    case "delivery": 
-                    case 'Delivery':
-                        return "Bij levering";
-                    default: return "Ter plaatse";
-                }
+                return 'betalingen ter plaatse'
             }
-            case PaymentMethod.Transfer: return "Overschrijving";
-            case PaymentMethod.DirectDebit: return "Domiciliëring";
-            case PaymentMethod.Bancontact: return "Bancontact";
-            case PaymentMethod.iDEAL: return "iDEAL";
-            case PaymentMethod.CreditCard: return "Kredietkaart";
-            case PaymentMethod.Payconiq: return "Payconiq by Bancontact";
+            case PaymentMethod.Transfer: return "overschrijvingen";
+            case PaymentMethod.DirectDebit: return "domiciliëringen";
+            case PaymentMethod.Bancontact: return "Bancontact betalingen";
+            case PaymentMethod.iDEAL: return "iDEAL betalingen";
+            case PaymentMethod.CreditCard: return "kredietkaart betalingen";
+            case PaymentMethod.Payconiq: return "Payconiq betalingen";
         }
+    }
+
+    static getNameCapitalized(method: PaymentMethod, context: null | "takeout" | "delivery" | 'Takeout' | 'Delivery' | 'OnSite' = null): string {
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(method, context))
     }
 }

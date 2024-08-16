@@ -95,7 +95,14 @@ const configurationId = computed(() => {
 const context = useContext();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const filterBuilders = paymentsUIFilterBuilders
-const title = 'Betalingen'
+const title = computed(() => {
+    if (props.methods?.length === 1) {
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getPluralName(props.methods[0]))
+    }
+
+    return "Betalingen"
+})
+
 const $navigate = useNavigate();
 const markPaid = useMarkPaymentsPaid()
 
