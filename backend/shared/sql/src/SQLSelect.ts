@@ -101,7 +101,8 @@ class SelectBase implements SQLExpression {
     async fetch(): Promise<SQLResultNamespacedRow[]> {
         const {query, params} = normalizeSQLQuery(this.getSQL())
 
-        console.log(query, params);
+        // when debugging: log all queries
+        //console.log(query, params);
         const [rows] = await Database.select(query, params, {nestTables: true});
 
         // Now map aggregated queries to the correct namespace

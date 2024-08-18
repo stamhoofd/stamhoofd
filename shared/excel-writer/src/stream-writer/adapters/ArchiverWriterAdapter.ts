@@ -50,7 +50,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
             console.error('Archiver error', err)
             throw err;
         });
-
+        
         // pipe archive data to the file
         this.archive.pipe(output);
     }

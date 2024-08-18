@@ -286,13 +286,10 @@ export class AdminPermissionChecker {
         }
 
         if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Webshops, webshop.id, permissionLevel)) {
-            console.warn('has access organizationPermissions.hasResourceAccess')
             return true;
         }
 
         if (permissionLevel === PermissionLevel.Read && organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
-            console.warn('has access organizationPermissions.hasResourceAccessRight')
-
             return true;
         }
 
