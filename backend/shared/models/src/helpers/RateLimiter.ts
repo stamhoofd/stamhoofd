@@ -42,6 +42,7 @@ export class RateLimitWindow {
             throw new SimpleError({
                 code: 'rate_limit',
                 message: `Rate limit exceeded (${w} ${amount > 1 ? '('+amount+' added)' : ''} requests in ${Math.round(this.age/1000)}s). Retry after ${retryAfter}s. Check your code and try to reduce the number of (parallel) requests you make. Add waiting periods if needed.`,
+                human: `Oeps! Te veel aanvragen. Om spam te vermijden is jouw aanvraag tijdelijk geblokkeerd. Probeer het over ${retryAfter} seconden opnieuw.`,
                 statusCode: 429
             })
         }

@@ -9,8 +9,8 @@ import { Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 
 import { areCronsRunning, crons, stopCronScheduling } from './src/crons';
-import { ContextMiddleware } from "./src/middleware/ContextMiddleware";
 import { resumeEmails } from "./src/helpers/EmailResumer";
+import { ContextMiddleware } from "./src/middleware/ContextMiddleware";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -80,6 +80,13 @@ const start = async () => {
     // Add CORS headers
     routerServer.addResponseMiddleware(CORSMiddleware)
 
+    // Register Excel loaders
+    await import('./src/excel-loaders/members');
+    await import('./src/excel-loaders/payments');
+
+    // Register Email Recipient loaders
+    await import('./src/email-recipient-loaders/members');
+
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
     resumeEmails().catch(console.error);
@@ -105,6 +112,13 @@ const start = async () => {
         
         stopCronScheduling();
         clearInterval(cronInterval)
+
+        if (STAMHOOFD.environment === 'development') {
+            setTimeout(() => {
+                console.error("Forcing exit after 5 seconds")
+                process.exit(1);
+            }, 5000);
+        }
 
         try {
             await routerServer.close()

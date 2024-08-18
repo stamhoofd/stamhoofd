@@ -139,6 +139,7 @@ declare global {
         readonly CRONS_DISABLED: boolean
 
         readonly WHITELISTED_EMAIL_DESTINATIONS?: string[] // E-mails we are allowed to send e-mails to in case of staging or development environment
+        readonly CACHE_PATH: string
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

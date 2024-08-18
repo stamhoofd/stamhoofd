@@ -2,44 +2,41 @@
     "name": "stamhoofd",
     "version": "1.0.0",
     "private": true,
-    "workspaces": [
-        "frontend/app/*",
-        "frontend/shared/*",
-        "backend/app/*",
-        "backend/shared/*",
-        "shared/*",
-        "*"
-    ],
+    "workspaces": {
+        "packages": [
+            "frontend/app/*",
+            "frontend/shared/*",
+            "backend/app/*",
+            "backend/shared/*",
+            "shared/*",
+            "*"
+        ],
+        "nohoist": [
+            "@simonbackx/simple-encoding"
+        ]
+    },
     "license": "AGPL-3.0-only",
     "scripts": {
-        "dev": "yarn clear-vite-cache && concurrently -r 'yarn -s build:shared:watch' 'wait-on shared/structures/dist/index.js && lerna run dev --stream --parallel'",
+        "dev": "yarn clear && yarn clear-vite-cache && concurrently -r 'yarn -s build:shared:watch' 'wait-on shared/structures/dist/index.js && wait-on shared/structures/dist/index.d.ts && lerna run dev --stream --parallel'",
         "dev:server": "concurrently -r 'yarn -s dev' 'yarn -s caddy' 'yarn -s dns' 'yarn -s mail' 'yarn -s stripe-webhooks'",
         "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
-
         "test": "lerna run test",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
-
         "app:release": "cd devops && yarn -s build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
-                
         "clear:shared": "yarn -s clear:global:shared && yarn clear:backend:shared",
         "build:shared": "yarn -s build:global:shared && yarn -s build:backend:shared",
         "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s build:shared'",
-
         "clear:global:shared": "rm -rf shared/*/dist shared/*/esm/dist",
-        "build:global:shared": "echo 'Building globally shared dependencies...' && cd shared/locales && yarn -s build && cd ../utility && yarn -s build && cd ../structures && yarn -s build && cd ../.. && echo 'Done building globally shared dependencies.'",
-        
+        "build:global:shared": "echo 'Building globally shared dependencies...' && cd shared/locales && yarn -s build && cd ../utility && yarn -s build && cd ../excel-writer && yarn -s build && cd ../structures && yarn -s build && cd ../.. && echo 'Done building globally shared dependencies.'",
         "clear:backend:shared": "rm -rf backend/shared/*/dist",
         "build:backend:shared": "echo 'Building shared backend dependencies...' && cd backend/shared/queues && yarn -s build && cd ../i18n && yarn -s build && cd ../email && yarn -s build && cd ../sql && yarn -s build && cd ../models && yarn -s build && cd ../logging && yarn -s build && cd ../middleware && yarn -s build && cd ../env && yarn -s build && cd ../.. && echo 'Done building backend shared dependencies.'",
-                
         "stripe-webhooks": "stripe listen --forward-to http://api.stamhoofd/stripe/webhooks",
         "caddy": "caddy run -w --config .development/caddy.json",
         "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
         "mail": "maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password",
-        
         "clear": "rm -rf shared/*/dist shared/*/esm/dist frontend/app/*/dist backend/shared/*/dist backend/app/*/dist",
         "clear-dependencies": "rm -rf node_modules */node_modules **/node_modules",
         "clear-vite-cache": "rm -rf frontend/app/*/node_modules/.vite",
-
         "ship": "node ./.development/increase-structures-version.js && yarn -s clear:shared && yarn -s build:shared && lerna publish --yes --no-private"
     },
     "dependencies": {
@@ -74,7 +71,6 @@
         "@babel/cli": "^7.16.0",
         "@babel/core": "^7.16.5",
         "@babel/preset-env": "^7.16.5",
-        "vite-svg-2-webfont": "3.4.0",
         "@types/jest": "^27.0.3",
         "@types/pdfkit": "0.13.4",
         "@typescript-eslint/eslint-plugin": "^7.7.1",
@@ -101,6 +97,7 @@
         "typescript": "5.4.5",
         "typescript-eslint": "^7.7.1",
         "vite": "5.3.5",
+        "vite-svg-2-webfont": "3.4.0",
         "vue-tsc": "^2.0.14",
         "wait-on": "^7.2.0"
     },

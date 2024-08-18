@@ -42,7 +42,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -54,6 +54,8 @@ import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue
 import { useChooseGroupForMember } from '../../checkout';
 import { useRegistrationActionBuilder } from '../../classes/RegistrationActionBuilder';
 import ViewMemberRegistrationRow from './ViewMemberRegistrationRow.vue';
+import { TableActionSelection } from '../../../tables';
+import { useMembersObjectFetcher } from '../../../fetchers/useMembersObjectFetcher';
 
 const props = defineProps<{
     member: PlatformMember
@@ -118,6 +120,7 @@ async function openCart() {
 }
 
 const buildActions = useRegistrationActionBuilder()
+const objectFetcher = useMembersObjectFetcher()
 
 async function editRegistration(registration: Registration, event: MouseEvent) {
     const builder = buildActions({
@@ -135,19 +138,25 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
     const el = event.currentTarget! as HTMLElement;
     const bounds = el.getBoundingClientRect()
 
+    const selection: TableActionSelection<PlatformMember> = {
+        filter: new LimitedFilteredRequest({
+            filter: {
+                id: props.member.id
+            },
+            limit: 2
+        }),
+        fetcher: objectFetcher, // todo
+        markedRows: new Map([[props.member.id, props.member]]),
+        markedRowsAreSelected: true,
+    }
+    
     const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.right,
         y: bounds.bottom,
         xPlacement: "left",
         yPlacement: "bottom",
         actions,
-        selection: {
-            isSingle: true,
-            hasSelection: true,
-            getSelection: () => {
-                return [props.member]
-            }
-        }
+        selection
     });
     await present(displayedComponent.setDisplayStyle("overlay"));
 }

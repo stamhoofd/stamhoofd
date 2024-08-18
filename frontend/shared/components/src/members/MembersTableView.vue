@@ -26,6 +26,7 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from "vue";
 import { useDirectMemberActions } from "./classes/MemberActionBuilder";
 import MemberSegmentedView from './MemberSegmentedView.vue';
+import { useMembersObjectFetcher } from "../fetchers/useMembersObjectFetcher";
 
 type ObjectType = PlatformMember;
 
@@ -98,18 +99,6 @@ const groups = (() => {
     return []
 })()
 
-function extendSort(list: SortList): SortList  {
-    // Map 'age' to 'birthDay' + reverse direction
-    list = list.map(l => {
-        if (l.key === 'age') {
-            return {key: 'birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC}
-        }
-        return l;
-    })
-
-    return assertSort(list, [{key: 'id'}])
-}
-
 function getRequiredFilter(): StamhoofdFilter|null  {
     if (props.customFilter) {
         return props.customFilter
@@ -132,50 +121,11 @@ function getRequiredFilter(): StamhoofdFilter|null  {
     }
 }
 
-const tableObjectFetcher = useTableObjectFetcher<ObjectType>({
+const objectFetcher = useMembersObjectFetcher({
     requiredFilter: getRequiredFilter(),
-    async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
-        console.log('Members.fetch', data);
-        data.sort = extendSort(data.sort);
-
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/members",
-            decoder: new PaginatedResponseDecoder(MembersBlob as Decoder<MembersBlob>, LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-            query: data,
-            shouldRetry: false,
-            owner: this
-        });
-
-        console.log('[Done] Members.fetch', data, response.data);
-
-        const blob = response.data.results;
-        
-        return {
-            results: PlatformFamily.createSingles(blob, {
-                contextOrganization: context.value.organization,
-                platform: platform.value
-            }),
-            next: response.data.next
-        }
-    },
-
-    async fetchCount(data: CountFilteredRequest): Promise<number> {
-        console.log('Members.fetchCount', data);
-
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/members/count",
-            decoder: CountResponse as Decoder<CountResponse>,
-            query: data,
-            shouldRetry: false,
-            owner: this
-        })
-
-        console.log('[Done] Members.fetchCount', data, response.data.count);
-        return response.data.count
-    }
 });
+
+const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({

@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SQL, SQLAlias, SQLSum, SQLCount, SQLDistinct, SQLSelectAs } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLCount, SQLDistinct, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context';
 

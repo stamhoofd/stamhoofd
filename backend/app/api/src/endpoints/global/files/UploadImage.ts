@@ -2,7 +2,7 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Image } from '@stamhoofd/models';
+import { Image, RateLimiter } from '@stamhoofd/models';
 import { Image as ImageStruct, ResolutionRequest } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from "fs";
@@ -31,6 +31,16 @@ interface FormidableFile {
   mimetype: string | null;
 }
 
+export const limiter = new RateLimiter({
+    limits: [
+        {   
+            // Max 50 per hour
+            limit: 50,
+            duration: 60 * 1000 * 60
+        }
+    ]
+});
+
 export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {    
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "POST") {
@@ -48,7 +58,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope()
-        await Context.authenticate();
+        const {user} = await Context.authenticate();
 
         if (!Context.auth.canUpload()) {
             throw Context.auth.error()
@@ -65,6 +75,8 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         if (!request.request.request) {
             throw new Error("Not supported without real request")
         }
+
+        limiter.track(user.id, 1);
 
         const form = formidable({ 
             maxFileSize: 5 * 1024 * 1024, 

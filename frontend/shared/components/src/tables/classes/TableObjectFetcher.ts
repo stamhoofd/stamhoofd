@@ -74,44 +74,6 @@ export class TableObjectFetcher<O extends {id: string}> {
         this.objects = [] // Fast memory cleanup
     }
 
-    async fetchAll(options?: FetchAllOptions) {
-        // todo: check if we have all or nearly all already.
-
-        let next: LimitedFilteredRequest|null = new LimitedFilteredRequest({
-            filter: this.filter,
-            pageFilter: null,
-            sort: [], // use default most performant sort
-            limit: this.maxLimit,
-            search: this.searchQuery
-        });
-
-        const results: O[] = []
-
-        while (next) {
-            // Override filter
-            // Because the filter could have been changed by the object fetcher, and we don't want to reapply any custom filters
-            // on the already custom filter that we got from the server
-            next.filter = this.filter;
-
-            // Same for sorting
-            next.sort = [];
-            
-            const data = await this.objectFetcher.fetch(next)
-            next = data.next ?? null;
-            results.push(...data.results)
-
-            if (data.results.length === 0) {
-                next = null;
-            }
-
-            if (options?.onProgress) {
-                options.onProgress(results.length, this.totalFilteredCount ?? results.length)
-            }
-        }
-
-        return results;
-    }
-
     resetRetryCount() {
         this.retryCount = 0;
     }
@@ -330,7 +292,7 @@ export class TableObjectFetcher<O extends {id: string}> {
                 this.nextRequest.filter = this.filter;
 
                 // Same for sorting
-                this.nextRequest.sort = this.sort;
+                this.nextRequest.sort = this.objectFetcher.extendSort ? this.objectFetcher.extendSort([...this.sort]) : this.sort;
                 
                 const data = await this.objectFetcher.fetch(this.nextRequest)
                 if (currentClearIndex !== this._clearIndex) {

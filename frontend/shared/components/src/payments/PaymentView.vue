@@ -61,6 +61,9 @@
                         <p class="style-definition-text">
                             {{ formatDate(payment.createdAt) }}
                         </p>
+                        <p class="style-description-small">
+                            Om {{ formatTime(payment.createdAt) }}
+                        </p>
                     </STListItem>
 
                     <STListItem v-if="payment.paidAt">
@@ -72,6 +75,9 @@
                         </h3>
                         <p class="style-definition-text">
                             {{ formatDate(payment.paidAt) }}
+                        </p>
+                        <p class="style-description-small">
+                            Om {{ formatTime(payment.paidAt) }}
                         </p>
                     </STListItem>
 

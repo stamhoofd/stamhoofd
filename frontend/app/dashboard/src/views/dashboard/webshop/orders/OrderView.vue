@@ -314,7 +314,7 @@ import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoE
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, EditPaymentView, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, PaymentView, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { CartItemRow, EditPaymentView, ErrorBox, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, PaymentView, PriceBreakdownBox, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, TableActionSelection, Toast, TooltipDirective, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { AccessRight, CartItem, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -525,12 +525,11 @@ export default class OrderView extends Mixins(NavigationMixin){
             yPlacement: "bottom",
             actions: this.actionBuilder.getActions(),
             selection: {
-                isSingle: true,
-                hasSelection: true,
-                getSelection: () => {
-                    return [this.order]
-                }
-            }
+                filter: {}, // todo
+                fetcher: {}, // todo
+                markedRows: new Map([[this.order.id, this.order]]),
+                markedRowsAreSelected: true,
+            } as TableActionSelection<PrivateOrderWithTickets>
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -543,13 +542,7 @@ export default class OrderView extends Mixins(NavigationMixin){
             xPlacement: "left",
             yPlacement: "bottom",
             actions: this.actionBuilder.getStatusActions(),
-            selection: {
-                isSingle: true,
-                hasSelection: true,
-                getSelection: () => {
-                    return [this.order]
-                }
-            }
+            // todo: selection
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -564,13 +557,7 @@ export default class OrderView extends Mixins(NavigationMixin){
             xPlacement: "right",
             yPlacement: "bottom",
             actions: this.actionBuilder.getPaymentActions(),
-            selection: {
-                isSingle: true,
-                hasSelection: true,
-                getSelection: () => {
-                    return [this.order]
-                }
-            }
+            // todo: selection
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

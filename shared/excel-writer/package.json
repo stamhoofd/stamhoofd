@@ -1,0 +1,24 @@
+{
+    "name": "@stamhoofd/excel-writer",
+    "version": "2.13.0",
+    "main": "./dist/index.js",
+    "module": "./esm/dist/index.js",
+    "types": "./dist/index.d.ts",
+    "license": "UNLICENCED",
+    "sideEffects": false,
+    "files": [
+        "dist",
+        "esm/dist"
+    ],
+    "scripts": {
+        "build": " tsc -b . esm",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    },
+    "devDependencies": {
+        "@types/archiver": "^6.0.2",
+        "@zip.js/zip.js": "^2.7.48"
+    },
+    "peerDependencies": {
+        "archiver": "^7.0.1"
+    }
+}

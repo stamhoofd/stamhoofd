@@ -2,314 +2,23 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email, Member, MemberWithRegistrations, Platform } from '@stamhoofd/models';
-import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler, joinSQLQuery } from "@stamhoofd/sql";
-import { CountFilteredRequest, EmailRecipientFilterType, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter, mergeFilters } from '@stamhoofd/structures';
-import { DataValidator, Formatter } from '@stamhoofd/utility';
+import { Member, Platform } from '@stamhoofd/models';
+import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
+import { CountFilteredRequest, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { DataValidator } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
-import { filterCompilers as organizationFilterCompilers } from '../../admin/organizations/GetOrganizationsEndpoint';
+import { memberFilterCompilers } from '../../../sql-filters/members';
+import { memberSorters } from '../../../sql-sorters/members';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<MembersBlob, LimitedFilteredRequest>
 
-Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
-    fetch: async (query: LimitedFilteredRequest) => {
-        const result = await GetMembersEndpoint.buildData(query)
-
-        return new PaginatedResponse({
-            results: result.results.members.flatMap(m => m.getEmailRecipients(['member'])),
-            next: result.next
-        });
-    },
-
-    count: async (query: LimitedFilteredRequest) => {
-        query.filter = mergeFilters([query.filter, {
-            'email': {
-                $neq: null
-            }
-        }])
-        const q = await GetMembersEndpoint.buildQuery(query)
-        return await q.count();
-    }
-});
-
-Email.recipientLoaders.set(EmailRecipientFilterType.MemberParents, {
-    fetch: async (query: LimitedFilteredRequest) => {
-        const result = await GetMembersEndpoint.buildData(query)
-
-        return new PaginatedResponse({
-            results: result.results.members.flatMap(m => m.getEmailRecipients(['parents'])),
-            next: result.next
-        });
-    },
-
-    count: async (query: LimitedFilteredRequest) => {
-        const q = await GetMembersEndpoint.buildQuery(query)
-        return await q.sum(
-            SQL.jsonLength(SQL.column('details'), '$.value.parents[*].email')
-        );
-    }
-});
-
-Email.recipientLoaders.set(EmailRecipientFilterType.MemberUnverified, {
-    fetch: async (query: LimitedFilteredRequest) => {
-        const result = await GetMembersEndpoint.buildData(query)
-
-        return new PaginatedResponse({
-            results: result.results.members.flatMap(m => m.getEmailRecipients(['unverified'])),
-            next: result.next
-        });
-    },
-
-    count: async (query: LimitedFilteredRequest) => {
-        const q = await GetMembersEndpoint.buildQuery(query)
-        return await q.sum(
-            SQL.jsonLength(SQL.column('details'), '$.value.unverifiedEmails')
-        );
-    }
-});
-
-const registrationFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    "price": createSQLColumnFilterCompiler('price', {nullable: true}),
-    "pricePaid": createSQLColumnFilterCompiler('pricePaid'),
-    "canRegister": createSQLColumnFilterCompiler('canRegister'),
-    "organizationId": createSQLColumnFilterCompiler('organizationId'),
-    "groupId": createSQLColumnFilterCompiler('groupId'),
-    "registeredAt": createSQLColumnFilterCompiler('registeredAt', {nullable: true}),
-    "periodId": createSQLColumnFilterCompiler(SQL.column('registrations', 'periodId')),
-
-    "group": createSQLFilterNamespace({
-        ...baseSQLFilterCompilers,
-        id: createSQLColumnFilterCompiler('groupId'),
-        name: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name')
-        ),
-        status: createSQLExpressionFilterCompiler(
-            SQL.column('groups', 'status')
-        ),
-        defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId'), {nullable: true}),
-    })
-}
-
-const filterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    name: createSQLExpressionFilterCompiler(
-        new SQLConcat(
-            SQL.column('firstName'),
-            new SQLScalar(' '),
-            SQL.column('lastName'),
-        )
-    ),
-    age: createSQLExpressionFilterCompiler(
-        new SQLAge(SQL.column('birthDay')), 
-        {nullable: true}
-    ),
-    gender: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('details'), '$.value.gender'),
-        {isJSONValue: true}
-    ),
-    birthDay: createSQLColumnFilterCompiler('birthDay', {
-        normalizeValue: (d) => {
-            if (typeof d === 'number') {
-                const date = new Date(d)
-                return Formatter.dateIso(date);
-            }
-            return d;
-        }
-    }),
-    organizationName: createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'name')
-    ),
-
-    email: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('details'), '$.value.email'),
-        {isJSONValue: true}
-    ),
-
-    parentEmail: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('details'), '$.value.parents[*].email'),
-        {isJSONValue: true, isJSONObject: true}
-    ),
-
-    registrations: createSQLRelationFilterCompiler(
-        SQL.select()
-        .from(
-            SQL.table('registrations')
-        ).join(
-            SQL.join(
-                SQL.table('groups')
-            ).where(
-                SQL.column('groups', 'id'),
-                SQL.column('registrations', 'groupId')
-            )
-        )
-        .join(
-            SQL.join(
-                SQL.table('organizations')
-            ).where(
-                SQL.column('organizations', 'id'),
-                SQL.column('registrations', 'organizationId')
-            )
-        )
-        .where(
-            SQL.column('memberId'),
-            SQL.column('members', 'id'),
-        ).whereNot(
-            SQL.column('registeredAt'),
-            null,
-        ).where(
-            SQL.column('deactivatedAt'),
-            null,
-        ).where(
-            SQL.column('groups', 'deletedAt'),
-            null
-        ),
-        {
-            ...registrationFilterCompilers,
-            "organization": createSQLFilterNamespace(organizationFilterCompilers)
-        }
-    ),
-
-    responsibilities: createSQLRelationFilterCompiler(
-        SQL.select()
-        .from(
-            SQL.table('member_responsibility_records')
-        )
-        .join(
-            SQL.leftJoin(
-                SQL.table('groups')
-            ).where(
-                SQL.column('groups', 'id'),
-                SQL.column('member_responsibility_records', 'groupId')
-            )
-        )
-        .where(
-            SQL.column('memberId'),
-            SQL.column('members', 'id'),
-        ),
-        {
-            ...baseSQLFilterCompilers,
-            // Alias for responsibilityId
-            "id": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
-            "responsibilityId": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
-            "organizationId": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'organizationId')),
-            "startDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'startDate')),
-            "endDate": createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'endDate')),
-            "group": createSQLFilterNamespace({
-                ...baseSQLFilterCompilers,
-                id: createSQLColumnFilterCompiler(SQL.column('groups', 'id')),
-                defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId')),
-            })
-        }
-    ),
-
-    platformMemberships: createSQLRelationFilterCompiler(
-        SQL.select()
-        .from(
-            SQL.table('member_platform_memberships')
-        )
-        .where(
-            SQL.column('memberId'),
-            SQL.column('members', 'id'),
-        )
-        .where(
-            SQL.column('deletedAt'),
-            null,
-        ),
-        {
-            ...baseSQLFilterCompilers,
-            "id": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'id')),
-            "membershipTypeId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'membershipTypeId')),
-            "organizationId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'organizationId')),
-            "periodId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'periodId')),
-            "price": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'price')),
-            "invoiceId": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'invoiceId')),
-            "startDate": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'startDate')),
-            "endDate": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'endDate')),
-            "expireDate": createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'expireDate')),
-        }
-    ),
-
-    organizations: createSQLRelationFilterCompiler(
-        SQL.select()
-        .from(
-            SQL.table('registrations')
-        ).join(
-            SQL.join(
-                SQL.table('groups')
-            ).where(
-                SQL.column('groups', 'id'),
-                SQL.column('registrations', 'groupId')
-            )
-        ).join(
-            SQL.join(
-                SQL.table('organizations')
-            ).where(
-                SQL.column('organizations', 'id'),
-                SQL.column('registrations', 'organizationId')
-            )
-        ).where(
-            SQL.column('memberId'),
-            SQL.column('members', 'id'),
-        ).whereNot(
-            SQL.column('registeredAt'),
-            null,
-        ).where(
-            SQL.column('groups', 'deletedAt'),
-            null
-        ),
-        organizationFilterCompilers
-    ),
-}
-
-const sorters: SQLSortDefinitions<MemberWithRegistrations> = {
-    'id': {
-        getValue(a) {
-            return a.id
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction
-            })
-        }
-    },
-    'name': {
-        getValue(a) {
-            return a.details.name
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return SQLOrderBy.combine([
-                new SQLOrderBy({
-                    column: SQL.column('firstName'),
-                    direction
-                }),
-                new SQLOrderBy({
-                    column: SQL.column('lastName'),
-                    direction
-                })
-            ])
-        }
-    },
-    'birthDay': {
-        getValue(a) {
-            return a.details.birthDay ? Formatter.dateIso(a.details.birthDay) : null
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('birthDay'),
-                direction
-            })
-        }
-    }
-    // Note: never add mapped sortings, that should happen in the frontend -> e.g. map age to birthDay
-}
+const sorters = memberSorters
+const filterCompilers = memberFilterCompilers
 
 export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>
@@ -364,6 +73,10 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (organization) {
             // Add organization scope filter
             const groups = await Context.auth.getAccessibleGroups(organization.id)
+
+            if (groups.length === 0) {
+                throw Context.auth.error()
+            }
 
             if (groups === 'all') {
                 if (await Context.auth.hasFullAccess(organization.id)) {

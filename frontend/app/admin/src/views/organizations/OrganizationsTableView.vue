@@ -19,10 +19,10 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, Toast, organizationsUIFilterBuilders, useAuth, useContext, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, Toast, organizationsUIFilterBuilders, useAuth, useContext, useOrganizationsObjectFetcher, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { I18nController, useTranslate } from "@stamhoofd/frontend-i18n";
 import { useRequestOwner } from "@stamhoofd/networking";
-import { Address, CountFilteredRequest, CountResponse, LimitedFilteredRequest, Organization, OrganizationTag, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { Address, Organization, OrganizationTag, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Ref, computed, ref } from "vue";
 import EditOrganizationView from "./EditOrganizationView.vue";
 import OrganizationView from "./OrganizationView.vue";
@@ -56,23 +56,6 @@ const configurationId = computed(() => {
     return 'organizations'
 })
 
-function extendSort(list: SortList): SortList  {
-    // Map 'age' to 'birthDay' + reverse direction
-    list = list.map(l => {
-        if (l.key === 'age') {
-            return {key: 'birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC}
-        }
-        return l;
-    })
-
-    if (list.find(l => l.key === 'id')) {
-        return list;
-    }
-
-    // Always add id as an extra sort key for sorters that are not unique
-    return [...list, {key: 'id', order: list[0]?.order ?? SortItemDirection.ASC}]
-}
-
 function getRequiredFilter(): StamhoofdFilter|null  {
     if (!props.tag) {
         return null;
@@ -85,43 +68,11 @@ function getRequiredFilter(): StamhoofdFilter|null  {
     }
 }
 
+const objectFetcher = useOrganizationsObjectFetcher({
+    requiredFilter: getRequiredFilter()
+})
 
-const tableObjectFetcher = useTableObjectFetcher<Organization>({
-    requiredFilter: getRequiredFilter(),
-    async fetch(data: LimitedFilteredRequest) {
-        console.log('Organizations.fetch', data);
-        data.sort = extendSort(data.sort);
-
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/admin/organizations",
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(Organization as Decoder<Organization>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-            query: data,
-            shouldRetry: false,
-            owner: this
-        });
-
-        console.log('[Done] Organizations.fetch', data, response.data);
-        
-        return response.data
-    },
-
-    async fetchCount(data: CountFilteredRequest): Promise<number> {
-        console.log('Organizations.fetchCount', data);
-
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/admin/organizations/count",
-            decoder: CountResponse as Decoder<CountResponse>,
-            query: data,
-            shouldRetry: false,
-            owner: this
-        })
-
-        console.log('[Done] Organizations.fetchCount', data, response.data.count);
-        return response.data.count
-    }
-});
+const tableObjectFetcher = useTableObjectFetcher<Organization>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({

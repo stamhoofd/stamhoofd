@@ -1,21 +1,17 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
-import { FetchAllOptions, TableObjectFetcher } from ".";
+import { LimitedFilteredRequest } from "@stamhoofd/structures";
+import { FetchAllOptions, ObjectFetcher } from ".";
 import { Toast } from "../../..";
 
 export interface TableActionSelection<T extends {id: string}> {
-    hasSelection: boolean,
-    isSingle: boolean,
-
-    /**
-     * For actions that handle on a full selection
-     */
-    getSelection(options?: FetchAllOptions): Promise<T[]>|T[],
-    
     /**
      * If you want to manually use the filter, or query data
      */
-    fetcher: TableObjectFetcher<T>,
+    filter: LimitedFilteredRequest,
+    fetcher: ObjectFetcher<T>,
+
+    // Manually selected rows that are already in memory
     markedRows: Map<string, T>,
     markedRowsAreSelected: boolean
 }
@@ -128,6 +124,52 @@ export class InMemoryTableAction<T extends {id: string}> extends TableAction<T> 
         this.handler = settings.handler ?? (() => { throw new Error("No handler defined") });
     }
 
+    async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions) {
+        // todo: check if we have all or nearly all already.
+        let next: LimitedFilteredRequest|null = initialRequest
+
+        let totalFilteredCount: number | null = null;
+        if (options?.onProgress) {
+            totalFilteredCount = await objectFetcher.fetchCount(initialRequest)
+        }
+
+        const results: T[] = []
+
+        while (next) {
+            // Override filter
+            // Because the filter could have been changed by the object fetcher, and we don't want to reapply any custom filters
+            // on the already custom filter that we got from the server
+            next.filter = initialRequest.filter;
+
+            // Same for sorting
+            next.sort = [];
+            
+            const data = await objectFetcher.fetch(next)
+            next = data.next ?? null;
+            results.push(...data.results)
+
+            if (data.results.length === 0) {
+                next = null;
+            }
+
+            if (options?.onProgress) {
+                options.onProgress(results.length, totalFilteredCount ?? results.length)
+            }
+        }
+
+        return results;
+    }
+
+
+    async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions) {
+        if (selection.markedRows.size && selection.markedRowsAreSelected) {
+            // No async needed
+            return Array.from(selection.markedRows.values())
+        } else {
+            return await this.fetchAll(selection.filter, selection.fetcher, options);
+        }
+    }
+
     async handle(data: TableActionSelection<T>) {
         const toast: Toast = new Toast("Ophalen...", "spinner").setHide(null)
         const timer = setTimeout(() => {
@@ -135,7 +177,7 @@ export class InMemoryTableAction<T extends {id: string}> extends TableAction<T> 
         }, 1000)
 
         try {
-            const items = this.needsSelection ? (await data.getSelection({
+            const items = this.needsSelection ? (await this.getSelection(data, {
                 onProgress(count, total) {
                     toast.setProgress(total !== 0 ? (count / total) : 0)
                 }

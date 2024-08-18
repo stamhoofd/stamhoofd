@@ -1,7 +1,7 @@
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
+import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..'
@@ -18,6 +18,16 @@ import { RegistrationActionBuilder } from './RegistrationActionBuilder'
 
 export function useDirectMemberActions(options?: {groups?: Group[], organizations?: Organization[]}) {
     return useMemberActions()(options)
+}
+
+function downloadURL(url: string, name: string) {
+    const link = document.createElement("a");
+    link.download = name;
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 export function useMemberActions() {
@@ -285,13 +295,14 @@ export class MemberActionBuilder {
                 priority: 11,
                 groupIndex: 3,
                 childActions: [
-                    new InMemoryTableAction({
+                    new AsyncTableAction({
                         name: "Excel...",
                         priority: 0,
                         groupIndex: 0,
-                        handler: async (members: PlatformMember[]) => {
-                        // TODO: vervangen door een context menu
-                            await this.exportToExcel(members)
+                        handler: async (selection) => {
+                            console.log('selection', selection)
+                            // TODO: vervangen door een context menu
+                            await this.exportToExcel(selection)
                         }
                     }),
                     new InMemoryTableAction({
@@ -331,7 +342,7 @@ export class MemberActionBuilder {
                 handler: async (members: PlatformMember[]) => {
                     await this.deleteMembers(members);
                 }
-            }),
+            })
 
         ]
     }
@@ -544,17 +555,35 @@ export class MemberActionBuilder {
         Toast.success(Formatter.capitalizeFirstLetter(Formatter.pluralText(members.length, 'lid', 'leden')) + ' verwijderd').show()
     }
 
-    async exportToExcel(members: PlatformMember[]) {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-        //const displayedComponent = new ComponentWithProperties(NavigationController, {
-        //    root: await LoadComponent(() => import(/* webpackChunkName: "MemberExcelBuilderView"*/ '../member/MemberExcelBuilderView.vue'), {
-        //        members,
-        //        groups: this.groups,
-        //        waitingList: this.inWaitingList,
-        //        cycleOffset: this.cycleOffset
-        //    })
-        //});
-        //this.present(displayedComponent.setDisplayStyle("popup"));
+    async exportToExcel(selection: TableActionSelection<PlatformMember>) {
+        try {
+            const response = await this.context.authenticatedServer.request({
+                method: "POST",
+                path: `/export/excel/${ExcelExportType.Members}`,
+                body: ExcelExportRequest.create({
+                    filter: selection.filter,
+                    workbookFilter: ExcelWorkbookFilter.create({
+                        sheets: [
+                            ExcelSheetFilter.create({
+                                id: "members",
+                                columns: ['id', 'firstName', 'lastName', 'birthDay']
+                            })
+                        ]
+                    })
+                }),
+                decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
+                shouldRetry: false
+            })
+
+            if (response.data.url) {
+                Toast.success('Excel bestand wordt gedownload').show()
+                downloadURL(response.data.url, 'leden.xlsx')
+            } else {
+                Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show()
+            }
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
     }
 
     async exportToPDF(members: PlatformMember[]) {

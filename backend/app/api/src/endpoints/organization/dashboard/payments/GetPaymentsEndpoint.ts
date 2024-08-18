@@ -3,149 +3,21 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
-import { SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
 import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
+import { paymentFilterCompilers } from '../../../../sql-filters/payments';
+import { paymentSorters } from '../../../../sql-sorters/payments';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>
 
-const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    "id": createSQLColumnFilterCompiler(SQL.column('balance_item_payments', 'id')),
-    "price": createSQLColumnFilterCompiler(SQL.column('balance_item_payments', 'price')),
-    
-    "balanceItem": createSQLFilterNamespace({
-        ...baseSQLFilterCompilers,
-        id: createSQLColumnFilterCompiler(SQL.column('balance_items', 'id')),
-        description: createSQLColumnFilterCompiler(SQL.column('balance_items', 'description')),
-    })
-}
-
-const filterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    method: createSQLColumnFilterCompiler('method'),
-    status: createSQLColumnFilterCompiler('status'),
-    organizationId: createSQLColumnFilterCompiler('organizationId'),
-    createdAt: createSQLColumnFilterCompiler('createdAt'),
-    updatedAt: createSQLColumnFilterCompiler('updatedAt'),
-    paidAt: createSQLColumnFilterCompiler('paidAt', {nullable: true}),
-    price: createSQLColumnFilterCompiler('price'),
-    provider: createSQLColumnFilterCompiler('provider', {nullable: true}),
-    customer: createSQLFilterNamespace({
-        ...baseSQLFilterCompilers,
-        email: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column('customer'), '$.value.email'),
-            {isJSONValue: true}
-        ),
-        firstName: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column('customer'), '$.value.firstName'),
-            {isJSONValue: true}
-        ),
-        lastName: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column('customer'), '$.value.lastName'),
-            {isJSONValue: true}
-        ),
-        name: createSQLExpressionFilterCompiler(
-            new SQLCast(
-                new SQLConcat(
-                    new SQLJsonUnquote(SQL.jsonValue(SQL.column('customer'), '$.value.firstName')),
-                    new SQLScalar(' '),
-                    new SQLJsonUnquote(SQL.jsonValue(SQL.column('customer'), '$.value.lastName')),
-                ),
-                'CHAR'
-            )
-        ),
-        company: createSQLFilterNamespace({
-            name: createSQLExpressionFilterCompiler(
-                SQL.jsonValue(SQL.column('customer'), '$.value.company.name'),
-                {isJSONValue: true}
-            ),
-            VATNumber: createSQLExpressionFilterCompiler(
-                SQL.jsonValue(SQL.column('customer'), '$.value.company.VATNumber'),
-                {isJSONValue: true}
-            ),
-            companyNumber: createSQLExpressionFilterCompiler(
-                SQL.jsonValue(SQL.column('customer'), '$.value.company.companyNumber'),
-                {isJSONValue: true}
-            ),
-            administrationEmail: createSQLExpressionFilterCompiler(
-                SQL.jsonValue(SQL.column('customer'), '$.value.company.administrationEmail'),
-                {isJSONValue: true}
-            ),
-        })
-    }),
-    balanceItemPayments: createSQLRelationFilterCompiler(
-        SQL.select()
-        .from(
-            SQL.table('balance_item_payments')
-        ).join(
-            SQL.join(
-                SQL.table('balance_items')
-            ).where(
-                SQL.column('balance_items', 'id'),
-                SQL.column('balance_item_payments', 'balanceItemId')
-            )
-        ).where(
-            SQL.column('paymentId'),
-            SQL.column('payments', 'id')
-        ),
-        balanceItemPaymentsCompilers
-    ),
-}
-
-const sorters: SQLSortDefinitions<Payment> = {
-    'id': {
-        getValue(a) {
-            return a.id
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction
-            })
-        }
-    },
-    'createdAt': {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt, 'UTC')
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('createdAt'),
-                direction
-            })
-        }
-    },
-    'paidAt': {
-        getValue(a) {
-            return a.paidAt !== null ? Formatter.dateTimeIso(a.paidAt, 'UTC') : null
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('paidAt'),
-                direction
-            })
-        }
-    },
-    'price': {
-        getValue(a) {
-            return a.price
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('price'),
-                direction
-            })
-        }
-    }
-}
+const filterCompilers = paymentFilterCompilers
+const sorters = paymentSorters
 
 export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>

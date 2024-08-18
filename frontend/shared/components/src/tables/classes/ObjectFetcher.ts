@@ -1,6 +1,7 @@
-import { CountFilteredRequest, LimitedFilteredRequest, StamhoofdFilter } from "@stamhoofd/structures";
+import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from "@stamhoofd/structures";
 
 export interface ObjectFetcher<O> {
+    extendSort?(list: SortList): SortList
     requiredFilter?: StamhoofdFilter|null|undefined
     fetch(data: LimitedFilteredRequest): Promise<{results: O[], next?: LimitedFilteredRequest}>
 

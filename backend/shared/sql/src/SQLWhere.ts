@@ -15,6 +15,10 @@ export type ParseWhereArguments = [
     value: SQLDynamicExpression
 ]
 
+function assertWhereable(o: any): any {
+    return o;
+}
+
 export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
     return class extends Base {
         parseWhere(...[whereOrColumn, signOrValue, value]: ParseWhereArguments): SQLWhere {
@@ -36,51 +40,59 @@ export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
             )
         }
 
+
         where<T>(this: T, ...args: ParseWhereArguments): T {
-            const w = (this as any).parseWhere(...args);
-            if (!(this as any)._where) {
-                (this as any)._where = w;
+            const me = assertWhereable(this)
+
+            const w = me.parseWhere(...args);
+            if (!me._where) {
+                me._where = w;
                 return this;
             }
-            (this as any)._where = (this as any)._where.and(w);
+            me._where = me._where.and(w);
             return this;
         }
 
-        andWhere(...args: ParseWhereArguments) {
-            return this.where(...args)
+        andWhere<T>(this: T, ...args: ParseWhereArguments): T {
+            const me = assertWhereable(this)
+            return me.where(...args)
         }
 
-        orWhere(...args: ParseWhereArguments) {
-            const w = this.parseWhere(...args);
-            if (!this._where) {
-                this._where = w;
+        orWhere<T>(this: T, ...args: ParseWhereArguments): T {
+            const me = assertWhereable(this)
+            const w = me.parseWhere(...args);
+            if (!me._where) {
+                me._where = w;
                 return this;
             }
-            this._where = this._where.or(w);
+            me._where = me._where.or(w);
             return this;
         }
 
-        whereNot(...args: ParseWhereArguments) {
-            const w = new SQLWhereNot(this.parseWhere(...args));
-            if (!this._where) {
-                this._where = w;
+        whereNot<T>(this: T, ...args: ParseWhereArguments): T {
+            const me = assertWhereable(this)
+            const w = new SQLWhereNot(me.parseWhere(...args));
+            if (!me._where) {
+                me._where = w;
                 return this;
             }
-            this._where = this._where.and(w);
+            me._where = me._where.and(w);
             return this;
         }
 
-        andWhereNot(...args: ParseWhereArguments) {
-            return this.whereNot(...args)
+        andWhereNot<T>(this: T, ...args: ParseWhereArguments): T {
+            const me = assertWhereable(this)
+            return me.whereNot(...args)
         }
 
-        orWhereNot(...args: ParseWhereArguments) {
-             const w = new SQLWhereNot(this.parseWhere(...args));
-            if (!this._where) {
-                this._where = w;
+        orWhereNot<T>(this: T, ...args: ParseWhereArguments): T {
+            const me = assertWhereable(this)
+            const w = new SQLWhereNot(me.parseWhere(...args));
+            if (!me._where) {
+                me._where = w;
                 return this;
             }
-            this._where = this._where.or(w);
+            me._where = me._where.or(w);
             return this;
         }
     }

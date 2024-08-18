@@ -55,7 +55,11 @@ export default class TableActionsContextMenu extends VueComponent {
     }
 
     get hasSelection() {
-        return this.selection.hasSelection
+        return this.selection.markedRows.size > 0
+    }
+
+    get isSingleSelection() {
+        return this.selection.markedRows.size == 1 && this.selection.markedRowsAreSelected
     }
 
     handleAction(action: TableAction<any>, event) {
@@ -72,7 +76,7 @@ export default class TableActionsContextMenu extends VueComponent {
                 if (!action.enabled) {
                     return false
                 }
-                if (action.singleSelection && !this.selection.isSingle) {
+                if (action.singleSelection && !this.isSingleSelection) {
                     return false;
                 }
 

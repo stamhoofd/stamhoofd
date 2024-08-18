@@ -21,8 +21,8 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, useTableObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, useTableObjectFetcher } from '@stamhoofd/components';
+import { assertSort, CountFilteredRequest, CountResponse, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref } from 'vue';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
@@ -267,6 +267,17 @@ async function showPayment(payment: PaymentGeneral) {
     await $navigate(Routes.Payment, {properties: {initialPayment: payment}})
 }
 
+function downloadURL(url: string, name: string) {
+    var link = document.createElement("a");
+    link.target = "_blank";
+    link.download = name;
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
         name: "Markeer als betaald",
@@ -276,6 +287,7 @@ const actions: TableAction<ObjectType>[] = [
         needsSelection: true,
         allowAutoSelectAll: false,
         handler: async (payments: PaymentGeneral[]) => {
+            console.log('mark as paid', payments);
             // Mark paid
             await markPaid(payments, true)
         }
@@ -290,6 +302,45 @@ const actions: TableAction<ObjectType>[] = [
         handler: async (payments: PaymentGeneral[]) => {
             // Mark paid
             await markPaid(payments, false)
+        }
+    }),
+
+    new AsyncTableAction({
+        name: "Exporteer naar Excel",
+        icon: "download",
+        priority: 0,
+        groupIndex: 2,
+        needsSelection: true,
+        allowAutoSelectAll: true,
+        handler: async (selection) => {
+            try {
+                const response = await context.value.authenticatedServer.request({
+                    method: "POST",
+                    path: `/export/excel/${ExcelExportType.Payments}`,
+                    body: ExcelExportRequest.create({
+                        filter: selection.filter,
+                        workbookFilter: ExcelWorkbookFilter.create({
+                            sheets: [
+                                ExcelSheetFilter.create({
+                                    id: "payments",
+                                    columns: ['id', 'customer.company.name', 'customer.name', 'price', 'createdAt']
+                                })
+                            ]
+                        })
+                    }),
+                    decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
+                    shouldRetry: false
+                })
+
+                if (response.data.url) {
+                    Toast.success('Excel bestand wordt gedownload').show()
+                    downloadURL(response.data.url, 'betalingen.xlsx')
+                } else {
+                    Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show()
+                }
+            } catch (e) {
+                Toast.fromError(e).show()
+            }
         }
     }),
 ]

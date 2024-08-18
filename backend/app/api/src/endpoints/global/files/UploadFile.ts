@@ -9,6 +9,7 @@ import { promises as fs } from "fs";
 import { v4 as uuidv4 } from "uuid";
 
 import { Context } from '../../../helpers/Context';
+import { limiter } from './UploadImage';
 
 type Params = Record<string, never>;
 type Query = {};
@@ -50,7 +51,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope()
-        await Context.authenticate();
+        const {user} = await Context.authenticate();
 
         if (!Context.auth.canUpload()) {
             throw Context.auth.error()
@@ -67,6 +68,8 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         if (!request.request.request) {
             throw new Error("Not supported without real request")
         }
+
+        limiter.track(user.id, 1);
 
         const form = formidable({ maxFileSize: 20 * 1024 * 1024, maxFields: 1, keepExtensions: true });
         const file = await new Promise<FormidableFile>((resolve, reject) => {

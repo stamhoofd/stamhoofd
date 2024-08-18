@@ -3,199 +3,21 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
-import { SQL, SQLConcat, SQLFilterDefinitions, SQLNow, SQLNull, SQLOrderBy, SQLOrderByDirection, SQLScalar, SQLSortDefinitions, SQLWhereEqual, SQLWhereOr, SQLWhereSign, baseSQLFilterCompilers, compileToSQLFilter, compileToSQLSorter, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from "@stamhoofd/sql";
+import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
 import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, PermissionLevel, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
+import { organizationFilterCompilers } from '../../../sql-filters/organizations';
+import { organizationSorters } from '../../../sql-sorters/organizations';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>
 
-export const filterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    id: createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'id')
-    ),
-    uri: createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'uri')
-    ),
-    name: createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'name')
-    ),
-    active: createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'active')
-    ),
-    city: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
-        {isJSONValue: true}
-    ),
-    country: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.country'),
-        {isJSONValue: true}
-    ),
-    umbrellaOrganization: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.umbrellaOrganization'),
-        {isJSONValue: true}
-    ),
-    type: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.type'),
-        {isJSONValue: true}
-    ),
-    tags: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
-        {isJSONValue: true, isJSONObject: true}
-    ),
-    packages: createSQLRelationFilterCompiler(
-        SQL.select().from(
-            SQL.table('stamhoofd_packages')
-        ).where(
-            SQL.column('organizationId'),
-            SQL.column('organizations', 'id'),
-        )
-        .andWhere(
-            SQL.column('validAt'),
-            SQLWhereSign.NotEqual,
-            new SQLNull()
-        ).andWhere(
-            new SQLWhereOr([
-                new SQLWhereEqual(
-                    SQL.column('validUntil'),
-                    SQLWhereSign.Equal,
-                    new SQLNull()
-                ),
-                new SQLWhereEqual(
-                    SQL.column('validUntil'),
-                    SQLWhereSign.Greater,
-                    new SQLNow()
-                )
-            ])
-        ).andWhere(
-            new SQLWhereOr([
-                new SQLWhereEqual(
-                    SQL.column('removeAt'),
-                    SQLWhereSign.Equal,
-                    new SQLNull()
-                ),
-                new SQLWhereEqual(
-                    SQL.column('removeAt'),
-                    SQLWhereSign.Greater,
-                    new SQLNow()
-                )
-            ])
-        ),
-
-        // const pack1 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
-        // const pack2 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: null })
-        {
-            ...baseSQLFilterCompilers,
-            "type": createSQLExpressionFilterCompiler(
-                SQL.jsonValue(SQL.column('meta'), '$.value.type'),
-                {isJSONValue: true}
-            )
-        }
-    ),
-    members: createSQLRelationFilterCompiler(
-        SQL.select().from(
-            SQL.table('members')
-        ).join(
-            SQL.join(
-                SQL.table('registrations')
-            ).where(
-                SQL.column('members', 'id'),
-                SQL.column('registrations', 'memberId')
-            )
-        ).where(
-            SQL.column('registrations', 'organizationId'),
-            SQL.column('organizations', 'id'),
-        ),
-
-        {
-            ...baseSQLFilterCompilers,
-            name: createSQLExpressionFilterCompiler(
-                new SQLConcat(
-                    SQL.column('firstName'),
-                    new SQLScalar(' '),
-                    SQL.column('lastName'),
-                )
-            ),
-            "firstName": createSQLColumnFilterCompiler('firstName'),
-            "lastName": createSQLColumnFilterCompiler('lastName'),
-            "email": createSQLColumnFilterCompiler('email')
-        }
-    ),
-}
-
-const sorters: SQLSortDefinitions<Organization> = {
-    'id': {
-        getValue(a) {
-            return a.id
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction
-            })
-        }
-    },
-    'name': {
-        getValue(a) {
-            return a.name
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('name'),
-                direction
-            })
-        }
-    },
-    'uri': {
-        getValue(a) {
-            return a.uri
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('uri'),
-                direction
-            })
-        }
-    },
-    'type': {
-        getValue(a) {
-            return a.meta.type
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('meta'), '$.value.type'),
-                direction
-            })
-        }
-    },
-    'city': {
-        getValue(a) {
-            return a.address.city
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('address'), '$.value.city'),
-                direction
-            })
-        }
-    },
-    'country': {
-        getValue(a) {
-            return a.address.country
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('address'), '$.value.country'),
-                direction
-            })
-        }
-    }
-}
+const sorters = organizationSorters
+const filterCompilers = organizationFilterCompilers
 
 export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>

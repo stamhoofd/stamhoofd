@@ -552,13 +552,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
             xPlacement: "left",
             yPlacement: "bottom",
             actions: this.actionBuilder.getStatusActions(),
-            selection: {
-                isSingle: true,
-                hasSelection: true,
-                getSelection: () => {
-                    return [this.order]
-                }
-            }
+            // todo: selection
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -571,13 +565,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
             xPlacement: "left",
             yPlacement: "bottom",
             actions: this.actionBuilder.getPaymentActions(),
-            selection: {
-                isSingle: true,
-                hasSelection: true,
-                getSelection: () => {
-                    return [this.order]
-                }
-            }
+            // todo: selection
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

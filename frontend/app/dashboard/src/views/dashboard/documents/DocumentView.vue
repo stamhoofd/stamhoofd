@@ -209,13 +209,7 @@ export default class DocumentView extends Mixins(NavigationMixin){
             xPlacement: "right",
             yPlacement: "bottom",
             actions: this.actionBuilder.getActions(),
-            selection: {
-                isSingle: true,
-                hasSelection: true,
-                getSelection: () => {
-                    return [this.document]
-                }
-            }
+            //selection: todo
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

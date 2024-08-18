@@ -145,13 +145,13 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simon
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
-import { isEmptyFilter, SortItemDirection, StamhoofdFilter, Version } from "@stamhoofd/structures";
+import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from "vue";
 
 import UIFilterEditor from "../filters/UIFilterEditor.vue";
-import { AsyncTableAction, Column, FetchAllOptions, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from "./classes";
+import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from "./classes";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
@@ -316,9 +316,6 @@ const isAllSelected = computed({
 const hasSelection = computed(() => {
     return  markedRowsAreSelected.value ? markedRows.value.size > 0 : (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0)
 })
-const hasSingleSelection = computed(() => {
-    return markedRowsAreSelected.value && markedRows.value.size === 1
-})
 
 function setShowSelection(s: boolean) {
     showSelection.value = s
@@ -370,23 +367,70 @@ function getSortingContextMenu() {
     })
 }
 
-async function getTableActionFilter() {
-    // todo
-}
-
-async function getSelection(options?: FetchAllOptions): Promise<Value[]> {
-    if (!showSelection.value || !hasSelection.value) {
-        return await props.tableObjectFetcher.fetchAll(options)
+function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelected?: boolean): TableActionSelection<Value> {
+    if (customMarkedRows === undefined) {
+        if (showSelection.value && hasSelection.value) {
+            customMarkedRows = [...markedRows.value.values()] as Value[]
+            customMarkedRowsSelected = markedRowsAreSelected.value
+        }
     }
 
-    // TODO: fix sorting
+    if (customMarkedRows !== undefined) {
+        if (customMarkedRowsSelected === undefined) {
+            customMarkedRowsSelected = true;
+        }
+        
+        const idFilter = {
+            id: {
+                $in: customMarkedRows.map(i => i.id)
+            }
+        };
 
-    if (markedRowsAreSelected.value) {
-        // No async needed
-        return Array.from(markedRows.value.values()) as Value[]
-    } else {
-        const all = await props.tableObjectFetcher.fetchAll(options);
-        return Array.from(all).filter(val => !markedRows.value.has(val.id))
+        const filter = customMarkedRowsSelected ? idFilter : mergeFilters([
+            props.tableObjectFetcher.filter,
+            {
+                $not: idFilter
+            }
+        ])
+
+        return {
+            filter: new LimitedFilteredRequest({
+                filter,
+                sort: props.tableObjectFetcher.objectFetcher.extendSort ? props.tableObjectFetcher.objectFetcher.extendSort([...props.tableObjectFetcher.sort]) : props.tableObjectFetcher.sort,
+                limit: props.tableObjectFetcher.maxLimit,
+            }),
+            fetcher: props.tableObjectFetcher.objectFetcher,
+            markedRows: new Map(customMarkedRows.map(i => [i.id, i])),
+            markedRowsAreSelected: customMarkedRowsSelected ?? true
+        }
+    }
+
+    // Optimization:
+    // Do we have everything in memory already?
+    if (props.tableObjectFetcher.totalFilteredCount === props.tableObjectFetcher.objects.length) {
+        return {
+            filter: new LimitedFilteredRequest({
+                filter: props.tableObjectFetcher.filter,
+                sort: props.tableObjectFetcher.objectFetcher.extendSort ? props.tableObjectFetcher.objectFetcher.extendSort([...props.tableObjectFetcher.sort]) : props.tableObjectFetcher.sort,
+                limit: props.tableObjectFetcher.maxLimit,
+                search: props.tableObjectFetcher.searchQuery,
+            }),
+            fetcher: props.tableObjectFetcher.objectFetcher,
+            markedRows: new Map(props.tableObjectFetcher.objects.map(i => [i.id, i])),
+            markedRowsAreSelected: true
+        }
+    }
+
+    return {
+        filter: new LimitedFilteredRequest({
+            filter: props.tableObjectFetcher.filter,
+            sort: props.tableObjectFetcher.objectFetcher.extendSort ? props.tableObjectFetcher.objectFetcher.extendSort([...props.tableObjectFetcher.sort]) : props.tableObjectFetcher.sort,
+            limit: props.tableObjectFetcher.maxLimit,
+            search: props.tableObjectFetcher.searchQuery,
+        }),
+        fetcher: props.tableObjectFetcher.objectFetcher,
+        markedRows: new Map(),
+        markedRowsAreSelected: false
     }
 }
 
@@ -449,19 +493,13 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
         childMenu: getSortingContextMenu()
     }))
 
-    const selection = {
-        isSingle: hasSingleSelection.value,
-        hasSelection: hasSelection.value,
-        getSelection: getSelection
-    };
-
     const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.right,
         y: bounds.top + (isOnTop ? el.offsetHeight : 0),
         xPlacement: "left",
         yPlacement: isOnTop ? "bottom" : "top",
         actions,
-        selection
+        selection: buildSelectionObject()
     });
     await present(displayedComponent.setDisplayStyle("overlay"));
 }
@@ -626,14 +664,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent|TouchEv
 
     if (row.cachedSelectionValue && showSelection.value) {
         // Use full selection
-        selection = {
-            isSingle: hasSingleSelection.value,
-            hasSelection: hasSelection.value,
-            getSelection: getSelection,
-            fetcher: props.tableObjectFetcher,
-            markedRows: new Map(markedRows.value as Map<string, Value>),
-            markedRowsAreSelected: markedRowsAreSelected.value
-        };
+        selection = buildSelectionObject()
 
         filteredActions.push(new AsyncTableAction({
             name: "Deselecteer",
@@ -647,19 +678,8 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent|TouchEv
 
         customFocusedRows.value = null
     } else {
-        const markedRows = new Map<string, Value>()
-        markedRows.set(row.value.id, row.value)
-        selection = {
-            isSingle: true,
-            hasSelection: true,
-            getSelection: () => {
-                return [row.value!]
-            },
-            fetcher: props.tableObjectFetcher,
-            markedRows,
-            markedRowsAreSelected: true
-        }
-
+        selection = buildSelectionObject([row.value!], true)
+        
         // Only focus this row
         // Add select action
         filteredActions.push(new AsyncTableAction({
@@ -1442,14 +1462,7 @@ async function handleAction(action: TableAction<Value>, event: MouseEvent) {
         return
     }
 
-    const selection: TableActionSelection<Value> = {
-        isSingle: hasSingleSelection.value,
-        hasSelection: hasSelection.value,
-        getSelection,
-        fetcher: props.tableObjectFetcher,
-        markedRows: new Map(markedRows.value as Map<string, Value>),
-        markedRowsAreSelected: markedRowsAreSelected.value
-    };
+    const selection: TableActionSelection<Value> = buildSelectionObject()
 
     if (action.hasChildActions) {
         const el = event.currentTarget as HTMLElement;

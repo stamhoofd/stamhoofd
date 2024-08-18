@@ -172,3 +172,5 @@ export * from "./src/BalanceItem"
 export * from "./src/BalanceItemDetailed"
 export * from "./src/SponsorConfig"
 
+
+export * from "./src/filters/ExcelExportRequest"

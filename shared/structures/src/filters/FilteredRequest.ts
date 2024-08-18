@@ -78,10 +78,10 @@ export class LimitedFilteredRequest implements Encodeable {
     limit: number
     search: string|null
 
-    constructor(data: {filter?: StamhoofdFilter|null, pageFilter?: StamhoofdFilter|null, sort: SortList, limit: number, search?: string|null}) {
+    constructor(data: {filter?: StamhoofdFilter|null, pageFilter?: StamhoofdFilter|null, sort?: SortList, limit: number, search?: string|null}) {
         this.filter = data.filter ?? null;
         this.pageFilter = data.pageFilter ?? null;
-        this.sort = data.sort
+        this.sort = data.sort ?? [];
         this.limit = data.limit
         this.search = data.search ?? null
     }

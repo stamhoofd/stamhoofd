@@ -25,9 +25,10 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { SegmentedControl, TableActionsContextMenu, useAuth, useKeyUpDown, useOrganization } from '@stamhoofd/components';
-import { AccessRight, Gender, Group, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { SegmentedControl, TableActionsContextMenu, TableActionSelection, useAuth, useKeyUpDown, useOrganization } from '@stamhoofd/components';
+import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed, getCurrentInstance, markRaw, ref } from 'vue';
+import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
 import { useEditMember } from './composables/useEditMember';
 import MemberDetailsTab from './tabs/MemberDetailsTab.vue';
@@ -140,6 +141,7 @@ async function goNext() {
 }
 
 const buildActions = useMemberActions()
+const objectFetcher = useMembersObjectFetcher()
 
 async function showContextMenu(event: MouseEvent) {
     const builder = buildActions({
@@ -151,19 +153,25 @@ async function showContextMenu(event: MouseEvent) {
     const el = event.currentTarget! as HTMLElement;
     const bounds = el.getBoundingClientRect()
 
+    const selection: TableActionSelection<PlatformMember> = {
+        filter: new LimitedFilteredRequest({
+            filter: {
+                id: props.member.id
+            },
+            limit: 2
+        }),
+        fetcher: objectFetcher, // todo
+        markedRows: new Map([[props.member.id, props.member]]),
+        markedRowsAreSelected: true,
+    }
+
     const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
         x: bounds.left,
         y: bounds.bottom,
         xPlacement: "right",
         yPlacement: "bottom",
         actions,
-        selection: {
-            isSingle: true,
-            hasSelection: true,
-            getSelection: () => {
-                return [props.member]
-            }
-        }
+        selection
     });
     await present(displayedComponent.setDisplayStyle("overlay"));
 }
