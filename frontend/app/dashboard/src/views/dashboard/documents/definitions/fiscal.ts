@@ -1,4 +1,4 @@
-import { ChoicesFilterMode, DocumentTemplateDefinition, FilterGroupEncoded, GroupFilterMode, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType,ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
+import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, ResolutionFit, ResolutionRequest } from "@stamhoofd/structures";
 
 export const fiscal = DocumentTemplateDefinition.create({
     type: 'fiscal',
@@ -87,17 +87,11 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Address
                 })
             ],
-            filter: new PropertyFilter(new FilterGroupEncoded({
-                id: 'filter_group',
-                filters: [
-                    {
-                        definitionId: 'record_certification.type',
-                        choiceIds: ['kind-en-gezin', 'authorities', 'foreign', 'schools'],
-                        mode: ChoicesFilterMode.Or
-                    }
-                ],
-                mode: GroupFilterMode.And
-            }, Version), null)
+            filter: new PropertyFilter({
+                definitionId: {
+                    $in: ['kind-en-gezin', 'authorities', 'foreign', 'schools']
+                }
+            }, null)
         }),
         RecordCategory.create({
             name: "Ondertekening",
