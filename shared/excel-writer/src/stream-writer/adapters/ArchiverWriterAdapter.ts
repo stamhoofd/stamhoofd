@@ -19,8 +19,16 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
         const output = Writable.fromWeb(writer)
 
         output.on('close', () => {
-            console.log(this.archive.pointer() + ' total bytes');
-            console.log('archiver has been finalized and the output file descriptor has closed.');
+            console.log('Archiver has been finalized and the output file descriptor has closed: ' + this.archive.pointer() + ' total bytes');
+        });
+
+        output.on('end', function() {
+            console.log('Data has been drained');
+          });
+
+        output.on('error', (e) => {
+            console.error('Error in output stream', e)
+            throw e;
         });
           
         this.archive = archiver('zip', {
@@ -33,13 +41,13 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
                 console.warn(err)
             } else {
                 console.error(err)
-            // throw error
-            throw err;
+                throw err;
             }
         });
         
         // good practice to catch this error explicitly
         this.archive.on('error', function(err) {
+            console.error('Archiver error', err)
             throw err;
         });
 
@@ -55,6 +63,15 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
             console.log('Finished file', name)
         });
 
+        stream.on('close', () => {
+            console.log('Closed file stream', name)
+        });
+
+        stream.on('error', (err) => {
+            console.error('Error in PassThrough stream', name, err)
+            //throw err;
+        });
+
         this.archive.append(stream, { name });
         return Promise.resolve(Writable.toWeb(stream))
     }
@@ -65,11 +82,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
     }
 
     async ready() {
-        this.finalizePromise = this.archive.finalize().then(() => {
-            console.log('Archive finalized')
-        }).catch((e) => {
-            console.error('Error finalizing archive', e)
-        })
+        this.finalizePromise = this.archive.finalize();
         return Promise.resolve()
     }
 
@@ -78,5 +91,10 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
      */
     async close() {
         return await this.finalizePromise;
+    }
+
+    async abort() {
+        //this.archive.abort();
+        await this.finalizePromise;
     }
 }

@@ -8,19 +8,23 @@ export async function exportToExcel<T>({definitions, writer, dataGenerator, filt
     writer: XlsxWriterAdapter, 
     dataGenerator: AsyncIterable<T[]>
 }) {
-    const sheets = new XlsxColumnFilterer(definitions).filterColumns(filter);
+    try {
 
-    // The transformer handles data and converts it into cell values and writes it to the writer
-    const transformer = new XlsxTransformer(sheets, writer);
+        const sheets = new XlsxColumnFilterer(definitions).filterColumns(filter);
 
-    await transformer.init();
-
-    // Start looping over the data
-    for await (const data of dataGenerator) {
-        console.log('Processing data', data.length);
-        await transformer.process(data);
+        // The transformer handles data and converts it into cell values and writes it to the writer
+        const transformer = new XlsxTransformer(sheets, writer);
+    
+        await transformer.init();
+    
+        // Start looping over the data
+        for await (const data of dataGenerator) {
+            await transformer.process(data);
+        }
+    
+        await writer.close();
+    } catch (e) {
+        await writer.abort();
+        throw e;
     }
-
-    console.log('Closing writer');
-    await writer.close();
 }

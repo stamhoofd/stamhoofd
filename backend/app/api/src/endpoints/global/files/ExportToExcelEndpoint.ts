@@ -69,29 +69,22 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         // Otherwise we'll just return the file directly
         const {file, stream} = await FileCache.getWriteStream('.xlsx');
 
-        try {
-            const zipWriterAdapter = new ArchiverWriterAdapter(stream);
-            const writer = new XlsxWriter(zipWriterAdapter);
+        const zipWriterAdapter = new ArchiverWriterAdapter(stream);
+        const writer = new XlsxWriter(zipWriterAdapter);
 
-            // Limit to pages of 100
-            request.body.filter.limit = 100;
+        // Limit to pages of 100
+        request.body.filter.limit = 100;
 
-            await exportToExcel({
-                definitions: loader.sheets,
-                writer,
-                dataGenerator: fetchToAsyncIterator(request.body.filter, loader),
-                filter: request.body.workbookFilter
-            })
-            
-            console.log('Done writing excel file')
-            stream.close().catch(console.error)
-            return new Response(ExcelExportResponse.create({
-                url: 'https://'+ STAMHOOFD.domains.api + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(request.params.type)
-            }))
-        } catch (e) {
-            // Close the stream
-            stream.close().catch(console.error)
-            throw e;
-        }
+        await exportToExcel({
+            definitions: loader.sheets,
+            writer,
+            dataGenerator: fetchToAsyncIterator(request.body.filter, loader),
+            filter: request.body.workbookFilter
+        })
+        
+        console.log('Done writing excel file')
+        return new Response(ExcelExportResponse.create({
+            url: 'https://'+ STAMHOOFD.domains.api + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(request.params.type)
+        }))
     }
 }

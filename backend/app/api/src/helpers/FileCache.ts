@@ -44,9 +44,15 @@ export class FileCache {
         const folder = STAMHOOFD.CACHE_PATH + "/" + path;
         await fs.promises.mkdir(folder, { recursive: true })
 
+        const s = fs.createWriteStream(folder + '/' + fileName, 'binary');
+
+        s.on('close', () => {
+            console.log('FileCache closed file: File written to disk', folder + '/' + fileName)
+        });
+
         return {
             file: path + '/' + fileName,
-            stream: Writable.toWeb(fs.createWriteStream(folder + '/' + fileName, 'binary'))
+            stream: Writable.toWeb(s)
         }
     }
 

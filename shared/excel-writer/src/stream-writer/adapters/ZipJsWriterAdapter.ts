@@ -55,4 +55,8 @@ export class ZipJsWriterAdapter implements ZipWriterAdapter {
         console.log('Closing zip writer')
         await this.zipWriter.close();
     }
+
+    async abort() {
+        await this.zipWriter.close();
+    }
 }

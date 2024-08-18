@@ -35,6 +35,7 @@ export interface XlsxWriterAdapter {
     // Depends on environment
     // the adapter should handle this (e.g. by saving to a file, which file location is set in the constructor)
     close(): Promise<void>;
+    abort(): Promise<void>;
 }
 
 export type XlsxWorkbookFilter = {

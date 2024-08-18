@@ -12,4 +12,5 @@ export interface ZipWriterAdapter {
     ready?(): Promise<void>
 
     close(): Promise<void>
+    abort(): Promise<void>
 }

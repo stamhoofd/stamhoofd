@@ -175,52 +175,122 @@ export class XlsxWriter implements XlsxWriterAdapter {
     }
 
     async close(): Promise<void> {
-
         // Close all sheet writers
-        console.log('Closing sheet writers')
         for (const writer of this.sheetWriters.values()) {
             await writer.close();
         }
 
         // Close styles
-        console.log('Closing styles')
         await this.styles.close();
 
         // Close shared strings
-        console.log('Closing shared strings')
         await this.sharedStrings.close();
 
         // Close workbook
-        console.log('Closing workbook')
         await this.workbook.close();
 
         // Close workbook relations
-        console.log('Closing workbook relations')
         await this.workbookRelations.close();
 
         // Close global relations
-        console.log('Closing global relations')
         await this.globalRelations.close();
 
         // Close core props
-        console.log('Closing core props')
         await this.coreProps.close();
 
         // Close app props
-        console.log('Closing app props')
         await this.appProps.close();
 
         // Close theme
-        console.log('Closing theme')
         await this.theme.close();
 
         // Close content types
-        console.log('Closing content types')
         await this.contentTypes.close();
 
-        // All writes streams should be closed now
-        console.log('Closing zip writer')
+        // All write streams should be closed now
         await this.zipWriter.close();
+    }
+
+    async abort(): Promise<void> {
+        // Close all sheet writers
+        for (const writer of this.sheetWriters.values()) {
+            try {
+                await writer.abort();
+            } catch (e) {
+                console.error('Error closing sheet writer', e);
+            }
+        }
+
+        // Close styles
+        try {
+            await this.styles.abort();
+        } catch (e) {
+            console.error('Error closing styles', e);
+        }
+
+        // Close shared strings
+        try {
+            await this.sharedStrings.abort();
+        } catch (e) {
+            console.error('Error closing shared strings', e);
+        }
+
+        // Close workbook
+        try {
+            await this.workbook.abort();
+        } catch (e) {
+            console.error('Error closing workbook', e);
+        }
+
+        // Close workbook relations
+        try {
+            await this.workbookRelations.abort();
+        } catch (e) {
+            console.error('Error closing workbook relations', e);
+        }
+
+        // Close global relations
+        try {
+            await this.globalRelations.abort();
+        } catch (e) {
+            console.error('Error closing global relations', e);
+        }
+
+        // Close core props
+        try {
+            await this.coreProps.abort();
+        } catch (e) {
+            console.error('Error closing core props', e);
+        }
+
+        // Close app props
+        try {
+            await this.appProps.abort();
+        } catch (e) {
+            console.error('Error closing app props', e);
+        }
+
+        // Close theme
+        try {
+            await this.theme.abort();
+        } catch (e) {
+            console.error('Error closing theme', e);
+        }
+
+        // Close content types
+        try {
+            await this.contentTypes.abort();
+        } catch (e) {
+            console.error('Error closing content types', e);
+        }
+
+        // All write streams should be closed now
+        try {
+            await this.zipWriter.abort();
+        } catch (e) {
+            console.error('Error closing zip writer', e);
+        }
+        
     }
     
 }

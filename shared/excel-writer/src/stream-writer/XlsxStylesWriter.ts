@@ -114,7 +114,6 @@ export class XlsxStylesWriter extends XlsxFileWriter {
             }
         }
 
-        console.log('Adding style', style);
         this.cellStyles.push(style);
         return Promise.resolve(this.cellStyles.length - 1);
     }
