@@ -1,24 +1,42 @@
+import { Database, SQLResultNamespacedRow } from "@simonbackx/simple-database";
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from "./SQLExpression";
-import { SQLOrderBy, addOrderByHelpers } from "./SQLOrderBy";
-import { SQLWhere, addWhereHelpers } from "./SQLWhere";
-import {Database, SQLResultNamespacedRow} from "@simonbackx/simple-database"
-import {SQLJoin} from './SQLJoin'
-import { SQLAlias, SQLCount, SQLSelectAs, SQLSum, SQLWildcardSelectExpression } from "./SQLExpressions";
+import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from "./SQLExpressions";
+import { SQLJoin } from './SQLJoin';
+import { Orderable } from "./SQLOrderBy";
+import { Whereable } from "./SQLWhere";
 
-class SelectBase implements SQLExpression {
+class EmptyClass {}
+
+export function parseTable(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): SQLExpression {
+    if (table !== undefined && typeof tableOrExpressiongOrNamespace === 'string') {
+        return new SQLTableExpression(tableOrExpressiongOrNamespace, table)
+    } else if (typeof tableOrExpressiongOrNamespace === 'string') {
+        return new SQLTableExpression(tableOrExpressiongOrNamespace)
+    } else {
+        return tableOrExpressiongOrNamespace;
+    }
+}
+
+export class SQLSelect<T = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
     _columns: SQLExpression[]
     _from: SQLExpression;
 
     _limit: number|null = null;
     _offset: number|null = null;
-
-    _where: SQLWhere|null = null;
-    _orderBy: SQLOrderBy|null = null;
     _groupBy: SQLExpression[] = [];
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
 
-    constructor(...columns: SQLExpression[]) {
-        this._columns = columns;
+    _transformer: ((row: SQLResultNamespacedRow) => T)|null = null;
+
+    constructor(...columns: (SQLExpression|string)[])
+    constructor(transformer: ((row: SQLResultNamespacedRow) => T),...columns: (SQLExpression|string)[])
+    constructor(...columns: (SQLExpression|string|((row: SQLResultNamespacedRow) => T))[]) {
+        super();
+        
+        if (typeof columns[0] === 'function') {
+            this._transformer = columns.shift() as any;
+        }
+        this._columns = columns.map(c => typeof c === 'string' ? new SQLColumnExpression(c) : c ) as any;
     }
 
     clone(): this {
@@ -27,8 +45,12 @@ class SelectBase implements SQLExpression {
         return c as any;
     }
 
-    from(table: SQLExpression): this {
-        this._from = table;
+    from(namespace: string, table: string): this
+    from(table: string): this
+    from(expression: SQLExpression): this
+    from(tableOrExpressiongOrNamespace: SQLExpression|string, table?: string): this {
+        this._from = parseTable(tableOrExpressiongOrNamespace, table);
+
         return this;
     }
 
@@ -98,7 +120,7 @@ class SelectBase implements SQLExpression {
         return this;
     }
 
-    async fetch(): Promise<SQLResultNamespacedRow[]> {
+    async fetch(): Promise<T[]> {
         const {query, params} = normalizeSQLQuery(this.getSQL())
 
         // when debugging: log all queries
@@ -122,12 +144,16 @@ class SelectBase implements SQLExpression {
                 delete row[''];
             }
         }
-        return rows;
+
+        if (this._transformer) {
+            return rows.map(this._transformer);
+        }
+        return rows as T[];
     }
 
-    first(required: false): Promise<SQLResultNamespacedRow|null>
-    first(required: true): Promise<SQLResultNamespacedRow>
-    async first(required = true): Promise<SQLResultNamespacedRow|null>  {
+    first(required: false): Promise<T|null>
+    first(required: true): Promise<T>
+    async first(required = true): Promise<T|null>  {
         const rows = await this.limit(1).fetch();
         if (rows.length === 0) {
             if (required) {
@@ -135,6 +161,7 @@ class SelectBase implements SQLExpression {
             }
             return null;
         }
+
         return rows[0]
     }
 
@@ -200,8 +227,3 @@ class SelectBase implements SQLExpression {
         return 0;
     }
 }
-
-export const SQLSelect = addOrderByHelpers(
-    addWhereHelpers(SelectBase)
-)
-

@@ -241,17 +241,15 @@ export class Email extends Model {
 
             // eslint-disable-next-line no-constant-condition
             while (true) {
-                const q = SQL.select()
-                    .from(SQL.table('email_recipients'))
-                    .where(SQL.column('emailId'), upToDate.id)
-                    .where(SQL.column('sentAt'), null)
-                    .where(SQL.column('id'), SQLWhereSign.Greater, idPointer);
-
-                q.orderBy(SQL.column('id'), 'ASC')
-                q.limit(batchSize)
+                const data = await SQL.select()
+                    .from('email_recipients')
+                    .where('emailId', upToDate.id)
+                    .where('sentAt', null)
+                    .where('id', SQLWhereSign.Greater, idPointer)
+                    .orderBy(SQL.column('id'), 'ASC')
+                    .limit(batchSize)
+                    .fetch();
                 
-                const data = await q.fetch();
-
                 const recipients = EmailRecipient.fromRows(data, 'email_recipients');
 
                 if (recipients.length == 0) {
@@ -301,7 +299,7 @@ export class Email extends Model {
                         from, 
                         replyTo,
                         subject: upToDate.subject!, 
-                        html: upToDate.html,
+                        html: upToDate.html!,
                         type: "broadcast",
                         callback(error: Error|null ) {
                             callback(error).catch(console.error)

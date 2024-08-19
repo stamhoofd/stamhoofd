@@ -2306,10 +2306,10 @@
     "@sigstore/core" "^1.1.0"
     "@sigstore/protobuf-specs" "^0.3.1"
 
-"@simonbackx/simple-database@1.24.0":
-  version "1.24.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.24.0.tgz#ca838a4fe15855f3b989b6e6fc384c1248e44f84"
-  integrity sha512-eRIMFtFIZIOaELVxlEv/7U0BBHqv1M/duniRAcOdRrqygSe4u/CbuEygmhEDcWhYRD7PLgT8s3VMRiUwHb3P/Q==
+"@simonbackx/simple-database@1.25.0":
+  version "1.25.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.25.0.tgz#9bbda17f25afb9d225e4959abcac58c34576825f"
+  integrity sha512-IF8wtPf7qsEWwsWH545Rqj9HcK8HJ9EmRpfiBJdblme8pn4gjqDSrZf0T8Mrxv/h6+2l4KqyKaxM5+FWfFinxA==
   dependencies:
     "@simonbackx/simple-logging" "^1.0.0"
     colors "^1.4.0"
@@ -2320,10 +2320,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.15.0.tgz#c1cfb4903d10a2a86c17578519c8c7cb028727eb"
   integrity sha512-4mqIKCODN2AXoheu5vQg6cANQAA0geM0FBJAkJ1zOoWhPCcuYp8D4U6hyJCW+Hrg/IeS1xA/wEYgNMnruQiL+Q==
 
-"@simonbackx/simple-endpoints@1.13.0":
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.13.0.tgz#6730b8c2b6d23aec176b7cd461e7280ac6845f26"
-  integrity sha512-C4CLvXP8jUwoDAGpTcNU6SmzTrya4QWTrFbdcBLf7WZyFZsF6HnnVqIBBSw92CTg4vOJynZbmgkf4Np4EUBSEg==
+"@simonbackx/simple-endpoints@1.14.0":
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.14.0.tgz#01cdecb48afff680bb68a093fa9fc7c1826fe3b0"
+  integrity sha512-3RLW9Vx2h6b3PXuAqoQGxUUw26/jaz+8ktGqvpOfYuTf+rV1jpotpbvlEqtLrwIe6P6oPltEUaMiCHQJD/QaCw==
 
 "@simonbackx/simple-errors@^1.4", "@simonbackx/simple-errors@^1.4.0":
   version "1.4.0"

@@ -26,8 +26,10 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         return [false];
     }
 
-    async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+    async handle(_: DecodedRequest<Params, Query, Body>): Promise<Response<ResponseBody>> {
+        await Promise.resolve();
+        throw new Error('Not implemented');
+        /*const organization = await Context.setOrganizationScope();
         await Context.authenticate()
 
         // Fast throw first (more in depth checking for patches later)
@@ -63,6 +65,6 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
                     lastId: tickets[tickets.length - 1].id ?? undefined
                 }) : undefined
             })
-        );
+        );*/
     }
 }

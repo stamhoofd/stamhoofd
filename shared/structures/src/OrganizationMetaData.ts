@@ -442,6 +442,9 @@ export class OrganizationMetaData extends AutoEncoder {
     }
 
     getEmailReplacements() {
+        if (!this.color) {
+            return []
+        }
         return [
             Replacement.create({
                 token: "primaryColor",

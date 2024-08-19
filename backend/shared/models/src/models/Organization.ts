@@ -3,17 +3,17 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
-import { AccessRight, Address, Company, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
+import { AccessRight, Address, Country, DNSRecordStatus, EmailTemplateType, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuidv4 } from "uuid";
 
-import { validateDNSRecords } from "../helpers/DNSValidator";
-import { getEmailBuilder } from "../helpers/EmailBuilder";
-import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { EmailTemplate, Group, OrganizationRegistrationPeriod, RegistrationPeriod, StripeAccount } from "./";
 import { QueueHandler } from "@stamhoofd/queues";
+import { validateDNSRecords } from "../helpers/DNSValidator";
+import { getEmailBuilderForTemplate } from "../helpers/EmailBuilder";
+import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
+import { Group, OrganizationRegistrationPeriod, StripeAccount } from "./";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -426,22 +426,11 @@ export class Organization extends Model {
         replyTo?: string,
         bcc?: boolean
     }) {
-        // First fetch template
-        const templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
-
-        if (templates.length == 0) {
-            console.error("Could not find email template for type "+data.type)
-            return
-        }
-
-        const template = templates[0]
-
         const recipients = await this.getAdminRecipients();
-
         const defaultI18n = new I18n("nl", Country.Belgium)
         const i18n = this.i18n;
 
-        const replacementStrings = [
+        const replaceAll = [
             {
                 from: defaultI18n.$t("shared.domains.marketing"),
                 to: i18n.$t("shared.domains.marketing")
@@ -456,17 +445,13 @@ export class Organization extends Model {
             }
         ];
 
-        let html = template.html;
-
-        for (const s of replacementStrings) {
-            html = html.replaceAll(s.from, s.to)
-        }
-
         // Create e-mail builder
-        const builder = await getEmailBuilder(this, {
+        const builder = await getEmailBuilderForTemplate(this, {
+            replaceAll,
             recipients,
-            subject: template.subject,
-            html,
+            template: {
+                type: data.type
+            },
             from: data.personal ? Email.getPersonalEmailFor(this.i18n) : Email.getInternalEmailFor(this.i18n),
             singleBcc: data.bcc ? 'simon@stamhoofd.be' : undefined,
             replyTo: data.replyTo,
@@ -481,7 +466,9 @@ export class Organization extends Model {
             fromStamhoofd: true
         })
 
-        Email.schedule(builder)
+        if (builder) {
+            Email.schedule(builder)
+        }
     }
 
     async deleteAWSMailIdenitity(mailDomain: string) {

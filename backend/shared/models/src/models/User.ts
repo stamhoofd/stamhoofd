@@ -1,7 +1,7 @@
 
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { EmailInterfaceRecipient } from "@stamhoofd/email";
-import { LoginProviderType, NewUser, Permissions, UserMeta, UserPermissions, User as UserStruct } from "@stamhoofd/structures";
+import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { v4 as uuidv4 } from "uuid";
 
@@ -90,6 +90,29 @@ export class User extends Model {
         }
 
         return null;
+    }
+
+    createRecipient(...replacements: Replacement[]) {
+        return Recipient.create({
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
+            replacements: [
+                ...replacements,
+                Replacement.create({
+                    token: 'firstName',
+                    value: this.firstName ?? ''
+                }),
+                Replacement.create({
+                    token: 'lastName',
+                    value: this.lastName ?? ''
+                }),
+                Replacement.create({
+                    token: 'email',
+                    value: this.email
+                })
+            ]
+        })
     }
 
     static async getAdmins(organizationIds: string[], options?: {verified?: boolean}) {

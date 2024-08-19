@@ -1,17 +1,16 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from "./SQLExpression";
-import { SQLArray, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from "./SQLExpressions";
+import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from "./SQLExpressions";
 
-type GConstructor<T = {}> = new (...args: any[]) => T;
-type Whereable = GConstructor<{ _where: SQLWhere|null }>;
+type Constructor<T = {}> = new (...args: any[]) => T;
 
 export type ParseWhereArguments = [
     where: SQLWhere
 ] | [
-    whereOrColumn: SQLExpression, 
+    whereOrColumn: SQLExpression|string, 
     sign: SQLWhereSign, 
     value: SQLDynamicExpression
 ] | [
-    whereOrColumn: SQLExpression, 
+    whereOrColumn: SQLExpression|string, 
     value: SQLDynamicExpression
 ]
 
@@ -19,8 +18,10 @@ function assertWhereable(o: any): any {
     return o;
 }
 
-export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
+export function Whereable<Sup extends Constructor<{}>>(Base: Sup) {
     return class extends Base {
+        _where: SQLWhere|null = null
+
         parseWhere(...[whereOrColumn, signOrValue, value]: ParseWhereArguments): SQLWhere {
             if (signOrValue === undefined) {
                 return whereOrColumn as SQLWhere;
@@ -28,13 +29,13 @@ export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
 
             if (value !== undefined) {
                 return new SQLWhereEqual(
-                    whereOrColumn, 
+                    typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn, 
                     signOrValue as SQLWhereSign, 
                     readDynamicSQLExpression(value)
                 )
             }
             return new SQLWhereEqual(
-                whereOrColumn, 
+                typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn, 
                 SQLWhereSign.Equal,
                 readDynamicSQLExpression(signOrValue)
             )
@@ -47,10 +48,10 @@ export function addWhereHelpers<TBase extends Whereable>(Base: TBase) {
             const w = me.parseWhere(...args);
             if (!me._where) {
                 me._where = w;
-                return this;
+                return me;
             }
             me._where = me._where.and(w);
-            return this;
+            return me;
         }
 
         andWhere<T>(this: T, ...args: ParseWhereArguments): T {

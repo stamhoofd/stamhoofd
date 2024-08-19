@@ -1,5 +1,5 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from "./SQLExpression";
-import { SQLWhere, addWhereHelpers } from "./SQLWhere";
+import { SQLWhere, Whereable } from "./SQLWhere";
 
 export enum SQLJoinType {
     Left = "Left",
@@ -8,12 +8,13 @@ export enum SQLJoinType {
     Outer = "Outer"
 }
 
-export class JoinBase implements SQLExpression {
+class EmptyClass {}
+export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
     type = SQLJoinType.Left
     table: SQLExpression;
-    _where: SQLWhere|null = null;
 
     constructor(type: SQLJoinType, table: SQLExpression) {
+        super();
         this.type = type;
         this.table = table;
     }
@@ -36,5 +37,3 @@ export class JoinBase implements SQLExpression {
         ], ' ')
     }
 }
-
-export const SQLJoin = addWhereHelpers(JoinBase)

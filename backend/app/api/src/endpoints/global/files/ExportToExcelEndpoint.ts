@@ -2,9 +2,11 @@
 import { Decoder, EncodableObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Email } from '@stamhoofd/email';
 import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter } from '@stamhoofd/excel-writer';
-import { RateLimiter } from '@stamhoofd/models';
-import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import { getEmailBuilderForTemplate, RateLimiter } from '@stamhoofd/models';
+import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement } from '@stamhoofd/structures';
+import { sleep } from "@stamhoofd/utility";
 import { Context } from '../../../helpers/Context';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
 import { FileCache } from '../../../helpers/FileCache';
@@ -49,7 +51,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         const {user} = await Context.authenticate()
 
         const loader = ExportToExcelEndpoint.loaders.get(request.params.type as ExcelExportType);
@@ -63,7 +65,68 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         limiter.track(user.id, 1);
+        let sendEmail = false;
 
+        const result = await Promise.race([
+            this.job(loader, request.body, request.params.type).then(async (url: string) => {
+                if (sendEmail) {
+                    const builder = await getEmailBuilderForTemplate(organization, {
+                        template: {
+                            type: EmailTemplateType.ExcelExportSucceeded
+                        },
+                        recipients: [
+                            user.createRecipient(Replacement.create({
+                                token: 'downloadUrl',
+                                value: url
+                            }))
+                        ],
+                        from: Email.getInternalEmailFor(Context.i18n)
+                    })
+            
+                    if (builder) {
+                        Email.schedule(builder)
+                    }
+
+                }
+
+                return url;
+            }).catch(async (error) => {
+                if (sendEmail) {
+                    const builder = await getEmailBuilderForTemplate(organization, {
+                        template: {
+                            type: EmailTemplateType.ExcelExportFailed
+                        },
+                        recipients: [
+                            user.createRecipient()
+                        ],
+                        from: Email.getInternalEmailFor(Context.i18n)
+                    })
+            
+                    if (builder) {
+                        Email.schedule(builder)
+                    }
+                }
+                throw error
+            }),
+            sleep(3000)
+        ])
+
+        if (typeof result === 'string') {
+            return new Response(ExcelExportResponse.create({
+                url: result
+            }))
+        }
+        
+        // We'll send an e-mail
+        // Let the job know to send an e-mail when it is done
+        sendEmail = true;
+
+        return new Response(ExcelExportResponse.create({
+            url: null
+        }))
+    }
+
+    async job(loader: ExcelExporter<EncodableObject>, request: ExcelExportRequest, type: string): Promise<string> {
         // Estimate how long it will take.
         // If too long, we'll schedule it and write it to Digitalocean Spaces
         // Otherwise we'll just return the file directly
@@ -73,18 +136,18 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         const writer = new XlsxWriter(zipWriterAdapter);
 
         // Limit to pages of 100
-        request.body.filter.limit = 100;
+        request.filter.limit = 100;
 
         await exportToExcel({
             definitions: loader.sheets,
             writer,
-            dataGenerator: fetchToAsyncIterator(request.body.filter, loader),
-            filter: request.body.workbookFilter
+            dataGenerator: fetchToAsyncIterator(request.filter, loader),
+            filter: request.workbookFilter
         })
-        
+
         console.log('Done writing excel file')
-        return new Response(ExcelExportResponse.create({
-            url: 'https://'+ STAMHOOFD.domains.api + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(request.params.type)
-        }))
+
+        const url = 'https://'+ STAMHOOFD.domains.api + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(type)
+        return url;
     }
 }

@@ -69,6 +69,12 @@ export enum EmailTemplateType {
     OrganizationDripTrialExpiredReminder = "OrganizationDripTrialExpiredReminder",
     OrganizationDripWebshopNotRenewed = "OrganizationDripWebshopNotRenewed",
     OrganizationDripMembersNotRenewed = "OrganizationDripMembersNotRenewed",
+
+    /**
+     * Exports
+     */
+    ExcelExportSucceeded = "ExcelExportSucceeded",
+    ExcelExportFailed = "ExcelExportFailed"
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -173,6 +179,9 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.OrganizationDripTrialExpiredReminder: return 'Organisatie: drip proefperiode verlopen reminder'
             case EmailTemplateType.OrganizationDripWebshopNotRenewed: return 'Organisatie: drip webshop niet verlengd'
             case EmailTemplateType.OrganizationDripMembersNotRenewed: return 'Organisatie: drip ledenadministratie niet verlengd'
+
+            case EmailTemplateType.ExcelExportSucceeded: return 'Export: Excel export geslaagd'
+            case EmailTemplateType.ExcelExportFailed: return 'Export: Excel export mislukt'
         }
     }
 
@@ -217,6 +226,10 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.OrganizationDNSSetupComplete: return 'Organisatie: DNS setup compleet'
 
             case EmailTemplateType.OrderOnlinePaymentFailed: return 'Wanneer een online betaling bij een webshop mislukt na een lange tijd wachten - zou zelden mogen voorkomen'
+
+            case EmailTemplateType.ExcelExportSucceeded: return 'Bij lange Excel exports ontvang je een e-mail om jouw bestand te downloaden'
+            case EmailTemplateType.ExcelExportFailed: return 'Als een lange Excel export toch mislukt, ontvang je een e-mail dat het mis ging'
+
         }
 
         return null
@@ -246,6 +259,21 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+        if (type === EmailTemplateType.ExcelExportSucceeded) {
+            return [
+                "firstName",
+                "lastName",
+                "downloadUrl"
+            ];
+        }
+
+        if (type === EmailTemplateType.ExcelExportFailed) {
+            return [
+                "firstName",
+                "lastName"
+            ];
+        }
+
         if (type === EmailTemplateType.RegistrationConfirmation) {
             return [
                 "firstName",
