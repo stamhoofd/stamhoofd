@@ -341,11 +341,11 @@ const filteredActions = computed(() => {
     }
 
     if (!isMobile.value || !showSelection.value) {
-        return sortedActions.value.filter(action => action.enabled && !action.singleSelection).slice(0, maximum)
+        return sortedActions.value.filter(action => action.enabled && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll)).slice(0, maximum)
     }
 
     return sortedActions.value.filter(action => {
-        return action.enabled && action.needsSelection && !action.singleSelection
+        return action.enabled && action.needsSelection && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll)
     }).slice(0, maximum)
 })
 

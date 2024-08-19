@@ -296,32 +296,16 @@ export class MemberActionBuilder {
                 }
             }),
         
-            new MenuTableAction({
-                name: "Exporteren naar",
+            new AsyncTableAction({
+                name: "Exporteren naar Excel",
                 icon: "download",
                 priority: 11,
                 groupIndex: 3,
-                childActions: [
-                    new AsyncTableAction({
-                        name: "Excel...",
-                        priority: 0,
-                        groupIndex: 0,
-                        handler: async (selection) => {
-                            console.log('selection', selection)
-                            // TODO: vervangen door een context menu
-                            await this.exportToExcel(selection)
-                        }
-                    }),
-                    new InMemoryTableAction({
-                        name: "PDF...",
-                        priority: 0,
-                        groupIndex: 0,
-                        handler: async (members: PlatformMember[]) => {
-                        // TODO: vervangen door een context menu
-                            await this.exportToPDF(members)
-                        }
-                    }),
-                ]
+                handler: async (selection) => {
+                    console.log('selection', selection)
+                    // TODO: vervangen door een context menu
+                    await this.exportToExcel(selection)
+                }
             }),
             new MenuTableAction({
                 name: "Inschrijven voor",
@@ -576,17 +560,6 @@ export class MemberActionBuilder {
             ],
             modalDisplayStyle: "popup"
         })
-    }
-
-    async exportToPDF(members: PlatformMember[]) {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-        //const displayedComponent = new ComponentWithProperties(NavigationController, {
-        //    root: await LoadComponent(() => import(/* webpackChunkName: "MemberSummaryBuilderView"*/ '../member/MemberSummaryBuilderView.vue'), {
-        //        members,
-        //        group: this.groups.length === 1 ? this.groups[0] : undefined,
-        //    })
-        //});
-        //this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async deleteRegistration(members: PlatformMember[]) {
