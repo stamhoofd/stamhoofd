@@ -54,6 +54,14 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         const organization = await Context.setOptionalOrganizationScope();
         const {user} = await Context.authenticate()
 
+        if (user.isApiUser) {
+            throw new SimpleError({
+                code: "not_allowed",
+                message: "API users are not allowed to export to Excel. The Excel export endpoint has a side effect of sending e-mails. Please use normal API endpoints to get the data you need.",
+                statusCode: 403
+            })
+        }
+
         const loader = ExportToExcelEndpoint.loaders.get(request.params.type as ExcelExportType);
         
         if (!loader) {
