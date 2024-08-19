@@ -55,14 +55,17 @@ export default class TableActionsContextMenu extends VueComponent {
     }
 
     get hasSelection() {
-        return this.selection.markedRows.size > 0
+        return this.selection.markedRows.size > 0 || this.selection.markedRowsAreSelected === false
     }
 
     get isSingleSelection() {
-        return this.selection.markedRows.size == 1 && this.selection.markedRowsAreSelected
+        return this.selection.markedRows.size == 1 && this.selection.markedRowsAreSelected === true
     }
 
     handleAction(action: TableAction<any>, event) {
+        if (this.isDisabled(action)) {
+            return
+        }
         action.handle(this.selection)?.catch((e) => {
             console.error(e)
             Toast.fromError(e).show()

@@ -340,23 +340,8 @@ export class MemberActionBuilder {
 
     // Action implementations
     async openMail(selection: TableActionSelection<PlatformMember>) {
-        const filter = mergeFilters([
-            selection.fetcher.filter,
-            selection.markedRows.size === 0 ? null : (
-                selection.markedRowsAreSelected ? {
-                    id: {
-                        $in: [...selection.markedRows.values()].map(m => m.id)
-                    }
-                } : {
-                    $not: {
-                        id: {
-                            $in: [...selection.markedRows.values()].map(m => m.id)
-                        }
-                    }
-                }
-            )
-        ])
-        const search = selection.fetcher.searchQuery
+        const filter = selection.filter.filter
+        const search = selection.filter.search
 
         const options: {
             name: string,
