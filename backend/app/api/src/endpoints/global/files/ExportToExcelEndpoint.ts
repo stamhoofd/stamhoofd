@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter } from '@stamhoofd/excel-writer';
-import { getEmailBuilderForTemplate, RateLimiter } from '@stamhoofd/models';
+import { getEmailBuilderForTemplate, Platform, RateLimiter } from '@stamhoofd/models';
 import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 import { Context } from '../../../helpers/Context';
@@ -66,6 +66,8 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
 
         limiter.track(user.id, 1);
         let sendEmail = false;
+
+        await Platform.getSharedStruct();
 
         const result = await Promise.race([
             this.job(loader, request.body, request.params.type).then(async (url: string) => {

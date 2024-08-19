@@ -94,7 +94,10 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
     }
 
     async abort() {
-        //this.archive.abort();
+        if (!this.finalizePromise) {
+            this.archive.abort();
+            return;
+        }
         await this.finalizePromise;
     }
 }

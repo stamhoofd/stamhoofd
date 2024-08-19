@@ -1,10 +1,13 @@
 // These types need to be implemented in an external package
-
-export interface XlsxTransformerColumn<T> {
+export type XlsxTransformerConcreteColumn<T> = {
     id: string;
     name: string;
     width: number;
     getValue(object: T): CellValue;
+}
+
+export type XlsxTransformerColumn<T> = XlsxTransformerConcreteColumn<T> | {
+    match: (id: string) => (XlsxTransformerConcreteColumn<T>[] | undefined);
 }
 
 export interface XlsxTransformerSheet<A, B = A> {
@@ -12,6 +15,13 @@ export interface XlsxTransformerSheet<A, B = A> {
     name: string;
     transform?: (data: A) => B[];
     columns: XlsxTransformerColumn<B>[];
+}
+
+export interface XlsxTransformerConcreteSheet<A, B = A> {
+    id: string;
+    name: string;
+    transform?: (data: A) => B[];
+    columns: XlsxTransformerConcreteColumn<B>[];
 }
 
 export interface CellValue {

@@ -1,4 +1,4 @@
-import { XlsxTransformerSheet, XlsxWorkbookFilter } from "./interfaces";
+import { XlsxTransformerConcreteColumn, XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWorkbookFilter } from "./interfaces";
 import { SimpleError } from "@simonbackx/simple-errors";
 
 /**
@@ -12,7 +12,7 @@ export class XlsxColumnFilterer<T> {
         this.allSheets = allSheets;
     }
 
-    filterColumns(filter: XlsxWorkbookFilter): XlsxTransformerSheet<T, unknown>[] {
+    filterColumns(filter: XlsxWorkbookFilter): XlsxTransformerConcreteSheet<T, unknown>[] {
         // Validate sheetFilter
         for (const {id} of filter.sheets) {
             if (!this.allSheets.find(sheet => sheet.id === id)) {
@@ -33,8 +33,28 @@ export class XlsxColumnFilterer<T> {
             }
 
             // Validate sheetFilter
+            const concreteColumns: XlsxTransformerConcreteColumn<T>[] = [];
             for (const id of sheetFilter.columns) {
-                if (!sheet.columns.find(col => col.id === id)) {
+                let found = false;
+
+                for (const column of sheet.columns) {
+                    if ("id" in column) {
+                        if (column.id === id) {
+                            concreteColumns.push(column);
+                            found = true;
+                            break;
+                        }
+                    } else {
+                        const matched = column.match(id);
+                        if (matched !== undefined) {
+                            concreteColumns.push(...matched);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found) {
                     throw new SimpleError({
                         code: "invalid_column",
                         message: "Invalid column " + id,
@@ -43,18 +63,13 @@ export class XlsxColumnFilterer<T> {
                     });
                 }
             }
-
-            const columns = sheet.columns.filter(col => {
-                return sheetFilter.columns.includes(col.id);
-            })
-
-            if (columns.length === 0) {
+            if (concreteColumns.length === 0) {
                 return [];
             }
 
             return [{
                 ...sheet,
-                columns
+                columns: concreteColumns
             }];
         });
 
@@ -66,7 +81,6 @@ export class XlsxColumnFilterer<T> {
                 statusCode: 400
             });
         }
-
 
         return sheets;
     }
