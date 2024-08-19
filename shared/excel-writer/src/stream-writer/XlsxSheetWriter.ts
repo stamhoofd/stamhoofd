@@ -28,6 +28,16 @@ function numberToAlpha(num: number) {
     return chars.map(c => String.fromCharCode(c)).join("")
 }
 
+class ColumnInfo {
+    width?: number;
+
+    growToMinimum(width: number) {
+        if (this.width === undefined || this.width < width) {
+            this.width = width;
+        }
+    }
+}
+
 export class XlsxSheetWriter extends XlsxFileWriter {
     /**
      * The sheet writer will write 
@@ -40,27 +50,54 @@ export class XlsxSheetWriter extends XlsxFileWriter {
      */
     timezone = 'Europe/Brussels';
 
+    columns: ColumnInfo[] = [];
+
     rowCount = 0;
 
-    async writeHeader() {
+    async writeHeader(columnCount = 0) {
         await this.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         await this.write(`<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`)
+        
+        // Sadly <cols> must be before <sheetData> - so we cant calculate the best widths on the fly
+        await this.write('<cols>');
+
+        for (const [index, column] of this.columns.entries()) {
+            const width = column.width ?? 20;
+            await this.write(`<col min="${index + 1}" max="${index + 1}" width="${width}" />`)
+        }
+        
+        await this.write('</cols>');
+
         await this.write('<sheetData>')
         this.didWriteHeader = true;
     }
 
     async writeFooter() {
         if (!this.didWriteHeader) {
-            await this.writeHeader();
+            await this.writeHeader(0);
         }
 
         await this.write('</sheetData>')
+
+
+
         await this.write('</worksheet>')
     }
 
     async writeRow(cells: CellValue[]) {
         if (!this.didWriteHeader) {
-            await this.writeHeader();
+            while (this.columns.length < cells.length) {
+                // Append until we have enough columns
+                const cell = cells[this.columns.length];
+                const info = new ColumnInfo();
+
+                if (cell.width !== undefined) {
+                    info.width = cell.width
+                }
+                this.columns.push(info);
+            }
+
+            await this.writeHeader(cells.length);
         }
 
         this.rowCount++;

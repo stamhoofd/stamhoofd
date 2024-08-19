@@ -34,6 +34,7 @@ export class XlsxTransformer<T> {
             await this.writer.addRow(sheetSymbol, sheet.columns.map(col => {
                 return {
                     value: col.name,
+                    width: col.width,
                     style: {
                         font: {
                             bold: true

@@ -2,13 +2,28 @@
     <SaveView :loading="exporting" save-icon="download" @save="startExport">
         <h1>Exporteren naar Excel</h1>
 
+        <ScrollableSegmentedControl v-if="workbook.sheets.length" v-model="visibleSheet" :items="workbook.sheets" :labels="workbook.sheets.map(s => s.name)" />
+
+        <p v-if="visibleSheet.description" class="style-description-block">
+            {{ visibleSheet.description }}
+        </p> 
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div v-for="{categoryName, columns} of groupedColumns" :key="categoryName" class="container">
-            <hr>
-            <h2>{{ categoryName }}</h2>
+        <div v-for="({categoryName, columns}, index) in groupedColumns" :key="visibleSheet.name + '-' + categoryName" class="container">
+            <hr v-if="index > 0">
 
             <STList>
+                <STListItem v-if="groupedColumns.length > 1" element-name="label" :selectable="true">
+                    <template #left>
+                        <Checkbox :model-value="getAllSelected(columns)" @update:model-value="setAllSelected($event, columns)" />
+                    </template>
+
+                    <div class="style-title-2">
+                        {{ categoryName || 'Algemeen' }}
+                    </div>
+                </STListItem>
+
                 <STListItem v-for="column of columns" :key="column.id" element-name="label" :selectable="true">
                     <template #left>
                         <Checkbox v-model="column.enabled" />
@@ -29,7 +44,7 @@
 <script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, Toast, useContext, useErrors } from '@stamhoofd/components';
+import { ErrorBox, ScrollableSegmentedControl, Toast, useContext, useErrors } from '@stamhoofd/components';
 import { Storage } from '@stamhoofd/networking';
 import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelWorkbookFilter, LimitedFilteredRequest, Version } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
@@ -67,6 +82,15 @@ const groupedColumns = computed(() => {
     return Array.from(categories.values());
 });
 
+function getAllSelected(columns: SelectableColumn[]) {
+    return columns.every(c => c.enabled);
+}
+
+function setAllSelected(selected: boolean, columns: SelectableColumn[]) {
+    for (const column of columns) {
+        column.enabled = selected;
+    }
+}
 
 onMounted(async () => {
     // Load from storage

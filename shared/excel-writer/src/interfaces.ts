@@ -26,6 +26,7 @@ export interface XlsxTransformerConcreteSheet<A, B = A> {
 
 export interface CellValue {
     value: string | number | Date | null;
+    width?: number; // Only works for first row
     style?: CellStyleRequest;
 }
 

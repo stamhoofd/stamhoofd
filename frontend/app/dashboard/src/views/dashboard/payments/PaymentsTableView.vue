@@ -20,12 +20,14 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, useTableObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, CountResponse, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref } from 'vue';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
+import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
+import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 const props = withDefaults(
     defineProps<{
@@ -93,6 +95,7 @@ const configurationId = computed(() => {
 })
 
 const context = useContext();
+const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>
 const filterBuilders = paymentsUIFilterBuilders
 const title = computed(() => {
@@ -313,34 +316,19 @@ const actions: TableAction<ObjectType>[] = [
         needsSelection: true,
         allowAutoSelectAll: true,
         handler: async (selection) => {
-            try {
-                const response = await context.value.authenticatedServer.request({
-                    method: "POST",
-                    path: `/export/excel/${ExcelExportType.Payments}`,
-                    body: ExcelExportRequest.create({
-                        filter: selection.filter,
-                        workbookFilter: ExcelWorkbookFilter.create({
-                            sheets: [
-                                ExcelSheetFilter.create({
-                                    id: "payments",
-                                    columns: ['id', 'customer.company.name', 'customer.name', 'price', 'createdAt']
-                                })
-                            ]
+            await present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(ExcelExportView, {
+                            type: ExcelExportType.Payments,
+                            filter: selection.filter,
+                            workbook: getSelectableWorkbook(),
+                            configurationId: configurationId.value
                         })
-                    }),
-                    decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
-                    shouldRetry: false
-                })
-
-                if (response.data.url) {
-                    Toast.success('Excel bestand wordt gedownload').show()
-                    downloadURL(response.data.url, 'betalingen.xlsx')
-                } else {
-                    Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show()
-                }
-            } catch (e) {
-                Toast.fromError(e).show()
-            }
+                    })
+                ],
+                modalDisplayStyle: "popup"
+            })
         }
     }),
 ]
