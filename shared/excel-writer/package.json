@@ -15,8 +15,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
-        "@types/archiver": "^6.0.2",
-        "@zip.js/zip.js": "^2.7.48"
+        "@types/archiver": "^6.0.2"
     },
     "peerDependencies": {
         "archiver": "^7.0.1"
