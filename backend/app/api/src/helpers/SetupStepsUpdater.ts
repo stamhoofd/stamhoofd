@@ -45,28 +45,31 @@ export class SetupStepUpdater {
                         lastId = "";
                         break;
                     }
+
+                    const organizationPeriodMap = new Map(organizationRegistrationPeriods.map(period => {
+                        return [period.organizationId, period]
+                    }))
+
+                    const organizations = await Organization.getByIDs(...organizationPeriodMap.keys());
     
-                    for (const organizationRegistrationPeriod of organizationRegistrationPeriods) {
-                        const organizationId =
-                            organizationRegistrationPeriod.organizationId;
-    
+                    for (const organization of organizations) {
+                        const organizationId = organization.id;
+                        const organizationRegistrationPeriod = organizationPeriodMap.get(organizationId);
+
+                        if(!organizationRegistrationPeriod) {
+                            console.error(`[FLAG-MOMENT] organizationRegistrationPeriod not found for organization with id ${organizationId}`);
+                            continue;
+                        }
+
                         console.log(
                             "[FLAG-MOMENT] checking flag moments for " +
                                 organizationId
                         );
-                        const organization = await Organization.getByID(
-                            organizationId
-                        );
-    
-                        if (!organization) {
-                            continue;
-                        }
     
                         await SetupStepUpdater.updateFor(
                             organizationRegistrationPeriod,
                             platform,
-                            organization,
-                            stepTypes
+                            organization
                         );
                     }
     
