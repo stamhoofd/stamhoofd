@@ -187,7 +187,8 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                 new MultipleChoiceUIFilterOption('Verlopen', 'Expiring'),
                 new MultipleChoiceUIFilterOption('Inactief', 'Inactive'),
             ],
-            buildFilter: (choices) => {
+            wrapFilter: (f: StamhoofdFilter) => {
+                const choices = Array.isArray(f) ? f : [f]
                 const d = new Date()
                 d.setHours(12);
                 d.setMinutes(0);
@@ -291,8 +292,8 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             options: platform.config.membershipTypes.map(type => {
                 return new MultipleChoiceUIFilterOption(type.name, type.id);
             }),
-            // todo
-            buildFilter: (choices) => {
+            wrapFilter: (f: StamhoofdFilter) => {
+                const choices = Array.isArray(f) ? f : [f]
                 const d = new Date()
                 d.setHours(12);
                 d.setMinutes(0);
