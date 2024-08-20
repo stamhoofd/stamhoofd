@@ -41,6 +41,8 @@ export class AuthenticatedStructures {
 
         const includeSettlements = checkPermissions && !!Context.user && !!Context.user.permissions
 
+        console.log('includeSettlements', includeSettlements)
+
         return Payment.getGeneralStructureFromRelations({
             payments,
             balanceItemPayments,

@@ -83,7 +83,7 @@ const auth = useAuth();
 const filterBuilders = getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform.value, {
     user: auth.user,
 })
-const selectedUIFilter = ref(filterBuilders[0].fromFilter(props.group.settings.getRecommendedFilter())) as Ref<null|UIFilter>;
+const selectedUIFilter = ref(filterBuilders[0].fromFilter(props.group.getRecommendedFilter())) as Ref<null|UIFilter>;
 
 async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {

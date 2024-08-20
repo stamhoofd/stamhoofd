@@ -384,7 +384,7 @@ class EmailStatic {
     }
 
     getInternalEmailFor(i18n: I18n) {
-        return '"Stamhoofd" <'+ (i18n.$t("shared.emails.general")) +'>'
+        return '"' + (STAMHOOFD.platformName ?? 'Stamhoofd') + ' " <'+ (i18n.$t("shared.emails.general")) +'>'
     }
 
     getPersonalEmailFor(i18n: I18n) {

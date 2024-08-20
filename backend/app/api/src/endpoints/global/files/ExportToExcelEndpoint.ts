@@ -2,12 +2,15 @@
 import { Decoder, EncodableObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Email } from '@stamhoofd/email';
 import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter } from '@stamhoofd/excel-writer';
-import { RateLimiter } from '@stamhoofd/models';
-import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import { getEmailBuilderForTemplate, Platform, RateLimiter } from '@stamhoofd/models';
+import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, Version } from '@stamhoofd/structures';
+import { sleep } from "@stamhoofd/utility";
 import { Context } from '../../../helpers/Context';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
 import { FileCache } from '../../../helpers/FileCache';
+import { QueueHandler } from '@stamhoofd/queues';
 
 type Params = { type: string };
 type Query = undefined;
@@ -49,8 +52,25 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         const {user} = await Context.authenticate()
+
+        if (user.isApiUser) {
+            throw new SimpleError({
+                code: "not_allowed",
+                message: "API users are not allowed to export to Excel. The Excel export endpoint has a side effect of sending e-mails. Please use normal API endpoints to get the data you need.",
+                statusCode: 403
+            })
+        }
+
+        if (QueueHandler.isRunning('user-export-to-excel-' + user.id)) {
+            throw new SimpleError({
+                code: "not_allowed",
+                message: "Export is pending",
+                human: 'Je hebt momenteel al een Excel export lopen. Wacht tot die klaar is voor je een nieuwe export start.',
+                statusCode: 403
+            })
+        }
 
         const loader = ExportToExcelEndpoint.loaders.get(request.params.type as ExcelExportType);
         
@@ -63,28 +83,97 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         limiter.track(user.id, 1);
+        let sendEmail = false;
 
-        // Estimate how long it will take.
-        // If too long, we'll schedule it and write it to Digitalocean Spaces
-        // Otherwise we'll just return the file directly
-        const {file, stream} = await FileCache.getWriteStream('.xlsx');
+        await Platform.getSharedStruct();
 
-        const zipWriterAdapter = new ArchiverWriterAdapter(stream);
-        const writer = new XlsxWriter(zipWriterAdapter);
+        const result = await Promise.race([
+            this.job(loader, request.body, request.params.type).then(async (url: string) => {
+                if (sendEmail) {
+                    const builder = await getEmailBuilderForTemplate(organization, {
+                        template: {
+                            type: EmailTemplateType.ExcelExportSucceeded
+                        },
+                        recipients: [
+                            user.createRecipient(Replacement.create({
+                                token: 'downloadUrl',
+                                value: url
+                            }))
+                        ],
+                        from: Email.getInternalEmailFor(Context.i18n)
+                    })
+            
+                    if (builder) {
+                        Email.schedule(builder)
+                    }
 
-        // Limit to pages of 100
-        request.body.filter.limit = 100;
+                }
 
-        await exportToExcel({
-            definitions: loader.sheets,
-            writer,
-            dataGenerator: fetchToAsyncIterator(request.body.filter, loader),
-            filter: request.body.workbookFilter
-        })
+                return url;
+            }).catch(async (error) => {
+                if (sendEmail) {
+                    const builder = await getEmailBuilderForTemplate(organization, {
+                        template: {
+                            type: EmailTemplateType.ExcelExportFailed
+                        },
+                        recipients: [
+                            user.createRecipient()
+                        ],
+                        from: Email.getInternalEmailFor(Context.i18n)
+                    })
+            
+                    if (builder) {
+                        Email.schedule(builder)
+                    }
+                }
+                throw error
+            }),
+            sleep(3000)
+        ])
+
+        if (typeof result === 'string') {
+            return new Response(ExcelExportResponse.create({
+                url: result
+            }))
+        }
         
-        console.log('Done writing excel file')
+        // We'll send an e-mail
+        // Let the job know to send an e-mail when it is done
+        sendEmail = true;
+
         return new Response(ExcelExportResponse.create({
-            url: 'https://'+ STAMHOOFD.domains.api + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(request.params.type)
+            url: null
         }))
+    }
+
+    async job(loader: ExcelExporter<EncodableObject>, request: ExcelExportRequest, type: string): Promise<string> {
+        // Only run 1 export per user at the same time
+        return await QueueHandler.schedule('user-export-to-excel-' + Context.user!.id, async () => {
+            // Allow maximum 2 running Excel jobs at the same time for all users
+            return await QueueHandler.schedule('export-to-excel', async () => {
+                // Estimate how long it will take.
+                // If too long, we'll schedule it and write it to Digitalocean Spaces
+                // Otherwise we'll just return the file directly
+                const {file, stream} = await FileCache.getWriteStream('.xlsx');
+
+                const zipWriterAdapter = new ArchiverWriterAdapter(stream);
+                const writer = new XlsxWriter(zipWriterAdapter);
+
+                // Limit to pages of 100
+                request.filter.limit = STAMHOOFD.environment === 'development' ? 1 : 100; // in development, we need to check if total count matches and pagination is working correctly
+
+                await exportToExcel({
+                    definitions: loader.sheets,
+                    writer,
+                    dataGenerator: fetchToAsyncIterator(request.filter, loader),
+                    filter: request.workbookFilter
+                })
+
+                console.log('Done writing excel file')
+
+                const url = 'https://'+ STAMHOOFD.domains.api + '/v'+ Version +'/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(type)
+                return url;
+            }, 2)
+        });
     }
 }

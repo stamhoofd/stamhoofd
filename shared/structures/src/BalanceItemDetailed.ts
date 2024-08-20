@@ -3,6 +3,7 @@ import { field } from "@simonbackx/simple-encoding"
 import { BalanceItem, BalanceItemPayment, BalanceItemRelationType, BalanceItemType, shouldAggregateOnRelationType } from "./BalanceItem"
 import { RegistrationWithMember } from "./members/RegistrationWithMember"
 import { Order } from "./webshops/Order"
+import { Formatter } from "@stamhoofd/utility"
 
 // Do we still need this?
 export class BalanceItemDetailed extends BalanceItem {
@@ -151,6 +152,10 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
                 .filter(([key]) => !shouldAggregateOnRelationType(key, this.balanceItem.relations))
                 .map(([key, value]) => key + '-' + value.id)
                 .join('-');
+    }
+
+    toString() {
+        return Formatter.float(this.amount) + 'x ' + this.itemTitle + (this.itemDescription ? ' (' + this.itemDescription + ')' : '');
     }
 
 }

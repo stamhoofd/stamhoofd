@@ -928,11 +928,11 @@
     display: inline-block;
     text-align: center;
     padding: 0 4px;
-    height: 21px;
-    min-width: 21px;
+    height: 22px;
+    min-width: 22px;
     box-sizing: border-box;
     font-weight: $font-weight-semibold;
-    line-height: 21px;
+    line-height: 22px;
     vertical-align: text-bottom;
 
     &.warn {
@@ -949,6 +949,19 @@
 
     &.primary {
         background: $color-primary;
+    }
+
+    &.gray {
+        background: $color-gray-1;
+    }
+
+    &.current-color {
+        color: inherit;
+        background: currentColor;
+
+        > * {
+            color: $color-background;
+        }
     }
 
     &.secundary {

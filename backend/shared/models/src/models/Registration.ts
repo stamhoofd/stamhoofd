@@ -4,10 +4,10 @@ import { EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Reci
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { getEmailBuilder } from '../helpers/EmailBuilder';
-import { Document, EmailTemplate, Group, Organization, User } from './';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
+import { getEmailBuilderForTemplate } from '../helpers/EmailBuilder';
+import { Document, Group, Organization, User } from './';
 
 export class Registration extends Model {
     static table = "registrations"
@@ -286,26 +286,6 @@ export class Registration extends Model {
             return
         }
 
-        // Most specific template: for specific group
-        let templates = (await EmailTemplate.where({ type: data.type, groupId: this.groupId, organizationId: group.organizationId }))
-
-        // Then for organization
-        if (templates.length == 0) {
-            templates = (await EmailTemplate.where({ type: data.type, organizationId: group.organizationId, groupId: null }))
-        }
-
-        // Then default
-        if (templates.length == 0) {
-            templates = (await EmailTemplate.where({ type: data.type, organizationId: null, groupId: null }))
-        }
-
-        if (templates.length == 0) {
-            console.error("Could not find email template for type "+data.type)
-            return
-        }
-
-        const template = templates[0]
-
         const organization = await Organization.getByID(group.organizationId);
         if (!organization) {
             return
@@ -316,37 +296,26 @@ export class Registration extends Model {
         const {from, replyTo} = organization.getGroupEmail(group)
 
         // Create e-mail builder
-        const builder = await getEmailBuilder(organization, {
+        const builder = await getEmailBuilderForTemplate(organization, {
+            template: {
+                type: data.type, 
+                groupId: this.groupId
+            },
             recipients,
-            subject: template.subject,
-            html: template.html,
             from,
             type: "transactional",
             replyTo
         })
 
-        Email.schedule(builder)
+        if (builder) {
+            Email.schedule(builder)
+        }
     }
 
     static async sendTransferEmail(user: User, organization: Organization, payment: import('./').Payment) {
         const data = {
             type: EmailTemplateType.RegistrationTransferDetails
         };
-
-        // First fetch template
-        let templates = (await EmailTemplate.where({ type: data.type, organizationId: organization.id, groupId: null }))
-
-        if (templates.length == 0) {
-            templates = (await EmailTemplate.where({ type: data.type, organizationId: null, groupId: null }))
-        }
-
-        if (templates.length == 0) {
-            console.error("Could not find email template for type "+data.type)
-            return
-        }
-
-        const template = templates[0]
-
         const paymentGeneral = await payment.getGeneralStructure();
         const groupIds = paymentGeneral.groupIds;
 
@@ -430,15 +399,18 @@ export class Registration extends Model {
         }
 
         // Create e-mail builder
-        const builder = await getEmailBuilder(organization, {
+        const builder = await getEmailBuilderForTemplate(organization, {
+            template: {
+                type: EmailTemplateType.RegistrationTransferDetails
+            },
             recipients,
-            subject: template.subject,
-            html: template.html,
             from,
             replyTo
         })
 
-        Email.schedule(builder)
+        if (builder) {
+            Email.schedule(builder)
+        }
     }
 
     shouldIncludeStock() {

@@ -10,6 +10,7 @@ import { OrganizationEmail } from "./OrganizationEmail";
 import { PermissionRoleDetailed } from "./Permissions";
 import { RegistrationPeriod } from "./RegistrationPeriod";
 import { UserWithMembers } from "./UserWithMembers";
+import { Colors } from "@stamhoofd/utility";
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -233,15 +234,14 @@ export class PlatformConfig extends AutoEncoder {
     expandLogo = false
 
     getEmailReplacements() {
-        // todo: implement real colors
         return [
             Replacement.create({
                 token: "primaryColor",
-                value: "#0053ff"
+                value: this.color ? this.color : "#0053ff"
             }),
             Replacement.create({
                 token: "primaryColorContrast",
-                value: "#fff"
+                value: this.color ? Colors.getContrastColor(this.color) : "#fff"
             }),
         ]
     }

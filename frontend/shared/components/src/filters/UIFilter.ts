@@ -15,8 +15,8 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
     wrapper?: WrapperFilter
 
     // More complicated wrapper support:
-    wrapFilter?: UIFilterWrapper|null
-    unwrapFilter?: UIFilterUnwrapper|null
+    wrapFilter?: UIFilterWrapper|null|undefined
+    unwrapFilter?: UIFilterUnwrapper|null|undefined
 
     fromFilter(filter: StamhoofdFilter): UIFilter|null
 }

@@ -26,6 +26,11 @@ export class XlsxFileWriter {
     }
 
     async abort() {
+        if (!this.writeStream) {
+            // Not yet initialized
+            return;
+        }
+
         if (this.writeStreamWriter) {
             await this.writeStreamWriter.ready;
             await this.writeStreamWriter.close();

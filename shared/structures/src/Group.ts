@@ -6,6 +6,9 @@ import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { GroupSettings, WaitingListType } from './GroupSettings';
 import { LoadedPermissions, PermissionLevel, PermissionsResourceType } from './Permissions';
 import { StockReservation } from './StockReservation';
+import { StamhoofdFilter } from './filters/StamhoofdFilter';
+import { GroupGenderType } from './GroupGenderType';
+import { Gender } from './members/Gender';
 
 export enum GroupStatus {
     "Open" = "Open",
@@ -243,6 +246,96 @@ export class Group extends AutoEncoder {
 
     get squareImage() {
         return this.settings.squarePhoto ?? this.settings.coverPhoto
+    }
+
+
+    getRecommendedFilter(): StamhoofdFilter {
+        const filter: StamhoofdFilter = []
+
+        if (this.settings.minAge !== null) {
+            filter.push({
+                age: {
+                    $gte: this.settings.minAge
+                }
+            })
+        }
+
+        if (this.settings.maxAge !== null) {
+            filter.push({
+                age: {
+                    $lte: this.settings.maxAge
+                }
+            })
+        }
+
+        if (this.settings.genderType === GroupGenderType.OnlyMale) {
+            filter.push({
+                gender: Gender.Male
+            })
+        }
+
+        if (this.settings.genderType === GroupGenderType.OnlyFemale) {
+            filter.push({
+                gender: Gender.Male
+            })
+        }
+
+        if (this.settings.requireGroupIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        groupId: {
+                            $in: this.settings.requireGroupIds
+                        }
+                    }
+                }
+            })
+        }
+
+        if (this.settings.requireDefaultAgeGroupIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        periodId: this.periodId,
+                        group: {
+                            defaultAgeGroupId: {
+                                $in: this.settings.requireDefaultAgeGroupIds
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        if (this.settings.requireOrganizationIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        periodId: this.periodId,
+                        organizationId: {
+                            $in: this.settings.requireOrganizationIds
+                        }
+                    }
+                }
+            })
+        }
+
+        if (this.settings.requireOrganizationTags.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        periodId: this.periodId,
+                        organization: {
+                            tags: {
+                                $in: this.settings.requireOrganizationTags
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        return filter
     }
 
 }

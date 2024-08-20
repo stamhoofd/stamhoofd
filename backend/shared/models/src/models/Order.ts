@@ -2,13 +2,13 @@ import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from "@stamhoofd/queues";
-import { BalanceItemPaymentWithPrivatePayment,BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, BalanceItemPaymentWithPayment, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { getEmailBuilder } from "../helpers/EmailBuilder";
+import { getEmailBuilderForTemplate } from "../helpers/EmailBuilder";
 import { WebshopCounter } from '../helpers/WebshopCounter';
-import { BalanceItem, EmailTemplate, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
+import { BalanceItem, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
 
 export class Order extends Model {
     static table = "webshop_orders";
@@ -860,20 +860,6 @@ export class Order extends Model {
             return
         }
 
-        // First fetch template
-        let templates = (await EmailTemplate.where({ type: data.type, webshopId: this.webshop.id }))
-
-        if (templates.length == 0) {
-            templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
-        }
-
-        if (templates.length == 0) {
-            console.error("Could not find email template for type "+data.type)
-            return
-        }
-
-        const template = templates[0]
-
         let recipient = (await this.getStructure()).getRecipient(
             this.webshop.organization.getBaseStructure(), 
             WebshopPreview.create(this.webshop)
@@ -889,10 +875,12 @@ export class Order extends Model {
         }
 
         // Create e-mail builder
-        const builder = await getEmailBuilder(this.webshop.organization, {
+        const builder = await getEmailBuilderForTemplate(this.webshop.organization, {
             recipients: [recipient],
-            subject: template.subject,
-            html: template.html,
+            template: {
+                type: data.type,
+                webshopId: this.id
+            },
             // text: template.text,
             from: data.from,
             replyTo: data.replyTo,
@@ -900,7 +888,9 @@ export class Order extends Model {
             defaultReplacements: this.webshop.meta.getEmailReplacements()
         })
 
-        Email.schedule(builder)
+        if (builder) {
+            Email.schedule(builder)
+        }
     }
 
     /**

@@ -355,14 +355,12 @@ export class Member extends Model {
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
         const query = SQL
-            .select(
-                SQL.column('id')
-            )
-            .from(SQL.table(Member.table))
+            .select('id')
+            .from(Member.table)
             .join(
-                SQL.leftJoin(
-                    SQL.table('_members_users')
-                ).where(
+                SQL
+                .leftJoin('_members_users')
+                .where(
                     SQL.column('_members_users', 'membersId'),
                     SQL.column(Member.table, 'id'),
                 )

@@ -341,11 +341,11 @@ const filteredActions = computed(() => {
     }
 
     if (!isMobile.value || !showSelection.value) {
-        return sortedActions.value.filter(action => action.enabled && !action.singleSelection).slice(0, maximum)
+        return sortedActions.value.filter(action => action.enabled && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll)).slice(0, maximum)
     }
 
     return sortedActions.value.filter(action => {
-        return action.enabled && action.needsSelection && !action.singleSelection
+        return action.enabled && action.needsSelection && !action.singleSelection && (!action.needsSelection || action.allowAutoSelectAll)
     }).slice(0, maximum)
 })
 
@@ -372,6 +372,14 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
         if (showSelection.value && hasSelection.value) {
             customMarkedRows = [...markedRows.value.values()] as Value[]
             customMarkedRowsSelected = markedRowsAreSelected.value
+
+            // Try to invert if we already have everything in memory (optimization)
+            if (!customMarkedRowsSelected) {
+                if (props.tableObjectFetcher.totalFilteredCount === props.tableObjectFetcher.objects.length) {
+                    customMarkedRows = props.tableObjectFetcher.objects.filter(i => !markedRows.value.has(i.id))
+                    customMarkedRowsSelected = true
+                }
+            }
         }
     }
 
@@ -386,12 +394,16 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
             }
         };
 
-        const filter = customMarkedRowsSelected ? idFilter : mergeFilters([
-            props.tableObjectFetcher.filter,
-            {
-                $not: idFilter
-            }
-        ])
+        const filter = customMarkedRowsSelected ? idFilter : (
+            customMarkedRows.length ?
+                mergeFilters([
+                    props.tableObjectFetcher.filter,
+                    {
+                        $not: idFilter
+                    }
+                ])
+                : props.tableObjectFetcher.filter
+        )
 
         return {
             filter: new LimitedFilteredRequest({
@@ -416,8 +428,9 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
                 search: props.tableObjectFetcher.searchQuery,
             }),
             fetcher: props.tableObjectFetcher.objectFetcher,
-            markedRows: new Map(props.tableObjectFetcher.objects.map(i => [i.id, i])),
-            markedRowsAreSelected: true
+            cachedAllValues: props.tableObjectFetcher.objects,
+            markedRows: new Map(),
+            markedRowsAreSelected: null
         }
     }
 
@@ -430,7 +443,7 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
         }),
         fetcher: props.tableObjectFetcher.objectFetcher,
         markedRows: new Map(),
-        markedRowsAreSelected: false
+        markedRowsAreSelected: null
     }
 }
 

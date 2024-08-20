@@ -1,15 +1,12 @@
 import { Database } from "@simonbackx/simple-database";
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from "./SQLExpression";
 import { SQLJoin } from './SQLJoin';
-import { SQLWhere, addWhereHelpers } from "./SQLWhere";
+import { SQLWhere, Whereable } from "./SQLWhere";
 
-class DeleteBase implements SQLExpression {
+class EmptyClass {}
+export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
     _from: SQLExpression;
-    _where: SQLWhere|null = null;
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
-
-    constructor() {
-    }
 
     clone(): this {
         const c = new SQLDelete()
@@ -63,5 +60,3 @@ class DeleteBase implements SQLExpression {
         return this.delete().then(onFulfilled, onRejected);
     }
 }
-
-export const SQLDelete = addWhereHelpers(DeleteBase)

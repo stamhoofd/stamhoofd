@@ -1,5 +1,6 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from "./SQLExpression";
 import { SQLSafeValue } from "./SQLExpressions";
+import { SQLWhere } from "./SQLWhere";
 
 export class SQLJsonUnquote implements SQLExpression {
     target: SQLExpression
@@ -97,12 +98,13 @@ export class SQLJsonSearch implements SQLExpression {
 /**
  * JSON_CONTAINS(target, candidate[, path])
  */
-export class SQLJsonContains implements SQLExpression {
+export class SQLJsonContains extends SQLWhere {
     target: SQLExpression
     candidate: SQLExpression;
     path: SQLExpression|null;
 
     constructor(target: SQLExpression, candidate: SQLExpression, path: SQLExpression|null = null) {
+        super()
         this.target = target;
         this.candidate = candidate;
         this.path = path;
@@ -127,11 +129,12 @@ export class SQLJsonContains implements SQLExpression {
 /**
  * JSON_CONTAINS(json_doc1, json_doc2)
  */
-export class SQLJsonOverlaps implements SQLExpression {
+export class SQLJsonOverlaps extends SQLWhere {
     jsonDoc1: SQLExpression
     jsonDoc2: SQLExpression;
 
     constructor(jsonDoc1: SQLExpression, jsonDoc2: SQLExpression) {
+        super()
         this.jsonDoc1 = jsonDoc1;
         this.jsonDoc2 = jsonDoc2;
     }

@@ -100,13 +100,9 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                 // }
 
                 // else
-                return new SQLWhereEqual(
-                    new SQLJsonContains(
-                        sqlExpression, 
-                        convertToExpression(JSON.stringify(v))
-                    ), 
-                    SQLWhereSign.Equal, 
-                    new SQLSafeValue(1)
+                return new SQLJsonContains(
+                    sqlExpression, 
+                    convertToExpression(JSON.stringify(v))
                 );
             }
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, convertToExpression(norm(f.$eq)));
@@ -133,25 +129,17 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
                     // that makes comparing more difficult, to combat this, we still need to use SQLJsonOverlaps with the JSON null value
                     return new SQLWhereOr([
                         new SQLWhereEqual(sqlExpression, SQLWhereSign.Equal, new SQLNull()), // checks path not exists (= mysql null)
-                        new SQLWhereEqual(
-                            new SQLJsonOverlaps(
-                                sqlExpression, 
-                                convertToExpression(JSON.stringify(v)) // contains json null
-                            ), 
-                            SQLWhereSign.Equal, 
-                            new SQLSafeValue(1)
+                        new SQLJsonOverlaps(
+                            sqlExpression, 
+                            convertToExpression(JSON.stringify(v)) // contains json null
                         )
                     ]);
                 }
 
                 // else
-                return new SQLWhereEqual(
-                    new SQLJsonOverlaps(
-                        sqlExpression, 
-                        convertToExpression(JSON.stringify(v))
-                    ), 
-                    SQLWhereSign.Equal, 
-                    new SQLSafeValue(1)
+                return new SQLJsonOverlaps(
+                    sqlExpression, 
+                    convertToExpression(JSON.stringify(v))
                 );
             }
 
@@ -174,13 +162,11 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             if (isJSONObject) {
                 const v = norm(f.$eq);
 
-                return new SQLWhereEqual(
+                return new SQLWhereNot(
                     new SQLJsonContains(
                         sqlExpression, 
                         convertToExpression(JSON.stringify(v))
-                    ), 
-                    SQLWhereSign.Equal, 
-                    new SQLSafeValue(0)
+                    )
                 );
             }
             return new SQLWhereEqual(sqlExpression, SQLWhereSign.NotEqual, convertToExpression(norm(f.$neq)));

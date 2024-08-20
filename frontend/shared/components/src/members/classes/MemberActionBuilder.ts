@@ -1,13 +1,13 @@
 import { Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation'
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking'
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, Group, GroupCategoryTree, GroupType, MemberWithRegistrationsBlob, Organization, PermissionLevel, Platform, PlatformMember, RegistrationWithMember, mergeFilters } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility'
 import { markRaw } from 'vue'
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..'
 import { GlobalEventBus } from '../../EventBus'
 import EmailView from '../../email/EmailView.vue'
-import { useContext, useOrganization } from '../../hooks'
+import { useContext, useOrganization, usePlatform } from '../../hooks'
 import { CenteredMessage } from '../../overlays/CenteredMessage'
 import { Toast } from '../../overlays/Toast'
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes'
@@ -15,6 +15,8 @@ import { NavigationActions } from '../../types/NavigationActions'
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager'
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue'
 import { RegistrationActionBuilder } from './RegistrationActionBuilder'
+import { ExcelExportView, SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export'
+import { getSelectableWorkbook } from './getSelectableWorkbook'
 
 export function useDirectMemberActions(options?: {groups?: Group[], organizations?: Organization[]}) {
     return useMemberActions()(options)
@@ -36,10 +38,12 @@ export function useMemberActions() {
     const platformFamilyManager = usePlatformFamilyManager()
     const owner = useRequestOwner()
     const organization = useOrganization()
+    const platform = usePlatform()
 
     return (options?: {groups?: Group[], organizations?: Organization[]}) => {
         return new MemberActionBuilder({
             present,
+            platform: platform.value,
             context: context.value,
             groups: options?.groups ?? [],
             organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
@@ -54,6 +58,7 @@ export class MemberActionBuilder {
      * Determines which registrations will get moved or removed
      */
     groups: Group[]
+    platform: Platform
 
     /**
      * Determines what to move or register the members to
@@ -69,12 +74,14 @@ export class MemberActionBuilder {
         present: ReturnType<typeof usePresent>,
         context: SessionContext,
         groups: Group[],
+        platform: Platform,
         organizations: Organization[],
         platformFamilyManager: PlatformFamilyManager
         owner: any
     }) {
         this.present = settings.present
         this.context = settings.context
+        this.platform = settings.platform
         this.groups = settings.groups
         this.organizations = settings.organizations
         this.platformFamilyManager = settings.platformFamilyManager
@@ -289,32 +296,16 @@ export class MemberActionBuilder {
                 }
             }),
         
-            new MenuTableAction({
-                name: "Exporteren naar",
+            new AsyncTableAction({
+                name: "Exporteren naar Excel",
                 icon: "download",
                 priority: 11,
                 groupIndex: 3,
-                childActions: [
-                    new AsyncTableAction({
-                        name: "Excel...",
-                        priority: 0,
-                        groupIndex: 0,
-                        handler: async (selection) => {
-                            console.log('selection', selection)
-                            // TODO: vervangen door een context menu
-                            await this.exportToExcel(selection)
-                        }
-                    }),
-                    new InMemoryTableAction({
-                        name: "PDF...",
-                        priority: 0,
-                        groupIndex: 0,
-                        handler: async (members: PlatformMember[]) => {
-                        // TODO: vervangen door een context menu
-                            await this.exportToPDF(members)
-                        }
-                    }),
-                ]
+                handler: async (selection) => {
+                    console.log('selection', selection)
+                    // TODO: vervangen door een context menu
+                    await this.exportToExcel(selection)
+                }
             }),
             new MenuTableAction({
                 name: "Inschrijven voor",
@@ -349,23 +340,8 @@ export class MemberActionBuilder {
 
     // Action implementations
     async openMail(selection: TableActionSelection<PlatformMember>) {
-        const filter = mergeFilters([
-            selection.fetcher.filter,
-            selection.markedRows.size === 0 ? null : (
-                selection.markedRowsAreSelected ? {
-                    id: {
-                        $in: [...selection.markedRows.values()].map(m => m.id)
-                    }
-                } : {
-                    $not: {
-                        id: {
-                            $in: [...selection.markedRows.values()].map(m => m.id)
-                        }
-                    }
-                }
-            )
-        ])
-        const search = selection.fetcher.searchQuery
+        const filter = selection.filter.filter
+        const search = selection.filter.search
 
         const options: {
             name: string,
@@ -556,45 +532,19 @@ export class MemberActionBuilder {
     }
 
     async exportToExcel(selection: TableActionSelection<PlatformMember>) {
-        try {
-            const response = await this.context.authenticatedServer.request({
-                method: "POST",
-                path: `/export/excel/${ExcelExportType.Members}`,
-                body: ExcelExportRequest.create({
-                    filter: selection.filter,
-                    workbookFilter: ExcelWorkbookFilter.create({
-                        sheets: [
-                            ExcelSheetFilter.create({
-                                id: "members",
-                                columns: ['id', 'firstName', 'lastName', 'birthDay']
-                            })
-                        ]
+        await this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(ExcelExportView, {
+                        type: ExcelExportType.Members,
+                        filter: selection.filter,
+                        workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null),
+                        configurationId: 'members'
                     })
-                }),
-                decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
-                shouldRetry: false
-            })
-
-            if (response.data.url) {
-                Toast.success('Excel bestand wordt gedownload').show()
-                downloadURL(response.data.url, 'leden.xlsx')
-            } else {
-                Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show()
-            }
-        } catch (e) {
-            Toast.fromError(e).show()
-        }
-    }
-
-    async exportToPDF(members: PlatformMember[]) {
-        Toast.info('Deze functie is tijdelijk niet beschikbaar').show()
-        //const displayedComponent = new ComponentWithProperties(NavigationController, {
-        //    root: await LoadComponent(() => import(/* webpackChunkName: "MemberSummaryBuilderView"*/ '../member/MemberSummaryBuilderView.vue'), {
-        //        members,
-        //        group: this.groups.length === 1 ? this.groups[0] : undefined,
-        //    })
-        //});
-        //this.present(displayedComponent.setDisplayStyle("popup"));
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
 
     async deleteRegistration(members: PlatformMember[]) {

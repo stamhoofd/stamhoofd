@@ -28,6 +28,16 @@ export enum BalanceItemType {
     "Other" = "Other", 
 }
 
+export function getBalanceItemTypeName(type: BalanceItemType): string {
+    switch (type) {
+        case BalanceItemType.Registration: return "Inschrijving"
+        case BalanceItemType.AdministrationFee: return "Administratiekosten"
+        case BalanceItemType.FreeContribution: return "Vrije bijdrage"
+        case BalanceItemType.Order: return "Webshopbestelling"
+        case BalanceItemType.Other: return "Andere"
+    }
+}
+
 export enum BalanceItemRelationType {
     "Webshop" = "Webshop", // Contains the name of the webshop 
     "Group" = "Group", // Contains the name of the group you registered for
@@ -45,6 +55,17 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupOptionMenu: return "Keuzemenu"
         case BalanceItemRelationType.GroupOption: return "Keuze"
         case BalanceItemRelationType.Member: return "Lid"
+    }
+}
+
+export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationType): string {
+    switch (type) {
+        case BalanceItemRelationType.Webshop: return "Webshop geassocieerd aan dit item"
+        case BalanceItemRelationType.Group: return "Naam van de groep of activiteit geassocieerd aan dit item"
+        case BalanceItemRelationType.GroupPrice: return "Tarief dat gekozen werd voor de groep of activiteit"
+        case BalanceItemRelationType.GroupOptionMenu: return "Naam van het keuzemenu waaruit gekozen werd"
+        case BalanceItemRelationType.GroupOption: return "De gekozen optie van het keuzemenu waarvoor betaald werd. Als er meerdere keuzes gekozen werden, dan wordt er per keuze een apart item aangemaakt."
+        case BalanceItemRelationType.Member: return "Naam van het lid geassocieerd aan dit item"
     }
 }
 

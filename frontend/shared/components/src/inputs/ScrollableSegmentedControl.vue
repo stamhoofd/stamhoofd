@@ -9,7 +9,8 @@
             :class="{ selected: item === modelValue }"
             @click="selectItem(index)"
         >
-            <span>{{ labels ? labels[index] : item }}</span>
+            <slot v-if="$slots.item" name="item" :item="item" :index="index" />
+            <span v-else>{{ labels ? labels[index] : item }}</span>
         </button>
 
         <div class="right">
@@ -20,14 +21,14 @@
     </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts" setup generic="T">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { useResizeObserver } from './hooks/useResizeObserver';
 
 
 const props = withDefaults(
-    defineProps<{items: any[], labels?: string[] | null}>(),
+    defineProps<{items: T[], labels?: string[] | null}>(),
     {labels: null}
 );
 const modelValue = defineModel<any>();
@@ -59,6 +60,10 @@ onMounted(() => {
 });
 
 useResizeObserver(rootElement, () => {
+    updateWidths();
+});
+
+useResizeObserver(elements, () => {
     updateWidths();
 });
 
@@ -127,6 +132,10 @@ $segmented-control-height: 60px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 7px;
 
         &:first-child {
             margin-left: 0;

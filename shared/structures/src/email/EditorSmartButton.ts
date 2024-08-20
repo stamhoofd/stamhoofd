@@ -38,6 +38,14 @@ export class EditorSmartButton extends AutoEncoder {
 
     static get all() {
         const buttons: EditorSmartButton[] = []
+
+        buttons.push(EditorSmartButton.create({
+            id: "downloadUrl",
+            name: "Knop om te downloaden",
+            text: "Download",
+            hint: "Download een gekoppeld bestand."
+        }))
+
         buttons.push(EditorSmartButton.create({
             id: "signInUrl",
             name: "Knop om in te loggen",

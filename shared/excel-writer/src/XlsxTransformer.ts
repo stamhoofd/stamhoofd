@@ -1,15 +1,15 @@
-import { XlsxTransformerSheet, XlsxWriterAdapter } from "./interfaces";
+import { XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWriterAdapter } from "./interfaces";
 
 /**
  * Transforms data into an excel file using
  * a writer that can write to an excel file
  */
 export class XlsxTransformer<T> {
-    sheets: XlsxTransformerSheet<T, unknown>[];
+    sheets: XlsxTransformerConcreteSheet<T, unknown>[];
     writer: XlsxWriterAdapter;
     sheetMap: Map<XlsxTransformerSheet<T, unknown>, symbol> = new Map();
 
-    constructor(sheets: XlsxTransformerSheet<T, unknown>[], writer: XlsxWriterAdapter) {
+    constructor(sheets: XlsxTransformerConcreteSheet<T, unknown>[], writer: XlsxWriterAdapter) {
         this.sheets = sheets;
         this.writer = writer;
     }
@@ -34,6 +34,7 @@ export class XlsxTransformer<T> {
             await this.writer.addRow(sheetSymbol, sheet.columns.map(col => {
                 return {
                     value: col.name,
+                    width: col.width,
                     style: {
                         font: {
                             bold: true

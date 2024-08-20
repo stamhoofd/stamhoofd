@@ -168,7 +168,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         return new PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.paymentsGeneral(payments, false),
+            results: await AuthenticatedStructures.paymentsGeneral(payments, true),
             next
         });
     }

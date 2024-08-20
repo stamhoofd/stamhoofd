@@ -1,26 +1,28 @@
 import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from "./SQLExpression";
 
-type GConstructor<T = {}> = new (...args: any[]) => T;
-type Orderable = GConstructor<{ _orderBy: SQLOrderBy|null }>;
+type Constructor<T = {}> = new (...args: any[]) => T;
 
-export function addOrderByHelpers<TBase extends Orderable>(Base: TBase) {
+export function Orderable<Sup extends Constructor<{}>>(Base: Sup) {
     return class extends Base {
-        
-        orderBy(orderBy: SQLOrderBy)
-        orderBy(column: SQLExpression, direction?: SQLOrderByDirection) 
-        orderBy(columnOrOrderBy: SQLExpression, direction?: SQLOrderByDirection) {
+        _orderBy: SQLOrderBy|null = null
+
+        orderBy<T>(this: T, orderBy: SQLOrderBy): T
+        orderBy<T>(this: T, column: SQLExpression, direction?: SQLOrderByDirection) : T
+        orderBy<T>(this: T, columnOrOrderBy: SQLExpression, direction?: SQLOrderByDirection): T {
             let o = columnOrOrderBy as SQLOrderBy
             if (!(columnOrOrderBy instanceof SQLOrderBy)) {
                 o = new SQLOrderBy({column: columnOrOrderBy, direction: direction ?? 'ASC'})
             }
 
-            if (this._orderBy) {
-                this._orderBy.add(o)
+            const me = this as any; // stupid typescript looses type information if we don't do the this: T dance
+
+            if (me._orderBy) {
+                me._orderBy.add(o)
             } else {
-                this._orderBy = o;
+                me._orderBy = o;
             }
 
-            return this;
+            return me;
         }
     }
 }

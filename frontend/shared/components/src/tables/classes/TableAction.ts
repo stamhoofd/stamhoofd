@@ -11,9 +11,11 @@ export interface TableActionSelection<T extends {id: string}> {
     filter: LimitedFilteredRequest,
     fetcher: ObjectFetcher<T>,
 
+    cachedAllValues?: T[],
+
     // Manually selected rows that are already in memory
     markedRows: Map<string, T>,
-    markedRowsAreSelected: boolean
+    markedRowsAreSelected: boolean|null
 }
 
 export abstract class TableAction<T extends {id: string}> {
@@ -58,7 +60,10 @@ export abstract class TableAction<T extends {id: string}> {
     }
 
     isDisabled(hasSelection: boolean) {
-        return !hasSelection && this.needsSelection && !this.allowAutoSelectAll
+        if (!this.allowAutoSelectAll && !hasSelection && this.needsSelection) {
+            return true;
+        }
+        return false
     }
 
     getChildActions(): TableAction<T>[] {
@@ -162,7 +167,11 @@ export class InMemoryTableAction<T extends {id: string}> extends TableAction<T> 
 
 
     async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions) {
-        if (selection.markedRows.size && selection.markedRowsAreSelected) {
+        if (selection.cachedAllValues) {
+            return selection.cachedAllValues;
+        }
+
+        if (selection.markedRows.size && selection.markedRowsAreSelected === true) {
             // No async needed
             return Array.from(selection.markedRows.values())
         } else {

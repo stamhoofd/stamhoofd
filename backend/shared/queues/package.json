@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/queues",
-    "version": "2.13.0",
+    "version": "2.17.3",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
@@ -12,5 +12,8 @@
     "scripts": {
         "build": "tsc -b",
         "test": "jest --runInBand"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

@@ -3,7 +3,6 @@
         ref="modernTableView" 
         :table-object-fetcher="tableObjectFetcher" 
         :filter-builders="organizationsUIFilterBuilders" 
-        :default-sort-direction="SortItemDirection.DESC" 
         :title="title" 
         :column-configuration-id="configurationId" 
         :actions="actions"

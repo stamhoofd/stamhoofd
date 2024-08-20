@@ -5,9 +5,8 @@ import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStat
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
-import { getEmailBuilder } from "../helpers/EmailBuilder";
+import { getEmailBuilderForTemplate } from "../helpers/EmailBuilder";
 import { GroupBuilder } from "../helpers/GroupBuilder";
-import { EmailTemplate } from "./";
 import { Organization } from "./";
 
 export class STPackage extends Model {
@@ -257,14 +256,6 @@ export class STPackage extends Model {
         type: EmailTemplateType,
         replyTo?: string
     }) {
-        // First fetch template
-        const templates = await EmailTemplate.where({ type: data.type, organizationId: null })
-
-        if (!templates || templates.length == 0) {
-            console.error("Could not find email template for type "+data.type)
-            return
-        }
-
         const organization = await Organization.getByID(this.organizationId)
 
         if (!organization) {
@@ -272,7 +263,6 @@ export class STPackage extends Model {
             return
         }
 
-        const template = templates[0]
         const admins = await organization.getFullAdmins()
 
         const recipients = admins.map(admin => 
@@ -308,17 +298,19 @@ export class STPackage extends Model {
                 ]
             })
         );
-
         
         // Create e-mail builder
-        const builder = await getEmailBuilder(organization, {
+        const builder = await getEmailBuilderForTemplate(organization, {
+            template: {
+                type: data.type
+            },
             recipients,
-            subject: template.subject,
-            html: template.html,
             from: Email.getInternalEmailFor(organization.i18n),
             replyTo: data.replyTo
         })
 
-        Email.schedule(builder)
+        if (builder) {
+            Email.schedule(builder)
+        }
     }
 }

@@ -81,6 +81,18 @@ export class QueueHandler {
         return promise
     }
 
+    static isRunning(queue: string) {
+        return this.getSize(queue) > 0
+    }
+
+    /**
+     * Returns amount of running jobs + pending jobs for a given queue
+     */
+    static getSize(queue: string) {
+        const q = this.queues.get(queue)
+        return !!q ? (q.runCount + q.items.length) : 0
+    }
+
     private static async runNext(queue: string) {
         const q = this.queues.get(queue)
         if (!q) {

@@ -3,7 +3,7 @@ import { StamhoofdCompareValue, StamhoofdFilter } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 import MultipleChoiceUIFilterView from "./MultipleChoiceUIFilterView.vue";
-import { UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
+import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder, WrapperFilter } from "./UIFilter";
 
 export class MultipleChoiceUIFilterOption {
     name: string;
@@ -54,31 +54,26 @@ export class MultipleChoiceUIFilter extends UIFilter {
     }
 }
 
-type FilterWrapper = ((values: StamhoofdCompareValue[]) => StamhoofdFilter);
-type FilterUnwrapper = ((filter: StamhoofdFilter) => unknown);
-
 export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoiceUIFilter> {
     name = ""
     options: MultipleChoiceUIFilterOption[] = []
     wrapper?: WrapperFilter;
-    buildFilter?: FilterWrapper
-    unbuildFilter?: FilterUnwrapper | null | undefined;
+    wrapFilter?: UIFilterWrapper | null | undefined;
+    unwrapFilter?: UIFilterUnwrapper | null | undefined
 
     constructor(data: {
         name: string, 
         options: MultipleChoiceUIFilterOption[], 
         wrapper?: WrapperFilter,
-        buildFilter?: FilterWrapper,
-        unbuildFilter?: FilterUnwrapper | null | undefined
+        wrapFilter?: UIFilterWrapper | null | undefined,
+        unwrapFilter?: UIFilterUnwrapper | null | undefined
     }) {
         this.name = data.name;
         this.options = data.options;
         this.wrapper = data.wrapper;
-        this.buildFilter = data.buildFilter
-        this.unbuildFilter = data.unbuildFilter
+        this.wrapFilter = data.wrapFilter
+        this.unwrapFilter = data.unwrapFilter
     }
-
-    wrapFilter?: UIFilterWrapper | null | undefined;
     
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
         const match = unwrapFilterForBuilder(this, filter)

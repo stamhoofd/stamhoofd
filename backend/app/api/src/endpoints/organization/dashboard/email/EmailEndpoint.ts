@@ -196,9 +196,29 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const email = request.body
 
+        if (!email.html) {
+            throw new SimpleError({
+                code: "missing_field",
+                message: "Missing html",
+                human: "Je hebt geen inhoud ingevuld voor je e-mail. Vul een bericht in en probeer opnieuw.",
+                field: "html"
+            })
+        }
+
+        if (!email.subject) {
+            throw new SimpleError({
+                code: "missing_field",
+                message: "Missing subject",
+                human: "Je hebt geen onderwerp ingevuld voor je e-mail. Vul een onderwerp in en probeer opnieuw.",
+                field: "subject"
+            })
+        }
+
         // Create e-mail builder
         const builder = await getEmailBuilder(organization, {
-            ...email,
+            subject: email.subject,
+            html: email.html,
+            recipients: email.recipients,
             from,
             replyTo,
             attachments,
@@ -218,7 +238,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         const builder2 = await getEmailBuilder(organization, {
             ...email,
             subject: "[KOPIE] "+email.subject,
-            html: email.html?.replace("<body>", "<body>"+prefix) ?? null,
+            html: email.html.replace("<body>", "<body>"+prefix),
             recipients: [
                 recipient
             ],
