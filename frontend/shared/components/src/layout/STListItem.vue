@@ -301,12 +301,25 @@ button.st-list-item {
         }
     }
 
+    &.full-border {
+        position: relative;
+
+        > .main > hr {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    }
+
     &:last-child,
     &.no-border {
         > .main > hr {
             display: none;
         }
     }
+
+
 
     &.disabled {
         opacity: 0.5;

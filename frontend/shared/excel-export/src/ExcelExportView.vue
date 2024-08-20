@@ -2,7 +2,7 @@
     <SaveView :loading="exporting" save-icon="download" @save="startExport">
         <h1>Exporteren naar Excel</h1>
 
-        <ScrollableSegmentedControl v-if="workbook.sheets.length" v-model="visibleSheet" :items="workbook.sheets">
+        <ScrollableSegmentedControl v-if="workbook.sheets.length > 1" v-model="visibleSheet" :items="workbook.sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
@@ -20,15 +20,16 @@
 
         <div v-for="({categoryName, columns}, index) in groupedColumns" :key="visibleSheet.name + '-' + categoryName" class="container">
             <hr v-if="index > 0">
+            <h2>{{ categoryName }}</h2>
 
             <STList>
-                <STListItem element-name="label" :selectable="true">
+                <STListItem element-name="label" :selectable="true" class="full-border">
                     <template #left>
-                        <Checkbox :model-value="getAllSelected(columns)" @update:model-value="setAllSelected($event, columns)" />
+                        <Checkbox :model-value="getAllSelected(columns)" @update:model-value="setAllSelected($event, columns)" :indeterminate="getAllSelectedindeterminate(columns)" />
                     </template>
 
-                    <div class="style-title-2">
-                        {{ categoryName || (groupedColumns.length > 1 ? 'Algemeen' : 'Alles selecteren') }}
+                    <div class="style-table-head">
+                        {{ 'Alles selecteren' }}
                     </div>
                 </STListItem>
 
@@ -93,6 +94,11 @@ const groupedColumns = computed(() => {
 function getAllSelected(columns: SelectableColumn[]) {
     return columns.every(c => c.enabled);
 }
+
+function getAllSelectedindeterminate(columns: SelectableColumn[]) {
+    return !getAllSelected(columns) && columns.some(c => c.enabled);
+}
+
 
 function setAllSelected(selected: boolean, columns: SelectableColumn[]) {
     for (const column of columns) {
