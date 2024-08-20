@@ -29,5 +29,8 @@
     "peerDependencies": {
         "@simonbackx/simple-errors": "^1.4",
         "uuid": "^8.3.2"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

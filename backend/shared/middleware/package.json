@@ -16,5 +16,8 @@
         "@simonbackx/simple-endpoints": "1.14.0",
         "@simonbackx/simple-errors": "^1.4",
         "@simonbackx/simple-logging": "^1.0.1"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

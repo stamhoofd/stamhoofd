@@ -25,5 +25,8 @@
     },
     "devDependencies": {
         "@simonbackx/simple-database": "1.25.0"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }
