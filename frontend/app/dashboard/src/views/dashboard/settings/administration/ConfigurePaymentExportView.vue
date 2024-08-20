@@ -4,6 +4,8 @@
             Cijfers exporteren
         </h1>
 
+        <STErrorsDefault :error-box="errorBox" />
+
         <div class="split-inputs">
             <STInputBox title="Vanaf" error-fields="startDate" :error-box="errorBox">
                 <DateSelection v-model="startDate" />
@@ -127,12 +129,11 @@
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, DateSelection, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput,Validator } from "@stamhoofd/components";
+import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+import { Checkbox, DateSelection, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { SessionManager } from "@stamhoofd/networking";
 import { BalanceItemPaymentDetailed, Country, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, StripeAccount } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 
 
 import PaymentExportView from "./PaymentExportView.vue";
