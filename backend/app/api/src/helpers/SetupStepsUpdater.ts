@@ -10,14 +10,12 @@ import {
     SetupSteps,
 } from "@stamhoofd/structures";
 
+type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void;
+
 export class SetupStepUpdater {
     private static readonly STEP_TYPE_OPERATIONS: Record<
         SetupStepType,
-        (
-            setupSteps: SetupSteps,
-            organization: Organization,
-            platform: PlatformStruct
-        ) => void
+        SetupStepOperation
     > = {
         [SetupStepType.Groups]: this.updateStepGroups,
         [SetupStepType.Premises]: this.updateStepPremises,
@@ -35,7 +33,6 @@ export class SetupStepUpdater {
 
             let lastId = "";
 
-            // eslint-disable-next-line no-constant-condition
             while (true) {
                 const organizationRegistrationPeriods =
                     await OrganizationRegistrationPeriod.where(
