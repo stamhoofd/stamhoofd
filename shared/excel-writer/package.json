@@ -20,5 +20,8 @@
     },
     "peerDependencies": {
         "archiver": "^7.0.1"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }
