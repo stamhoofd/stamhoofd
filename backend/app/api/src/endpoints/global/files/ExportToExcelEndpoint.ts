@@ -5,7 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { ArchiverWriterAdapter, exportToExcel, XlsxTransformerSheet, XlsxWriter } from '@stamhoofd/excel-writer';
 import { getEmailBuilderForTemplate, Platform, RateLimiter } from '@stamhoofd/models';
-import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, LimitedFilteredRequest, PaginatedResponse, Recipient, Replacement, Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 import { Context } from '../../../helpers/Context';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
@@ -157,7 +157,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
 
         console.log('Done writing excel file')
 
-        const url = 'https://'+ STAMHOOFD.domains.api + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(type)
+        const url = 'https://'+ STAMHOOFD.domains.api + '/v'+ Version +'/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(type)
         return url;
     }
 }
