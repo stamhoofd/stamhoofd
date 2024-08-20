@@ -37,6 +37,25 @@ export class SetupStep extends AutoEncoder {
         return this.finishedSteps / this.totalSteps
     }
 
+    get priority() {
+        const isDone = this.isDone;
+        const isReviewed = !this.shouldBeReviewed;
+
+        if(isDone && isReviewed) {
+            return 0;
+        }
+
+        if(isDone && !isReviewed) {
+            return 1;
+        }
+        
+        if(!isDone && isReviewed) {
+            return 2;
+        }
+
+        return 3;
+    }
+
     markReviewed() {
         const now = new Date();
         if(this.reviewedAt === null || (now.getTime() > this.reviewedAt.getTime())) {

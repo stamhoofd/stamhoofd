@@ -2,7 +2,11 @@
     <STListItem class="left-center right-stack" :selectable="true" @click="onClick">
         <template #left>
             <div class="progress-container">
-                <Checkbox v-if="$isDone" :model-value="$isReviewed" :manual="true" :disabled="$saving" @click.stop.prevent="markReviewed" />
+                <div v-if="$isDone">
+                    <SpinnerWithTransition :is-loading="$saving">
+                        <Checkbox :model-value="$isReviewed" :manual="true" :disabled="$saving" @click.stop.prevent="markReviewed" />
+                    </SpinnerWithTransition>
+                </div>
                 <div v-else>
                     <ProgressRing :radius="14" :progress="step.progress" :stroke="3" />
                 </div>
@@ -24,14 +28,13 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, STListItem } from '@stamhoofd/components';
+import { CenteredMessage, STListItem, SpinnerWithTransition } from '@stamhoofd/components';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
 import ProgressRing from './ProgressRing.vue';
 
-const props = defineProps<{type: SetupStepType, step: SetupStep}>();
-const emits = defineEmits<{(e: 'review', isReviewed: boolean): void}>();
+const props = defineProps<{type: SetupStepType, step: SetupStep, saveHandler: (payload: {type: SetupStepType, isReviewed: boolean}) => Promise<void>}>();
 
 const $isReviewed = computed(() => !props.step.shouldBeReviewed);
 const $isDone = computed(() => props.step.isDone);
@@ -58,12 +61,12 @@ async function markReviewed() {
 
     // todo: translate
     const isReviewed = $isReviewed.value;
-    const isConfirm = isReviewed ? true : await CenteredMessage.confirm("Ben je zeker dat je deze stap wilt voltooien?", "Voltooi", "De stap zal niet meer worden weergegeven bij het herladen van de pagina.");
+    const isConfirm = isReviewed ? true : await CenteredMessage.confirm("Ben je zeker dat je deze stap wilt voltooien?", "Voltooi");
 
     if(isConfirm) {
         $saving.value = true;
         try {
-            emits('review', !isReviewed);
+            await props.saveHandler({type: props.type, isReviewed: !isReviewed});
         } catch (e) {
             console.error(e);
         }
