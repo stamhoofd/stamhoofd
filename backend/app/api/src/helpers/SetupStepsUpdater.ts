@@ -45,9 +45,7 @@ export class SetupStepUpdater {
                 for (const organizationRegistrationPeriod of organizationRegistrationPeriods) {
                     const organizationId =
                         organizationRegistrationPeriod.organizationId;
-                    if (!organizationId) {
-                        continue;
-                    }
+                        
                     console.log(
                         "[FLAG-MOMENT] checking flag moments for " +
                             organizationId

@@ -14,8 +14,8 @@ export class OrganizationRegistrationPeriod extends Model {
     })
     id!: string;
 
-    @column({ type: "string", nullable: true })
-    organizationId: string | null = null;
+    @column({ type: "string" })
+    organizationId: string;
 
     @column({ type: "string" })
     periodId: string
