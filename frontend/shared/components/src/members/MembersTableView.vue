@@ -5,6 +5,7 @@
         :filter-builders="filterBuilders" 
         :title="title" 
         :column-configuration-id="configurationId" 
+        :default-filter="defaultFilter"
         :actions="actions"
         :all-columns="allColumns" 
         @click="showMember"
@@ -73,6 +74,15 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform()
+const defaultFilter = app === 'admin' ? {
+    platformMemberships: {
+        $elemMatch: {
+            endDate: {
+                $gt: {$: '$now'}
+            }
+        }
+    }
+} : null;
 
 useGlobalEventListener('members-deleted', async () => {
     tableObjectFetcher.reset(true, true)
