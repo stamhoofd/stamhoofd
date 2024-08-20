@@ -1,8 +1,8 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { Group as GroupStruct, OrganizationRegistrationPeriodSettings, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct } from '@stamhoofd/structures';
+import { Group as GroupStruct, OrganizationRegistrationPeriodSettings, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, SetupSteps } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 import { Group, RegistrationPeriod } from '.';
-import { Formatter } from '@stamhoofd/utility';
 
 export class OrganizationRegistrationPeriod extends Model {
     static table = "organization_registration_periods";
@@ -14,8 +14,8 @@ export class OrganizationRegistrationPeriod extends Model {
     })
     id!: string;
 
-    @column({ type: "string", nullable: true })
-    organizationId: string | null = null;
+    @column({ type: "string" })
+    organizationId: string;
 
     @column({ type: "string" })
     periodId: string
@@ -44,6 +44,9 @@ export class OrganizationRegistrationPeriod extends Model {
         skipUpdate: true
     })
     updatedAt: Date
+
+    @column({ type: "json", decoder: SetupSteps })
+    setupSteps = SetupSteps.create({})
 
     getStructure(this: OrganizationRegistrationPeriod, period: RegistrationPeriod, groups: Group[]) {
         return OrganizationRegistrationPeriodStruct.create({

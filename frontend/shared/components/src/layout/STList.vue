@@ -14,7 +14,7 @@
 
 <script setup lang="ts" generic="T">
 import { SortableEvent, SortableOptions } from "sortablejs";
-import { Sortable } from "sortablejs-vue3"
+import { Sortable } from "sortablejs-vue3";
 import { computed, nextTick, ref } from 'vue';
 
 const props = withDefaults(
@@ -102,12 +102,12 @@ const moveItemInArray = async <T>(array: T[], from: number, to: number) => {
 
     > .st-list-item {        
         &.list-move {
-            transition: transform 0.2s, opacity 0.2s;
+            transition: transform 0.2s, opacity 0.2s !important;
         }
 
         &.list-enter-active,
         &.list-leave-active {
-            transition: transform 0.2s, opacity 0.2s;
+            transition: transform 0.2s, opacity 0.2s !important;
         }
 
         &.list-enter-from,

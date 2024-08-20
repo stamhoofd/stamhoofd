@@ -1,10 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
-import { v4 as uuidv4 } from "uuid";
-import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from "./GroupCategory";
 import { Formatter } from "@stamhoofd/utility";
+import { v4 as uuidv4 } from "uuid";
 import { Group } from "./Group";
-import { LoadedPermissions } from "./Permissions";
+import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from "./GroupCategory";
 import { Organization } from "./Organization";
+import { LoadedPermissions } from "./Permissions";
+import { SetupSteps } from "./SetupSteps";
 
 export class RegistrationPeriodSettings extends AutoEncoder {
     // todo
@@ -65,6 +66,9 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Group) })
     groups: Group[] = []
+
+    @field({ decoder: SetupSteps, ...NextVersion })
+    setupSteps = SetupSteps.create({})
 
     /**
      * Get all groups that are in a category

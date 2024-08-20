@@ -48,6 +48,7 @@ export * from "./src/Event"
 export * from "./src/StockReservation"
 export * from "./src/PaymentCustomer"
 export * from "./src/Company"
+export * from "./src/SetupSteps"
 
 // UserPermissions
 export * from "./src/UserPermissions"

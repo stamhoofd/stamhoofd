@@ -1,10 +1,11 @@
 import { AutoEncoderPatchType, Decoder, patchObject } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Platform, RegistrationPeriod } from "@stamhoofd/models";
-import { Platform as PlatformStruct } from "@stamhoofd/structures";
+import { PlatformPremiseType, Platform as PlatformStruct } from "@stamhoofd/structures";
 
-import { Context } from "../../../helpers/Context";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Context } from "../../../helpers/Context";
+import { SetupStepUpdater } from "../../../helpers/SetupStepsUpdater";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -64,7 +65,18 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             // Update config
-            platform.config = patchObject(platform.config, request.body.config)
+            if(request.body.config.premiseTypes) {
+                const oldConfig = platform.config.clone();
+                platform.config = patchObject(platform.config, request.body.config);
+                const newPremiseTypes = platform.config.premiseTypes;
+
+                // update setup step premise types
+                if(this.shouldUpdateSetupStepPremise(newPremiseTypes, oldConfig.premiseTypes)) {
+                    await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod({premiseTypes: newPremiseTypes});
+                }
+            } else {
+                platform.config = patchObject(platform.config, request.body.config)
+            }
         }
 
         if (request.body.period && request.body.period.id !== platform.periodId) {
@@ -80,5 +92,36 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
 
         await platform.save()
         return new Response(await Platform.getSharedPrivateStruct());
+    }
+
+    private shouldUpdateSetupStepPremise(newPremiseTypes: PlatformPremiseType[], oldPremiseTypes: PlatformPremiseType[]) {
+        for(const premiseType of newPremiseTypes) {
+            const id = premiseType.id;
+            const oldVersion = oldPremiseTypes.find(x => x.id === id);
+
+            // if premise type is not new
+            if(oldVersion) {
+                if(oldVersion.min !== premiseType.min || oldVersion.max !== premiseType.max) {
+                    return true;
+                }
+                continue;
+            }
+
+            // if premise type is new
+            if(premiseType.min || premiseType.max) {
+                return true;
+            }
+        }
+
+        for(const oldPremiseType of oldPremiseTypes) {
+            const id = oldPremiseType.id;
+
+            // if premise type is removed
+            if(!newPremiseTypes.some(x => x.id === id)) {
+                if(oldPremiseType.min || oldPremiseType.max) {
+                    return true;
+                }
+            }
+        }
     }
 }

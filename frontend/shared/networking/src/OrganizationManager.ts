@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, GroupsWithOrganizations, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
+import { Group, Organization, OrganizationAdmins, OrganizationPatch, OrganizationRegistrationPeriod, RegistrationPeriodList, STBillingStatus } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -86,20 +86,9 @@ export class OrganizationManager {
             decoder: new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
             shouldRetry: options.shouldRetry ?? false,
             owner: options.owner
-        })
+        });
 
-        // Update in memory
-        for (const period of this.organization.periods?.organizationPeriods ?? []) {
-            const updated = response.data.find(p => p.id === period.id)
-            if (updated) {
-                period.deepSet(updated)
-            }
-        }
-
-        const updated = response.data.find(p => p.id === this.organization.period.id)
-        if (updated) {
-            this.organization.period.deepSet(updated)
-        }
+        this.updatePeriods(response.data);
     }
 
     async patchPeriod(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean, owner?: any } = {}) {
@@ -107,6 +96,21 @@ export class OrganizationManager {
         arr.addPatch(patch)
 
         await this.patchPeriods(arr, options)
+    }
+
+    updatePeriods(periods: OrganizationRegistrationPeriod[]) {
+        // Update in memory
+        for (const period of this.organization.periods?.organizationPeriods ?? []) {
+            const updated = periods.find(p => p.id === period.id)
+            if (updated) {
+                period.deepSet(updated)
+            }
+        }
+
+        const updated = periods.find(p => p.id === this.organization.period.id)
+        if (updated) {
+            this.organization.period.deepSet(updated)
+        }
     }
 
     async patchGroup(organizationPeriod: OrganizationRegistrationPeriod, patch: AutoEncoderPatchType<Group>, options: { shouldRetry?: boolean, owner?: any } = {}) {

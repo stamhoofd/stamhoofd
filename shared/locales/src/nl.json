@@ -167,6 +167,24 @@
             "structured": "Gestructureerde mededeling"
         }
     },
+    "setup": {
+        "Premises": {
+            "review": {
+                "title": "Kijk de gebouwen na",
+                "description": "Kijk de adressen van de gebouwen na."
+            },
+            "todo": {
+                "title": "Voeg gebouwen toe",
+                "description": "Voeg gebouwen toe of verwijder gebouwen."
+            }
+        },
+        "Groups": {
+            "review": {
+                "title": "Kijk de leeftijdgroepen na",
+                "description": "Kijk of de prijzen, de leeftijd en de beschrijving correct zijn ingesteld."
+            }
+        }
+    },
     "shared.address": "Adres",
     "shared.confirmDelete": "Ja, verwijderen",
     "Verwijderen": "Verwijderen",

@@ -18,6 +18,7 @@ export * from "./src/payments"
 export * from "./src/events"
 export * from "./src/containers"
 export * from "./src/tables"
+export * from './src/transitions'
 export * from "./src/responsibilities"
 export * from "./src/groups"
 export * from "./src/filters"
@@ -68,6 +69,7 @@ export * from "./src/context"
 
 export { default as GroupAvatar } from "./src/GroupAvatar.vue"
 export { default as Spinner } from "./src/Spinner.vue"
+export { default as SpinnerWithTransition } from "./src/SpinnerWithTransition.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
 
 // Icons
