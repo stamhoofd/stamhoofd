@@ -164,6 +164,7 @@ export class Payment extends Model {
                         })
                     })
                 }),
+                ...(payment.provider !== PaymentProvider.Stripe ? {stripeAccountId: null} : {}),
                 ...(!includeSettlements) ? {settlement: null, transferFee: 0, stripeAccountId: null} : {}
             })
         })

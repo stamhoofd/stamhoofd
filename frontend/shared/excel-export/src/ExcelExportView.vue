@@ -2,7 +2,15 @@
     <SaveView :loading="exporting" save-icon="download" @save="startExport">
         <h1>Exporteren naar Excel</h1>
 
-        <ScrollableSegmentedControl v-if="workbook.sheets.length" v-model="visibleSheet" :items="workbook.sheets" :labels="workbook.sheets.map(s => s.name)" />
+        <ScrollableSegmentedControl v-if="workbook.sheets.length" v-model="visibleSheet" :items="workbook.sheets">
+            <template #item="{item}">
+                <span>{{ item.name }}</span>
+
+                <div class="style-bubble current-color" v-if="item.enabledCount > 0">
+                    <span>{{ item.enabledCount }}</span>
+                </div>
+            </template>
+        </ScrollableSegmentedControl>
 
         <p v-if="visibleSheet.description" class="style-description-block">
             {{ visibleSheet.description }}
@@ -14,13 +22,13 @@
             <hr v-if="index > 0">
 
             <STList>
-                <STListItem v-if="groupedColumns.length > 1" element-name="label" :selectable="true">
+                <STListItem element-name="label" :selectable="true">
                     <template #left>
                         <Checkbox :model-value="getAllSelected(columns)" @update:model-value="setAllSelected($event, columns)" />
                     </template>
 
                     <div class="style-title-2">
-                        {{ categoryName || 'Algemeen' }}
+                        {{ categoryName || (groupedColumns.length > 1 ? 'Algemeen' : 'Alles selecteren') }}
                     </div>
                 </STListItem>
 

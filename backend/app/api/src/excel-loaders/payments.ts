@@ -1,15 +1,42 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerColumn } from "@stamhoofd/excel-writer";
-import { BalanceItemPaymentDetailed, BalanceItemRelationType, CountryHelper, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper } from "@stamhoofd/structures";
+import { StripeAccount as StripeAccountStruct, BalanceItemPaymentDetailed, BalanceItemRelationType, CountryHelper, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, PaginatedResponse, PaymentProvider } from "@stamhoofd/structures";
 import { ExportToExcelEndpoint } from "../endpoints/global/files/ExportToExcelEndpoint";
 import { GetPaymentsEndpoint } from "../endpoints/organization/dashboard/payments/GetPaymentsEndpoint";
+import { Formatter } from "@stamhoofd/utility";
+import { StripeAccount } from "@stamhoofd/models";
+import { field } from "@simonbackx/simple-encoding";
 
 type PaymentWithItem = {
     payment: PaymentGeneral,
     balanceItemPayment: BalanceItemPaymentDetailed
 }
 
+export class PaymentGeneralWithStripeAccount extends PaymentGeneral {
+    @field({ decoder: StripeAccountStruct, nullable: true })
+    stripeAccount: StripeAccountStruct|null = null
+}
+
 ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
-    fetch: GetPaymentsEndpoint.buildData.bind(GetPaymentsEndpoint),
+    fetch: async (requestQuery) => {
+        const data = await GetPaymentsEndpoint.buildData(requestQuery);
+
+        // Also load Stripe Account Ids
+        const stripeAccountIds = Formatter.uniqueArray(data.results.map(p => p.stripeAccountId).filter(id => id !== null));
+
+        let accounts: StripeAccountStruct[] = [];
+        if (stripeAccountIds.length > 0) {
+            accounts = (await StripeAccount.getByIDs(...stripeAccountIds)).map(s => StripeAccountStruct.create(s));
+        }
+
+        return new PaginatedResponse({
+            ...data,
+            results: data.results.map(p => {
+                const payment = PaymentGeneralWithStripeAccount.create(p);
+                payment.stripeAccount = p.stripeAccountId ? (accounts.find(a => a.id === p.stripeAccountId) ?? null) : null;
+                return payment;
+            })
+        })
+    },
     sheets: [
         {
             id: 'payments',
@@ -41,7 +68,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         {
             id: 'id',
             name: 'ID',
-            width: 35,
+            width: 40,
             getValue: (object: PaymentWithItem) => ({
                 value: object.balanceItemPayment.id,
                 style: {
@@ -54,7 +81,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         {
             id: 'paymentId',
             name: 'Betaling ID',
-            width: 35,
+            width: 40,
             getValue: (object: PaymentWithItem) => ({
                 value: object.payment.id
             })
@@ -65,6 +92,14 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             width: 30,
             getValue: (object: PaymentWithItem) => ({
                 value: getBalanceItemTypeName(object.balanceItemPayment.balanceItem.type)
+            })
+        },
+        {
+            id: 'balanceItem.description',
+            name: 'Beschrijving',
+            width: 40,
+            getValue: (object: PaymentWithItem) => ({
+                value: object.balanceItemPayment.balanceItem.description
             })
         },
         {
@@ -134,8 +169,8 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         {
             id: 'id',
             name: 'ID',
-            width: 35,
-            getValue: (object: PaymentGeneral) => ({
+            width: 40,
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.id,
                 style: {
                     font: {
@@ -148,7 +183,7 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'price',
             name: 'Bedrag',
             width: 10,
-            getValue: (object: PaymentGeneral) => ({
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.price / 100,
                 style: {
                     numberFormat: {
@@ -161,7 +196,7 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'status',
             name: 'Status',
             width: 18,
-            getValue: (object: PaymentGeneral) => ({
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: PaymentStatusHelper.getNameCapitalized(object.status)
             })
         },
@@ -169,7 +204,7 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'method',
             name: 'Betaalmethode',
             width: 18,
-            getValue: (object: PaymentGeneral) => ({
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: PaymentMethodHelper.getNameCapitalized(object.method)
             })
         },
@@ -177,7 +212,7 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'provider',
             name: 'Betaalprovider',
             width: 16,
-            getValue: (object: PaymentGeneral) => ({
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.provider
             })
         },
@@ -185,7 +220,7 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'createdAt',
             name: 'Aangemaakt op',
             width: 16,
-            getValue: (object: PaymentGeneral) => ({
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.createdAt,
                 style: {
                     numberFormat: {
@@ -198,7 +233,7 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'paidAt',
             name: 'Betaald op',
             width: 16,
-            getValue: (object: PaymentGeneral) => ({
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.paidAt,
                 style: {
                     numberFormat: {
@@ -211,7 +246,7 @@ function getGeneralColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'description',
             name: 'Detail',
             width: 60,
-            getValue: (object: PaymentGeneral) => ({
+            getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.balanceItemPayments.map(p => p.toString()).join('\n'),
                 style: {
                     alignment: {
@@ -229,7 +264,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'settlement.reference',
             name: 'Uitbetalingsmededeling',
             width: 21,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.settlement?.reference || ''
                 }
@@ -239,7 +274,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'settlement.settledAt',
             name: 'Uitbetalingsdatum',
             width: 16,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.settlement?.settledAt ?? null,
                     style: {
@@ -254,7 +289,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'settlement.amount',
             name: 'Uitbetalingsbedrag',
             width: 18,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.settlement?.amount !== undefined ? (object.settlement?.amount / 100) : null,
                     style: {
@@ -269,7 +304,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'settlement.fee',
             name: 'Uitbetalingstransactiekosten',
             width: 25,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.settlement?.fee !== undefined ? (object.settlement?.fee / 100) : null,
                     style: {
@@ -289,7 +324,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'transferFee',
             name: 'Transactiekosten',
             width: 16,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.transferFee / 100,
                     style: {
@@ -303,10 +338,10 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         {
             id: 'stripeAccountId',
             name: 'Account ID',
-            width: 16,
-            getValue: (object: PaymentGeneral) => {
+            width: 20,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.stripeAccountId || ''
+                    value: object.stripeAccount?.accountId || ''
                 }
             }
         },
@@ -314,7 +349,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'iban',
             name: 'Kaartnummer',
             width: 20,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.iban || ''
                 }
@@ -324,7 +359,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'ibanName',
             name: 'Kaarthouder',
             width: 20,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.ibanName || ''
                 }
@@ -338,8 +373,8 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         {
             id: 'transferDescription',
             name: 'Mededeling',
-            width: 20,
-            getValue: (object: PaymentGeneral) => {
+            width: 25,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.transferDescription || ''
                 }
@@ -348,8 +383,14 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         {
             id: 'transferSettings.creditor',
             name: 'Begunstigde',
-            width: 20,
-            getValue: (object: PaymentGeneral) => {
+            width: 25,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
+                if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_bank_name) {
+                    return {
+                        value: (object.stripeAccount.meta.bank_account_name || object.stripeAccount.meta.business_profile?.name || object.stripeAccount.meta.company?.name) + ' (' + (object.stripeAccount?.meta.bank_account_bank_name || '') + ')'
+                    }
+                }
+
                 return {
                     value: object.transferSettings?.creditor || ''
                 }
@@ -358,8 +399,14 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         {
             id: 'transferSettings.iban',
             name: 'Rekeningnummer begunstigde',
-            width: 20,
-            getValue: (object: PaymentGeneral) => {
+            width: 30,
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
+                if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_last4) {
+                    return {
+                        value: 'xxxx ' + object.stripeAccount?.meta.bank_account_last4
+                    }
+                }
+
                 return {
                     value: object.transferSettings?.iban || ''
                 }
@@ -374,7 +421,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'customer.name',
             name: 'Naam',
             width: 30,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.customer?.name || ''
                 }
@@ -384,7 +431,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'customer.email',
             name: 'E-mailadres',
             width: 40,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.customer?.email || ''
                 }
@@ -394,7 +441,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'customer.company.name',
             name: 'Bedrijfsnaam',
             width: 30,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.customer?.company?.name || ''
                 }
@@ -404,7 +451,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'customer.company.VATNumber',
             name: 'BTW-nummer',
             width: 20,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.customer?.company?.VATNumber || ''
                 }
@@ -414,7 +461,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'customer.company.companyNumber',
             name: 'Ondernemingsnummer',
             width: 20,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.customer?.company?.companyNumber || ''
                 }
@@ -426,9 +473,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                     return [
                         {
                             id: 'customer.company.address.street',
-                            name: 'Bedrijfsadres - Straat',
+                            name: 'Adres - Straat',
                             width: 30,
-                            getValue: (object: PaymentGeneral) => {
+                            getValue: (object: PaymentGeneralWithStripeAccount) => {
                                 return {
                                     value: object.customer?.company?.address?.street || ''
                                 }
@@ -436,9 +483,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                         },
                         {
                             id: 'customer.company.address.number',
-                            name: 'Bedrijfsadres - Huisnummer',
+                            name: 'Adres - Nummer',
                             width: 20,
-                            getValue: (object: PaymentGeneral) => {
+                            getValue: (object: PaymentGeneralWithStripeAccount) => {
                                 return {
                                     value: object.customer?.company?.address?.number || ''
                                 }
@@ -446,9 +493,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                         },
                         {
                             id: 'customer.company.address.postalCode',
-                            name: 'Bedrijfsadres - Postcode',
+                            name: 'Adres - Postcode',
                             width: 20,
-                            getValue: (object: PaymentGeneral) => {
+                            getValue: (object: PaymentGeneralWithStripeAccount) => {
                                 return {
                                     value: object.customer?.company?.address?.postalCode || ''
                                 }
@@ -456,9 +503,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                         },
                         {
                             id: 'customer.company.address.city',
-                            name: 'Bedrijfsadres - Stad',
+                            name: 'Adres - Stad',
                             width: 20,
-                            getValue: (object: PaymentGeneral) => {
+                            getValue: (object: PaymentGeneralWithStripeAccount) => {
                                 return {
                                     value: object.customer?.company?.address?.city || ''
                                 }
@@ -466,9 +513,9 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
                         },
                         {
                             id: 'customer.company.address.country',
-                            name: 'Bedrijfsadres - Land',
+                            name: 'Adres - Land',
                             width: 20,
-                            getValue: (object: PaymentGeneral) => {
+                            getValue: (object: PaymentGeneralWithStripeAccount) => {
                                 return {
                                     value: object.customer?.company?.address?.country ? CountryHelper.getName(object.customer?.company?.address?.country) : ''
                                 }
@@ -482,7 +529,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             id: 'customer.company.administrationEmail',
             name: 'E-mailadres administratie',
             width: 30,
-            getValue: (object: PaymentGeneral) => {
+            getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
                     value: object.customer?.company?.administrationEmail || ''
                 }

@@ -989,6 +989,10 @@ export class Organization extends Model {
                 human: 'Deze betaalmethode werd helaas niet volledig geconfigureerd. Probeer later even opnieuw, neem contact met ons op of kies een andere betaalmethode.'
             })
         }
+
+        if (provider !== PaymentProvider.Stripe && stripeAccount) {
+            stripeAccount = null
+        }
         return {
             provider,
             stripeAccount

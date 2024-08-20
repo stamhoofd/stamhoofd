@@ -85,6 +85,11 @@ export function getSelectableWorkbook() {
                         description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' en '),
                     }),
 
+                    new SelectableColumn({
+                        id: 'balanceItem.description',
+                        name: 'Beschrijving'
+                    }),
+
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
                         id: `balanceItem.relations.${relationType}`,
                         name: getBalanceItemRelationTypeName(relationType),

@@ -25,5 +25,9 @@ export class SelectableSheet {
     get enabled() {
         return this.columns.some(c => c.enabled);
     }
+
+    get enabledCount() {
+        return this.columns.filter(c => c.enabled).length;
+    }
 }
 
