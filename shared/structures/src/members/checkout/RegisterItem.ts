@@ -458,7 +458,7 @@ export class RegisterItem {
 
         if (this.group.settings.requireDefaultAgeGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
-                return !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId)
+                return r.group.periodId === this.group.periodId && !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId)
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
@@ -471,7 +471,7 @@ export class RegisterItem {
     doesMeetRequireOrganizationIds() {
         if (this.group.settings.requireOrganizationIds.length > 0) {
             const hasGroup = this.member.member.registrations.find(r => {
-                return !this.willReplace(r.id) && r.group.type === GroupType.Membership && this.group.settings.requireOrganizationIds.includes(r.organizationId) && r.registeredAt !== null && r.deactivatedAt === null
+                return r.group.periodId === this.group.periodId && !this.willReplace(r.id) && r.group.type === GroupType.Membership && this.group.settings.requireOrganizationIds.includes(r.organizationId) && r.registeredAt !== null && r.deactivatedAt === null
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireOrganizationIds.includes(item.organization.id))) {

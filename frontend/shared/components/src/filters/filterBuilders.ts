@@ -91,27 +91,6 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
 
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: 'Standaard leeftijdsgroep',
-                options: platform.config.defaultAgeGroups.map(group => {
-                    return new MultipleChoiceUIFilterOption(group.name, group.id);
-                }),
-                wrapper: {
-                    registrations: {
-                        $elemMatch: {
-                            group: {
-                                defaultAgeGroupId: {
-                                    $in: UIFilterWrapperMarker
-                                }
-                            },
-                            periodId: platform.period.id
-                        }
-                    }
-                }
-            })
-        )
-
-        all.push(
-            new MultipleChoiceFilterBuilder({
                 name: 'Functies',
                 options: platform.config.responsibilities.map(responsibility => {
                     return new MultipleChoiceUIFilterOption(responsibility.name, responsibility.id);
@@ -123,6 +102,27 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                                 $in: UIFilterWrapperMarker
                             },
                             endDate: null
+                        }
+                    }
+                }
+            })
+        )
+
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: 'Tags',
+                options: platform.config.tags.map(tag => {
+                    return new MultipleChoiceUIFilterOption(tag.name, tag.id);
+                }),
+                wrapper: {
+                    registrations: {
+                        $elemMatch: {
+                            organization: {
+                                tags: {
+                                    $in: UIFilterWrapperMarker
+                                }
+                            },
+                            periodId: platform.period.id
                         }
                     }
                 }
@@ -157,6 +157,27 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             )
         }
     }
+
+    all.push(
+        new MultipleChoiceFilterBuilder({
+            name: 'Standaard leeftijdsgroep',
+            options: platform.config.defaultAgeGroups.map(group => {
+                return new MultipleChoiceUIFilterOption(group.name, group.id);
+            }),
+            wrapper: {
+                registrations: {
+                    $elemMatch: {
+                        group: {
+                            defaultAgeGroupId: {
+                                $in: UIFilterWrapperMarker
+                            }
+                        },
+                        periodId: platform.period.id
+                    }
+                }
+            }
+        })
+    )
 
     all.push(
         new MultipleChoiceFilterBuilder({
