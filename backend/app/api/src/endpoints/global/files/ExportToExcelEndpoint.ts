@@ -160,7 +160,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 const writer = new XlsxWriter(zipWriterAdapter);
 
                 // Limit to pages of 100
-                request.filter.limit = 100;
+                request.filter.limit = STAMHOOFD.environment === 'development' ? 1 : 100; // in development, we need to check if total count matches and pagination is working correctly
 
                 await exportToExcel({
                     definitions: loader.sheets,

@@ -9,6 +9,8 @@ import { registrationFilterCompilers } from "./registrations";
 export const memberFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
     id: createSQLColumnFilterCompiler('id'),
+    firstName: createSQLColumnFilterCompiler('firstName'),
+    lastName: createSQLColumnFilterCompiler('lastName'),
     name: createSQLExpressionFilterCompiler(
         new SQLConcat(
             SQL.column('firstName'),

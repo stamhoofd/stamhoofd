@@ -7,11 +7,21 @@ type ObjectType = PlatformMember;
 
 function extendSort(list: SortList): SortList  {
     // Map 'age' to 'birthDay' + reverse direction
-    list = list.map(l => {
+    list = list.flatMap(l => {
         if (l.key === 'age') {
-            return {key: 'birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC}
+            return [
+                {key: 'birthDay', order: l.order === SortItemDirection.ASC ? SortItemDirection.DESC : SortItemDirection.ASC}
+            ]
         }
-        return l;
+
+        if (l.key === 'name') {
+            return [
+                {key: 'firstName', order: l.order},
+                {key: 'lastName', order: l.order}
+            ]
+        }
+
+        return [l];
     })
 
     return assertSort(list, [{key: 'id'}])
