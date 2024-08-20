@@ -71,7 +71,7 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 // update setup step premise types
                 if(this.shouldUpdateSetupStepPremise(platform.config.premiseTypes, oldConfig.premiseTypes)) {
-                    await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod({platforms: [platform]})
+                    await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod();
                 }
             } else {
                 platform.config = patchObject(platform.config, request.body.config)
