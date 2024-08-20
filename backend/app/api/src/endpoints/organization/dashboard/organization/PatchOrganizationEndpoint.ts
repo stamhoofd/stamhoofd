@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, isPatchableArray, ObjectData, PatchableA
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, SetupStepType } from "@stamhoofd/structures";
+import { BuckarooSettings, Company, OrganizationMetaData, OrganizationPatch, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -102,7 +102,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
                 organization.privateMeta.premises = patchObject(organization.privateMeta.premises, request.body.privateMeta.premises);
                 if(request.body.privateMeta.premises) {
-                    await SetupStepUpdater.updateForOrganization(organization, {stepTypes: [SetupStepType.Premises]});
+                    await SetupStepUpdater.updateForOrganization(organization);
                 }
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
                 organization.privateMeta.responsibilities = request.body.privateMeta.responsibilities.applyTo(organization.privateMeta.responsibilities)

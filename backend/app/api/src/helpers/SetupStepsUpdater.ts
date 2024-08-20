@@ -3,6 +3,7 @@ import {
     OrganizationRegistrationPeriod,
     Platform,
 } from "@stamhoofd/models";
+import { QueueHandler } from "@stamhoofd/queues";
 import { SetupStepType, SetupSteps } from "@stamhoofd/structures";
 
 export class SetupStepUpdater {
@@ -14,77 +15,79 @@ export class SetupStepUpdater {
     }
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
-        batchSize, stepTypes, platforms
-    }: { batchSize?: number, stepTypes?: SetupStepType[], platforms?: Platform[] } = {}) {
+        batchSize, platforms
+    }: { batchSize?: number, platforms?: Platform[] } = {}) {
+        const tag = 'updateSetupStepsForAllOrganizationsInCurrentPeriod';
+        QueueHandler.cancel(tag);
 
-        if(!platforms) {
-            platforms = await Platform.all();
-        }
-
-        for (const platform of platforms) {
-            const periodId = platform.periodId;
-
-            let lastId = "";
-
-            // eslint-disable-next-line no-constant-condition
-            while (true) {
-                const organizationRegistrationPeriods =
-                    await OrganizationRegistrationPeriod.where(
-                        {
-                            id: { sign: ">", value: lastId },
-                            periodId: periodId,
-                        },
-                        { limit: batchSize ?? 10, sort: ["id"] }
-                    );
-
-                if (organizationRegistrationPeriods.length === 0) {
-                    lastId = "";
-                    break;
-                }
-
-                for (const organizationRegistrationPeriod of organizationRegistrationPeriods) {
-                    const organizationId =
-                        organizationRegistrationPeriod.organizationId;
-                        
-                    console.log(
-                        "[FLAG-MOMENT] checking flag moments for " +
-                            organizationId
-                    );
-                    const organization = await Organization.getByID(
-                        organizationId
-                    );
-
-                    if (!organization) {
-                        continue;
-                    }
-
-                    await SetupStepUpdater.updateFor(
-                        organizationRegistrationPeriod,
-                        platform,
-                        organization,
-                        stepTypes
-                    );
-                }
-
-                lastId =
-                    organizationRegistrationPeriods[
-                        organizationRegistrationPeriods.length - 1
-                    ].id;
+        await QueueHandler.schedule(tag, async () => {
+            if(!platforms) {
+                platforms = await Platform.all();
             }
-        }
+    
+            for (const platform of platforms) {
+                const periodId = platform.periodId;
+    
+                let lastId = "";
+    
+                // eslint-disable-next-line no-constant-condition
+                while (true) {
+                    const organizationRegistrationPeriods =
+                        await OrganizationRegistrationPeriod.where(
+                            {
+                                id: { sign: ">", value: lastId },
+                                periodId: periodId,
+                            },
+                            { limit: batchSize ?? 10, sort: ["id"] }
+                        );
+    
+                    if (organizationRegistrationPeriods.length === 0) {
+                        lastId = "";
+                        break;
+                    }
+    
+                    for (const organizationRegistrationPeriod of organizationRegistrationPeriods) {
+                        const organizationId =
+                            organizationRegistrationPeriod.organizationId;
+    
+                        console.log(
+                            "[FLAG-MOMENT] checking flag moments for " +
+                                organizationId
+                        );
+                        const organization = await Organization.getByID(
+                            organizationId
+                        );
+    
+                        if (!organization) {
+                            continue;
+                        }
+    
+                        await SetupStepUpdater.updateFor(
+                            organizationRegistrationPeriod,
+                            platform,
+                            organization,
+                            stepTypes
+                        );
+                    }
+    
+                    lastId =
+                        organizationRegistrationPeriods[
+                            organizationRegistrationPeriods.length - 1
+                        ].id;
+                }
+            }
+        });
     }
 
     static async updateForOrganization(
         organization: Organization,
         {
             platform,
-            organizationRegistrationPeriod,
-            stepTypes
+            organizationRegistrationPeriod
         }: {
             platform?: Platform;
             organizationRegistrationPeriod?: OrganizationRegistrationPeriod;
-            stepTypes?: SetupStepType[]
-        }
+        } = {}
     ) {
         if (!platform) {
             platform = (await Platform.all())[0];
@@ -114,21 +117,19 @@ export class SetupStepUpdater {
         await this.updateFor(
             organizationRegistrationPeriod,
             platform,
-            organization,
-            stepTypes
+            organization
         );
     }
 
     static async updateFor(
         organizationRegistrationPeriod: OrganizationRegistrationPeriod,
         platform: Platform,
-        organization: Organization,
-        stepTypes?: SetupStepType[]
+        organization: Organization
     ) {
         const setupSteps = organizationRegistrationPeriod.setupSteps;
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        for(const stepType of (stepTypes ?? Object.values(SetupStepType))) {
+        for(const stepType of Object.values(SetupStepType)) {
             console.log(`[STEP TYPE] ${stepType}`);
             const operation = this.STEP_TYPE_OPERATIONS[stepType];
             operation(setupSteps, organization, platform);

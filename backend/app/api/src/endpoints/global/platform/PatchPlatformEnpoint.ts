@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, patchObject } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Platform, RegistrationPeriod } from "@stamhoofd/models";
-import { PlatformPremiseType, Platform as PlatformStruct, SetupStepType } from "@stamhoofd/structures";
+import { PlatformPremiseType, Platform as PlatformStruct } from "@stamhoofd/structures";
 
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Context } from "../../../helpers/Context";
@@ -71,7 +71,7 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 // update setup step premise types
                 if(this.shouldUpdateSetupStepPremise(platform.config.premiseTypes, oldConfig.premiseTypes)) {
-                    await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod({platforms: [platform], stepTypes: [SetupStepType.Premises]})
+                    await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod({platforms: [platform]})
                 }
             } else {
                 platform.config = patchObject(platform.config, request.body.config)
