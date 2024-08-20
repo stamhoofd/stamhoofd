@@ -65,7 +65,7 @@ export function getSelectableWorkbook() {
             new SelectableSheet({
                 id: 'balanceItemPayments',
                 name: 'Betaallijnen',
-                description: 'Een betaling kan soms voor meerdere items tegelijk zijn. Dat is vaak nuttige informatie omdat je die sommige items anders moet verwerken in je boekhouding. Als je dit werkblad exporteert, krijgt elk item een aparte lijn met bijhorende informatie.',
+                description: 'Een betaling kan soms voor meerdere items tegelijk zijn. Dat is vaak nuttige informatie omdat je die items soms anders moet verwerken in je boekhouding. Als je dit werkblad exporteert, krijgt elk item een aparte lijn met bijhorende informatie.',
                 columns: [
                     new SelectableColumn({
                         id: 'id',
