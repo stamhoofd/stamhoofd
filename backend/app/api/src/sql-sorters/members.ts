@@ -16,7 +16,8 @@ export const memberSorters: SQLSortDefinitions<MemberWithRegistrations> = {
     },
     'name': {
         getValue(a) {
-            return a.details.name
+            // Note: we should not use 'name' here (that will remove the in between space if one is missing), because we need to use Exactly the same value as the filter will use
+            return a.firstName + ' ' + a.lastName
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return SQLOrderBy.combine([
