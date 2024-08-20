@@ -17,16 +17,15 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, usePresent } from "@simonbackx/vue-app-navigation";
-import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useContext, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
+import { Column, ComponentExposed, InMemoryTableAction, ModernTableView, TableAction, getAdvancedMemberWithRegistrationsBlobUIFilterBuilders, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from "@stamhoofd/components";
 import { useTranslate } from "@stamhoofd/frontend-i18n";
-import { AccessRight, assertSort, CountFilteredRequest, CountResponse, Group, GroupCategoryTree, GroupPrice, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, MembershipStatus, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterItemOption, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategoryTree, GroupPrice, GroupType, MemberResponsibility, MembershipStatus, Organization, PlatformMember, RegisterItemOption, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from "vue";
+import { useMembersObjectFetcher } from "../fetchers/useMembersObjectFetcher";
 import { useDirectMemberActions } from "./classes/MemberActionBuilder";
 import MemberSegmentedView from './MemberSegmentedView.vue';
-import { useMembersObjectFetcher } from "../fetchers/useMembersObjectFetcher";
 
 type ObjectType = PlatformMember;
 
@@ -68,7 +67,6 @@ const title = computed(() => {
     return 'Leden'
 })
 
-const context = useContext();
 const present = usePresent();
 const app = useAppContext();
 const $t = useTranslate();
