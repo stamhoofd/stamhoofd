@@ -189,12 +189,6 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
             ],
             wrapFilter: (f: StamhoofdFilter) => {
                 const choices = Array.isArray(f) ? f : [f]
-                const d = new Date()
-                d.setHours(12);
-                d.setMinutes(0);
-                d.setSeconds(0);
-                d.setMilliseconds(0);
-
                 const filters: StamhoofdFilter[] = []
                 const invertedFilters: StamhoofdFilter[] = []
 
@@ -202,7 +196,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                     filters.push(...[
                         {
                             endDate: {
-                                $gt: Formatter.dateIso(d)
+                                $gt: {$: '$now'}
                             },
                         }
                     ])
@@ -213,12 +207,12 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                         {
                             expireDate: null,
                             endDate: {
-                                $gt: Formatter.dateIso(d)
+                                $gt: {$: '$now'}
                             },
                         },
                         {
                             expireDate: {
-                                $gt: Formatter.dateIso(d)
+                                $gt: {$: '$now'}
                             },
                         }
                     ])
@@ -228,10 +222,10 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                     filters.push(...[
                         {
                             expireDate: {
-                                $lt: Formatter.dateIso(d)
+                                $lt: {$: '$now'}
                             },
                             endDate: {
-                                $gt: Formatter.dateIso(d)
+                                $gt: {$: '$now'}
                             },
                         }
                     ])
@@ -241,7 +235,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                     invertedFilters.push(...[
                         {
                             endDate: {
-                                $gt: Formatter.dateIso(d)
+                                $gt: {$: '$now'}
                             },
                         }
                     ])
@@ -252,7 +246,7 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                 if (filters.length > 0) {
                     filter.push({
                         platformMemberships: {
-                            $elemMatch: {
+                            $elemMatch: filters.length === 1 ? filters[0] : {
                                 $or: filters
                             }
                         }
@@ -282,6 +276,23 @@ export function getAdvancedMemberWithRegistrationsBlobUIFilterBuilders(platform:
                 return {
                     $or: filter
                 }
+            },
+            unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter|null => {
+                const activeAndExpiring = unwrapFilter(f, {
+                    platformMemberships: {
+                        $elemMatch: {
+                            endDate: {
+                                $gt: {$: '$now'}
+                            },
+                        }
+                    }
+                });
+
+                if (activeAndExpiring.match) {
+                    return ['Active', 'Expiring']
+                }
+                
+                return null;
             }
         })
     )

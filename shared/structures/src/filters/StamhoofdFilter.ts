@@ -12,7 +12,11 @@ export type StamhoofdNotFilter<T = StamhoofdCompareValue> = {
     $not: StamhoofdFilter<T>
 }
 
-export type StamhoofdCompareValue = string|number|Date|null|boolean
+/**
+ * Magic values help with storage of filters and maintaining their meaning
+ */
+export type StamhoofdMagicValues = '$now'
+export type StamhoofdCompareValue = string|number|Date|null|boolean|{$: StamhoofdMagicValues}
 
 export type StamhoofdKeyFilterValue<T = StamhoofdCompareValue> = 
     {$eq: T}
