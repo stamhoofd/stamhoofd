@@ -77,7 +77,8 @@ async function markReviewed() {
 async function onClick() {
     switch(props.type) {
         case SetupStepType.Premises: {
-            await $navigate(Routes.Premises)
+            await $navigate(Routes.Premises);
+            break;
         }
     }
 }
