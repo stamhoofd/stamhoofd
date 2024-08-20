@@ -68,10 +68,11 @@ export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, Respons
             if(request.body.config.premiseTypes) {
                 const oldConfig = platform.config.clone();
                 platform.config = patchObject(platform.config, request.body.config);
+                const newPremiseTypes = platform.config.premiseTypes;
 
                 // update setup step premise types
-                if(this.shouldUpdateSetupStepPremise(platform.config.premiseTypes, oldConfig.premiseTypes)) {
-                    await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod();
+                if(this.shouldUpdateSetupStepPremise(newPremiseTypes, oldConfig.premiseTypes)) {
+                    await SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod({premiseTypes: newPremiseTypes});
                 }
             } else {
                 platform.config = patchObject(platform.config, request.body.config)

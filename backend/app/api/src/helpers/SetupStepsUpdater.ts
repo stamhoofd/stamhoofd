@@ -5,6 +5,7 @@ import {
 } from "@stamhoofd/models";
 import { QueueHandler } from "@stamhoofd/queues";
 import {
+    PlatformPremiseType,
     Platform as PlatformStruct,
     SetupStepType,
     SetupSteps,
@@ -22,13 +23,16 @@ export class SetupStepUpdater {
     };
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
-        batchSize,
-    }: { batchSize?: number } = {}) {
+        batchSize, premiseTypes
+    }: { batchSize?: number, premiseTypes?: PlatformPremiseType[] } = {}) {
         const tag = "updateSetupStepsForAllOrganizationsInCurrentPeriod";
         QueueHandler.cancel(tag);
 
         await QueueHandler.schedule(tag, async () => {
-            const platform = await Platform.getSharedPrivateStruct();
+            const platform = (await Platform.getSharedPrivateStruct()).clone();
+            if(premiseTypes) {
+                platform.config.premiseTypes = premiseTypes;
+            }
             const periodId = platform.period.id;
 
             let lastId = "";
