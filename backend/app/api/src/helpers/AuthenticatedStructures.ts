@@ -1,10 +1,9 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Event, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Organization, OrganizationRegistrationPeriod, Payment, RegistrationPeriod, User, Webshop } from "@stamhoofd/models";
-import { Event as EventStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, MembersBlob, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, User as UserStruct, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
-import { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType } from '@stamhoofd/structures';
+import { Event as EventStruct, Group as GroupStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberWithRegistrationsBlob, MembersBlob, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, PrivateWebshop, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
-import { Context } from "./Context";
 import { Formatter } from "@stamhoofd/utility";
+import { Context } from "./Context";
 
 /**
  * Builds authenticated structures for the current user
@@ -55,7 +54,7 @@ export class AuthenticatedStructures {
     }
 
     static async groups(groups: Group[]) {
-        const waitingListIds = Formatter.uniqueArray(groups.map(g => g.waitingListId).filter(id => id !== null) as string[])
+        const waitingListIds = Formatter.uniqueArray(groups.map(g => g.waitingListId).filter(id => id !== null))
         const waitingLists = waitingListIds.length > 0 ? await Group.getByIDs(...waitingListIds) : []
 
         const structs: GroupStruct[] = []
@@ -194,7 +193,7 @@ export class AuthenticatedStructures {
      */
     static async usersWithMembers(users: User[]): Promise<UserWithMembers[]> {
         const structs: UserWithMembers[] = [];
-        const memberIds = Formatter.uniqueArray(users.map(u => u.memberId).filter(id => id !== null) as string[])
+        const memberIds = Formatter.uniqueArray(users.map(u => u.memberId).filter(id => id !== null))
         const members = memberIds.length > 0 ? await Member.getBlobByIds(...memberIds) : []
 
         for (const user of users) {
@@ -251,7 +250,7 @@ export class AuthenticatedStructures {
         const platformMemberships = members.length > 0 ? await MemberPlatformMembership.where({ deletedAt: null, memberId: { sign: 'IN', value: members.map(m => m.id) } }) : []
 
         // Load missing organizations
-        const organizationIds = Formatter.uniqueArray(responsibilities.map(r => r.organizationId).filter(id => id !== null) as string[])
+        const organizationIds = Formatter.uniqueArray(responsibilities.map(r => r.organizationId).filter(id => id !== null))
         for (const id of organizationIds) {
             if (includeContextOrganization || id !== Context.auth.organization?.id) {
                 const found = organizations.get(id);
@@ -275,7 +274,7 @@ export class AuthenticatedStructures {
 
     static async events(events: Event[]): Promise<EventStruct[]> {
         // Load groups
-        const groupIds = events.map(e => e.groupId).filter(id => id !== null) as string[]
+        const groupIds = events.map(e => e.groupId).filter(id => id !== null)
         const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : []
         const groupStructs = await this.groups(groups)
 
