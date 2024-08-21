@@ -867,6 +867,7 @@
 
 .style-image-with-icon {
     position: relative;
+    margin-right: 5px;
 
     .image-component {
         width: var(--block-width, 40px);
@@ -1174,4 +1175,8 @@ ul.style-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0px 15px;
+}
+
+.style-dark {
+    color: $color-dark;
 }

@@ -61,6 +61,8 @@ export { default as TooltipDirective } from "./src/directives/Tooltip"
 // Layout
 export { default as STList } from "./src/layout/STList.vue"
 export { default as STListItem } from "./src/layout/STListItem.vue"
+export { default as STListItemGrid } from "./src/layout/STListItemGrid.vue"
+export { default as STListItemGridRow } from "./src/layout/STListItemGridRow.vue"
 
 // Other
 
@@ -75,6 +77,7 @@ export { default as Steps } from "./src/steps/Steps.vue"
 // Icons
 export { default as Logo } from "./src/icons/Logo.vue"
 export { default as STGradientBackground } from "./src/icons/STGradientBackground.vue"
+export { default as GroupIcon } from './src/members/components/group/GroupIcon.vue'
 
 // Inputs (last, because they use other components from this library)
 export { default as AddressInput } from "./src/inputs/AddressInput.vue"
