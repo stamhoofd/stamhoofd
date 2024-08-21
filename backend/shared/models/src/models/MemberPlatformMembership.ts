@@ -39,10 +39,7 @@ export class MemberPlatformMembership extends Model {
     expireDate: Date | null = null;
 
     @column({ type: "string", nullable: true })
-    invoiceItemDetailId: string | null = null;
-
-    @column({ type: "string", nullable: true })
-    invoiceId: string | null = null;
+    balanceItemId: string | null = null;
 
     @column({ type: "integer" })
     price = 0;
@@ -81,7 +78,7 @@ export class MemberPlatformMembership extends Model {
     updatedAt: Date
 
     canDelete() {
-        if (this.invoiceId || this.invoiceItemDetailId) {
+        if (this.balanceItemId) {
             return false;
         }
         return true;
@@ -92,7 +89,7 @@ export class MemberPlatformMembership extends Model {
     }
 
     async calculatePrice() {
-        if (this.invoiceId || this.invoiceItemDetailId) {
+        if (this.balanceItemId) {
             return;
         }
 
@@ -119,7 +116,6 @@ export class MemberPlatformMembership extends Model {
 
         const priceConfig = periodConfig.getPriceForDate(membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ? this.startDate : (this.createdAt ?? new Date()));
         
-
         if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
             // Make sure time is equal between start and end date
             let startBrussels = Formatter.luxon(this.startDate);

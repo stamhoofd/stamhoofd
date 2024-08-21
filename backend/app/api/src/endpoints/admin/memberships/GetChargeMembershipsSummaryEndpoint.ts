@@ -63,12 +63,8 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                     new SQLAlias('data__price')
                 )
             )
-            .from(
-                SQL.table('member_platform_memberships')
-            )
-            .where(SQL.column('invoiceId'), null)
-            .andWhere(SQL.column('invoiceItemDetailId'), null);
-
+            .from('member_platform_memberships')
+            .where('balanceItemId', null);
 
         const result = await query.fetch();
         const members = result[0]['data']['members'] as number;
@@ -122,17 +118,13 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
                     new SQLAlias('data__price')
                 )
             )
-            .from(
-                SQL.table('member_platform_memberships')
+            .from('member_platform_memberships')
+            .where('balanceItemId', null)
+            .groupBy(
+                SQL.column('member_platform_memberships', 'membershipTypeId')
             );
-        query.where(SQL.column('invoiceId'), null)
-        query.andWhere(SQL.column('invoiceItemDetailId'), null)
-        query.groupBy(SQL.column('member_platform_memberships', 'membershipTypeId'));
-
 
         const result = await query.fetch();
-        console.log(result);
-
         const membershipsPerType = new Map<string, ChargeMembershipsTypeSummary>();
 
         for (const row of result) {
