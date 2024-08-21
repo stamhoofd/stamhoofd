@@ -75,6 +75,7 @@ export * from "./src/endpoints/VerifyEmailRequest"
 export * from "./src/endpoints/WebshopUriAvailabilityResponse"
 export * from "./src/endpoints/ChargeMembershipsSummary"
 export * from "./src/endpoints/GroupsWithOrganizations"
+export * from "./src/endpoints/OrganizationBillingStatus"
 
 // email
 export * from "./src/email/Email"

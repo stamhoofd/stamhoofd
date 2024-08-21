@@ -437,7 +437,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.present({
             components: [
                 new ComponentWithProperties(PaymentView, {
-                    initialPayment: payment
+                    payment
                 })
             ],
             modalDisplayStyle: "popup"

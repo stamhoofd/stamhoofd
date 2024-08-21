@@ -40,46 +40,6 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
         return this.balanceItem.unitPrice
     }
 
-
-    get groupPrefix(): string {
-        switch (this.balanceItem.type) {
-            case BalanceItemType.Registration: {
-                if (this.balanceItem.relations.get(BalanceItemRelationType.GroupOption)) {
-                    const group = this.balanceItem.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
-                    return 'Inschrijving voor ' + group;
-                }
-                return 'Inschrijving'
-            }
-            case BalanceItemType.AdministrationFee: return 'Administratiekosten'
-            case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
-            case BalanceItemType.Order: return 'Bestelling'
-            case BalanceItemType.Other: return 'Andere'
-        }
-    }
-
-    get groupTitle(): string {
-        switch (this.balanceItem.type) {
-            case BalanceItemType.Registration: {
-                const option = this.balanceItem.relations.get(BalanceItemRelationType.GroupOption);
-                if (option) {
-                    const optionMenu = this.balanceItem.relations.get(BalanceItemRelationType.GroupOptionMenu)
-                    return (optionMenu?.name ?? 'Onbekend') + ': ' + option.name;
-                }
-                const group = this.balanceItem.relations.get(BalanceItemRelationType.Group)?.name || 'Onbekende inschrijvingsgroep';
-                const price = this.balanceItem.relations.get(BalanceItemRelationType.GroupPrice)?.name;
-                return group + (price && price !== 'Standaardtarief'  ? ' (' + price + ')' : '');
-            }
-            case BalanceItemType.AdministrationFee: return 'Administratiekosten'
-            case BalanceItemType.FreeContribution: return 'Vrije bijdrage'
-            case BalanceItemType.Order: return this.balanceItem.relations.get(BalanceItemRelationType.Webshop)?.name || 'Onbekende webshop'
-            case BalanceItemType.Other: return this.balanceItem.description
-        }
-    }
-
-    get groupDescription() {
-        return null
-    }
-
     /**
      * When displayed as a single item
      */
@@ -134,24 +94,6 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
             }
         }
         return null;
-    }
-
-    /**
-     * Unique identifier whithing a reporting group
-     */
-    get groupCode() {
-        if (this.balanceItem.type === BalanceItemType.Other) {
-            return 'type-'+this.balanceItem.type
-                + '-unit-price-'+this.unitPrice 
-                + '-description-'+this.balanceItem.description;
-        }
-
-        return 'type-'+this.balanceItem.type
-            + '-unit-price-'+this.unitPrice 
-            + '-relations' + Array.from(this.balanceItem.relations.entries())
-                .filter(([key]) => !shouldAggregateOnRelationType(key, this.balanceItem.relations))
-                .map(([key, value]) => key + '-' + value.id)
-                .join('-');
     }
 
     toString() {

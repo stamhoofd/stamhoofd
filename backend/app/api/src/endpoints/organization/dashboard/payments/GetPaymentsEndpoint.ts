@@ -4,7 +4,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
 import { SQL, compileToSQLFilter, compileToSQLSorter } from "@stamhoofd/sql";
-import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, getSortFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -134,7 +134,11 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 query.where(compileToSQLFilter(q.pageFilter, filterCompilers))
             }
 
-            query.orderBy(compileToSQLSorter(q.sort, sorters))
+            query.orderBy(compileToSQLSorter(assertSort(q.sort, [
+                {
+                    key: 'id'
+                }
+            ]), sorters))
             query.limit(q.limit)
         }
        

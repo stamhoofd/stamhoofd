@@ -16,7 +16,7 @@
                 <STList>
                     <STListItem v-for="item in filteredBalanceItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
                         <h3 class="style-title-list">
-                            <span class="style-price" v-if="item.amount > 1">{{ item.amount }} x</span> {{ item.description }}
+                            <span v-if="item.amount > 1" class="style-price">{{ item.amount }} x</span> {{ item.description }}
                         </h3>
                         <p v-if="item.memberId && getMember(item.memberId) && multipleMembers" class="style-description-small">
                             {{ getMember(item.memberId)!.patchedMember.name }}
@@ -151,14 +151,13 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, GlobalEventBus, Spinner, useAuth, useContext, useErrors, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { AsyncPaymentView, ErrorBox, GlobalEventBus, Spinner, useAuth, useContext, useErrors, useOrganization, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItemWithPayments, FinancialSupportSettings, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import EditBalanceItemView from '../../payments/EditBalanceItemView.vue';
 import EditPaymentView from '../../payments/EditPaymentView.vue';
-import PaymentView from '../../payments/PaymentView.vue';
 
 const props = defineProps<{
     member: PlatformMember
@@ -331,8 +330,8 @@ async function createPayment() {
 }
 
 async function openPayment(payment: Payment) {
-    const component = new ComponentWithProperties(PaymentView, {
-        initialPayment: payment
+    const component = new ComponentWithProperties(AsyncPaymentView, {
+        payment
     })
     await present({
         components: [component],

@@ -5,6 +5,7 @@ import { SQLColumnExpression, SQLSafeValue, SQLTableExpression, SQLWildcardSelec
 import { SQLJoin, SQLJoinType } from "./SQLJoin";
 import { SQLJsonExtract, SQLJsonLength } from "./SQLJsonExpressions";
 import { parseTable, SQLSelect } from "./SQLSelect";
+import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from "./SQLWhere";
 
 class StaticSQL {
     wildcard(namespace?: string) {
@@ -42,6 +43,14 @@ class StaticSQL {
             return new SQLSelect(this.wildcard())
         }
         return new SQLSelect(...columns)
+    }
+
+    where(...args: ParseWhereArguments): SQLWhere {
+        return new SQLEmptyWhere().and(...args)
+    }
+
+    whereNot(...args: ParseWhereArguments): SQLWhere {
+        return new SQLEmptyWhere().andNot(...args)
     }
 
     delete(): InstanceType<typeof SQLDelete> {

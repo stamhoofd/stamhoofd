@@ -120,12 +120,16 @@ export class ContextPermissions {
     }
 
     canAccessPayment(payment: PaymentGeneral|null|undefined, level: PermissionLevel) {
-        if (this.canManagePayments() || this.hasFullAccess()) {
-            return true;
-        }
-
         if (!payment) {
             return false
+        }
+
+        if (this.organization && payment.organizationId !== this.organization.id) {
+            return false;
+        }
+
+        if (this.canManagePayments() || this.hasFullAccess()) {
+            return true;
         }
 
         if (this.organization) {

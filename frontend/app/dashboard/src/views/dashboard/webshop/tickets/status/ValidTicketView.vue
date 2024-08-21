@@ -393,7 +393,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, LongPressDirective, PaymentView, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
+import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, LongPressDirective, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, ViewRecordCategoryAnswersBox } from "@stamhoofd/components";
 import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
@@ -534,10 +534,11 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         if (!this.hasPaymentsWrite) {
             return;
         }
+
         this.present({
             components: [
-                new ComponentWithProperties(PaymentView, {
-                    initialPayment: payment
+                new ComponentWithProperties(AsyncPaymentView, {
+                    payment
                 })
             ],
             modalDisplayStyle: "popup"

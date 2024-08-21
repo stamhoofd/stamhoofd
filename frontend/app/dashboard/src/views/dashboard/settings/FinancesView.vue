@@ -1,5 +1,6 @@
 <template>
-    <div class="st-view">
+    <LoadingView v-if="!outstandingBalance" :error-box="errors.errorBox" />
+    <div v-else class="st-view">
         <STNavigationBar title="Boekhouding" />
 
         <main class="center">
@@ -53,22 +54,72 @@
                     </template>
                 </STListItem>
             </STList>
+
+            <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
+                <hr>
+                <h2>Betalingen aan {{ item.organization.name }}</h2>
+                <p>Hier vind je een overzicht van wat je moet betalen aan {{ item.organization.name }}, bv. voor de aansluitingkosten van leden.</p>
+
+                <STList class="illustration-list">    
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.OutstandingBalance, {properties: {item}})">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            Openstaand bedrag
+                        </h2>
+                        <p class="style-description">
+                            Breng de betaling van dit bedrag in orde.
+                        </p>
+
+                        <p class="style-description">
+                            Betaling van {{ formatPrice(BalanceItemWithPayments.getOutstandingBalance(item.balanceItems).totalPending) }} gestart, maar nog in verwerking.
+                        </p>
+
+                        <template #right>
+                            <p class="style-price">
+                                {{ formatPrice(BalanceItemWithPayments.getOutstandingBalance(item.balanceItems).totalOpen) }}
+                            </p>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.OutstandingBalance, {properties: {item}})">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            Betaalbewijzen
+                        </h2>
+                        <p class="style-description">
+                            Bekijk een overzicht van jouw betalingen aan {{ item.organization.name }}.
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
+import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { useAuth } from '@stamhoofd/components';
-import { AccessRight, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
-import { ComponentOptions } from 'vue';
+import { ErrorBox, useAuth, useContext, useErrors } from '@stamhoofd/components';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { AccessRight, BalanceItemWithPayments, OrganizationDetailedBillingStatus, OrganizationDetailedBillingStatusItem, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { ComponentOptions, ref, Ref } from 'vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
+import BillingStatusView from './components/BillingStatusView.vue';
 
 enum Routes {
     Transfers = "Transfers",
     Export = "Export",
-    Payments = "Payments"
+    Payments = "Payments",
+    OutstandingBalance = "OutstandingBalance"
 }
 
 defineRoutes([
@@ -111,10 +162,68 @@ defineRoutes([
         url: 'exporteren',
         present: 'popup',
         component: ConfigurePaymentExportView as unknown as ComponentOptions,
+    },
+    {
+        name: Routes.OutstandingBalance,
+        url: 'openstaand/@uri',
+        present: 'popup',
+        params: {
+            uri: String
+        },
+        component: BillingStatusView as ComponentOptions,
+        async paramsToProps(params: {uri: string}) {
+            await balancePromise
+            const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri)
+
+            if (!item) {
+                throw new Error('Organization not found')
+            }
+
+            return {
+                item
+            }
+        },
+        propsToParams(props) {
+            if (!("item" in props) || !(props.item instanceof OrganizationDetailedBillingStatusItem)) {
+                throw new Error('Missing item')
+            }
+
+            return {
+                params: {
+                    uri: props.item.organization.uri
+                }
+            }
+        }
     }
 ])
 
 const auth = useAuth()
 const $navigate = useNavigate();
+const owner = useRequestOwner();
+const context = useContext()
+const errors = useErrors()
+const outstandingBalance = ref(null) as Ref<OrganizationDetailedBillingStatus | null>
+
+const balancePromise = updateBalance().catch(console.error)
+
+// Fetch balance
+async function updateBalance() {
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: `/billing/status/detailed`,
+            decoder: OrganizationDetailedBillingStatus as Decoder<OrganizationDetailedBillingStatus>,
+            shouldRetry: true,
+            owner,
+            timeout: 5 * 60 * 1000
+        })
+
+        outstandingBalance.value = response.data
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e)
+    }
+
+}
+
 
 </script>

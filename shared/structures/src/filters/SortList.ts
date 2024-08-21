@@ -17,7 +17,12 @@ export function encodeSortList(sort: SortList): string {
 
 export class SortListDecoder {
     static decode(data: Data): SortList {
-        const str = data.string;
+        const str = data.string.trim();
+
+        if (str === '') {
+            return [];
+        }
+
         const splitted = str.split(',');
         const list: SortList = []
 
