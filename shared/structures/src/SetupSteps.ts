@@ -88,7 +88,7 @@ export class SetupStep extends AutoEncoder {
 }
 
 export class SetupSteps extends AutoEncoder {
-    @field({ decoder: new MapDecoder(new EnumDecoder(SetupStepType), SetupStep), ...NextVersion })
+    @field({ decoder: new MapDecoder(new EnumDecoder(SetupStepType), SetupStep), version: 324 })
     steps: Map<SetupStepType, SetupStep> = new Map()
 
     getAll(): {type: SetupStepType, step: SetupStep}[] {

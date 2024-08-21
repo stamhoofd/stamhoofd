@@ -262,7 +262,7 @@ export class Platform extends AutoEncoder {
     /**
      * The organization that represents the platform for collection of platform memberships payments
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 324 })
     membershipOrganizationId: string|null = null
 
     /**
