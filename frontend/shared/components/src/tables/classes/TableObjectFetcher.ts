@@ -4,9 +4,7 @@ import { onBeforeUnmount, reactive } from "vue";
 import { useAuth } from "../../hooks";
 import { ObjectFetcher } from "./ObjectFetcher";
 
-export type FetchAllOptions = {
-    onProgress?: (count: number, total: number) => void
-}
+
 
 export function useTableObjectFetcher<O extends {id: string}, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {
     const auth = useAuth();

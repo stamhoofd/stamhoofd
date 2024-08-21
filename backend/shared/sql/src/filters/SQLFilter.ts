@@ -55,9 +55,9 @@ function guardFilterCompareValue(val: any): StamhoofdCompareValue {
     throw new Error('Invalid compare value. Expected a string, number, boolean, date or null.')
 }
 
-function doNormalizeValue(val: StamhoofdCompareValue): string|number|null {
+function doNormalizeValue(val: StamhoofdCompareValue): string|number|Date|null {
     if (val instanceof Date) {
-        return val.toISOString()
+        return val
     }
 
     if (typeof val === 'string') {

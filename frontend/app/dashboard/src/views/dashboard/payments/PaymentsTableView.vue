@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, InMemoryTableAction, ModernTableView, paymentsUIFilterBuilders, PaymentView, TableAction, Toast, useContext, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, CountResponse, ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelSheetFilter, ExcelWorkbookFilter, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref } from 'vue';
@@ -119,40 +119,11 @@ function getRequiredFilter(): StamhoofdFilter|null  {
     return null;
 }
 
-function extendSort(list: SortList): SortList  {
-    return assertSort(list, [{key: 'id'}])
-}
+const objectFetcher = usePaymentsObjectFetcher({
+    requiredFilter: getRequiredFilter()
+})
 
-const tableObjectFetcher = useTableObjectFetcher<ObjectType>({
-    requiredFilter: getRequiredFilter(),
-    async fetch(data: LimitedFilteredRequest): Promise<{results: ObjectType[], next?: LimitedFilteredRequest}> {
-        data.sort = extendSort(data.sort);
-
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/payments",
-            decoder: new PaginatedResponseDecoder(new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-            query: data,
-            shouldRetry: false,
-            owner: this
-        });
-
-        return response.data
-    },
-
-    async fetchCount(data: CountFilteredRequest): Promise<number> {
-        const response = await context.value.authenticatedServer.request({
-            method: "GET",
-            path: "/payments/count",
-            decoder: CountResponse as Decoder<CountResponse>,
-            query: data,
-            shouldRetry: false,
-            owner: this
-        })
-
-        return response.data.count
-    }
-});
+const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
@@ -267,17 +238,6 @@ const allColumns: Column<ObjectType, any>[] = [
 
 async function showPayment(payment: PaymentGeneral) {
     await $navigate(Routes.Payment, {properties: {initialPayment: payment}})
-}
-
-function downloadURL(url: string, name: string) {
-    var link = document.createElement("a");
-    link.target = "_blank";
-    link.download = name;
-    link.href = url;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 
 const actions: TableAction<ObjectType>[] = [

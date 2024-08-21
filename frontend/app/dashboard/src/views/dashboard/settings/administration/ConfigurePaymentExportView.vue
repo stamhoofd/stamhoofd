@@ -72,56 +72,6 @@
                 </STListItem>
             </STList>
         </template>
-
-        <hr>
-        <h2>Webshops</h2>
-
-        <STList>
-            <STListItem :selectable="true" element-name="label" class="left-center">
-                <template #left>
-                    <Checkbox v-model="allWebshopsSelected" />
-                </template>
-                <h3 class="style-title-list">
-                    Alle webshops
-                </h3>
-            </STListItem>
-
-            <template v-if="!allWebshopsSelected">
-                <STListItem v-for="webshop in allWebshops" :key="webshop.id" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox :model-value="getWebshop(webshop.id)" @update:model-value="setWebshop(webshop.id, $event)" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ webshop.meta.name }}
-                    </h3>
-                </STListItem>
-            </template>
-        </STList>
-
-        <hr>
-        <h2>Inschrijvingsgroepen</h2>
-
-        <STList>
-            <STListItem :selectable="true" element-name="label" class="left-center">
-                <template #left>
-                    <Checkbox v-model="allGroupsSelected" />
-                </template>
-                <h3 class="style-title-list">
-                    Alle inschrijvingsgroepen
-                </h3>
-            </STListItem>
-
-            <template v-if="!allGroupsSelected">
-                <STListItem v-for="group in allGroups" :key="group.id" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox :model-value="getGroup(group.id)" @update:model-value="setGroup(group.id, $event)" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ group.settings.name }}
-                    </h3>
-                </STListItem>
-            </template>
-        </STList>
     </SaveView>
 </template>
 
@@ -132,11 +82,12 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
 import { Checkbox, DateSelection, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { BalanceItemPaymentDetailed, Country, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, StripeAccount } from "@stamhoofd/structures";
+import { Country, ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StamhoofdFilter, StripeAccount } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
 
-import PaymentExportView from "./PaymentExportView.vue";
+import { ExcelExportView } from "@stamhoofd/frontend-excel-export";
+import { getSelectableWorkbook } from "../../payments/getSelectableWorkbook";
 
 class DateRangeSuggestion {
     name: string;
@@ -172,9 +123,6 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     
     methods: PaymentMethod[] = []
     providers: PaymentProvider[] = []
-
-    webshops: string[]|null = null;
-    groups: string[]|null = null;
 
     loadingStripeAccounts = false
     stripeAccounts: StripeAccount[] = []
@@ -298,30 +246,6 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         return this.organization.meta.modules.useWebshops
     }
 
-    get allWebshopsSelected() {
-        return this.webshops === null
-    }
-
-    set allWebshopsSelected(value: boolean) {
-        if (value) {
-            this.webshops = null
-        } else {
-            this.webshops = []
-        }
-    }
-
-    get allGroupsSelected() {
-        return this.groups === null
-    }
-
-    set allGroupsSelected(value: boolean) {
-        if (value) {
-            this.groups = null
-        } else {
-            this.groups = []
-        }
-    }
-
     get country() {
         return I18nController.shared.country
     }
@@ -436,44 +360,8 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         }
     }
 
-    get allWebshops() {
-        return this.organization.webshops
-    }
-
-    get allGroups() {
-        return this.organization.groups
-    }
-
-    getWebshop(id: string) {
-        return this.webshops?.includes(id) ?? true
-    }
-
-    setWebshop(id: string, enabled: boolean) {
-        if (this.webshops === null) {
-            this.webshops = []
-        }
-        this.webshops = this.webshops.filter(m => m != id)
-        if (enabled) {
-            this.webshops.push(id)
-        }
-    }
-
-    getGroup(id: string) {
-        return this.groups?.includes(id) ?? true
-    }
-
-    setGroup(id: string, enabled: boolean) {
-        if (this.groups === null) {
-            this.groups = []
-        }
-        this.groups = this.groups.filter(m => m != id)
-        if (enabled) {
-            this.groups.push(id)
-        }
-    }
-
     get canContinue() {
-        return this.methods.length > 0 && (this.providers.length > 0 || this.methods.includes(PaymentMethod.Transfer) || this.methods.includes(PaymentMethod.PointOfSale)) && (this.webshops === null || this.webshops.length || this.groups === null || this.groups.length)
+        return this.methods.length > 0 && (this.providers.length > 0 || this.methods.includes(PaymentMethod.Transfer) || this.methods.includes(PaymentMethod.PointOfSale))
     }
    
     async save() {
@@ -484,75 +372,59 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         this.saving = true;
 
         try {
-            const payments: PaymentGeneral[] = []
-            await this.downloadUntil(payments)
-            
             this.show({
                 components: [
-                    new ComponentWithProperties(PaymentExportView, {
-                        stripeAccounts: this.stripeAccounts,
-                        payments,
-                        filterBalanceItems: this.webshops !== null || this.groups !== null ? (balanceItem: BalanceItemPaymentDetailed) => {
-                            if (this.webshops !== null) {
-                                if (balanceItem.balanceItem.order) {
-                                    if (!this.webshops.includes(balanceItem.balanceItem.order.webshopId)) {
-                                        return false
-                                    }
+                    new ComponentWithProperties(ExcelExportView, {
+                        type: ExcelExportType.Payments,
+                        filter: new LimitedFilteredRequest({
+                            filter: this.buildFilter(),
+                            limit: 100,
+                            sort: [
+                                {
+                                    key: "paidAt",
+                                    order: SortItemDirection.ASC
+                                },
+                                {
+                                    key: "id",
+                                    order: SortItemDirection.ASC
                                 }
-                            }
-                            if (this.groups !== null) {
-                                if (balanceItem.balanceItem.registration) {
-                                    if (!this.groups.includes(balanceItem.balanceItem.registration.groupId)) {
-                                        return false
-                                    }
-                                }
-                            }
-
-                            return !!balanceItem.balanceItem.order || !!balanceItem.balanceItem.registration
-                        } : undefined,
+                            ]
+                        }),
+                        workbook: getSelectableWorkbook(),
+                        configurationId: "configure-payment-export"
                     })
-                ],
-                animated: true
+                ]
             })
+
         } catch (e) {
             this.errorBox = new ErrorBox(e as Error)
         }
         this.saving = false;
     }
 
-    async downloadUntil(arr: PaymentGeneral[], params: { afterId?: string, paidSince?: number } = {}) {
-        const limit = 100
-        
-        const session = this.$context
-
-        const response = await session.authenticatedServer.request({
-            method: "GET",
-            query: {
-                methods: this.methods.join(','),
-                providers: [...this.providers, 'null'].join(','),
-                paidSince: this.correctedStartDate.getTime(),
-                paidBefore: this.correctedEndDate.getTime(),
-                limit,
-                ...params
-            },
-            path: "/organization/payments",
-            decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
-            owner: this
-        })
-        arr.push(...response.data)
-    
-        if (response.data.length === limit) {
-            const last = response.data[response.data.length - 1]
-
-            if (!last.paidAt) {
-                throw new Error("Missing paidAt")
-            }
-
-            // Download next page
-            await this.downloadUntil(arr, {
-                afterId: last.id,
-                paidSince: last.paidAt.getTime(),
-            })
+    buildFilter(): StamhoofdFilter {
+        return {
+            $and: [
+                {
+                    status: PaymentStatus.Succeeded,
+                    method: {
+                        $in: this.methods
+                    },
+                    provider: {
+                        $in: [null, ...this.providers]
+                    },
+                },
+                {
+                    paidAt: {
+                        $gte: this.correctedStartDate,
+                    }
+                },
+                {
+                    paidAt: {
+                        $lte: this.correctedEndDate
+                    }
+                }
+            ]
         }
     }
 }

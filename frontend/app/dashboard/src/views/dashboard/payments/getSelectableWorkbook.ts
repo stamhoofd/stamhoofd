@@ -22,37 +22,12 @@ export function getSelectableWorkbook() {
                     }),
 
                     new SelectableColumn({
-                        id: 'status',
-                        name: 'Betaalstatus'
-                    }),
-
-                    new SelectableColumn({
-                        id: 'method',
-                        name: 'Betaalmethode'
-                    }),
-
-                    new SelectableColumn({
-                        id: 'provider',
-                        name: 'Betaalprovider'
-                    }),
-
-
-                    new SelectableColumn({
-                        id: 'createdAt',
-                        name: 'Aangemaakt op'
-                    }),
-
-                    new SelectableColumn({
-                        id: 'paidAt',
-                        name: 'Betaald op'
-                    }),
-
-                    new SelectableColumn({
                         id: 'description',
                         name: 'Detail',
                         description: 'De inschrijvingen of producten die zijn afgerekend',
                     }),
 
+                    ...getGeneralColumns(),
 
                     // Facturatiegegevens
                     ...getInvoiceColumns(),
@@ -111,10 +86,49 @@ export function getSelectableWorkbook() {
                         name: 'Prijs'
                     }),
 
+                    ...getGeneralColumns({ category: 'Betaling (herhaling)' }),
+                    ...getInvoiceColumns(),
                 ]
             })
         ]
     })
+}
+
+function getGeneralColumns(options?: {category?: string | null;}) {
+    {
+        return [
+            new SelectableColumn({
+                id: 'status',
+                name: 'Betaalstatus',
+                ...options
+            }),
+
+            new SelectableColumn({
+                id: 'method',
+                name: 'Betaalmethode',
+                ...options
+            }),
+
+            new SelectableColumn({
+                id: 'provider',
+                name: 'Betaalprovider',
+                ...options
+            }),
+
+
+            new SelectableColumn({
+                id: 'createdAt',
+                name: 'Aangemaakt op',
+                ...options
+            }),
+
+            new SelectableColumn({
+                id: 'paidAt',
+                name: 'Betaald op',
+                ...options
+            }),
+        ]
+    }
 }
 
 function getSettlementColumns() {
