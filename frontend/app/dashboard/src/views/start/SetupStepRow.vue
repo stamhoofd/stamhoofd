@@ -32,6 +32,7 @@ import { CenteredMessage, STListItem, SpinnerWithTransition } from '@stamhoofd/c
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { ComponentOptions, computed, ref } from 'vue';
 import PremisesView from "../../views/dashboard/settings/PremisesView.vue";
+import GroupsReview from './GroupsReview.vue';
 import ProgressRing from './ProgressRing.vue';
 
 const props = defineProps<{type: SetupStepType, step: SetupStep, saveHandler: (payload: {type: SetupStepType, isReviewed: boolean}) => Promise<void>}>();
@@ -44,6 +45,7 @@ const $saving = ref(false);
 
 enum Routes {
     Premises = 'gebouwen',
+    Groups = 'leeftijds-groepen'
 }
 
 defineRoutes([
@@ -51,6 +53,11 @@ defineRoutes([
         url: Routes.Premises,
         present: 'popup',
         component: PremisesView as unknown as ComponentOptions,
+    },
+    {
+        url: Routes.Groups,
+        present: 'popup',
+        component: GroupsReview as unknown as ComponentOptions,
     }
 ]);
 
@@ -78,6 +85,10 @@ async function onClick() {
     switch(props.type) {
         case SetupStepType.Premises: {
             await $navigate(Routes.Premises);
+            break;
+        }
+        case SetupStepType.Groups: {
+            await $navigate(Routes.Groups);
             break;
         }
     }
